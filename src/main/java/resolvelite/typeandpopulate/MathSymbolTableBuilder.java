@@ -19,7 +19,6 @@ public class MathSymbolTableBuilder {
 
     public MathSymbolTableBuilder() {
         myTypeGraph = new TypeGraph();
-
     }
 
     public TypeGraph getTypeGraph() {
