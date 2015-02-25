@@ -36,10 +36,13 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.misc.Builder;
 import resolvelite.typeandpopulate.MTType;
 
+import java.io.File;
+
 public class ParseTreeAnnotations {
 
     private final ParseTree root;
-
+    //Not sure if this should really go here. We'll see.
+    private final File file;
     private final ParseTreeProperty<MTType> mathTypes;
     private final ParseTreeProperty<MTType> mathTypeValues;
 
@@ -47,18 +50,21 @@ public class ParseTreeAnnotations {
         this.root = builder.root;
         this.mathTypes = builder.mathTypes;
         this.mathTypeValues = builder.mathTypeValues;
+        this.file = builder.file;
     }
 
+    @NotNull
+    public File getFile() {
+        return file;
+    }
     @NotNull
     public MTType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
-
     @NotNull
     public MTType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
-
     @NotNull
     public ParseTree getRoot() {
         return root;
@@ -73,9 +79,11 @@ public class ParseTreeAnnotations {
         protected final ParseTreeProperty<MTType> mathTypeValues =
                 new ParseTreeProperty<MTType>();
         protected ParseTree root;
+        protected File file;
 
-        public TreeAnnotatingBuilder(ParseTree root) {
+        public TreeAnnotatingBuilder(ParseTree root, @NotNull File file) {
             this.root = root;
+            this.file = file;
         }
 
         public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,
