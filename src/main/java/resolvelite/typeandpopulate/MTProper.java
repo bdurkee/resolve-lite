@@ -25,7 +25,7 @@ public class MTProper extends MTType {
     }
 
     public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
-                    String name) {
+            String name) {
         super(g);
         myKnownToContainOnlyMTypesFlag = knownToContainOnlyMTypes;
         myType = type;

@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -55,16 +55,16 @@ public class ResolveMessage {
     public Token offendingToken;
 
     public ResolveMessage(@NotNull ErrorKind errorKind) {
-        this(errorKind, (Throwable)null, null);
+        this(errorKind, (Throwable) null, null);
     }
 
-    public ResolveMessage(@NotNull ErrorKind errorType,
-                          Token offendingToken, Object... args) {
+    public ResolveMessage(@NotNull ErrorKind errorType, Token offendingToken,
+            Object... args) {
         this(errorType, null, offendingToken, args);
     }
 
     public ResolveMessage(@NotNull ErrorKind errorType, @Nullable Throwable e,
-                          Token offendingToken, Object... args) {
+            Token offendingToken, Object... args) {
         this.errorType = errorType;
         this.e = e;
         this.args = args;
@@ -90,7 +90,7 @@ public class ResolveMessage {
 
         messageST.add("verbose", verbose);
         Object[] args = getArgs();
-        for (int i=0; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             String attr = "arg";
             if (i > 0) {
                 attr += i + 1;
@@ -119,13 +119,9 @@ public class ResolveMessage {
 
     @Override
     public String toString() {
-        return "Message{" +
-                "errorType=" + getErrorType() +
-                ", args=" + Arrays.asList(getArgs()) +
-                ", e=" + getCause() +
-                ", fileName='" + fileName + '\'' +
-                ", line=" + line +
-                ", charPosition=" + charPosition +
-                '}';
+        return "Message{" + "errorType=" + getErrorType() + ", args="
+                + Arrays.asList(getArgs()) + ", e=" + getCause()
+                + ", fileName='" + fileName + '\'' + ", line=" + line
+                + ", charPosition=" + charPosition + '}';
     }
 }

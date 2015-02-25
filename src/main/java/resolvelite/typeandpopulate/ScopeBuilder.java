@@ -11,24 +11,32 @@ public class ScopeBuilder implements Scope {
             new HashMap<String, SymbolTableEntry>();
 
     public ScopeBuilder() {
-        //define(new BuiltInTypeSymbol("B"));
+    //define(new BuiltInTypeSymbol("B"));
     }
 
     protected void initMathTypeSystem() {
 
     }
 
-    @Override public String getScopeName() { return "global"; }
+    @Override
+    public String getScopeName() {
+        return "global";
+    }
 
-    @Override public Scope getEnclosingScope() {
+    @Override
+    public Scope getEnclosingScope() {
         return null;
     }
 
     //addbinding methods go here.
 
-    @Override public SymbolTableEntry resolve(String name) {
+    @Override
+    public SymbolTableEntry resolve(String name) {
         return symbols.get(name);
     }
 
-    @Override public String toString() { return getScopeName()+":"+symbols; }
+    @Override
+    public String toString() {
+        return getScopeName() + ":" + symbols;
+    }
 }

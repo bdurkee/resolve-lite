@@ -4,5 +4,4 @@ import resolvelite.parsing.ResolveBaseListener;
 
 public class PopulatingListener extends ResolveBaseListener {
 
-
 }

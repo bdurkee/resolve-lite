@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -37,6 +37,7 @@ import resolvelite.misc.Builder;
 import resolvelite.typeandpopulate.MTType;
 
 public class ParseTreeAnnotations {
+
     private final ParseTree root;
 
     private final ParseTreeProperty<MTType> mathTypes;
@@ -48,37 +49,49 @@ public class ParseTreeAnnotations {
         this.mathTypeValues = builder.mathTypeValues;
     }
 
-    @NotNull public MTType getMathType(@NotNull ParseTree t) {
+    @NotNull
+    public MTType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
-    @NotNull public MTType getMathTypeValue(@NotNull ParseTree t) {
+
+    @NotNull
+    public MTType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
+
+    @NotNull
+    public ParseTree getRoot() {
+        return root;
+    }
+
     public static class TreeAnnotatingBuilder
             implements
                 Builder<ParseTreeAnnotations> {
+
         protected final ParseTreeProperty<MTType> mathTypes =
                 new ParseTreeProperty<MTType>();
         protected final ParseTreeProperty<MTType> mathTypeValues =
                 new ParseTreeProperty<MTType>();
         protected ParseTree root;
+
         public TreeAnnotatingBuilder(ParseTree root) {
             this.root = root;
         }
 
         public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,
-                                                 @NotNull MTType type) {
+                @NotNull MTType type) {
             mathTypes.put(ctx, type);
             return this;
         }
 
         public TreeAnnotatingBuilder setMathTypeValue(@NotNull ParseTree ctx,
-                            @NotNull MTType typeValue) {
+                @NotNull MTType typeValue) {
             mathTypeValues.put(ctx, typeValue);
             return this;
         }
 
-        @Override public ParseTreeAnnotations build() {
+        @Override
+        public ParseTreeAnnotations build() {
             return new ParseTreeAnnotations(this);
         }
     }

@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -46,11 +46,11 @@ import java.util.Set;
 
 public class ErrorManager extends BaseErrorListener {
 
-    public static final String FORMATS_DIR =  "carbon/templates/messages/";
+    public static final String FORMATS_DIR = "resolvelite/templates/messages/";
 
     private final STGroup format =
-            new STGroupFile(FORMATS_DIR
-                    + "carbon" + STGroup.GROUP_FILE_EXTENSION);
+            new STGroupFile(FORMATS_DIR + "resolvelite"
+                    + STGroup.GROUP_FILE_EXTENSION);
 
     private final resolvelite.Compiler compiler;
     private int errorCount, warningCount;
@@ -93,7 +93,7 @@ public class ErrorManager extends BaseErrorListener {
             File f = new File(msg.fileName);
             // Don't show path to file in messages; too long.
             String displayFileName = msg.fileName;
-            if ( f.exists() ) {
+            if (f.exists()) {
                 displayFileName = f.getName();
             }
             locationST.add("file", displayFileName);
@@ -102,7 +102,8 @@ public class ErrorManager extends BaseErrorListener {
         messageFormatST.add("id", msg.getErrorType().code);
         messageFormatST.add("text", messageST);
 
-        if (locationValid) reportST.add("location", locationST);
+        if (locationValid)
+            reportST.add("location", locationST);
         reportST.add("message", messageFormatST);
 
         return reportST;
@@ -123,9 +124,9 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     @Override
-    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
-                            int line, int charPositionInLine, String msg,
-                            RecognitionException e) {
+    public void syntaxError(Recognizer<?, ?> recognizer,
+            Object offendingSymbol, int line, int charPositionInLine,
+            String msg, RecognitionException e) {
         ResolveMessage m =
                 new LanguageSyntaxMessage(ErrorKind.SYNTAX_ERROR,
                         (Token) offendingSymbol, e, msg);
@@ -133,42 +134,90 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     public void semanticError(ErrorKind kind, String fileName, Token token,
-                              Object ... args) {
+            Object... args) {
         ResolveMessage m =
                 new LanguageSemanticsMessage(kind, fileName, token, args);
         emit(kind, m);
     }
 
-    public void toolError(ErrorKind kind, String msg) {
+    /**
+     * <p>Raise a predefined message with some number of paramters for the
+     * StringTemplate but for which there is no location information p
+     * ossible.</p>
+     *
+     * @param errorType The Message Descriptor
+     * @param args The arguments to pass to the StringTemplate
+     */
+    public void toolError(ErrorKind errorType, Object... args) {
+        toolError(errorType, null, args);
+    }
 
+    public void toolError(ErrorKind errorType, Throwable e, Object... args) {
+        CompilerMessage msg = new CompilerMessage(errorType, e, args);
+        emit(errorType, msg);
+    }
+
+    public static void fatalInternalError(String error, Throwable e) {
+        internalError(error, e);
+        throw new RuntimeException(error, e);
+    }
+
+    public static void internalError(String error, Throwable e) {
+        StackTraceElement location = getLastNonErrorManagerCodeLocation(e);
+        internalError("Exception " + e + "@" + location + ": " + error);
+    }
+
+    public static void internalError(String error) {
+        StackTraceElement location =
+                getLastNonErrorManagerCodeLocation(new Exception());
+        String msg = location + ": " + error;
+        System.err.println("internal error: " + msg);
+    }
+
+    /**
+     * <p>Returns first non ErrorManager code location for generating
+     * messages.</p>
+     */
+    private static StackTraceElement getLastNonErrorManagerCodeLocation(
+            Throwable e) {
+        StackTraceElement[] stack = e.getStackTrace();
+        int i = 0;
+        for (; i < stack.length; i++) {
+            StackTraceElement t = stack[i];
+            if (!t.toString().contains("ErrorManager")) {
+                break;
+            }
+        }
+        StackTraceElement location = stack[i];
+        return location;
     }
 
     public boolean formatWantsSingleLineMessage() {
-        return format.getInstanceOf("wantsSingleLineMessage")
-                .render().equals("true");
+        return format.getInstanceOf("wantsSingleLineMessage").render().equals(
+                "true");
     }
 
     @SuppressWarnings("fallthrough")
     public void emit(ErrorKind kind, ResolveMessage msg) {
         switch (kind.severity) {
-            case WARNING_ONE_OFF:
-                if (errorTypes.contains(kind)) {
-                    break;
-                }
-                // fall thru
-            case WARNING:
-                warningCount++;
-                compiler.warning(msg);
+        case WARNING_ONE_OFF:
+            if (errorTypes.contains(kind)) {
                 break;
-            case ERROR_ONE_OFF:
-                if (errorTypes.contains(kind)) {
-                    break;
-                }
-                // fall thru
-            case ERROR:
-                errorCount++;
-                compiler.error(msg);
+            }
+            // fall thru
+        case WARNING:
+            warningCount++;
+            compiler.warning(msg);
+            break;
+        case ERROR_ONE_OFF:
+            if (errorTypes.contains(kind)) {
                 break;
+            }
+            // fall thru
+        case ERROR:
+            errorCount++;
+            compiler.error(msg);
+            break;
         }
         errorTypes.add(kind);
     }

@@ -34,4 +34,4 @@ message(id, text) ::= "(<id>) <text>"
 
 report(location, message, type) ::= "<type>(<message.id>): <location> <message.text>"
 
-wantsSingleLin
+wantsSingleLineMessage() ::= "true"

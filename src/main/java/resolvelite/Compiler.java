@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -50,8 +50,12 @@ public class Compiler {
 
     public static String VERSION = "2.22.15a";
 
-    public static enum OptionArgType { NONE, STRING } // NONE implies boolean
+    public static enum OptionArgType {
+        NONE, STRING
+    } // NONE implies boolean
+
     public static class Option {
+
         String fieldName;
         String name;
         OptionArgType argType;
@@ -62,7 +66,7 @@ public class Compiler {
         }
 
         public Option(String fieldName, String name, OptionArgType argType,
-                      String description) {
+                String description) {
             this.fieldName = fieldName;
             this.name = name;
             this.argType = argType;
@@ -70,10 +74,12 @@ public class Compiler {
         }
     }
 
-    public static Option[] optionDefs = {
-            new Option("longMessages", "-longMessages",
-                    "show exception details on errors"),
-    };
+    public static Option[] optionDefs =
+            {
+                    new Option("longMessages", "-longMessages",
+                            "show exception details on errors"),
+                    new Option("log", "-Xlog",
+                            "dump lots of logging info to antlr-timestamp.log") };
 
     public final ErrorManager errorManager;
     public final String[] args;
@@ -103,10 +109,10 @@ public class Compiler {
             boolean found = false;
             int i = 0;
             for (Option o : optionDefs) {
-                if ( arg.equals(o.name) ) {
+                if (arg.equals(o.name)) {
                     found = true;
                     String argValue = null;
-                    if ( o.argType== OptionArgType.STRING ) {
+                    if (o.argType == OptionArgType.STRING) {
                         argValue = args[i];
                         i++;
                     }
@@ -114,20 +120,22 @@ public class Compiler {
                     Class<? extends Compiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
-                        if ( argValue==null ) {
-                            if ( arg.startsWith("-no-") ) f.setBoolean(this, false);
-                            else f.setBoolean(this, true);
+                        if (argValue == null) {
+                            if (arg.startsWith("-no-"))
+                                f.setBoolean(this, false);
+                            else
+                                f.setBoolean(this, true);
                         }
-                        else f.set(this, argValue);
+                        else
+                            f.set(this, argValue);
                     }
                     catch (Exception e) {
-                        errorManager
-                                .toolError(ErrorKind.INTERNAL_ERROR,
-                                        "can't access field " + o.fieldName);
+                        errorManager.toolError(ErrorKind.INTERNAL_ERROR,
+                                "can't access field " + o.fieldName);
                     }
                 }
             }
-            if ( !found ) {
+            if (!found) {
                 errorManager.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
             }
         }
@@ -169,15 +177,14 @@ public class Compiler {
                 roots.add(parser.module());
             }
             catch (IOException ioe) {
-                //errorManager.toolError(ErrorKind.CANNOT_OPEN_FILE, "");
-                throw new RuntimeException(ioe);
+                errorManager.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe,
+                        fileName);
             }
         }
         return roots;
     }
 
-    public void log(String msg) {
-    }
+    public void log(String msg) {}
 
     public void version() {
         info("RESOLVE Compiler Version " + VERSION);
@@ -186,7 +193,8 @@ public class Compiler {
     public void help() {
         version();
         for (Option o : optionDefs) {
-            String name = o.name + (o.argType!= OptionArgType.NONE? " ___" : "");
+            String name =
+                    o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
             String s = String.format(" %-19s %s", name, o.description);
             info(s);
         }
