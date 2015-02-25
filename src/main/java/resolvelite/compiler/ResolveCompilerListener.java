@@ -1,6 +1,6 @@
 /*
  * [The "BSD license"]
- * Copyright (c) 2014 Takumi Bolte, Dan Welch
+ * Copyright (c) 2015 Clemson University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

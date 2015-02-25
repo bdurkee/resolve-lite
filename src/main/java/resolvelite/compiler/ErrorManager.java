@@ -1,6 +1,6 @@
 /*
  * [The "BSD license"]
- * Copyright (c) 2014 Takumi Bolte, Dan Welch
+ * Copyright (c) 2015 Clemson University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ import org.antlr.v4.tool.ErrorSeverity;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
+import resolvelite.Compiler;
 
 import java.io.File;
 import java.util.EnumSet;
@@ -51,7 +52,7 @@ public class ErrorManager extends BaseErrorListener {
             new STGroupFile(FORMATS_DIR
                     + "carbon" + STGroup.GROUP_FILE_EXTENSION);
 
-    private final Compiler compiler;
+    private final resolvelite.Compiler compiler;
     private int errorCount, warningCount;
 
     public Set<ErrorKind> errorTypes = EnumSet.noneOf(ErrorKind.class);

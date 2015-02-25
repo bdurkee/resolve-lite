@@ -1,6 +1,6 @@
 /*
  * [The "BSD license"]
- * Copyright (c) 2014 Takumi Bolte, Dan Welch
+ * Copyright (c) 2015 Clemson University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import resolvelite.compiler.DefaultCompilerListener;
+import resolvelite.compiler.ErrorKind;
+import resolvelite.compiler.ErrorManager;
+import resolvelite.compiler.ResolveMessage;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
 
@@ -58,7 +61,8 @@ public class Compiler {
             this(fieldName, name, OptionArgType.NONE, description);
         }
 
-        public Option(String fieldName, String name, OptionArgType argType, String description) {
+        public Option(String fieldName, String name, OptionArgType argType,
+                      String description) {
             this.fieldName = fieldName;
             this.name = name;
             this.argType = argType;
@@ -67,7 +71,8 @@ public class Compiler {
     }
 
     public static Option[] optionDefs = {
-            new Option("longMessages", "-longMessages", "show exception details on errors"),
+            new Option("longMessages", "-longMessages",
+                    "show exception details on errors"),
     };
 
     public final ErrorManager errorManager;
@@ -140,6 +145,7 @@ public class Compiler {
         if (resolve.errorManager.getErrorCount() > 0) {
             resolve.exit(1);
         }
+        resolve.exit(0);
     }
 
     public void processCommandLineTargets() {
