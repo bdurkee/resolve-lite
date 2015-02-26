@@ -31,12 +31,16 @@
 grammar Resolve;
 
 module
-    :   'Precis' name=Identifier ';'
-        moduleBlock
-        'end' ';'
+    :   precisModule
     ;
 
-moduleBlock
+precisModule
+    :   'Precis' name=Identifier ';'
+        precisBlock
+        'end' closename=Identifier ';'
+    ;
+
+precisBlock
     :   definitionDecl
     ;
 
@@ -46,10 +50,10 @@ definitionDecl
     ;
 
 definitionParameterList
-    :   '(' ')'
+    :   '(' mathVariableDecl (mathVariableDecl)* ')'
     ;
 
-variableDecl
+mathVariableDecl
     :   name=Identifier ':' mathTypeExp
     ;
 
@@ -58,20 +62,20 @@ mathTypeExp
     ;
 
 mathExp
-    :   primary                                     #primaryExp
-    |   op=('+'|'-'|'~'|'not') mathExp              #unaryExp
-    |   mathExp op=('*'|'/') mathExp                #infixExp
-    |   mathExp op=('+'|'-') mathExp                #infixExp
-    |   mathExp op=('..'|'->') mathExp              #infixExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp    #infixExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp      #infixExp
-    |   mathExp op=('='|'/=') mathExp               #infixExp
-    |   mathExp op='implies' mathExp                #infixExp
-    |   mathExp op=('and'|'or') mathExp             #infixExp
-    |   mathExp (':') mathExp                       #typeAssertionExp
+    :   primaryExp                                  #mathPrimaryExp
+    |   op=('+'|'-'|'~'|'not') mathExp              #mathUnaryExp
+    |   mathExp op=('*'|'/') mathExp                #mathInfixExp
+    |   mathExp op=('+'|'-') mathExp                #mathInfixExp
+    |   mathExp op=('..'|'->') mathExp              #mathInfixExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp    #mathInfixExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp      #mathInfixExp
+    |   mathExp op=('='|'/=') mathExp               #mathInfixExp
+    |   mathExp op='implies' mathExp                #mathInfixExp
+    |   mathExp op=('and'|'or') mathExp             #mathInfixExp
+    |   mathExp (':') mathExp                       #mathTypeAssertionExp
     ;
 
-primary
+primaryExp
     :   literalExp
     |   functionExp
     |   variableExp

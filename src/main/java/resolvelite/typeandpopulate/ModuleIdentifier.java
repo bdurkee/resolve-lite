@@ -11,7 +11,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
-    @NotNull private final String name;
+    @NotNull
+    private final String name;
     private final boolean globalFlag;
 
     private ModuleIdentifier() {
@@ -34,19 +35,20 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     private static Token getModuleNameRuleCtx(@NotNull ParserRuleContext ctx) {
         Token result = null;
-        if (ctx instanceof ResolveParser.ModuleContext) {
-            ResolveParser.ModuleContext ctxAsModule =
-                    (ResolveParser.ModuleContext) ctx;
-            result = ctxAsModule.name;
+        if (ctx instanceof ResolveParser.PrecisModuleContext) {
+            ResolveParser.PrecisModuleContext ctxAsPrecis =
+                    (ResolveParser.PrecisModuleContext) ctx;
+            result = ctxAsPrecis.name;
         }
         else {
             ErrorManager.fatalInternalError("unrecognized module: "
-                            + ctx.getText(), new IllegalArgumentException());
+                    + ctx.getText(), new IllegalArgumentException());
         }
         return result;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof ModuleIdentifier);
 
         if (result) {
@@ -55,7 +57,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         return result;
     }
 
-    @Override public int compareTo(ModuleIdentifier o) {
+    @Override
+    public int compareTo(ModuleIdentifier o) {
         return name.compareTo(o.name);
     }
 
@@ -68,6 +71,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     }
 
     public String fullyQualifiedRepresentation(String symbol) {
-        return name+"."+symbol;
+        return name + "." + symbol;
     }
 }

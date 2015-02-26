@@ -57,14 +57,17 @@ public class ParseTreeAnnotations {
     public File getFile() {
         return file;
     }
+
     @NotNull
     public MTType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
+
     @NotNull
     public MTType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
+
     @NotNull
     public ParseTree getRoot() {
         return root;
