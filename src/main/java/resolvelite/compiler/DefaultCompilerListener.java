@@ -31,13 +31,13 @@
 package resolvelite.compiler;
 
 import org.stringtemplate.v4.ST;
-import resolvelite.Compiler;
+import resolvelite.ResolveCompiler;
 
 public class DefaultCompilerListener implements ResolveCompilerListener {
 
-    private final resolvelite.Compiler compiler;
+    private final ResolveCompiler compiler;
 
-    public DefaultCompilerListener(Compiler c) {
+    public DefaultCompilerListener(ResolveCompiler c) {
         this.compiler = c;
     }
 

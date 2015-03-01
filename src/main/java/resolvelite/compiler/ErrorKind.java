@@ -64,7 +64,14 @@ public enum ErrorKind {
     /**
      * <p>Compiler error 5: syntax error: <em>errormsg</em>.</p>
      */
-    SYNTAX_ERROR(5, "syntax error: <arg>", ErrorSeverity.ERROR);
+    SYNTAX_ERROR(5, "syntax error: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * <p>Compiler error 6: unexpected symboltablentry: <em>expectedentry</em>,
+     * <em>foundentry</em>.</p>
+     */
+    UNEXPECTED_SYMTAB_ENTRY(6, "expecting <arg>; found <arg2>",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

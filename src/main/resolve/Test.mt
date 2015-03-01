@@ -1,4 +1,4 @@
 Precis Test;
 
-    Definition Test: B;
-end;
+    Definition Test(a, b : B) : B;
+end Test;

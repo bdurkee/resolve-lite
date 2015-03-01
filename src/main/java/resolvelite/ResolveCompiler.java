@@ -47,7 +47,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Compiler {
+public class ResolveCompiler {
 
     public static String VERSION = "2.22.15a";
 
@@ -95,7 +95,7 @@ public class Compiler {
     public final List<String> targetFiles = new ArrayList<String>();
     public LogManager logMgr = new LogManager();
 
-    public Compiler(String[] args) {
+    public ResolveCompiler(String[] args) {
         this.errorManager = new ErrorManager(this);
         this.args = args;
         handleArgs();
@@ -120,7 +120,7 @@ public class Compiler {
                         i++;
                     }
                     // use reflection to set field
-                    Class<? extends Compiler> c = this.getClass();
+                    Class<? extends ResolveCompiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
                         if (argValue == null) {
@@ -145,7 +145,7 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-        Compiler resolve = new Compiler(args);
+        ResolveCompiler resolve = new ResolveCompiler(args);
         if (args.length == 0) {
             resolve.help();
             resolve.exit(0);

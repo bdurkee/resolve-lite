@@ -50,7 +50,11 @@ definitionDecl
     ;
 
 definitionParameterList
-    :   '(' mathVariableDecl (',' mathVariableDecl)* ')'
+    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+    ;
+
+mathVariableDeclGroup
+    :   Identifier (',' Identifier)* ':' mathTypeExp
     ;
 
 mathVariableDecl

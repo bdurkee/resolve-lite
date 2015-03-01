@@ -38,7 +38,7 @@ import org.antlr.v4.tool.ErrorSeverity;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import resolvelite.Compiler;
+import resolvelite.ResolveCompiler;
 
 import java.io.File;
 import java.util.EnumSet;
@@ -52,12 +52,12 @@ public class ErrorManager extends BaseErrorListener {
             new STGroupFile(FORMATS_DIR + "resolvelite"
                     + STGroup.GROUP_FILE_EXTENSION);
 
-    private final resolvelite.Compiler compiler;
+    private final ResolveCompiler compiler;
     private int errorCount, warningCount;
 
     public Set<ErrorKind> errorTypes = EnumSet.noneOf(ErrorKind.class);
 
-    public ErrorManager(Compiler c) {
+    public ErrorManager(ResolveCompiler c) {
         this.compiler = c;
     }
 

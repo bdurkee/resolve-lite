@@ -38,7 +38,7 @@ import resolvelite.typeandpopulate.MTType;
 
 import java.io.File;
 
-public class ParseTreeAnnotations {
+public class AnnotatedParseTree {
 
     private final ParseTree root;
     //Not sure if this should really go here. We'll see.
@@ -46,7 +46,7 @@ public class ParseTreeAnnotations {
     private final ParseTreeProperty<MTType> mathTypes;
     private final ParseTreeProperty<MTType> mathTypeValues;
 
-    private ParseTreeAnnotations(TreeAnnotatingBuilder builder) {
+    private AnnotatedParseTree(TreeAnnotatingBuilder builder) {
         this.root = builder.root;
         this.mathTypes = builder.mathTypes;
         this.mathTypeValues = builder.mathTypeValues;
@@ -75,7 +75,7 @@ public class ParseTreeAnnotations {
 
     public static class TreeAnnotatingBuilder
             implements
-                Builder<ParseTreeAnnotations> {
+                Builder<AnnotatedParseTree> {
 
         protected final ParseTreeProperty<MTType> mathTypes =
                 new ParseTreeProperty<MTType>();
@@ -102,8 +102,8 @@ public class ParseTreeAnnotations {
         }
 
         @Override
-        public ParseTreeAnnotations build() {
-            return new ParseTreeAnnotations(this);
+        public AnnotatedParseTree build() {
+            return new AnnotatedParseTree(this);
         }
     }
 }
