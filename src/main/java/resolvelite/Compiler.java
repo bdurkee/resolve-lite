@@ -37,6 +37,7 @@ import resolvelite.compiler.DefaultCompilerListener;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ErrorManager;
 import resolvelite.compiler.ResolveMessage;
+import resolvelite.misc.LogManager;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
 
@@ -79,18 +80,20 @@ public class Compiler {
                     new Option("longMessages", "-longMessages",
                             "show exception details on errors"),
                     new Option("log", "-Xlog",
-                            "dump lots of logging info to antlr-timestamp.log") };
+                            "dump lots of logging info to resolve-timestamp.log") };
 
     public final ErrorManager errorManager;
     public final String[] args;
 
     public boolean helpFlag = false;
     public boolean longMessages = false;
+    public boolean log = false;
 
     public final DefaultCompilerListener defaultListener =
             new DefaultCompilerListener(this);
 
     public final List<String> targetFiles = new ArrayList<String>();
+    public LogManager logMgr = new LogManager();
 
     public Compiler(String[] args) {
         this.errorManager = new ErrorManager(this);
@@ -148,8 +151,21 @@ public class Compiler {
             resolve.exit(0);
         }
         resolve.version();
-        resolve.processCommandLineTargets();
-
+        try {
+            resolve.processCommandLineTargets();
+        }
+        finally {
+            if (resolve.log) {
+                try {
+                    String logname = resolve.logMgr.save();
+                    System.out.println("wrote " + logname);
+                }
+                catch (IOException ioe) {
+                    resolve.errorManager.toolError(ErrorKind.INTERNAL_ERROR,
+                            ioe);
+                }
+            }
+        }
         if (resolve.errorManager.getErrorCount() > 0) {
             resolve.exit(1);
         }

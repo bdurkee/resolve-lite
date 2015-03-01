@@ -50,7 +50,7 @@ definitionDecl
     ;
 
 definitionParameterList
-    :   '(' mathVariableDecl (mathVariableDecl)* ')'
+    :   '(' mathVariableDecl (',' mathVariableDecl)* ')'
     ;
 
 mathVariableDecl
