@@ -71,7 +71,13 @@ public enum ErrorKind {
      * <em>foundentry</em>.</p>
      */
     UNEXPECTED_SYMTAB_ENTRY(6, "expecting <arg>; found <arg2>",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    /**
+     * <p>Compiler error 7: unexpected symboltablentry: <em>expectedentry</em>,
+     * <em>foundentry</em>.</p>
+     */
+    DUP_SYMBOL(7, "duplicate symbol: <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

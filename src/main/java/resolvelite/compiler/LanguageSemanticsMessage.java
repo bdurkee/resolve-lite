@@ -34,13 +34,22 @@ import org.antlr.v4.runtime.Token;
 
 public class LanguageSemanticsMessage extends ResolveMessage {
 
-    public LanguageSemanticsMessage(ErrorKind etype, String fileName,
-            Token offendingToken, Object... args) {
+    public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken,
+                                    Object... args) {
         super(etype, offendingToken, args);
-        this.fileName = fileName;
         if (offendingToken != null) {
-            line = offendingToken.getLine();
-            charPosition = offendingToken.getCharPositionInLine();
+            this.fileName =
+                    groomFileName(offendingToken.getTokenSource().getSourceName());
+            this.line = offendingToken.getLine();
+            this.charPosition = offendingToken.getCharPositionInLine();
         }
+    }
+
+    protected static String groomFileName(String fileName) {
+        int start = fileName.lastIndexOf("/");
+        if (start == -1) {
+            return fileName;
+        }
+        return fileName.substring(start + 1, fileName.length());
     }
 }

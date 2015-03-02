@@ -133,11 +133,11 @@ public class ErrorManager extends BaseErrorListener {
         emit(ErrorKind.SYNTAX_ERROR, m);
     }
 
-    public void semanticError(ErrorKind kind, String fileName, Token token,
-            Object... args) {
-        ResolveMessage m =
-                new LanguageSemanticsMessage(kind, fileName, token, args);
-        emit(kind, m);
+    public void semanticError(ErrorKind etype, Token offendingSymbol,
+                            Object... args) {
+        ResolveMessage msg =
+                new LanguageSemanticsMessage(etype, offendingSymbol, args);
+        emit(etype, msg);
     }
 
     /**

@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import resolvelite.ResolveCompiler;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.typereasoning.TypeGraph;
 
@@ -15,14 +16,22 @@ public class MathSymbolTableBuilder {
     private final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<ScopeBuilder>();
 
-    private final TypeGraph myTypeGraph;
+    @NotNull private final TypeGraph typeGraph;
+    @NotNull private final ResolveCompiler compiler;
 
-    public MathSymbolTableBuilder() {
-        myTypeGraph = new TypeGraph();
+    public MathSymbolTableBuilder(ResolveCompiler rc) {
+        this.typeGraph = new TypeGraph();
+        this.compiler = rc;
     }
 
+    @NotNull
+    public ResolveCompiler getCompiler() {
+        return compiler;
+    }
+
+    @NotNull
     public TypeGraph getTypeGraph() {
-        return myTypeGraph;
+        return typeGraph;
     }
 
     public void startScope(@NotNull ParseTree t) {
