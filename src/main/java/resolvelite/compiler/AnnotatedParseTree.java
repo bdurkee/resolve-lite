@@ -41,33 +41,21 @@ import java.io.File;
 public class AnnotatedParseTree {
 
     private final ParseTree root;
-    //Not sure if this should really go here. We'll see.
-    private final File file;
-    private final ParseTreeProperty<MTType> mathTypes;
-    private final ParseTreeProperty<MTType> mathTypeValues;
+    private final ParseTreeProperty<MTType> mathTypes, mathTypeValues;
 
     private AnnotatedParseTree(TreeAnnotatingBuilder builder) {
         this.root = builder.root;
         this.mathTypes = builder.mathTypes;
         this.mathTypeValues = builder.mathTypeValues;
-        this.file = builder.file;
     }
-
-    @NotNull
-    public File getFile() {
-        return file;
-    }
-
     @NotNull
     public MTType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
-
     @NotNull
     public MTType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
-
     @NotNull
     public ParseTree getRoot() {
         return root;
@@ -84,9 +72,8 @@ public class AnnotatedParseTree {
         protected ParseTree root;
         protected File file;
 
-        public TreeAnnotatingBuilder(ParseTree root, @NotNull File file) {
+        public TreeAnnotatingBuilder(ParseTree root) {
             this.root = root;
-            this.file = file;
         }
 
         public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,

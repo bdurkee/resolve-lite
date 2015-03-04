@@ -28,18 +28,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite;
+package resolvelite.compiler;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.compiler.DefaultCompilerListener;
-import resolvelite.compiler.ErrorKind;
-import resolvelite.compiler.ErrorManager;
-import resolvelite.compiler.ResolveMessage;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import resolvelite.misc.LogManager;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
+import resolvelite.typeandpopulate.MathSymbolTableBuilder;
+import resolvelite.typeandpopulate.PopulatingListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,8 +90,10 @@ public class ResolveCompiler {
 
     public final DefaultCompilerListener defaultListener =
             new DefaultCompilerListener(this);
-
+    public final MathSymbolTableBuilder symbolTable =
+            new MathSymbolTableBuilder(this);
     public final List<String> targetFiles = new ArrayList<String>();
+
     public LogManager logMgr = new LogManager();
 
     public ResolveCompiler(String[] args) {
@@ -174,7 +175,15 @@ public class ResolveCompiler {
 
     public void processCommandLineTargets() {
         List<ParseTree> targets = getTrees();
-        //analysis here.
+
+        for (ParseTree tree : targets) {
+            AnnotatedParseTree.TreeAnnotatingBuilder annotations =
+                    new AnnotatedParseTree.TreeAnnotatingBuilder(tree);
+            PopulatingListener populator =
+                    new PopulatingListener(this, annotations, symbolTable);
+            ParseTreeWalker.DEFAULT.walk(populator, tree);
+            int i = 0;
+        }
     }
 
     public List<ParseTree> getTrees() {

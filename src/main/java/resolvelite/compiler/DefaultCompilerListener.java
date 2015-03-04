@@ -31,7 +31,6 @@
 package resolvelite.compiler;
 
 import org.stringtemplate.v4.ST;
-import resolvelite.ResolveCompiler;
 
 public class DefaultCompilerListener implements ResolveCompilerListener {
 

@@ -2,7 +2,7 @@ package resolvelite.typeandpopulate.entry;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.ResolveCompiler;
+import resolvelite.compiler.ResolveCompiler;
 import resolvelite.compiler.ErrorKind;
 
 public abstract class SymbolTableEntry {

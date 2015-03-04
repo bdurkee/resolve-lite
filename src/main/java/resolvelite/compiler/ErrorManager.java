@@ -38,7 +38,6 @@ import org.antlr.v4.tool.ErrorSeverity;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
-import resolvelite.ResolveCompiler;
 
 import java.io.File;
 import java.util.EnumSet;

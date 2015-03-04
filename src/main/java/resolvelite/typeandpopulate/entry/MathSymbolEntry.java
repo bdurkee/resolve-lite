@@ -33,10 +33,9 @@ package resolvelite.typeandpopulate.entry;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.ResolveCompiler;
+import resolvelite.compiler.ResolveCompiler;
 import resolvelite.typeandpopulate.MTProper;
 import resolvelite.typeandpopulate.MTType;
-import resolvelite.typeandpopulate.ModuleIdentifier;
 import resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;

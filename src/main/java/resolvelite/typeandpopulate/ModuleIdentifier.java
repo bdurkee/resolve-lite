@@ -8,7 +8,6 @@ import resolvelite.compiler.ErrorManager;
 import resolvelite.parsing.ResolveParser;
 
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
-
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
     @NotNull

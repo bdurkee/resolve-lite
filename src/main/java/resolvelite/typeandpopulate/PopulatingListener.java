@@ -1,8 +1,7 @@
 package resolvelite.typeandpopulate;
 
 import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.ResolveCompiler;
-import resolvelite.compiler.AnnotatedParseTree;
+import resolvelite.compiler.ResolveCompiler;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.compiler.AnnotatedParseTree.TreeAnnotatingBuilder;
 import resolvelite.parsing.ResolveParser;
@@ -52,6 +51,11 @@ public class PopulatingListener extends ResolveBaseListener {
 
     @Override
     public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+        builder.startScope(ctx);
+    }
 
+    @Override
+    public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
+        builder.endScope();
     }
 }

@@ -1,6 +1,9 @@
 package resolvelite.typeandpopulate;
 
 import resolvelite.typeandpopulate.entry.SymbolTableEntry;
+import resolvelite.typeandpopulate.query.MultimatchSymbolQuery;
+
+import java.util.List;
 
 /**
  * <p>A <code>Scope</code> represents a mapping from symbol names to symbol
@@ -20,11 +23,15 @@ import resolvelite.typeandpopulate.entry.SymbolTableEntry;
  */
 public interface Scope {
 
-    public String getScopeName();
-
-    /** Where to look next for symbols */
-    public Scope getEnclosingScope();
-
-    /** Look up name in this scope or in enclosing scope if not here */
-    public SymbolTableEntry resolve(String name);
+    /**
+     * <p>Searches for symbols by the given query, using this <code>Scope</code>
+     * as the source scope of the search, i.e. the scope that is the context
+     * from which the search was triggered.</p>
+     *
+     * @param query The query to use.
+     *
+     * @return A list of all symbols matching the given query.
+     */
+    public <E extends SymbolTableEntry> List<E> query(
+            MultimatchSymbolQuery<E> query);
 }

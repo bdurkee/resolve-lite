@@ -30,6 +30,11 @@
  */
 package resolvelite.misc;
 
+/**
+ * <p>A builder of objects of type <code>T</code>.</p>
+ *
+ * @param <T> The type to build.
+ */
 public interface Builder<T> {
 
     public T build();

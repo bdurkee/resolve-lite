@@ -1,47 +1,51 @@
 package resolvelite.typeandpopulate;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.ResolveCompiler;
-import resolvelite.compiler.ErrorKind;
+import resolvelite.compiler.ResolveCompiler;
+import resolvelite.misc.HardCoded;
 import resolvelite.typeandpopulate.entry.MathSymbolEntry;
 import resolvelite.typeandpopulate.entry.SymbolTableEntry;
 import resolvelite.typereasoning.TypeGraph;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ScopeBuilder implements Scope {
 
+    protected final List<ScopeBuilder> children =
+            new ArrayList<ScopeBuilder>();
     private final Map<String, SymbolTableEntry> bindings;
 
     protected final TypeGraph typeGraph;
     protected final ParseTree definingElement;
     protected Scope parent;
     private final MathSymbolTableBuilder source;
-
     private final ResolveCompiler compiler;
 
     public ScopeBuilder(MathSymbolTableBuilder b, TypeGraph g,
-                        ParseTree definingElement, Scope parent,
-                        Map<String, SymbolTableEntry> bindings) {
+                        ParseTree definingElement, Scope parent) {
         this.source = b;
         this.typeGraph = g;
-        this.definingElement = definingElement;
         this.parent = parent;
-        this.bindings = bindings;
+        this.definingElement = definingElement;
+        this.bindings = new HashMap<String, SymbolTableEntry>();
         this.compiler = source.getCompiler();
-        initMathTypeSystem();
+        HardCoded.
     }
 
-    protected void initMathTypeSystem() {
-        try {
+    public ParseTree getDefiningElement() {
+        return definingElement;
+    }
 
-            addBinding("", null, null);
+    void setParent(Scope parent) {
+        this.parent = parent;
+    }
 
-        }
-        catch (DuplicateSymbolException dse) {
-            //shouldn't happen, we're first ones to add anything.
-        }
+    void addChild(ScopeBuilder b) {
+        children.add(b);
+    }
+
+    List<ScopeBuilder> children() {
+        return new ArrayList<ScopeBuilder>(children);
     }
 
     @Override
