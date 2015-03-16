@@ -28,23 +28,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
-
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCompilationPipeline {
+public abstract class SpecModule extends Module {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    @ModelElement public List<TypeDecl> types = new ArrayList<TypeDecl>();
+    @ModelElement public List<FunctionDecl> funcs =
+            new ArrayList<FunctionDecl>();
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public SpecModule(String name, ModuleFile file) {
+        super(name, file);
     }
 
-    public abstract void process();
+    public static class Concept extends SpecModule {
+
+        public Concept(String name, ModuleFile file) {
+            super(name, file);
+        }
+    }
+
+    public static class Enhancement extends SpecModule {
+
+        public String concept;
+
+        public Enhancement(String name, String concept, ModuleFile file) {
+            super(name, file);
+            this.concept = concept;
+        }
+    }
 }

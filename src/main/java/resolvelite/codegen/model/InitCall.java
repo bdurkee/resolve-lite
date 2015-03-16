@@ -28,23 +28,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+public class InitCall extends Expr {
 
-import java.util.List;
+    //if we represent a literal initialization, we pass the initial value as
+    //a str to the createX(..) method.
+    public String initialValue;
+    public String typeName;
+    @ModelElement public Qualifier qualifier;
 
-public abstract class AbstractCompilationPipeline {
-
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
-
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public InitCall(Qualifier typeFacilityQualifier, String typeToInitName) {
+        this(typeFacilityQualifier, typeToInitName, null);
     }
 
-    public abstract void process();
+    public InitCall(Qualifier typeFacilityQualifier, String typeToInitName,
+            String initialValue) {
+        this.typeName = typeToInitName;
+        this.qualifier = typeFacilityQualifier;
+        this.initialValue = initialValue;
+    }
+
+    public static class Qualifier extends OutputModelObject {
+
+        public String facilitySpecName, facilityName;
+
+        public Qualifier(String facilityName, String facilitySpecName) {
+            this.facilityName = facilityName;
+            this.facilitySpecName = facilitySpecName;
+        }
+    }
 }

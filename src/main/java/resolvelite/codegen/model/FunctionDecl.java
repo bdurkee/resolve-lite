@@ -28,23 +28,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
-
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCompilationPipeline {
+public class FunctionDecl extends Decl {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    public boolean hasReturn = false;
+    public boolean isStatic = false;
+    public String containingModuleName;
+    @ModelElement public List<ParameterDecl> params =
+            new ArrayList<ParameterDecl>();
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public FunctionDecl(String name) {
+        super(name);
     }
-
-    public abstract void process();
 }

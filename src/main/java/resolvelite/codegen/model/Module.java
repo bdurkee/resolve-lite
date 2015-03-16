@@ -1,3 +1,15 @@
+/**
+ * Module.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 /*
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
@@ -28,23 +40,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
-
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCompilationPipeline {
+public abstract class Module extends OutputModelObject {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    public String name;
+    public ModuleFile file;
+    @ModelElement public List<FunctionImpl> funcImpls =
+            new ArrayList<FunctionImpl>();
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public Module(String name, ModuleFile file) {
+        this.name = name;
+        this.file = file;//who contains us?
     }
-
-    public abstract void process();
 }

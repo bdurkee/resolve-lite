@@ -28,23 +28,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import resolvelite.compiler.ResolveCompiler;
 import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-public abstract class AbstractCompilationPipeline {
+public class ModuleFile extends OutputModelObject {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    public String RESOLVEVersion;
+    public List<String> targetDir; //in this case, our pkg directory
+    public String resolveFileName;
+    @ModelElement public Set<ImportRef> imports =
+            new LinkedHashSet<ImportRef>();
+    @ModelElement public Module module;
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public ModuleFile(TreeAnnotatingBuilder e, String resolveFileName) {
+        this.resolveFileName = resolveFileName;
+        this.RESOLVEVersion = ResolveCompiler.VERSION;
+        //this.targetDir = ImportRef.listifyFileString(e.getFileName());
     }
-
-    public abstract void process();
 }

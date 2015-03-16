@@ -28,23 +28,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen;
 
 import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import resolvelite.codegen.model.OutputModelObject;
+import resolvelite.parsing.ResolveBaseListener;
 
-import java.util.List;
+public class ModelBuilder extends ResolveBaseListener {
 
-public abstract class AbstractCompilationPipeline {
+    public ParseTreeProperty<OutputModelObject> built =
+            new ParseTreeProperty<OutputModelObject>();
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    private final CodeGenerator gen;
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public ModelBuilder(@NotNull CodeGenerator g) {
+        this.gen = g;
     }
-
-    public abstract void process();
 }

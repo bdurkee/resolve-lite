@@ -1,14 +1,32 @@
-/**
- * ResolveCompiler.java
- * ---------------------------------
- * Copyright (c) 2014
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
+/*
+ * [The "BSD license"]
+ * Copyright (c) 2015 Clemson University
  * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. The name of the author may not be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package resolvelite.compiler;
 
@@ -23,6 +41,7 @@ import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import resolvelite.compiler.tree.ImportCollection;
 import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.ResolveTokenFactory;
 import resolvelite.misc.FileLocator;
 import resolvelite.misc.LogManager;
 import resolvelite.misc.Utils;
@@ -44,10 +63,10 @@ public class ResolveCompiler {
     } // NONE implies boolean
 
     public static final List<String> NATIVE_EXT = Collections
-            .unmodifiableList(Arrays.asList("co", "fa", "mt", "en", "rb"));
+            .unmodifiableList(Arrays.asList("concept", "precis"));
 
     public static final List<String> NON_NATIVE_EXT = Collections
-            .unmodifiableList(Arrays.asList("java", "c", "h"));
+            .unmodifiableList(Arrays.asList("java"));
 
     public static class Option {
 
@@ -228,8 +247,8 @@ public class ResolveCompiler {
             findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
                     TreeAnnotatingBuilder root,
                     Map<String, TreeAnnotatingBuilder> roots) {
-        for (Token importRequest : root.getImports()
-                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
+        for (Token importRequest : root.getImports().getImportsExcluding(
+                ImportCollection.ImportType.EXTERNAL)) {
             TreeAnnotatingBuilder module = roots.get(importRequest.getText());
             try {
                 File file =
@@ -252,12 +271,14 @@ public class ResolveCompiler {
 
             if (root.getImports().inCategory(
                     ImportCollection.ImportType.EXPLICIT, module.getName())) {
-                /*if (!module.appropriateForImport()) {
-                    errorManager.toolError(ErrorKind.INVALID_IMPORT,
-                            "MODULE TYPE GOES HERE", root.getName().getText(),
-                            "IMPORTED MODULE TYPE GOES HERE", module.getName()
-                                    .getText());
-                }*/
+                /*
+                 * if (!module.appropriateForImport()) {
+                 * errorManager.toolError(ErrorKind.INVALID_IMPORT,
+                 * "MODULE TYPE GOES HERE", root.getName().getText(),
+                 * "IMPORTED MODULE TYPE GOES HERE", module.getName()
+                 * .getText());
+                 * }
+                 */
             }
             if (pathExists(g, module.getName().getText(), root.getName()
                     .getText())) {
@@ -320,8 +341,14 @@ public class ResolveCompiler {
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
             ResolveLexer lexer = new ResolveLexer(input);
+            ResolveTokenFactory factory = new ResolveTokenFactory(input);
+            lexer.setTokenFactory(factory);
+
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
+            parser.setTokenFactory(factory);
+            parser.removeErrorListeners();
+            parser.addErrorListener(errorManager);
             ParserRuleContext start = parser.module();
 
             TreeAnnotatingBuilder result =

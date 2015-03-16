@@ -1,3 +1,18 @@
+/**
+ * LayeredFacilityInstantiation.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+package resolvelite.codegen.model;
+
+import java.util.ArrayList;
 /*
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
@@ -28,23 +43,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
-
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
-
 import java.util.List;
 
-public abstract class AbstractCompilationPipeline {
+public class LayeredFacilityInstantiation extends OutputModelObject {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    public boolean isProxied;
+    public String specName, specRealizName;
+    @ModelElement public List<Argument> args = new ArrayList<Argument>();
+    @ModelElement public LayeredFacilityInstantiation child;
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+    public LayeredFacilityInstantiation(String specName, String specRealizName) {
+        this.specName = specName;
+        this.specRealizName = specRealizName;
     }
-
-    public abstract void process();
+    /*
+     * public FacilityLayerItem(ASTModuleParameterization spec,
+     * ASTModuleParameterization impl) {
+     * this(factory, spec.getName().getText(), impl.getName().getText());
+     * }
+     * public void addArguments(List<AbstractArgRef> argRefs) {
+     * args.addAll(argRefs);
+     * }
+     */
 }

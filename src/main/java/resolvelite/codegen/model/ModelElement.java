@@ -28,23 +28,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import java.util.List;
-
-public abstract class AbstractCompilationPipeline {
-
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
-
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
-    }
-
-    public abstract void process();
-}
+/**
+ * <p>
+ * Indicates a field of an {@link OutputModelObject} that should be walked when
+ * constructing a hierarchy of {@link org.stringtemplate.v4.ST}s.
+ * </p>
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ModelElement {}

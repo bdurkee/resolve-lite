@@ -28,23 +28,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.codegen;
 
 import org.antlr.v4.runtime.misc.NotNull;
+import org.stringtemplate.v4.ST;
+import resolvelite.compiler.AbstractCompilationPipeline;
+import resolvelite.compiler.ResolveCompiler;
 import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
 
 import java.util.List;
 
-public abstract class AbstractCompilationPipeline {
+public class CodeGenPipeline extends AbstractCompilationPipeline {
 
-    @NotNull protected final List<TreeAnnotatingBuilder> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
-
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
+    public CodeGenPipeline(@NotNull ResolveCompiler rc,
             @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+        super(rc, compilationUnits);
     }
 
-    public abstract void process();
+    @Override
+    public void process() {
+        if (compiler.genCode == null) {
+            return;
+        }
+        for (TreeAnnotatingBuilder unit : compilationUnits) {
+            if (!compiler.targetNames.contains(unit.getName().getText())) {
+                continue;
+            }
+            CodeGenerator gen = new CodeGenerator(compiler, unit);
+            compiler.info("gencode: " + unit.getName().getText());
+            if (compiler.genCode.equals("Java")) {
+                ST x = gen.generateModule();
+                System.out.println(x.render());
+                //gen.writeModuleFile(gen.generateModule());
+            }
+        }
+    }
 }

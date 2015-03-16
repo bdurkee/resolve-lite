@@ -32,75 +32,374 @@ grammar Resolve;
 
 module
     :   precisModule
+    |   conceptModule
     ;
+
+// precis module
 
 precisModule
     :   'Precis' name=Identifier ';'
         (importList)?
-        precisBlock
-        'end' closename=Identifier ';'
+        (precisItems)?
+        'end' closename=Identifier ';' EOF
     ;
+
+precisItems
+    :   (precisItem)+
+    ;
+
+precisItem
+    :   mathDefinitionDecl
+    ;
+
+// concept module
+
+conceptModule
+    :   'Concept' name=Identifier (moduleParameterList)? ';'
+        (importList)?
+        (requiresClause)?
+        (conceptItems)?
+        'end' closename=Identifier ';' EOF
+    ;
+
+conceptItems
+    :   (conceptItem)+
+    ;
+
+conceptItem
+    :   operationDecl
+    |   typeModelDecl
+    |   mathDefinitionDecl
+    ;
+
+// uses, imports
 
 importList
-    :   'uses' Identifier (',' Identifier)*
+    :   'uses' Identifier (',' Identifier)* ';'
     ;
 
-precisBlock
-    :   definitionDecl
+// parameter related rules
+
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
-definitionDecl
-    :   'Definition' name=Identifier (definitionParameterList)? ':'
-        mathTypeExp ';'
+moduleParameterList
+    :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
     ;
 
-definitionParameterList
-    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+moduleParameterDecl
+    :   typeParameterDecl
+    |   parameterDeclGroup
     ;
+
+typeParameterDecl
+    :   'type' name=Identifier
+    ;
+
+parameterDeclGroup
+    :   Identifier (',' Identifier)* ':' type
+    ;
+
+parameterMode
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
+    ;
+
+// type and record related rules
+
+type
+    :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+typeModelDecl
+    :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeExp ';'
+        'exemplar' exemplar=Identifier ';'
+        (constraintClause)?
+        (typeModelInit)?
+        (typeModelFinal)?
+    ;
+
+// initialization, finalization rules
+
+typeModelInit
+    :   'initialization' (requiresClause)? (ensuresClause)?
+    ;
+
+typeModelFinal
+    :   'finalization' (requiresClause)? (ensuresClause)?
+    ;
+
+// functions
+
+operationDecl
+    :   ('Operation'|'Oper') name=Identifier operationParameterList
+        (':' type)? ';' (requiresClause)? (ensuresClause)?
+    ;
+
+// variable declarations
 
 mathVariableDeclGroup
     :   Identifier (',' Identifier)* ':' mathTypeExp
     ;
 
 mathVariableDecl
-    :   name=Identifier ':' mathTypeExp
+    :   Identifier ':' mathTypeExp
     ;
+
+// mathematical theorems, corollaries, etc
+
+mathTheoremDecl
+    :   ('Theorem'|'Lemma'|'Corollary') name=Identifier
+        ':' mathAssertionExp ';'
+    ;
+
+// mathematical definitions
+
+mathDefinitionDecl
+    :   mathStandardDefinitionDecl
+    |   mathInductiveDefinitionDecl
+    ;
+
+mathInductiveDefinitionDecl
+    :   'Inductive' 'Definition' inductiveDefinitionSignature
+        'is' '(i.)' mathAssertionExp ';' '(ii.)' mathAssertionExp ';'
+    ;
+
+mathStandardDefinitionDecl
+    :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    ;
+
+inductiveDefinitionSignature
+    :   inductivePrefixSignature
+    |   inductiveInfixSignature
+    ;
+
+inductivePrefixSignature
+    :   'on' mathVariableDecl 'of' prefixOp
+        '(' (inductiveParameterList ',')? Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveInfixSignature
+    :   'on' mathVariableDecl 'of' '(' mathVariableDecl ')' infixOp
+        '(' Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveParameterList
+    :   mathVariableDeclGroup (',' mathVariableDeclGroup)*
+    ;
+
+definitionSignature
+    :   standardInfixSignature
+    |   standardOutfixSignature
+    |   standardPrefixSignature
+    ;
+
+standardInfixSignature
+    :   '(' mathVariableDecl ')'
+        infixOp
+        '(' mathVariableDecl ')' ':' mathTypeExp
+    ;
+
+standardOutfixSignature
+    :   ( lOp='|'  '(' mathVariableDecl ')' rOp='|'
+    |     lOp='||' '(' mathVariableDecl ')' rOp='||'
+    |     lOp='<'  '(' mathVariableDecl ')' rOp='>') ':' mathTypeExp
+    ;
+
+standardPrefixSignature
+    :   prefixOp (definitionParameterList)? ':' mathTypeExp
+    ;
+
+prefixOp
+    :   infixOp
+    |   IntegerLiteral
+    ;
+
+infixOp
+    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
+    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
+    |   Identifier
+    ;
+
+definitionParameterList
+    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+    ;
+
+// mathematical clauses
+
+affectsClause
+    :   parameterMode Identifier (',' Identifier)*
+    ;
+
+requiresClause
+    :   'requires' mathAssertionExp ';'
+    ;
+
+ensuresClause
+    :   'ensures' mathAssertionExp ';'
+    ;
+
+constraintClause
+    :   ('constraint'|'Constraint') mathAssertionExp ';'
+    ;
+
+changingClause
+    :   'changing' progVariableExp (',' progVariableExp)*
+    ;
+
+maintainingClause
+    :   'maintaining' mathAssertionExp ';'
+    ;
+
+decreasingClause
+    :   'decreasing' mathAssertionExp ';'
+    ;
+
+whereClause
+    :   'where' mathAssertionExp
+    ;
+
+correspondenceClause
+    :   'correspondence' mathAssertionExp ';'
+    ;
+
+conventionClause
+    :   'convention' mathAssertionExp ';'
+    ;
+
+// mathematical expressions
 
 mathTypeExp
     :   mathExp
     ;
 
+mathAssertionExp
+    :   mathExp
+    |   mathQuantifiedExp
+    ;
+
+mathQuantifiedExp
+    :   'For' 'all' mathVariableDeclGroup (whereClause)? ','
+         mathAssertionExp
+    ;
+
 mathExp
-    :   primaryExp                                  #mathPrimaryExp
-    |   op=('+'|'-'|'~'|'not') mathExp              #mathUnaryExp
-    |   mathExp op=('*'|'/') mathExp                #mathInfixExp
-    |   mathExp op=('+'|'-') mathExp                #mathInfixExp
-    |   mathExp op=('..'|'->') mathExp              #mathInfixExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp    #mathInfixExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp      #mathInfixExp
-    |   mathExp op=('='|'/=') mathExp               #mathInfixExp
-    |   mathExp op='implies' mathExp                #mathInfixExp
-    |   mathExp op=('and'|'or') mathExp             #mathInfixExp
-    |   mathExp (':') mathExp                       #mathTypeAssertionExp
+    :   mathPrimaryExp                                  #mathPrimeExp
+    |   op=('+'|'-'|'~'|'not') mathExp                  #mathUnaryExp
+    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixExp
+    |   mathExp op=('+'|'-') mathExp                    #mathInfixExp
+    |   mathExp op=('..'|'->') mathExp                  #mathInfixExp
+    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixExp
+    |   mathExp op=('='|'/=') mathExp                   #mathInfixExp
+    |   mathExp op='implies' mathExp                    #mathInfixExp
+    |   mathExp op=('and'|'or') mathExp                 #mathInfixExp
+    |   mathExp (':') mathExp                           #mathTypeAssertExp
+    |   '(' mathAssertionExp ')'                        #mathNestedExp
     ;
 
-primaryExp
-    :   literalExp
-    |   functionExp
-    |   variableExp
+mathPrimaryExp
+    :   mathLiteralExp
+    |   mathDotExp
+    |   mathFunctionApplicationExp
+    |   mathOutfixExp
+    |   mathSetExp
+    |   mathTupleExp
+    |   mathLambdaExp
     ;
 
-literalExp
-    :   BooleanLiteral      #booleanExp
-    |   IntegerLiteral      #integerExp
+mathLiteralExp
+    :   BooleanLiteral      #mathBooleanExp
+    |   IntegerLiteral      #mathIntegerExp
     ;
 
-functionExp
-    :   name=Identifier '(' mathExp (',' mathExp)* ')'
+mathDotExp
+    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
-variableExp
+mathFunctionApplicationExp
+    :   '#' mathCleanFunctionExp
+    |   mathCleanFunctionExp
+    ;
+
+mathCleanFunctionExp
+    :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
+    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
+    |   ('+'|'-'|'*'|'/')                               #mathOpExp
+    ;
+
+mathOutfixExp
+    :   lop='<' mathExp rop='>'
+    |   lop='|' mathExp rop='|'
+    |   lop='||' mathExp rop='||'
+    ;
+
+mathSetExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
+    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    ;
+
+mathTupleExp
+    :   '(' mathExp (',' mathExp)+ ')'
+    ;
+
+//NOTE: Allows only very rudimentary lambda expressions.
+
+mathLambdaExp
+    :   'lambda' '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+        '.' '(' mathAssertionExp ')'
+    ;
+
+// program expressions
+
+progExp
+    :   op=('not'|'-') progExp                  #progApplicationExp
+    |   progExp op=('*'|'/') progExp            #progApplicationExp
+    |   progExp op=('+'|'-') progExp            #progApplicationExp
+    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
+    |   progExp op=('='|'/=') progExp           #progApplicationExp
+    |   '(' progExp ')'                         #progNestedExp
+    |   progPrimary                             #progPrimaryExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progVariableExp
+    |   progParamExp
+    ;
+
+//This intermediate rule is really only needed to help make
+//the 'changingClause' rule a little more strict about what it accepts.
+//A root VariableExp class is no longer reflected in the ast.
+progVariableExp
+    :   progDotExp
+    |   progNamedExp
+    ;
+
+progDotExp
+    :   progNamedExp ('.' progNamedExp)+
+    ;
+
+progParamExp
     :   (qualifier=Identifier '::')? name=Identifier
+        '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNamedExp
+    :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+progLiteralExp
+    :   IntegerLiteral      #progIntegerExp
+    |   CharacterLiteral    #progCharacterExp
+    |   StringLiteral       #progStringExp
     ;
 
 // literal rules and fragments
@@ -113,6 +412,14 @@ BooleanLiteral
 
 IntegerLiteral
     :   DecimalIntegerLiteral
+    ;
+
+CharacterLiteral
+    :   '\'' SingleCharacter '\''
+    ;
+
+StringLiteral
+    :   '\"' StringCharacters? '\"'
     ;
 
 fragment
@@ -151,6 +458,22 @@ fragment
 SingleCharacter
     :   ~['\\]
     ;
+
+// Some lexer tokens (allows for easy switch stmts)
+
+Not      : 'not';
+Or       : 'and';
+And      : 'or';
+NEquals   : '/=';
+Equals   : '=';
+GTEquals : '>=';
+LTEquals : '<=';
+GT       : '>';
+LT       : '<';
+Add      : '+';
+Subtract : '-';
+Multiply : '*';
+Divide   : '/';
 
 // whitespace, identifier rules, and comments
 
