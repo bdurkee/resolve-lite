@@ -1,32 +1,14 @@
-/*
- * [The "BSD license"]
- * Copyright (c) 2015 Clemson University
+/**
+ * ErrorManager.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * 
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package resolvelite.compiler;
 
@@ -45,11 +27,11 @@ import java.util.Set;
 
 public class ErrorManager extends BaseErrorListener {
 
-    public static final String FORMATS_DIR = "resolvelite/templates/messages/";
+    public static final String FORMATS_DIR =
+            "edu/clemson/cs/r2jt/templates/messages/formats/";
 
-    private final STGroup format =
-            new STGroupFile(FORMATS_DIR + "resolvelite"
-                    + STGroup.GROUP_FILE_EXTENSION);
+    private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve"
+            + STGroup.GROUP_FILE_EXTENSION);
 
     private final ResolveCompiler compiler;
     private int errorCount, warningCount;
@@ -90,7 +72,7 @@ public class ErrorManager extends BaseErrorListener {
         }
         if (msg.fileName != null) {
             File f = new File(msg.fileName);
-            // Don't show path to file in messages; too long.
+            // Don't show path to file in edu.clemson.cs.r2jt.templates.messages; too long.
             String displayFileName = msg.fileName;
             if (f.exists()) {
                 displayFileName = f.getName();
@@ -122,8 +104,7 @@ public class ErrorManager extends BaseErrorListener {
         return st;
     }
 
-    @Override
-    public void syntaxError(Recognizer<?, ?> recognizer,
+    @Override public void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         ResolveMessage m =
@@ -132,18 +113,28 @@ public class ErrorManager extends BaseErrorListener {
         emit(ErrorKind.SYNTAX_ERROR, m);
     }
 
+    //Todo: A temporary method that halts on semantic errors. Ideally this
+    //will eventually become unnecessary and we can recover and continue
+    //processing after encountering an error, for instance: a dup symbol exception.
+    public void fatalSemanticError(ErrorKind etype, Token offendingSymbol,
+            Object... args) {
+        semanticError(etype, offendingSymbol, args);
+        compiler.exit(1);
+    }
+
     public void semanticError(ErrorKind etype, Token offendingSymbol,
-                            Object... args) {
+            Object... args) {
         ResolveMessage msg =
                 new LanguageSemanticsMessage(etype, offendingSymbol, args);
         emit(etype, msg);
     }
 
     /**
-     * <p>Raise a predefined message with some number of paramters for the
-     * StringTemplate but for which there is no location information p
-     * ossible.</p>
-     *
+     * <p>
+     * Raise a predefined message with some number of paramters for the
+     * StringTemplate but for which there is no location information p ossible.
+     * </p>
+     * 
      * @param errorType The Message Descriptor
      * @param args The arguments to pass to the StringTemplate
      */
@@ -174,8 +165,9 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     /**
-     * <p>Returns first non ErrorManager code location for generating
-     * messages.</p>
+     * <p>
+     * Returns first non ErrorManager code location for generating messages.
+     * </p>
      */
     private static StackTraceElement getLastNonErrorManagerCodeLocation(
             Throwable e) {
@@ -192,12 +184,12 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     public boolean formatWantsSingleLineMessage() {
-        return format.getInstanceOf("wantsSingleLineMessage").render().equals(
-                "true");
+        return format.getInstanceOf("wantsSingleLineMessage").render()
+                .equals("true");
     }
 
-    @SuppressWarnings("fallthrough")
-    public void emit(ErrorKind kind, ResolveMessage msg) {
+    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind,
+            ResolveMessage msg) {
         switch (kind.severity) {
         case WARNING_ONE_OFF:
             if (errorTypes.contains(kind)) {

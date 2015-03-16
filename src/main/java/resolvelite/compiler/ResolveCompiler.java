@@ -1,50 +1,39 @@
-/*
- * [The "BSD license"]
- * Copyright (c) 2015 Clemson University
+/**
+ * ResolveCompiler.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * 
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package resolvelite.compiler;
 
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.Nullable;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
+import resolvelite.compiler.tree.ImportCollection;
+import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.misc.FileLocator;
 import resolvelite.misc.LogManager;
+import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
-import resolvelite.typeandpopulate.MathSymbolTableBuilder;
-import resolvelite.typeandpopulate.PopulatingListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 
 public class ResolveCompiler {
 
@@ -53,6 +42,12 @@ public class ResolveCompiler {
     public static enum OptionArgType {
         NONE, STRING
     } // NONE implies boolean
+
+    public static final List<String> NATIVE_EXT = Collections
+            .unmodifiableList(Arrays.asList("co", "fa", "mt", "en", "rb"));
+
+    public static final List<String> NON_NATIVE_EXT = Collections
+            .unmodifiableList(Arrays.asList("java", "c", "h"));
 
     public static class Option {
 
@@ -74,26 +69,33 @@ public class ResolveCompiler {
         }
     }
 
-    public static Option[] optionDefs =
-            {
-                    new Option("longMessages", "-longMessages",
-                            "show exception details on errors"),
-                    new Option("log", "-Xlog",
-                            "dump lots of logging info to resolve-timestamp.log") };
+    public static Option[] optionDefs = {
+            new Option("longMessages", "-longMessages",
+                    "show exception details on errors"),
+            new Option("genCode", "-genCode", OptionArgType.STRING,
+                    "generate code"),
+            new Option("workspaceDir", "-workspaceDir", OptionArgType.STRING,
+                    "specify root location of current workspace housing"
+                            + "resolve files"),
+            new Option("log", "-Xlog",
+                    "dump lots of logging info to resolve-timestamp.log") };
 
-    public final ErrorManager errorManager;
     public final String[] args;
 
     public boolean helpFlag = false;
     public boolean longMessages = false;
+    public String genCode;
+    public String workspaceDir;
     public boolean log = false;
 
     public final DefaultCompilerListener defaultListener =
             new DefaultCompilerListener(this);
-    public final MathSymbolTableBuilder symbolTable =
-            new MathSymbolTableBuilder(this);
-    public final List<String> targetFiles = new ArrayList<String>();
+    //public final MathSymbolTableBuilder symbolTable =
+    //        new MathSymbolTableBuilder(this);
 
+    public final List<String> targetFiles = new ArrayList<String>();
+    public final List<String> targetNames = new ArrayList<String>();
+    public final ErrorManager errorManager;
     public LogManager logMgr = new LogManager();
 
     public ResolveCompiler(String[] args) {
@@ -103,15 +105,19 @@ public class ResolveCompiler {
     }
 
     public void handleArgs() {
-        for (String arg : args) {
-            if (!arg.startsWith("-")) {
+        int i = 0;
+        while (args != null && i < args.length) {
+            String arg = args[i];
+            i++;
+            if (arg.charAt(0) != '-') { // file name
                 if (!targetFiles.contains(arg)) {
                     targetFiles.add(arg);
+                    String f = Utils.groomFileName(arg);
+                    targetNames.add(f.substring(0, f.indexOf(".")));
                 }
                 continue;
             }
             boolean found = false;
-            int i = 0;
             for (Option o : optionDefs) {
                 if (arg.equals(o.name)) {
                     found = true;
@@ -174,42 +180,168 @@ public class ResolveCompiler {
     }
 
     public void processCommandLineTargets() {
-        List<ParseTree> targets = getTrees();
+        List<TreeAnnotatingBuilder> targets =
+                sortTargetModulesByUsesReferences();
+        int initialErrCt = errorManager.getErrorCount();
+        // AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
+        //  CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
 
-        for (ParseTree tree : targets) {
-            AnnotatedParseTree.TreeAnnotatingBuilder annotations =
-                    new AnnotatedParseTree.TreeAnnotatingBuilder(tree);
-            PopulatingListener populator =
-                    new PopulatingListener(this, annotations, symbolTable);
-            ParseTreeWalker.DEFAULT.walk(populator, tree);
-            int i = 0;
-        }
+        // analysisPipe.process();
+        // if (analysisPipe.myCompiler.errorManager.getErrorCount() > initialErrCt) {
+        //     return;
+        // }
+        //   codegenPipe.process();
     }
 
-    public List<ParseTree> getTrees() {
-        List<ParseTree> roots = new ArrayList<ParseTree>();
+    public List<TreeAnnotatingBuilder> sortTargetModulesByUsesReferences() {
+        Map<String, TreeAnnotatingBuilder> roots =
+                new HashMap<String, TreeAnnotatingBuilder>();
         for (String fileName : targetFiles) {
+            TreeAnnotatingBuilder t = parseModule(fileName);
+            if (t == null || t.hasErrors()) {
+                continue;
+            }
+            roots.put(t.getName().getText(), t);
+        }
+        DefaultDirectedGraph<String, DefaultEdge> g =
+                new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
+        for (TreeAnnotatingBuilder t : Collections.unmodifiableCollection(roots
+                .values())) {
+            g.addVertex(t.getName().getText());
+            findDependencies(g, t, roots);
+        }
+        List<TreeAnnotatingBuilder> finalOrdering =
+                new ArrayList<TreeAnnotatingBuilder>();
+
+        for (String s : getCompileOrder(g)) {
+            TreeAnnotatingBuilder m = roots.get(s);
+            if (m.hasErrors) {
+                finalOrdering.clear();
+                break;
+            }
+            finalOrdering.add(m);
+        }
+        return finalOrdering;
+    }
+
+    private void
+            findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
+                    TreeAnnotatingBuilder root,
+                    Map<String, TreeAnnotatingBuilder> roots) {
+        for (Token importRequest : root.getImports()
+                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
+            TreeAnnotatingBuilder module = roots.get(importRequest.getText());
             try {
-                File file = new File(fileName);
-                if (!file.isAbsolute()) {
-                    file = new File(System.getProperty("user.dir"), fileName);
+                File file =
+                        findResolveFile(importRequest.getText(), NATIVE_EXT);
+
+                if (module == null) {
+                    module = parseModule(file.getAbsolutePath());
+                    roots.put(module.getName().getText(), module);
                 }
-                ANTLRFileStream input =
-                        new ANTLRFileStream(file.getAbsolutePath());
-                ResolveLexer lexer = new ResolveLexer(input);
-                CommonTokenStream tokens = new CommonTokenStream(lexer);
-                ResolveParser parser = new ResolveParser(tokens);
-                roots.add(parser.module());
             }
             catch (IOException ioe) {
-                errorManager.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe,
-                        fileName);
+                errorManager.semanticError(ErrorKind.MISSING_IMPORT_FILE,
+                        importRequest, importRequest.getText());
+                //drop the erroneous import referenced by the current root.
+                //(If we don't do this, populator might attempt to search an
+                //invalid module)
+                root.hasErrors = true;
+                continue;
             }
+
+            if (root.getImports().inCategory(
+                    ImportCollection.ImportType.EXPLICIT, module.getName())) {
+                /*if (!module.appropriateForImport()) {
+                    errorManager.toolError(ErrorKind.INVALID_IMPORT,
+                            "MODULE TYPE GOES HERE", root.getName().getText(),
+                            "IMPORTED MODULE TYPE GOES HERE", module.getName()
+                                    .getText());
+                }*/
+            }
+            if (pathExists(g, module.getName().getText(), root.getName()
+                    .getText())) {
+                //Todo.
+                throw new IllegalStateException("circular dependency detected");
+            }
+            Graphs.addEdgeWithVertices(g, root.getName().getText(), module
+                    .getName().getText());
+            findDependencies(g, module, roots);
         }
-        return roots;
     }
 
-    public void log(String msg) {}
+    protected List<String> getCompileOrder(
+            DefaultDirectedGraph<String, DefaultEdge> g) {
+        List<String> result = new ArrayList<String>();
+
+        EdgeReversedGraph<String, DefaultEdge> reversed =
+                new EdgeReversedGraph<String, DefaultEdge>(g);
+
+        TopologicalOrderIterator<String, DefaultEdge> dependencies =
+                new TopologicalOrderIterator<String, DefaultEdge>(reversed);
+        while (dependencies.hasNext()) {
+            result.add(dependencies.next());
+        }
+        return result;
+    }
+
+    protected boolean pathExists(DefaultDirectedGraph<String, DefaultEdge> g,
+            String src, String dest) {
+        //If src doesn't exist in g, then there is obviously no path from
+        //src -> ... -> dest
+        if (!g.containsVertex(src)) {
+            return false;
+        }
+        GraphIterator<String, DefaultEdge> iterator =
+                new DepthFirstIterator<String, DefaultEdge>(g, src);
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            //we've reached dest from src -- a path exists.
+            if (next.equals(dest)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private File findResolveFile(String baseName, List<String> extensions)
+            throws IOException {
+        FileLocator l = new FileLocator(baseName, extensions);
+        Files.walkFileTree(new File(System.getProperty("user.dir")).toPath(), l);
+        return l.getFile();
+    }
+
+    private TreeAnnotatingBuilder parseModule(String fileName) {
+        try {
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(System.getProperty("user.dir"), fileName);
+            }
+            ANTLRInputStream input =
+                    new ANTLRFileStream(file.getAbsolutePath());
+            ResolveLexer lexer = new ResolveLexer(input);
+            TokenStream tokens = new CommonTokenStream(lexer);
+            ResolveParser parser = new ResolveParser(tokens);
+            ParserRuleContext start = parser.module();
+
+            TreeAnnotatingBuilder result =
+                    new TreeAnnotatingBuilder(start, parser.getSourceName())
+                            .hasErrors(parser.getNumberOfSyntaxErrors() > 0);
+            return result;
+        }
+        catch (IOException ioe) {
+            errorManager.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
+        }
+        return null;
+    }
+
+    public void log(@Nullable String component, String msg) {
+        logMgr.log(component, msg);
+    }
+
+    public void log(String msg) {
+        log(null, msg);
+    }
 
     public void version() {
         info("RESOLVE Compiler Version " + VERSION);

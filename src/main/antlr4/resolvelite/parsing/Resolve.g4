@@ -36,8 +36,13 @@ module
 
 precisModule
     :   'Precis' name=Identifier ';'
+        (importList)?
         precisBlock
         'end' closename=Identifier ';'
+    ;
+
+importList
+    :   'uses' Identifier (',' Identifier)*
     ;
 
 precisBlock

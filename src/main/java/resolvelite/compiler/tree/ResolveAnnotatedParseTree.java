@@ -28,52 +28,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.compiler.tree;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import resolvelite.misc.Builder;
-import resolvelite.typeandpopulate.MTType;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import resolvelite.misc.Utils.Builder;
+import resolvelite.parsing.ResolveParser;
+import resolvelite.semantics.MTType;
 
 import java.io.File;
 
-public class AnnotatedParseTree {
+public class ResolveAnnotatedParseTree extends AnnotatedParseTree {
 
-    private final ParseTree root;
-    private final ParseTreeProperty<MTType> mathTypes, mathTypeValues;
+    @NotNull private final ImportCollection imports;
+    @NotNull private final ParseTreeProperty<MTType> mathTypes, mathTypeValues;
 
-    private AnnotatedParseTree(TreeAnnotatingBuilder builder) {
-        this.root = builder.root;
+    private ResolveAnnotatedParseTree(@NotNull TreeAnnotatingBuilder builder) {
+        super(builder.root, builder.fileName);
         this.mathTypes = builder.mathTypes;
         this.mathTypeValues = builder.mathTypeValues;
+        this.imports = builder.imports;
     }
+
     @NotNull
     public MTType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
+
     @NotNull
     public MTType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
-    @NotNull
-    public ParseTree getRoot() {
-        return root;
-    }
 
-    public static class TreeAnnotatingBuilder
+    public static class TreeAnnotatingBuilder extends AnnotatedParseTree
             implements
-                Builder<AnnotatedParseTree> {
+                Builder<ResolveAnnotatedParseTree> {
 
         protected final ParseTreeProperty<MTType> mathTypes =
                 new ParseTreeProperty<MTType>();
         protected final ParseTreeProperty<MTType> mathTypeValues =
                 new ParseTreeProperty<MTType>();
-        protected ParseTree root;
-        protected File file;
 
-        public TreeAnnotatingBuilder(ParseTree root) {
-            this.root = root;
+        public TreeAnnotatingBuilder(ParseTree root, String fileName) {
+            super(root, fileName);
+            if (!(root instanceof ResolveParser.ModuleContext)) {
+                throw new IllegalArgumentException(
+                        "ResolveParser.ModuleContext " + "expected, got: "
+                                + root.getClass());
+            }
+            ParseTreeWalker.DEFAULT.walk(ImportListener.INSTANCE, root);
+            this.imports = ImportListener.INSTANCE.getImports();
+
+            ParseTree child = root.getChild(0);
+            if (child instanceof ResolveParser.PrecisModuleContext) {
+                this.name = ((ResolveParser.PrecisModuleContext) child).name;
+            }
+        }
+
+        public TreeAnnotatingBuilder hasErrors(boolean e) {
+            this.hasErrors = e;
+            return this;
         }
 
         public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,
@@ -89,8 +107,8 @@ public class AnnotatedParseTree {
         }
 
         @Override
-        public AnnotatedParseTree build() {
-            return new AnnotatedParseTree(this);
+        public ResolveAnnotatedParseTree build() {
+            return new ResolveAnnotatedParseTree(this);
         }
     }
 }
