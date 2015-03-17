@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -45,8 +45,7 @@ import java.util.Set;
 
 public class ErrorManager extends BaseErrorListener {
 
-    public static final String FORMATS_DIR =
-            "edu/clemson/cs/r2jt/templates/messages/formats/";
+    public static final String FORMATS_DIR = "resolvelite/templates/messages/";
 
     private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve"
             + STGroup.GROUP_FILE_EXTENSION);
@@ -122,7 +121,8 @@ public class ErrorManager extends BaseErrorListener {
         return st;
     }
 
-    @Override public void syntaxError(Recognizer<?, ?> recognizer,
+    @Override
+    public void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         ResolveMessage m =
@@ -206,8 +206,8 @@ public class ErrorManager extends BaseErrorListener {
                 .equals("true");
     }
 
-    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind,
-            ResolveMessage msg) {
+    @SuppressWarnings("fallthrough")
+    public void emit(ErrorKind kind, ResolveMessage msg) {
         switch (kind.severity) {
         case WARNING_ONE_OFF:
             if (errorTypes.contains(kind)) {

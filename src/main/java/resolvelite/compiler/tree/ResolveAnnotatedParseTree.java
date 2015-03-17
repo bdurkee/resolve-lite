@@ -42,13 +42,14 @@ import resolvelite.semantics.MTType;
 
 import java.io.File;
 
-public class ResolveAnnotatedParseTree extends AnnotatedParseTree {
+public class ResolveAnnotatedParseTree {
 
+    @NotNull private final ParseTree root;
     @NotNull private final ImportCollection imports;
     @NotNull private final ParseTreeProperty<MTType> mathTypes, mathTypeValues;
 
     private ResolveAnnotatedParseTree(@NotNull TreeAnnotatingBuilder builder) {
-        super(builder.root, builder.fileName);
+        this.root = builder.root;
         this.mathTypes = builder.mathTypes;
         this.mathTypeValues = builder.mathTypeValues;
         this.imports = builder.imports;
@@ -64,28 +65,35 @@ public class ResolveAnnotatedParseTree extends AnnotatedParseTree {
         return mathTypeValues.get(t);
     }
 
-    public static class TreeAnnotatingBuilder extends AnnotatedParseTree
+    public static class TreeAnnotatingBuilder
             implements
                 Builder<ResolveAnnotatedParseTree> {
 
+        public Token name;
+        public boolean hasErrors;
+        public final ParseTree root;
+        public final ImportCollection imports;
         protected final ParseTreeProperty<MTType> mathTypes =
                 new ParseTreeProperty<MTType>();
         protected final ParseTreeProperty<MTType> mathTypeValues =
                 new ParseTreeProperty<MTType>();
 
         public TreeAnnotatingBuilder(ParseTree root, String fileName) {
-            super(root, fileName);
             if (!(root instanceof ResolveParser.ModuleContext)) {
                 throw new IllegalArgumentException(
                         "ResolveParser.ModuleContext " + "expected, got: "
                                 + root.getClass());
             }
-            ParseTreeWalker.DEFAULT.walk(ImportListener.INSTANCE, root);
-            this.imports = ImportListener.INSTANCE.getImports();
-
+            ImportListener scanner = new ImportListener();
+            ParseTreeWalker.DEFAULT.walk(scanner, root);
+            this.imports = scanner.getImports();
+            this.root = root;
             ParseTree child = root.getChild(0);
             if (child instanceof ResolveParser.PrecisModuleContext) {
                 this.name = ((ResolveParser.PrecisModuleContext) child).name;
+            }
+            else if (child instanceof ResolveParser.ConceptModuleContext) {
+                this.name = ((ResolveParser.ConceptModuleContext) child).name;
             }
         }
 

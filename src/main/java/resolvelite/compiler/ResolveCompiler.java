@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -217,16 +217,16 @@ public class ResolveCompiler {
                 new HashMap<String, TreeAnnotatingBuilder>();
         for (String fileName : targetFiles) {
             TreeAnnotatingBuilder t = parseModule(fileName);
-            if (t == null || t.hasErrors()) {
+            if (t == null || t.hasErrors) {
                 continue;
             }
-            roots.put(t.getName().getText(), t);
+            roots.put(t.name.getText(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
         for (TreeAnnotatingBuilder t : Collections.unmodifiableCollection(roots
                 .values())) {
-            g.addVertex(t.getName().getText());
+            g.addVertex(t.name.getText());
             findDependencies(g, t, roots);
         }
         List<TreeAnnotatingBuilder> finalOrdering =
@@ -247,8 +247,8 @@ public class ResolveCompiler {
             findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
                     TreeAnnotatingBuilder root,
                     Map<String, TreeAnnotatingBuilder> roots) {
-        for (Token importRequest : root.getImports().getImportsExcluding(
-                ImportCollection.ImportType.EXTERNAL)) {
+        for (Token importRequest : root.imports
+                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
             TreeAnnotatingBuilder module = roots.get(importRequest.getText());
             try {
                 File file =
@@ -256,21 +256,19 @@ public class ResolveCompiler {
 
                 if (module == null) {
                     module = parseModule(file.getAbsolutePath());
-                    roots.put(module.getName().getText(), module);
+                    roots.put(module.name.getText(), module);
                 }
             }
             catch (IOException ioe) {
                 errorManager.semanticError(ErrorKind.MISSING_IMPORT_FILE,
                         importRequest, importRequest.getText());
-                //drop the erroneous import referenced by the current root.
-                //(If we don't do this, populator might attempt to search an
-                //invalid module)
+                //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
 
-            if (root.getImports().inCategory(
-                    ImportCollection.ImportType.EXPLICIT, module.getName())) {
+            if (root.imports.inCategory(ImportCollection.ImportType.EXPLICIT,
+                    module.name)) {
                 /*
                  * if (!module.appropriateForImport()) {
                  * errorManager.toolError(ErrorKind.INVALID_IMPORT,
@@ -280,13 +278,12 @@ public class ResolveCompiler {
                  * }
                  */
             }
-            if (pathExists(g, module.getName().getText(), root.getName()
-                    .getText())) {
+            if (pathExists(g, module.name.getText(), root.name.getText())) {
                 //Todo.
                 throw new IllegalStateException("circular dependency detected");
             }
-            Graphs.addEdgeWithVertices(g, root.getName().getText(), module
-                    .getName().getText());
+            Graphs.addEdgeWithVertices(g, root.name.getText(),
+                    module.name.getText());
             findDependencies(g, module, roots);
         }
     }

@@ -1,4 +1,4 @@
-Precis Test;
+Precis Test_Theory;
 
     Definition Test(a, b : B) : B;
-end Test;
+end Test_Theory;

@@ -1,3 +1,4 @@
 Concept Search_Store_Template;
+    uses Test_Theory;
 
 end Search_Store_Template;

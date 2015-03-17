@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -40,11 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>
  * Traverses a tree of directories. Each file encountered is reported via the
  * <code>visitFile</code> method and each directory via an optional
  * <code>visitDirectory</code> method (override others as needed).
- * </p>
  */
 public class FileLocator extends SimpleFileVisitor<Path> {
 
@@ -54,10 +52,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     private List<File> myMatches = new ArrayList<File>();
 
     /**
-     * <p>
      * Constructs a new <code>FileLocator</code> that will match based on the
      * <code>pattern</code> (or, name) and <code>extension</code> pair provided.
-     * </p>
      * 
      * @param pattern An <em>extensionless</em> pattern.
      * @param extensions An list of valid extensions to choose from after a
@@ -87,9 +83,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     /**
-     * <p>
      * Returns a single file matching <code>myPattern</code>.
-     * </p>
      * 
      * @throws java.nio.file.NoSuchFileException If a file matching
      *         <code>myPattern</code> could not be found.

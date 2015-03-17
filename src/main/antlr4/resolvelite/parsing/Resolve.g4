@@ -98,7 +98,7 @@ typeParameterDecl
     ;
 
 parameterDeclGroup
-    :   Identifier (',' Identifier)* ':' type
+    :   parameterMode Identifier (',' Identifier)* ':' type
     ;
 
 parameterMode
