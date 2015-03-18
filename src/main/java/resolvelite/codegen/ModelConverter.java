@@ -149,12 +149,12 @@ public class ModelConverter {
                  * else if ( o instanceof Map ) {
                  * Map<?, ?> nestedOmoMap = (Map<?, ?>)o;
                  * Map<Object, ST> m = new LinkedHashMap<Object, ST>();
-                 * for (Map.Entry<?, ?> entry : nestedOmoMap.entrySet()) {
-                 * ST nestedST = walk((OutputModelObject)entry.getValue());
+                 * for (Map.Entry<?, ?> symbol : nestedOmoMap.entrySet()) {
+                 * ST nestedST = walk((OutputModelObject)symbol.getValue());
                  * //
                  * System.out.println("set ModelElement "+fieldName+"="+nestedST
                  * +" in "+templateName);
-                 * m.put(entry.getKey(), nestedST);
+                 * m.put(symbol.getKey(), nestedST);
                  * }
                  * st.add(fieldName, m);
                  * }

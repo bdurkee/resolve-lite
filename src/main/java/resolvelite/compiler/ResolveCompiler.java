@@ -47,6 +47,7 @@ import resolvelite.misc.LogManager;
 import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
+import resolvelite.semantics.SymbolTable;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,8 +110,7 @@ public class ResolveCompiler {
 
     public final DefaultCompilerListener defaultListener =
             new DefaultCompilerListener(this);
-    //public final MathSymbolTableBuilder symbolTable =
-    //        new MathSymbolTableBuilder(this);
+    public final SymbolTable symbolTable = new SymbolTable(this);
 
     public final List<String> targetFiles = new ArrayList<String>();
     public final List<String> targetNames = new ArrayList<String>();

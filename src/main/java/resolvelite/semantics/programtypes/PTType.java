@@ -22,9 +22,9 @@ public abstract class PTType {
     /**
      * Returns <code>true</code> <strong>iff</strong> a value of this type
      * is acceptable where one of type <code>t</code> is required.
-     *
+     * 
      * @param t The required type.
-     *
+     * 
      * @return <code>true</code> <strong>iff</strong> an value of this type
      *         would be acceptable where one of type <code>t</code> were
      *         required.

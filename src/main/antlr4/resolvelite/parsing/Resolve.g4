@@ -162,69 +162,8 @@ mathTheoremDecl
 // mathematical definitions
 
 mathDefinitionDecl
-    :   mathStandardDefinitionDecl
-    |   mathInductiveDefinitionDecl
-    ;
-
-mathInductiveDefinitionDecl
-    :   'Inductive' 'Definition' inductiveDefinitionSignature
-        'is' '(i.)' mathAssertionExp ';' '(ii.)' mathAssertionExp ';'
-    ;
-
-mathStandardDefinitionDecl
-    :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
-    ;
-
-inductiveDefinitionSignature
-    :   inductivePrefixSignature
-    |   inductiveInfixSignature
-    ;
-
-inductivePrefixSignature
-    :   'on' mathVariableDecl 'of' prefixOp
-        '(' (inductiveParameterList ',')? Identifier ')' ':' mathTypeExp
-    ;
-
-inductiveInfixSignature
-    :   'on' mathVariableDecl 'of' '(' mathVariableDecl ')' infixOp
-        '(' Identifier ')' ':' mathTypeExp
-    ;
-
-inductiveParameterList
-    :   mathVariableDeclGroup (',' mathVariableDeclGroup)*
-    ;
-
-definitionSignature
-    :   standardInfixSignature
-    |   standardOutfixSignature
-    |   standardPrefixSignature
-    ;
-
-standardInfixSignature
-    :   '(' mathVariableDecl ')'
-        infixOp
-        '(' mathVariableDecl ')' ':' mathTypeExp
-    ;
-
-standardOutfixSignature
-    :   ( lOp='|'  '(' mathVariableDecl ')' rOp='|'
-    |     lOp='||' '(' mathVariableDecl ')' rOp='||'
-    |     lOp='<'  '(' mathVariableDecl ')' rOp='>') ':' mathTypeExp
-    ;
-
-standardPrefixSignature
-    :   prefixOp (definitionParameterList)? ':' mathTypeExp
-    ;
-
-prefixOp
-    :   infixOp
-    |   IntegerLiteral
-    ;
-
-infixOp
-    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
-    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
-    |   Identifier
+    :   'Definition' Identifier (definitionParameterList)? ':'
+        mathTypeExp ('is' mathAssertionExp)? ';'
     ;
 
 definitionParameterList
@@ -232,10 +171,6 @@ definitionParameterList
     ;
 
 // mathematical clauses
-
-affectsClause
-    :   parameterMode Identifier (',' Identifier)*
-    ;
 
 requiresClause
     :   'requires' mathAssertionExp ';'
@@ -307,21 +242,15 @@ mathExp
 
 mathPrimaryExp
     :   mathLiteralExp
-    |   mathDotExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
-    |   mathLambdaExp
     ;
 
 mathLiteralExp
     :   BooleanLiteral      #mathBooleanExp
     |   IntegerLiteral      #mathIntegerExp
-    ;
-
-mathDotExp
-    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
 mathFunctionApplicationExp
@@ -332,7 +261,6 @@ mathFunctionApplicationExp
 mathCleanFunctionExp
     :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
     |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
-    |   ('+'|'-'|'*'|'/')                               #mathOpExp
     ;
 
 mathOutfixExp
@@ -348,13 +276,6 @@ mathSetExp
 
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
-    ;
-
-//NOTE: Allows only very rudimentary lambda expressions.
-
-mathLambdaExp
-    :   'lambda' '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
-        '.' '(' mathAssertionExp ')'
     ;
 
 // program expressions
@@ -458,22 +379,6 @@ fragment
 SingleCharacter
     :   ~['\\]
     ;
-
-// Some lexer tokens (allows for easy switch stmts)
-
-Not      : 'not';
-Or       : 'and';
-And      : 'or';
-NEquals   : '/=';
-Equals   : '=';
-GTEquals : '>=';
-LTEquals : '<=';
-GT       : '>';
-LT       : '<';
-Add      : '+';
-Subtract : '-';
-Multiply : '*';
-Divide   : '/';
 
 // whitespace, identifier rules, and comments
 

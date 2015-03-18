@@ -1,5 +1,7 @@
 package resolvelite.semantics;
 
+import resolvelite.semantics.symbol.Symbol;
+
 public interface Scope {
 
     public String getScopeName();
@@ -13,7 +15,7 @@ public interface Scope {
     public Scope getEnclosingScope();
 
     /**
-     * Defines a {@link Symbol}, <code>sym</code>, for this <code>Scope</code>.
+     * Defines a {@link resolvelite.semantics.symbol.Symbol}, <code>sym</code>, for this <code>Scope</code>.
      */
     public void define(Symbol sym);
 

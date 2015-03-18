@@ -37,7 +37,7 @@ import resolvelite.parsing.ResolveParser;
 
 /**
  * Fills in the contents of an {@link ImportCollection} by visiting the
- * various nodes in an {@link ParseTree} that reference other modules.
+ * various {@link ParseTree} nodes that reference other modules.
  */
 public class ImportListener extends ResolveBaseListener {
 
