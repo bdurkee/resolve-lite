@@ -47,9 +47,7 @@ public class Utils {
     }
 
     /**
-     * <p>
      * A builder of objects of type <code>T</code>.
-     * </p>
      * 
      * @param <T> The type object to be created.
      */
@@ -59,9 +57,7 @@ public class Utils {
     }
 
     /**
-     * <p>
      * A two-parameter mapping.
-     * </p>
      */
     public interface Mapping<I, O> {
 
@@ -69,9 +65,7 @@ public class Utils {
     }
 
     /**
-     * <p>
      * A three-parameter mapping.
-     * </p>
      */
     public interface Mapping3<P1, P2, P3, R> {
 
@@ -81,7 +75,7 @@ public class Utils {
     public static <T> List<T> filter(List<T> data, Predicate<T> pred) {
         List<T> output = new ArrayList<T>();
         for (T x : data) {
-            if (pred.test(x)) {
+            if ( pred.test(x) ) {
                 output.add(x);
             }
         }
@@ -119,7 +113,7 @@ public class Utils {
 
         while (iter.hasNext()) {
             buf.append(iter.next());
-            if (iter.hasNext()) {
+            if ( iter.hasNext() ) {
                 buf.append(separator);
             }
         }
@@ -131,27 +125,33 @@ public class Utils {
 
         for (int i = 0; i < array.length; ++i) {
             builder.append(array[i]);
-            if (i < array.length - 1) {
+            if ( i < array.length - 1 ) {
                 builder.append(separator);
             }
         }
         return builder.toString();
     }
 
+    public static String tab(int n) {
+        StringBuilder buf = new StringBuilder();
+        for (int i=1; i<=n; i++) buf.append("    ");
+        return buf.toString();
+    }
+
     public static String groomFileName(String name) {
         int start = name.lastIndexOf("/");
-        if (start == -1) {
+        if ( start == -1 ) {
             return name;
         }
         return name.substring(start + 1, name.length());
     }
 
     public static String stripFileExtension(String name) {
-        if (name == null) {
+        if ( name == null ) {
             return null;
         }
         int lastDot = name.lastIndexOf('.');
-        if (lastDot < 0) {
+        if ( lastDot < 0 ) {
             return name;
         }
         return name.substring(0, lastDot);

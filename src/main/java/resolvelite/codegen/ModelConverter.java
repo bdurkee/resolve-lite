@@ -61,7 +61,7 @@ import java.util.*;
  * This simple mechanism means we don't have to include code in every output
  * model object that says how to create the corresponding template.
  * 
- * @author Terrence Parr <parrt@github.com>
+ * @author TParr <parrt@cs.usfca.edu>
  */
 public class ModelConverter {
 
@@ -78,12 +78,12 @@ public class ModelConverter {
         Class<? extends OutputModelObject> cl = omo.getClass();
         String templateName = cl.getSimpleName();
         ST st = templates.getInstanceOf(templateName);
-        if (st == null) {
+        if ( st == null ) {
             compiler.errorManager.toolError(
                     ErrorKind.CODE_GEN_TEMPLATES_INCOMPLETE, templateName);
             return new ST("[" + templateName + " invalid]");
         }
-        if (st.impl.formalArguments == null) {
+        if ( st.impl.formalArguments == null ) {
             compiler.errorManager.toolError(ErrorKind.CODE_TEMPLATE_ARG_ISSUE,
                     templateName, "<none>");
             return st;
@@ -103,13 +103,13 @@ public class ModelConverter {
         Field fields[] = cl.getFields();
         for (Field fi : fields) {
             ModelElement annotation = fi.getAnnotation(ModelElement.class);
-            if (annotation == null) {
+            if ( annotation == null ) {
                 continue;
             }
 
             String fieldName = fi.getName();
 
-            if (!usedFieldNames.add(fieldName)) {
+            if ( !usedFieldNames.add(fieldName) ) {
                 compiler.errorManager.toolError(ErrorKind.INTERNAL_ERROR,
                         "Model object " + omo.getClass().getSimpleName()
                                 + " has multiple fields named '" + fieldName
@@ -118,26 +118,26 @@ public class ModelConverter {
             }
 
             // Just don't set @ModelElement fields w/o formal arg in target ST
-            if (formalArgs.get(fieldName) == null) {
+            if ( formalArgs.get(fieldName) == null ) {
                 continue;
             }
             try {
                 Object o = fi.get(omo);
-                if (o instanceof OutputModelObject) { // SINGLE MODEL OBJECT?
+                if ( o instanceof OutputModelObject ) { // SINGLE MODEL OBJECT?
                     OutputModelObject nestedOmo = (OutputModelObject) o;
                     ST nestedST = walk(nestedOmo);
                     //System.out.println("set ModelElement "+fieldName+"="+nestedST+" in "+templateName);
                     st.add(fieldName, nestedST);
                 }
-                else if (o instanceof Collection
-                        || o instanceof OutputModelObject[]) {
+                else if ( o instanceof Collection
+                        || o instanceof OutputModelObject[] ) {
                     // LIST OF MODEL OBJECTS?
-                    if (o instanceof OutputModelObject[]) {
+                    if ( o instanceof OutputModelObject[] ) {
                         o = Arrays.asList((OutputModelObject[]) o);
                     }
                     Collection<?> nestedOmos = (Collection<?>) o;
                     for (Object nestedOmo : nestedOmos) {
-                        if (nestedOmo == null) {
+                        if ( nestedOmo == null ) {
                             continue;
                         }
                         ST nestedST = walk((OutputModelObject) nestedOmo);
@@ -159,7 +159,7 @@ public class ModelConverter {
                  * st.add(fieldName, m);
                  * }
                  */
-                else if (o != null) {
+                else if ( o != null ) {
                     compiler.errorManager.toolError(ErrorKind.INTERNAL_ERROR,
                             "unrecognized nested model element: " + fieldName);
                 }

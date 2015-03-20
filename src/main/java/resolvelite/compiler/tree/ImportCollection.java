@@ -55,7 +55,7 @@ import java.util.*;
 //Todo: If an import is classified as explicit then a facility implicitly
 //makes mention of it again, delete it from the implicit list (since it's
 //actually now explicit. In other words, explicit imports in some sense have
-//highest priority, if it's listed there, no need to mention it again
+//highest priority; so if it's listed there, no need to mention it again
 //implicitly.
 public class ImportCollection {
 
@@ -80,7 +80,7 @@ public class ImportCollection {
         List<ImportType> typesToExclude = Arrays.asList(type);
 
         for (ImportType s : imports.keySet()) {
-            if (!typesToExclude.contains(s)) {
+            if ( !typesToExclude.contains(s) ) {
                 result.addAll(imports.get(s));
             }
         }
@@ -150,7 +150,7 @@ public class ImportCollection {
             //Initialize the uses/import map to empty sets
             for (int i = 0; i < ImportType.values().length; i++) {
                 ImportType curType = ImportType.values()[i];
-                if (imports.get(curType) == null) {
+                if ( imports.get(curType) == null ) {
                     imports.put(curType, new HashSet<Token>());
                 }
             }
@@ -204,7 +204,7 @@ public class ImportCollection {
         private void addTokenSet(ImportType type,
                 Collection<? extends Token> newToks) {
             Set<Token> tokSet = imports.get(type);
-            if (tokSet == null) {
+            if ( tokSet == null ) {
                 tokSet = new HashSet<Token>();
             }
             //Todo: Do a little normalization here on additions. For instance,

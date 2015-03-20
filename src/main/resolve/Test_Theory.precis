@@ -1,4 +1,4 @@
 Precis Test_Theory;
 
-    Definition Test(a, b : B) : B;
+    Definition Foo : SSet;
 end Test_Theory;

@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.typereasoning.TypeGraph;
 
 /**
- * A proper type.  Any type that does not depend on other types.  I.e., it
+ * A proper type. Any type that does not depend on other types. I.e., it
  * is atomic.
  */
 public class MTProper extends MTType {
@@ -26,7 +26,7 @@ public class MTProper extends MTType {
     }
 
     public MTProper(@NotNull TypeGraph g, MTType type,
-                    boolean knownToContainOnlyMTypes, String name) {
+            boolean knownToContainOnlyMTypes, String name) {
         super(g);
         this.knownToContainOnlyMTypes = knownToContainOnlyMTypes;
         this.type = type;
@@ -44,5 +44,10 @@ public class MTProper extends MTType {
 
     public MTType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

@@ -71,7 +71,7 @@ public class ResolveToken extends CommonToken {
     public boolean equals(Object o) {
         boolean result = (o instanceof ResolveToken);
 
-        if (result) {
+        if ( result ) {
             result = ((ResolveToken) o).getText().equals(getText());
         }
         return result;

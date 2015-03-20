@@ -9,11 +9,11 @@ import resolvelite.parsing.ResolveParser;
 /**
  * Identifies a particular module unambiguously.
  * <p>
- * <strong>Note:</strong> Currently, we only permit one level of namespace.
- * But ultimately that will probably change (because, for example, at this
- * moment if there were two "Stack_Templates", we couldn't deal with that.  A
- * java class-path-like solution seems inevitable.  For the moment however, this
- * is just a wrapper around the string name of the module to facilitate changing
+ * <strong>Note:</strong> Currently, we only permit one level of namespace. But
+ * ultimately that will probably change (because, for example, at this moment if
+ * there were two "Stack_Templates", we couldn't deal with that. A java
+ * class-path-like solution seems inevitable. For the moment however, this is
+ * just a wrapper around the string name of the module to facilitate changing
  * how we deal with modules later.
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
@@ -45,10 +45,11 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         myGlobalFlag = false;
     }
 
+    @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof ModuleIdentifier);
 
-        if (result) {
+        if ( result ) {
             result = ((ModuleIdentifier) o).myName.equals(myName);
         }
         return result;
@@ -69,12 +70,17 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     public static String getModuleNameFromContext(ParseTree ctx) {
         String result = null;
-        if (ctx instanceof ResolveParser.PrecisModuleContext) {
+        //In case the user passes a plain ModuleContext node.
+        if ( ctx instanceof ResolveParser.ModuleContext ) {
+            ctx = ctx.getChild(0); //specific module-ctxs are zeroth child of
+            // of the ModuleContext rule/context.
+        }
+        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
             ResolveParser.PrecisModuleContext ctxAsPrecisModule =
                     (ResolveParser.PrecisModuleContext) ctx;
             result = ctxAsPrecisModule.name.getText();
         }
-        else if (ctx instanceof ResolveParser.ConceptModuleContext) {
+        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
             ResolveParser.PrecisModuleContext ctxAsPrecisModule =
                     (ResolveParser.PrecisModuleContext) ctx;
             result = ctxAsPrecisModule.name.getText();
@@ -85,6 +91,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         }
         return result;
     }
+
     public String fullyQualifiedRepresentation(String symbol) {
         return myName + "::" + symbol;
     }

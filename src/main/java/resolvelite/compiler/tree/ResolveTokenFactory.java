@@ -38,7 +38,7 @@ import org.antlr.v4.runtime.misc.Pair;
 /**
  * A <code>ResolveTokenFactory</code> produces {@link ResolveToken}s. This can
  * be plugged into to the RESOLVE parser and lexer to outfit the parse tree with
- * {@link ResolveToken}s as opposed to {@link org.antlr.v4.runtime.CommonToken}s.
+ * {@link ResolveToken}s instead of {@link org.antlr.v4.runtime.CommonToken}s.
  */
 public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
 

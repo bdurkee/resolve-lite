@@ -22,7 +22,6 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             ParseTreeWalker walker = new ParseTreeWalker();
             DefSymbolsAndScopes definePhase = new DefSymbolsAndScopes();
             walker.walk(definePhase, unit.root);
-
         }
     }
 }

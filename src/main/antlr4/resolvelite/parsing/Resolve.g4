@@ -162,7 +162,7 @@ mathTheoremDecl
 // mathematical definitions
 
 mathDefinitionDecl
-    :   'Definition' Identifier (definitionParameterList)? ':'
+    :   'Definition' name=Identifier (definitionParameterList)? ':'
         mathTypeExp ('is' mathAssertionExp)? ';'
     ;
 
@@ -254,13 +254,8 @@ mathLiteralExp
     ;
 
 mathFunctionApplicationExp
-    :   '#' mathCleanFunctionExp
-    |   mathCleanFunctionExp
-    ;
-
-mathCleanFunctionExp
-    :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
+    :   ('#')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
+    |   ('#')? name=Identifier    #mathVariableExp
     ;
 
 mathOutfixExp

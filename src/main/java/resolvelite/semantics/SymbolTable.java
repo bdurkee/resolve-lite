@@ -1,74 +1,57 @@
 package resolvelite.semantics;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.semantics.symbol.MathSymbol;
+import resolvelite.misc.Utils;
+import resolvelite.semantics.programtypes.PTType;
 import resolvelite.typereasoning.TypeGraph;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+public class SymbolTable {
+    //public static final MTType INVALID_MTTYPE = new InvalidType();
+    //public static final PTType INVALID_PTTYPE = new InvalidType();
 
-public class SymbolTable extends ScopeRepository {
+    public ModuleScope MODULE = new ModuleScope(PredefinedScope.INSTANCE);
+    private final ResolveCompiler compiler;
+    private final TypeGraph typeGraph;
 
-    private final Map<ModuleIdentifier, ModuleScope> moduleScopes =
-            new HashMap<ModuleIdentifier, ModuleScope>();
-
-    private final Deque<Scope> lexicalScopeStack = new LinkedList<Scope>();
-
-    private final ParseTreeProperty<Scope> scopes =
-            new ParseTreeProperty<Scope>();
-
-    @NotNull private final ResolveCompiler compiler;
-
-
-    @NotNull private final TypeGraph typeGraph;
-    @Nullable private ModuleScope currentModuleScope;
-
-    public SymbolTable(@NotNull ResolveCompiler rc) {
-        this.typeGraph = new TypeGraph(rc);
+    public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
-
-        Scope topLevelScope = new LocalScope(null);
-        initBuiltinMathTypes(typeGraph, topLevelScope);
-
-        //install the top level scope
-        lexicalScopeStack.push(topLevelScope);
+        this.typeGraph = new TypeGraph(rc);
+        initTypeSystem();
     }
 
-    protected void initBuiltinMathTypes(TypeGraph g, Scope s) {
-        s.define(new MathSymbol(g, "B", null, null, ModuleIdentifier.GLOBAL));
+    private void initTypeSystem() {
+        definePredefinedSymbol(new MathSymbol("B", typeGraph.SSET, typeGraph.BOOLEAN));
+        definePredefinedSymbol(new MathSymbol("SSet", typeGraph.CLS, typeGraph.SSET));
     }
 
-    public ModuleScope startModuleScope(@NotNull ParserRuleContext ctx) {
-        Scope topLvlScope = lexicalScopeStack.peek();
-        ModuleScope s = new ModuleScope(typeGraph, ctx, topLvlScope, this);
-        this.currentModuleScope = s;
-        addScope(s, parent);
-        myModuleScopes.put(s.getModuleIdentifier(), s);
-        return s;
+    public void definePredefinedSymbol(Symbol s) {
+        PredefinedScope.INSTANCE.define(s);
     }
 
-    public Scope endScope() {
-
+    public void defineModuleSymbol(Symbol s) {
+        MODULE.define(s);
     }
 
-    @Override
-    public ModuleScope getModuleScope(ModuleIdentifier module) {
-        return moduleScopes.get(module);
+    public static String toString(Scope s) {
+        StringBuilder buf = new StringBuilder();
+        toString(buf, s, 0);
+        return buf.toString();
     }
 
-    @Override
-    public TypeGraph getTypeGraph() {
-        return typeGraph;
-    }
-
-    @Override
-    public ResolveCompiler getCompiler() {
-        return compiler;
+    public static void toString(StringBuilder buf, Scope s, int level) {
+        buf.append(Utils.tab(level));
+        buf.append(s.getScopeDescription());
+        buf.append("\n");
+        level++;
+        for (Symbol sym : s.getSymbols()) {
+            if ( !(sym instanceof Scope) ) {
+                buf.append(Utils.tab(level));
+                buf.append(sym+"\n");
+            }
+        }
+        for (Scope nested : s.getNestedScopes()) {
+            toString(buf, nested, level);
+        }
+        level--;
     }
 }

@@ -73,13 +73,13 @@ public class ResolveAnnotatedParseTree {
         public boolean hasErrors;
         public final ParseTree root;
         public final ImportCollection imports;
-        protected final ParseTreeProperty<MTType> mathTypes =
+        public final ParseTreeProperty<MTType> mathTypes =
                 new ParseTreeProperty<MTType>();
-        protected final ParseTreeProperty<MTType> mathTypeValues =
+        public final ParseTreeProperty<MTType> mathTypeValues =
                 new ParseTreeProperty<MTType>();
 
         public TreeAnnotatingBuilder(ParseTree root, String fileName) {
-            if (!(root instanceof ResolveParser.ModuleContext)) {
+            if ( !(root instanceof ResolveParser.ModuleContext) ) {
                 throw new IllegalArgumentException(
                         "ResolveParser.ModuleContext " + "expected, got: "
                                 + root.getClass());
@@ -89,10 +89,10 @@ public class ResolveAnnotatedParseTree {
             this.imports = scanner.getImports();
             this.root = root;
             ParseTree child = root.getChild(0);
-            if (child instanceof ResolveParser.PrecisModuleContext) {
+            if ( child instanceof ResolveParser.PrecisModuleContext ) {
                 this.name = ((ResolveParser.PrecisModuleContext) child).name;
             }
-            else if (child instanceof ResolveParser.ConceptModuleContext) {
+            else if ( child instanceof ResolveParser.ConceptModuleContext ) {
                 this.name = ((ResolveParser.ConceptModuleContext) child).name;
             }
         }

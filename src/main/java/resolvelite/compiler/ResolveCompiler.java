@@ -128,8 +128,8 @@ public class ResolveCompiler {
         while (args != null && i < args.length) {
             String arg = args[i];
             i++;
-            if (arg.charAt(0) != '-') { // file name
-                if (!targetFiles.contains(arg)) {
+            if ( arg.charAt(0) != '-' ) { // file name
+                if ( !targetFiles.contains(arg) ) {
                     targetFiles.add(arg);
                     String f = Utils.groomFileName(arg);
                     targetNames.add(f.substring(0, f.indexOf(".")));
@@ -138,10 +138,10 @@ public class ResolveCompiler {
             }
             boolean found = false;
             for (Option o : optionDefs) {
-                if (arg.equals(o.name)) {
+                if ( arg.equals(o.name) ) {
                     found = true;
                     String argValue = null;
-                    if (o.argType == OptionArgType.STRING) {
+                    if ( o.argType == OptionArgType.STRING ) {
                         argValue = args[i];
                         i++;
                     }
@@ -149,8 +149,8 @@ public class ResolveCompiler {
                     Class<? extends ResolveCompiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
-                        if (argValue == null) {
-                            if (arg.startsWith("-no-"))
+                        if ( argValue == null ) {
+                            if ( arg.startsWith("-no-") )
                                 f.setBoolean(this, false);
                             else
                                 f.setBoolean(this, true);
@@ -164,7 +164,7 @@ public class ResolveCompiler {
                     }
                 }
             }
-            if (!found) {
+            if ( !found ) {
                 errorManager.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
             }
         }
@@ -172,7 +172,7 @@ public class ResolveCompiler {
 
     public static void main(String[] args) {
         ResolveCompiler resolve = new ResolveCompiler(args);
-        if (args.length == 0) {
+        if ( args.length == 0 ) {
             resolve.help();
             resolve.exit(0);
         }
@@ -181,7 +181,7 @@ public class ResolveCompiler {
             resolve.processCommandLineTargets();
         }
         finally {
-            if (resolve.log) {
+            if ( resolve.log ) {
                 try {
                     String logname = resolve.logMgr.save();
                     System.out.println("wrote " + logname);
@@ -192,7 +192,7 @@ public class ResolveCompiler {
                 }
             }
         }
-        if (resolve.errorManager.getErrorCount() > 0) {
+        if ( resolve.errorManager.getErrorCount() > 0 ) {
             resolve.exit(1);
         }
         resolve.exit(0);
@@ -217,7 +217,7 @@ public class ResolveCompiler {
                 new HashMap<String, TreeAnnotatingBuilder>();
         for (String fileName : targetFiles) {
             TreeAnnotatingBuilder t = parseModule(fileName);
-            if (t == null || t.hasErrors) {
+            if ( t == null || t.hasErrors ) {
                 continue;
             }
             roots.put(t.name.getText(), t);
@@ -234,7 +234,7 @@ public class ResolveCompiler {
 
         for (String s : getCompileOrder(g)) {
             TreeAnnotatingBuilder m = roots.get(s);
-            if (m.hasErrors) {
+            if ( m.hasErrors ) {
                 finalOrdering.clear();
                 break;
             }
@@ -254,7 +254,7 @@ public class ResolveCompiler {
                 File file =
                         findResolveFile(importRequest.getText(), NATIVE_EXT);
 
-                if (module == null) {
+                if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
                     roots.put(module.name.getText(), module);
                 }
@@ -267,8 +267,8 @@ public class ResolveCompiler {
                 continue;
             }
 
-            if (root.imports.inCategory(ImportCollection.ImportType.EXPLICIT,
-                    module.name)) {
+            if ( root.imports.inCategory(ImportCollection.ImportType.EXPLICIT,
+                    module.name) ) {
                 /*
                  * if (!module.appropriateForImport()) {
                  * errorManager.toolError(ErrorKind.INVALID_IMPORT,
@@ -278,7 +278,7 @@ public class ResolveCompiler {
                  * }
                  */
             }
-            if (pathExists(g, module.name.getText(), root.name.getText())) {
+            if ( pathExists(g, module.name.getText(), root.name.getText()) ) {
                 //Todo.
                 throw new IllegalStateException("circular dependency detected");
             }
@@ -307,7 +307,7 @@ public class ResolveCompiler {
             String src, String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if (!g.containsVertex(src)) {
+        if ( !g.containsVertex(src) ) {
             return false;
         }
         GraphIterator<String, DefaultEdge> iterator =
@@ -315,7 +315,7 @@ public class ResolveCompiler {
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if (next.equals(dest)) {
+            if ( next.equals(dest) ) {
                 return true;
             }
         }
@@ -332,7 +332,7 @@ public class ResolveCompiler {
     private TreeAnnotatingBuilder parseModule(String fileName) {
         try {
             File file = new File(fileName);
-            if (!file.isAbsolute()) {
+            if ( !file.isAbsolute() ) {
                 file = new File(System.getProperty("user.dir"), fileName);
             }
             ANTLRInputStream input =
