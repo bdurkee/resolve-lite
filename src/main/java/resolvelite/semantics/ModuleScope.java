@@ -13,6 +13,6 @@ public class ModuleScope extends BaseScope {
 
     @Override
     public String getScopeDescription() {
-        return "global";
+        return "module";
     }
 }

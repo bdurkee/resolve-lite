@@ -47,6 +47,7 @@ import resolvelite.misc.LogManager;
 import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveLexer;
 import resolvelite.parsing.ResolveParser;
+import resolvelite.semantics.AnalysisPipeline;
 import resolvelite.semantics.SymbolTable;
 
 import java.io.File;
@@ -202,10 +203,10 @@ public class ResolveCompiler {
         List<TreeAnnotatingBuilder> targets =
                 sortTargetModulesByUsesReferences();
         int initialErrCt = errorManager.getErrorCount();
-        // AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        //  CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
+        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
 
-        // analysisPipe.process();
+        analysisPipe.process();
         // if (analysisPipe.myCompiler.errorManager.getErrorCount() > initialErrCt) {
         //     return;
         // }

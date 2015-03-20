@@ -9,33 +9,39 @@ public class MathSymbol extends SymbolWithScope implements TypedSymbol {
     protected BaseSymbol.Quantification quantification;
     protected MTType mathType, mathTypeValue;
 
-    public MathSymbol(String name, MTType type, MTType typeValue) {
-        this(name, type, typeValue, null);
+    public MathSymbol(String name) {
+        this(name, null);
     }
 
-    public MathSymbol(String name, MTType type, MTType typeValue,
+    public MathSymbol(String name, @Nullable ParserRuleContext tree) {
+        this(name, BaseSymbol.Quantification.NONE, tree);
+    }
+
+    public MathSymbol(String name, BaseSymbol.Quantification q,
             @Nullable ParserRuleContext tree) {
-        this(name, type, typeValue, BaseSymbol.Quantification.NONE, tree);
-    }
-
-    public MathSymbol(String name, MTType type, MTType typeValue,
-                      BaseSymbol.Quantification q,
-                      @Nullable ParserRuleContext tree) {
         super(name);
         this.quantification = q;
         this.tree = tree;
-        this.mathType = type;
-        this.mathTypeValue = typeValue;
     }
 
-    //@Override
-    //public MTType getMathType() {
-     //   return mathType;
-    //}
+    @Override
+    public MathSymbol toMathSymbol() {
+        return this;
+    }
 
-   // @Override
-   // public void setMathType(MTType type) {
-   //     this.mathType = type;
-   // }
+    public MTType getMathType() {
+        return mathType;
+    }
 
+    public MTType getMathTypeValue() {
+        return mathTypeValue;
+    }
+
+    public void setMathType(MTType type) {
+        this.mathType = type;
+    }
+
+    public void setMathTypeValue(MTType typeValue) {
+        this.mathTypeValue = typeValue;
+    }
 }

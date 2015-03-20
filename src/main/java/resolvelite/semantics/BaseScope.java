@@ -11,7 +11,7 @@ import java.util.*;
 
 public abstract class BaseScope implements Scope {
 
-    protected Scope enclosingScope; // null if global (outermost) scope
+    protected Scope enclosingScope; // null if predefined (outermost) scope
 
     protected Map<String, Symbol> symbols = new LinkedHashMap<>();
 
@@ -71,6 +71,7 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Scope> getNestedScopes() {
         List<? extends Symbol> scopes =
                 Utils.filter(getSymbols(), s -> s instanceof Scope);

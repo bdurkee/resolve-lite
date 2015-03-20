@@ -6,6 +6,7 @@ import resolvelite.semantics.programtypes.PTType;
 import resolvelite.typereasoning.TypeGraph;
 
 public class SymbolTable {
+
     //public static final MTType INVALID_MTTYPE = new InvalidType();
     //public static final PTType INVALID_PTTYPE = new InvalidType();
 
@@ -16,16 +17,27 @@ public class SymbolTable {
     public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
         this.typeGraph = new TypeGraph(rc);
-        initTypeSystem();
+        initMathTypeSystem();
     }
 
-    private void initTypeSystem() {
-        definePredefinedSymbol(new MathSymbol("B", typeGraph.SSET, typeGraph.BOOLEAN));
-        definePredefinedSymbol(new MathSymbol("SSet", typeGraph.CLS, typeGraph.SSET));
+    private void initMathTypeSystem() {
+        defineMathSymbol("B", typeGraph.SSET, typeGraph.BOOLEAN);
+        defineMathSymbol("SSet", typeGraph.CLS, typeGraph.SSET);
+    }
+
+    public void defineMathSymbol(String name, MTType type, MTType typeValue) {
+        MathSymbol result = new MathSymbol(name);
+        result.setMathType(type);
+        result.setMathTypeValue(typeValue);
+        definePredefinedSymbol(result);
     }
 
     public void definePredefinedSymbol(Symbol s) {
         PredefinedScope.INSTANCE.define(s);
+    }
+
+    public TypeGraph getTypeGraph() {
+        return typeGraph;
     }
 
     public void defineModuleSymbol(Symbol s) {
@@ -46,7 +58,7 @@ public class SymbolTable {
         for (Symbol sym : s.getSymbols()) {
             if ( !(sym instanceof Scope) ) {
                 buf.append(Utils.tab(level));
-                buf.append(sym+"\n");
+                buf.append(sym + "\n");
             }
         }
         for (Scope nested : s.getNestedScopes()) {

@@ -19,4 +19,5 @@ public interface Symbol {
 
     boolean equals(Object o);
 
+    public MathSymbol toMathSymbol();
 }

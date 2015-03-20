@@ -11,8 +11,7 @@ public class PredefinedScope extends BaseScope {
 
     public static final PredefinedScope INSTANCE = new PredefinedScope();
 
-    private PredefinedScope() {
-    }
+    private PredefinedScope() {}
 
     @Override
     public String getScopeDescription() {

@@ -29,6 +29,7 @@ public interface Scope {
     /**
      * Returns all scopes that are immediate decendents of <code>this</code>
      * <code>Scope</code>.
+     * 
      * @return A list of nested <code>Scope</code>s of <code>this</code>.
      */
     public List<Scope> getNestedScopes();

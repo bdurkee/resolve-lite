@@ -11,6 +11,7 @@ public class TypeGraph {
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
 
     private final ResolveCompiler compiler;
+
     public TypeGraph(@NotNull ResolveCompiler rc) {
         this.compiler = rc;
     }

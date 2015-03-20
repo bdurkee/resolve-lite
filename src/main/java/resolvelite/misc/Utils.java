@@ -134,7 +134,8 @@ public class Utils {
 
     public static String tab(int n) {
         StringBuilder buf = new StringBuilder();
-        for (int i=1; i<=n; i++) buf.append("    ");
+        for (int i = 1; i <= n; i++)
+            buf.append("    ");
         return buf.toString();
     }
 
