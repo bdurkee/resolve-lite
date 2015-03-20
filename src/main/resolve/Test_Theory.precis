@@ -1,4 +1,6 @@
 Precis Test_Theory;
 
     Definition Foo : SSet;
+
+    Definition Boo : Foo;
 end Test_Theory;

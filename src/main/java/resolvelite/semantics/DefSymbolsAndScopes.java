@@ -22,6 +22,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override
     public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
         currentScope = symtab.MODULE;
+        scopes.put(ctx, currentScope);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         String name = ctx.name.getText();
 
         // push new scope by making new one that points to enclosing scope
-        MathSymbol mathSymFxn = new MathSymbol(name, ctx);
+        MathSymbol mathSymFxn = new MathSymbol(symtab.getTypeGraph(), name, ctx);
         mathSymFxn.setEnclosingScope(currentScope);
 
         currentScope.define(mathSymFxn); // Define function in current scope

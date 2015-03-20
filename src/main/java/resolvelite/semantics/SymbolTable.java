@@ -1,5 +1,6 @@
 package resolvelite.semantics;
 
+import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.compiler.ResolveCompiler;
 import resolvelite.misc.Utils;
 import resolvelite.semantics.programtypes.PTType;
@@ -26,9 +27,8 @@ public class SymbolTable {
     }
 
     public void defineMathSymbol(String name, MTType type, MTType typeValue) {
-        MathSymbol result = new MathSymbol(name);
-        result.setMathType(type);
-        result.setMathTypeValue(typeValue);
+        MathSymbol result = new MathSymbol(typeGraph, name);
+        result.setMathTypes(type, typeValue);
         definePredefinedSymbol(result);
     }
 
@@ -36,6 +36,12 @@ public class SymbolTable {
         PredefinedScope.INSTANCE.define(s);
     }
 
+    @NotNull
+    public ResolveCompiler getCompiler() {
+        return compiler;
+    }
+
+    @NotNull
     public TypeGraph getTypeGraph() {
         return typeGraph;
     }

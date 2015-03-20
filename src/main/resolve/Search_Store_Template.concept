@@ -1,4 +1,18 @@
-Concept Search_Store_Template;
+Concept Search_Store_Template (type Key;
+        evalutes Max_Capacity : Integer);
+ (*   requires Max_Capacity > 0
+        which_entails Max_Capacity : N;
     uses Test_Theory;
+
+    Type Family Store
+            is modeled by Powerset(Key);
+        exemplar S;
+        initialization ensure S = { }
+        constraint ||S|| < Max_Capacity;
+
+    Operation Add (restores k : Key;
+        updates S : Store);
+            requires ||S|| < Max_Capacity;
+            ensures S = #S union { k }*)
 
 end Search_Store_Template;
