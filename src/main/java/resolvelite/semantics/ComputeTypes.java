@@ -1,6 +1,5 @@
 package resolvelite.semantics;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -37,7 +36,7 @@ public class ComputeTypes extends SetScopes {
 
     @Override
     public void
-            exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
+    exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
         mathTypes.put(ctx, mathTypes.get(ctx.mathPrimaryExp()));
         mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathPrimaryExp()));
     }
@@ -46,26 +45,6 @@ public class ComputeTypes extends SetScopes {
     public void exitMathTypeExp(@NotNull ResolveParser.MathTypeExpContext ctx) {
         mathTypes.put(ctx, mathTypes.get(ctx.mathExp()));
         mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathExp()));
-    }
-
-    @Override
-    public void exitMathDefinitionDecl(
-            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
-        MTType declaredType = mathTypeValues.get(ctx.mathTypeExp());
-        MTType typeValue = null;
-        if ( ctx.mathAssertionExp() != null ) { //if the def. has an rhs.
-            typeValue = mathTypeValues.get(ctx.mathAssertionExp());
-        }
-        //set the types in the entry for the actual definition.
-        try {
-            MathSymbol def =
-                    (MathSymbol) currentScope.resolve(ctx.name.getText());
-            def.setMathTypes(declaredType, typeValue);
-        }
-        catch (IllegalArgumentException iae) {
-            symbolTable.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
-        }
     }
 
     @Override

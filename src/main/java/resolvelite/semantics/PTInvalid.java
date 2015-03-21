@@ -1,6 +1,5 @@
 package resolvelite.semantics;
 
-import resolvelite.semantics.programtypes.PTType;
 import resolvelite.typereasoning.TypeGraph;
 
 public class PTInvalid extends PTType {

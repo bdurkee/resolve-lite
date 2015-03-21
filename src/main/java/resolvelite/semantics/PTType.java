@@ -1,9 +1,6 @@
-package resolvelite.semantics.programtypes;
+package resolvelite.semantics;
 
-import resolvelite.semantics.MTType;
 import resolvelite.typereasoning.TypeGraph;
-
-import java.util.Map;
 
 public abstract class PTType {
 

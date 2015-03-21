@@ -1,6 +1,7 @@
 Precis Test_Theory;
 
-Definition Foo : SSet;
 Definition X : Foo;
+
+Definition Foo : SSet;
 
 end Test_Theory;

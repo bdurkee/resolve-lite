@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.compiler.ResolveCompiler;
 import resolvelite.misc.Utils;
-import resolvelite.semantics.programtypes.PTType;
 import resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;

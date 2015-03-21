@@ -1,10 +1,8 @@
 package resolvelite.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.parsing.ResolveBaseListener;
-import resolvelite.parsing.ResolveParser;
 
 /**
  * Descends the nodes of a parse tree, setting a scope pointer for each subtree
@@ -23,7 +21,7 @@ class SetScopes extends ResolveBaseListener {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Sets current scope pointer to the appropriate pre-established scope
      * for the section of the tree getting traversed.
      */

@@ -1,30 +1,32 @@
 package resolvelite.semantics;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 
-public class DefSymbolsAndScopes extends ResolveBaseListener {
+public class PopulatingListener extends ResolveBaseListener {
 
-    //ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     Scope currentScope; // define symbols in this scope
     ResolveCompiler compiler;
     SymbolTable symtab;
 
-    public DefSymbolsAndScopes(@NotNull ResolveCompiler rc) {
+    public PopulatingListener(@NotNull ResolveCompiler rc) {
         this.compiler = rc;
         this.symtab = rc.symbolTable;
     }
 
     @Override
-    public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
-        ModuleScope module = new ModuleScope(PredefinedScope.INSTANCE);
-        symtab.moduleScopes.put(Utils.extractModuleName(ctx), module);
-        currentScope = module;
+    public void enterPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
+        currentScope = establishModuleScope(ctx.name.getText(), ctx);
+    }
+
+    @Override
+    public void enterConceptModule(
+            @NotNull ResolveParser.ConceptModuleContext ctx) {
+        currentScope = establishModuleScope(ctx.name.getText(), ctx);
     }
 
     @Override
@@ -46,5 +48,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     public void exitMathDefinitionDecl(
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope(); // pop scope
+    }
+
+    private ModuleScope establishModuleScope(@NotNull String moduleName,
+                                             @NotNull ParserRuleContext ctx) {
+        ModuleScope module = new ModuleScope(PredefinedScope.INSTANCE);
+        symtab.moduleScopes.put(moduleName, module);
+        return module;
     }
 }
