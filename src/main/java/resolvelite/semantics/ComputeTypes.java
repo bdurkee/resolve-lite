@@ -10,7 +10,7 @@ import resolvelite.typereasoning.TypeGraph;
 import resolvelite.semantics.BaseSymbol.Quantification;
 
 /**
- * Annotates expressions and sub-expressions with appropriate {@link PTType}s
+ * Annotates expressions and sub-expressions with appropriate {@link Type}s
  * and {@link MathType}s.
  */
 public class ComputeTypes extends ResolveBaseListener {

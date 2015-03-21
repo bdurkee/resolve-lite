@@ -36,7 +36,7 @@ public class MathSymbol extends SymbolWithScope {
         else if ( mathType != null
                 && mathType.isKnownToContainOnlyThingsThatAreTypes() ) {
             this.mathTypeValue =
-                    new MTProper(typeGraph, type,
+                    new MathTypeProp(typeGraph, type,
                             type.membersKnownToContainOnlyThingsThatAreTypes(),
                             name);
         }

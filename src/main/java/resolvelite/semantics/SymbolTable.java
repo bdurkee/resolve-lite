@@ -26,6 +26,8 @@ public class SymbolTable {
     private void initMathTypeSystem() {
         defineMathSymbol("B", typeGraph.SSET, typeGraph.BOOLEAN);
         defineMathSymbol("SSet", typeGraph.CLS, typeGraph.SSET);
+        defineMathSymbol("Cls", typeGraph.CLS, typeGraph.CLS);
+        defineMathSymbol("Powerset", typeGraph.POWERSET, null);
     }
 
     public void

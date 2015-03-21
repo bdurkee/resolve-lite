@@ -2,11 +2,11 @@ package resolvelite.semantics;
 
 import resolvelite.typereasoning.TypeGraph;
 
-public abstract class PTType {
+public abstract class Type {
 
     private final TypeGraph myTypeGraph;
 
-    public PTType(TypeGraph g) {
+    public Type(TypeGraph g) {
         myTypeGraph = g;
     }
 
@@ -26,7 +26,7 @@ public abstract class PTType {
      *         would be acceptable where one of type <code>t</code> were
      *         required.
      */
-    public boolean acceptableFor(PTType t) {
+    public boolean acceptableFor(Type t) {
         return equals(t);
     }
 }

@@ -6,11 +6,11 @@ import resolvelite.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MathTypeCartesian extends MathType {
+public class MathTypeCart extends MathType {
 
     private final List<Element> elements = new ArrayList<>();
 
-    public MathTypeCartesian(@NotNull TypeGraph g, List<Element> elements) {
+    public MathTypeCart(@NotNull TypeGraph g, List<Element> elements) {
         super(g);
         this.elements.addAll(elements);
     }

@@ -7,35 +7,35 @@ import resolvelite.typereasoning.TypeGraph;
  * A proper type. Any type that does not depend on other types. I.e., it
  * is atomic.
  */
-public class MTProper extends MathType {
+public class MathTypeProp extends MathType {
 
     private String name;
     private MathType type = null;
-    private final boolean knownToContainOnlyMTypes;
+    private final boolean knownToContainOnlyThingsThatAreTypes;
 
-    public MTProper(@NotNull TypeGraph g) {
+    public MathTypeProp(@NotNull TypeGraph g) {
         this(g, null, false, null);
     }
 
-    public MTProper(@NotNull TypeGraph g, boolean knownToContainOnlyMTypes) {
+    public MathTypeProp(@NotNull TypeGraph g, boolean knownToContainOnlyMTypes) {
         this(g, null, knownToContainOnlyMTypes, null);
     }
 
-    public MTProper(@NotNull TypeGraph g, String name) {
+    public MathTypeProp(@NotNull TypeGraph g, String name) {
         this(g, null, false, name);
     }
 
-    public MTProper(@NotNull TypeGraph g, MathType type,
-            boolean knownToContainOnlyMTypes, String name) {
+    public MathTypeProp(@NotNull TypeGraph g, MathType type,
+                        boolean knownToContainOnlyTypes, String name) {
         super(g);
-        this.knownToContainOnlyMTypes = knownToContainOnlyMTypes;
+        this.knownToContainOnlyThingsThatAreTypes = knownToContainOnlyTypes;
         this.type = type;
         this.name = name;
     }
 
     @Override
     public boolean isKnownToContainOnlyThingsThatAreTypes() {
-        return knownToContainOnlyMTypes;
+        return knownToContainOnlyThingsThatAreTypes;
     }
 
     public String getName() {
