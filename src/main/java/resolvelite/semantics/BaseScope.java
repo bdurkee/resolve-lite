@@ -32,7 +32,7 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
-    public Symbol resolve(String name) {
+    public Symbol resolve(String name) throws IllegalArgumentException {
         Symbol s = symbols.get(name);
         if ( s != null ) {
             //			System.out.println("found "+name+" in "+this.asScopeStackString());
@@ -40,9 +40,10 @@ public abstract class BaseScope implements Scope {
         }
         // if not here, check any enclosing scope
         Scope parent = getParentScope();
-        if ( parent != null )
+        if ( parent != null ) {
             return parent.resolve(name);
-        return null; // not found
+        }
+        throw new IllegalArgumentException();//not found
     }
 
     @Override

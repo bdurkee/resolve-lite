@@ -30,6 +30,9 @@
  */
 package resolvelite.misc;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import resolvelite.parsing.ResolveParser;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -130,6 +133,30 @@ public class Utils {
             }
         }
         return builder.toString();
+    }
+
+    public static String extractModuleName(ParseTree ctx) {
+        String result = null;
+        //In case the user passes a plain ModuleContext node.
+        if ( ctx instanceof ResolveParser.ModuleContext ) {
+            ctx = ctx.getChild(0); //specific module-ctxs are zeroth child of
+            // of the ModuleContext rule/context.
+        }
+        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
+            ResolveParser.PrecisModuleContext ctxAsPrecisModule =
+                    (ResolveParser.PrecisModuleContext) ctx;
+            result = ctxAsPrecisModule.name.getText();
+        }
+        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
+            ResolveParser.PrecisModuleContext ctxAsPrecisModule =
+                    (ResolveParser.PrecisModuleContext) ctx;
+            result = ctxAsPrecisModule.name.getText();
+        }
+        else {
+            throw new IllegalArgumentException("cannot retrieve module name "
+                    + "from rule context: " + ctx.getClass());
+        }
+        return result;
     }
 
     public static String tab(int n) {

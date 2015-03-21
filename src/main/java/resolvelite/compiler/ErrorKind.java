@@ -83,9 +83,9 @@ public enum ErrorKind {
             + "declared closing name '<arg2>'", ErrorSeverity.WARNING),
 
     /**
-     * Compiler error 9: no such function: <em>name</em>.
+     * Compiler error 9: no such symbol: <em>name</em>.
      */
-    NO_SUCH_FUNCTION(9, "no such function: <arg>", ErrorSeverity.ERROR),
+    NO_SUCH_SYMBOL(9, "no such symbol: <arg>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 10: <em>module1type</em> module '<em>module1</em>' cannot
@@ -147,7 +147,13 @@ public enum ErrorKind {
      * Compiler error 18: Non-facility qualifier on variable: <em>varName</em>.
      */
     NON_FACILITY_QUALIFIER(18, "qualifier '<arg>' refers"
-            + " to a module, not a facility.", ErrorSeverity.ERROR);
+            + " to a module, not a facility", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 19: type <em>name</em> is not known to ba type".
+     */
+    INVALID_MATH_TYPE(19, "type '<arg>' is not known to be a type",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

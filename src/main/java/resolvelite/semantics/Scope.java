@@ -64,11 +64,13 @@ public interface Scope {
      * Look up <code>name</code> in this scope or in an enclosing
      * <code>Scope</code> if not already present.
      * 
+     * @throws IllegalArgumentException If a symbol corresponding to the
+     *         requested name is not found.
      * @param name The name of the <code>Scope</code> to lookup.
      * @return the found symbol, <code>null</code> if not present.
      */
     @Nullable
-    public Symbol resolve(String name);
+    public Symbol resolve(String name) throws IllegalArgumentException;
 
     public Symbol getSymbol(String name);
 

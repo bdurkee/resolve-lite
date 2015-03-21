@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import resolvelite.compiler.ErrorKind;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.typereasoning.TypeGraph;
@@ -15,9 +16,8 @@ public class ComputeTypes extends SetScopes {
     ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
     TypeGraph g;
 
-    public ComputeTypes(SymbolTable symtab,
-            @NotNull DefSymbolsAndScopes scopeRepo) {
-        super(symtab, scopeRepo);
+    public ComputeTypes(SymbolTable symtab) {
+        super(symtab);
         this.g = symtab.getTypeGraph();
     }
 
@@ -53,37 +53,56 @@ public class ComputeTypes extends SetScopes {
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
         MTType declaredType = mathTypeValues.get(ctx.mathTypeExp());
         MTType typeValue = null;
-        if (ctx.mathAssertionExp() != null) { //if the def. has an rhs.
+        if ( ctx.mathAssertionExp() != null ) { //if the def. has an rhs.
             typeValue = mathTypeValues.get(ctx.mathAssertionExp());
         }
         //set the types in the entry for the actual definition.
-        currentScope.resolve(ctx.name.getText()).toMathSymbol()
-                .setMathTypes(declaredType, typeValue);
+        try {
+            MathSymbol def =
+                    (MathSymbol) currentScope.resolve(ctx.name.getText());
+            def.setMathTypes(declaredType, typeValue);
+        }
+        catch (IllegalArgumentException iae) {
+            symbolTable.getCompiler().errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+        }
     }
 
     @Override
     public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        MathSymbol intendedEntry =
-                currentScope.resolve(ctx.name.getText()).toMathSymbol();
-        mathTypes.put(ctx, intendedEntry.getMathType());
+        try {
+            MathSymbol intendedEntry =
+                    (MathSymbol) currentScope.resolve(ctx.name.getText());
 
-       if (intendedEntry.getQuantification() == Quantification.NONE) {
-           mathTypeValues.put(ctx, intendedEntry.getMathTypeValue());
-       }
-       else {
-           throw new UnsupportedOperationException("quantification is not yet working");
-       //     if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
-       //         node.setMathTypeValue(new MTNamed(myTypeGraph, symbolName));
-       //     }
+            mathTypes.put(ctx, intendedEntry.getMathType());
+            if ( intendedEntry.getQuantification() == Quantification.NONE ) {
+                mathTypeValues.put(ctx, intendedEntry.getMathTypeValue());
+            }
+            else {
+                throw new UnsupportedOperationException("todo");
+                //     if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
+                //         node.setMathTypeValue(new MTNamed(myTypeGraph, symbolName));
+                //     }
+            }
+            String typeValueDesc = "";
+            if ( mathTypeValues.get(ctx) != null ) {
+                typeValueDesc =
+                        ", referencing math type " + mathTypeValues.get(ctx)
+                                + " (" + mathTypeValues.get(ctx).getClass()
+                                + ")";
+            }
+            symbolTable.getCompiler().info(
+                    "processed math symbol " + ctx.name + " with type "
+                            + mathTypes.get(ctx) + typeValueDesc);
         }
-        String typeValueDesc = "";
-        if (mathTypeValues.get(ctx) != null) {
-            typeValueDesc =
-                    ", referencing math type " + mathTypeValues.get(ctx) + " ("
-                            + mathTypeValues.get(ctx).getClass() + ")";
+        catch (IllegalStateException e) {
+            symbolTable.getCompiler().errorManager.semanticError(
+                    ErrorKind.INVALID_MATH_TYPE, ctx.name, ctx.name.getText());
         }
-        symbolTable.getCompiler().info("processed math symbol " + ctx.name
-                        + " with type " + mathTypes.get(ctx) + typeValueDesc);
+        catch (IllegalArgumentException iae) {
+            symbolTable.getCompiler().errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+        }
     }
 }

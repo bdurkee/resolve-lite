@@ -10,12 +10,12 @@ public class MathSymbol extends SymbolWithScope implements TypedSymbol {
     protected BaseSymbol.Quantification quantification;
     protected MTType mathType, mathTypeValue;
     protected final TypeGraph typeGraph;
+
     public MathSymbol(TypeGraph g, String name) {
         this(g, name, null);
     }
 
-    public MathSymbol(TypeGraph g, String name,
-                      @Nullable ParserRuleContext tree) {
+    public MathSymbol(TypeGraph g, String name, @Nullable ParserRuleContext tree) {
         this(g, name, BaseSymbol.Quantification.NONE, tree);
     }
 
@@ -40,8 +40,8 @@ public class MathSymbol extends SymbolWithScope implements TypedSymbol {
         return mathType;
     }
 
-    public MTType getMathTypeValue() {
-        if (mathTypeValue == null) {
+    public MTType getMathTypeValue() throws IllegalStateException {
+        if ( mathTypeValue == null ) {
             throw new IllegalStateException();
         }
         return mathTypeValue;
@@ -49,13 +49,13 @@ public class MathSymbol extends SymbolWithScope implements TypedSymbol {
 
     public void setMathTypes(MTType type, MTType typeValue) {
         this.mathType = type;
-        if (typeValue != null) {
+        if ( typeValue != null ) {
             this.mathTypeValue = typeValue;
         }
-        else if (mathType.isKnownToContainOnlyMTypes()) {
+        else if ( mathType != null && mathType.isKnownToContainOnlyMTypes() ) {
             this.mathTypeValue =
-                    new MTProper(typeGraph, type, type
-                            .membersKnownToContainOnlyMTypes(), name);
+                    new MTProper(typeGraph, type,
+                            type.membersKnownToContainOnlyMTypes(), name);
         }
         else {
             this.mathTypeValue = null;

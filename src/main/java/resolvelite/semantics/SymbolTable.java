@@ -1,17 +1,20 @@
 package resolvelite.semantics;
 
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.compiler.ResolveCompiler;
 import resolvelite.misc.Utils;
 import resolvelite.semantics.programtypes.PTType;
 import resolvelite.typereasoning.TypeGraph;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SymbolTable {
 
-    //public static final MTType INVALID_MTTYPE = new InvalidType();
-    //public static final PTType INVALID_PTTYPE = new InvalidType();
+    Map<String, ModuleScope> moduleScopes = new HashMap<>();
+    ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
-    public ModuleScope MODULE = new ModuleScope(PredefinedScope.INSTANCE);
     private final ResolveCompiler compiler;
     private final TypeGraph typeGraph;
 
@@ -44,10 +47,6 @@ public class SymbolTable {
     @NotNull
     public TypeGraph getTypeGraph() {
         return typeGraph;
-    }
-
-    public void defineModuleSymbol(Symbol s) {
-        MODULE.define(s);
     }
 
     public static String toString(Scope s) {

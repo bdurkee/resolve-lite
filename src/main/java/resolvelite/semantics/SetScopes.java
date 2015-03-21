@@ -16,19 +16,20 @@ class SetScopes extends ResolveBaseListener {
     protected Scope currentScope;
     protected SymbolTable symbolTable;
 
-    SetScopes(SymbolTable symtab, @NotNull DefSymbolsAndScopes scopeRepo) {
+    SetScopes(SymbolTable symtab) {
         this.symbolTable = symtab;
-        this.establishedScopes = scopeRepo.scopes;
+        this.establishedScopes = symtab.scopes;
     }
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * Sets current scope pointer to the appropriate pre-established scope
      * for the section of the tree getting traversed.
      */
-    @Override public void enterEveryRule(ParserRuleContext ctx) {
-        if (establishedScopes.get(ctx) != null) {
+    @Override
+    public void enterEveryRule(ParserRuleContext ctx) {
+        if ( establishedScopes.get(ctx) != null ) {
             currentScope = establishedScopes.get(ctx);
             symbolTable.getCompiler().info("scope ptr -> " + currentScope);
         }
