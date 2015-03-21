@@ -28,9 +28,9 @@ public class SymbolTable {
         defineMathSymbol("SSet", typeGraph.CLS, typeGraph.SSET);
     }
 
-    public void defineMathSymbol(String name, MTType type, MTType typeValue) {
-        MathSymbol result = new MathSymbol(typeGraph, name);
-        result.setMathTypes(type, typeValue);
+    public void
+            defineMathSymbol(String name, MathType type, MathType typeValue) {
+        MathSymbol result = new MathSymbol(typeGraph, name, type, typeValue);
         definePredefinedSymbol(result);
     }
 

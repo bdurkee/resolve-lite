@@ -18,6 +18,4 @@ public interface Symbol {
     int hashCode();
 
     boolean equals(Object o);
-
-    public MathSymbol toMathSymbol();
 }

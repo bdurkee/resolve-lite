@@ -30,7 +30,6 @@
  */
 package resolvelite.compiler.tree;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -38,15 +37,14 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import resolvelite.misc.Utils.Builder;
 import resolvelite.parsing.ResolveParser;
-import resolvelite.semantics.MTType;
-
-import java.io.File;
+import resolvelite.semantics.MathType;
 
 public class ResolveAnnotatedParseTree {
 
     @NotNull private final ParseTree root;
     @NotNull private final ImportCollection imports;
-    @NotNull private final ParseTreeProperty<MTType> mathTypes, mathTypeValues;
+    @NotNull private final ParseTreeProperty<MathType> mathTypes,
+            mathTypeValues;
 
     private ResolveAnnotatedParseTree(@NotNull TreeAnnotatingBuilder builder) {
         this.root = builder.root;
@@ -56,12 +54,12 @@ public class ResolveAnnotatedParseTree {
     }
 
     @NotNull
-    public MTType getMathType(@NotNull ParseTree t) {
+    public MathType getMathType(@NotNull ParseTree t) {
         return mathTypes.get(t);
     }
 
     @NotNull
-    public MTType getMathTypeValue(@NotNull ParseTree t) {
+    public MathType getMathTypeValue(@NotNull ParseTree t) {
         return mathTypeValues.get(t);
     }
 
@@ -73,10 +71,10 @@ public class ResolveAnnotatedParseTree {
         public boolean hasErrors;
         public final ParseTree root;
         public final ImportCollection imports;
-        public final ParseTreeProperty<MTType> mathTypes =
-                new ParseTreeProperty<MTType>();
-        public final ParseTreeProperty<MTType> mathTypeValues =
-                new ParseTreeProperty<MTType>();
+        public final ParseTreeProperty<MathType> mathTypes =
+                new ParseTreeProperty<MathType>();
+        public final ParseTreeProperty<MathType> mathTypeValues =
+                new ParseTreeProperty<MathType>();
 
         public TreeAnnotatingBuilder(ParseTree root, String fileName) {
             if ( !(root instanceof ResolveParser.ModuleContext) ) {
@@ -103,13 +101,13 @@ public class ResolveAnnotatedParseTree {
         }
 
         public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,
-                @NotNull MTType type) {
+                @NotNull MathType type) {
             mathTypes.put(ctx, type);
             return this;
         }
 
         public TreeAnnotatingBuilder setMathTypeValue(@NotNull ParseTree ctx,
-                @NotNull MTType typeValue) {
+                @NotNull MathType typeValue) {
             mathTypeValues.put(ctx, typeValue);
             return this;
         }

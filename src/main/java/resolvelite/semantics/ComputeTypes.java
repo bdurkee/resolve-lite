@@ -9,15 +9,22 @@ import resolvelite.parsing.ResolveParser;
 import resolvelite.typereasoning.TypeGraph;
 import resolvelite.semantics.BaseSymbol.Quantification;
 
-public class ComputeTypes extends SetScopes {
+/**
+ * Annotates expressions and sub-expressions with appropriate {@link PTType}s
+ * and {@link MathType}s.
+ */
+public class ComputeTypes extends ResolveBaseListener {
 
-    ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
-    ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
+    ParseTreeProperty<MathType> mathTypes = new ParseTreeProperty<>();
+    ParseTreeProperty<MathType> mathTypeValues = new ParseTreeProperty<>();
     TypeGraph g;
+    SymbolTable symtab;
+    Scope currentScope;
 
-    public ComputeTypes(SymbolTable symtab) {
-        super(symtab);
+    public ComputeTypes(SymbolTable symtab, Scope currentScope) {
+        this.symtab = symtab;
         this.g = symtab.getTypeGraph();
+        this.currentScope = currentScope;
     }
 
     @Override
@@ -36,7 +43,7 @@ public class ComputeTypes extends SetScopes {
 
     @Override
     public void
-    exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
+            exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
         mathTypes.put(ctx, mathTypes.get(ctx.mathPrimaryExp()));
         mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathPrimaryExp()));
     }
@@ -60,7 +67,7 @@ public class ComputeTypes extends SetScopes {
             }
             else {
                 throw new UnsupportedOperationException("todo");
-                //     if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
+                //     if (intendedEntry.getType().isKnownToContainOnlyThingsThatAreTypes()) {
                 //         node.setMathTypeValue(new MTNamed(myTypeGraph, symbolName));
                 //     }
             }
@@ -71,16 +78,16 @@ public class ComputeTypes extends SetScopes {
                                 + " (" + mathTypeValues.get(ctx).getClass()
                                 + ")";
             }
-            symbolTable.getCompiler().info(
+            symtab.getCompiler().info(
                     "processed math symbol " + ctx.name + " with type "
                             + mathTypes.get(ctx) + typeValueDesc);
         }
         catch (IllegalStateException e) {
-            symbolTable.getCompiler().errorManager.semanticError(
+            symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.INVALID_MATH_TYPE, ctx.name, ctx.name.getText());
         }
         catch (IllegalArgumentException iae) {
-            symbolTable.getCompiler().errorManager.semanticError(
+            symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
         }
     }

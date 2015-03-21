@@ -51,7 +51,6 @@ public class ImportListener extends ResolveBaseListener {
 
     //Todo: override facilities, enhancements, etc when they get added to the
     //grammar.
-
     @Override
     public void exitImportList(@NotNull ResolveParser.ImportListContext ctx) {
         builder.imports(ImportCollection.ImportType.EXPLICIT, ctx.Identifier());

@@ -20,10 +20,10 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
         for (TreeAnnotatingBuilder unit : compilationUnits) {
             compiler.info("populating: " + unit.name.getText());
             ParseTreeWalker walker = new ParseTreeWalker();
-            PopulatingListener definePhase = new PopulatingListener(compiler);
-            ComputeTypes typePhase = new ComputeTypes(compiler.symbolTable);
+            DefSymbolsAndScopes definePhase = new DefSymbolsAndScopes(compiler);
+            // MTResolvingListener typePhase = new MTResolvingListener(compiler.symbolTable);
             walker.walk(definePhase, unit.root);
-            walker.walk(typePhase, unit.root);
+            // walker.walk(typePhase, unit.root);
             int i = 0;
         }
     }

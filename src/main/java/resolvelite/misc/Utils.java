@@ -44,11 +44,6 @@ import java.util.function.Predicate;
  */
 public class Utils {
 
-    public static class Indirect<T> {
-
-        public T data;
-    }
-
     /**
      * A builder of objects of type <code>T</code>.
      * 
@@ -135,30 +130,6 @@ public class Utils {
         return builder.toString();
     }
 
-    public static String extractModuleName(ParseTree ctx) {
-        String result = null;
-        //In case the user passes a plain ModuleContext node.
-        if ( ctx instanceof ResolveParser.ModuleContext ) {
-            ctx = ctx.getChild(0); //specific module-ctxs are zeroth child of
-            // of the ModuleContext rule/context.
-        }
-        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
-            ResolveParser.PrecisModuleContext ctxAsPrecisModule =
-                    (ResolveParser.PrecisModuleContext) ctx;
-            result = ctxAsPrecisModule.name.getText();
-        }
-        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
-            ResolveParser.PrecisModuleContext ctxAsPrecisModule =
-                    (ResolveParser.PrecisModuleContext) ctx;
-            result = ctxAsPrecisModule.name.getText();
-        }
-        else {
-            throw new IllegalArgumentException("cannot retrieve module name "
-                    + "from rule context: " + ctx.getClass());
-        }
-        return result;
-    }
-
     public static String tab(int n) {
         StringBuilder buf = new StringBuilder();
         for (int i = 1; i <= n; i++)
@@ -166,6 +137,24 @@ public class Utils {
         return buf.toString();
     }
 
+    /**
+     * Strips leading directories off a file's name. Example: a file name
+     * 
+     * <pre>
+     * ../Foo/Test.concept
+     * </pre>
+     * 
+     * will groom to
+     * 
+     * <pre>
+     * Test.concept
+     * </pre>
+     * 
+     * .
+     * 
+     * @param name A file name with zero or more '/' delimited directories.
+     * @return just the file name.
+     */
     public static String groomFileName(String name) {
         int start = name.lastIndexOf("/");
         if ( start == -1 ) {

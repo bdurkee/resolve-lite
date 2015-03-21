@@ -14,7 +14,7 @@ public abstract class PTType {
         return myTypeGraph;
     }
 
-    public abstract MTType toMath();
+    public abstract MathType toMath();
 
     /**
      * Returns <code>true</code> <strong>iff</strong> a value of this type

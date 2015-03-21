@@ -1,7 +1,7 @@
 Precis Test_Theory;
 
-Definition X : Foo;
+Definition Foo : B;
 
-Definition Foo : SSet;
+Definition X : Foo;
 
 end Test_Theory;

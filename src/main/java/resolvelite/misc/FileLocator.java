@@ -41,15 +41,16 @@ import java.util.List;
 
 /**
  * Traverses a tree of directories. Each file encountered is reported via the
- * <code>visitFile</code> method and each directory via an optional
- * <code>visitDirectory</code> method (override others as needed).
+ * {@link #visitFile(Path, BasicFileAttributes)} method and each directory via
+ * optional {@link #preVisitDirectory} or {@link #postVisitDirectory} methods.
+ * Override others as needed.
  */
 public class FileLocator extends SimpleFileVisitor<Path> {
 
     private final PathMatcher myMatcher;
     private String myPattern = null;
 
-    private List<File> myMatches = new ArrayList<File>();
+    private List<File> myMatches = new ArrayList<>();
 
     /**
      * Constructs a new <code>FileLocator</code> that will match based on the
@@ -57,7 +58,13 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * 
      * @param pattern An <em>extensionless</em> pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *        pattern is matched (i.e. ["java", "cpp", "groovy"]).
+     *        pattern is matched (i.e.
+     * 
+     *        <pre>
+     * ["java", "cpp", "groovy"]
+     * </pre>
+     * 
+     *        ).
      */
     public FileLocator(String pattern, List<String> extensions) {
         myPattern = pattern;
@@ -76,7 +83,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
         Path name = file.getFileName();
-        if (name != null && myMatcher.matches(name)) {
+        if ( name != null && myMatcher.matches(name) ) {
             myMatches.add(file.toFile());
         }
         return FileVisitResult.CONTINUE;
@@ -85,13 +92,13 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     /**
      * Returns a single file matching <code>myPattern</code>.
      * 
-     * @throws java.nio.file.NoSuchFileException If a file matching
-     *         <code>myPattern</code> could not be found.
+     * @throws NoSuchFileException If a file matching <code>myPattern</code>
+     *         could not be found.
      * 
      * @return The matching file.
      */
     public File getFile() throws IOException {
-        if (myMatches.size() == 0) {
+        if ( myMatches.size() == 0 ) {
             throw new NoSuchFileException("File matching name '" + myPattern
                     + "' could not be found.");
         }
@@ -103,7 +110,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     private String parseExtensions(List<String> extensions) {
-        ST result = new ST("*.{<exts; separator={,}>}");
-        return result.add("exts", extensions).render();
+        return "*.{" + Utils.join(extensions, ",") + "}";
     }
 }
