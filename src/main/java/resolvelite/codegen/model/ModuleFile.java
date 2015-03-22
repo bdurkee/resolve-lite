@@ -38,12 +38,10 @@ import java.util.List;
 import java.util.Set;
 
 public class ModuleFile extends OutputModelObject {
-
     public String RESOLVEVersion;
     public List<String> targetDir; //in this case, our pkg directory
     public String resolveFileName;
-    @ModelElement public Set<ImportRef> imports =
-            new LinkedHashSet<ImportRef>();
+    @ModelElement public Set<ImportRef> imports = new LinkedHashSet<>();
     @ModelElement public Module module;
 
     public ModuleFile(TreeAnnotatingBuilder e, String resolveFileName) {

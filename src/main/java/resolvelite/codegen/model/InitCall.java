@@ -31,7 +31,6 @@
 package resolvelite.codegen.model;
 
 public class InitCall extends Expr {
-
     //if we represent a literal initialization, we pass the initial value as
     //a str to the createX(..) method.
     public String initialValue;
@@ -50,7 +49,6 @@ public class InitCall extends Expr {
     }
 
     public static class Qualifier extends OutputModelObject {
-
         public String facilitySpecName, facilityName;
 
         public Qualifier(String facilityName, String facilitySpecName) {

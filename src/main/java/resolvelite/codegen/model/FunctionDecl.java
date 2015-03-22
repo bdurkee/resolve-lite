@@ -34,12 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionDecl extends Decl {
-
     public boolean hasReturn = false;
     public boolean isStatic = false;
     public String containingModuleName;
-    @ModelElement public List<ParameterDecl> params =
-            new ArrayList<ParameterDecl>();
+    @ModelElement public List<ParameterDecl> params = new ArrayList<>();
 
     public FunctionDecl(String name) {
         super(name);

@@ -35,7 +35,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         String name = ctx.name.getText();
-
     }
 
     @Override

@@ -76,16 +76,21 @@ public class MathTypeFunc extends MathType {
             result = paramTypes.get(0);
             break;
         default:
-            List<MathTypeCart.Element> elements = new ArrayList<>();
+            List<MathTypeCartProd.Element> elements = new ArrayList<>();
             Iterator<String> namesIter = paramNames.iterator();
             Iterator<MathType> typesIter = paramTypes.iterator();
             while (namesIter.hasNext()) {
-                elements.add(new MathTypeCart.Element(typesIter.next(),
+                elements.add(new MathTypeCartProd.Element(typesIter.next(),
                         namesIter.next()));
             }
-            result = new MathTypeCart(g, elements);
+            result = new MathTypeCartProd(g, elements);
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + domain.toString() + "->" + range.toString() + ")";
     }
 
     /**

@@ -34,9 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionImpl extends FunctionDecl {
-
-    @ModelElement public List<VariableDecl> vars =
-            new ArrayList<VariableDecl>();
+    @ModelElement public List<VariableDecl> vars = new ArrayList<>();
 
     public FunctionImpl(String name) {
         super(name);

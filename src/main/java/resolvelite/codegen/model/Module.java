@@ -1,15 +1,3 @@
-/**
- * Module.java
- * ---------------------------------
- * Copyright (c) 2014
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 /*
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
@@ -46,11 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Module extends OutputModelObject {
-
     public String name;
     public ModuleFile file;
-    @ModelElement public List<FunctionImpl> funcImpls =
-            new ArrayList<FunctionImpl>();
+    @ModelElement public List<FunctionImpl> funcImpls = new ArrayList<>();
 
     public Module(String name, ModuleFile file) {
         this.name = name;

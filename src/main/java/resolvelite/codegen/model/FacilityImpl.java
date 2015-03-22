@@ -34,10 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FacilityImpl extends Module {
-
     public String conceptName;
     @ModelElement public List<FacilityInstanceDecl> facilities =
-            new ArrayList<FacilityInstanceDecl>();
+            new ArrayList<>();
 
     public FacilityImpl(String name, ModuleFile file) {
         super(name, file);

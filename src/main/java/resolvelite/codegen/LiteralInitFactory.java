@@ -34,5 +34,5 @@ import resolvelite.codegen.model.InitCall;
 
 public interface LiteralInitFactory {
 
-    public InitCall buildLiteralCtor(String initialValue);
+    public InitCall buildLiteralInitialization(String initialValue);
 }

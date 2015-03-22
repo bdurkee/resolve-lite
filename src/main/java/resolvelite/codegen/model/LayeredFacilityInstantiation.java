@@ -46,10 +46,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LayeredFacilityInstantiation extends OutputModelObject {
-
     public boolean isProxied;
     public String specName, specRealizName;
-    @ModelElement public List<Argument> args = new ArrayList<Argument>();
+    @ModelElement public List<Argument> args = new ArrayList<>();
     @ModelElement public LayeredFacilityInstantiation child;
 
     public LayeredFacilityInstantiation(String specName, String specRealizName) {

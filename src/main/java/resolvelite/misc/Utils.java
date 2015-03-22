@@ -30,6 +30,8 @@
  */
 package resolvelite.misc;
 
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import resolvelite.parsing.ResolveParser;
 
@@ -50,7 +52,6 @@ public class Utils {
      * @param <T> The type object to be created.
      */
     public interface Builder<T> {
-
         T build();
     }
 
@@ -58,7 +59,6 @@ public class Utils {
      * A two-parameter mapping.
      */
     public interface Mapping<I, O> {
-
         public O map(I input);
     }
 
@@ -66,8 +66,28 @@ public class Utils {
      * A three-parameter mapping.
      */
     public interface Mapping3<P1, P2, P3, R> {
-
         public R map(P1 p1, P2 p2, P3 p3);
+    }
+
+    public static ParserRuleContext getAncestor(Parser parser,
+            ParserRuleContext ctx, String ruleName) {
+        int ruleIndex = parser.getRuleIndex(ruleName);
+        return getAncestor(ctx, ruleIndex);
+    }
+
+    /**
+     * Return first ancestor node up the chain towards the root that has the
+     * rule index. Search includes the current node.
+     */
+    public static ParserRuleContext getAncestor(ParserRuleContext ctx,
+            int ruleIndex) {
+        while (ctx != null) {
+            if ( ctx.getRuleIndex() == ruleIndex ) {
+                return ctx;
+            }
+            ctx = ctx.getParent();
+        }
+        return null;
     }
 
     public static <T> List<T> filter(List<T> data, Predicate<T> pred) {
@@ -138,19 +158,17 @@ public class Utils {
     }
 
     /**
-     * Strips leading directories off a file's name. Example: a file name
+     * Strips leading directories off a file's name. Example:
      * 
      * <pre>
      * ../Foo/Test.concept
      * </pre>
      * 
-     * will groom to
+     * grooms to
      * 
      * <pre>
      * Test.concept
      * </pre>
-     * 
-     * .
      * 
      * @param name A file name with zero or more '/' delimited directories.
      * @return just the file name.

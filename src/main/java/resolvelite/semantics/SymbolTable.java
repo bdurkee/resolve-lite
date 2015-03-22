@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class SymbolTable {
 
-    Map<String, ModuleScope> moduleScopes = new HashMap<>();
-    ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
+    public Map<String, ModuleScope> moduleScopes = new HashMap<>();
+    public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
     private final ResolveCompiler compiler;
     private final TypeGraph typeGraph;
@@ -28,6 +28,7 @@ public class SymbolTable {
         defineMathSymbol("SSet", typeGraph.CLS, typeGraph.SSET);
         defineMathSymbol("Cls", typeGraph.CLS, typeGraph.CLS);
         defineMathSymbol("Powerset", typeGraph.POWERSET, null);
+        defineMathSymbol("Empty_Set", typeGraph.EMPTY_SET, null);
     }
 
     public void

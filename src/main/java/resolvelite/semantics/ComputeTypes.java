@@ -9,6 +9,9 @@ import resolvelite.parsing.ResolveParser;
 import resolvelite.typereasoning.TypeGraph;
 import resolvelite.semantics.BaseSymbol.Quantification;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Annotates expressions and sub-expressions with appropriate {@link Type}s
  * and {@link MathType}s.
@@ -30,7 +33,8 @@ public class ComputeTypes extends ResolveBaseListener {
     @Override
     public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
-        mathTypes.put(ctx, g.BOOLEAN);
+        mathTypes.put(ctx, g.SSET);
+        mathTypeValues.put(ctx, g.BOOLEAN);
     }
 
     @Override
@@ -52,6 +56,15 @@ public class ComputeTypes extends ResolveBaseListener {
     public void exitMathTypeExp(@NotNull ResolveParser.MathTypeExpContext ctx) {
         mathTypes.put(ctx, mathTypes.get(ctx.mathExp()));
         mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathExp()));
+    }
+
+    @Override
+    public void exitMathFunctionExp(
+            @NotNull ResolveParser.MathFunctionExpContext ctx) {
+        MathTypeFunc foundExpType;
+        foundExpType = getPreApplicationType(symtab.getTypeGraph(), ctx);
+        symtab.getCompiler().info(
+                "expression: " + ctx.getText() + " of type " + foundExpType);
     }
 
     @Override
@@ -91,4 +104,16 @@ public class ComputeTypes extends ResolveBaseListener {
                     ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
         }
     }
+
+    public MathTypeFunc getPreApplicationType(TypeGraph g,
+            ResolveParser.MathFunctionExpContext ctx) {
+        List<MathType> subTypes = new ArrayList<>();
+
+        for (ResolveParser.MathExpContext arg : ctx.mathExp()) {
+            subTypes.add(mathTypes.get(arg));
+        }
+        return new MathTypeFunc.MathTypeFuncBuilder(g, g.EMPTY_SET).paramTypes(
+                subTypes).build();
+    }
+
 }

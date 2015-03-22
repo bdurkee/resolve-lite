@@ -6,11 +6,11 @@ import resolvelite.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MathTypeCart extends MathType {
+public class MathTypeCartProd extends MathType {
 
     private final List<Element> elements = new ArrayList<>();
 
-    public MathTypeCart(@NotNull TypeGraph g, List<Element> elements) {
+    public MathTypeCartProd(@NotNull TypeGraph g, List<Element> elements) {
         super(g);
         this.elements.addAll(elements);
     }

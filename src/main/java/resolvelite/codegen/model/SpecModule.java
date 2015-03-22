@@ -34,24 +34,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SpecModule extends Module {
-
-    @ModelElement public List<TypeDecl> types = new ArrayList<TypeDecl>();
-    @ModelElement public List<FunctionDecl> funcs =
-            new ArrayList<FunctionDecl>();
+    @ModelElement public List<TypeDecl> types = new ArrayList<>();
+    @ModelElement public List<FunctionDecl> funcs = new ArrayList<>();
 
     public SpecModule(String name, ModuleFile file) {
         super(name, file);
     }
 
     public static class Concept extends SpecModule {
-
         public Concept(String name, ModuleFile file) {
             super(name, file);
         }
     }
 
     public static class Enhancement extends SpecModule {
-
         public String concept;
 
         public Enhancement(String name, String concept, ModuleFile file) {

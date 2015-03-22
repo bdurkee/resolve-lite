@@ -39,6 +39,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import resolvelite.codegen.CodeGenPipeline;
 import resolvelite.compiler.tree.ImportCollection;
 import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
 import resolvelite.compiler.tree.ResolveTokenFactory;
@@ -113,8 +114,8 @@ public class ResolveCompiler {
             new DefaultCompilerListener(this);
     public final SymbolTable symbolTable = new SymbolTable(this);
 
-    public final List<String> targetFiles = new ArrayList<String>();
-    public final List<String> targetNames = new ArrayList<String>();
+    public final List<String> targetFiles = new ArrayList<>();
+    public final List<String> targetNames = new ArrayList<>();
     public final ErrorManager errorManager;
     public LogManager logMgr = new LogManager();
 
@@ -204,18 +205,17 @@ public class ResolveCompiler {
                 sortTargetModulesByUsesReferences();
         int initialErrCt = errorManager.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
 
         analysisPipe.process();
-        // if (analysisPipe.myCompiler.errorManager.getErrorCount() > initialErrCt) {
-        //     return;
-        // }
-        //   codegenPipe.process();
+        if ( analysisPipe.compiler.errorManager.getErrorCount() > initialErrCt ) {
+            return;
+        }
+        codegenPipe.process();
     }
 
     public List<TreeAnnotatingBuilder> sortTargetModulesByUsesReferences() {
-        Map<String, TreeAnnotatingBuilder> roots =
-                new HashMap<String, TreeAnnotatingBuilder>();
+        Map<String, TreeAnnotatingBuilder> roots = new HashMap<>();
         for (String fileName : targetFiles) {
             TreeAnnotatingBuilder t = parseModule(fileName);
             if ( t == null || t.hasErrors ) {
@@ -224,15 +224,13 @@ public class ResolveCompiler {
             roots.put(t.name.getText(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
-                new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
+                new DefaultDirectedGraph<>(DefaultEdge.class);
         for (TreeAnnotatingBuilder t : Collections.unmodifiableCollection(roots
                 .values())) {
             g.addVertex(t.name.getText());
             findDependencies(g, t, roots);
         }
-        List<TreeAnnotatingBuilder> finalOrdering =
-                new ArrayList<TreeAnnotatingBuilder>();
-
+        List<TreeAnnotatingBuilder> finalOrdering = new ArrayList<>();
         for (String s : getCompileOrder(g)) {
             TreeAnnotatingBuilder m = roots.get(s);
             if ( m.hasErrors ) {
@@ -291,13 +289,13 @@ public class ResolveCompiler {
 
     protected List<String> getCompileOrder(
             DefaultDirectedGraph<String, DefaultEdge> g) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         EdgeReversedGraph<String, DefaultEdge> reversed =
-                new EdgeReversedGraph<String, DefaultEdge>(g);
+                new EdgeReversedGraph<>(g);
 
         TopologicalOrderIterator<String, DefaultEdge> dependencies =
-                new TopologicalOrderIterator<String, DefaultEdge>(reversed);
+                new TopologicalOrderIterator<>(reversed);
         while (dependencies.hasNext()) {
             result.add(dependencies.next());
         }
@@ -312,7 +310,7 @@ public class ResolveCompiler {
             return false;
         }
         GraphIterator<String, DefaultEdge> iterator =
-                new DepthFirstIterator<String, DefaultEdge>(g, src);
+                new DepthFirstIterator<>(g, src);
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.

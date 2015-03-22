@@ -41,26 +41,37 @@ import resolvelite.semantics.MathType;
 
 public class ResolveAnnotatedParseTree {
 
+    @NotNull private final String name, fileName;
+    @NotNull private final boolean hasErrors;
     @NotNull private final ParseTree root;
     @NotNull private final ImportCollection imports;
-    @NotNull private final ParseTreeProperty<MathType> mathTypes,
-            mathTypeValues;
 
     private ResolveAnnotatedParseTree(@NotNull TreeAnnotatingBuilder builder) {
         this.root = builder.root;
-        this.mathTypes = builder.mathTypes;
-        this.mathTypeValues = builder.mathTypeValues;
         this.imports = builder.imports;
+        this.name = builder.name.getText();
+        this.hasErrors = builder.hasErrors;
+        this.fileName = builder.fileName;
     }
 
     @NotNull
-    public MathType getMathType(@NotNull ParseTree t) {
-        return mathTypes.get(t);
+    public String getName() {
+        return name;
     }
 
     @NotNull
-    public MathType getMathTypeValue(@NotNull ParseTree t) {
-        return mathTypeValues.get(t);
+    public String getFileName() {
+        return fileName;
+    }
+
+    @NotNull
+    public ImportCollection getImportCollection() {
+        return imports;
+    }
+
+    @NotNull
+    public ParseTree getRoot() {
+        return root;
     }
 
     public static class TreeAnnotatingBuilder
@@ -68,13 +79,10 @@ public class ResolveAnnotatedParseTree {
                 Builder<ResolveAnnotatedParseTree> {
 
         public Token name;
+        public final String fileName;
         public boolean hasErrors;
         public final ParseTree root;
         public final ImportCollection imports;
-        public final ParseTreeProperty<MathType> mathTypes =
-                new ParseTreeProperty<MathType>();
-        public final ParseTreeProperty<MathType> mathTypeValues =
-                new ParseTreeProperty<MathType>();
 
         public TreeAnnotatingBuilder(ParseTree root, String fileName) {
             if ( !(root instanceof ResolveParser.ModuleContext) ) {
@@ -84,6 +92,7 @@ public class ResolveAnnotatedParseTree {
             }
             ImportListener scanner = new ImportListener();
             ParseTreeWalker.DEFAULT.walk(scanner, root);
+            this.fileName = fileName;
             this.imports = scanner.getImports();
             this.root = root;
             ParseTree child = root.getChild(0);
@@ -93,22 +102,16 @@ public class ResolveAnnotatedParseTree {
             else if ( child instanceof ResolveParser.ConceptModuleContext ) {
                 this.name = ((ResolveParser.ConceptModuleContext) child).name;
             }
+            else if ( child instanceof ResolveParser.FacilityModuleContext ) {
+                this.name = ((ResolveParser.FacilityModuleContext) child).name;
+            }
+            else {
+                throw new IllegalArgumentException("Unrecognized module");
+            }
         }
 
         public TreeAnnotatingBuilder hasErrors(boolean e) {
             this.hasErrors = e;
-            return this;
-        }
-
-        public TreeAnnotatingBuilder setMathType(@NotNull ParseTree ctx,
-                @NotNull MathType type) {
-            mathTypes.put(ctx, type);
-            return this;
-        }
-
-        public TreeAnnotatingBuilder setMathTypeValue(@NotNull ParseTree ctx,
-                @NotNull MathType typeValue) {
-            mathTypeValues.put(ctx, typeValue);
             return this;
         }
 

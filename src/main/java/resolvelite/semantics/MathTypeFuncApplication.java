@@ -14,7 +14,7 @@ public class MathTypeFuncApplication extends MathType {
     private final List<MathType> arguments = new ArrayList<>();
 
     public MathTypeFuncApplication(TypeGraph g, MathTypeFunc f, String name,
-                                   List<MathType> arguments) {
+            List<MathType> arguments) {
         super(g);
         this.name = name;
         this.func = f;
@@ -22,7 +22,7 @@ public class MathTypeFuncApplication extends MathType {
     }
 
     public MathTypeFuncApplication(TypeGraph g, MathTypeFunc f, String name,
-                                   MathType... arguments) {
+            MathType... arguments) {
         this(g, f, name, Arrays.asList(arguments));
     }
 

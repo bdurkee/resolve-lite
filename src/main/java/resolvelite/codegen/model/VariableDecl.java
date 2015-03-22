@@ -31,7 +31,6 @@
 package resolvelite.codegen.model;
 
 public class VariableDecl extends Decl {
-
     public VariableDecl(String name) {
         super(name);
     }

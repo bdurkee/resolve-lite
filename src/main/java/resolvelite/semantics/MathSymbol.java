@@ -29,14 +29,13 @@ public class MathSymbol extends SymbolWithScope {
         this.quantification = q;
         this.tree = tree;
         this.mathType = type;
-        this.mathType = type;
         if ( typeValue != null ) {
             this.mathTypeValue = typeValue;
         }
         else if ( mathType != null
                 && mathType.isKnownToContainOnlyThingsThatAreTypes() ) {
             this.mathTypeValue =
-                    new MathTypeProp(typeGraph, type,
+                    new MathTypeProper(typeGraph, type,
                             type.membersKnownToContainOnlyThingsThatAreTypes(),
                             name);
         }

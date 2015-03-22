@@ -31,7 +31,6 @@
 package resolvelite.codegen.model;
 
 public class ParameterDecl extends Decl {
-
     public ParameterDecl(String name) {
         super(name);
     }

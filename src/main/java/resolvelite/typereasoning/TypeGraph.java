@@ -7,17 +7,22 @@ import resolvelite.semantics.MathType;
 import resolvelite.semantics.MathTypeFunc;
 import resolvelite.semantics.MathTypeFunc.MathTypeFuncBuilder;
 import resolvelite.semantics.MathTypeFuncApplication.FunctionApplicationFactory;
-import resolvelite.semantics.MathTypeProp;
+import resolvelite.semantics.MathTypeProper;
 
 import java.util.List;
 
 public class TypeGraph {
 
-    public final MathTypeProp CLS = new MathTypeProp(this, null, true, "Cls");
-    public final MathTypeProp SSET = new MathTypeProp(this, CLS, true, "SSet");
-    public final MathTypeProp BOOLEAN =
-            new MathTypeProp(this, SSET, false, "B");
-    public final MathTypeProp VOID = new MathTypeProp(this, CLS, false, "Void");
+    public final MathTypeProper CLS = new MathTypeProper(this, null, true,
+            "Cls");
+    public final MathTypeProper SSET = new MathTypeProper(this, CLS, true,
+            "SSet");
+    public final MathTypeProper BOOLEAN = new MathTypeProper(this, SSET, false,
+            "B");
+    public final MathTypeProper VOID = new MathTypeProper(this, CLS, false,
+            "Void");
+    public final MathTypeProper EMPTY_SET = new MathTypeProper(this, SSET,
+            false, "Empty_Set");
 
     public final MathTypeFunc POWERSET = //
             new MathTypeFuncBuilder(this, POWERSET_APPLICATION, SSET) //

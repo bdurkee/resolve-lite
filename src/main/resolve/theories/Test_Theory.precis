@@ -1,0 +1,7 @@
+Precis Test_Theory;
+
+Definition N : SSet;
+
+Definition Foo : Powerset(N);
+
+end Test_Theory;

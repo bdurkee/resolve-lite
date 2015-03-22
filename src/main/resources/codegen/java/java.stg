@@ -1,0 +1,107 @@
+/*
+ * [The "BSD license"]
+ * Copyright (c) 2015 Clemson University
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. The name of the author may not be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+ModuleFile(file, module, imports) ::= <<
+<fileHeader(file.resolveFileName, file.RESOLVEVersion)>
+package <trunc(file.targetDir); separator=".">;
+
+import resolve.*;
+import facilities.standard.*;
+<imports; separator="\n">
+import java.lang.reflect.*;
+
+<module>
+>>
+
+fileHeader(resolveFileName, RESOLVEVersion) ::= <<
+/**
+ * Generated from <resolveFileName> by RESOLVE
+ * version <RESOLVEVersion>.
+ */
+>>
+
+Concept(concept, types, funcs) ::= <<
+public interface <concept.name> extends RESOLVE_INTERFACE {
+    <types; separator="\n">
+    <types: {t|public RTType create<t.type.name>();};separator="\n">
+    <funcs; separator="\n">
+}
+>>
+
+FacilityImpl(impl, facilities) ::= <<
+public class <impl.name> {
+    <facilities; separator="\n">
+}
+>>
+
+ImportRef(imports) ::= "import <imports.segs; separator={.}>.*;"
+
+TypeDecl(type) ::= <<
+interface <type.name> extends RTType { }
+>>
+
+ParameterDecl(param) ::= "RTType <param.name>"
+
+FunctionDecl(func, params) ::= <<
+public <if(func.isStatic)>static <endif><\\>
+<if(func.hasReturn)>RTType <else>void <endif><\\>
+<func.name>(<params; separator=", ">);
+>>
+
+FacilityInstanceDecl(facility, root) ::= <<
+public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
+<if(stdFacQualMap.(facility.name))>INSTANCE<else><facility.name><endif> =
+    <root>;
+>>
+
+LayeredFacilityInstantiation(init, args, child) ::= <%
+<if(init.isProxied)><init.specRealizName>.createProxy<\\>
+<else>new <init.specRealizName><endif>(<[args, child]; separator=",\n ">)
+%>
+
+Argument(argExp, arg) ::= "<arg>"
+
+VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
+
+InitCall(init, qualifier) ::= <<
+<qualifier>.init<init.typeName>(<init.initialValue>)
+>>
+
+Qualifier(q) ::= <%
+((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>
+<stdFacQualMap.(q.facilityName)><else><q.facilityName><endif>)%>
+
+stdFacQualMap ::= [
+    "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",
+    "Std_Integer_Fac":"Standard_Integers.INSTANCE"
+]
+
+moduleFileExtension() ::= ".java"

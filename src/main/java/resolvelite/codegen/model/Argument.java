@@ -31,7 +31,6 @@
 package resolvelite.codegen.model;
 
 public class Argument extends OutputModelObject {
-
     @ModelElement public Expr arg;
 
     public Argument(Expr arg) {

@@ -31,7 +31,6 @@
 package resolvelite.codegen.model;
 
 public class FacilityInstanceDecl extends VariableDecl {
-
     public boolean isStatic = false;
     public String concept;
     @ModelElement public LayeredFacilityInstantiation root;

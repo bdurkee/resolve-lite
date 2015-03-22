@@ -33,6 +33,7 @@ grammar Resolve;
 module
     :   precisModule
     |   conceptModule
+    |   facilityModule
     ;
 
 // precis module
@@ -58,18 +59,29 @@ conceptModule
     :   'Concept' name=Identifier (moduleParameterList)? ';'
         (importList)?
         (requiresClause)?
-        (conceptItems)?
+        (conceptBlock)?
         'end' closename=Identifier ';' EOF
     ;
 
-conceptItems
-    :   (conceptItem)+
+conceptBlock
+    :   ( operationDecl
+        | typeModelDecl
+        | mathDefinitionDecl
+        )+
     ;
 
-conceptItem
-    :   operationDecl
-    |   typeModelDecl
-    |   mathDefinitionDecl
+// facility module
+
+facilityModule
+    :   'Facility' name=Identifier ';'
+        (importList)?
+        (facilityBlock)?
+        'end' closename=Identifier ';'
+    ;
+
+facilityBlock
+    :   ( facilityDecl
+        )+
     ;
 
 // uses, imports
@@ -140,6 +152,29 @@ typeModelFinal
 operationDecl
     :   ('Operation'|'Oper') name=Identifier operationParameterList
         (':' type)? ';' (requiresClause)? (ensuresClause)?
+    ;
+
+// facility decls
+
+facilityDecl
+    :   'Facility' name=Identifier 'is' spec=Identifier
+        (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
+        'by' impl=Identifier (implArgs=moduleArgumentList)?
+        (enhancementPairDecl)* ';'
+    ;
+
+enhancementPairDecl
+    :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
+        (externally='externally')? 'realized' 'by' impl=Identifier
+        (implArgs=moduleArgumentList)?
+    ;
+
+moduleArgumentList
+    :   '(' moduleArgument (',' moduleArgument)* ')'
+    ;
+
+moduleArgument
+    :   progExp
     ;
 
 // variable declarations

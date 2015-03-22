@@ -46,14 +46,13 @@ import java.io.Writer;
 
 public class CodeGenerator {
 
-    public static final String TEMPLATE_ROOT =
-            "edu/clemson/cs/r2jt/templates/codegen";
+    public static final String TEMPLATE_ROOT = "codegen";
 
-    public static final String DEFAULT_LANGUAGE = "Java";
+    public static final String DEFAULT_LANGUAGE = "java";
 
     protected final ResolveCompiler compiler;
     protected final TreeAnnotatingBuilder module;
-    private final STGroup myTemplates;
+    private final STGroup templates;
 
     public final int myLineWidth = 72;
 
@@ -61,18 +60,18 @@ public class CodeGenerator {
             @NotNull TreeAnnotatingBuilder current) {
         this.compiler = rc;
         this.module = current;
-        myTemplates = loadTemplates();
+        this.templates = loadTemplates();
     }
 
     private OutputModelObject buildModuleOutputModel() {
-        ModelBuilder builder = new ModelBuilder(this);
+        ModelBuilder builder = new ModelBuilder(this, compiler.symbolTable);
         ParseTree root = module.root;
         ParseTreeWalker.DEFAULT.walk(builder, root);
         return builder.built.get(root);
     }
 
     private ST walk(OutputModelObject outputModel) {
-        ModelConverter walker = new ModelConverter(compiler, myTemplates);
+        ModelConverter walker = new ModelConverter(compiler, templates);
         return walker.walk(outputModel);
     }
 
@@ -110,7 +109,7 @@ public class CodeGenerator {
     }
 
     public String getModuleFileName() {
-        ST extST = myTemplates.getInstanceOf("moduleFileExtension");
+        ST extST = templates.getInstanceOf("moduleFileExtension");
         String moduleName = module.name.getText();
         return moduleName + extST.render();
     }
@@ -129,7 +128,7 @@ public class CodeGenerator {
                     .toolError(ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae,
                             DEFAULT_LANGUAGE);
         }
-        if (result == null) {
+        if ( result == null ) {
             return null;
         }
         result.registerRenderer(Integer.class, new NumberRenderer());

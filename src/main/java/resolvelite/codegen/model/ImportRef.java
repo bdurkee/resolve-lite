@@ -56,7 +56,7 @@ public class ImportRef extends OutputModelObject {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof ImportRef);
-        if (result) {
+        if ( result ) {
             String oAsStr = "";
             String thisAsStr = "";
             for (String s : segs) {
@@ -80,16 +80,16 @@ public class ImportRef extends OutputModelObject {
 
     public static List<String> listifyFileString(String fileName) {
         boolean foundStart = false;
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         File f = new File(fileName);
-        if (!f.exists()) {
+        if ( !f.exists() ) {
             throw new IllegalArgumentException("the directory doesn't exist");
         }
         for (Path p : f.toPath()) {
-            if (p.toString().equals("RESOLVE")) {
+            if ( p.toString().equalsIgnoreCase("resolve") ) {
                 foundStart = true;
             }
-            if (foundStart) {
+            if ( foundStart ) {
                 result.add(p.toString());
             }
         }
