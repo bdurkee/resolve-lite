@@ -96,10 +96,11 @@ public class ModelBuilder extends ResolveBaseListener {
                         ctx.impl.getText());
         basePtr.isProxied = false;
 
-        // List<Argument> coreArgs =
-        //         collectModelsFor(Argument.class, ctx.specArgs.moduleArgument(),
-        //                 built);
-        // basePtr.args.addAll(coreArgs);
+        List<Argument> specArgs =
+                ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
+                        Argument.class, ctx.specArgs.moduleArgument(), built);
+
+        basePtr.args.addAll(specArgs);
 
         for (ResolveParser.EnhancementPairDeclContext pair : ctx
                 .enhancementPairDecl()) {
@@ -147,13 +148,35 @@ public class ModelBuilder extends ResolveBaseListener {
         FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
-            System.out.println("HEREDAWG");
             impl.facilities.addAll(collectModelsFor(FacilityInstanceDecl.class,
                     ctx.facilityBlock().facilityDecl(), built));
         }
         file.module = impl;
         file.imports = buildImports(annotatedTree);
         built.put(ctx, file);
+    }
+
+    @Override
+    public void exitModuleArgument(
+            @NotNull ResolveParser.ModuleArgumentContext ctx) {
+        built.put(ctx, new Argument((Expr) built.get(ctx.progExp())));
+    }
+
+    @Override
+    public void exitProgPrimaryExp(
+            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
+        built.put(ctx, built.get(ctx.progPrimary()));
+    }
+
+    @Override
+    public void exitProgPrimary(@NotNull ResolveParser.ProgPrimaryContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitProgIntegerExp(
+            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
+        built.put(ctx, INTEGER_INIT_FACTORY.buildLiteralInit(ctx.getText()));
     }
 
     @Override
@@ -209,11 +232,11 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected static <T extends OutputModelObject> List<T> collectModelsFor(
-            Class<T> expectedModelType, List<? extends ParseTree> children,
+            Class<T> expectedModelType, List<? extends ParseTree> nodes,
             ParseTreeProperty<OutputModelObject> annotations) {
         List<T> result = new ArrayList<T>();
-        for (ParseTree child : children) {
-            result.add(expectedModelType.cast(annotations.get(child)));
+        for (ParseTree x : nodes) {
+            result.add(expectedModelType.cast(annotations.get(x)));
         }
         return result;
     }
@@ -226,7 +249,7 @@ public class ModelBuilder extends ResolveBaseListener {
     public static class IntegerCallFactory implements LiteralInitFactory {
 
         @Override
-        public InitCall buildLiteralInitialization(String initialValue) {
+        public InitCall buildLiteralInit(String initialValue) {
             return new InitCall(new InitCall.Qualifier("Std_Integer_Fac",
                     "Integer_Template"), "Integer", initialValue);
         }

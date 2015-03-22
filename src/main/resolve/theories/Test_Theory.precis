@@ -1,7 +1,7 @@
 Precis Test_Theory;
 
-Definition N : SSet;
+Definition Bar : Foo;
 
-Definition Foo : Powerset(N);
+Definition Foo : SSet;
 
 end Test_Theory;
