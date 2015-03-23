@@ -1,11 +1,8 @@
 package resolvelite.semantics;
 
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.compiler.ResolveCompiler;
 import resolvelite.misc.Utils;
-import resolvelite.typereasoning.TypeGraph;
+import resolvelite.semantics.symbol.Symbol;
 
 import java.util.*;
 
@@ -32,7 +29,7 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
-    public Symbol resolve(String name) throws IllegalArgumentException {
+    public Symbol resolve(String name) {
         Symbol s = symbols.get(name);
         if ( s != null ) {
             //			System.out.println("found "+name+" in "+this.asScopeStackString());
@@ -43,7 +40,7 @@ public abstract class BaseScope implements Scope {
         if ( parent != null ) {
             return parent.resolve(name);
         }
-        throw new IllegalArgumentException();//not found
+        return null;//not found
     }
 
     @Override
@@ -51,8 +48,8 @@ public abstract class BaseScope implements Scope {
         if ( symbols.containsKey(sym.getName()) ) {
             throw new IllegalArgumentException();
         }
+        //Note that we set the enclosing scopes here
         sym.setScope(this);
-        sym.setInsertionOrderNumber(symbols.size()); // set to insertion position from 0
         symbols.put(sym.getName(), sym);
     }
 
@@ -93,4 +90,16 @@ public abstract class BaseScope implements Scope {
     public String toString() {
         return getScopeDescription() + ":" + symbols.keySet().toString();
     }
+
+    /*public String toTestString() {
+        return toTestString(", ", ".");
+    }
+
+    public String toTestString(String separator, String scopePathSeparator) {
+        List<? extends Symbol> allSymbols = this.getAllSymbols();
+        List<String> syms = Utils.map(allSymbols, s ->
+                s.getScope().getScopeDescription()
+                        + scopePathSeparator + s.getName());
+        return Utils.join(syms, separator);
+    }*/
 }

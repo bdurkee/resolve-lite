@@ -2,9 +2,7 @@ package resolvelite.semantics;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
-import resolvelite.compiler.ResolveCompiler;
-import resolvelite.typereasoning.TypeGraph;
+import resolvelite.semantics.symbol.Symbol;
 
 import java.util.List;
 import java.util.Set;

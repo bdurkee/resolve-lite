@@ -1,4 +1,7 @@
-package resolvelite.semantics;
+package resolvelite.semantics.symbol;
+
+import resolvelite.semantics.BaseScope;
+import resolvelite.semantics.Scope;
 
 public abstract class SymbolWithScope extends BaseScope
         implements
@@ -37,16 +40,6 @@ public abstract class SymbolWithScope extends BaseScope
 
     public String getScopeDescription() {
         return name;
-    }
-
-    @Override
-    public int getInsertionOrderNumber() {
-        return index;
-    }
-
-    @Override
-    public void setInsertionOrderNumber(int i) {
-        this.index = i;
     }
 
     @Override

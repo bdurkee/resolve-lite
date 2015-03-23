@@ -1,0 +1,15 @@
+Facility Test;
+
+    Type Info = Record
+            X, Y : Integer;
+        end;
+        convention true;
+
+    Operation Foo();
+        Procedure
+            Var P : Info;
+            Var U, V : Integer;
+
+            U := P.X;
+    end Foo;
+end Test;

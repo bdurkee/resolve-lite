@@ -1,4 +1,6 @@
-package resolvelite.semantics;
+package resolvelite.semantics.symbol;
+
+import resolvelite.semantics.Scope;
 
 public interface Symbol {
 
@@ -7,10 +9,6 @@ public interface Symbol {
     public Scope getScope();
 
     public void setScope(Scope scope);
-
-    public int getInsertionOrderNumber();
-
-    public void setInsertionOrderNumber(int i);
 
     //force implementors to write equals and hashcode
     //so symbols can be properly used in collections such

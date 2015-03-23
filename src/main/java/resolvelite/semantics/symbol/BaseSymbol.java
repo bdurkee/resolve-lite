@@ -1,4 +1,7 @@
-package resolvelite.semantics;
+package resolvelite.semantics.symbol;
+
+import resolvelite.semantics.Scope;
+import resolvelite.semantics.Type;
 
 public abstract class BaseSymbol implements Symbol {
 
@@ -29,6 +32,7 @@ public abstract class BaseSymbol implements Symbol {
     protected final String name;
     protected Scope scope;
     protected int lexicalOrder;
+    protected Type type;
 
     public BaseSymbol(String name) {
         this(null, name);
@@ -54,14 +58,12 @@ public abstract class BaseSymbol implements Symbol {
         this.scope = scope;
     }
 
-    @Override
-    public int getInsertionOrderNumber() {
-        return lexicalOrder;
+    public Type getType() {
+        return type;
     }
 
-    @Override
-    public void setInsertionOrderNumber(int i) {
-        this.lexicalOrder = i;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     @Override

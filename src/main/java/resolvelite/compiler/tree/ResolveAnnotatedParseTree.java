@@ -33,11 +33,9 @@ package resolvelite.compiler.tree;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import resolvelite.misc.Utils.Builder;
 import resolvelite.parsing.ResolveParser;
-import resolvelite.semantics.MathType;
 
 public class ResolveAnnotatedParseTree {
 

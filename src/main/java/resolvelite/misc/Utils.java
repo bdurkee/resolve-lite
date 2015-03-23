@@ -39,11 +39,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-/**
- * A collection of general-purpose methods.
- * 
- * @author dwelch <dtw.welch@gmail.com>
- */
 public class Utils {
 
     /**

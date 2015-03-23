@@ -2,31 +2,6 @@ package resolvelite.semantics;
 
 import resolvelite.typereasoning.TypeGraph;
 
-public abstract class Type {
-
-    private final TypeGraph myTypeGraph;
-
-    public Type(TypeGraph g) {
-        myTypeGraph = g;
-    }
-
-    public final TypeGraph getTypeGraph() {
-        return myTypeGraph;
-    }
-
-    public abstract MathType toMath();
-
-    /**
-     * Returns <code>true</code> <strong>iff</strong> a value of this type
-     * is acceptable where one of type <code>t</code> is required.
-     * 
-     * @param t The required type.
-     * 
-     * @return <code>true</code> <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type <code>t</code> were
-     *         required.
-     */
-    public boolean acceptableFor(Type t) {
-        return equals(t);
-    }
+public interface Type {
+    public String getName();
 }

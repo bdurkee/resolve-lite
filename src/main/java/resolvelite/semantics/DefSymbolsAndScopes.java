@@ -3,10 +3,15 @@ package resolvelite.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
+import resolvelite.semantics.symbol.*;
+
+import java.util.List;
+import java.util.Stack;
 
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
@@ -14,9 +19,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     ResolveCompiler compiler;
     SymbolTable symtab;
 
-    public DefSymbolsAndScopes(@NotNull ResolveCompiler rc) {
+    public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
+            @NotNull SymbolTable symtab) {
         this.compiler = rc;
-        this.symtab = rc.symbolTable;
+        this.symtab = symtab;
     }
 
     @Override
@@ -32,42 +38,72 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     }
 
     @Override
+    public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        currentScope = establishModuleScope(ctx.name.getText(), ctx);
+    }
+
+    @Override
     public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         String name = ctx.name.getText();
     }
 
     @Override
-    public void enterMathDefinitionDecl(
-            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
-        String name = ctx.name.getText();
-        ComputeTypes resolver = new ComputeTypes(symtab, currentScope);
-        ParseTreeWalker.DEFAULT.walk(resolver, ctx.mathTypeExp());
-        MathType declaredType = resolver.mathTypeValues.get(ctx.mathTypeExp());
-        MathType typeValue = null;
-        if ( ctx.mathAssertionExp() != null ) { //if the def. has an rhs.
-            typeValue = resolver.mathTypeValues.get(ctx.mathAssertionExp());
+    public void enterTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        AbstractReprSymbol rs = null;
+        if ( ctx.record() != null ) {
+            rs = new RecordReprSymbol(ctx.name.getText(), ctx);
         }
-        // push new scope by making new one that points to enclosing scope
-        try {
-            MathSymbol mathSymFxn =
-                    new MathSymbol(symtab.getTypeGraph(), name, declaredType,
-                            typeValue, ctx);
-            mathSymFxn.setEnclosingScope(currentScope);
+        else {
+            throw new UnsupportedOperationException("named repr types not "
+                    + "currently supported; only records for now");
+            // rs = new NamedReprSymbol(...)
+        }
+        currentScope.define(rs);
+        symtab.scopes.put(ctx, rs); //save the scope
+        currentScope = rs; // set cur scope to record type def. scope
+    }
 
-            currentScope.define(mathSymFxn); // Define def in current scope
-            symtab.scopes.put(ctx, mathSymFxn); // Push: set def's parent to current
-            currentScope = mathSymFxn; // Current scope is now def scope
-        }
-        catch (IllegalArgumentException iae) {
-            symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
+    @Override
+    public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override
+    public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    protected void insertVariables(List<TerminalNode> terminalGroup,
+            ResolveParser.TypeContext type) {
+        for (TerminalNode t : terminalGroup) {
+            VariableSymbol vs = new VariableSymbol(t.getText(), currentScope);
+            currentScope.define(vs);
         }
     }
 
     @Override
-    public void exitMathDefinitionDecl(
-            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+    public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        FunctionSymbol func = new FunctionSymbol(ctx.name.getText(), ctx);
+        symtab.scopes.put(ctx, func);
+        currentScope.define(func);
+        currentScope = func;
+    }
+
+    @Override
+    public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        currentScope = currentScope.getEnclosingScope();
+    }
+
+    @Override
+    public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope(); // pop scope
     }
 

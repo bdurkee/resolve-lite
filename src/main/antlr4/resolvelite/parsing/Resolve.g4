@@ -81,6 +81,8 @@ facilityModule
 
 facilityBlock
     :   ( facilityDecl
+        | typeRepresentationDecl
+        | operationProcedureDecl
         )+
     ;
 
@@ -123,10 +125,37 @@ parameterMode
         | 'evaluates' )
     ;
 
+variableDeclGroup
+    :   'Var' Identifier (',' Identifier)* ':' type ';'
+    ;
+
+// statements
+
+stmt
+    :   assignStmt
+    |   swapStmt
+    ;
+
+assignStmt
+    :   left=progExp ':=' right=progExp ';'
+    ;
+
+swapStmt
+    :   left=progExp ':=:' right=progExp ';'
+    ;
+
 // type and record related rules
 
 type
     :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+record
+    :   'Record' (recordVariableDeclGroup)+ 'end'
+    ;
+
+recordVariableDeclGroup
+    :   Identifier (',' Identifier)* ':' type ';'
     ;
 
 typeModelDecl
@@ -135,6 +164,14 @@ typeModelDecl
         (constraintClause)?
         (typeModelInit)?
         (typeModelFinal)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=Identifier '=' (record|type) ';'
+        (conventionClause)?
+       // (correspondenceClause)?
+      //  (typeRepresentationInit)?
+      //  (typeRepresentationFinal)?
     ;
 
 // initialization, finalization rules
@@ -153,6 +190,19 @@ operationDecl
     :   ('Operation'|'Oper') name=Identifier operationParameterList
         (':' type)? ';' (requiresClause)? (ensuresClause)?
     ;
+
+operationProcedureDecl
+    :   (recursive='Recursive')? ('Operation'|'Oper')
+        name=Identifier operationParameterList (':' type)? ';'
+        (requiresClause)?
+        (ensuresClause)?
+        'Procedure'
+        (variableDeclGroup)*
+        (stmt)*
+        'end' closename=Identifier ';'
+    ;
+
+//todo: Procs.
 
 // facility decls
 
@@ -220,7 +270,7 @@ constraintClause
     ;
 
 changingClause
-    :   'changing' progVariableExp (',' progVariableExp)*
+    :   'changing' progExp (',' progExp)*
     ;
 
 maintainingClause
@@ -311,31 +361,14 @@ mathTupleExp
 // program expressions
 
 progExp
-    :   op=('not'|'-') progExp                  #progApplicationExp
-    |   progExp op=('*'|'/') progExp            #progApplicationExp
-    |   progExp op=('+'|'-') progExp            #progApplicationExp
-    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
-    |   progExp op=('='|'/=') progExp           #progApplicationExp
-    |   '(' progExp ')'                         #progNestedExp
+    :   progExp op='.' progExp                  #progFieldExp
     |   progPrimary                             #progPrimaryExp
     ;
 
 progPrimary
     :   progLiteralExp
-    |   progVariableExp
-    |   progParamExp
-    ;
-
-//This intermediate rule is really only needed to help make
-//the 'changingClause' rule a little more strict about what it accepts.
-//A root VariableExp class is no longer reflected in the ast.
-progVariableExp
-    :   progDotExp
     |   progNamedExp
-    ;
-
-progDotExp
-    :   progNamedExp ('.' progNamedExp)+
+    |   progParamExp
     ;
 
 progParamExp
