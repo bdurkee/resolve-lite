@@ -76,7 +76,7 @@ facilityModule
     :   'Facility' name=Identifier ';'
         (importList)?
         (facilityBlock)?
-        'end' closename=Identifier ';'
+        'end' closename=Identifier ';' EOF
     ;
 
 facilityBlock
@@ -134,6 +134,7 @@ variableDeclGroup
 stmt
     :   assignStmt
     |   swapStmt
+ //   |   callStmt
     ;
 
 assignStmt
@@ -361,14 +362,21 @@ mathTupleExp
 // program expressions
 
 progExp
-    :   progExp op='.' progExp                  #progFieldExp
-    |   progPrimary                             #progPrimaryExp
+    :   //progExp op='.' progExp                  #progMemberExp
+   // |   progPrimary                             #progPrimaryExp
+        progPrimary #progPrimaryExp
     ;
 
 progPrimary
     :   progLiteralExp
     |   progNamedExp
     |   progParamExp
+    |   progMemberExp
+    ;
+
+progMemberExp
+    :   progNamedExp ('.' Identifier)+      #variableMemberExp
+    |   progParamExp ('.' Identifier)+      #functionMemberExp
     ;
 
 progParamExp
@@ -382,8 +390,6 @@ progNamedExp
 
 progLiteralExp
     :   IntegerLiteral      #progIntegerExp
-    |   CharacterLiteral    #progCharacterExp
-    |   StringLiteral       #progStringExp
     ;
 
 // literal rules and fragments

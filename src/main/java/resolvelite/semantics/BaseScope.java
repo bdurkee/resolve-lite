@@ -29,7 +29,7 @@ public abstract class BaseScope implements Scope {
     }
 
     @Override
-    public Symbol resolve(String name) {
+    public Symbol resolve(String name) throws NoSuchSymbolException {
         Symbol s = symbols.get(name);
         if ( s != null ) {
             //			System.out.println("found "+name+" in "+this.asScopeStackString());
@@ -40,13 +40,13 @@ public abstract class BaseScope implements Scope {
         if ( parent != null ) {
             return parent.resolve(name);
         }
-        return null;//not found
+        throw new NoSuchSymbolException(name);
     }
 
     @Override
-    public void define(@NotNull Symbol sym) throws IllegalArgumentException {
+    public void define(@NotNull Symbol sym) throws DuplicateSymbolException {
         if ( symbols.containsKey(sym.getName()) ) {
-            throw new IllegalArgumentException();
+            throw new DuplicateSymbolException();
         }
         //Note that we set the enclosing scopes here
         sym.setScope(this);

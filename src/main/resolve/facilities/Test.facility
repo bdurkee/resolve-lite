@@ -1,15 +1,19 @@
 Facility Test;
 
-    Type Info = Record
-            X, Y : Integer;
+    Type Student_Info = Record
+            ID : Integer;
         end;
-        convention true;
+
+    Type Student = Record
+            Info : Student_Info;
+            A : Integer;
+        end;
 
     Operation Foo();
         Procedure
-            Var P : Info;
-            Var U, V : Integer;
-
-            U := P.X;
+            Var S : Student;
+            Var ID : Integer;
+            ID := S.A.Z.V.Bar;
+            ID := 0;
     end Foo;
 end Test;

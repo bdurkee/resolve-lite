@@ -24,4 +24,5 @@ public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
     public void setType(Type type) {
         retType = type;
     }
+
 }

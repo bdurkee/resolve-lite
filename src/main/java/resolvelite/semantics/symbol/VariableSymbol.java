@@ -28,4 +28,5 @@ public class VariableSymbol extends BaseSymbol implements TypedSymbol {
     public void setType(Type t) {
         super.setType(t);
     }
+
 }

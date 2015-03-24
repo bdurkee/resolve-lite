@@ -52,18 +52,24 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override
     public void enterTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
-        AbstractReprSymbol rs = null;
-        if ( ctx.record() != null ) {
-            rs = new RecordReprSymbol(ctx.name.getText(), ctx);
+        try {
+            AbstractReprSymbol rs = null;
+            if ( ctx.record() != null ) {
+                rs = new RecordReprSymbol(ctx.name.getText(), ctx);
+            }
+            else {
+                throw new UnsupportedOperationException("named repr types not "
+                        + "currently supported; only records for now");
+                // rs = new NamedReprSymbol(...)
+            }
+            currentScope.define(rs);
+            symtab.scopes.put(ctx, rs); //save the scope
+            currentScope = rs; // set cur scope to record type def. scope
         }
-        else {
-            throw new UnsupportedOperationException("named repr types not "
-                    + "currently supported; only records for now");
-            // rs = new NamedReprSymbol(...)
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
         }
-        currentScope.define(rs);
-        symtab.scopes.put(ctx, rs); //save the scope
-        currentScope = rs; // set cur scope to record type def. scope
     }
 
     @Override
@@ -81,18 +87,31 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected void insertVariables(List<TerminalNode> terminalGroup,
             ResolveParser.TypeContext type) {
         for (TerminalNode t : terminalGroup) {
-            VariableSymbol vs = new VariableSymbol(t.getText(), currentScope);
-            currentScope.define(vs);
+            try {
+                VariableSymbol vs =
+                        new VariableSymbol(t.getText(), currentScope);
+                currentScope.define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
         }
     }
 
     @Override
     public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        FunctionSymbol func = new FunctionSymbol(ctx.name.getText(), ctx);
-        symtab.scopes.put(ctx, func);
-        currentScope.define(func);
-        currentScope = func;
+        try {
+            FunctionSymbol func = new FunctionSymbol(ctx.name.getText(), ctx);
+            symtab.scopes.put(ctx, func);
+            currentScope.define(func);
+            currentScope = func;
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
     }
 
     @Override

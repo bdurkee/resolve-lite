@@ -1,6 +1,7 @@
 package resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import resolvelite.semantics.DuplicateSymbolException;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class RecordReprSymbol extends AbstractReprSymbol {
     }
 
     @Override
-    public void define(Symbol sym) throws IllegalArgumentException {
+    public void define(Symbol sym) throws DuplicateSymbolException {
         if ( !(sym instanceof VariableSymbol) ) {
             throw new IllegalArgumentException("sym is "
                     + sym.getClass().getSimpleName() + ", not VariableSymbol");
@@ -28,4 +29,5 @@ public class RecordReprSymbol extends AbstractReprSymbol {
     public List<VariableSymbol> getSymbols() {
         return (List<VariableSymbol>) super.getSymbols();
     }
+
 }

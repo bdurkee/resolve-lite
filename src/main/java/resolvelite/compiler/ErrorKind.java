@@ -68,8 +68,7 @@ public enum ErrorKind {
      * Compiler error 6: unexpected symboltablentry: <em>expectedentry</em>,
      * <em>foundentry</em>.
      */
-    UNEXPECTED_SYMTAB_ENTRY(6, "expecting <arg>; found <arg2>",
-            ErrorSeverity.ERROR),
+    UNEXPECTED_SYMBOL(6, "expecting <arg>; found <arg2>", ErrorSeverity.ERROR),
 
     /**
      * Compiler error 7: duplicate symbol: <em>name</em>.

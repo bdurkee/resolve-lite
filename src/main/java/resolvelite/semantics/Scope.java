@@ -52,23 +52,23 @@ public interface Scope {
      * {@link IllegalArgumentException} if {@link Symbol} already defined in
      * this scope. Set insertion order number of {@link Symbol}.
      * 
-     * @throws IllegalArgumentException if <code>sym</code> has already been
+     * @throws DuplicateSymbolException if <code>sym</code> has already been
      *         defined.
      * @param sym The symbol we're adding.
      */
-    public void define(@NotNull Symbol sym) throws IllegalArgumentException;
+    public void define(@NotNull Symbol sym) throws DuplicateSymbolException;
 
     /**
      * Look up <code>name</code> in this scope or in an enclosing
      * <code>Scope</code> if not already present.
      * 
-     * @throws IllegalArgumentException If a symbol corresponding to the
+     * @throws NoSuchSymbolException If a symbol corresponding to the
      *         requested name is not found.
      * @param name The name of the <code>Scope</code> to lookup.
      * @return the found symbol, <code>null</code> if not present.
      */
     @Nullable
-    public Symbol resolve(String name) throws IllegalArgumentException;
+    public Symbol resolve(String name) throws NoSuchSymbolException;
 
     public Symbol getSymbol(String name);
 

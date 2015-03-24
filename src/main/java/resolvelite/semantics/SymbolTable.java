@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class SymbolTable {
 
+    public static final ProgTypeDefinitionSymbol VOID =
+            new ProgTypeDefinitionSymbol("Void");
     public Map<String, ModuleScope> moduleScopes = new HashMap<>();
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
@@ -27,8 +29,14 @@ public class SymbolTable {
     }
 
     private void initProgramTypeSystem() {
-        definePredefinedSymbol(new ProgTypeDefinitionSymbol("Boolean"));
-        definePredefinedSymbol(new ProgTypeDefinitionSymbol("Integer"));
+        try {
+            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Boolean"));
+            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Integer"));
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException("Dup sym. Todo: put the actual Symbol "
+                    + "as a field inside the dse exception.");
+        }
     }
 
     private void initMathTypeSystem() {
@@ -45,7 +53,8 @@ public class SymbolTable {
     //    definePredefinedSymbol(result);
     //  }
 
-    public void definePredefinedSymbol(Symbol s) {
+    protected void definePredefinedSymbol(Symbol s)
+            throws DuplicateSymbolException {
         PredefinedScope.INSTANCE.define(s);
     }
 

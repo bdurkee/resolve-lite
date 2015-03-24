@@ -26,6 +26,9 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                     new ComputeTypes(compiler, compiler.symbolTable);
             walker.walk(definePhase, unit.root);
             walker.walk(typingPhase, unit.root);
+
+            PrintTypes pt = new PrintTypes(typingPhase.types);
+            walker.walk(pt, unit.root);
             int i = 0;
         }
     }
