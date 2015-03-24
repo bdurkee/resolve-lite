@@ -15,18 +15,15 @@ public abstract class SymbolWithScope extends BaseScope
         this.name = name;
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return name;
     }
 
-    @Override
-    public Scope getScope() {
+    @Override public Scope getScope() {
         return enclosingScope;
     }
 
-    @Override
-    public void setScope(Scope scope) {
+    @Override public void setScope(Scope scope) {
         setEnclosingScope(scope);
     }
 
@@ -42,19 +39,13 @@ public abstract class SymbolWithScope extends BaseScope
         return name;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if ( !(obj instanceof Symbol) ) {
-            return false;
-        }
-        if ( obj == this ) {
-            return true;
-        }
+    @Override public boolean equals(Object obj) {
+        if ( !(obj instanceof Symbol) ) return false;
+        if ( obj == this ) return true;
         return name.equals(((Symbol) obj).getName());
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return name.hashCode();
     }
 

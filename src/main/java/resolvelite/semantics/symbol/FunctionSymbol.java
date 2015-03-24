@@ -15,13 +15,11 @@ public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
         this.tree = tree;
     }
 
-    @Override
-    public Type getType() {
+    @Override public Type getType() {
         return retType;
     }
 
-    @Override
-    public void setType(Type type) {
+    @Override public void setType(Type type) {
         retType = type;
     }
 

@@ -58,13 +58,11 @@ public class SymbolTable {
         PredefinedScope.INSTANCE.define(s);
     }
 
-    @NotNull
-    public ResolveCompiler getCompiler() {
+    @NotNull public ResolveCompiler getCompiler() {
         return compiler;
     }
 
-    @NotNull
-    public TypeGraph getTypeGraph() {
+    @NotNull public TypeGraph getTypeGraph() {
         return typeGraph;
     }
 

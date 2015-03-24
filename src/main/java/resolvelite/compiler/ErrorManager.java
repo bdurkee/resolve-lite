@@ -79,19 +79,19 @@ public class ErrorManager extends BaseErrorListener {
         ST messageFormatST = getMessageFormat();
 
         boolean locationValid = false;
-        if (msg.line != -1) {
+        if ( msg.line != -1 ) {
             locationST.add("line", msg.line);
             locationValid = true;
         }
-        if (msg.charPosition != -1) {
+        if ( msg.charPosition != -1 ) {
             locationST.add("column", msg.charPosition);
             locationValid = true;
         }
-        if (msg.fileName != null) {
+        if ( msg.fileName != null ) {
             File f = new File(msg.fileName);
             // Don't show path to file in edu.clemson.cs.r2jt.templates.messages; too long.
             String displayFileName = msg.fileName;
-            if (f.exists()) {
+            if ( f.exists() ) {
                 displayFileName = f.getName();
             }
             locationST.add("file", displayFileName);
@@ -100,8 +100,7 @@ public class ErrorManager extends BaseErrorListener {
         messageFormatST.add("id", msg.getErrorType().code);
         messageFormatST.add("text", messageST);
 
-        if (locationValid)
-            reportST.add("location", locationST);
+        if ( locationValid ) reportST.add("location", locationST);
         reportST.add("message", messageFormatST);
 
         return reportST;
@@ -121,8 +120,7 @@ public class ErrorManager extends BaseErrorListener {
         return st;
     }
 
-    @Override
-    public void syntaxError(Recognizer<?, ?> recognizer,
+    @Override public void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         ResolveMessage m =
@@ -193,7 +191,7 @@ public class ErrorManager extends BaseErrorListener {
         int i = 0;
         for (; i < stack.length; i++) {
             StackTraceElement t = stack[i];
-            if (!t.toString().contains("ErrorManager")) {
+            if ( !t.toString().contains("ErrorManager") ) {
                 break;
             }
         }
@@ -206,11 +204,11 @@ public class ErrorManager extends BaseErrorListener {
                 .equals("true");
     }
 
-    @SuppressWarnings("fallthrough")
-    public void emit(ErrorKind kind, ResolveMessage msg) {
+    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind,
+            ResolveMessage msg) {
         switch (kind.severity) {
         case WARNING_ONE_OFF:
-            if (errorTypes.contains(kind)) {
+            if ( errorTypes.contains(kind) ) {
                 break;
             }
             // fall thru
@@ -219,7 +217,7 @@ public class ErrorManager extends BaseErrorListener {
             compiler.warning(msg);
             break;
         case ERROR_ONE_OFF:
-            if (errorTypes.contains(kind)) {
+            if ( errorTypes.contains(kind) ) {
                 break;
             }
             // fall thru

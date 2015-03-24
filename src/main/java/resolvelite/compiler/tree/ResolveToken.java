@@ -58,13 +58,11 @@ public class ResolveToken extends CommonToken {
         super(source, type, channel, start, stop);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return getText();
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return getText().hashCode();
     }
 

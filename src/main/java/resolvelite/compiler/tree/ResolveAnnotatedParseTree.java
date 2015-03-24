@@ -52,23 +52,19 @@ public class ResolveAnnotatedParseTree {
         this.fileName = builder.fileName;
     }
 
-    @NotNull
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    @NotNull
-    public String getFileName() {
+    @NotNull public String getFileName() {
         return fileName;
     }
 
-    @NotNull
-    public ImportCollection getImportCollection() {
+    @NotNull public ImportCollection getImportCollection() {
         return imports;
     }
 
-    @NotNull
-    public ParseTree getRoot() {
+    @NotNull public ParseTree getRoot() {
         return root;
     }
 
@@ -113,8 +109,7 @@ public class ResolveAnnotatedParseTree {
             return this;
         }
 
-        @Override
-        public ResolveAnnotatedParseTree build() {
+        @Override public ResolveAnnotatedParseTree build() {
             return new ResolveAnnotatedParseTree(this);
         }
     }

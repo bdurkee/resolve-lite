@@ -18,18 +18,15 @@ public abstract class BaseScope implements Scope {
         setEnclosingScope(enclosingScope);
     }
 
-    @Override
-    public Symbol getSymbol(String name) {
+    @Override public Symbol getSymbol(String name) {
         return symbols.get(name);
     }
 
-    @Override
-    public void setEnclosingScope(Scope enclosingScope) {
+    @Override public void setEnclosingScope(Scope enclosingScope) {
         this.enclosingScope = enclosingScope;
     }
 
-    @Override
-    public Symbol resolve(String name) throws NoSuchSymbolException {
+    @Override public Symbol resolve(String name) throws NoSuchSymbolException {
         Symbol s = symbols.get(name);
         if ( s != null ) {
             //			System.out.println("found "+name+" in "+this.asScopeStackString());
@@ -37,14 +34,12 @@ public abstract class BaseScope implements Scope {
         }
         // if not here, check any enclosing scope
         Scope parent = getParentScope();
-        if ( parent != null ) {
-            return parent.resolve(name);
-        }
+        if ( parent != null ) return parent.resolve(name);
         throw new NoSuchSymbolException(name);
     }
 
-    @Override
-    public void define(@NotNull Symbol sym) throws DuplicateSymbolException {
+    @Override public void define(@NotNull Symbol sym)
+            throws DuplicateSymbolException {
         if ( symbols.containsKey(sym.getName()) ) {
             throw new DuplicateSymbolException();
         }
@@ -53,18 +48,15 @@ public abstract class BaseScope implements Scope {
         symbols.put(sym.getName(), sym);
     }
 
-    @Override
-    public Scope getParentScope() {
+    @Override public Scope getParentScope() {
         return getEnclosingScope();
     }
 
-    @Override
-    public Scope getEnclosingScope() {
+    @Override public Scope getEnclosingScope() {
         return enclosingScope;
     }
 
-    @Override
-    public List<? extends Symbol> getSymbols() {
+    @Override public List<? extends Symbol> getSymbols() {
         return new ArrayList<>(symbols.values());
     }
 
@@ -76,18 +68,15 @@ public abstract class BaseScope implements Scope {
         return (List)scopes; // force it to cast
     }
 
-    @Override
-    public int getNumberOfSymbols() {
+    @Override public int getNumberOfSymbols() {
         return symbols.size();
     }
 
-    @Override
-    public Set<String> getSymbolNames() {
+    @Override public Set<String> getSymbolNames() {
         return symbols.keySet();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return getScopeDescription() + ":" + symbols.keySet().toString();
     }
 

@@ -75,18 +75,15 @@ public class CodeGenerator {
         return walker.walk(outputModel);
     }
 
-    @Nullable
-    public ST generateModule() {
+    @Nullable public ST generateModule() {
         return walk(buildModuleOutputModel());
     }
 
-    @NotNull
-    public TreeAnnotatingBuilder getModule() {
+    @NotNull public TreeAnnotatingBuilder getModule() {
         return module;
     }
 
-    @NotNull
-    public ResolveCompiler getCompiler() {
+    @NotNull public ResolveCompiler getCompiler() {
         return compiler;
     }
 
@@ -114,8 +111,7 @@ public class CodeGenerator {
         return moduleName + extST.render();
     }
 
-    @Nullable
-    protected STGroup loadTemplates() {
+    @Nullable protected STGroup loadTemplates() {
         String groupFileName =
                 CodeGenerator.TEMPLATE_ROOT + "/" + DEFAULT_LANGUAGE + "/"
                         + DEFAULT_LANGUAGE + STGroup.GROUP_FILE_EXTENSION;
@@ -135,23 +131,19 @@ public class CodeGenerator {
         result.registerRenderer(String.class, new StringRenderer());
         result.setListener(new STErrorListener() {
 
-            @Override
-            public void compileTimeError(STMessage msg) {
+            @Override public void compileTimeError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override
-            public void runTimeError(STMessage msg) {
+            @Override public void runTimeError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override
-            public void IOError(STMessage msg) {
+            @Override public void IOError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override
-            public void internalError(STMessage msg) {
+            @Override public void internalError(STMessage msg) {
                 reportError(msg);
             }
 

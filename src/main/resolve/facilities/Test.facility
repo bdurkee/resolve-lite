@@ -1,7 +1,13 @@
 Facility Test;
 
+    Type Moo = Record
+            ID : Integer;
+            Foo : Boolean;
+        end;
+
     Type Student_Info = Record
             ID : Integer;
+            M : Moo;
         end;
 
     Type Student = Record
@@ -13,7 +19,7 @@ Facility Test;
         Procedure
             Var S : Student;
             Var ID : Integer;
-            ID := S.A.Z.V.Bar;
+            ID := S.Info.M.Foo;
             ID := 0;
     end Foo;
 end Test;

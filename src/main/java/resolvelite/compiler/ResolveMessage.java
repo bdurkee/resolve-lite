@@ -68,14 +68,12 @@ public class ResolveMessage {
         this.offendingToken = offendingToken;
     }
 
-    @NotNull
-    public ErrorKind getErrorType() {
+    @NotNull public ErrorKind getErrorType() {
         return errorType;
     }
 
-    @NotNull
-    public Object[] getArgs() {
-        if (args == null) {
+    @NotNull public Object[] getArgs() {
+        if ( args == null ) {
             return EMPTY_ARGS;
         }
         return args;
@@ -89,16 +87,16 @@ public class ResolveMessage {
         Object[] args = getArgs();
         for (int i = 0; i < args.length; i++) {
             String attr = "arg";
-            if (i > 0) {
+            if ( i > 0 ) {
                 attr += i + 1;
             }
             messageST.add(attr, args[i]);
         }
-        if (args.length < 2) {
+        if ( args.length < 2 ) {
             messageST.add("arg2", null);
         }
         Throwable cause = getCause();
-        if (cause != null) {
+        if ( cause != null ) {
             messageST.add("exception", cause);
             messageST.add("stackTrace", cause.getStackTrace());
         }
@@ -109,13 +107,11 @@ public class ResolveMessage {
         return messageST;
     }
 
-    @Nullable
-    public Throwable getCause() {
+    @Nullable public Throwable getCause() {
         return e;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "Message{" + "errorType=" + getErrorType() + ", args="
                 + Arrays.asList(getArgs()) + ", e=" + getCause()
                 + ", fileName='" + fileName + '\'' + ", line=" + line

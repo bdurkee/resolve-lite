@@ -11,8 +11,7 @@ public class ModuleScope extends BaseScope {
         super(scope);
     }
 
-    @Override
-    public String getScopeDescription() {
+    @Override public String getScopeDescription() {
         return "module";
     }
 }

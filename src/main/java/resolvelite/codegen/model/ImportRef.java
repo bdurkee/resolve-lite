@@ -53,8 +53,7 @@ public class ImportRef extends OutputModelObject {
         this.segs = segs;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         boolean result = (o instanceof ImportRef);
         if ( result ) {
             String oAsStr = "";

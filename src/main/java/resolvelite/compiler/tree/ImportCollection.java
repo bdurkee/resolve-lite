@@ -216,8 +216,7 @@ public class ImportCollection {
             tokSet.addAll(newToks);
         }
 
-        @Override
-        public ImportCollection build() {
+        @Override public ImportCollection build() {
             return new ImportCollection(this);
         }
     }

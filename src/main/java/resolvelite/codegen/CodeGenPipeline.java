@@ -45,18 +45,15 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         super(rc, compilationUnits);
     }
 
-    @Override
-    public void process() {
-        if (compiler.genCode == null) {
-            return;
-        }
+    @Override public void process() {
+        if ( compiler.genCode == null ) return;
         for (TreeAnnotatingBuilder unit : compilationUnits) {
-            if (!compiler.targetNames.contains(unit.name.getText())) {
+            if ( !compiler.targetNames.contains(unit.name.getText()) ) {
                 continue;
             }
             CodeGenerator gen = new CodeGenerator(compiler, unit);
             compiler.info("gencode: " + unit.name.getText());
-            if (compiler.genCode.equals("Java")) {
+            if ( compiler.genCode.equals("Java") ) {
                 ST x = gen.generateModule();
                 System.out.println(x.render());
                 //gen.writeModuleFile(gen.generateModule());

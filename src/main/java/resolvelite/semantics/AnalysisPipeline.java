@@ -15,8 +15,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
         super(rc, compilationUnits);
     }
 
-    @Override
-    public void process() {
+    @Override public void process() {
         for (TreeAnnotatingBuilder unit : compilationUnits) {
             compiler.info("populating: " + unit.name.getText());
             ParseTreeWalker walker = new ParseTreeWalker();

@@ -13,8 +13,7 @@ public class PredefinedScope extends BaseScope {
 
     private PredefinedScope() {}
 
-    @Override
-    public String getScopeDescription() {
+    @Override public String getScopeDescription() {
         return "predefined";
     }
 }

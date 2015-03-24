@@ -153,17 +153,8 @@ public class Utils {
     }
 
     /**
-     * Strips leading directories off a file's name. Example:
-     * 
-     * <pre>
-     * ../Foo/Test.concept
-     * </pre>
-     * 
-     * grooms to
-     * 
-     * <pre>
-     * Test.concept
-     * </pre>
+     * Strips leading directories off a file's name; for example:
+     * <code>../Foo/Test.concept</code> grooms to <code>Test.concept</code>.
      * 
      * @param name A file name with zero or more '/' delimited directories.
      * @return just the file name.
@@ -177,13 +168,9 @@ public class Utils {
     }
 
     public static String stripFileExtension(String name) {
-        if ( name == null ) {
-            return null;
-        }
+        if ( name == null ) return null;
         int lastDot = name.lastIndexOf('.');
-        if ( lastDot < 0 ) {
-            return name;
-        }
+        if ( lastDot < 0 ) return name;
         return name.substring(0, lastDot);
     }
 }

@@ -1,10 +1,8 @@
 package resolvelite.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
@@ -23,20 +21,17 @@ public class ComputeTypes extends SetScopes {
         super(compiler, symtab);
     }
 
-    @Override
-    public void exitVariableDeclGroup(
+    @Override public void exitVariableDeclGroup(
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
-        typeVariableGroup(ctx, ctx.Identifier(), ctx.type());
+        typeVariableDeclGroup(ctx, ctx.Identifier(), ctx.type());
     }
 
-    @Override
-    public void exitRecordVariableDeclGroup(
+    @Override public void exitRecordVariableDeclGroup(
             @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
-        typeVariableGroup(ctx, ctx.Identifier(), ctx.type());
+        typeVariableDeclGroup(ctx, ctx.Identifier(), ctx.type());
     }
 
-    @Override
-    public void exitOperationProcedureDecl(
+    @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         try {
             FunctionSymbol func =
@@ -51,8 +46,7 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override
-    public void exitType(@NotNull ResolveParser.TypeContext ctx) {
+    @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         Type type = null;
         try {
             type = (Type) currentScope.resolve(ctx.name.getText());
@@ -65,20 +59,18 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, type);
     }
 
-    @Override
-    public void exitProgPrimaryExp(
+    @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         types.put(ctx, types.get(ctx.progPrimary()));
     }
 
-    @Override
-    public void exitProgPrimary(@NotNull ResolveParser.ProgPrimaryContext ctx) {
+    @Override public void exitProgPrimary(
+            @NotNull ResolveParser.ProgPrimaryContext ctx) {
         types.put(ctx, types.get(ctx.getChild(0)));
     }
 
-    @Override
-    public void
-            exitProgNamedExp(@NotNull ResolveParser.ProgNamedExpContext ctx) {
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
             if ( types.get(ctx) != null ) {
                 return; //already typed (as is the case for record member refs.
@@ -95,9 +87,8 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override
-    public void
-            exitProgParamExp(@NotNull ResolveParser.ProgParamExpContext ctx) {
+    @Override public void exitProgParamExp(
+            @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {
             Symbol s = currentScope.resolve(ctx.name.getText());
             if ( s.getClass() != FunctionSymbol.class ) {
@@ -135,28 +126,16 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override
-    public void exitProgIntegerExp(
+    @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        try {
-            ProgTypeDefinitionSymbol intType =
-                    (ProgTypeDefinitionSymbol) currentScope.resolve("Integer");
-            types.put(ctx, intType);
-        }
-        catch (NoSuchSymbolException nsse) {
-            symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(), "Integer");
-            types.put(ctx, InvalidType.INSTANCE);
-        }
+        types.put(ctx, getProgramType(ctx, "Integer"));
     }
 
-    @Override
-    public void exitVariableMemberExp(
+    @Override public void exitVariableMemberExp(
             @NotNull ResolveParser.VariableMemberExpContext ctx) {
         //The first spot had better be a record
         Iterator<TerminalNode> memberIter = ctx.Identifier().iterator();
         ParserRuleContext firstRecordRef = ctx.progNamedExp();
-
         Type t = types.get(firstRecordRef);
         if ( !(t instanceof RecordReprSymbol) ) {
             compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
@@ -167,14 +146,13 @@ public class ComputeTypes extends SetScopes {
             return;
         }
         RecordReprSymbol currentRecordRef = (RecordReprSymbol) t;
-
         //now type and make sure each of the members is correct..
         Type curType = null;
         while (memberIter.hasNext()) {
             TerminalNode curTerm = memberIter.next();
             try {
                 VariableSymbol s = (VariableSymbol)
-                        currentRecordRef.resolve(curTerm.getText());
+                        currentRecordRef.resolveMember(curTerm.getText());
                 curType = s.getType();
                 types.put(curTerm, curType);
                 if (curType instanceof RecordReprSymbol) {
@@ -193,7 +171,7 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, curType);
     }
 
-    protected void typeVariableGroup(ParserRuleContext ctx,
+    protected void typeVariableDeclGroup(ParserRuleContext ctx,
             List<TerminalNode> terminalGroup,
             @NotNull ResolveParser.TypeContext typeCtx) {
         Type type = types.get(typeCtx);
@@ -210,6 +188,25 @@ public class ComputeTypes extends SetScopes {
             }
         }
         types.put(ctx, type);
+    }
+
+    /**
+     * Returns the symbol representing a basic type such as Integer, Boolean,
+     * Character, etc.
+     * 
+     * @param typeName
+     * @return
+     */
+    private Type getProgramType(@NotNull ParserRuleContext ctx,
+            @NotNull String typeName) {
+        try {
+            return (ProgTypeDefinitionSymbol) currentScope.resolve(typeName);
+        }
+        catch (NoSuchSymbolException nsse) {
+            symtab.getCompiler().errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(), typeName);
+        }
+        return InvalidType.INSTANCE;
     }
 
     private Type checkForInvalidType(@Nullable Type t,

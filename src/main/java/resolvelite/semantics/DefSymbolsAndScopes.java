@@ -13,6 +13,10 @@ import resolvelite.semantics.symbol.*;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * The first phase of compilation, responsible for defines symbols and building
+ * scopes.
+ */
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     Scope currentScope; // define symbols in this scope
@@ -25,32 +29,27 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         this.symtab = symtab;
     }
 
-    @Override
-    public void
-            enterPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
+    @Override public void enterPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
         currentScope = establishModuleScope(ctx.name.getText(), ctx);
     }
 
-    @Override
-    public void enterConceptModule(
+    @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         currentScope = establishModuleScope(ctx.name.getText(), ctx);
     }
 
-    @Override
-    public void enterFacilityModule(
+    @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         currentScope = establishModuleScope(ctx.name.getText(), ctx);
     }
 
-    @Override
-    public void enterTypeModelDecl(
+    @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         String name = ctx.name.getText();
     }
 
-    @Override
-    public void enterTypeRepresentationDecl(
+    @Override public void enterTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         try {
             AbstractReprSymbol rs = null;
@@ -72,14 +71,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
-    @Override
-    public void exitRecordVariableDeclGroup(
+    @Override public void exitRecordVariableDeclGroup(
             @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
         insertVariables(ctx.Identifier(), ctx.type());
     }
 
-    @Override
-    public void exitVariableDeclGroup(
+    @Override public void exitVariableDeclGroup(
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
         insertVariables(ctx.Identifier(), ctx.type());
     }
@@ -99,8 +96,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
-    @Override
-    public void enterOperationProcedureDecl(
+    @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         try {
             FunctionSymbol func = new FunctionSymbol(ctx.name.getText(), ctx);
@@ -114,14 +110,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
-    @Override
-    public void exitOperationProcedureDecl(
+    @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope();
     }
 
-    @Override
-    public void exitTypeRepresentationDecl(
+    @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope(); // pop scope
     }

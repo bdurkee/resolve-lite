@@ -62,14 +62,12 @@ public class ModelBuilder extends ResolveBaseListener {
                 scopeRepository.moduleScopes.get(g.getModule().name.getText());
     }
 
-    @Override
-    public void exitTypeModelDecl(
+    @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         built.put(ctx, new TypeDecl(ctx.name.getText()));
     }
 
-    @Override
-    public void exitOperationDecl(
+    @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         FunctionDecl f = new FunctionDecl(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
@@ -83,9 +81,8 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override
-    public void
-            exitFacilityDecl(@NotNull ResolveParser.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
         FacilityInstanceDecl f =
                 new FacilityInstanceDecl(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
@@ -124,21 +121,18 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override
-    public void exitParameterDeclGroup(
+    @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
             built.put(t, new ParameterDecl(t.getText()));
         }
     }
 
-    @Override
-    public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
+    @Override public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override
-    public void exitFacilityModule(
+    @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         TreeAnnotatingBuilder annotatedTree = gen.getModule();
         ModuleFile file =
@@ -156,31 +150,27 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, file);
     }
 
-    @Override
-    public void exitModuleArgument(
+    @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
         built.put(ctx, new Argument((Expr) built.get(ctx.progExp())));
     }
 
-    @Override
-    public void exitProgPrimaryExp(
+    @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         built.put(ctx, built.get(ctx.progPrimary()));
     }
 
-    @Override
-    public void exitProgPrimary(@NotNull ResolveParser.ProgPrimaryContext ctx) {
+    @Override public void exitProgPrimary(
+            @NotNull ResolveParser.ProgPrimaryContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override
-    public void exitProgIntegerExp(
+    @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         built.put(ctx, INTEGER_INIT_FACTORY.buildLiteralInit(ctx.getText()));
     }
 
-    @Override
-    public void exitConceptModule(
+    @Override public void exitConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         TreeAnnotatingBuilder annotatedTree = gen.getModule();
         ModuleFile file =
@@ -248,8 +238,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     public static class IntegerCallFactory implements LiteralInitFactory {
 
-        @Override
-        public InitCall buildLiteralInit(String initialValue) {
+        @Override public InitCall buildLiteralInit(String initialValue) {
             return new InitCall(new InitCall.Qualifier("Std_Integer_Fac",
                     "Integer_Template"), "Integer", initialValue);
         }

@@ -48,14 +48,12 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
         myInput = input;
     }
 
-    @Override
-    public ResolveToken create(int type, String text) {
+    @Override public ResolveToken create(int type, String text) {
         return new ResolveToken(type, text);
     }
 
-    @Override
-    public ResolveToken create(Pair<TokenSource, CharStream> source, int type,
-            String text, int channel, int start, int stop, int line,
+    @Override public ResolveToken create(Pair<TokenSource, CharStream> source,
+            int type, String text, int channel, int start, int stop, int line,
             int charPositionInLine) {
         ResolveToken t = new ResolveToken(source, type, channel, start, stop);
         t.setLine(line);

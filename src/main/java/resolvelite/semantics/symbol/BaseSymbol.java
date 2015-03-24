@@ -8,22 +8,19 @@ public abstract class BaseSymbol implements Symbol {
     public enum Quantification {
         NONE {
 
-            @Override
-            public String toString() {
+            @Override public String toString() {
                 return "None";
             }
         },
         UNIVERSAL {
 
-            @Override
-            public String toString() {
+            @Override public String toString() {
                 return "Universal";
             }
         },
         EXISTENTIAL {
 
-            @Override
-            public String toString() {
+            @Override public String toString() {
                 return "Existential";
             }
         }
@@ -43,18 +40,15 @@ public abstract class BaseSymbol implements Symbol {
         this.name = name;
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return name;
     }
 
-    @Override
-    public Scope getScope() {
+    @Override public Scope getScope() {
         return scope;
     }
 
-    @Override
-    public void setScope(Scope scope) {
+    @Override public void setScope(Scope scope) {
         this.scope = scope;
     }
 
@@ -66,8 +60,7 @@ public abstract class BaseSymbol implements Symbol {
         this.type = type;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if ( !(obj instanceof Symbol) ) {
             return false;
         }
@@ -77,13 +70,11 @@ public abstract class BaseSymbol implements Symbol {
         return name.equals(((Symbol) obj).getName());
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return name.hashCode();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         String s = "";
         if ( scope != null ) {
             s = scope.getScopeDescription() + ".";

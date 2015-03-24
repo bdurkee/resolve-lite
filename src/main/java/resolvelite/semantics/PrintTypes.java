@@ -14,8 +14,7 @@ public class PrintTypes extends ResolveBaseListener {
         this.types = types;
     }
 
-    @Override
-    public void exitProgPrimaryExp(
+    @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         System.out.printf("%-17s", ctx.getText());
         System.out.printf(" type %-8s\n", types.get(ctx).toString()

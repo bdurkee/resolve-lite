@@ -9,8 +9,7 @@ public class VariableSymbol extends BaseSymbol implements TypedSymbol {
         super(enclosingScope, name);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         String s = "";
         s = scope.getScopeDescription() + ".";
         if ( type != null ) {
@@ -19,13 +18,11 @@ public class VariableSymbol extends BaseSymbol implements TypedSymbol {
         return s + getName();
     }
 
-    @Override
-    public Type getType() {
+    @Override public Type getType() {
         return super.getType();
     }
 
-    @Override
-    public void setType(Type t) {
+    @Override public void setType(Type t) {
         super.setType(t);
     }
 

@@ -58,17 +58,10 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * 
      * @param pattern An <em>extensionless</em> pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *        pattern is matched (i.e.
-     * 
-     *        <pre>
-     * ["java", "cpp", "groovy"]
-     * </pre>
-     * 
-     *        ).
+     *        pattern is matched (i.e.<code>["java", "cpp", "groovy"]</code>).
      */
     public FileLocator(String pattern, List<String> extensions) {
         myPattern = pattern;
-
         myMatcher =
                 FileSystems.getDefault().getPathMatcher(
                         "glob:" + pattern + parseExtensions(extensions));
@@ -80,8 +73,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
                         "glob:*.{" + extension + "}");
     }
 
-    @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
+    @Override public FileVisitResult visitFile(Path file,
+            BasicFileAttributes attr) {
         Path name = file.getFileName();
         if ( name != null && myMatcher.matches(name) ) {
             myMatches.add(file.toFile());

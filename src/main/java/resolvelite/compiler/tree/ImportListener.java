@@ -44,15 +44,14 @@ public class ImportListener extends ResolveBaseListener {
     private final ImportCollection.ImportCollectionBuilder builder =
             new ImportCollection.ImportCollectionBuilder();
 
-    @NotNull
-    public ImportCollection getImports() {
+    @NotNull public ImportCollection getImports() {
         return builder.build();
     }
 
     //Todo: override facilities, enhancements, etc when they get added to the
     //grammar.
-    @Override
-    public void exitImportList(@NotNull ResolveParser.ImportListContext ctx) {
+    @Override public void exitImportList(
+            @NotNull ResolveParser.ImportListContext ctx) {
         builder.imports(ImportCollection.ImportType.EXPLICIT, ctx.Identifier());
     }
 }

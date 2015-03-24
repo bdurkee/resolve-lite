@@ -9,11 +9,9 @@ import java.util.Set;
 
 public interface Scope {
 
-    @NotNull
-    public String getScopeDescription();
+    @NotNull public String getScopeDescription();
 
-    @Nullable
-    public Scope getParentScope();
+    @Nullable public Scope getParentScope();
 
     /**
      * Returns the <code>Scope</code> surrounding this <code>Scope</code>.
@@ -21,8 +19,7 @@ public interface Scope {
      * 
      * @return The surrounding, 'next' <code>Scope</code>.
      */
-    @Nullable
-    public Scope getEnclosingScope();
+    @Nullable public Scope getEnclosingScope();
 
     /**
      * Returns all scopes that are immediate decendents of <code>this</code>
@@ -67,8 +64,7 @@ public interface Scope {
      * @param name The name of the <code>Scope</code> to lookup.
      * @return the found symbol, <code>null</code> if not present.
      */
-    @Nullable
-    public Symbol resolve(String name) throws NoSuchSymbolException;
+    @Nullable public Symbol resolve(String name) throws NoSuchSymbolException;
 
     public Symbol getSymbol(String name);
 
