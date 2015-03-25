@@ -15,10 +15,15 @@ Facility Test;
             A : Integer;
         end;
 
+    Operation Test(evaluates a : Integer) : Boolean;
+        Procedure
+
+    end Test;
+
     Operation Foo();
         Procedure
             Var S : Student;
             Var ID : Integer;
-            ID := S.Info.ID;
+            ID := Test();
     end Foo;
 end Test;

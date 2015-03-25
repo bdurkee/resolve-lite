@@ -2,9 +2,11 @@ package resolvelite.semantics;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.misc.Utils;
+import resolvelite.semantics.symbol.ParameterSymbol;
 import resolvelite.semantics.symbol.Symbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class BaseScope implements Scope {
 

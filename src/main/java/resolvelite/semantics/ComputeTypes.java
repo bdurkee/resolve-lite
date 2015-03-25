@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
+import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.symbol.*;
 
@@ -31,12 +32,33 @@ public class ComputeTypes extends SetScopes {
         typeVariableDeclGroup(ctx, ctx.Identifier(), ctx.type());
     }
 
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        Type type = types.get(ctx.type());
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ParameterSymbol paramSym =
+                        (ParameterSymbol) currentScope.resolve(t.getText());
+                paramSym.setType(type);
+            }
+            catch (NoSuchSymbolException nsse) {
+                symtab.getCompiler().errorManager.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, t.getSymbol(), t.getText());
+                types.put(ctx, InvalidType.INSTANCE);
+            }
+        }
+        types.put(ctx, type);
+    }
+
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         try {
             FunctionSymbol func =
                     (FunctionSymbol) currentScope.resolve(ctx.name.getText());
             Type t = types.get(ctx.type());
+            if (t == null) {
+                t = SymbolTable.VOID;
+            }
             func.setType(t);
             types.put(ctx, t);
         }
@@ -87,6 +109,7 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {
@@ -95,34 +118,38 @@ public class ComputeTypes extends SetScopes {
                 compiler.errorManager.semanticError(
                         ErrorKind.UNEXPECTED_SYMBOL, ctx.name, "a function", s
                                 .getClass().getSimpleName());
-                types.put(ctx, SymbolTable.VOID);
+                types.put(ctx, InvalidType.INSTANCE);
             }
             FunctionSymbol func = (FunctionSymbol) s;
             types.put(ctx, func.getType());
-            /*    int i=0;
-                  for (Symbol a : ms.orderedArgs.values() ) { // for each arg
-                      CymbolAST argAST = (CymbolAST)args.get(i++);
 
-                      // get argument expression type and expected type
-                      Type actualArgType = argAST.evalType;
-                      Type formalArgType = ((VariableSymbol)a).type;
-                      int targ = actualArgType.getTypeIndex();
-                      int tformal = formalArgType.getTypeIndex();
+            //Todo: Put stuff below into additional semantic checking pass
+            //(the pass that will presumably check assignment, swap, etc stmts)
+           /* List<? extends Symbol> raw =
+                    Utils.filter(func.getSymbols(),
+                            p -> (p instanceof ParameterSymbol));
+            List<ParameterSymbol> formals = (List)raw;
 
-                      // do we need to promote argument type to defined type?
-                      argAST.promoteToType = promoteFromTo[targ][tformal];
-                      if ( !canAssignTo(actualArgType, formalArgType,
-                              argAST.promoteToType) ) {
-                          listener.error(text(argAST)+", argument "+
-                                  a.name+":<"+a.type+"> of "+ms.name+
-                                  "() have incompatible types in "+
-                                  text((CymbolAST)id.getParent()));
-                      }
-                  }*/
+            if (ctx.progExp().size() != formals.size()) {
+                symtab.getCompiler().errorManager.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+                types.put(ctx, InvalidType.INSTANCE);
+            }
+            int i=0;
+            for (ParameterSymbol p : formals) {
+                Type actuaArgType = types.get(ctx.progExp(i++));
+                Type formalArgType = p.getType();
+
+                if (!actuaArgType.getName().equals(formalArgType.getName())) {
+                    break;
+                }
+            }
+            */
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+            types.put(ctx, InvalidType.INSTANCE);
         }
     }
 

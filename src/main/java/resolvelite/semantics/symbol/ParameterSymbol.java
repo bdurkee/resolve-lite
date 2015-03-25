@@ -1,6 +1,7 @@
-package resolvelite.semantics;
+package resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.misc.NotNull;
+import resolvelite.semantics.Scope;
 import resolvelite.semantics.symbol.BaseSymbol;
 import resolvelite.semantics.symbol.TypedSymbol;
 
@@ -91,8 +92,8 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
 
     @NotNull private final ParameterMode mode;
 
-    public ParameterSymbol(String name, ParameterMode mode) {
-        super(name);
+    public ParameterSymbol(String name, ParameterMode mode, Scope enclosingScope) {
+        super(enclosingScope, name);
         this.mode = mode;
     }
 

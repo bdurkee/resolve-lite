@@ -110,6 +110,22 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ParameterSymbol.ParameterMode mode = ParameterSymbol
+                        .getModeMapping().get(ctx.parameterMode().getText());
+                currentScope.define(new ParameterSymbol(t.getText(), mode,
+                        currentScope));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope();
