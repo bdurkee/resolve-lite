@@ -16,8 +16,9 @@ public class PrintTypes extends ResolveBaseListener {
 
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
-        if (types.get(ctx) == null) {
-            throw new IllegalStateException("ctx: "+ctx.getClass().getSimpleName() +" null");
+        if ( types.get(ctx) == null ) {
+            throw new IllegalStateException("ctx: "
+                    + ctx.getClass().getSimpleName() + " null");
         }
         System.out.printf("%-17s", ctx.getText());
         System.out.printf(" type %-8s\n", types.get(ctx).toString()

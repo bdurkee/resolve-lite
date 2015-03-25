@@ -114,8 +114,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
             try {
-                ParameterSymbol.ParameterMode mode = ParameterSymbol
-                        .getModeMapping().get(ctx.parameterMode().getText());
+                ParameterSymbol.ParameterMode mode =
+                        ParameterSymbol.getModeMapping().get(
+                                ctx.parameterMode().getText());
                 currentScope.define(new ParameterSymbol(t.getText(), mode,
                         currentScope));
             }

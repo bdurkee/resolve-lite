@@ -13,52 +13,44 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
 
     public static enum ParameterMode {
         ALTERS {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ALTERS, CLEARS};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { ALTERS, CLEARS };
             }
         },
         UPDATES {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{UPDATES, CLEARS, RESTORES,
-                        PRESERVES};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { UPDATES, CLEARS, RESTORES,
+                        PRESERVES };
             }
         },
         REPLACES {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{REPLACES, CLEARS};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { REPLACES, CLEARS };
             }
         },
         CLEARS {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{CLEARS};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { CLEARS };
             }
         },
         RESTORES {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{RESTORES, PRESERVES};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { RESTORES, PRESERVES };
             }
         },
         PRESERVES {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{PRESERVES};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { PRESERVES };
             }
         },
         EVALUATES {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{EVALUATES};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { EVALUATES };
             }
         },
         TYPE {
-            @Override
-            public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{TYPE};
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { TYPE };
             }
         };
 
@@ -78,6 +70,7 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
 
             return result;
         }
+
         public abstract ParameterMode[] getValidImplementationModes();
     }
 

@@ -3,6 +3,7 @@ package resolvelite.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
@@ -56,7 +57,7 @@ public class ComputeTypes extends SetScopes {
             FunctionSymbol func =
                     (FunctionSymbol) currentScope.resolve(ctx.name.getText());
             Type t = types.get(ctx.type());
-            if (t == null) {
+            if ( t == null ) {
                 t = SymbolTable.VOID;
             }
             func.setType(t);
@@ -109,8 +110,7 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override public void exitProgParamExp(
+    @SuppressWarnings("unchecked") @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {
             Symbol s = currentScope.resolve(ctx.name.getText());
@@ -125,26 +125,26 @@ public class ComputeTypes extends SetScopes {
 
             //Todo: Put stuff below into additional semantic checking pass
             //(the pass that will presumably check assignment, swap, etc stmts)
-           /* List<? extends Symbol> raw =
-                    Utils.filter(func.getSymbols(),
-                            p -> (p instanceof ParameterSymbol));
-            List<ParameterSymbol> formals = (List)raw;
+            /* List<? extends Symbol> raw =
+                     Utils.filter(func.getSymbols(),
+                             p -> (p instanceof ParameterSymbol));
+             List<ParameterSymbol> formals = (List)raw;
 
-            if (ctx.progExp().size() != formals.size()) {
-                symtab.getCompiler().errorManager.semanticError(
-                        ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
-                types.put(ctx, InvalidType.INSTANCE);
-            }
-            int i=0;
-            for (ParameterSymbol p : formals) {
-                Type actuaArgType = types.get(ctx.progExp(i++));
-                Type formalArgType = p.getType();
+             if (ctx.progExp().size() != formals.size()) {
+                 symtab.getCompiler().errorManager.semanticError(
+                         ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+                 types.put(ctx, InvalidType.INSTANCE);
+             }
+             int i=0;
+             for (ParameterSymbol p : formals) {
+                 Type actuaArgType = types.get(ctx.progExp(i++));
+                 Type formalArgType = p.getType();
 
-                if (!actuaArgType.getName().equals(formalArgType.getName())) {
-                    break;
-                }
-            }
-            */
+                 if (!actuaArgType.getName().equals(formalArgType.getName())) {
+                     break;
+                 }
+             }
+             */
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
@@ -158,11 +158,11 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, getProgramType(ctx, "Integer"));
     }
 
-    @Override public void exitVariableMemberExp(
-            @NotNull ResolveParser.VariableMemberExpContext ctx) {
+    @Override public void exitProgMemberExp(
+            @NotNull ResolveParser.ProgMemberExpContext ctx) {
         //The first spot had better be a record
         Iterator<TerminalNode> memberIter = ctx.Identifier().iterator();
-        ParserRuleContext firstRecordRef = ctx.progNamedExp();
+        ParseTree firstRecordRef = ctx.getChild(0);
         Type t = types.get(firstRecordRef);
         if ( !(t instanceof RecordReprSymbol) ) {
             compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,

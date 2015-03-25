@@ -375,8 +375,7 @@ progPrimary
     ;
 
 progMemberExp
-    :   progNamedExp ('.' Identifier)+      #variableMemberExp
-    |   progParamExp ('.' Identifier)+      #functionMemberExp
+    :   (progParamExp|progNamedExp) ('.' Identifier)+
     ;
 
 progParamExp
