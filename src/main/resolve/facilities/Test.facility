@@ -9,6 +9,7 @@ Facility Test;
             ID : Integer;
             M : Moo;
         end;
+        Convention
 
     Type Student = Record
             Info : Student_Info;

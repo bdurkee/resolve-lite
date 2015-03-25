@@ -66,7 +66,7 @@ public class ResolveToken extends CommonToken {
         return getText().hashCode();
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         boolean result = (o instanceof ResolveToken);
 
         if ( result ) {
