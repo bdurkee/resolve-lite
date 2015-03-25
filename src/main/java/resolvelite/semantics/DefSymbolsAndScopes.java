@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * The first phase of compilation, responsible for defines symbols and building
+ * The first phase of compilation, responsible for defining symbols and building
  * scopes.
  */
 public class DefSymbolsAndScopes extends ResolveBaseListener {

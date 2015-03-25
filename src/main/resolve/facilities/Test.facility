@@ -9,7 +9,6 @@ Facility Test;
             ID : Integer;
             M : Moo;
         end;
-        Convention
 
     Type Student = Record
             Info : Student_Info;
@@ -20,7 +19,6 @@ Facility Test;
         Procedure
             Var S : Student;
             Var ID : Integer;
-            ID := S.Info.M.Foo;
-            ID := 0;
+            ID := S.Info.ID;
     end Foo;
 end Test;
