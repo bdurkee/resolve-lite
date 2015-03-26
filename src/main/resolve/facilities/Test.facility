@@ -1,14 +1,5 @@
 Facility Test;
-
-    Type Moo = Record
-            ID : Integer;
-            Foo : Boolean;
-        end;
-
-    Type Student_Info = Record
-            ID : Integer;
-            M : Moo;
-        end;
+    uses Alt_Test_Fac;
 
     Type Student = Record
             Info : Student_Info;
@@ -24,6 +15,6 @@ Facility Test;
         Procedure
             Var S : Student;
             Var ID, T : Integer;
-
+            Var I : Alt_Test_Fac::Info;
     end Foo;
 end Test;

@@ -1,0 +1,7 @@
+Facility Alt_Test_Fac;
+
+    Type Info = Record
+            X, Y : Integer;
+        end;
+
+end Alt_Test_Fac;

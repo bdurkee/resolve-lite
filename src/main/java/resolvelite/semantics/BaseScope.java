@@ -34,6 +34,10 @@ public abstract class BaseScope implements Scope {
             //System.out.println("found "+name+" in "+this.asScopeStackString());
             return s;
         }
+        if ( this instanceof ModuleScope ) {
+            ModuleScope x = (ModuleScope)this;
+            System.out.println("Searching: " + x.getImportedModules());
+        }
         // if not here, check any enclosing scope
         Scope parent = getParentScope();
         if ( parent != null ) return parent.resolve(name);

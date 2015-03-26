@@ -20,7 +20,8 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             compiler.info("populating: " + unit.name.getText());
             ParseTreeWalker walker = new ParseTreeWalker();
             DefSymbolsAndScopes definePhase =
-                    new DefSymbolsAndScopes(compiler, compiler.symbolTable);
+                    new DefSymbolsAndScopes(compiler, compiler.symbolTable,
+                            unit);
             ComputeTypes typingPhase =
                     new ComputeTypes(compiler, compiler.symbolTable);
             walker.walk(definePhase, unit.root);

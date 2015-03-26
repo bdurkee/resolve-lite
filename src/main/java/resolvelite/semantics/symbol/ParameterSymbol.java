@@ -96,7 +96,9 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
 
     @Override public String toString() {
         String s = "";
-        s = scope.getScopeDescription() + ".(" + mode.toString().toLowerCase() + ")";
+        s =
+                scope.getScopeDescription() + ".("
+                        + mode.toString().toLowerCase() + ")";
         if ( type != null ) {
             return '<' + s + getName() + "." + type + '>';
         }

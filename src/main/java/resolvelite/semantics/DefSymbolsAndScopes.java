@@ -6,6 +6,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
+import resolvelite.compiler.tree.ImportCollection;
+import resolvelite.compiler.tree.ImportCollection.ImportType;
+import resolvelite.compiler.tree.ResolveAnnotatedParseTree;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.symbol.*;
@@ -22,26 +25,35 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     Scope currentScope; // define symbols in this scope
     ResolveCompiler compiler;
     SymbolTable symtab;
+    ResolveAnnotatedParseTree.TreeAnnotatingBuilder tree;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
-            @NotNull SymbolTable symtab) {
+            @NotNull SymbolTable symtab,
+            ResolveAnnotatedParseTree.TreeAnnotatingBuilder annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;
+        this.tree = annotatedTree;
     }
 
     @Override public void enterPrecisModule(
             @NotNull ResolveParser.PrecisModuleContext ctx) {
-        currentScope = establishModuleScope(ctx.name.getText(), ctx);
+        currentScope =
+                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                        tree.imports.getImportsExcluding(ImportType.EXTERNAL));
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        currentScope = establishModuleScope(ctx.name.getText(), ctx);
+        currentScope =
+                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                        tree.imports.getImportsExcluding(ImportType.EXTERNAL));
     }
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        currentScope = establishModuleScope(ctx.name.getText(), ctx);
+        currentScope =
+                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                        tree.imports.getImportsExcluding(ImportType.EXTERNAL));
     }
 
     @Override public void enterTypeModelDecl(
