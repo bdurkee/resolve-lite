@@ -93,4 +93,13 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
     @NotNull public ParameterMode getMode() {
         return mode;
     }
+
+    @Override public String toString() {
+        String s = "";
+        s = scope.getScopeDescription() + ".(" + mode.toString().toLowerCase() + ")";
+        if ( type != null ) {
+            return '<' + s + getName() + "." + type + '>';
+        }
+        return s + getName();
+    }
 }

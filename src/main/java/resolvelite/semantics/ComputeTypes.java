@@ -110,6 +110,26 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @Override public void exitAssignStmt(
+            @NotNull ResolveParser.AssignStmtContext ctx) {
+        types.put(ctx, checkTypes(ctx, ctx.left, ctx.right));
+    }
+
+    protected Type checkTypes(@NotNull ParserRuleContext parent,
+        @NotNull ResolveParser.ProgExpContext t1,
+            @NotNull ResolveParser.ProgExpContext t2) {
+        Type resultType = null;
+        Type progT1 = types.get(t1);
+        Type progT2 = types.get(t2);
+        if (!progT1.getName().equals(progT2.getName())) {
+            compiler.errorManager.semanticError(ErrorKind.INCOMPATIBLE_TYPES,
+                    null, t1.getText(), progT1, t2.getText(), progT2,
+                    parent.getText());
+            return InvalidType.INSTANCE;
+        }
+        return progT1;
+    }
+
     @SuppressWarnings("unchecked") @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {

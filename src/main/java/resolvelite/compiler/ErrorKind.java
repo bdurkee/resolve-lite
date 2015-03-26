@@ -152,7 +152,10 @@ public enum ErrorKind {
      * Compiler error 19: type <em>name</em> is not known to ba type".
      */
     INVALID_MATH_TYPE(19, "type '<arg>' is not known to be a type",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    INCOMPATIBLE_TYPES(20, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
+            + "program types in <arg5>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
