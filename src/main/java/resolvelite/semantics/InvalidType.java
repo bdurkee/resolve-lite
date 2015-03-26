@@ -6,6 +6,6 @@ public class InvalidType implements Type {
     private InvalidType() {}
 
     @Override public String getName() {
-        return "INVALID";
+        return "Invalid";
     }
 }
