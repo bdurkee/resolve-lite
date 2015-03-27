@@ -1,5 +1,6 @@
 package resolvelite.semantics;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import resolvelite.semantics.symbol.Symbol;
@@ -65,6 +66,12 @@ public interface Scope {
      * @return the found symbol, <code>null</code> if not present.
      */
     @Nullable public Symbol resolve(String name) throws NoSuchSymbolException;
+
+   // @Nullable public Symbol resolve(String name, boolean searchImports)
+   //         throws NoSuchSymbolException;
+
+    @Nullable public Symbol resolve(Token qualifier, Token name)
+            throws NoSuchSymbolException;
 
     public Symbol getSymbol(String name);
 

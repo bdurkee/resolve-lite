@@ -82,9 +82,10 @@ public enum ErrorKind {
             + "declared closing name '<arg2>'", ErrorSeverity.WARNING),
 
     /**
-     * Compiler error 9: no such symbol: <em>name</em>.
+     * Compiler error 9: no such symbol: <em>name</em> in <em>moduleName</em>
      */
-    NO_SUCH_SYMBOL(9, "no such symbol: <arg>", ErrorSeverity.ERROR),
+    NO_SUCH_SYMBOL(9, "no such symbol: <arg> <if(arg2)>in <arg2><endif>",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 10: <em>module1type</em> module '<em>module1</em>' cannot

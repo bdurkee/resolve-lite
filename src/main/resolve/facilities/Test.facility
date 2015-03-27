@@ -2,8 +2,8 @@ Facility Test;
     uses Alt_Test_Fac;
 
     Type Student = Record
-            Info : Student_Info;
-            A : Integer;
+            Info : Integer;
+            A : Boolean;
         end;
 
     Operation Test(evaluates I : Integer);
@@ -15,6 +15,10 @@ Facility Test;
         Procedure
             Var S : Student;
             Var ID, T : Integer;
-            Var I : Alt_Test_Fac::Info;
+            Var bool : Boolean;
+            --Var X : Foo; -- crash! uh oh.
+
+            Var P : Alt_Test_Fac::Info;
+            bool := Alt_Test_Fac::Zoo();
     end Foo;
 end Test;

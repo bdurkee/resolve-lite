@@ -66,7 +66,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         try {
             AbstractReprSymbol rs = null;
             if ( ctx.record() != null ) {
-                rs = new RecordReprSymbol(ctx.name.getText(), ctx);
+                rs = new RecordReprSymbol(ctx.name.getText(), ctx, symtab);
             }
             else {
                 throw new UnsupportedOperationException("named repr types not "
@@ -111,7 +111,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         try {
-            FunctionSymbol func = new FunctionSymbol(ctx.name.getText(), ctx);
+            FunctionSymbol func =
+                    new FunctionSymbol(ctx.name.getText(), ctx, symtab);
             symtab.scopes.put(ctx, func);
             currentScope.define(func);
             currentScope = func;
@@ -151,7 +152,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     private ModuleScope establishModuleScope(@NotNull String moduleName,
             @NotNull ParserRuleContext ctx) {
-        ModuleScope module = new ModuleScope(PredefinedScope.INSTANCE);
+        ModuleScope module = new ModuleScope(symtab.getGlobalScope(), symtab);
         symtab.moduleScopes.put(moduleName, module);
         return module;
     }

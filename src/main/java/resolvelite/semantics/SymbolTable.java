@@ -13,25 +13,25 @@ import java.util.Map;
 
 public class SymbolTable {
 
-    public static final ProgTypeDefinitionSymbol VOID =
-            new ProgTypeDefinitionSymbol("Void");
     public Map<String, ModuleScope> moduleScopes = new HashMap<>();
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
     private final ResolveCompiler compiler;
     private final TypeGraph typeGraph;
+    private final PredefinedScope globalScope;
 
     public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
         this.typeGraph = new TypeGraph();
+        this.globalScope = new PredefinedScope(this);
         initMathTypeSystem();
         initProgramTypeSystem();
     }
 
     private void initProgramTypeSystem() {
         try {
-            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Boolean"));
-            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Integer"));
+            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Boolean", this));
+            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Integer", this));
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException("Dup sym. Todo: put the actual Symbol "
@@ -53,9 +53,20 @@ public class SymbolTable {
     //    definePredefinedSymbol(result);
     //  }
 
+    public ModuleScope getModuleScope(String name)
+            throws NoSuchSymbolException {
+        ModuleScope module = moduleScopes.get(name);
+        if (module == null) throw new NoSuchSymbolException();
+        return module;
+    }
+
     protected void definePredefinedSymbol(Symbol s)
             throws DuplicateSymbolException {
-        PredefinedScope.INSTANCE.define(s);
+        globalScope.define(s);
+    }
+
+    @NotNull public PredefinedScope getGlobalScope() {
+        return globalScope;
     }
 
     @NotNull public ResolveCompiler getCompiler() {

@@ -1,5 +1,6 @@
 package resolvelite.semantics;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.misc.Utils;
 import resolvelite.semantics.symbol.ParameterSymbol;
@@ -13,11 +14,15 @@ public abstract class BaseScope implements Scope {
     protected Scope enclosingScope; // null if predefined (outermost) scope
 
     protected Map<String, Symbol> symbols = new LinkedHashMap<>();
+    protected final SymbolTable scopeRepo;
 
-    public BaseScope() {}
+    public BaseScope(SymbolTable scopeRepo) {
+        this(null, scopeRepo);
+    }
 
-    public BaseScope(Scope enclosingScope) {
+    public BaseScope(Scope enclosingScope, SymbolTable scopeRepo) {
         setEnclosingScope(enclosingScope);
+        this.scopeRepo = scopeRepo;
     }
 
     @Override public Symbol getSymbol(String name) {
@@ -28,17 +33,48 @@ public abstract class BaseScope implements Scope {
         this.enclosingScope = enclosingScope;
     }
 
+    @Override public Symbol resolve(Token qualifier, Token name)
+            throws NoSuchSymbolException {
+        Symbol result = null;
+        if (qualifier != null) {
+            ModuleScope referencedModule =
+                    scopeRepo.getModuleScope(qualifier.getText());
+            result = referencedModule.resolve(name.getText());
+        }
+        else {
+            result = resolve(name.getText());
+        }
+        return result;
+    }
+
+    /*@Override public Symbol resolve(String name, boolean searchImports)
+            throws NoSuchSymbolException {
+        Symbol s = symbols.get(name);
+        if ( s != null ) {
+            //System.out.println("found "+name+" in "+this.asScopeStackString());
+            return s;
+        }
+        // if not here, check any enclosing scope
+        if (this instanceof ModuleScope && searchImports) {
+            ModuleScope module = (ModuleScope) this;
+            for (String referencedImport : module.getImportedModules()) {
+                ModuleScope ref = scopeRepo.moduleScopes.get(referencedImport);
+                return ref.resolve(name, false); // only search one level for now.
+            }
+        }
+        Scope parent = getParentScope();
+        if ( parent != null ) {
+            return parent.resolve(name);
+        }
+        throw new NoSuchSymbolException(name);
+    }*/
+
     @Override public Symbol resolve(String name) throws NoSuchSymbolException {
         Symbol s = symbols.get(name);
         if ( s != null ) {
             //System.out.println("found "+name+" in "+this.asScopeStackString());
             return s;
         }
-        if ( this instanceof ModuleScope ) {
-            ModuleScope x = (ModuleScope)this;
-            System.out.println("Searching: " + x.getImportedModules());
-        }
-        // if not here, check any enclosing scope
         Scope parent = getParentScope();
         if ( parent != null ) return parent.resolve(name);
         throw new NoSuchSymbolException(name);

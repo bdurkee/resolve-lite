@@ -13,8 +13,8 @@ import java.util.*;
 public class ModuleScope extends BaseScope {
     private final Set<String> importedModules = new LinkedHashSet<>();
 
-    public ModuleScope(Scope scope) {
-        super(scope);
+    public ModuleScope(Scope scope, SymbolTable scopeRepo) {
+        super(scope, scopeRepo);
     }
 
     @Override public String getScopeDescription() {

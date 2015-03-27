@@ -4,4 +4,9 @@ Facility Alt_Test_Fac;
             X, Y : Integer;
         end;
 
+    Operation Zoo() : Integer;
+        Procedure
+            Var v : Integer;
+    end Zoo;
+
 end Alt_Test_Fac;

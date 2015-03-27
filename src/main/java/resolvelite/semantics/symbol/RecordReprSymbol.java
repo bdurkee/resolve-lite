@@ -3,6 +3,7 @@ package resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import resolvelite.semantics.DuplicateSymbolException;
 import resolvelite.semantics.NoSuchSymbolException;
+import resolvelite.semantics.SymbolTable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +13,13 @@ public class RecordReprSymbol extends AbstractReprSymbol {
 
     private final Map<String, VariableSymbol> fields = new HashMap<>();
 
-    public RecordReprSymbol(String name, ParserRuleContext tree) {
-        super(name, tree);
+    public RecordReprSymbol(String name, ParserRuleContext tree,
+            SymbolTable scopeRepo) {
+        super(name, tree, scopeRepo);
     }
 
-    public RecordReprSymbol(String name) {
-        this(name, null);
+    public RecordReprSymbol(String name, SymbolTable scopeRepo) {
+        this(name, null, scopeRepo);
     }
 
     @Override public void define(Symbol sym) throws DuplicateSymbolException {

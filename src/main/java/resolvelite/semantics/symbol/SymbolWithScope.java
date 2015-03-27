@@ -2,6 +2,7 @@ package resolvelite.semantics.symbol;
 
 import resolvelite.semantics.BaseScope;
 import resolvelite.semantics.Scope;
+import resolvelite.semantics.SymbolTable;
 
 public abstract class SymbolWithScope extends BaseScope
         implements
@@ -11,7 +12,8 @@ public abstract class SymbolWithScope extends BaseScope
     protected final String name; // All symbols at least have a name
     protected int index; // insertion order from 0; compilers often need this
 
-    public SymbolWithScope(String name) {
+    public SymbolWithScope(String name, SymbolTable scopeRepo) {
+        super(scopeRepo);
         this.name = name;
     }
 

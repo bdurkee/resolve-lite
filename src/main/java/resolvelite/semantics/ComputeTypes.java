@@ -58,7 +58,7 @@ public class ComputeTypes extends SetScopes {
                     (FunctionSymbol) currentScope.resolve(ctx.name.getText());
             Type t = types.get(ctx.type());
             if ( t == null ) {
-                t = SymbolTable.VOID;
+                t = new ProgTypeDefinitionSymbol("Void", symtab);
             }
             func.setType(t);
             types.put(ctx, t);
@@ -72,11 +72,12 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         Type type = null;
         try {
-            type = (Type) currentScope.resolve(ctx.name.getText());
+            type = (Type) currentScope.resolve(ctx.qualifier, ctx.name);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText(),
+                    ctx.qualifier);
             type = InvalidType.INSTANCE;
         }
         types.put(ctx, type);
@@ -99,13 +100,15 @@ public class ComputeTypes extends SetScopes {
                 return; //already typed (as is the case for record member refs.
             }
             VariableSymbol varSym =
-                    (VariableSymbol) currentScope.resolve(ctx.name.getText());
+                    (VariableSymbol)
+                            currentScope.resolve(ctx.qualifier, ctx.name);
             Type t = checkForInvalidType(varSym.getType(), null);
             types.put(ctx, t);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText(),
+                    ctx.qualifier);
             types.put(ctx, InvalidType.INSTANCE);
         }
     }
@@ -138,7 +141,7 @@ public class ComputeTypes extends SetScopes {
     @SuppressWarnings("unchecked") @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {
-            Symbol s = currentScope.resolve(ctx.name.getText());
+            Symbol s = currentScope.resolve(ctx.qualifier, ctx.name);
             if ( s.getClass() != FunctionSymbol.class ) {
                 compiler.errorManager.semanticError(
                         ErrorKind.UNEXPECTED_SYMBOL, ctx.name, "a function", s

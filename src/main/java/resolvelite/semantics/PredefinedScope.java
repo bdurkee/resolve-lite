@@ -9,9 +9,9 @@ import resolvelite.typereasoning.TypeGraph;
  */
 public class PredefinedScope extends BaseScope {
 
-    public static final PredefinedScope INSTANCE = new PredefinedScope();
-
-    private PredefinedScope() {}
+    public PredefinedScope(SymbolTable scopeRepo) {
+        super(scopeRepo);
+    }
 
     @Override public String getScopeDescription() {
         return "predefined";
