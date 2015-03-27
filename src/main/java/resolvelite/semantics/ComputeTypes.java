@@ -100,8 +100,8 @@ public class ComputeTypes extends SetScopes {
                 return; //already typed (as is the case for record member refs.
             }
             VariableSymbol varSym =
-                    (VariableSymbol)
-                            currentScope.resolve(ctx.qualifier, ctx.name);
+                    (VariableSymbol) currentScope.resolve(ctx.qualifier,
+                            ctx.name);
             Type t = checkForInvalidType(varSym.getType(), null);
             types.put(ctx, t);
         }

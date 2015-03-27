@@ -1,6 +1,7 @@
 package resolvelite.semantics.symbol;
 
 import resolvelite.semantics.Scope;
+import resolvelite.semantics.UnexpectedSymbolException;
 
 public interface Symbol {
 
@@ -16,4 +17,6 @@ public interface Symbol {
     int hashCode();
 
     boolean equals(Object o);
+
+    public FacilitySymbol toFacilitySym() throws UnexpectedSymbolException;
 }

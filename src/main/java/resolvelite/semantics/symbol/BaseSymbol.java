@@ -2,6 +2,7 @@ package resolvelite.semantics.symbol;
 
 import resolvelite.semantics.Scope;
 import resolvelite.semantics.Type;
+import resolvelite.semantics.UnexpectedSymbolException;
 
 public abstract class BaseSymbol implements Symbol {
 
@@ -58,6 +59,11 @@ public abstract class BaseSymbol implements Symbol {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    @Override public FacilitySymbol toFacilitySym()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
     }
 
     @Override public boolean equals(Object obj) {

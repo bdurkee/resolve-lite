@@ -3,6 +3,7 @@ package resolvelite.semantics;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.misc.Utils;
+import resolvelite.semantics.symbol.FacilitySymbol;
 import resolvelite.semantics.symbol.ParameterSymbol;
 import resolvelite.semantics.symbol.Symbol;
 
@@ -35,16 +36,40 @@ public abstract class BaseScope implements Scope {
 
     @Override public Symbol resolve(Token qualifier, Token name)
             throws NoSuchSymbolException {
-        Symbol result = null;
         if (qualifier != null) {
-            ModuleScope referencedModule =
-                    scopeRepo.getModuleScope(qualifier.getText());
-            result = referencedModule.resolve(name.getText());
+            return qualifiedResolution(qualifier.getText(), name.getText());
         }
         else {
-            result = resolve(name.getText());
+            return null;
+            //return unqualifiedResolution(name);
         }
-        return result;
+    }
+
+    private Symbol qualifiedResolution(String qualifier, String name)
+            throws NoSuchSymbolException {
+        try {
+            //first look for a facility in the current modulescope with
+            //name 'qualifier'
+            FacilitySymbol f = this.resolve(qualifier).toFacilitySym();
+            //found one, cool. Now search its spec to see if we can find
+            //'name' in there.
+        }
+        catch (UnexpectedSymbolException use) {
+            //change this.
+        }
+        //maybe our facility is in one of our named imports
+        catch (NoSuchSymbolException nsse) {
+            Scope current = this;
+            while (!(current instanceof ModuleScope)) {
+                current = current.getParentScope();
+            }
+            ModuleScope curModuleScope = (ModuleScope) current;
+            Symbol FoundSymbol = null;
+            for (String s : curModuleScope.getImportedModules()) {
+                curModuleScope = scopeRepo.getModuleScope(s);
+                FoundSymbol = curModuleScope.resolve(s);
+            }
+        }
     }
 
     /*@Override public Symbol resolve(String name, boolean searchImports)

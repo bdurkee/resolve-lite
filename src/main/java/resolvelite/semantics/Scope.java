@@ -67,8 +67,8 @@ public interface Scope {
      */
     @Nullable public Symbol resolve(String name) throws NoSuchSymbolException;
 
-   // @Nullable public Symbol resolve(String name, boolean searchImports)
-   //         throws NoSuchSymbolException;
+    // @Nullable public Symbol resolve(String name, boolean searchImports)
+    //         throws NoSuchSymbolException;
 
     @Nullable public Symbol resolve(Token qualifier, Token name)
             throws NoSuchSymbolException;

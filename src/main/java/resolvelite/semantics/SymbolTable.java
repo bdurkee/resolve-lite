@@ -53,10 +53,9 @@ public class SymbolTable {
     //    definePredefinedSymbol(result);
     //  }
 
-    public ModuleScope getModuleScope(String name)
-            throws NoSuchSymbolException {
+    public ModuleScope getModuleScope(String name) throws NoSuchSymbolException {
         ModuleScope module = moduleScopes.get(name);
-        if (module == null) throw new NoSuchSymbolException();
+        if ( module == null ) throw new NoSuchSymbolException();
         return module;
     }
 

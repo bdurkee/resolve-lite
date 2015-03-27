@@ -56,6 +56,18 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         tree.imports.getImportsExcluding(ImportType.EXTERNAL));
     }
 
+    @Override public void enterFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        try {
+            currentScope.define(new FacilitySymbol(ctx.name.getText(),
+                    ctx.spec.getText(), ctx.impl.getText()));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         String name = ctx.name.getText();
