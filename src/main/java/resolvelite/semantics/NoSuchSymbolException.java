@@ -1,6 +1,7 @@
 package resolvelite.semantics;
 
 public class NoSuchSymbolException extends Exception {
+
     public NoSuchSymbolException() {
         super();
     }

@@ -42,6 +42,5 @@ class SetScopes extends ResolveBaseListener {
         if ( symtab.scopes.get(ctx) != null ) {
             currentScope = symtab.scopes.get(ctx);
         }
-
     }
 }

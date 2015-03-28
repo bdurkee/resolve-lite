@@ -77,14 +77,13 @@ public class ComputeTypes extends SetScopes {
             type = (Type) foundSym;
         }
         catch (ClassCastException cce) {
-            compiler.errorManager.semanticError(
-                    ErrorKind.UNEXPECTED_SYMBOL, ctx.name, "a type", foundSym
-                            .getClass().getSimpleName());
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a type", foundSym.getClass().getSimpleName());
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText(),
-                    ctx.qualifier);
+                    ctx.qualifier, nsse.getMessage());
             type = InvalidType.INSTANCE;
         }
         types.put(ctx, type);

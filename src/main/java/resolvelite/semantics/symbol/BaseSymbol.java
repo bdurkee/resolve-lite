@@ -41,10 +41,10 @@ public abstract class BaseSymbol implements Symbol {
         this.name = name;
     }
 
-  /*  @Override public ProgTypeDefinitionSymbol toProgTypeDefSym()
-            throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
-    }*/
+    /*  @Override public ProgTypeDefinitionSymbol toProgTypeDefSym()
+              throws UnexpectedSymbolException {
+          throw new UnexpectedSymbolException();
+      }*/
 
     @Override public String getName() {
         return name;

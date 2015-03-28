@@ -156,7 +156,9 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     INCOMPATIBLE_TYPES(20, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
-            + "program types in <arg5>", ErrorSeverity.ERROR);
+            + "program types in <arg5>", ErrorSeverity.ERROR),
+
+    NO_SUCH_MODULE(21, "no such module: <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
