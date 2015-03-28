@@ -3,11 +3,9 @@ package resolvelite.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.compiler.tree.ImportCollection;
 import resolvelite.compiler.tree.ImportCollection.ImportType;
 import resolvelite.compiler.tree.ResolveAnnotatedParseTree;
 import resolvelite.parsing.ResolveBaseListener;
@@ -15,7 +13,6 @@ import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.symbol.*;
 
 import java.util.List;
-import java.util.Stack;
 
 /**
  * The first phase of compilation, responsible for defining symbols and building
@@ -72,6 +69,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         String name = ctx.name.getText();
+        try {
+            currentScope.define(new ProgTypeSymbol(ctx.name.getText(), symtab,
+                    currentScope.getRootModuleID()));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
     }
 
     @Override public void enterTypeRepresentationDecl(

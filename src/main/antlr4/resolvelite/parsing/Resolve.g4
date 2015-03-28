@@ -75,6 +75,7 @@ conceptBlock
 facilityModule
     :   'Facility' name=Identifier ';'
         (importList)?
+        (requiresClause)?
         (facilityBlock)?
         'end' closename=Identifier ';' EOF
     ;

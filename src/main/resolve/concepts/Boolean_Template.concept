@@ -13,4 +13,7 @@ Concept Boolean_Template;
     Operation And(evaluates a, b: Boolean): Boolean;
         ensures And = (a and b);
 
+    Operation Or(evaluates a, b: Boolean): Boolean;
+        ensures Or = (a or b);
+
 end Boolean_Template;

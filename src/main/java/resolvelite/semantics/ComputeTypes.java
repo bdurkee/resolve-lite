@@ -58,7 +58,9 @@ public class ComputeTypes extends SetScopes {
                     (FunctionSymbol) currentScope.resolve(ctx.name.getText());
             Type t = types.get(ctx.type());
             if ( t == null ) {
-                t = new ProgTypeDefinitionSymbol("Void", symtab);
+                t =
+                        new ProgTypeSymbol("Void", symtab,
+                                currentScope.getRootModuleID());
             }
             func.setType(t);
             types.put(ctx, t);
@@ -237,7 +239,7 @@ public class ComputeTypes extends SetScopes {
     private Type getProgramType(@NotNull ParserRuleContext ctx,
             @NotNull String typeName) {
         try {
-            return (ProgTypeDefinitionSymbol) currentScope.resolve(typeName);
+            return (ProgTypeSymbol) currentScope.resolve(typeName);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(

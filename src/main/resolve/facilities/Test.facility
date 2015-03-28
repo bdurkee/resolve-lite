@@ -3,7 +3,8 @@ Facility Test;
 
     Operation Main();
         Procedure
-            Var X : Standard_Boolens::Zoo;
+            Var X : Std_Boolean_Fac::Boolean;
     end Main;
+
 
 end Test;

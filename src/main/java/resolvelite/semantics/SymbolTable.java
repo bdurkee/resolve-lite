@@ -4,8 +4,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.misc.Utils;
-import resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
+import resolvelite.semantics.symbol.ProgTypeSymbol;
 import resolvelite.semantics.symbol.Symbol;
 import resolvelite.typereasoning.TypeGraph;
 
@@ -30,14 +29,7 @@ public class SymbolTable {
     }
 
     private void initProgramTypeSystem() {
-        try {
-            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Boolean", this));
-            definePredefinedSymbol(new ProgTypeDefinitionSymbol("Integer", this));
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException("Dup sym. Todo: put the actual Symbol "
-                    + "as a field inside the dse exception.");
-        }
+
     }
 
     private void initMathTypeSystem() {
@@ -54,12 +46,11 @@ public class SymbolTable {
     //    definePredefinedSymbol(result);
     //  }
 
-    public ModuleScope getModuleScope(String name)
-            throws NoSuchSymbolException {
+    public ModuleScope getModuleScope(String name) throws NoSuchSymbolException {
         ModuleScope module = moduleScopes.get(name);
         if ( module == null ) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    null, name);
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE, null,
+                    name);
             throw new NoSuchSymbolException();
         }
         return module;

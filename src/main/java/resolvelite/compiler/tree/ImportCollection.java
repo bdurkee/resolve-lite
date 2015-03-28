@@ -76,7 +76,7 @@ public class ImportCollection {
      * @return A set of {@link Token} filtered by <code>type</code>.
      */
     public Set<Token> getImportsExcluding(ImportType... type) {
-        Set<Token> result = new HashSet<Token>();
+        Set<Token> result = new HashSet<>();
         List<ImportType> typesToExclude = Arrays.asList(type);
 
         for (ImportType s : imports.keySet()) {
