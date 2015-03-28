@@ -12,8 +12,8 @@ public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
     protected Type retType;
 
     public FunctionSymbol(String name, ParserRuleContext tree,
-            SymbolTable scopeRepo) {
-        super(name, scopeRepo);
+            SymbolTable scopeRepo, String rootModuleID) {
+        super(name, scopeRepo, rootModuleID);
         this.tree = tree;
     }
 

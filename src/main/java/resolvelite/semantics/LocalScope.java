@@ -7,8 +7,9 @@ import resolvelite.typereasoning.TypeGraph;
 
 public class LocalScope extends BaseScope {
 
-    public LocalScope(Scope enclosingScope, SymbolTable scopeRepo) {
-        super(enclosingScope, scopeRepo);
+    public LocalScope(Scope enclosingScope, SymbolTable scopeRepo,
+            String rootModuleID) {
+        super(enclosingScope, scopeRepo, rootModuleID);
     }
 
     @Override public String getScopeDescription() {

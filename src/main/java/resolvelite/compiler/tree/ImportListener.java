@@ -34,6 +34,7 @@ import org.antlr.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.misc.NotNull;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
+import resolvelite.compiler.tree.ImportCollection.ImportType;
 
 /**
  * Fills in the contents of an {@link ImportCollection} by visiting the
@@ -48,10 +49,16 @@ public class ImportListener extends ResolveBaseListener {
         return builder.build();
     }
 
-    //Todo: override facilities, enhancements, etc when they get added to the
-    //grammar.
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
-        builder.imports(ImportCollection.ImportType.EXPLICIT, ctx.Identifier());
+        builder.imports(ImportType.EXPLICIT, ctx.Identifier());
+    }
+
+    @Override public void exitFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        builder.imports(ImportType.IMPLICIT, ctx.spec);
+        ImportCollection.ImportType type = (ctx.externally != null) ?
+                ImportType.EXTERNAL : ImportType.IMPLICIT;
+        builder.imports(type, ctx.impl);
     }
 }

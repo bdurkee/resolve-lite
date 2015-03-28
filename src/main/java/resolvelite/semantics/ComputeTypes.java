@@ -71,8 +71,15 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         Type type = null;
+        Symbol foundSym = null;
         try {
-            type = (Type) currentScope.resolve(ctx.qualifier, ctx.name);
+            foundSym = currentScope.resolve(ctx.qualifier, ctx.name);
+            type = (Type) foundSym;
+        }
+        catch (ClassCastException cce) {
+            compiler.errorManager.semanticError(
+                    ErrorKind.UNEXPECTED_SYMBOL, ctx.name, "a type", foundSym
+                            .getClass().getSimpleName());
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(

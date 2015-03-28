@@ -14,12 +14,13 @@ public class RecordReprSymbol extends AbstractReprSymbol {
     private final Map<String, VariableSymbol> fields = new HashMap<>();
 
     public RecordReprSymbol(String name, ParserRuleContext tree,
-            SymbolTable scopeRepo) {
-        super(name, tree, scopeRepo);
+            SymbolTable scopeRepo, String rootModuleID) {
+        super(name, tree, scopeRepo, rootModuleID);
     }
 
-    public RecordReprSymbol(String name, SymbolTable scopeRepo) {
-        this(name, null, scopeRepo);
+    public RecordReprSymbol(String name, SymbolTable scopeRepo,
+            String rootModuleID) {
+        this(name, null, scopeRepo, rootModuleID);
     }
 
     @Override public void define(Symbol sym) throws DuplicateSymbolException {

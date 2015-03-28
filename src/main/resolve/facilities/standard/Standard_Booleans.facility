@@ -1,7 +1,8 @@
 Facility Standard_Booleans;
 
-    Type Foo = Record
-            X, Y : Integer;
+    Type Zoo = Record
+            x, y : Integer;
         end;
-
+    Facility Std_Boolean_Fac is Boolean_Template
+        externally realized by Boolean_Impl;
 end Standard_Booleans;

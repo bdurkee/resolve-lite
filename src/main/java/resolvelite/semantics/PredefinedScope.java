@@ -10,7 +10,7 @@ import resolvelite.typereasoning.TypeGraph;
 public class PredefinedScope extends BaseScope {
 
     public PredefinedScope(SymbolTable scopeRepo) {
-        super(scopeRepo);
+        super(scopeRepo, "GLOBAL");
     }
 
     @Override public String getScopeDescription() {

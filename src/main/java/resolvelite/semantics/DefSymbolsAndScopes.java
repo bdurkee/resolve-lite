@@ -1,6 +1,7 @@
 package resolvelite.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -59,8 +60,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {
-            currentScope.define(new FacilitySymbol(ctx.name.getText(),
-                    ctx.spec.getText(), ctx.impl.getText()));
+            currentScope.define(new FacilitySymbol(ctx.name.getText(), ctx.spec
+                    .getText(), ctx.impl.getText()));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -78,7 +79,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         try {
             AbstractReprSymbol rs = null;
             if ( ctx.record() != null ) {
-                rs = new RecordReprSymbol(ctx.name.getText(), ctx, symtab);
+                rs =
+                        new RecordReprSymbol(ctx.name.getText(), ctx, symtab,
+                                currentScope.getRootModuleID());
             }
             else {
                 throw new UnsupportedOperationException("named repr types not "
@@ -120,19 +123,34 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
-    @Override public void enterOperationProcedureDecl(
-            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+    private void insertFunction(Token name, ParserRuleContext ctx) {
         try {
             FunctionSymbol func =
-                    new FunctionSymbol(ctx.name.getText(), ctx, symtab);
+                    new FunctionSymbol(name.getText(), ctx, symtab,
+                            currentScope.getRootModuleID());
             symtab.scopes.put(ctx, func);
             currentScope.define(func);
             currentScope = func;
         }
         catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
-                    ctx.name.getText());
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
         }
+    }
+
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        insertFunction(ctx.name, ctx);
+    }
+
+    @Override public void enterOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        insertFunction(ctx.name, ctx);
+    }
+
+    @Override public void exitOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        currentScope = currentScope.getEnclosingScope();
     }
 
     @Override public void exitParameterDeclGroup(
@@ -164,7 +182,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     private ModuleScope establishModuleScope(@NotNull String moduleName,
             @NotNull ParserRuleContext ctx) {
-        ModuleScope module = new ModuleScope(symtab.getGlobalScope(), symtab);
+        ModuleScope module =
+                new ModuleScope(symtab.getGlobalScope(), symtab, moduleName);
         symtab.moduleScopes.put(moduleName, module);
         return module;
     }

@@ -12,12 +12,13 @@ public abstract class AbstractReprSymbol extends SymbolWithScope
     protected ParserRuleContext tree;
 
     public AbstractReprSymbol(String name, ParserRuleContext tree,
-            SymbolTable scopeRepo) {
-        super(name, scopeRepo);
+            SymbolTable scopeRepo, String rootModuleID) {
+        super(name, scopeRepo, rootModuleID);
         this.tree = tree;
     }
 
-    public AbstractReprSymbol(String name, SymbolTable scopeRepo) {
-        this(name, null, scopeRepo);
+    public AbstractReprSymbol(String name, SymbolTable scopeRepo,
+            String rootModuleID) {
+        this(name, null, scopeRepo, rootModuleID);
     }
 }

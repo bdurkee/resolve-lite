@@ -14,6 +14,8 @@ public interface Scope {
 
     @Nullable public Scope getParentScope();
 
+    public String getRootModuleID();
+
     /**
      * Returns the <code>Scope</code> surrounding this <code>Scope</code>.
      * In practice, this defines where to look next for symbols.
@@ -29,8 +31,6 @@ public interface Scope {
      * @return A list of nested <code>Scope</code>s of <code>this</code>.
      */
     public List<Scope> getNestedScopes();
-
-    public Set<String> getImports();
 
     /**
      * Set which <code>Scope</code> encloses this scope. E.g., if this scope is

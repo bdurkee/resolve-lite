@@ -16,18 +16,17 @@ public abstract class BaseScope implements Scope {
 
     protected Map<String, Symbol> symbols = new LinkedHashMap<>();
     protected final SymbolTable scopeRepo;
+    protected final String rootModuleID;
 
-    public BaseScope(SymbolTable scopeRepo) {
-        this(null, scopeRepo);
+    public BaseScope(SymbolTable scopeRepo, String rootModuleID) {
+        this(null, scopeRepo, rootModuleID);
     }
 
-    public BaseScope(Scope enclosingScope, SymbolTable scopeRepo) {
+    public BaseScope(Scope enclosingScope, SymbolTable scopeRepo,
+            String rootModuleID) {
         setEnclosingScope(enclosingScope);
         this.scopeRepo = scopeRepo;
-    }
-
-    @Override public Set<String> getImports() {
-        return Collections.emptySet();
+        this.rootModuleID = rootModuleID;
     }
 
     @Override public Symbol getSymbol(String name) {
@@ -40,43 +39,53 @@ public abstract class BaseScope implements Scope {
 
     @Override public Symbol resolve(Token qualifier, Token name)
             throws NoSuchSymbolException {
-        if (qualifier != null) {
+        if ( qualifier != null ) {
             return qualifiedResolution(qualifier.getText(), name.getText());
         }
         else {
-            return null;
-            //return unqualifiedResolution(name);
+            //for now just a local modulescope resolve.
+            return resolve(name.getText());
         }
     }
 
     private Symbol qualifiedResolution(String qualifier, String name)
             throws NoSuchSymbolException {
-        Symbol referencedFacility = null;
+        FacilitySymbol referencedFacility = null;
         try {
             //first look for a facility in the current modulescope with
             //name 'qualifier'
             Symbol f = this.resolve(qualifier);
             referencedFacility = (FacilitySymbol) f;
         }
-        //maybe our facility is in one of our named imports
+        //maybe the fac referenced by qualifier is in one of our named imports?
         catch (NoSuchSymbolException nsse) {
-            for(String importedScope : this.getImports()) {
+            ModuleScope thisModule =
+                    scopeRepo.getModuleScope(this.getRootModuleID());
+            for (String referencedModule : thisModule.getImports()) {
                 try {
-                    referencedFacility = scopeRepo.moduleScopes
-                            .get(importedScope).resolve(qualifier);
-                } catch (NoSuchSymbolException e) {
+                    /// scopeRepo.getModuleScope(this.g);
+                    referencedFacility = //
+                            (FacilitySymbol) scopeRepo //
+                                    .getModuleScope(referencedModule) //
+                                    .resolve(qualifier); //
+                    if ( referencedFacility != null ) break;
+                }
+                catch (ClassCastException | NoSuchSymbolException cce) {
                     referencedFacility = null;
                 }
             }
         }
-        if (referencedFacility == null) {
-            //ok maybe our qualifier is just referencing an imported module.
-            String refModule = this.getImports().stream()
-                    .filter(i -> i.equals(qualifier)).toString();
-            scopeRepo.moduleScopes.get(refModule).resolve(name);
+        if ( referencedFacility == null ) {
+            //ok maybe our qualifier is just referencing a named
+            //(imported) module.
+            return scopeRepo.getModuleScope(qualifier).resolve(name);
         }
-
-        return null;
+        else {
+            //we're referencing a facility, let's search it to see if we
+            //can find the requested symbol.
+            return scopeRepo.getModuleScope(referencedFacility.getSpecName())
+                    .resolve(name);
+        }
     }
 
     @Override public Symbol resolve(String name) throws NoSuchSymbolException {
@@ -98,6 +107,10 @@ public abstract class BaseScope implements Scope {
         //Note that we set the enclosing scopes here
         sym.setScope(this);
         symbols.put(sym.getName(), sym);
+    }
+
+    @Override public String getRootModuleID() {
+        return rootModuleID;
     }
 
     @Override public Scope getParentScope() {

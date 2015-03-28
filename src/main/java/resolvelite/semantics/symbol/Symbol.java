@@ -1,6 +1,7 @@
 package resolvelite.semantics.symbol;
 
 import resolvelite.semantics.Scope;
+import resolvelite.semantics.Type;
 import resolvelite.semantics.UnexpectedSymbolException;
 
 public interface Symbol {
@@ -17,4 +18,7 @@ public interface Symbol {
     int hashCode();
 
     boolean equals(Object o);
+
+    //todo: this should be changed to ProgTypeSymbol in the future once we kill
+    //the hardcoded defs of Integer and Boolean.
 }
