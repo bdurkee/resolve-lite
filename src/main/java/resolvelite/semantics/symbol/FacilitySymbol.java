@@ -21,8 +21,4 @@ public class FacilitySymbol extends BaseSymbol {
         return implName;
     }
 
-    @Override public FacilitySymbol toFacilitySym()
-            throws UnexpectedSymbolException {
-        return this;
-    }
 }

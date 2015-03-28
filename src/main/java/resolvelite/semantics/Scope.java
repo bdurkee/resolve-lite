@@ -30,6 +30,8 @@ public interface Scope {
      */
     public List<Scope> getNestedScopes();
 
+    public Set<String> getImports();
+
     /**
      * Set which <code>Scope</code> encloses this scope. E.g., if this scope is
      * a function, the enclosing scope could be a class. The {@link BaseScope}

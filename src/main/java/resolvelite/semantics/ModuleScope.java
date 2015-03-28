@@ -26,7 +26,7 @@ public class ModuleScope extends BaseScope {
         return this;
     }
 
-    public Set<String> getImportedModules() {
+    @Override public Set<String> getImports() {
         return importedModules;
     }
 }

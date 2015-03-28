@@ -61,11 +61,6 @@ public abstract class BaseSymbol implements Symbol {
         this.type = type;
     }
 
-    @Override public FacilitySymbol toFacilitySym()
-            throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
-    }
-
     @Override public boolean equals(Object obj) {
         if ( !(obj instanceof Symbol) ) {
             return false;

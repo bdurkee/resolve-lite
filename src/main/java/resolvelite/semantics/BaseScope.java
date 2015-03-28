@@ -26,6 +26,10 @@ public abstract class BaseScope implements Scope {
         this.scopeRepo = scopeRepo;
     }
 
+    @Override public Set<String> getImports() {
+        return Collections.emptySet();
+    }
+
     @Override public Symbol getSymbol(String name) {
         return symbols.get(name);
     }
@@ -47,52 +51,33 @@ public abstract class BaseScope implements Scope {
 
     private Symbol qualifiedResolution(String qualifier, String name)
             throws NoSuchSymbolException {
+        Symbol referencedFacility = null;
         try {
             //first look for a facility in the current modulescope with
             //name 'qualifier'
-            FacilitySymbol f = this.resolve(qualifier).toFacilitySym();
-            //found one, cool. Now search its spec to see if we can find
-            //'name' in there.
-        }
-        catch (UnexpectedSymbolException use) {
-            //change this.
+            Symbol f = this.resolve(qualifier);
+            referencedFacility = (FacilitySymbol) f;
         }
         //maybe our facility is in one of our named imports
         catch (NoSuchSymbolException nsse) {
-            Scope current = this;
-            while (!(current instanceof ModuleScope)) {
-                current = current.getParentScope();
-            }
-            ModuleScope curModuleScope = (ModuleScope) current;
-            Symbol FoundSymbol = null;
-            for (String s : curModuleScope.getImportedModules()) {
-                curModuleScope = scopeRepo.getModuleScope(s);
-                FoundSymbol = curModuleScope.resolve(s);
+            for(String importedScope : this.getImports()) {
+                try {
+                    referencedFacility = scopeRepo.moduleScopes
+                            .get(importedScope).resolve(qualifier);
+                } catch (NoSuchSymbolException e) {
+                    referencedFacility = null;
+                }
             }
         }
-    }
+        if (referencedFacility == null) {
+            //ok maybe our qualifier is just referencing an imported module.
+            String refModule = this.getImports().stream()
+                    .filter(i -> i.equals(qualifier)).toString();
+            scopeRepo.moduleScopes.get(refModule).resolve(name);
+        }
 
-    /*@Override public Symbol resolve(String name, boolean searchImports)
-            throws NoSuchSymbolException {
-        Symbol s = symbols.get(name);
-        if ( s != null ) {
-            //System.out.println("found "+name+" in "+this.asScopeStackString());
-            return s;
-        }
-        // if not here, check any enclosing scope
-        if (this instanceof ModuleScope && searchImports) {
-            ModuleScope module = (ModuleScope) this;
-            for (String referencedImport : module.getImportedModules()) {
-                ModuleScope ref = scopeRepo.moduleScopes.get(referencedImport);
-                return ref.resolve(name, false); // only search one level for now.
-            }
-        }
-        Scope parent = getParentScope();
-        if ( parent != null ) {
-            return parent.resolve(name);
-        }
-        throw new NoSuchSymbolException(name);
-    }*/
+        return null;
+    }
 
     @Override public Symbol resolve(String name) throws NoSuchSymbolException {
         Symbol s = symbols.get(name);
@@ -147,15 +132,4 @@ public abstract class BaseScope implements Scope {
         return getScopeDescription() + ":" + symbols.keySet().toString();
     }
 
-    /*public String toTestString() {
-        return toTestString(", ", ".");
-    }
-
-    public String toTestString(String separator, String scopePathSeparator) {
-        List<? extends Symbol> allSymbols = this.getAllSymbols();
-        List<String> syms = Utils.map(allSymbols, s ->
-                s.getScope().getScopeDescription()
-                        + scopePathSeparator + s.getName());
-        return Utils.join(syms, separator);
-    }*/
 }
