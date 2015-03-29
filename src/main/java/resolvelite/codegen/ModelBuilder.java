@@ -36,8 +36,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.codegen.model.*;
+import resolvelite.compiler.tree.AnnotatedTree;
 import resolvelite.compiler.tree.ImportCollection;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
 import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
@@ -59,7 +59,7 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull SymbolTable scopeRepository) {
         this.gen = g;
         this.moduleScope =
-                scopeRepository.moduleScopes.get(g.getModule().name.getText());
+                scopeRepository.moduleScopes.get(g.getModule().getName());
     }
 
     @Override public void exitTypeModelDecl(
@@ -134,11 +134,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        TreeAnnotatingBuilder annotatedTree = gen.getModule();
+        AnnotatedTree annotatedTree = gen.getModule();
         ModuleFile file =
-                new ModuleFile(annotatedTree,
-                        Utils.groomFileName(annotatedTree.fileName));
-        file.targetDir = ImportRef.listifyFileString(annotatedTree.fileName);
+                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
+                        .getFileName()));
+        file.targetDir =
+                ImportRef.listifyFileString(annotatedTree.getFileName());
         FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
@@ -172,11 +173,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        TreeAnnotatingBuilder annotatedTree = gen.getModule();
+        AnnotatedTree annotatedTree = gen.getModule();
         ModuleFile file =
-                new ModuleFile(annotatedTree,
-                        Utils.groomFileName(annotatedTree.fileName));
-        file.targetDir = ImportRef.listifyFileString(annotatedTree.fileName);
+                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
+                        .getFileName()));
+        file.targetDir =
+                ImportRef.listifyFileString(annotatedTree.getFileName());
         SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
@@ -205,7 +207,7 @@ public class ModelBuilder extends ResolveBaseListener {
      * @param m A module builder maintaining a collection of imports
      * @return a set of model-friendly imports.
      */
-    protected Set<ImportRef> buildImports(@NotNull TreeAnnotatingBuilder m) {
+    protected Set<ImportRef> buildImports(@NotNull AnnotatedTree m) {
         Set<ImportRef> result = new HashSet<ImportRef>();
         /*
          * for (Token t : m.imports.getImportsExcluding(
@@ -232,7 +234,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     public boolean withinFacilityModule() {
-        ParseTree t = gen.getModule().root;
+        ParseTree t = gen.getModule().getRoot();
         return t instanceof ResolveParser.FacilityModuleContext;
     }
 

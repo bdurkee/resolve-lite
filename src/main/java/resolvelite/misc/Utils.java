@@ -32,6 +32,7 @@ package resolvelite.misc;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import resolvelite.parsing.ResolveParser;
 
@@ -83,6 +84,25 @@ public class Utils {
             ctx = ctx.getParent();
         }
         return null;
+    }
+
+    public static String getModuleName(@NotNull ParseTree ctx) {
+        if ( ctx instanceof ResolveParser.ModuleContext ) {
+            ctx = ctx.getChild(0);
+        }
+
+        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
+            return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
+            return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
+            return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
+        }
+        else {
+            throw new IllegalArgumentException("Unrecognized module");
+        }
     }
 
     public static <T> List<T> filter(List<T> data, Predicate<T> pred) {

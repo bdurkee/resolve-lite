@@ -43,7 +43,7 @@ import resolvelite.parsing.ResolveLexer;
  */
 public class ResolveToken extends CommonToken {
 
-    public String mySourceName;
+    public String sourceName;
 
     public ResolveToken(String text) {
         super(ResolveLexer.Identifier, text);

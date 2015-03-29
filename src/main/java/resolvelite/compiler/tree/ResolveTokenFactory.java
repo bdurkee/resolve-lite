@@ -58,7 +58,7 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
         ResolveToken t = new ResolveToken(source, type, channel, start, stop);
         t.setLine(line);
         t.setCharPositionInLine(charPositionInLine);
-        t.mySourceName = myInput.getSourceName();
+        t.sourceName = myInput.getSourceName();
         return t;
     }
 }

@@ -34,6 +34,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.misc.Utils.Builder;
+import resolvelite.parsing.ResolveParser;
 
 import java.util.*;
 
@@ -46,37 +47,37 @@ import java.util.*;
  * implementations are preceded by the <tt>externally</tt> keyword.</li>
  * 
  * <li><strong>Implicit</strong> imports are those that are implicitly
- * referenced via a {@link ResolveParser.FacilityDecl} or enhancement.</li>
+ * referenced via a {@link ResolveParser.FacilityDeclContext} or enhancement.</li>
  * 
  * <li><strong>Explicit</strong> imports are any mentioned explicitly in the
  * <tt>imports</tt> list in a module's preamble.</li>
  * </ul>
  */
-//Todo: If an import is classified as explicit then a facility implicitly
-//makes mention of it again, delete it from the implicit list (since it's
-//actually now explicit. In other words, explicit imports in some sense have
-//highest priority; so if it's listed there, no need to mention it again
-//implicitly.
 public class ImportCollection {
 
     public static enum ImportType {
         EXPLICIT, IMPLICIT, EXTERNAL
     }
 
-    private final Map<ImportType, Set<Token>> imports;
+    private final Map<ImportType, Set<String>> imports = new HashMap<>();
 
-    private ImportCollection(ImportCollectionBuilder builder) {
-        this.imports = builder.imports;
+    public ImportCollection() {
+        for (int i = 0; i < ImportType.values().length; i++) {
+            ImportType curType = ImportType.values()[i];
+            if ( imports.get(curType) == null ) {
+                imports.put(curType, new HashSet<>());
+            }
+        }
     }
 
     /**
      * Retrieves a set of all imports except those of <code>type</code>.
      * 
      * @param type Any types we would like to filter/exclude.
-     * @return A set of {@link Token} filtered by <code>type</code>.
+     * @return A set of imports filtered by <code>type</code>.
      */
-    public Set<Token> getImportsExcluding(ImportType... type) {
-        Set<Token> result = new HashSet<>();
+    public Set<String> getImportsExcluding(ImportType... type) {
+        Set<String> result = new HashSet<>();
         List<ImportType> typesToExclude = Arrays.asList(type);
 
         for (ImportType s : imports.keySet()) {
@@ -87,20 +88,42 @@ public class ImportCollection {
         return result;
     }
 
-    public Set<Token> getImportsOfType(ImportType type) {
+    public Set<String> getImportsOfType(ImportType type) {
         return imports.get(type);
     }
 
-    /**
-     * Removes {@link Token} <code>t</code> from this import collection.
-     * 
-     * @param e The token reference to remove.
-     * @return A modified collection with <code>e</code> deleted.
-     */
-    public void removeImport(Token e) {
-        for (Set<Token> category : imports.values()) {
-            category.remove(e);
+    public void imports(ImportType type, String... t) {
+        addTokenSet(type, Arrays.asList(t));
+    }
+
+    public void imports(ImportType type, TerminalNode... t) {
+        imports(type, Arrays.asList(t));
+    }
+
+    public void imports(ImportType type, List<TerminalNode> terminals) {
+        List<String> convertedTerms = new ArrayList<>();
+        for (TerminalNode t : terminals) {
+            convertedTerms.add(t.getSymbol().getText());
         }
+        addTokenSet(type, convertedTerms);
+    }
+
+    public void addImports(ImportType type, String... t) {
+        addTokenSet(type, Arrays.asList(t));
+    }
+
+    private void addTokenSet(ImportType type, Collection<String> newToks) {
+        Set<String> tokSet = imports.get(type);
+        if ( tokSet == null ) {
+            tokSet = new HashSet<String>();
+        }
+        //Todo: Do a little normalization here on additions. For instance,
+        //if something already exists in the map as an implicit import,
+        //but is later added as an explicit import too, then it the import
+        //should appear twice in two different categories (especially if
+        // it's already listed as an implicit import). So in other words,
+        //cull duplicate references in multiple categories...
+        tokSet.addAll(newToks);
     }
 
     /**
@@ -114,111 +137,17 @@ public class ImportCollection {
      * @return <code>true</code> if <code>t</code> is in the set of
      *         <code>type</code>, <code>false</code> otherwise.
      */
-    public boolean inCategory(ImportType type, Token t) {
+    public boolean inCategory(ImportType type, String t) {
         return imports.get(type).contains(t);
     }
 
-    /**
-     * <p>
-     * Returns all imports, regardless of their <code>ImportType</code>, in a
-     * single set.
-     * </p>
-     * 
-     * @return <strong>All</strong> imports.
-     */
-    public Set<Token> getAllImports() {
-        Set<Token> aggregateImports = new HashSet<Token>();
+    public Set<String> getAllImports() {
+        Set<String> aggregateImports = new HashSet<>();
 
-        for (Set<Token> typeSet : imports.values()) {
+        for (Set<String> typeSet : imports.values()) {
             aggregateImports.addAll(typeSet);
         }
         return aggregateImports;
-    }
-
-    public static class ImportCollectionBuilder
-            implements
-                Builder<ImportCollection> {
-
-        protected final Map<ImportType, Set<Token>> imports =
-                new HashMap<ImportType, Set<Token>>();
-
-        public ImportCollectionBuilder() {
-            this(null, null);
-        }
-
-        public ImportCollectionBuilder(Token start, Token stop) {
-            //Initialize the uses/import map to empty sets
-            for (int i = 0; i < ImportType.values().length; i++) {
-                ImportType curType = ImportType.values()[i];
-                if ( imports.get(curType) == null ) {
-                    imports.put(curType, new HashSet<Token>());
-                }
-            }
-        }
-
-        /*
-         * public ImportCollectionBuilder imports(
-         * 
-         * @NotNull ResolveParser.FacilityDeclContext ctx) {
-         * imports(ImportType.IMPLICIT, ctx.concept);
-         * ImportType specType =
-         * (ctx.externally != null) ? ImportType.EXTERNAL
-         * : ImportType.IMPLICIT;
-         * imports(specType, ctx.impl);
-         * //Todo: External keyword for enhancement pairs.
-         * for (ResolveParser.EnhancementPairDeclContext enhancement : ctx
-         * .enhancementPairDecl()) {
-         * imports(ImportType.IMPLICIT, enhancement.spec);
-         * imports(specType, enhancement.impl);
-         * }
-         * return this;
-         * }
-         */
-
-        public ImportCollectionBuilder imports(ImportType type, Token... t) {
-            addTokenSet(type, Arrays.asList(t));
-            return this;
-        }
-
-        public ImportCollectionBuilder imports(ImportType type,
-                TerminalNode... t) {
-            imports(type, Arrays.asList(t));
-            return this;
-        }
-
-        public ImportCollectionBuilder imports(ImportType type,
-                List<TerminalNode> terminals) {
-            List<Token> convertedTerms = new ArrayList<Token>();
-            for (TerminalNode t : terminals) {
-                convertedTerms.add(t.getSymbol());
-            }
-            addTokenSet(type, convertedTerms);
-            return this;
-        }
-
-        public ImportCollectionBuilder addImports(ImportType type, Token... t) {
-            addTokenSet(type, Arrays.asList(t));
-            return this;
-        }
-
-        private void addTokenSet(ImportType type,
-                Collection<? extends Token> newToks) {
-            Set<Token> tokSet = imports.get(type);
-            if ( tokSet == null ) {
-                tokSet = new HashSet<Token>();
-            }
-            //Todo: Do a little normalization here on additions. For instance,
-            //if something already exists in the map as an implicit import,
-            //but is later added as an explicit import too, then it the import
-            //should appear twice in two different categories (especially if
-            // it's already listed as an implicit import). So in other words,
-            //cull duplicate references in multiple categories...
-            tokSet.addAll(newToks);
-        }
-
-        @Override public ImportCollection build() {
-            return new ImportCollection(this);
-        }
     }
 
 }

@@ -4,31 +4,31 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import resolvelite.compiler.AbstractCompilationPipeline;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.AnnotatedTree;
 
 import java.util.List;
 
 public class AnalysisPipeline extends AbstractCompilationPipeline {
 
     public AnalysisPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
+            @NotNull List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }
 
     @Override public void process() {
-        for (TreeAnnotatingBuilder unit : compilationUnits) {
-            compiler.info("populating: " + unit.name.getText());
+        for (AnnotatedTree unit : compilationUnits) {
+            compiler.info("populating: " + unit.getName());
             ParseTreeWalker walker = new ParseTreeWalker();
             DefSymbolsAndScopes definePhase =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
             ComputeTypes typingPhase =
                     new ComputeTypes(compiler, compiler.symbolTable);
-            walker.walk(definePhase, unit.root);
-            walker.walk(typingPhase, unit.root);
+            walker.walk(definePhase, unit.getRoot());
+            walker.walk(typingPhase, unit.getRoot());
 
             PrintTypes pt = new PrintTypes(typingPhase.types);
-            walker.walk(pt, unit.root);
+            walker.walk(pt, unit.getRoot());
             int i = 0;
         }
     }

@@ -21,8 +21,8 @@ public class ModuleScope extends BaseScope {
         return "module";
     }
 
-    public ModuleScope addImports(Set<Token> imports) {
-        imports.forEach(i -> importedModules.add(i.getText()));
+    public ModuleScope addImports(Set<String> imports) {
+        imports.forEach(importedModules::add);
         return this;
     }
 

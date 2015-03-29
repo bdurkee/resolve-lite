@@ -42,24 +42,23 @@ import resolvelite.compiler.tree.ImportCollection.ImportType;
  */
 public class ImportListener extends ResolveBaseListener {
 
-    private final ImportCollection.ImportCollectionBuilder builder =
-            new ImportCollection.ImportCollectionBuilder();
+    private final ImportCollection importCollection = new ImportCollection();
 
     @NotNull public ImportCollection getImports() {
-        return builder.build();
+        return importCollection;
     }
 
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
-        builder.imports(ImportType.EXPLICIT, ctx.Identifier());
+        importCollection.imports(ImportType.EXPLICIT, ctx.Identifier());
     }
 
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        builder.imports(ImportType.IMPLICIT, ctx.spec);
+        importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
         ImportCollection.ImportType type =
                 (ctx.externally != null) ? ImportType.EXTERNAL
                         : ImportType.IMPLICIT;
-        builder.imports(type, ctx.impl);
+        importCollection.imports(type, ctx.impl.getText());
     }
 }

@@ -41,7 +41,7 @@ import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import resolvelite.codegen.CodeGenPipeline;
 import resolvelite.compiler.tree.ImportCollection;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.AnnotatedTree;
 import resolvelite.compiler.tree.ResolveTokenFactory;
 import resolvelite.misc.FileLocator;
 import resolvelite.misc.LogManager;
@@ -201,8 +201,7 @@ public class ResolveCompiler {
     }
 
     public void processCommandLineTargets() {
-        List<TreeAnnotatingBuilder> targets =
-                sortTargetModulesByUsesReferences();
+        List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errorManager.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
@@ -214,25 +213,25 @@ public class ResolveCompiler {
         codegenPipe.process();
     }
 
-    public List<TreeAnnotatingBuilder> sortTargetModulesByUsesReferences() {
-        Map<String, TreeAnnotatingBuilder> roots = new HashMap<>();
+    public List<AnnotatedTree> sortTargetModulesByUsesReferences() {
+        Map<String, AnnotatedTree> roots = new HashMap<>();
         for (String fileName : targetFiles) {
-            TreeAnnotatingBuilder t = parseModule(fileName);
+            AnnotatedTree t = parseModule(fileName);
             if ( t == null || t.hasErrors ) {
                 continue;
             }
-            roots.put(t.name.getText(), t);
+            roots.put(t.getName(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
-        for (TreeAnnotatingBuilder t : Collections.unmodifiableCollection(roots
+        for (AnnotatedTree t : Collections.unmodifiableCollection(roots
                 .values())) {
-            g.addVertex(t.name.getText());
+            g.addVertex(t.getName());
             findDependencies(g, t, roots);
         }
-        List<TreeAnnotatingBuilder> finalOrdering = new ArrayList<>();
+        List<AnnotatedTree> finalOrdering = new ArrayList<>();
         for (String s : getCompileOrder(g)) {
-            TreeAnnotatingBuilder m = roots.get(s);
+            AnnotatedTree m = roots.get(s);
             if ( m.hasErrors ) {
                 finalOrdering.clear();
                 break;
@@ -242,32 +241,29 @@ public class ResolveCompiler {
         return finalOrdering;
     }
 
-    private void
-            findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
-                    TreeAnnotatingBuilder root,
-                    Map<String, TreeAnnotatingBuilder> roots) {
-        for (Token importRequest : root.imports
+    private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
+            AnnotatedTree root, Map<String, AnnotatedTree> roots) {
+        for (String importRequest : root.imports
                 .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
-            TreeAnnotatingBuilder module = roots.get(importRequest.getText());
+            AnnotatedTree module = roots.get(importRequest);
             try {
-                File file =
-                        findResolveFile(importRequest.getText(), NATIVE_EXT);
+                File file = findResolveFile(importRequest, NATIVE_EXT);
 
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
-                    roots.put(module.name.getText(), module);
+                    roots.put(module.getName(), module);
                 }
             }
             catch (IOException ioe) {
-                errorManager.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest, importRequest.getText());
+                errorManager.semanticError(ErrorKind.MISSING_IMPORT_FILE, null,
+                        importRequest, importRequest);
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
 
             if ( root.imports.inCategory(ImportCollection.ImportType.EXPLICIT,
-                    module.name) ) {
+                    module.getName()) ) {
                 /*
                  * if (!module.appropriateForImport()) {
                  * errorManager.toolError(ErrorKind.INVALID_IMPORT,
@@ -277,12 +273,11 @@ public class ResolveCompiler {
                  * }
                  */
             }
-            if ( pathExists(g, module.name.getText(), root.name.getText()) ) {
+            if ( pathExists(g, module.getName(), root.getName()) ) {
                 //Todo.
                 throw new IllegalStateException("circular dependency detected");
             }
-            Graphs.addEdgeWithVertices(g, root.name.getText(),
-                    module.name.getText());
+            Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
             findDependencies(g, module, roots);
         }
     }
@@ -328,7 +323,7 @@ public class ResolveCompiler {
         return l.getFile();
     }
 
-    private TreeAnnotatingBuilder parseModule(String fileName) {
+    private AnnotatedTree parseModule(String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
@@ -347,9 +342,10 @@ public class ResolveCompiler {
             parser.addErrorListener(errorManager);
             ParserRuleContext start = parser.module();
 
-            TreeAnnotatingBuilder result =
-                    new TreeAnnotatingBuilder(start, parser.getSourceName())
-                            .hasErrors(parser.getNumberOfSyntaxErrors() > 0);
+            AnnotatedTree result =
+                    new AnnotatedTree(start, Utils.getModuleName(start),
+                            parser.getSourceName());
+            result.hasErrors = parser.getNumberOfSyntaxErrors() > 0;
             return result;
         }
         catch (IOException ioe) {

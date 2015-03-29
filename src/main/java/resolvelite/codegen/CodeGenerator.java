@@ -39,7 +39,7 @@ import org.stringtemplate.v4.misc.STMessage;
 import resolvelite.codegen.model.OutputModelObject;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.AnnotatedTree;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -51,13 +51,13 @@ public class CodeGenerator {
     public static final String DEFAULT_LANGUAGE = "java";
 
     protected final ResolveCompiler compiler;
-    protected final TreeAnnotatingBuilder module;
+    protected final AnnotatedTree module;
     private final STGroup templates;
 
     public final int myLineWidth = 72;
 
     public CodeGenerator(@NotNull ResolveCompiler rc,
-            @NotNull TreeAnnotatingBuilder current) {
+            @NotNull AnnotatedTree current) {
         this.compiler = rc;
         this.module = current;
         this.templates = loadTemplates();
@@ -65,7 +65,7 @@ public class CodeGenerator {
 
     private OutputModelObject buildModuleOutputModel() {
         ModelBuilder builder = new ModelBuilder(this, compiler.symbolTable);
-        ParseTree root = module.root;
+        ParseTree root = module.getRoot();
         ParseTreeWalker.DEFAULT.walk(builder, root);
         return builder.built.get(root);
     }
@@ -79,7 +79,7 @@ public class CodeGenerator {
         return walk(buildModuleOutputModel());
     }
 
-    @NotNull public TreeAnnotatingBuilder getModule() {
+    @NotNull public AnnotatedTree getModule() {
         return module;
     }
 
@@ -107,7 +107,7 @@ public class CodeGenerator {
 
     public String getModuleFileName() {
         ST extST = templates.getInstanceOf("moduleFileExtension");
-        String moduleName = module.name.getText();
+        String moduleName = module.getName();
         return moduleName + extST.render();
     }
 

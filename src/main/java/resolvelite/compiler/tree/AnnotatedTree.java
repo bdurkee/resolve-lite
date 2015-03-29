@@ -28,23 +28,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package resolvelite.compiler;
+package resolvelite.compiler.tree;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import resolvelite.compiler.tree.AnnotatedTree;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import resolvelite.misc.Utils.Builder;
+import resolvelite.parsing.ResolveParser;
 
-import java.util.List;
+public class AnnotatedTree {
 
-public abstract class AbstractCompilationPipeline {
+    @NotNull private final String name, fileName;
+    @NotNull private final ParseTree root;
+    public boolean hasErrors;
+    public ImportCollection imports;
 
-    @NotNull protected final List<AnnotatedTree> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
+            String fileName) {
+        this.root = root;
+        this.name = name;
+        this.fileName = fileName;
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<AnnotatedTree> compilationUnits) {
-        this.compilationUnits = compilationUnits;
-        this.compiler = rc;
+        ImportListener l = new ImportListener();
+        ParseTreeWalker.DEFAULT.walk(l, root);
+        this.imports = l.getImports();
     }
 
-    public abstract void process();
+    @NotNull public String getName() {
+        return name;
+    }
+
+    @NotNull public String getFileName() {
+        return fileName;
+    }
+
+    @NotNull public ParseTree getRoot() {
+        return root;
+    }
 }

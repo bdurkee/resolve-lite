@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import resolvelite.compiler.ErrorKind;
 import resolvelite.compiler.ResolveCompiler;
 import resolvelite.compiler.tree.ImportCollection.ImportType;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree;
+import resolvelite.compiler.tree.AnnotatedTree;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.symbol.*;
@@ -23,11 +23,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     Scope currentScope; // define symbols in this scope
     ResolveCompiler compiler;
     SymbolTable symtab;
-    ResolveAnnotatedParseTree.TreeAnnotatingBuilder tree;
+    AnnotatedTree tree;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
-            @NotNull SymbolTable symtab,
-            ResolveAnnotatedParseTree.TreeAnnotatingBuilder annotatedTree) {
+            @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;
         this.tree = annotatedTree;

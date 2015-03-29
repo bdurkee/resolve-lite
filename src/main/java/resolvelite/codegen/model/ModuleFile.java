@@ -31,7 +31,7 @@
 package resolvelite.codegen.model;
 
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.AnnotatedTree;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -44,7 +44,7 @@ public class ModuleFile extends OutputModelObject {
     @ModelElement public Set<ImportRef> imports = new LinkedHashSet<>();
     @ModelElement public Module module;
 
-    public ModuleFile(TreeAnnotatingBuilder e, String resolveFileName) {
+    public ModuleFile(AnnotatedTree e, String resolveFileName) {
         this.resolveFileName = resolveFileName;
         this.RESOLVEVersion = ResolveCompiler.VERSION;
         //this.targetDir = ImportRef.listifyFileString(e.getFileName());

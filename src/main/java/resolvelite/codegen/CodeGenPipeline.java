@@ -34,25 +34,25 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.stringtemplate.v4.ST;
 import resolvelite.compiler.AbstractCompilationPipeline;
 import resolvelite.compiler.ResolveCompiler;
-import resolvelite.compiler.tree.ResolveAnnotatedParseTree.TreeAnnotatingBuilder;
+import resolvelite.compiler.tree.AnnotatedTree;
 
 import java.util.List;
 
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
     public CodeGenPipeline(@NotNull ResolveCompiler rc,
-            @NotNull List<TreeAnnotatingBuilder> compilationUnits) {
+            @NotNull List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }
 
     @Override public void process() {
         if ( compiler.genCode == null ) return;
-        for (TreeAnnotatingBuilder unit : compilationUnits) {
-            if ( !compiler.targetNames.contains(unit.name.getText()) ) {
+        for (AnnotatedTree unit : compilationUnits) {
+            if ( !compiler.targetNames.contains(unit.getName()) ) {
                 continue;
             }
             CodeGenerator gen = new CodeGenerator(compiler, unit);
-            compiler.info("gencode: " + unit.name.getText());
+            compiler.info("gencode: " + unit.getName());
             if ( compiler.genCode.equals("Java") ) {
                 ST x = gen.generateModule();
                 System.out.println(x.render());

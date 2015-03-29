@@ -181,9 +181,7 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     /**
-     * <p>
      * Returns first non ErrorManager code location for generating messages.
-     * </p>
      */
     private static StackTraceElement getLastNonErrorManagerCodeLocation(
             Throwable e) {
