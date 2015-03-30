@@ -262,7 +262,7 @@ public class ResolveCompiler {
                 continue;
             }
 
-            if ( root.imports.inCategory(ImportCollection.ImportType.EXPLICIT,
+            if ( root.imports.inCategory(ImportCollection.ImportType.NAMED,
                     module.getName()) ) {
                 /*
                  * if (!module.appropriateForImport()) {

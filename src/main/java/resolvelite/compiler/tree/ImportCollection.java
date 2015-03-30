@@ -56,16 +56,17 @@ import java.util.*;
 public class ImportCollection {
 
     public static enum ImportType {
-        EXPLICIT, IMPLICIT, EXTERNAL
+        NAMED, IMPLICIT, EXTERNAL
     }
 
-    private final Map<ImportType, Set<String>> imports = new HashMap<>();
+    private final Map<ImportType, LinkedHashSet<String>> imports =
+            new HashMap<>();
 
     public ImportCollection() {
         for (int i = 0; i < ImportType.values().length; i++) {
             ImportType curType = ImportType.values()[i];
             if ( imports.get(curType) == null ) {
-                imports.put(curType, new HashSet<>());
+                imports.put(curType, new LinkedHashSet<>());
             }
         }
     }
@@ -112,10 +113,10 @@ public class ImportCollection {
         addTokenSet(type, Arrays.asList(t));
     }
 
-    private void addTokenSet(ImportType type, Collection<String> newToks) {
-        Set<String> tokSet = imports.get(type);
+    public void addTokenSet(ImportType type, Collection<String> newToks) {
+        LinkedHashSet<String> tokSet = imports.get(type);
         if ( tokSet == null ) {
-            tokSet = new HashSet<String>();
+            tokSet = new LinkedHashSet<String>();
         }
         //Todo: Do a little normalization here on additions. For instance,
         //if something already exists in the map as an implicit import,

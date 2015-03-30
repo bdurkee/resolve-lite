@@ -3,7 +3,6 @@ package resolvelite.semantics.symbol;
 import resolvelite.semantics.BaseScope;
 import resolvelite.semantics.Scope;
 import resolvelite.semantics.SymbolTable;
-import resolvelite.semantics.UnexpectedSymbolException;
 
 public abstract class SymbolWithScope extends BaseScope
         implements

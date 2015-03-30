@@ -1,7 +1,5 @@
 package resolvelite.semantics.symbol;
 
-import resolvelite.semantics.UnexpectedSymbolException;
-
 public class FacilitySymbol extends BaseSymbol {
     //implements Type {?
     //if we want it to be the rhs of representation type, then yes.

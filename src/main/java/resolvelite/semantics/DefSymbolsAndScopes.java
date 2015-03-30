@@ -36,21 +36,21 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.PrecisModuleContext ctx) {
         currentScope =
                 establishModuleScope(ctx.name.getText(), ctx).addImports(
-                        tree.imports.getImportsOfType(ImportType.EXPLICIT));
+                        tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         currentScope =
                 establishModuleScope(ctx.name.getText(), ctx).addImports(
-                        tree.imports.getImportsOfType(ImportType.EXPLICIT));
+                        tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         currentScope =
                 establishModuleScope(ctx.name.getText(), ctx).addImports(
-                        tree.imports.getImportsOfType(ImportType.EXPLICIT));
+                        tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void enterFacilityDecl(

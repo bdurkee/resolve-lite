@@ -1,0 +1,9 @@
+Facility Copy_Stack;
+    Operation Copy_Integer(replaces C: Integer; restores Orig: Integer);
+            ensures C = Orig;
+        Procedure
+            C := Orig;
+    end Copy_Integer;
+
+
+end Copy_Stack;

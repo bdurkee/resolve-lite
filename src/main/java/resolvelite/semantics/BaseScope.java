@@ -78,11 +78,20 @@ public abstract class BaseScope implements Scope {
         if ( referencedFacility == null ) {
             //ok maybe our qualifier is just referencing a named
             //(imported) module.
+            //  if (scopeRepo.getModuleScope(this.getRootModuleID())
+            //         .getImports().contains(qualifier)) {
+
+            //Todo: if the qualifier isn't in the list of module imports,
+            //then we technically shouldn't grab the modulescope for it.
             return scopeRepo.getModuleScope(qualifier).resolve(name);
+            //  }
+            //  else {
+            //      throw new NoSuchSymbolException();
+            //  }
         }
         else {
-            //we're referencing a facility, let's search it to see if we
-            //can find the requested symbol.
+            //we've found the referenced facility, let's search it to see if we
+            //can find the requested symbol, 'name'.
             return scopeRepo.getModuleScope(referencedFacility.getSpecName())
                     .resolve(name);
         }

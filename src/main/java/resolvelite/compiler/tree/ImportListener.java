@@ -30,11 +30,14 @@
  */
 package resolvelite.compiler.tree;
 
-import org.antlr.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTree;
+import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.compiler.tree.ImportCollection.ImportType;
+
+import java.util.*;
 
 /**
  * Fills in the contents of an {@link ImportCollection} by visiting the
@@ -48,9 +51,52 @@ public class ImportListener extends ResolveBaseListener {
         return importCollection;
     }
 
+    public static final Map<String, LinkedHashSet<String>> NON_STD_MODULES =
+            new HashMap<>();
+
+    public static final List<String> DEFAULT_IMPORTS = Collections
+            .unmodifiableList(Arrays.asList("Standard_Booleans",
+                    "Standard_Integers"));
+
+    static {
+        registerStandardModule("Boolean_Template");
+        registerStandardModule("Standard_Booleans");
+        registerStandardModule("Integer_Template", "Standard_Booleans");
+        registerStandardModule("Standard_Integers");
+    }
+
+    protected static void registerStandardModule(String moduleName) {
+        NON_STD_MODULES.put(moduleName, new LinkedHashSet<>());
+    }
+
+    protected static void registerStandardModule(String moduleName,
+            String... defaultImports) {
+        NON_STD_MODULES.put(moduleName,
+                new LinkedHashSet<>(Arrays.asList(defaultImports)));
+    }
+
+    protected static void registerStandardModule(String moduleName,
+            LinkedHashSet<String> defaultImports) {
+        NON_STD_MODULES.put(moduleName, defaultImports);
+    }
+
+    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+        ParseTree moduleChild = ctx.getChild(0);
+        if ( !(moduleChild instanceof ResolveParser.PrecisModuleContext) ) {
+            LinkedHashSet<String> stdImports =
+                    NON_STD_MODULES.get(Utils.getModuleName(moduleChild));
+            if ( stdImports != null ) { // if this is a standard module
+                importCollection.addTokenSet(ImportType.NAMED, stdImports);
+            }
+            else {
+                importCollection.addTokenSet(ImportType.NAMED, DEFAULT_IMPORTS);
+            }
+        }
+    }
+
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
-        importCollection.imports(ImportType.EXPLICIT, ctx.Identifier());
+        importCollection.imports(ImportType.NAMED, ctx.Identifier());
     }
 
     @Override public void exitFacilityDecl(

@@ -2,7 +2,6 @@ package resolvelite.semantics.symbol;
 
 import resolvelite.semantics.Scope;
 import resolvelite.semantics.Type;
-import resolvelite.semantics.UnexpectedSymbolException;
 
 public interface Symbol {
 
