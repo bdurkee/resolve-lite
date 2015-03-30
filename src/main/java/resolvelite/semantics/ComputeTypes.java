@@ -39,7 +39,8 @@ public class ComputeTypes extends SetScopes {
         for (TerminalNode t : ctx.Identifier()) {
             try {
                 ParameterSymbol paramSym =
-                        (ParameterSymbol) currentScope.resolve(t.getText());
+                        (ParameterSymbol) currentScope.resolve(null,
+                                t.getText(), false);
                 paramSym.setType(type);
             }
             catch (NoSuchSymbolException nsse) {
@@ -55,7 +56,8 @@ public class ComputeTypes extends SetScopes {
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         try {
             FunctionSymbol func =
-                    (FunctionSymbol) currentScope.resolve(ctx.name.getText());
+                    (FunctionSymbol) currentScope.resolve(null,
+                            ctx.name.getText(), false);
             Type t = types.get(ctx.type());
             if ( t == null ) {
                 t =
@@ -75,7 +77,7 @@ public class ComputeTypes extends SetScopes {
         Type type = null;
         Symbol foundSym = null;
         try {
-            foundSym = currentScope.resolve(ctx.qualifier, ctx.name);
+            foundSym = currentScope.resolve(ctx.qualifier, ctx.name, true);
             type = (Type) foundSym;
         }
         catch (ClassCastException cce) {
@@ -108,7 +110,8 @@ public class ComputeTypes extends SetScopes {
                 return; //already typed (as is the case for record member refs.
             }
             TypedSymbol sym =
-                    (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name);
+                    (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name,
+                            false);
             Type t = checkForInvalidType(sym.getType(), null);
             types.put(ctx, t);
         }
@@ -148,7 +151,7 @@ public class ComputeTypes extends SetScopes {
     @SuppressWarnings("unchecked") @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         try {
-            Symbol s = currentScope.resolve(ctx.qualifier, ctx.name);
+            Symbol s = currentScope.resolve(ctx.qualifier, ctx.name, true);
             if ( s.getClass() != FunctionSymbol.class ) {
                 compiler.errorManager.semanticError(
                         ErrorKind.UNEXPECTED_SYMBOL, ctx.name, "a function", s
@@ -216,7 +219,8 @@ public class ComputeTypes extends SetScopes {
         for (TerminalNode t : terminalGroup) {
             try {
                 VariableSymbol varSym =
-                        (VariableSymbol) currentScope.resolve(t.getText());
+                        (VariableSymbol) currentScope.resolve(null,
+                                t.getText(), false);
                 varSym.setType(type);
             }
             catch (NoSuchSymbolException nsse) {
@@ -238,7 +242,8 @@ public class ComputeTypes extends SetScopes {
     private Type getProgramType(@NotNull ParserRuleContext ctx,
             @Nullable String qualifier, @NotNull String typeName) {
         try {
-            return (ProgTypeSymbol) currentScope.resolve(qualifier, typeName);
+            return (ProgTypeSymbol) currentScope.resolve(qualifier, typeName,
+                    true);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(

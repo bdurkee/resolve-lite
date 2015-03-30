@@ -1,7 +1,7 @@
 Facility Test;
     Facility STF is Bdd_Search_Store_Template
-            <Std_Integer_Fac::Integer>(4) externally
-                realized by Array_Impl;
+        <Std_Integer_Fac::Integer>(4) externally
+            realized by Array_Impl;
 
     Operation Main();
         Procedure

@@ -223,7 +223,7 @@ public class ModelBuilder extends ResolveBaseListener {
                                 .getWrappedModuleTree();
                 result.add(new ImportRef(e.getFileName()));
             }
-            catch (NoSuchSymbolException nsse) {}   //shouldn't happen.
+            catch (NoSuchSymbolException nsse) {} //shouldn't happen.
         }
         //Todo: handle external imports
         return result;

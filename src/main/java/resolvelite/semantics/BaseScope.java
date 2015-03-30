@@ -5,11 +5,9 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import resolvelite.misc.Utils;
 import resolvelite.semantics.symbol.FacilitySymbol;
-import resolvelite.semantics.symbol.ParameterSymbol;
 import resolvelite.semantics.symbol.Symbol;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class BaseScope implements Scope {
 
@@ -38,34 +36,86 @@ public abstract class BaseScope implements Scope {
         this.enclosingScope = enclosingScope;
     }
 
-    @Override public Symbol resolve(Token qualifier, Token name)
-            throws NoSuchSymbolException {
-        return resolve(qualifier == null ? null :
-                qualifier.getText(), name.getText());
+    @Override public Symbol resolve(Token qualifier, Token name,
+            boolean searchImports) throws NoSuchSymbolException {
+        return resolve(qualifier == null ? null : qualifier.getText(),
+                name.getText(), searchImports);
     }
 
-    @Nullable public Symbol resolve(String qualifier, String name)
-            throws NoSuchSymbolException {
+    @Nullable public Symbol resolve(String qualifier, String name,
+            boolean searchImports) throws NoSuchSymbolException {
         if ( qualifier != null ) {
-            return qualifiedResolution(qualifier, name);
+            return qualifiedSearch(qualifier, name, searchImports);
         }
         else {
-            //for now just a local modulescope resolve.
-            return resolve(name);
+            return unqualifiedSearch(name, searchImports);
         }
     }
 
-    private Symbol qualifiedResolution(String qualifier, String name)
+    protected Symbol unqualifiedSearch(String name, boolean searchImports)
             throws NoSuchSymbolException {
+        //first search locally...
+        Symbol s = symbols.get(name);
+        if ( s != null ) {
+            //System.out.println("found "+name+" in "+this.asScopeStackString());
+            return s;
+        }
+        Scope parent = getParentScope();
+        if ( parent != null && !(parent instanceof PredefinedScope) ) {
+            return parent.resolve(null, name, searchImports);
+        }
+        //if we get to here we were NOT able to find it locally...
+        if ( !searchImports )
+            throw new NoSuchSymbolException();
+        else {
+            ModuleScope m = (ModuleScope) this;
+            //Todo: in the future we can collect a list and if it has more than we need we raise hell
+            for (String importRef : m.getImports()) {
+                try {
+                    Symbol result = scopeRepo //
+                            .getModuleScope(importRef) //
+                            .resolve(null, name, false); //
+                    if ( result != null ) return result; // found a match
+                }
+                catch (NoSuchSymbolException nsse) {
+                    //no dice for the name in the imported module we've just
+                    //searched? Ok then, lets check for it in any facilities.
+                    //that might be available.
+                    //no problem, just keep searching until we find a match.
+                }
+            }
+        }
+        //Two options here.
+        // 1. Make this version work, where I can find facilities,
+        //search them in diff modules etc.
+        // 2. Enforce qualification and make it so that you need to
+
+        throw new NoSuchSymbolException();
+    }
+
+    /*@Override public Symbol resolve(String name) throws NoSuchSymbolException {
+        Symbol s = symbols.get(name);
+        if ( s != null ) {
+            //System.out.println("found "+name+" in "+this.asScopeStackString());
+            return s;
+        }
+        Scope parent = getParentScope();
+        if ( parent != null ) return parent.resolve(name);
+        throw new NoSuchSymbolException(name);
+    }*/
+
+    protected Symbol qualifiedSearch(String qualifier, String name,
+            boolean searchImports) throws NoSuchSymbolException {
         FacilitySymbol referencedFacility = null;
         try {
             //first look for a facility in the current modulescope with
             //name 'qualifier'
-            Symbol f = this.resolve(qualifier);
+            Symbol f = this.resolve(null, qualifier, false);
             referencedFacility = (FacilitySymbol) f;
         }
         //maybe the fac referenced by qualifier is in one of our named imports?
         catch (NoSuchSymbolException nsse) {
+            if ( !searchImports ) throw new NoSuchSymbolException();
             ModuleScope thisModule =
                     scopeRepo.getModuleScope(this.getRootModuleID());
             for (String referencedModule : thisModule.getImports()) {
@@ -74,7 +124,7 @@ public abstract class BaseScope implements Scope {
                     referencedFacility = //
                             (FacilitySymbol) scopeRepo //
                                     .getModuleScope(referencedModule) //
-                                    .resolve(qualifier); //
+                                    .resolve(null, qualifier, false); //
                     if ( referencedFacility != null ) break;
                 }
                 catch (ClassCastException | NoSuchSymbolException cce) {
@@ -90,7 +140,8 @@ public abstract class BaseScope implements Scope {
 
             //Todo: if the qualifier isn't in the list of module imports,
             //then we technically shouldn't grab the modulescope for it.
-            return scopeRepo.getModuleScope(qualifier).resolve(name);
+            return scopeRepo.getModuleScope(qualifier).resolve(null, name,
+                    false);
             //  }
             //  else {
             //      throw new NoSuchSymbolException();
@@ -100,19 +151,8 @@ public abstract class BaseScope implements Scope {
             //we've found the referenced facility, let's search it to see if we
             //can find the requested symbol, 'name'.
             return scopeRepo.getModuleScope(referencedFacility.getSpecName())
-                    .resolve(name);
+                    .resolve(null, name, false);
         }
-    }
-
-    @Override public Symbol resolve(String name) throws NoSuchSymbolException {
-        Symbol s = symbols.get(name);
-        if ( s != null ) {
-            //System.out.println("found "+name+" in "+this.asScopeStackString());
-            return s;
-        }
-        Scope parent = getParentScope();
-        if ( parent != null ) return parent.resolve(name);
-        throw new NoSuchSymbolException(name);
     }
 
     @Override public void define(@NotNull Symbol sym)
