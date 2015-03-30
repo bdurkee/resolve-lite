@@ -98,8 +98,9 @@ public enum ErrorKind {
      * Compiler Error 11: <em>module1type</em> module '<em>module1</em>' cannot
      * import <em>module2type</em> module '<em>module2</em>'.
      */
-    MISSING_IMPORT_FILE(11, "unable to find the file corresponding to "
-            + "import reference: '<arg>'", ErrorSeverity.ERROR),
+    MISSING_IMPORT_FILE(11, "module <arg> was unable to find the file "
+            + "corresponding to import reference: '<arg2>'",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler error 12: no mapping to template name for output model

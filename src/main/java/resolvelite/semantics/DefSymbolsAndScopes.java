@@ -35,21 +35,21 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterPrecisModule(
             @NotNull ResolveParser.PrecisModuleContext ctx) {
         currentScope =
-                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                establishModuleScope(tree, ctx).addImports(
                         tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         currentScope =
-                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                establishModuleScope(tree, ctx).addImports(
                         tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         currentScope =
-                establishModuleScope(ctx.name.getText(), ctx).addImports(
+                establishModuleScope(tree, ctx).addImports(
                         tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
@@ -184,11 +184,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         currentScope = currentScope.getEnclosingScope(); // pop scope
     }
 
-    private ModuleScope establishModuleScope(@NotNull String moduleName,
+    private ModuleScope establishModuleScope(@NotNull AnnotatedTree t,
             @NotNull ParserRuleContext ctx) {
         ModuleScope module =
-                new ModuleScope(symtab.getGlobalScope(), symtab, moduleName);
-        symtab.moduleScopes.put(moduleName, module);
+                new ModuleScope(symtab.getGlobalScope(), symtab, tree);
+        symtab.moduleScopes.put(tree.getName(), module);
         return module;
     }
 }

@@ -56,7 +56,8 @@ precisItem
 // concept module
 
 conceptModule
-    :   'Concept' name=Identifier (moduleParameterList)? ';'
+    :   'Concept' name=Identifier ('<' Identifier (',' Identifier)* '>')?
+        (moduleParameterList)? ';'
         (importList)?
         (requiresClause)?
         (conceptBlock)?
@@ -104,12 +105,7 @@ moduleParameterList
     ;
 
 moduleParameterDecl
-    :   typeParameterDecl
-    |   parameterDeclGroup
-    ;
-
-typeParameterDecl
-    :   'type' name=Identifier
+    :   parameterDeclGroup
     ;
 
 parameterDeclGroup
@@ -210,6 +206,7 @@ operationProcedureDecl
 
 facilityDecl
     :   'Facility' name=Identifier 'is' spec=Identifier
+        ('<' type (',' type)* '>')?
         (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
         'by' impl=Identifier (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'

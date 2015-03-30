@@ -2,6 +2,7 @@ package resolvelite.semantics;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.misc.Nullable;
 import resolvelite.misc.Utils;
 import resolvelite.semantics.symbol.FacilitySymbol;
 import resolvelite.semantics.symbol.ParameterSymbol;
@@ -39,12 +40,18 @@ public abstract class BaseScope implements Scope {
 
     @Override public Symbol resolve(Token qualifier, Token name)
             throws NoSuchSymbolException {
+        return resolve(qualifier == null ? null :
+                qualifier.getText(), name.getText());
+    }
+
+    @Nullable public Symbol resolve(String qualifier, String name)
+            throws NoSuchSymbolException {
         if ( qualifier != null ) {
-            return qualifiedResolution(qualifier.getText(), name.getText());
+            return qualifiedResolution(qualifier, name);
         }
         else {
             //for now just a local modulescope resolve.
-            return resolve(name.getText());
+            return resolve(name);
         }
     }
 

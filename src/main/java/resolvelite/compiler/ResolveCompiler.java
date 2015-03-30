@@ -256,7 +256,7 @@ public class ResolveCompiler {
             }
             catch (IOException ioe) {
                 errorManager.semanticError(ErrorKind.MISSING_IMPORT_FILE, null,
-                        importRequest, importRequest);
+                        root.getName(), importRequest);
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;

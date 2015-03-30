@@ -75,6 +75,9 @@ public interface Scope {
     @Nullable public Symbol resolve(Token qualifier, Token name)
             throws NoSuchSymbolException;
 
+    @Nullable public Symbol resolve(String qualifier, String name)
+            throws NoSuchSymbolException;
+
     public Symbol getSymbol(String name);
 
 }

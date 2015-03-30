@@ -107,10 +107,9 @@ public class ComputeTypes extends SetScopes {
             if ( types.get(ctx) != null ) {
                 return; //already typed (as is the case for record member refs.
             }
-            VariableSymbol varSym =
-                    (VariableSymbol) currentScope.resolve(ctx.qualifier,
-                            ctx.name);
-            Type t = checkForInvalidType(varSym.getType(), null);
+            TypedSymbol sym =
+                    (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name);
+            Type t = checkForInvalidType(sym.getType(), null);
             types.put(ctx, t);
         }
         catch (NoSuchSymbolException nsse) {
@@ -167,7 +166,7 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        types.put(ctx, getProgramType(ctx, "Integer"));
+        types.put(ctx, getProgramType(ctx, "Std_Integer_Fac", "Integer"));
     }
 
     @Override public void exitProgMemberExp(
@@ -237,9 +236,9 @@ public class ComputeTypes extends SetScopes {
      * @return
      */
     private Type getProgramType(@NotNull ParserRuleContext ctx,
-            @NotNull String typeName) {
+            @Nullable String qualifier, @NotNull String typeName) {
         try {
-            return (ProgTypeSymbol) currentScope.resolve(typeName);
+            return (ProgTypeSymbol) currentScope.resolve(qualifier, typeName);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(

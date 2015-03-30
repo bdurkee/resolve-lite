@@ -34,7 +34,6 @@ ModuleFile(file, module, imports) ::= <<
 package <trunc(file.targetDir); separator=".">;
 
 import resolve.*;
-import facilities.standard.*;
 <imports; separator="\n">
 import java.lang.reflect.*;
 

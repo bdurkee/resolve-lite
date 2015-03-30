@@ -30,7 +30,6 @@
  */
 package resolvelite.codegen;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -42,6 +41,7 @@ import resolvelite.misc.Utils;
 import resolvelite.parsing.ResolveBaseListener;
 import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.ModuleScope;
+import resolvelite.semantics.NoSuchSymbolException;
 import resolvelite.semantics.SymbolTable;
 
 import java.util.*;
@@ -50,8 +50,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-    protected final LiteralInitFactory INTEGER_INIT_FACTORY =
-            new IntegerCallFactory();
+
+    protected final TypeRefInitFactory INTEGER_INIT_FACTORY =
+            new IntegerTypeInitFactory();
+
+    protected final TypeRefInitFactory BOOLEAN_INIT_FACTORY =
+            new IntegerTypeInitFactory();
+
     @NotNull private final ModuleScope moduleScope;
     @NotNull private final CodeGenerator gen;
 
@@ -168,7 +173,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        built.put(ctx, INTEGER_INIT_FACTORY.buildLiteralInit(ctx.getText()));
+        built.put(ctx, INTEGER_INIT_FACTORY.buildTypeInit(ctx.getText()));
     }
 
     @Override public void exitConceptModule(
@@ -201,7 +206,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     /**
-     * Converts the {@link Token}s in an {@link ImportCollection} to a set of
+     * Converts the imports in an {@link ImportCollection} to a set of
      * {@link ImportRef}s.
      * 
      * @param m A module builder maintaining a collection of imports
@@ -209,16 +214,17 @@ public class ModelBuilder extends ResolveBaseListener {
      */
     protected Set<ImportRef> buildImports(@NotNull AnnotatedTree m) {
         Set<ImportRef> result = new HashSet<ImportRef>();
-        /*
-         * for (Token t : m.imports.getImportsExcluding(
-         * ImportCollection.ImportType.EXTERNAL)) {
-         * 
-         * TreeAnnotatingBuilder e =
-         * gen.getCompiler().symbolTable.moduleScopes(
-         * t.getText()).getDefiningElement();
-         * result.add(new ImportRef(e.getFileName()));
-         * }
-         */
+
+        for (String s : m.imports
+                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
+            try {
+                AnnotatedTree e = gen.getCompiler() //
+                        .symbolTable.getModuleScope(s) //
+                                .getWrappedModuleTree();
+                result.add(new ImportRef(e.getFileName()));
+            }
+            catch (NoSuchSymbolException nsse) {}   //shouldn't happen.
+        }
         //Todo: handle external imports
         return result;
     }
@@ -238,11 +244,19 @@ public class ModelBuilder extends ResolveBaseListener {
         return t instanceof ResolveParser.FacilityModuleContext;
     }
 
-    public static class IntegerCallFactory implements LiteralInitFactory {
+    public static class IntegerTypeInitFactory implements TypeRefInitFactory {
 
-        @Override public InitCall buildLiteralInit(String initialValue) {
+        @Override public InitCall buildTypeInit(String initialValue) {
             return new InitCall(new InitCall.Qualifier("Std_Integer_Fac",
                     "Integer_Template"), "Integer", initialValue);
+        }
+    }
+
+    public static class booleanTypeInitFactory implements TypeRefInitFactory {
+
+        @Override public InitCall buildTypeInit(String initialValue) {
+            return new InitCall(new InitCall.Qualifier("Std_Boolean_Fac",
+                    "Boolean_Template"), "Boolean", initialValue);
         }
     }
 }

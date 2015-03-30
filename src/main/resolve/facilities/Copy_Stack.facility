@@ -1,9 +1,16 @@
 Facility Copy_Stack;
-    Operation Copy_Integer(replaces C: Integer; restores Orig: Integer);
+    Operation Copy_Integer(replaces C: Std_Integer_Fac::Integer;
+                restores Orig: Std_Integer_Fac::Integer);
             ensures C = Orig;
         Procedure
             C := Orig;
     end Copy_Integer;
 
+    Operation Main();
+        Procedure
+            Var S1, S2: Stack;
+
+
+    end Main;
 
 end Copy_Stack;
