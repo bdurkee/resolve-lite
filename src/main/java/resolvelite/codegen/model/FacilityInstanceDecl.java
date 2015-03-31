@@ -36,7 +36,7 @@ public class FacilityInstanceDecl extends VariableDecl {
     @ModelElement public LayeredFacilityInstantiation root;
 
     public FacilityInstanceDecl(String name, String concept) {
-        super(name);
+        super(name, null);
         this.concept = concept;
     }
 

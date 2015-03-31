@@ -1,11 +1,11 @@
 package resolvelite.codegen.model;
 
-public class LocallyDefinedTypeInit extends Expr {
+public class LocallyDefinedTypeInit extends TypeInit {
 
-    public String name, moduleQualifier;
+    public String moduleQualifier;
 
     public LocallyDefinedTypeInit(String name, String moduleQualifier) {
-        this.name = name;
+        super(name, "");
         this.moduleQualifier = moduleQualifier;
     }
 }

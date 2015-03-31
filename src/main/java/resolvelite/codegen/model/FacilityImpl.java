@@ -37,6 +37,7 @@ public class FacilityImpl extends Module {
     public String conceptName;
     @ModelElement public List<FacilityInstanceDecl> facilities =
             new ArrayList<>();
+    @ModelElement public List<FunctionImpl> funcs = new ArrayList<>();
 
     public FacilityImpl(String name, ModuleFile file) {
         super(name, file);

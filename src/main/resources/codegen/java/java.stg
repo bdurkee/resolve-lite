@@ -42,7 +42,7 @@ import java.lang.reflect.*;
 
 fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 /**
- * Generated from <resolveFileName; format="java-escape"> by RESOLVE
+ * Generated from <resolveFileName> by RESOLVE
  * version <RESOLVEVersion>.
  */
 >>
@@ -55,9 +55,10 @@ public interface <concept.name> extends RESOLVE_INTERFACE {
 }
 >>
 
-FacilityImpl(impl, facilities) ::= <<
+FacilityImpl(impl, facilities, funcs) ::= <<
 public class <impl.name> {
     <facilities; separator="\n">
+    <funcs; separator="\n">
 }
 >>
 
@@ -69,10 +70,20 @@ interface <type.name> extends RTType { }
 
 ParameterDecl(param) ::= "RTType <param.name>"
 
+VariableDecl(var, init) ::= "RTType <var.name> = <init>;"
+
 FunctionDecl(func, params) ::= <<
 public <if(func.isStatic)>static <endif><\\>
 <if(func.hasReturn)>RTType <else>void <endif><\\>
 <func.name>(<params; separator=", ">);
+>>
+
+FunctionImpl(func, params, vars) ::= <<
+public <if(func.isStatic)>static <endif><\\>
+<if(func.hasReturn)>RTType <else>void <endif><\\>
+<func.name>(<params; separator=", ">) {
+    <vars; separator="\n">
+}
 >>
 
 FacilityInstanceDecl(facility, root) ::= <<

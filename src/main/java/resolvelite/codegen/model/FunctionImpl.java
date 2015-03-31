@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionImpl extends FunctionDecl {
+    public boolean hasReturn = false;
+    public boolean isStatic = false;
     @ModelElement public List<VariableDecl> vars = new ArrayList<>();
 
     public FunctionImpl(String name) {

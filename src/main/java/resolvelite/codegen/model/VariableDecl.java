@@ -32,9 +32,10 @@ package resolvelite.codegen.model;
 
 public class VariableDecl extends Decl {
 
-    @ModelElement public FacilityDefinedTypeInit typeInitialization;
+    @ModelElement public TypeInit init;
 
-    public VariableDecl(String name) {
+    public VariableDecl(String name, TypeInit init) {
         super(name);
+        this.init = init;
     }
 }

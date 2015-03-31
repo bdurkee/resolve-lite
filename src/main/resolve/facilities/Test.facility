@@ -6,5 +6,7 @@ Facility Test;
 
     Operation Main();
         Procedure
+            Var X: STF::Store;
+            Var Y, M : Std_Boolean_Fac::Boolean;
     end Main;
 end Test;

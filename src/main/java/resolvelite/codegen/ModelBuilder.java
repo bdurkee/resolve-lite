@@ -81,6 +81,24 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        FunctionImpl f = new FunctionImpl(ctx.name.getText());
+        f.hasReturn = ctx.type() != null;
+        f.isStatic = withinFacilityModule();
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            f.params.addAll(collectModelsFor(ParameterDecl.class,
+                    grp.Identifier(), built));
+        }
+        for (ResolveParser.VariableDeclGroupContext grp : ctx
+                .variableDeclGroup()) {
+            f.vars.addAll(collectModelsFor(VariableDecl.class,
+                    grp.Identifier(), built));
+        }
+        built.put(ctx, f);
+    }
+
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         FacilityInstanceDecl f =
@@ -121,6 +139,15 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        TypeInit init = (TypeInit)built.get(ctx.type());
+        for (TerminalNode t : ctx.Identifier()) {
+            //System.out.println("adding " + t.getText() + " to built map");
+            built.put(t, new VariableDecl(t.getSymbol().getText(), init));
+        }
     }
 
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
@@ -164,25 +191,6 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitFacilityModule(
-            @NotNull ResolveParser.FacilityModuleContext ctx) {
-        AnnotatedTree annotatedTree = gen.getModule();
-        ModuleFile file =
-                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
-                        .getFileName()));
-        file.targetDir =
-                ImportRef.listifyFileString(annotatedTree.getFileName());
-        FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
-
-        if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(collectModelsFor(FacilityInstanceDecl.class,
-                    ctx.facilityBlock().facilityDecl(), built));
-        }
-        file.module = impl;
-        file.imports = buildImports(annotatedTree);
-        built.put(ctx, file);
-    }
-
     @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
         built.put(ctx, built.get(ctx.progExp()));
@@ -206,6 +214,27 @@ public class ModelBuilder extends ResolveBaseListener {
                                 "Std_Integer_Fac", "Integer_Template"),
                         "Integer", ctx.getText());
         built.put(ctx, init);
+    }
+
+    @Override public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        AnnotatedTree annotatedTree = gen.getModule();
+        ModuleFile file =
+                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
+                        .getFileName()));
+        file.targetDir =
+                ImportRef.listifyFileString(annotatedTree.getFileName());
+        FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
+
+        if ( ctx.facilityBlock() != null ) {
+            impl.facilities.addAll(collectModelsFor(FacilityInstanceDecl.class,
+                    ctx.facilityBlock().facilityDecl(), built));
+            impl.funcs.addAll(collectModelsFor(FunctionImpl.class,
+                    ctx.facilityBlock().operationProcedureDecl(), built));
+        }
+        file.module = impl;
+        file.imports = buildImports(annotatedTree);
+        built.put(ctx, file);
     }
 
     @Override public void exitConceptModule(
