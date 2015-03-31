@@ -30,28 +30,35 @@
  */
 package resolvelite.codegen.model;
 
-public class InitCall extends Expr {
+import resolvelite.semantics.symbol.FacilitySymbol;
+
+public class FacilityDefinedTypeInit extends Expr {
     //if we represent a literal initialization, we pass the initial value as
     //a str to the createX(..) method.
     public String initialValue;
     public String typeName;
-    @ModelElement public Qualifier qualifier;
+    @ModelElement public FacilityQualifier qualifier;
 
-    public InitCall(Qualifier typeFacilityQualifier, String typeToInitName) {
+    public FacilityDefinedTypeInit(FacilityQualifier typeFacilityQualifier,
+            String typeToInitName) {
         this(typeFacilityQualifier, typeToInitName, null);
     }
 
-    public InitCall(Qualifier typeFacilityQualifier, String typeToInitName,
-            String initialValue) {
+    public FacilityDefinedTypeInit(FacilityQualifier typeFacilityQualifier,
+            String typeToInitName, String initialValue) {
         this.typeName = typeToInitName;
         this.qualifier = typeFacilityQualifier;
         this.initialValue = initialValue;
     }
 
-    public static class Qualifier extends OutputModelObject {
+    public static class FacilityQualifier extends OutputModelObject {
         public String facilitySpecName, facilityName;
 
-        public Qualifier(String facilityName, String facilitySpecName) {
+        public FacilityQualifier(FacilitySymbol f) {
+            this(f.getName(), f.getSpecName());
+        }
+
+        public FacilityQualifier(String facilityName, String facilitySpecName) {
             this.facilityName = facilityName;
             this.facilitySpecName = facilitySpecName;
         }

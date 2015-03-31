@@ -8,7 +8,6 @@ Facility Copy_Stack;
 
     Operation Main();
         Procedure
-            Var S1, S2: Stack;
 
 
     end Main;

@@ -89,7 +89,6 @@ public abstract class BaseScope implements Scope {
         // 1. Make this version work, where I can find facilities,
         //search them in diff modules etc.
         // 2. Enforce qualification and make it so that you need to
-
         throw new NoSuchSymbolException();
     }
 

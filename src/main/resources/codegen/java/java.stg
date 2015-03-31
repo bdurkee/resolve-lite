@@ -90,11 +90,14 @@ Argument(argExp, arg) ::= "<arg>"
 
 VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
 
-InitCall(init, qualifier) ::= <<
+LocallyDefinedTypeInit(init) ::= <%
+new <if(init.moduleQualifier)><init.moduleQualifier>.<endif><init.name>()%>
+
+FacilityDefinedTypeInit(init, qualifier) ::= <<
 <qualifier>.init<init.typeName>(<init.initialValue>)
 >>
 
-Qualifier(q) ::= <%
+FacilityQualifier(q) ::= <%
 ((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>
 <stdFacQualMap.(q.facilityName)><else><q.facilityName><endif>)%>
 

@@ -43,20 +43,15 @@ import resolvelite.parsing.ResolveParser;
 import resolvelite.semantics.ModuleScope;
 import resolvelite.semantics.NoSuchSymbolException;
 import resolvelite.semantics.SymbolTable;
+import resolvelite.semantics.symbol.FacilitySymbol;
+import resolvelite.semantics.symbol.Symbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
-
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-
-    protected final TypeRefInitFactory INTEGER_INIT_FACTORY =
-            new IntegerTypeInitFactory();
-
-    protected final TypeRefInitFactory BOOLEAN_INIT_FACTORY =
-            new IntegerTypeInitFactory();
-
     @NotNull private final ModuleScope moduleScope;
     @NotNull private final CodeGenerator gen;
 
@@ -98,10 +93,12 @@ public class ModelBuilder extends ResolveBaseListener {
                         ctx.impl.getText());
         basePtr.isProxied = false;
 
-        List<Argument> specArgs =
+        List<Expr> generics = collectModelsFor(Expr.class, ctx.type(), built);
+        List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
-                        Argument.class, ctx.specArgs.moduleArgument(), built);
+                        Expr.class, ctx.specArgs.moduleArgument(), built);
 
+        basePtr.args.addAll(generics);
         basePtr.args.addAll(specArgs);
 
         for (ResolveParser.EnhancementPairDeclContext pair : ctx
@@ -124,6 +121,36 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
+    }
+
+    @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
+        try {
+            if ( ctx.qualifier == null ) {
+                //dealing with locally defined type
+                //the compiler should've complained earlier if this was
+                //(erroneously) lacking a qualifier.
+                built.put(ctx, new LocallyDefinedTypeInit(ctx.name.getText(),
+                        null));
+                return;
+            }
+            Symbol s = moduleScope.resolve(null, ctx.qualifier, true);
+            if ( !(s instanceof FacilitySymbol) ) {
+                throw new RuntimeException("non-facility qualifier... "
+                        + "whats going on here?");
+            }
+            FacilityDefinedTypeInit init =
+                    new FacilityDefinedTypeInit(
+                            new FacilityDefinedTypeInit.FacilityQualifier(
+                                    (FacilitySymbol) s), ctx.name.getText(), "");
+            built.put(ctx, init);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //couldn't find a facility for s? Then the qualifier must identify
+            //a module, thus, we're dealing with a user defined type that
+            //doesn't come through a facility.
+            built.put(ctx, new LocallyDefinedTypeInit(ctx.name.getText(),
+                    ctx.qualifier.getText()));
+        }
     }
 
     @Override public void exitParameterDeclGroup(
@@ -158,7 +185,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
-        built.put(ctx, new Argument((Expr) built.get(ctx.progExp())));
+        built.put(ctx, built.get(ctx.progExp()));
     }
 
     @Override public void exitProgPrimaryExp(
@@ -173,7 +200,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        built.put(ctx, INTEGER_INIT_FACTORY.buildTypeInit(ctx.getText()));
+        FacilityDefinedTypeInit init =
+                new FacilityDefinedTypeInit(
+                        new FacilityDefinedTypeInit.FacilityQualifier(
+                                "Std_Integer_Fac", "Integer_Template"),
+                        "Integer", ctx.getText());
+        built.put(ctx, init);
     }
 
     @Override public void exitConceptModule(
@@ -214,7 +246,6 @@ public class ModelBuilder extends ResolveBaseListener {
      */
     protected Set<ImportRef> buildImports(@NotNull AnnotatedTree m) {
         Set<ImportRef> result = new HashSet<ImportRef>();
-
         for (String s : m.imports
                 .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
             try {
@@ -232,31 +263,13 @@ public class ModelBuilder extends ResolveBaseListener {
     protected static <T extends OutputModelObject> List<T> collectModelsFor(
             Class<T> expectedModelType, List<? extends ParseTree> nodes,
             ParseTreeProperty<OutputModelObject> annotations) {
-        List<T> result = new ArrayList<T>();
-        for (ParseTree x : nodes) {
-            result.add(expectedModelType.cast(annotations.get(x)));
-        }
-        return result;
+        return nodes.stream().map(x -> expectedModelType
+                .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
     public boolean withinFacilityModule() {
         ParseTree t = gen.getModule().getRoot();
-        return t instanceof ResolveParser.FacilityModuleContext;
+        return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
     }
 
-    public static class IntegerTypeInitFactory implements TypeRefInitFactory {
-
-        @Override public InitCall buildTypeInit(String initialValue) {
-            return new InitCall(new InitCall.Qualifier("Std_Integer_Fac",
-                    "Integer_Template"), "Integer", initialValue);
-        }
-    }
-
-    public static class booleanTypeInitFactory implements TypeRefInitFactory {
-
-        @Override public InitCall buildTypeInit(String initialValue) {
-            return new InitCall(new InitCall.Qualifier("Std_Boolean_Fac",
-                    "Boolean_Template"), "Boolean", initialValue);
-        }
-    }
 }
