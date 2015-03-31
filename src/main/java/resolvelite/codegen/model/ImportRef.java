@@ -38,7 +38,7 @@ import java.util.List;
 
 public class ImportRef extends OutputModelObject {
 
-    public List<String> segs = new ArrayList<String>();
+    public List<String> segs = new ArrayList<>();
 
     public ImportRef(String fileName) {
         this.segs = listifyFileString(fileName);
