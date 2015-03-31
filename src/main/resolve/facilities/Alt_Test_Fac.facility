@@ -1,12 +1,6 @@
 Facility Alt_Test_Fac;
 
     Type Info = Record
-            X, Y : Integer;
+            X, Y : Std_Integer_Fac::Integer;
         end;
-
-    Operation Zoo() : Integer;
-        Procedure
-            Var v : Integer;
-    end Zoo;
-
 end Alt_Test_Fac;

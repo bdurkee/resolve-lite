@@ -58,25 +58,14 @@ public interface Scope {
      */
     public void define(@NotNull Symbol sym) throws DuplicateSymbolException;
 
-    /**
-     * Look up <code>name</code> in this scope or in an enclosing
-     * <code>Scope</code> if not already present.
-     * 
-     * @throws NoSuchSymbolException If a symbol corresponding to the
-     *         requested name is not found.
-     * @param name The name of the <code>Scope</code> to lookup.
-     * @return the found symbol, <code>null</code> if not present.
-     */
-    @Nullable public Symbol resolve(String name) throws NoSuchSymbolException;
-
     // @Nullable public Symbol resolve(String name, boolean searchImports)
     //         throws NoSuchSymbolException;
 
-    @Nullable public Symbol resolve(Token qualifier, Token name)
-            throws NoSuchSymbolException;
+    @Nullable public Symbol resolve(Token qualifier, Token name,
+            boolean searchImports) throws NoSuchSymbolException;
 
-    @Nullable public Symbol resolve(String qualifier, String name)
-            throws NoSuchSymbolException;
+    @Nullable public Symbol resolve(String qualifier, String name,
+            boolean searchImports) throws NoSuchSymbolException;
 
     public Symbol getSymbol(String name);
 
