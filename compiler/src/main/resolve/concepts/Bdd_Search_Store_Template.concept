@@ -5,9 +5,6 @@ Concept Bdd_Search_Store_Template<T>
     Type Family Store is modeled by Powerset(T);
         exemplar S;
 
-    Type Family Junk is modeled by B;
-        exemplar J;
-
     Operation Add(restores E: T; updates S: Store);
 
 end Bdd_Search_Store_Template;

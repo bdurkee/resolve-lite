@@ -13,6 +13,8 @@ public class ModuleScope extends BaseScope {
         this.wrappedTree = m;
     }
 
+    //public ModuleScope withGenericsReplaced()
+
     @Override public String getScopeDescription() {
         return "module";
     }

@@ -45,13 +45,7 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
             @Override public ParameterMode[] getValidImplementationModes() {
                 return new ParameterMode[] { EVALUATES };
             }
-        },
-        TYPE {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { TYPE };
-            }
         };
-
         public boolean canBeImplementedWith(ParameterMode o) {
             return contains(getValidImplementationModes(), o);
         }
@@ -92,6 +86,7 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
         return mode;
     }
 
+    //Todo: this toString sucks. Make it better.
     @Override public String toString() {
         String s = "";
         s =

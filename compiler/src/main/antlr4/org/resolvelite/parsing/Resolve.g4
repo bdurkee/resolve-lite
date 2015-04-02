@@ -56,7 +56,7 @@ precisItem
 // concept module
 
 conceptModule
-    :   'Concept' name=Identifier ('<' Identifier (',' Identifier)* '>')?
+    :   'Concept' name=Identifier ('<' genericType (',' genericType)* '>')?
         (moduleParameterList)? ';'
         (importList)?
         (requiresClause)?
@@ -106,6 +106,10 @@ moduleParameterList
 
 moduleParameterDecl
     :   parameterDeclGroup
+    ;
+
+genericType
+    :   Identifier
     ;
 
 parameterDeclGroup

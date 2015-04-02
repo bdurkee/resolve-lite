@@ -44,6 +44,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         currentScope =
                 establishModuleScope(tree, ctx).addImports(
                         tree.imports.getImportsOfType(ImportType.NAMED));
+
+        for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
+            try {
+                currentScope.define(new GenericSymbol(generic.getText()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.name, ctx.name.getText());
+            }
+        }
     }
 
     @Override public void enterFacilityModule(
