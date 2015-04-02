@@ -77,7 +77,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
-        String name = ctx.name.getText();
         try {
             currentScope.define(new ProgTypeSymbol(ctx.name.getText(), symtab,
                     currentScope.getRootModuleID()));
@@ -91,7 +90,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         try {
-            AbstractReprSymbol rs = null;
+            AbstractReprSymbol rs;
             if ( ctx.record() != null ) {
                 rs =
                         new RecordReprSymbol(ctx.name.getText(), ctx, symtab,

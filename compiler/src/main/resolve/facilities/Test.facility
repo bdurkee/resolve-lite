@@ -1,15 +1,7 @@
-Facility Test;
-    uses Alt_Test_Fac;
-    Facility STF is Bdd_Search_Store_Template
-        <Std_Integer_Fac::Integer>(4) externally
-            realized by Array_Impl;
+Facility facilities.Test;
 
     Operation Foo();
         Procedure
-            Var X: STF::Store;
-            Var P: STF2::Store;
-            Var Y: Std_Integer_Fac::Integer;
-
-            STF::Add(Y, X); --error.
+            Var X: Std_Boolean_Fac::Boolean;
     end Main;
-end Test;
+end facilities.Test;

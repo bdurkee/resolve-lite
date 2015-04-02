@@ -32,6 +32,7 @@ package org.resolvelite.compiler;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.antlr.v4.tool.Grammar;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -51,8 +52,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.AnalysisPipeline;
 import org.resolvelite.semantics.SymbolTable;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.*;
@@ -94,6 +94,8 @@ public class ResolveCompiler {
     public static Option[] optionDefs = {
             new Option("longMessages", "-longMessages",
                     "show exception details on errors"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING,
+                    "specify location of grammars, tokens files"),
             new Option("genCode", "-genCode", OptionArgType.STRING,
                     "generate code"),
             new Option("workspaceDir", "-workspaceDir", OptionArgType.STRING,
@@ -103,7 +105,9 @@ public class ResolveCompiler {
                     "dump lots of logging info to resolve-timestamp.log") };
 
     public final String[] args;
+    protected boolean haveOutputDir = false;
 
+    public String outputDirectory;
     public boolean helpFlag = false;
     public boolean longMessages = false;
     public String genCode;
@@ -353,6 +357,102 @@ public class ResolveCompiler {
         }
         return null;
     }
+
+    /**
+     * This method is used by all code generators to create new output
+     * files. If the outputDir set by -o is not present it will be created.
+     * The final filename is sensitive to the output directory and
+     * the directory where the grammar file was found.  If -o is /tmp
+     * and the original grammar file was foo/t.g4 then output files
+     * go in /tmp/foo.
+     *
+     * The output dir -o spec takes precedence if it's absolute.
+     * E.g., if the grammar file dir is absolute the output dir is given
+     * precendence. "-o /tmp /usr/lib/t.g4" results in "/tmp/T.java" as
+     * output (assuming t.g4 holds T.java).
+     *
+     * If no -o is specified, then just write to the directory where the
+     * grammar file was found.
+     *
+     * If outputDirectory==null then write a String.
+     */
+    public Writer getOutputFileWriter(AnnotatedTree t, String fileName) throws IOException {
+        if (outputDirectory == null) {
+            return new StringWriter();
+        }
+        // output directory is a function of where the grammar file lives
+        // for subdir/T.g4, you get subdir here.  Well, depends on -o etc...
+        File outputDir = getOutputDirectory(t.getFileName());
+        File outputFile = new File(outputDir, fileName);
+
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        OutputStreamWriter osw;
+        osw = new OutputStreamWriter(fos);
+
+        return new BufferedWriter(osw);
+    }
+
+    /**
+     * Return the location where ANTLR will generate output files for a given
+     * file. This is a base directory and output files will be relative to
+     * here in some cases such as when -o option is used and input files are
+     * given relative to the input directory.
+     *
+     * @param fileNameWithPath path to input source
+     */
+    public File getOutputDirectory(String fileNameWithPath) {
+        File outputDir;
+        String fileDirectory;
+
+        // Some files are given to us without a PATH but should should
+        // still be written to the output directory in the relative path of
+        // the output directory. The file directory is either the set of sub directories
+        // or just or the relative path recorded for the parent grammar. This means
+        // that when we write the tokens files, or the .java files for imported grammars
+        // taht we will write them in the correct place.
+        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
+            // No path is included in the file name, so make the file
+            // directory the same as the parent grammar (which might sitll be just ""
+            // but when it is not, we will write the file in the correct place.
+            fileDirectory = ".";
+
+        }
+        else {
+            fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
+        }
+        if ( haveOutputDir ) {
+            // -o /tmp /var/lib/t.g4 => /tmp/T.java
+            // -o subdir/output /usr/lib/t.g4 => subdir/output/T.java
+            // -o . /usr/lib/t.g4 => ./T.java
+            if (fileDirectory != null &&
+                    (new File(fileDirectory).isAbsolute() ||
+                            fileDirectory.startsWith("~"))) { // isAbsolute doesn't count this :(
+                // somebody set the dir, it takes precendence; write new file there
+                outputDir = new File(outputDirectory);
+            }
+            else {
+                // -o /tmp subdir/t.g4 => /tmp/subdir/t.g4
+                if (fileDirectory != null) {
+                    outputDir = new File(outputDirectory, fileDirectory);
+                }
+                else {
+                    outputDir = new File(outputDirectory);
+                }
+            }
+        }
+        else {
+            // they didn't specify a -o dir so just write to location
+            // where grammar is, absolute or relative, this will only happen
+            // with command line invocation as build tools will always
+            // supply an output directory.
+            outputDir = new File(fileDirectory);
+        }
+        return outputDir;
+    }
+
 
     public void log(@Nullable String component, String msg) {
         logMgr.log(component, msg);
