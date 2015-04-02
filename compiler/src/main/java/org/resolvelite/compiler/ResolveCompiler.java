@@ -94,19 +94,19 @@ public class ResolveCompiler {
     public static Option[] optionDefs = {
             new Option("longMessages", "-longMessages",
                     "show exception details on errors"),
+            new Option("outputDirectory", "-o", OptionArgType.STRING,
+                    "specify output directory where all output is generated"),
             new Option("libDirectory", "-lib", OptionArgType.STRING,
                     "specify location of grammars, tokens files"),
             new Option("genCode", "-genCode", OptionArgType.STRING,
                     "generate code"),
-            new Option("workspaceDir", "-workspaceDir", OptionArgType.STRING,
-                    "specify root location of current workspace housing"
-                            + "resolve files"),
             new Option("log", "-Xlog",
                     "dump lots of logging info to resolve-timestamp.log") };
 
     public final String[] args;
     protected boolean haveOutputDir = false;
 
+    public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean longMessages = false;
@@ -172,6 +172,38 @@ public class ResolveCompiler {
             }
             if ( !found ) {
                 errorManager.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
+            }
+            if ( outputDirectory != null ) {
+                if ( outputDirectory.endsWith("/")
+                        || outputDirectory.endsWith("\\") ) {
+                    outputDirectory =
+                            outputDirectory.substring(0,
+                                    outputDirectory.length() - 1);
+                }
+                File outDir = new File(outputDirectory);
+                haveOutputDir = true;
+                if ( outDir.exists() && !outDir.isDirectory() ) {
+                    //  errMgr.toolError(ErrorType.OUTPUT_DIR_IS_FILE, outputDirectory);
+                    libDirectory = ".";
+                }
+            }
+            else {
+                outputDirectory = ".";
+            }
+            if ( libDirectory != null ) {
+                if ( libDirectory.endsWith("/") || libDirectory.endsWith("\\") ) {
+                    libDirectory =
+                            libDirectory
+                                    .substring(0, libDirectory.length() - 1);
+                }
+                File outDir = new File(libDirectory);
+                if ( !outDir.exists() ) {
+                    //    errMgr.toolError(ErrorType.DIR_NOT_FOUND, libDirectory);
+                    libDirectory = ".";
+                }
+            }
+            else {
+                libDirectory = ".";
             }
         }
     }
@@ -362,22 +394,23 @@ public class ResolveCompiler {
      * This method is used by all code generators to create new output
      * files. If the outputDir set by -o is not present it will be created.
      * The final filename is sensitive to the output directory and
-     * the directory where the grammar file was found.  If -o is /tmp
+     * the directory where the grammar file was found. If -o is /tmp
      * and the original grammar file was foo/t.g4 then output files
      * go in /tmp/foo.
-     *
+     * 
      * The output dir -o spec takes precedence if it's absolute.
      * E.g., if the grammar file dir is absolute the output dir is given
      * precendence. "-o /tmp /usr/lib/t.g4" results in "/tmp/T.java" as
      * output (assuming t.g4 holds T.java).
-     *
+     * 
      * If no -o is specified, then just write to the directory where the
      * grammar file was found.
-     *
+     * 
      * If outputDirectory==null then write a String.
      */
-    public Writer getOutputFileWriter(AnnotatedTree t, String fileName) throws IOException {
-        if (outputDirectory == null) {
+    public Writer getOutputFileWriter(AnnotatedTree t, String fileName)
+            throws IOException {
+        if ( outputDirectory == null ) {
             return new StringWriter();
         }
         // output directory is a function of where the grammar file lives
@@ -385,7 +418,7 @@ public class ResolveCompiler {
         File outputDir = getOutputDirectory(t.getFileName());
         File outputFile = new File(outputDir, fileName);
 
-        if (!outputDir.exists()) {
+        if ( !outputDir.exists() ) {
             outputDir.mkdirs();
         }
         FileOutputStream fos = new FileOutputStream(outputFile);
@@ -400,7 +433,7 @@ public class ResolveCompiler {
      * file. This is a base directory and output files will be relative to
      * here in some cases such as when -o option is used and input files are
      * given relative to the input directory.
-     *
+     * 
      * @param fileNameWithPath path to input source
      */
     public File getOutputDirectory(String fileNameWithPath) {
@@ -413,7 +446,7 @@ public class ResolveCompiler {
         // or just or the relative path recorded for the parent grammar. This means
         // that when we write the tokens files, or the .java files for imported grammars
         // taht we will write them in the correct place.
-        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
+        if ( fileNameWithPath.lastIndexOf(File.separatorChar) == -1 ) {
             // No path is included in the file name, so make the file
             // directory the same as the parent grammar (which might sitll be just ""
             // but when it is not, we will write the file in the correct place.
@@ -421,21 +454,23 @@ public class ResolveCompiler {
 
         }
         else {
-            fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
+            fileDirectory =
+                    fileNameWithPath.substring(0,
+                            fileNameWithPath.lastIndexOf(File.separatorChar));
         }
         if ( haveOutputDir ) {
             // -o /tmp /var/lib/t.g4 => /tmp/T.java
             // -o subdir/output /usr/lib/t.g4 => subdir/output/T.java
             // -o . /usr/lib/t.g4 => ./T.java
-            if (fileDirectory != null &&
-                    (new File(fileDirectory).isAbsolute() ||
-                            fileDirectory.startsWith("~"))) { // isAbsolute doesn't count this :(
+            if ( fileDirectory != null
+                    && (new File(fileDirectory).isAbsolute() || fileDirectory
+                            .startsWith("~")) ) { // isAbsolute doesn't count this :(
                 // somebody set the dir, it takes precendence; write new file there
                 outputDir = new File(outputDirectory);
             }
             else {
                 // -o /tmp subdir/t.g4 => /tmp/subdir/t.g4
-                if (fileDirectory != null) {
+                if ( fileDirectory != null ) {
                     outputDir = new File(outputDirectory, fileDirectory);
                 }
                 else {
@@ -452,7 +487,6 @@ public class ResolveCompiler {
         }
         return outputDir;
     }
-
 
     public void log(@Nullable String component, String msg) {
         logMgr.log(component, msg);

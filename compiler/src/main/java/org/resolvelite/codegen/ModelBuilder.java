@@ -236,7 +236,6 @@ public class ModelBuilder extends ResolveBaseListener {
                     .facilityBlock().operationProcedureDecl(), built));
         }
         file.module = impl;
-        file.imports = buildImports(annotatedTree);
         built.put(ctx, file);
     }
 
@@ -265,31 +264,7 @@ public class ModelBuilder extends ResolveBaseListener {
          * }
          */
         file.module = spec;
-        file.imports = buildImports(annotatedTree);
         built.put(ctx, file);
-    }
-
-    /**
-     * Converts the imports in an {@link ImportCollection} to a set of
-     * {@link ImportRef}s.
-     * 
-     * @param m A module builder maintaining a collection of imports
-     * @return a set of model-friendly imports.
-     */
-    protected Set<ImportRef> buildImports(@NotNull AnnotatedTree m) {
-        Set<ImportRef> result = new HashSet<ImportRef>();
-        for (String s : m.imports
-                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
-            try {
-                AnnotatedTree e = gen.getCompiler() //
-                        .symbolTable.getModuleScope(s) //
-                                .getWrappedModuleTree();
-                result.add(new ImportRef(e.getFileName()));
-            }
-            catch (NoSuchSymbolException nsse) {} //shouldn't happen.
-        }
-        //Todo: handle external imports
-        return result;
     }
 
     protected static <T extends OutputModelObject> List<T> collectModelsFor(

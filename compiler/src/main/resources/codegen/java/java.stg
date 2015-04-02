@@ -29,12 +29,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-ModuleFile(file, module, imports) ::= <<
+ModuleFile(file, module) ::= <<
 <fileHeader(file.resolveFileName, file.RESOLVEVersion)>
-package <trunc(file.targetDir); separator=".">;
-
-import resolve.*;
-<imports; separator="\n">
+import org.resolvelite.runtime.*;
 import java.lang.reflect.*;
 
 <module>
@@ -48,9 +45,9 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 >>
 
 Concept(concept, types, funcs) ::= <<
-public interface <concept.name> extends RESOLVE_INTERFACE {
+public interface <concept.name> extends ResolveInterface {
     <types; separator="\n">
-    <types: {t|public RTType create<t.type.name>();};separator="\n">
+    <types: {t|public RType create<t.type.name>();};separator="\n">
     <funcs; separator="\n">
 }
 >>
@@ -65,22 +62,22 @@ public class <impl.name> {
 ImportRef(imports) ::= "import <imports.segs; separator={.}>.*;"
 
 TypeDecl(type) ::= <<
-interface <type.name> extends RTType { }
+interface <type.name> extends RType { }
 >>
 
-ParameterDecl(param) ::= "RTType <param.name>"
+ParameterDecl(param) ::= "RType <param.name>"
 
-VariableDecl(var, init) ::= "RTType <var.name> = <init>;"
+VariableDecl(var, init) ::= "RType <var.name> = <init>;"
 
 FunctionDecl(func, params) ::= <<
 public <if(func.isStatic)>static <endif><\\>
-<if(func.hasReturn)>RTType <else>void <endif><\\>
+<if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">);
 >>
 
 FunctionImpl(func, params, vars) ::= <<
 public <if(func.isStatic)>static <endif><\\>
-<if(func.hasReturn)>RTType <else>void <endif><\\>
+<if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">) {
     <vars; separator="\n">
 }

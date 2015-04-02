@@ -93,7 +93,7 @@ public class CodeGenerator {
 
     private void write(ST code, String fileName) {
         try {
-            Writer w = null; //myTool.getOutputFileWriter(g, fileName);
+            Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(myLineWidth);
             code.write(wr);

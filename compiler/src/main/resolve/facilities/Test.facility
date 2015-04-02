@@ -1,7 +1,7 @@
-Facility facilities.Test;
+Facility Test;
 
     Operation Foo();
         Procedure
             Var X: Std_Boolean_Fac::Boolean;
     end Main;
-end facilities.Test;
+end Test;

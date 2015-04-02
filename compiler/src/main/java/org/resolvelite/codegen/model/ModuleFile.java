@@ -41,12 +41,13 @@ public class ModuleFile extends OutputModelObject {
     public String RESOLVEVersion;
     public List<String> targetDir; //in this case, our pkg directory
     public String resolveFileName;
-    @ModelElement public Set<ImportRef> imports = new LinkedHashSet<>();
+    //   public Set<String> imports = new LinkedHashSet<>(); //not necessary atm
     @ModelElement public Module module;
 
     public ModuleFile(AnnotatedTree e, String resolveFileName) {
         this.resolveFileName = resolveFileName;
         this.RESOLVEVersion = ResolveCompiler.VERSION;
+        // this.imports.addAll(e.imports.getAllImports());
         //this.targetDir = ImportRef.listifyFileString(e.getFileName());
     }
 }
