@@ -33,11 +33,13 @@ package org.resolvelite.runtime;
 public abstract class ResolveBase implements ResolveInterface {
 
     @Override public void swap(RType r1, RType r2) {
-        throw new UnsupportedOperationException("not yet supported");
+        Object tmp = r1.getRep();
+        r1.setRep(r2.getRep());
+        r2.setRep(tmp);
     }
 
     @Override public void assign(RType r1, RType r2) {
-        throw new UnsupportedOperationException("not yet supported");
+        r1.setRep(r2.getRep());
     }
 
 }

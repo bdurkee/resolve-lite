@@ -219,6 +219,11 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, init);
     }
 
+    @Override public void exitRealizationModule(
+            @NotNull ResolveParser.RealizationModuleContext ctx) {
+
+    }
+
     @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         AnnotatedTree annotatedTree = gen.getModule();
@@ -236,7 +241,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     .facilityBlock().operationProcedureDecl(), built));
         }
         for (FunctionDecl f : impl.funcs) {
-            if (f.name.equalsIgnoreCase("main")) {
+            if ( f.name.equalsIgnoreCase("main") ) {
                 impl.definedMain = f.name;
             }
         }

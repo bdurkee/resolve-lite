@@ -1,0 +1,17 @@
+Concept Bdd_Stack_Template<T>
+        (evaluates Max_Depth: Std_Integer_Fac::Integer);
+
+    Type Family Stack is modeled by Str(T);
+        exemplar s;
+
+    Operation Push (restores e: T; updates S: Stack);
+
+    Operation Pop (replaces e: T; updates S: Stack);
+
+    Operation Depth (restores S: Stack): Std_Integer_Fac::Integer;
+
+    Operation Rem_Capacity (restores S: Stack): Std_Integer_Fac::Integer;
+
+    Operation Clear (clears S: Stack);
+
+end Bdd_Stack_Template;

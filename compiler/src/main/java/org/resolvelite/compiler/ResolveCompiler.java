@@ -65,7 +65,8 @@ public class ResolveCompiler {
     } // NONE implies boolean
 
     public static final List<String> NATIVE_EXT = Collections
-            .unmodifiableList(Arrays.asList("concept", "precis", "facility"));
+            .unmodifiableList(Arrays.asList("concept", "precis", "facility",
+                    "realization"));
 
     public static final List<String> NON_NATIVE_EXT = Collections
             .unmodifiableList(Arrays.asList("java"));

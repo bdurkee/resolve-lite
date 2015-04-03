@@ -71,19 +71,16 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             for (File externalFile : l.getFiles()) {
                 File out = new File(compiler.outputDirectory);
                 Path src = externalFile.toPath();
-                Path dest = new File(out.getName() + "/" +
-                        externalFile.getName()).toPath();
-                Files.copy(externalFile.toPath(), dest);
+                Path dest =
+                        new File(out.getName() + "/" + externalFile.getName())
+                                .toPath();
+                Files.copy(externalFile.toPath(), dest,
+                        StandardCopyOption.REPLACE_EXISTING);
             }
         }
         catch (IOException ioe) {
-            System.out.println(ioe.getMessage());
+            throw new RuntimeException(ioe.getMessage());
+            //System.out.println(ioe.getMessage());
         }
-        createBoolean();
     }
-
-    public Boolean createBoolean(Boolean ... b) {
-        return null;
-    }
-
 }

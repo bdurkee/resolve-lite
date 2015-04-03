@@ -34,6 +34,7 @@ module
     :   precisModule
     |   conceptModule
     |   facilityModule
+    |   realizationModule
     ;
 
 // precis module
@@ -88,6 +89,21 @@ facilityBlock
         )+
     ;
 
+// realization module
+
+realizationModule
+    :   'Realization' name=Identifier (moduleParameterList)?
+        'for' concept=Identifier ';'
+        (importList)?
+        (realizationBlock)?
+        'end' closename=Identifier ';'
+    ;
+
+realizationBlock
+    :   ( typeRepresentationDecl
+        | operationProcedureDecl
+        )+
+    ;
 // uses, imports
 
 importList

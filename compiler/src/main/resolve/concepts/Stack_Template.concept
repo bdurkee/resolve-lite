@@ -1,5 +1,0 @@
-Concept Stack_Template<T>;
-
-    Operation Foo(updates S : T);
-
-end Stack_Template;
