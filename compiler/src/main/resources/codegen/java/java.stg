@@ -47,15 +47,26 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 Concept(concept, types, funcs) ::= <<
 public interface <concept.name> extends ResolveInterface {
     <types; separator="\n">
-    <types: {t|public RType create<t.type.name>();};separator="\n">
+    <types: {t|<initMethodDecl(t.type)>}; separator="\n">
     <funcs; separator="\n">
 }
 >>
+
+initMethodDecl(type) ::= <%
+public RType init<type.name>(
+<if(toPrimitive.(type.name))><toPrimitive.(type.name)>
+<else><type.name><endif>... e);
+%>
 
 FacilityImpl(impl, facilities, funcs) ::= <<
 public class <impl.name> {
     <facilities; separator="\n">
     <funcs; separator="\n">
+    <if(impl.definedMain)>
+    public static void main(String[] args) {
+        <impl.definedMain>();
+    }
+    <endif>
 }
 >>
 
@@ -106,6 +117,11 @@ FacilityDefinedTypeInit(init, qualifier) ::= <<
 FacilityQualifier(q) ::= <%
 ((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>
 <stdFacQualMap.(q.facilityName)><else><q.facilityName><endif>)%>
+
+toPrimitive ::= [
+    "Boolean":"boolean",
+    "Integer":"int"
+]
 
 stdFacQualMap ::= [
     "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",

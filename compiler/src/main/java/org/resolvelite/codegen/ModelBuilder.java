@@ -235,6 +235,11 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.funcs.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
         }
+        for (FunctionDecl f : impl.funcs) {
+            if (f.name.equalsIgnoreCase("main")) {
+                impl.definedMain = f.name;
+            }
+        }
         file.module = impl;
         built.put(ctx, file);
     }

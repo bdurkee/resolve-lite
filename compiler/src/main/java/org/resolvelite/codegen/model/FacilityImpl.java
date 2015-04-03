@@ -35,6 +35,7 @@ import java.util.List;
 
 public class FacilityImpl extends Module {
     public String conceptName;
+    public String definedMain;
     @ModelElement public List<FacilityInstanceDecl> facilities =
             new ArrayList<>();
     @ModelElement public List<FunctionImpl> funcs = new ArrayList<>();

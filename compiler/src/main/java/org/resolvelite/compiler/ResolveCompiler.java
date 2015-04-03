@@ -32,7 +32,6 @@ package org.resolvelite.compiler;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.tool.Grammar;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -183,7 +182,8 @@ public class ResolveCompiler {
                 File outDir = new File(outputDirectory);
                 haveOutputDir = true;
                 if ( outDir.exists() && !outDir.isDirectory() ) {
-                    //  errMgr.toolError(ErrorType.OUTPUT_DIR_IS_FILE, outputDirectory);
+                    errorManager.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
+                            outputDirectory);
                     libDirectory = ".";
                 }
             }
@@ -198,7 +198,8 @@ public class ResolveCompiler {
                 }
                 File outDir = new File(libDirectory);
                 if ( !outDir.exists() ) {
-                    //    errMgr.toolError(ErrorType.DIR_NOT_FOUND, libDirectory);
+                    errorManager.toolError(ErrorKind.DIR_NOT_FOUND,
+                            libDirectory);
                     libDirectory = ".";
                 }
             }
@@ -355,7 +356,7 @@ public class ResolveCompiler {
     private File findResolveFile(String baseName, List<String> extensions)
             throws IOException {
         FileLocator l = new FileLocator(baseName, extensions);
-        Files.walkFileTree(new File(System.getProperty("user.dir")).toPath(), l);
+        Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();
     }
 
@@ -363,7 +364,7 @@ public class ResolveCompiler {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
-                file = new File(System.getProperty("user.dir"), fileName);
+                file = new File(libDirectory, fileName);
             }
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
@@ -395,13 +396,13 @@ public class ResolveCompiler {
      * files. If the outputDir set by -o is not present it will be created.
      * The final filename is sensitive to the output directory and
      * the directory where the grammar file was found. If -o is /tmp
-     * and the original grammar file was foo/t.g4 then output files
+     * and the original resolve file was foo/T.facility then output files
      * go in /tmp/foo.
      * 
      * The output dir -o spec takes precedence if it's absolute.
      * E.g., if the grammar file dir is absolute the output dir is given
-     * precendence. "-o /tmp /usr/lib/t.g4" results in "/tmp/T.java" as
-     * output (assuming t.g4 holds T.java).
+     * precendence. "-o /tmp /usr/lib/T.facility" results in "/tmp/T.java" as
+     * output (assuming T.facility holds T.java).
      * 
      * If no -o is specified, then just write to the directory where the
      * grammar file was found.
@@ -429,7 +430,8 @@ public class ResolveCompiler {
     }
 
     /**
-     * Return the location where ANTLR will generate output files for a given
+     * Return the location where the compiler will generate output files for a
+     * given
      * file. This is a base directory and output files will be relative to
      * here in some cases such as when -o option is used and input files are
      * given relative to the input directory.
@@ -459,9 +461,9 @@ public class ResolveCompiler {
                             fileNameWithPath.lastIndexOf(File.separatorChar));
         }
         if ( haveOutputDir ) {
-            // -o /tmp /var/lib/t.g4 => /tmp/T.java
-            // -o subdir/output /usr/lib/t.g4 => subdir/output/T.java
-            // -o . /usr/lib/t.g4 => ./T.java
+            // -o /tmp /var/lib/T.facility => /tmp/T.java
+            // -o subdir/output /usr/lib/T.facility => subdir/output/T.java
+            // -o . /usr/lib/T.facility => ./T.java
             if ( fileDirectory != null
                     && (new File(fileDirectory).isAbsolute() || fileDirectory
                             .startsWith("~")) ) { // isAbsolute doesn't count this :(

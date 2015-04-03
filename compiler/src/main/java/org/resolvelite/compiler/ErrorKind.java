@@ -53,113 +53,132 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 4: internal error: <em>message</em>.
+     * Compiler Error 4.
+     * 
+     * <p>
+     * directory not found: <em>directory</em>
+     * </p>
      */
-    INTERNAL_ERROR(4, "internal error: <arg> <arg2><if(exception&&verbose)>: "
+    DIR_NOT_FOUND(4, "directory not found: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 5.
+     * 
+     * <p>
+     * output directory is a file: <em>filename</em>
+     * </p>
+     */
+    OUTPUT_DIR_IS_FILE(5, "output directory is a file: <arg>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 6: internal error: <em>message</em>.
+     */
+    INTERNAL_ERROR(6, "internal error: <arg> <arg2><if(exception&&verbose)>: "
             + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 5: syntax error: <em>errormsg</em>.
+     * Compiler error 7: syntax error: <em>errormsg</em>.
      */
-    SYNTAX_ERROR(5, "syntax error: <arg>", ErrorSeverity.ERROR),
+    SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 6: unexpected symboltablentry: <em>expectedentry</em>,
+     * Compiler error 8: unexpected symboltablentry: <em>expectedentry</em>,
      * <em>foundentry</em>.
      */
-    UNEXPECTED_SYMBOL(6, "expecting <arg>; found <arg2>", ErrorSeverity.ERROR),
+    UNEXPECTED_SYMBOL(8, "expecting <arg>; found <arg2>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 7: duplicate symbol: <em>name</em>.
+     * Compiler error 9: duplicate symbol: <em>name</em>.
      */
-    DUP_SYMBOL(7, "duplicate symbol: <arg>", ErrorSeverity.ERROR),
+    DUP_SYMBOL(9, "duplicate symbol: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler warning 8: mismatched block top and bottom names.
+     * Compiler warning 10: mismatched block top and bottom names.
      */
-    MISMATCHED_BLOCK_NAMES(8, "block start name '<arg>' does not match the "
+    MISMATCHED_BLOCK_NAMES(10, "block start name '<arg>' does not match the "
             + "declared closing name '<arg2>'", ErrorSeverity.WARNING),
 
     /**
-     * Compiler error 9: no such symbol: <em>name</em> in <em>moduleName</em>
+     * Compiler error 11: no such symbol: <em>name</em> in <em>moduleName</em>
      */
-    NO_SUCH_SYMBOL(9, "no such symbol: <arg> <if(arg2)>in <arg2><endif>",
+    NO_SUCH_SYMBOL(11, "no such symbol: <arg> <if(arg2)>in <arg2><endif>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 10: <em>module1type</em> module '<em>module1</em>' cannot
+     * Compiler Error 12: <em>module1type</em> module '<em>module1</em>' cannot
      * import <em>module2type</em> module '<em>module2</em>'.
      */
-    INVALID_IMPORT(10, "<arg> module '<arg1>' cannot import "
+    INVALID_IMPORT(12, "<arg> module '<arg1>' cannot import "
             + "<arg2> module '<arg3>'", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 11: <em>module1type</em> module '<em>module1</em>' cannot
+     * Compiler Error 13: <em>module1type</em> module '<em>module1</em>' cannot
      * import <em>module2type</em> module '<em>module2</em>'.
      */
-    MISSING_IMPORT_FILE(11, "module <arg> was unable to find the file "
+    MISSING_IMPORT_FILE(13, "module <arg> was unable to find the file "
             + "corresponding to import reference: '<arg2>'",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 12: no mapping to template name for output model
+     * Compiler error 14: no mapping to template name for output model
      * class <em>class</em>.
      */
-    NO_MODEL_TO_TEMPLATE_MAPPING(12, "no mapping to template name for output "
+    NO_MODEL_TO_TEMPLATE_MAPPING(14, "no mapping to template name for output "
             + "model class <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 13: missing code generation template <em>template</em>.
+     * Compiler error 15: missing code generation template <em>template</em>.
      */
-    CODE_GEN_TEMPLATES_INCOMPLETE(13, "missing code generation template <arg>",
+    CODE_GEN_TEMPLATES_INCOMPLETE(15, "missing code generation template <arg>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 14: code generation template <em>template</em> has
+     * Compiler error 16: code generation template <em>template</em> has
      * missing, misnamed, or incomplete arg list; missing <em>field</em>.
      */
-    CODE_TEMPLATE_ARG_ISSUE(14, "code generation template <arg> has missing, "
+    CODE_TEMPLATE_ARG_ISSUE(16, "code generation template <arg> has missing, "
             + "misnamed, or incomplete arg list; missing <arg2>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 15: can't find code generation templates: <em>group</em>.
+     * Compiler error 17: can't find code generation templates: <em>group</em>.
      */
-    MISSING_CODE_GEN_TEMPLATES(15,
+    MISSING_CODE_GEN_TEMPLATES(17,
             "can't find code generation templates: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler warning 16: template error: <em>message</em>.
+     * Compiler warning 18: template error: <em>message</em>.
      */
-    STRING_TEMPLATE_WARNING(16, "template error: <arg> "
+    STRING_TEMPLATE_WARNING(18, "template error: <arg> "
             + "<arg2><if(exception&&verbose)>: <exception>"
             + "<stackTrace; separator=\"\\n\"><endif>", ErrorSeverity.WARNING),
 
     /**
-     * Compiler error 17: RESOLVE cannot generate <em>language</em> code as
+     * Compiler error 19: RESOLVE cannot generate <em>language</em> code as
      * of version <em>version</em>.
      */
-    CANNOT_CREATE_TARGET_GENERATOR(17, "RESOLVE cannot generate <arg> code as "
+    CANNOT_CREATE_TARGET_GENERATOR(19, "RESOLVE cannot generate <arg> code as "
             + "of version " + ResolveCompiler.VERSION,
             ErrorSeverity.ERROR_ONE_OFF),
 
     /**
-     * Compiler error 18: Non-facility qualifier on variable: <em>varName</em>.
+     * Compiler error 20: Non-facility qualifier on variable: <em>varName</em>.
      */
-    NON_FACILITY_QUALIFIER(18, "qualifier '<arg>' refers"
+    NON_FACILITY_QUALIFIER(20, "qualifier '<arg>' refers"
             + " to a module, not a facility", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 19: type <em>name</em> is not known to ba type".
+     * Compiler error 21: type <em>name</em> is not known to ba type".
      */
-    INVALID_MATH_TYPE(19, "type '<arg>' is not known to be a type",
+    INVALID_MATH_TYPE(21, "type '<arg>' is not known to be a type",
             ErrorSeverity.ERROR),
 
-    INCOMPATIBLE_TYPES(20, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
+    INCOMPATIBLE_TYPES(22, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
             + "program types in <arg5>", ErrorSeverity.ERROR),
 
-    NO_SUCH_MODULE(21, "no such module: <arg>", ErrorSeverity.ERROR);
+    NO_SUCH_MODULE(23, "no such module: <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

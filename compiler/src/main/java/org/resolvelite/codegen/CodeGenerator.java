@@ -57,9 +57,9 @@ public class CodeGenerator {
     public final int myLineWidth = 72;
 
     public CodeGenerator(@NotNull ResolveCompiler rc,
-            @NotNull AnnotatedTree current) {
+            @NotNull AnnotatedTree rootTarget) {
         this.compiler = rc;
-        this.module = current;
+        this.module = rootTarget;
         this.templates = loadTemplates();
     }
 
