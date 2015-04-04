@@ -1,0 +1,17 @@
+Concept Bdd_Ceramic_Array_Template<T>
+        (evaluates Upper_Bound, Lower_Bound: Std_Integer_Fac::Integer);
+
+    Type Family Array is modeled by Z -> T;
+        exemplar A;
+        constraint true;
+
+    Oper Swap_Element (updates A: Array; updates e: T;
+            evaluates i: Std_Integer_Fac::Integer);
+
+    Oper Swap_Two_Elements (updates A: Array;
+            evaluates i, j: Std_Integer_Fac::Integer);
+
+    Oper Assign_Element (updates A: Array;
+            evaluates e: T; evaluates i: Std_Integer_Fac::Integer);
+
+end Bdd_Ceramic_Array_Template;

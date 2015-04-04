@@ -45,8 +45,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class CodeGenerator {
-
-    public static final String TEMPLATE_ROOT = "codegen";
+    public static final String TEMPLATE_ROOT = "org/resolvelite/templates/codegen";
 
     public static final String DEFAULT_LANGUAGE = "java";
 
@@ -57,10 +56,13 @@ public class CodeGenerator {
     public final int myLineWidth = 72;
 
     public CodeGenerator(@NotNull ResolveCompiler rc,
-            @NotNull AnnotatedTree rootTarget) {
+            @NotNull AnnotatedTree rootTarget) throws IllegalStateException {
         this.compiler = rc;
         this.module = rootTarget;
         this.templates = loadTemplates();
+        if (templates == null) {
+            throw new IllegalStateException();
+        }
     }
 
     private OutputModelObject buildModuleOutputModel() {

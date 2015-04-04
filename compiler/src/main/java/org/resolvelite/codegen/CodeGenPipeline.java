@@ -52,35 +52,39 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     @Override public void process() {
         if ( compiler.genCode == null ) return;
         for (AnnotatedTree unit : compilationUnits) {
-            compiler.info("generating code: " + unit.getName());
-            CodeGenerator gen = new CodeGenerator(compiler, unit);
-            if ( compiler.genCode.equals("Java") ) {
-                ST x = gen.generateModule();
-                //System.out.println(x.render());
-                gen.writeModuleFile(gen.generateModule());
+            try {
+                CodeGenerator gen = new CodeGenerator(compiler, unit);
+                compiler.info("generating code: " + unit.getName());
+                if ( compiler.genCode.equals("Java") ) {
+                    ST x = gen.generateModule();
+                    System.out.println(x.render());
+                    //gen.writeModuleFile(gen.generateModule());
+                }
+            } catch (IllegalStateException ise) {
+                return; //if the templates were unable to be loaded, etc.
             }
         }
 
-            //Todo: this process of copying externally realized stuff over from the
-            //workspace is very basic atm. It doesn't take into account whether or
-            //not an externally realized file is used in the context of any of the
-            //current target files.
-            try {
-                FileLocator l = new FileLocator("java"); //Todo: Use non-native ext. in ResolveCompiler
-                Files.walkFileTree(new File(compiler.libDirectory).toPath(), l);
-                for (File externalFile : l.getFiles()) {
-                    File out = new File(compiler.outputDirectory);
-                    Path src = externalFile.toPath();
-                    Path dest =
-                            new File(out.getName() + "/" + externalFile.getName())
-                                    .toPath();
-                    Files.copy(externalFile.toPath(), dest,
-                            StandardCopyOption.REPLACE_EXISTING);
-                }
-            }
-            catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
-                //System.out.println(ioe.getMessage());
-            }
+        //Todo: this process of copying externally realized stuff over from the
+        //workspace is very basic atm. It doesn't take into account whether or
+        //not an externally realized file is used in the context of any of the
+        //current target files.
+        /*  try {
+              FileLocator l = new FileLocator("java"); //Todo: Use non-native ext. in ResolveCompiler
+              Files.walkFileTree(new File(compiler.libDirectory).toPath(), l);
+              for (File externalFile : l.getFiles()) {
+                  File out = new File(compiler.outputDirectory);
+                  Path src = externalFile.toPath();
+                  Path dest =
+                          new File(out.getName() + "/" + externalFile.getName())
+                                  .toPath();
+                  Files.copy(externalFile.toPath(), dest,
+                          StandardCopyOption.REPLACE_EXISTING);
+              }
+          }
+          catch (IOException ioe) {
+              throw new RuntimeException(ioe.getMessage());
+              //System.out.println(ioe.getMessage());
+          }*/
     }
 }

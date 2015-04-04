@@ -37,7 +37,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.codegen.model.*;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
@@ -49,9 +48,7 @@ import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
@@ -61,8 +58,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @NotNull private final CodeGenerator gen;
     @NotNull private final SymbolTable symtab;
 
-    public ModelBuilder(@NotNull CodeGenerator g,
-            @NotNull SymbolTable symtab) {
+    public ModelBuilder(@NotNull CodeGenerator g, @NotNull SymbolTable symtab) {
         this.gen = g;
         this.moduleScope = symtab.moduleScopes.get(g.getModule().getName());
         this.symtab = symtab;
@@ -200,6 +196,13 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        MemberClassDef representationClass =
+                new MemberClassDef(ctx.name.getText());
+        built.put(ctx, representationClass);
+    }
+
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
@@ -247,13 +250,13 @@ public class ModelBuilder extends ResolveBaseListener {
                     .implBlock().procedureDecl(), built));
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
+            impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
+                    .implBlock().typeRepresentationDecl(), built));
         }
-
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
             List<ParameterSymbol> formals = conceptScope.getFormalParameters();
-
 
             int i;
             i = 0;

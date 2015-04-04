@@ -37,6 +37,7 @@ public abstract class Module extends OutputModelObject {
     public String name;
     public ModuleFile file;
     @ModelElement public List<FunctionImpl> funcImpls = new ArrayList<>();
+    @ModelElement public List<MemberClassDef> repClasses = new ArrayList<>();
 
     public Module(String name, ModuleFile file) {
         this.name = name;

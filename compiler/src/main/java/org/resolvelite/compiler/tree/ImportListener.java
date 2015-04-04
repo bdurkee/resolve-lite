@@ -59,6 +59,8 @@ public class ImportListener extends ResolveBaseListener {
                     "Standard_Integers"));
 
     static {
+        //first param defines a special, "default module", all proceeding params
+        //are things it will automatically import.
         registerStandardModule("Boolean_Template");
         registerStandardModule("Standard_Booleans");
         registerStandardModule("Integer_Template", "Standard_Booleans");
@@ -92,6 +94,11 @@ public class ImportListener extends ResolveBaseListener {
                 importCollection.addTokenSet(ImportType.NAMED, DEFAULT_IMPORTS);
             }
         }
+    }
+
+    @Override public void enterConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        importCollection.imports(ImportType.NAMED, ctx.concept.getText());
     }
 
     @Override public void exitImportList(

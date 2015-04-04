@@ -103,6 +103,7 @@ implBlock
     :   ( typeRepresentationDecl
         | operationProcedureDecl
         | procedureDecl
+        | facilityDecl
         )+
     ;
 // uses, imports
@@ -236,14 +237,14 @@ procedureDecl
 facilityDecl
     :   'Facility' name=Identifier 'is' spec=Identifier
         ('<' type (',' type)* '>')?
-        (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
+        (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
         'by' impl=Identifier (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'
     ;
 
 enhancementPairDecl
     :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
-        (externally='externally')? 'realized' 'by' impl=Identifier
+        (externally='externally')? 'implemented' 'by' impl=Identifier
         (implArgs=moduleArgumentList)?
     ;
 
