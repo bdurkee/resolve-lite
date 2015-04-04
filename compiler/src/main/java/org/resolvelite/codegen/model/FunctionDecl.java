@@ -30,6 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,5 +45,20 @@ public class FunctionDecl extends Decl {
 
     public FunctionDecl(String name) {
         super(name);
+    }
+
+    public FunctionDecl(ParameterSymbol specParameter) {
+        this("get" + specParameter.getName());
+        hasReturn = true;
+    }
+
+    public FunctionDecl(GenericSymbol specGeneric) {
+        this("get" + specGeneric.getName());
+        hasReturn = true;
+    }
+
+    public FunctionDecl(ResolveParser.GenericTypeContext specGeneric) {
+        this("get" + specGeneric.Identifier().getText());
+        hasReturn = true;
     }
 }

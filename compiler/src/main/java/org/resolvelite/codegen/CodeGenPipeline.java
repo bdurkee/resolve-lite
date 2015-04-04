@@ -62,9 +62,9 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
                     System.out.println(x.render());
-                    gen.writeModuleFile(gen.generateModule());
+                    //gen.writeModuleFile(gen.generateModule());
                 }
-                for (String external : unit.imports
+              /*  for (String external : unit.imports
                         .getImportsOfType(ImportCollection.ImportType.EXTERNAL)) {
                     FileLocator l =
                             new FileLocator(external,
@@ -78,15 +78,15 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                                     + srcFile.getName()).toPath();
                     Files.copy(srcPath, destPath,
                             StandardCopyOption.REPLACE_EXISTING);
-                }
+                }*/
             }
             catch (IllegalStateException ise) {
                 return; //if the templates were unable to be loaded, etc.
             }
-            catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
+           // catch (IOException ioe) {
+          //      throw new RuntimeException(ioe.getMessage());
                 //System.out.println(ioe.getMessage());
-            }
+          //  }
         }
     }
 }

@@ -180,10 +180,13 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             if ( ctx.qualifier == null ) {
                 Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
+                String qual =
+                        s.getRootModuleID().equals(
+                                moduleScope.getRootModuleID()) ? null : s
+                                .getRootModuleID();
                 built.put(
                         ctx,
-                        new LocallyDefinedTypeInit(ctx.name.getText(), s
-                                .getRootModuleID()));
+                        new LocallyDefinedTypeInit(ctx.name.getText(), qual));
                 return;
             }
             Symbol s = moduleScope.resolve(null, ctx.qualifier, true);
@@ -266,6 +269,7 @@ public class ModelBuilder extends ResolveBaseListener {
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
+            //private procedures...
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
             impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
@@ -274,10 +278,9 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
-            List<ParameterSymbol> formals = conceptScope.getFormalParameters();
-
-            int i;
-            i = 0;
+            for (ParameterSymbol s : conceptScope.getFormalParameters()) {
+                impl.funcImpls.add(new FunctionImpl(s));
+            }
         }
         catch (NoSuchSymbolException nsse) {
             gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -314,6 +317,12 @@ public class ModelBuilder extends ResolveBaseListener {
                     .conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(collectModelsFor(FunctionDecl.class, ctx
                     .conceptBlock().operationDecl(), built));
+        }
+        for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
+            spec.funcs.add(new FunctionDecl(generic));
+        }
+        for (ParameterSymbol s : moduleScope.getFormalParameters()) {
+            spec.funcs.add(new FunctionDecl(s));
         }
         file.module = spec;
         built.put(ctx, file);

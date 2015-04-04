@@ -111,7 +111,7 @@ public class ComputeTypes extends SetScopes {
             }
             TypedSymbol sym =
                     (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name,
-                            false);
+                            true);  //search adjacent modules for it if we don't find it in this one
             Type t = checkForInvalidType(sym.getType(), null);
             types.put(ctx, t);
         }

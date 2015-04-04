@@ -51,9 +51,12 @@ public interface <concept.name> extends ResolveInterface {
 }
 >>
 
-ConceptImpl(impl, funcImpls, repClasses) ::= <<
+ConceptImpl(impl, funcImpls, repClasses, memberVars) ::= <<
 public class <impl.name> extends ResolveBase implements <impl.concept> {
+    <memberVars: {m|RType <m.var.name>;};separator="\n">
     <repClasses; separator="\n">
+    public <impl.name>() {
+    }
     <funcImpls; separator="\n">
 }
 >>
@@ -142,8 +145,7 @@ class <clazz.name>_Rep {
         return <fields: {f|<f.var.name>.toString()}; separator="+">;
     }
 }
-<if(clazz.isStatic)>public static <else><\\>
-@Override public <endif> RType init<clazz.name>() {
+public <if(clazz.isStatic)>static <endif> RType init<clazz.name>() {
     return new <clazz.name>();
 }
 >>

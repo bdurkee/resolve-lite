@@ -30,6 +30,9 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,5 +44,19 @@ public class FunctionImpl extends FunctionDecl {
 
     public FunctionImpl(String name) {
         super(name);
+    }
+
+    public FunctionImpl(ParameterSymbol specParameter) {
+        this("get" + specParameter.getName());
+        implementsOper = true;
+        hasReturn = true;
+        //Todo: Add the statement object once we're there.
+    }
+
+    public FunctionImpl(GenericSymbol specGeneric) {
+        this("get" + specGeneric.getName());
+        implementsOper = true;
+        hasReturn = true;
+        //Todo: Add the statement object once we're there.
     }
 }
