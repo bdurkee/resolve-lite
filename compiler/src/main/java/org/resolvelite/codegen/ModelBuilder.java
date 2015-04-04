@@ -180,8 +180,10 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             if ( ctx.qualifier == null ) {
                 Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
-                built.put(ctx, new LocallyDefinedTypeInit(ctx.name.getText(),
-                        s.getRootModuleID()));
+                built.put(
+                        ctx,
+                        new LocallyDefinedTypeInit(ctx.name.getText(), s
+                                .getRootModuleID()));
                 return;
             }
             Symbol s = moduleScope.resolve(null, ctx.qualifier, true);

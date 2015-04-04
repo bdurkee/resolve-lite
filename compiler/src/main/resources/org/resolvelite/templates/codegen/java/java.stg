@@ -112,15 +112,25 @@ MemberClassDef(clazz, fields) ::= <<
 <if(clazz.isStatic)>static <endif><\\>
 class <clazz.name> extends ResolveBase implements RType {
     <clazz.name>_Rep rep;
-    <clazz.name>() { rep = new <clazz.name>_Rep(); }
+    <clazz.name>() {
+        rep = new <clazz.name>_Rep();
+    }
 
-    @Override public Object getRep() { return rep; }
+    @Override public Object getRep() {
+        return rep;
+    }
 
-    @Override public void setRep(Object o) { rep = (<clazz.name>_Rep)o; }
+    @Override public void setRep(Object o) {
+        rep = (<clazz.name>_Rep)o;
+    }
 
-    @Override public RType initialValue() { return new <clazz.name>(); }
+    @Override public RType initialValue() {
+        return new <clazz.name>();
+    }
 
-    @Override public String toString() { return rep.toString(); }
+    @Override public String toString() {
+        return rep.toString();
+    }
 }
 <if(clazz.isStatic)>static <endif><\\>
 class <clazz.name>_Rep {
@@ -128,7 +138,9 @@ class <clazz.name>_Rep {
     <clazz.name>_Rep() {
         <fields: {f|<f.var.name> = <f.init>;}; separator="\n">
     }
-    @Override public String toString() { return ""; }
+    @Override public String toString() {
+        return <fields: {f|<f.var.name>.toString()}; separator="+">;
+    }
 }
 <if(clazz.isStatic)>public static <else><\\>
 @Override public <endif> RType init<clazz.name>() {
