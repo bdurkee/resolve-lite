@@ -1,9 +1,6 @@
 Facility Test;
-    Facility Stack_Fac is Bdd_Stack_Template
-        <Std_Integer_Fac::Integer>(5) realized by Array_Impl;
 
-    Operation Main();
-        Procedure
-            Var X: Std_Boolean_Fac::Boolean;
-    end Main;
+    Type Baz = Record
+            x, y : Std_Integer_Fac::Integer;
+        end;
 end Test;

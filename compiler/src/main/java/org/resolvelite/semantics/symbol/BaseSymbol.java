@@ -26,24 +26,29 @@ public abstract class BaseSymbol implements Symbol {
         }
     }
 
-    protected final String name;
+    protected final String name, rootModuleID;
     protected Scope scope;
     protected int lexicalOrder;
     protected Type type;
 
-    public BaseSymbol(String name) {
-        this(null, name);
+    public BaseSymbol(String name, String rootModuleID) {
+        this(null, name, rootModuleID);
     }
 
-    public BaseSymbol(Scope scope, String name) {
+    public BaseSymbol(Scope scope, String name, String rootModuleID) {
         this.scope = scope;
         this.name = name;
+        this.rootModuleID = rootModuleID;
     }
 
     /*  @Override public ProgTypeDefinitionSymbol toProgTypeDefSym()
               throws UnexpectedSymbolException {
           throw new UnexpectedSymbolException();
       }*/
+
+    @Override public String getRootModuleID() {
+        return rootModuleID;
+    }
 
     @Override public String getName() {
         return name;

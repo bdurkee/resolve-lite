@@ -32,7 +32,7 @@ package org.resolvelite.codegen.model;
 
 public class VariableDecl extends Decl {
 
-    @ModelElement public TypeInit init;
+    @ModelElement public OutputModelObject init;
 
     public VariableDecl(String name, TypeInit init) {
         super(name);

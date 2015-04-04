@@ -35,12 +35,20 @@ import java.util.List;
 
 public class FacilityImpl extends Module {
     public String conceptName;
-    public String definedMain;
-    @ModelElement public List<FacilityInstanceDecl> facilities =
+    private String definedMain;
+    @ModelElement public List<FacilityVariableDecl> facilities =
             new ArrayList<>();
-    @ModelElement public List<FunctionImpl> funcs = new ArrayList<>();
 
     public FacilityImpl(String name, ModuleFile file) {
         super(name, file);
+    }
+
+    public String getDefinedMain() {
+        for (FunctionDecl f : funcImpls) {
+            if ( f.name.equalsIgnoreCase("main") ) {
+                return f.name;
+            }
+        }
+        return null;
     }
 }

@@ -6,8 +6,9 @@ public class FacilitySymbol extends BaseSymbol {
 
     private final String specName, implName;
 
-    public FacilitySymbol(String name, String specName, String implName) {
-        super(name);
+    public FacilitySymbol(String name, String specName, String implName,
+            String rootModuleID) {
+        super(name, rootModuleID);
         this.specName = specName;
         this.implName = implName;
     }

@@ -4,8 +4,8 @@ import org.resolvelite.semantics.Scope;
 
 public class VariableSymbol extends BaseSymbol implements TypedSymbol {
 
-    public VariableSymbol(String name, Scope enclosingScope) {
-        super(enclosingScope, name);
+    public VariableSymbol(String name, Scope enclosingScope, String rootModuleID) {
+        super(enclosingScope, name, rootModuleID);
     }
 
     @Override public String toString() {

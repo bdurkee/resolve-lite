@@ -47,7 +47,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
-                currentScope.define(new GenericSymbol(generic.getText()));
+                currentScope.define(new GenericSymbol(generic.getText(),
+                        currentScope.getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -76,7 +77,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {
             currentScope.define(new FacilitySymbol(ctx.name.getText(), ctx.spec
-                    .getText(), ctx.impl.getText()));
+                    .getText(), ctx.impl.getText(), currentScope
+                    .getRootModuleID()));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -135,7 +137,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         for (TerminalNode t : terminalGroup) {
             try {
                 VariableSymbol vs =
-                        new VariableSymbol(t.getText(), currentScope);
+                        new VariableSymbol(t.getText(), currentScope,
+                                currentScope.getRootModuleID());
                 currentScope.define(vs);
             }
             catch (DuplicateSymbolException dse) {
@@ -198,7 +201,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         ParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
                 currentScope.define(new ParameterSymbol(t.getText(), mode,
-                        currentScope));
+                        currentScope, currentScope.getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,

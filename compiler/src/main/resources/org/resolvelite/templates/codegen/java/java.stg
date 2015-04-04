@@ -58,15 +58,10 @@ public class <impl.name> extends ResolveBase implements <impl.concept> {
 }
 >>
 
-initMethodDecl(type) ::= <%
-public RType init<type.name>(
-<if(toPrimitive.(type.name))><toPrimitive.(type.name)>
-<else><type.name><endif>... e);
-%>
-
-FacilityImpl(impl, facilities, funcs) ::= <<
+FacilityImpl(impl, facilities, funcs, repClasses) ::= <<
 public class <impl.name> {
     <facilities; separator="\n">
+    <repClasses; separator="\n">
     <funcs; separator="\n">
     <if(impl.definedMain)>
     public static void main(String[] args) {
@@ -98,10 +93,11 @@ public <if(func.isStatic)>static <endif><\\>
 <if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">) {
     <vars; separator="\n">
+    <if(func.hasReturn)>return null;//temp<endif>
 }
 >>
 
-FacilityInstanceDecl(facility, root) ::= <<
+FacilityVariableDecl(facility, root) ::= <<
 public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
 <if(stdFacQualMap.(facility.name))>INSTANCE<else><facility.name><endif> =
     <root>;
@@ -112,10 +108,10 @@ LayeredFacilityInstantiation(init, args, child) ::= <%
 <else>new <init.specRealizName><endif>(<[args, child]; separator=",\n ">)
 %>
 
-MemberClassDef(clazz) ::= <<
+MemberClassDef(clazz, fields) ::= <<
+<if(clazz.isStatic)>static <endif><\\>
 class <clazz.name> extends ResolveBase implements RType {
-    <clazz.name> rep;
-
+    <clazz.name>_Rep rep;
     <clazz.name>() { rep = new <clazz.name>_Rep(); }
 
     @Override public Object getRep() { return rep; }
@@ -126,20 +122,24 @@ class <clazz.name> extends ResolveBase implements RType {
 
     @Override public String toString() { return rep.toString(); }
 }
-
+<if(clazz.isStatic)>static <endif><\\>
 class <clazz.name>_Rep {
-    //representation member components declared here.
+    <fields: {f|RType <f.var.name>;}; separator="\n">
     <clazz.name>_Rep() {
-        //initialize components here.
+        <fields: {f|<f.var.name> = <f.init>;}; separator="\n">
     }
     @Override public String toString() { return ""; }
+}
+<if(clazz.isStatic)>public static <else><\\>
+@Override public <endif> RType init<clazz.name>() {
+    return new <clazz.name>();
 }
 >>
 
 VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
 
 LocallyDefinedTypeInit(init) ::= <%
-<if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.name>()%>
+<if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>
 
 FacilityDefinedTypeInit(init, qualifier) ::= <<
 <qualifier>.init<init.typeName>(<init.initialValue>)

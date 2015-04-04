@@ -77,8 +77,9 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
 
     @NotNull private final ParameterMode mode;
 
-    public ParameterSymbol(String name, ParameterMode mode, Scope enclosingScope) {
-        super(enclosingScope, name);
+    public ParameterSymbol(String name, ParameterMode mode,
+            Scope enclosingScope, String rootModuleID) {
+        super(enclosingScope, name, rootModuleID);
         this.mode = mode;
     }
 

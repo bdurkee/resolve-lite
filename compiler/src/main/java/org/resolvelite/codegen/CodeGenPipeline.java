@@ -57,10 +57,11 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 compiler.info("generating code: " + unit.getName());
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
-                    System.out.println(x.render());
-                    //gen.writeModuleFile(gen.generateModule());
+                    //System.out.println(x.render());
+                    gen.writeModuleFile(gen.generateModule());
                 }
-            } catch (IllegalStateException ise) {
+            }
+            catch (IllegalStateException ise) {
                 return; //if the templates were unable to be loaded, etc.
             }
         }
@@ -69,22 +70,22 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         //workspace is very basic atm. It doesn't take into account whether or
         //not an externally realized file is used in the context of any of the
         //current target files.
-        /*  try {
-              FileLocator l = new FileLocator("java"); //Todo: Use non-native ext. in ResolveCompiler
-              Files.walkFileTree(new File(compiler.libDirectory).toPath(), l);
-              for (File externalFile : l.getFiles()) {
-                  File out = new File(compiler.outputDirectory);
-                  Path src = externalFile.toPath();
-                  Path dest =
-                          new File(out.getName() + "/" + externalFile.getName())
-                                  .toPath();
-                  Files.copy(externalFile.toPath(), dest,
-                          StandardCopyOption.REPLACE_EXISTING);
-              }
-          }
-          catch (IOException ioe) {
-              throw new RuntimeException(ioe.getMessage());
-              //System.out.println(ioe.getMessage());
-          }*/
+        try {
+                FileLocator l = new FileLocator("java"); //Todo: Use non-native ext. in ResolveCompiler
+                Files.walkFileTree(new File(compiler.libDirectory).toPath(), l);
+                for (File externalFile : l.getFiles()) {
+                    File out = new File(compiler.outputDirectory);
+                    Path src = externalFile.toPath();
+                    Path dest =
+                            new File(out.getName() + "/" + externalFile.getName())
+                                    .toPath();
+                    Files.copy(externalFile.toPath(), dest,
+                            StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException(ioe.getMessage());
+                //System.out.println(ioe.getMessage());
+            }
     }
 }

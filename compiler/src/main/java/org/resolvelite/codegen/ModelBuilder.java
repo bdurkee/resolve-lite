@@ -42,6 +42,7 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
+import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
@@ -117,8 +118,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        FacilityInstanceDecl f =
-                new FacilityInstanceDecl(ctx.name.getText(), ctx.spec.getText());
+        FacilityVariableDecl f =
+                new FacilityVariableDecl(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
         List<LayeredFacilityInstantiation> layers = new ArrayList<>();
 
@@ -166,14 +167,21 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        TypeInit init = (TypeInit) built.get(ctx.type());
+        for (TerminalNode t : ctx.Identifier()) {
+            //System.out.println("adding "+t.getText()+" to built map");
+            built.put(t, new VariableDecl(t.getSymbol().getText(), init));
+        }
+    }
+
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         try {
             if ( ctx.qualifier == null ) {
-                //dealing with locally defined type
-                //the compiler should've complained earlier if this was
-                //(erroneously) lacking a qualifier.
+                Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
                 built.put(ctx, new LocallyDefinedTypeInit(ctx.name.getText(),
-                        null));
+                        s.getRootModuleID()));
                 return;
             }
             Symbol s = moduleScope.resolve(null, ctx.qualifier, true);
@@ -200,6 +208,14 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         MemberClassDef representationClass =
                 new MemberClassDef(ctx.name.getText());
+        representationClass.isStatic = withinFacilityModule();
+        if ( ctx.record() != null ) {
+            for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
+                    .record().recordVariableDeclGroup()) {
+                representationClass.fields.addAll(collectModelsFor(
+                        VariableDecl.class, grp.Identifier(), built));
+            }
+        }
         built.put(ctx, representationClass);
     }
 
@@ -275,15 +291,12 @@ public class ModelBuilder extends ResolveBaseListener {
         FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(collectModelsFor(FacilityInstanceDecl.class,
+            impl.facilities.addAll(collectModelsFor(FacilityVariableDecl.class,
                     ctx.facilityBlock().facilityDecl(), built));
-            impl.funcs.addAll(collectModelsFor(FunctionImpl.class, ctx
+            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
-        }
-        for (FunctionDecl f : impl.funcs) {
-            if ( f.name.equalsIgnoreCase("main") ) {
-                impl.definedMain = f.name;
-            }
+            impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
+                    .facilityBlock().typeRepresentationDecl(), built));
         }
         file.module = impl;
         built.put(ctx, file);

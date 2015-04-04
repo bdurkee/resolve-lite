@@ -2,6 +2,8 @@ package org.resolvelite.semantics.symbol;
 
 import org.resolvelite.semantics.Scope;
 
+// Todo: Add a getRootModuleID() method (right now only SymbolsWithScope get
+// this
 public interface Symbol {
 
     public String getName();
@@ -9,6 +11,8 @@ public interface Symbol {
     public Scope getScope();
 
     public void setScope(Scope scope);
+
+    public String getRootModuleID();
 
     //force implementors to write equals and hashcode
     //so symbols can be properly used in collections such

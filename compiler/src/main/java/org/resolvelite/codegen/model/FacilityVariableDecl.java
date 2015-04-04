@@ -30,12 +30,12 @@
  */
 package org.resolvelite.codegen.model;
 
-public class FacilityInstanceDecl extends VariableDecl {
+public class FacilityVariableDecl extends VariableDecl {
     public boolean isStatic = false;
     public String concept;
     @ModelElement public LayeredFacilityInstantiation root;
 
-    public FacilityInstanceDecl(String name, String concept) {
+    public FacilityVariableDecl(String name, String concept) {
         super(name, null);
         this.concept = concept;
     }

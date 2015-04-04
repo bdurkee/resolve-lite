@@ -1,9 +1,8 @@
 Implementation Array_Impl for Bdd_Stack_Template;
-
-
-
+    uses Test;
     Type Stack = Record
             Top: Std_Integer_Fac::Integer;
+            Bottom: Baz;
         end;
 
     Procedure Push (restores e: T; updates S: Stack);
