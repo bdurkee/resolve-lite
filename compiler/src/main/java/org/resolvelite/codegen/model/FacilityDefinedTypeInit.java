@@ -48,6 +48,7 @@ public class FacilityDefinedTypeInit extends TypeInit {
         this.qualifier = typeFacilityQualifier;
     }
 
+    //Todo: Pull this out and make it extend a generic, abstract "Qualifier"
     public static class FacilityQualifier extends OutputModelObject {
         public String facilitySpecName, facilityName;
 

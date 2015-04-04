@@ -163,7 +163,7 @@ public <if(clazz.isStatic)>static <endif> RType get<clazz.name>() {
 
 VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
 
-MethodCall(call) ::= "<if(call.qualifier)><call.qualifier><endif><call.name>()"
+MethodCall(call) ::= "<if(call.qualifier)><call.qualifier>.<endif><call.name>()"
 
 MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>

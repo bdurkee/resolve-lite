@@ -368,8 +368,8 @@ mathLiteralExp
     ;
 
 mathFunctionApplicationExp
-    :   ('#')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   ('#')? name=Identifier    #mathVariableExp
+    :   ('@')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
+    |   ('@')? name=Identifier    #mathVariableExp
     ;
 
 mathOutfixExp

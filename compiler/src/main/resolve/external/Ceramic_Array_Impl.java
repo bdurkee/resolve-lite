@@ -75,4 +75,16 @@ public class Ceramic_Array_Impl extends ResolveBase
         RType[] temp1 = ((Array_Rep)A.getRep()).content;
         assign(temp1[adjI], e);
     }
+
+    @Override public RType getUpper_Bound() {
+        return Standard_Integers.INSTANCE.initInteger(upperBound);
+    }
+
+    @Override public RType getLower_Bound() {
+        return Standard_Integers.INSTANCE.initInteger(lowerBound);
+    }
+
+    @Override public RType getT() {
+        return type;
+    }
 }

@@ -181,8 +181,7 @@ public class ModelBuilder extends ResolveBaseListener {
             if ( ctx.qualifier == null ) {
                 Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
                 String qual =
-                        s.getRootModuleID().equals(
-                                moduleScope.getRootModuleID()) ? "this" : s
+                        isLocallyAccessibleSymbol(s) ? "this" : s
                                 .getRootModuleID();
                 built.put(ctx, new MethodCall(qual, "get" + ctx.name.getText()));
                 return;
@@ -201,10 +200,16 @@ public class ModelBuilder extends ResolveBaseListener {
         catch (NoSuchSymbolException nsse) {
             //couldn't find a facility for s? Then the qualifier must identify
             //a module, thus, we're dealing with a user defined type that
-            //doesn't come through a facility.
-            built.put(ctx, new MemberClassDefinedTypeInit(ctx.name.getText(),
-                    ctx.qualifier.getText()));
+            //doesn't come through a facility
+            built.put(ctx, new MethodCall(ctx.qualifier.getText(), "get"
+                    + ctx.name.getText()));
         }
+    }
+
+    public boolean isLocallyAccessibleSymbol(Symbol s)
+            throws NoSuchSymbolException {
+        ModuleScope module = symtab.getModuleScope(s.getRootModuleID());
+        return module.getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext;
     }
 
     @Override public void exitTypeRepresentationDecl(
