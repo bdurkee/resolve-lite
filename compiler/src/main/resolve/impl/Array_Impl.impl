@@ -1,0 +1,12 @@
+Implementation Array_Impl for Bdd_Stack_Template;
+
+    Procedure Push (restores e: T; updates S: Stack);
+    end Push;
+
+    Procedure Pop (replaces e: T; updates S: Stack);
+    end Pop;
+
+    Procedure Depth (restores S: Stack): Std_Integer_Fac::Integer;
+    end Depth;
+
+end Array_Impl;

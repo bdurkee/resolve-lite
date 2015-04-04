@@ -36,6 +36,7 @@ import java.util.List;
 public class FunctionImpl extends FunctionDecl {
     public boolean hasReturn = false;
     public boolean isStatic = false;
+    public boolean implementsOper = false;
     @ModelElement public List<VariableDecl> vars = new ArrayList<>();
 
     public FunctionImpl(String name) {

@@ -34,7 +34,7 @@ module
     :   precisModule
     |   conceptModule
     |   facilityModule
-    |   realizationModule
+    |   conceptImplModule
     ;
 
 // precis module
@@ -91,17 +91,18 @@ facilityBlock
 
 // realization module
 
-realizationModule
-    :   'Realization' name=Identifier (moduleParameterList)?
+conceptImplModule
+    :   'Implementation' name=Identifier (moduleParameterList)?
         'for' concept=Identifier ';'
         (importList)?
-        (realizationBlock)?
+        (implBlock)?
         'end' closename=Identifier ';'
     ;
 
-realizationBlock
+implBlock
     :   ( typeRepresentationDecl
         | operationProcedureDecl
+        | procedureDecl
         )+
     ;
 // uses, imports
@@ -215,6 +216,14 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         'Procedure'
+        (variableDeclGroup)*
+        (stmt)*
+        'end' closename=Identifier ';'
+    ;
+
+procedureDecl
+    :   (recursive='Recursive')? ('Procedure'|'Proc') name=Identifier
+        operationParameterList (':' type)? ';'
         (variableDeclGroup)*
         (stmt)*
         'end' closename=Identifier ';'

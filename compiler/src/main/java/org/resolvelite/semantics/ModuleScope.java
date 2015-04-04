@@ -23,6 +23,10 @@ public class ModuleScope extends BaseScope {
         return wrappedTree;
     }
 
+    public ModuleScope addImports(String... s) {
+        return addImports(new LinkedHashSet<String>(Arrays.asList(s)));
+    }
+
     public ModuleScope addImports(Set<String> imports) {
         imports.forEach(importedModules::add);
         return this;

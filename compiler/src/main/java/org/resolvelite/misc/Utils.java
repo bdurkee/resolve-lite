@@ -100,8 +100,8 @@ public class Utils {
         else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
             return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof ResolveParser.RealizationModuleContext ) {
-            return ((ResolveParser.RealizationModuleContext) ctx).name
+        else if ( ctx instanceof ResolveParser.ConceptImplModuleContext ) {
+            return ((ResolveParser.ConceptImplModuleContext) ctx).name
                     .getText();
         }
         else {

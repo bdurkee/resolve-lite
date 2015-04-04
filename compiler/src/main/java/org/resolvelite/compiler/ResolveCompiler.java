@@ -66,7 +66,7 @@ public class ResolveCompiler {
 
     public static final List<String> NATIVE_EXT = Collections
             .unmodifiableList(Arrays.asList("concept", "precis", "facility",
-                    "realization"));
+                    "impl"));
 
     public static final List<String> NON_NATIVE_EXT = Collections
             .unmodifiableList(Arrays.asList("java"));
@@ -91,17 +91,20 @@ public class ResolveCompiler {
         }
     }
 
-    public static Option[] optionDefs = {
-            new Option("longMessages", "-longMessages",
-                    "show exception details on errors"),
-            new Option("outputDirectory", "-o", OptionArgType.STRING,
-                    "specify output directory where all output is generated"),
-            new Option("libDirectory", "-lib", OptionArgType.STRING,
-                    "specify location of grammars, tokens files"),
-            new Option("genCode", "-genCode", OptionArgType.STRING,
-                    "generate code"),
-            new Option("log", "-Xlog",
-                    "dump lots of logging info to resolve-timestamp.log") };
+    public static Option[] optionDefs =
+            {
+                    new Option("longMessages", "-longMessages",
+                            "show exception details on errors"),
+                    new Option("outputDirectory", "-o", OptionArgType.STRING,
+                            "specify output directory where all output is generated"),
+                    new Option("longMessages", "-long-messages",
+                            "show exception details when available for errors and warnings"),
+                    new Option("libDirectory", "-lib", OptionArgType.STRING,
+                            "specify location of grammars, tokens files"),
+                    new Option("genCode", "-genCode", OptionArgType.STRING,
+                            "generate code"),
+                    new Option("log", "-Xlog",
+                            "dump lots of logging info to resolve-timestamp.log") };
 
     public final String[] args;
     protected boolean haveOutputDir = false;

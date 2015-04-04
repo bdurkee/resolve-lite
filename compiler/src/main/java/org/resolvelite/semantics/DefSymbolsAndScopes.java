@@ -63,6 +63,15 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
+    @Override public void enterConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        currentScope =
+                establishModuleScope(tree, ctx).addImports(
+                        tree.imports.getImportsOfType(ImportType.NAMED))
+                        .addImports(ctx.concept.getText());
+        //concept impls implicitly import the concepts they impl
+    }
+
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {
@@ -156,6 +165,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         insertFunction(ctx.name, ctx);
     }
 
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        currentScope = currentScope.getEnclosingScope();
+    }
+
     @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         insertFunction(ctx.name, ctx);
@@ -163,6 +177,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
+        currentScope = currentScope.getEnclosingScope();
+    }
+
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        insertFunction(ctx.name, ctx);
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
         currentScope = currentScope.getEnclosingScope();
     }
 
@@ -181,11 +205,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         t.getSymbol(), t.getText());
             }
         }
-    }
-
-    @Override public void exitOperationProcedureDecl(
-            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        currentScope = currentScope.getEnclosingScope();
     }
 
     @Override public void exitTypeRepresentationDecl(

@@ -39,7 +39,6 @@ import java.util.Set;
 
 public class ModuleFile extends OutputModelObject {
     public String RESOLVEVersion;
-    public List<String> targetDir; //in this case, our pkg directory
     public String resolveFileName;
     //   public Set<String> imports = new LinkedHashSet<>(); //not necessary atm
     @ModelElement public Module module;

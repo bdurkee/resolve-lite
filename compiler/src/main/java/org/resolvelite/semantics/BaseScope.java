@@ -5,9 +5,12 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.semantics.symbol.TypedSymbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class BaseScope implements Scope {
 
@@ -180,12 +183,18 @@ public abstract class BaseScope implements Scope {
         return new ArrayList<>(symbols.values());
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<Scope> getNestedScopes() {
-        List<? extends Symbol> scopes =
-                Utils.filter(getSymbols(), s -> s instanceof Scope);
-        return (List)scopes; // force it to cast
+    @Override public List<Scope> getNestedScopes() {
+        return getSymbols()
+                .stream()
+                .filter(s -> s instanceof Scope)
+                .map(s -> (Scope)s).collect(Collectors.toList());
+    }
+
+    @Override public List<ParameterSymbol> getFormalParameters() {
+        return getSymbols()
+                .stream()
+                .filter(s -> s instanceof ParameterSymbol)
+                .map(s -> (ParameterSymbol) s).collect(Collectors.toList());
     }
 
     @Override public int getNumberOfSymbols() {

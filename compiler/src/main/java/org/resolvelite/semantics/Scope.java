@@ -3,6 +3,7 @@ package org.resolvelite.semantics;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public interface Scope {
 
     /**
      * Set which <code>Scope</code> encloses this scope. E.g., if this scope is
-     * a function, the enclosing scope could be a class. The {@link BaseScope}
+     * a function, the enclosing scope could be a module. The {@link BaseScope}
      * class automatically adds this to nested scope list of s.
      * 
      * @param s The enclosing scope.
@@ -44,6 +45,8 @@ public interface Scope {
     public List<? extends Symbol> getSymbols();
 
     public Set<String> getSymbolNames();
+
+    public List<ParameterSymbol> getFormalParameters();
 
     public int getNumberOfSymbols();
 

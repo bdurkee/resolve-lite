@@ -53,20 +53,12 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 4.
-     * 
-     * <p>
-     * directory not found: <em>directory</em>
-     * </p>
+     * Compiler error 4: directory not found: <em>directory</em>
      */
     DIR_NOT_FOUND(4, "directory not found: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 5.
-     * 
-     * <p>
-     * output directory is a file: <em>filename</em>
-     * </p>
+     * Compiler error 5: output directory is a file: <em>filename</em>
      */
     OUTPUT_DIR_IS_FILE(5, "output directory is a file: <arg>",
             ErrorSeverity.ERROR),

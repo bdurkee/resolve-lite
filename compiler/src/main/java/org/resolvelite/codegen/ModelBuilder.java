@@ -35,6 +35,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.codegen.model.*;
+import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.misc.Utils;
@@ -44,6 +45,7 @@ import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
@@ -57,12 +59,13 @@ public class ModelBuilder extends ResolveBaseListener {
             new ParseTreeProperty<>();
     @NotNull private final ModuleScope moduleScope;
     @NotNull private final CodeGenerator gen;
+    @NotNull private final SymbolTable symtab;
 
     public ModelBuilder(@NotNull CodeGenerator g,
-            @NotNull SymbolTable scopeRepository) {
+            @NotNull SymbolTable symtab) {
         this.gen = g;
-        this.moduleScope =
-                scopeRepository.moduleScopes.get(g.getModule().getName());
+        this.moduleScope = symtab.moduleScopes.get(g.getModule().getName());
+        this.symtab = symtab;
     }
 
     @Override public void exitTypeModelDecl(
@@ -97,6 +100,20 @@ public class ModelBuilder extends ResolveBaseListener {
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
             f.vars.addAll(collectModelsFor(VariableDecl.class,
+                    grp.Identifier(), built));
+        }
+        built.put(ctx, f);
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        FunctionImpl f = new FunctionImpl(ctx.name.getText());
+        f.hasReturn = ctx.type() != null;
+        f.isStatic = withinFacilityModule();
+        f.implementsOper = true;
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            f.params.addAll(collectModelsFor(ParameterDecl.class,
                     grp.Identifier(), built));
         }
         built.put(ctx, f);
@@ -148,7 +165,7 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
         TypeInit init = (TypeInit) built.get(ctx.type());
         for (TerminalNode t : ctx.Identifier()) {
-            //System.out.println("adding " + t.getText() + " to built map");
+            //System.out.println("adding "+t.getText()+" to built map");
             built.put(t, new VariableDecl(t.getSymbol().getText(), init));
         }
     }
@@ -219,19 +236,39 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, init);
     }
 
-    @Override public void exitRealizationModule(
-            @NotNull ResolveParser.RealizationModuleContext ctx) {
+    @Override public void exitConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        ModuleFile file = buildFile();
+        ConceptImpl impl =
+                new ConceptImpl(ctx.name.getText(), ctx.concept.getText(), file);
 
+        if ( ctx.implBlock() != null ) {
+            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
+                    .implBlock().procedureDecl(), built));
+            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
+                    .implBlock().operationProcedureDecl(), built));
+        }
+
+        try {
+            ModuleScope conceptScope =
+                    symtab.getModuleScope(ctx.concept.getText());
+            List<ParameterSymbol> formals = conceptScope.getFormalParameters();
+
+
+            int i;
+            i = 0;
+        }
+        catch (NoSuchSymbolException nsse) {
+            gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    ctx.concept, ctx.concept.getText());
+        }
+        file.module = impl;
+        built.put(ctx, file);
     }
 
     @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        AnnotatedTree annotatedTree = gen.getModule();
-        ModuleFile file =
-                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
-                        .getFileName()));
-        file.targetDir =
-                ImportRef.listifyFileString(annotatedTree.getFileName());
+        ModuleFile file = buildFile();
         FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
@@ -251,12 +288,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        AnnotatedTree annotatedTree = gen.getModule();
-        ModuleFile file =
-                new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
-                        .getFileName()));
-        file.targetDir =
-                ImportRef.listifyFileString(annotatedTree.getFileName());
+        ModuleFile file = buildFile();
         SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
@@ -265,16 +297,14 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(collectModelsFor(FunctionDecl.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
-        /*
-         * for (ModuleParameterAST ast : e.getParameters()) {
-         * FunctionDecl paramFunc =
-         * new FunctionDecl("get" + ast.getName().getText());
-         * paramFunc.hasReturn = true;
-         * specModule.funcs.add(paramFunc);
-         * }
-         */
         file.module = spec;
         built.put(ctx, file);
+    }
+
+    protected ModuleFile buildFile() {
+        AnnotatedTree annotatedTree = gen.getModule();
+        return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
+                .getFileName()));
     }
 
     protected static <T extends OutputModelObject> List<T> collectModelsFor(

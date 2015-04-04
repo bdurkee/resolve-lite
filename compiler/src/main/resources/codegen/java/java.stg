@@ -47,8 +47,13 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 Concept(concept, types, funcs) ::= <<
 public interface <concept.name> extends ResolveInterface {
     <types; separator="\n">
-    <types: {t|<initMethodDecl(t.type)>}; separator="\n">
     <funcs; separator="\n">
+}
+>>
+
+ConceptImpl(impl, funcImpls) ::= <<
+public class <impl.name> extends ResolveBase implements <impl.concept> {
+    <funcImpls; separator="\n">
 }
 >>
 
@@ -70,10 +75,10 @@ public class <impl.name> {
 }
 >>
 
-ImportRef(imports) ::= "import <imports.segs; separator={.}>.*;"
-
 TypeDecl(type) ::= <<
 interface <type.name> extends RType { }
+public RType init<type.name>(<\\>
+<if(toPrimitive.(type.name))><toPrimitive.(type.name)>... e<endif>);
 >>
 
 ParameterDecl(param) ::= "RType <param.name>"
@@ -87,6 +92,7 @@ public <if(func.isStatic)>static <endif><\\>
 >>
 
 FunctionImpl(func, params, vars) ::= <<
+<if(func.implementsOper)>@Override <endif><\\>
 public <if(func.isStatic)>static <endif><\\>
 <if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">) {
@@ -105,10 +111,54 @@ LayeredFacilityInstantiation(init, args, child) ::= <%
 <else>new <init.specRealizName><endif>(<[args, child]; separator=",\n ">)
 %>
 
+MemberClassDef(clazz) <<
+    class <clazz.name> extends ResolveBase implements RType
+     {
+        Event_Info_Rep rep;
+
+        Event_Info() {
+            rep = new Event_Info_Rep();
+        }
+
+        public Object getRep() {
+            return rep;
+        }
+
+        public void setRep(Object o) {
+            rep = (Event_Info_Rep)o;
+        }
+
+        public RType initialValue() {
+            return new Event_Info();
+        }
+
+        public String toString() {
+            return rep.toString();
+        }
+    }
+
+    class Event_Info_Rep {
+        Integer_Template.Integer Id;
+        Boolean_Template.Boolean Parking;
+
+        Event_Info_Rep() {
+            Id = Std_Integer_Fac.createInteger();
+            Parking = Std_Boolean_Fac.createBoolean();
+        }
+
+        public String toString() {
+            StringBuffer sb = new StringBuffer();
+            sb.append(Id.toString());
+            sb.append(Parking.toString());
+            return sb.toString();
+        }
+    }
+>>
+
 VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
 
 LocallyDefinedTypeInit(init) ::= <%
-new <if(init.moduleQualifier)><init.moduleQualifier>.<endif><init.name>()%>
+<if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.name>()%>
 
 FacilityDefinedTypeInit(init, qualifier) ::= <<
 <qualifier>.init<init.typeName>(<init.initialValue>)
