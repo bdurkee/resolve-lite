@@ -81,17 +81,17 @@ public <ctor.name>() {
 }
 >>
 
-TypeDecl(type) ::= <<
+TypeDef(type) ::= <<
 interface <type.name> extends RType { }
 public RType init<type.name>(<\\>
 <if(toPrimitive.(type.name))><toPrimitive.(type.name)>... e<endif>);
 >>
 
-ParameterDecl(param) ::= "RType <param.name>"
+ParameterDef(param) ::= "RType <param.name>"
 
-VariableDecl(var, init) ::= "RType <var.name> = <init>;"
+VariableDef(var, init) ::= "RType <var.name> = <init>;"
 
-FunctionDecl(func, params) ::= <<
+FunctionDef(func, params) ::= <<
 public <if(func.isStatic)>static <endif><\\>
 <if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">);
@@ -107,7 +107,7 @@ public <if(func.isStatic)>static <endif><\\>
 }
 >>
 
-FacilityDecl(facility, root) ::= <<
+FacilityDef(facility, root) ::= <<
 public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
 <if(stdFacQualMap.(facility.name))>INSTANCE<else><facility.name><endif> =
     <root>;
@@ -152,11 +152,11 @@ class <clazz.name>_Rep {
         return <fields: {f|<f.var.name>.toString()}; separator="+">;
     }
 }
-public <if(clazz.isStatic)>static <endif> RType init<clazz.name>() {
+public <if(clazz.isStatic)>static<endif> RType init<clazz.name>() {
     return new <clazz.name>();
 }
 
-public <if(clazz.isStatic)>static <endif> RType get<clazz.name>() {
+public <if(clazz.isStatic)>static<endif> RType get<clazz.name>() {
     return init<clazz.name>();
 }
 >>

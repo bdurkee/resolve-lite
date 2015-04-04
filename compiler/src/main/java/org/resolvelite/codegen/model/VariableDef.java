@@ -30,24 +30,12 @@
  */
 package org.resolvelite.codegen.model;
 
-import java.util.ArrayList;
-import java.util.List;
+public class VariableDef extends OutputModelObject {
+    @ModelElement public Expr init; //in practice, usually MethodCall and FacilityDefinedTypeInit
+    public String name;
 
-public class FacilityImpl extends Module {
-    public String conceptName;
-    private String definedMain;
-    @ModelElement public List<FacilityDecl> facilities = new ArrayList<>();
-
-    public FacilityImpl(String name, ModuleFile file) {
-        super(name, file);
-    }
-
-    public String getDefinedMain() {
-        for (FunctionDecl f : funcImpls) {
-            if ( f.name.equalsIgnoreCase("main") ) {
-                return f.name;
-            }
-        }
-        return null;
+    public VariableDef(String name, Expr init) {
+        this.name = name;
+        this.init = init;
     }
 }

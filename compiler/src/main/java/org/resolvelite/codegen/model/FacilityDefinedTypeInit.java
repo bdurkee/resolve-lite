@@ -32,10 +32,11 @@ package org.resolvelite.codegen.model;
 
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 
-public class FacilityDefinedTypeInit extends TypeInit {
+public class FacilityDefinedTypeInit extends Expr {
     //if we represent a literal initialization, we pass the initial value as
     //a str to the createX(..) method.
     @ModelElement public FacilityQualifier qualifier;
+    public String typeName, initialValue;
 
     public FacilityDefinedTypeInit(FacilityQualifier typeFacilityQualifier,
             String typeToInitName) {
@@ -44,7 +45,8 @@ public class FacilityDefinedTypeInit extends TypeInit {
 
     public FacilityDefinedTypeInit(FacilityQualifier typeFacilityQualifier,
             String typeToInitName, String initialValue) {
-        super(typeToInitName, initialValue);
+        this.typeName = typeToInitName;
+        this.initialValue = initialValue;
         this.qualifier = typeFacilityQualifier;
     }
 

@@ -30,11 +30,24 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class Decl extends OutputModelObject {
+import java.util.ArrayList;
+import java.util.List;
 
-    public String name;
+public class FacilityImplModule extends Module {
+    public String conceptName;
+    private String definedMain;
+    @ModelElement public List<FacilityDef> facilities = new ArrayList<>();
 
-    public Decl(String name) {
-        this.name = name;
+    public FacilityImplModule(String name, ModuleFile file) {
+        super(name, file);
+    }
+
+    public String getDefinedMain() {
+        for (FunctionDef f : funcImpls) {
+            if ( f.name.equalsIgnoreCase("main") ) {
+                return f.name;
+            }
+        }
+        return null;
     }
 }

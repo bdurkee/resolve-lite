@@ -3,12 +3,12 @@ package org.resolvelite.codegen.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConceptImpl extends Module {
+public class ConceptImplModule extends Module implements SpecImplModule {
     public String concept;
-    @ModelElement public List<FacilityDecl> facilityVars = new ArrayList<>();
+    @ModelElement public List<FacilityDef> facilityVars = new ArrayList<>();
     @ModelElement public CtorDef ctor;
 
-    public ConceptImpl(String name, String concept, ModuleFile file) {
+    public ConceptImplModule(String name, String concept, ModuleFile file) {
         super(name, file);
         this.concept = concept;
     }

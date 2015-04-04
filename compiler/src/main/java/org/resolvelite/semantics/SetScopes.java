@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.symbol.Symbol;
 
 class SetScopes extends ResolveBaseListener {
 
@@ -39,7 +40,7 @@ class SetScopes extends ResolveBaseListener {
 
     /**
      * Sets current scope ptr on pre-traversal; {@link ComputeTypes} resolves
-     * references to declared syms on the post traversal.
+     * references to declared {@link Symbol}s on the post traversal.
      * 
      * @param ctx
      */

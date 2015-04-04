@@ -30,9 +30,14 @@
  */
 package org.resolvelite.codegen.model;
 
-public class TypeDecl extends Decl {
+public class FacilityDef extends OutputModelObject {
+    public boolean isStatic = false;
+    public String name, concept;
+    @ModelElement public LayeredFacilityInstantiation root;
 
-    public TypeDecl(String name) {
-        super(name);
+    public FacilityDef(String name, String concept) {
+        this.name = name;
+        this.concept = concept;
     }
+
 }

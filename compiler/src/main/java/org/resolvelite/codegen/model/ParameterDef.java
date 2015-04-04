@@ -30,11 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
-public class VariableDecl extends Decl {
-    @ModelElement public TypeInit init;
+public class ParameterDef extends OutputModelObject {
+    public String name;
 
-    public VariableDecl(String name, TypeInit init) {
-        super(name);
-        this.init = init;
+    public ParameterDef(String name) {
+        this.name = name;
     }
 }

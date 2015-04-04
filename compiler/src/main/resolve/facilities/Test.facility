@@ -1,9 +1,8 @@
 Facility Test;
-    uses Bdd_Stack_Template;
 
     Operation Main();
         Procedure
-            Var x: T;
+            Var x: Std_Int_Fac::Integer;
     end Main;
 
 end Test;

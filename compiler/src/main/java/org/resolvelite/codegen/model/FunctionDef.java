@@ -37,27 +37,27 @@ import org.resolvelite.semantics.symbol.ParameterSymbol;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionDecl extends Decl {
+public class FunctionDef extends OutputModelObject {
     public boolean hasReturn = false;
     public boolean isStatic = false;
-    public String containingModuleName;
-    @ModelElement public List<ParameterDecl> params = new ArrayList<>();
+    public String containingModuleName, name;
+    @ModelElement public List<ParameterDef> params = new ArrayList<>();
 
-    public FunctionDecl(String name) {
-        super(name);
+    public FunctionDef(String name) {
+        this.name = name;
     }
 
-    public FunctionDecl(ParameterSymbol specParameter) {
+    public FunctionDef(ParameterSymbol specParameter) {
         this("get" + specParameter.getName());
         hasReturn = true;
     }
 
-    public FunctionDecl(GenericSymbol specGeneric) {
+    public FunctionDef(GenericSymbol specGeneric) {
         this("get" + specGeneric.getName());
         hasReturn = true;
     }
 
-    public FunctionDecl(ResolveParser.GenericTypeContext specGeneric) {
+    public FunctionDef(ResolveParser.GenericTypeContext specGeneric) {
         this("get" + specGeneric.Identifier().getText());
         hasReturn = true;
     }

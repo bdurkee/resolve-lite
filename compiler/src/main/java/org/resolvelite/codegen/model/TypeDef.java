@@ -30,6 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
-public class VariableNameRef extends Expr {
+public class TypeDef extends OutputModelObject {
+    public String name;
 
+    public TypeDef(String name) {
+        this.name = name;
+    }
 }

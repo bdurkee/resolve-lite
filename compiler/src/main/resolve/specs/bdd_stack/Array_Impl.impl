@@ -4,6 +4,7 @@ Implementation Array_Impl for Bdd_Stack_Template;
         externally implemented by Ceramic_Array_Impl;
 
     Type Stack = Record
+            Contents: Array_Fac::Array;
             Top: Std_Integer_Fac::Integer;
         end;
 

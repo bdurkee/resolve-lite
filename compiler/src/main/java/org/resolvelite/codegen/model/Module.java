@@ -38,7 +38,7 @@ public abstract class Module extends OutputModelObject {
     public ModuleFile file;
     @ModelElement public List<FunctionImpl> funcImpls = new ArrayList<>();
     @ModelElement public List<MemberClassDef> repClasses = new ArrayList<>();
-    @ModelElement public List<VariableDecl> memberVars = new ArrayList<>();
+    @ModelElement public List<VariableDef> memberVars = new ArrayList<>();
 
     //might need special list for
 

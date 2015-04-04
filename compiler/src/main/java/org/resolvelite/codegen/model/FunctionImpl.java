@@ -36,11 +36,11 @@ import org.resolvelite.semantics.symbol.ParameterSymbol;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionImpl extends FunctionDecl {
+public class FunctionImpl extends FunctionDef {
     public boolean hasReturn = false;
     public boolean isStatic = false;
     public boolean implementsOper = false;
-    @ModelElement public List<VariableDecl> vars = new ArrayList<>();
+    @ModelElement public List<VariableDef> vars = new ArrayList<>();
 
     public FunctionImpl(String name) {
         super(name);

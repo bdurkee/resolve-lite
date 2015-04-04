@@ -44,7 +44,6 @@ import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
-import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
@@ -67,18 +66,18 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
-        built.put(ctx, new TypeDecl(ctx.name.getText()));
+        built.put(ctx, new TypeDef(ctx.name.getText()));
     }
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
-        FunctionDecl f = new FunctionDecl(ctx.name.getText());
+        FunctionDef f = new FunctionDef(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
         f.isStatic = withinFacilityModule();
         for (ResolveParser.ParameterDeclGroupContext grp : ctx
                 .operationParameterList().parameterDeclGroup()) {
             for (TerminalNode id : grp.Identifier()) {
-                f.params.add((ParameterDecl) built.get(id));
+                f.params.add((ParameterDef) built.get(id));
             }
         }
         built.put(ctx, f);
@@ -91,13 +90,13 @@ public class ModelBuilder extends ResolveBaseListener {
         f.isStatic = withinFacilityModule();
         for (ResolveParser.ParameterDeclGroupContext grp : ctx
                 .operationParameterList().parameterDeclGroup()) {
-            f.params.addAll(collectModelsFor(ParameterDecl.class,
+            f.params.addAll(collectModelsFor(ParameterDef.class,
                     grp.Identifier(), built));
         }
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
-            f.vars.addAll(collectModelsFor(VariableDecl.class,
-                    grp.Identifier(), built));
+            f.vars.addAll(collectModelsFor(VariableDef.class, grp.Identifier(),
+                    built));
         }
         built.put(ctx, f);
     }
@@ -110,7 +109,7 @@ public class ModelBuilder extends ResolveBaseListener {
         f.implementsOper = true;
         for (ResolveParser.ParameterDeclGroupContext grp : ctx
                 .operationParameterList().parameterDeclGroup()) {
-            f.params.addAll(collectModelsFor(ParameterDecl.class,
+            f.params.addAll(collectModelsFor(ParameterDef.class,
                     grp.Identifier(), built));
         }
         built.put(ctx, f);
@@ -118,8 +117,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        FacilityDecl f =
-                new FacilityDecl(ctx.name.getText(), ctx.spec.getText());
+        FacilityDef f = new FacilityDef(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
         List<LayeredFacilityInstantiation> layers = new ArrayList<>();
 
@@ -160,19 +158,19 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitVariableDeclGroup(
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
-        TypeInit init = (TypeInit) built.get(ctx.type());
+        Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.Identifier()) {
             //System.out.println("adding "+t.getText()+" to built map");
-            built.put(t, new VariableDecl(t.getSymbol().getText(), init));
+            built.put(t, new VariableDef(t.getSymbol().getText(), init));
         }
     }
 
     @Override public void exitRecordVariableDeclGroup(
             @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
-        TypeInit init = (TypeInit) built.get(ctx.type());
+        Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.Identifier()) {
             //System.out.println("adding "+t.getText()+" to built map");
-            built.put(t, new VariableDecl(t.getSymbol().getText(), init));
+            built.put(t, new VariableDef(t.getSymbol().getText(), init));
         }
     }
 
@@ -221,7 +219,7 @@ public class ModelBuilder extends ResolveBaseListener {
             for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
                     .record().recordVariableDeclGroup()) {
                 representationClass.fields.addAll(collectModelsFor(
-                        VariableDecl.class, grp.Identifier(), built));
+                        VariableDef.class, grp.Identifier(), built));
             }
         }
         built.put(ctx, representationClass);
@@ -230,7 +228,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
-            built.put(t, new ParameterDecl(t.getText()));
+            built.put(t, new ParameterDef(t.getText()));
         }
     }
 
@@ -271,8 +269,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
         ModuleFile file = buildFile();
-        ConceptImpl impl =
-                new ConceptImpl(ctx.name.getText(), ctx.concept.getText(), file);
+        ConceptImplModule impl =
+                new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
 
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
@@ -281,7 +279,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     .implBlock().operationProcedureDecl(), built));
             impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
                     .implBlock().typeRepresentationDecl(), built));
-            impl.facilityVars.addAll(collectModelsFor(FacilityDecl.class, ctx
+            impl.facilityVars.addAll(collectModelsFor(FacilityDef.class, ctx
                     .implBlock().facilityDecl(), built));
         }
         try {
@@ -303,10 +301,10 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         ModuleFile file = buildFile();
-        FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
+        FacilityImplModule impl = new FacilityImplModule(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(collectModelsFor(FacilityDecl.class, ctx
+            impl.facilities.addAll(collectModelsFor(FacilityDef.class, ctx
                     .facilityBlock().facilityDecl(), built));
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
@@ -323,16 +321,16 @@ public class ModelBuilder extends ResolveBaseListener {
         SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
-            spec.types.addAll(collectModelsFor(TypeDecl.class, ctx
+            spec.types.addAll(collectModelsFor(TypeDef.class, ctx
                     .conceptBlock().typeModelDecl(), built));
-            spec.funcs.addAll(collectModelsFor(FunctionDecl.class, ctx
+            spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
-            spec.funcs.add(new FunctionDecl(generic));
+            spec.funcs.add(new FunctionDef(generic));
         }
         for (ParameterSymbol s : moduleScope.getFormalParameters()) {
-            spec.funcs.add(new FunctionDecl(s));
+            spec.funcs.add(new FunctionDef(s));
         }
         file.module = spec;
         built.put(ctx, file);
