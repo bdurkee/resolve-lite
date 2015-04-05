@@ -63,12 +63,11 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
     }
 
-    public Type typeFunctionLikeThing(Token name,
-            ResolveParser.TypeContext type) {
+    public Type
+            typeFunctionLikeThing(Token name, ResolveParser.TypeContext type) {
         try {
             FunctionSymbol func =
-                    (FunctionSymbol) currentScope.resolve(null,
-                            name, false);
+                    (FunctionSymbol) currentScope.resolve(null, name, false);
             Type t = types.get(type);
             if ( t == null ) {
                 t =
@@ -143,6 +142,11 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
         types.put(ctx, checkTypes(ctx, ctx.left, ctx.right));
+    }
+
+    @Override public void exitCallStmt(
+            @NotNull ResolveParser.CallStmtContext ctx) {
+        types.put(ctx, types.get(ctx.progParamExp()));
     }
 
     protected Type checkTypes(@NotNull ParserRuleContext parent,

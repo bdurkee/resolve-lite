@@ -1,10 +1,11 @@
 package org.resolvelite.codegen.model;
 
 public class VarNameRef extends Expr {
-    public String qualifier, name;
+    public String name;
+    @ModelElement public Qualifier q;
 
-    public VarNameRef(String qualifier, String name) {
+    public VarNameRef(Qualifier qualifier, String name) {
         this.name = name;
-        this.qualifier = qualifier;
+        this.q = qualifier;
     }
 }

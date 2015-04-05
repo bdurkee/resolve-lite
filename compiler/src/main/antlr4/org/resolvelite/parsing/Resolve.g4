@@ -153,7 +153,7 @@ variableDeclGroup
 stmt
     :   assignStmt
     |   swapStmt
- //   |   callStmt
+    |   callStmt
     ;
 
 assignStmt
@@ -162,6 +162,10 @@ assignStmt
 
 swapStmt
     :   left=progExp ':=:' right=progExp ';'
+    ;
+
+callStmt
+    :   progParamExp ';'
     ;
 
 // type and record related rules

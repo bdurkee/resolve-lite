@@ -11,7 +11,7 @@
     <modules>
         <module>runtime/Java</module>
         <module>compiler</module>
-        <module>resolve-maven-plugin</module>
+       <!-- <module>resolve-maven-plugin</module> -->
     </modules>
     <name>resolve-lite</name>
 

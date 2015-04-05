@@ -30,6 +30,7 @@
  */
 package org.resolvelite.codegen;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -47,6 +48,8 @@ import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
+import org.resolvelite.codegen.model.Qualifier.FacilityQualifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +104,7 @@ public class ModelBuilder extends ResolveBaseListener {
                         .operationParameterList().parameterDeclGroup(),
                         ctx.variableDeclGroup());
         f.implementsOper = true;
+        f.stats.addAll(collectModelsFor(Stat.class, ctx.stmt(), built));
         built.put(ctx, f);
     }
 
@@ -182,33 +186,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
-        try {
-            if ( ctx.qualifier == null ) {
-                Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
-                String qual =
-                        isLocallyAccessibleSymbol(s) ? "this" : s
-                                .getRootModuleID();
-                built.put(ctx, new MethodCall(qual, "get" + ctx.name.getText()));
-                return;
-            }
-            Symbol s = moduleScope.resolve(null, ctx.qualifier, true);
-            if ( !(s instanceof FacilitySymbol) ) {
-                throw new RuntimeException("non-facility qualifier... "
-                        + "whats going on here?");
-            }
-            FacilityDefinedTypeInit init =
-                    new FacilityDefinedTypeInit(
-                            new FacilityDefinedTypeInit.FacilityQualifier(
-                                    (FacilitySymbol) s), ctx.name.getText(), "");
-            built.put(ctx, init);
-        }
-        catch (NoSuchSymbolException nsse) {
-            //couldn't find a facility for s? Then the qualifier must identify
-            //a module, thus, we're dealing with a user defined type that
-            //doesn't come through a facility
-            built.put(ctx, new MethodCall(ctx.qualifier.getText(), "get"
-                    + ctx.name.getText()));
-        }
+        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name),
+                ctx.name.getText(), ""));
     }
 
     public boolean isLocallyAccessibleSymbol(Symbol s)
@@ -247,8 +226,35 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
         Expr e = (Expr) built.get(ctx.progExp());
         if ( e instanceof VarNameRef ) e = new MethodCall((VarNameRef) e);
-        //operations n' shit will eventually go here.
+        //Todo: operations n' shit will eventually go here.
         built.put(ctx, e);
+    }
+
+    @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitAssignStmt(
+            @NotNull ResolveParser.AssignStmtContext ctx) {
+        NormalQualifier qualifier = new NormalQualifier("ResolveBase");
+        CallStat assignCall =
+                new CallStat(qualifier, "assign", (Expr) built.get(ctx.left),
+                        (Expr) built.get(ctx.right));
+        built.put(ctx, assignCall);
+    }
+
+    @Override public void exitSwapStmt(
+            @NotNull ResolveParser.SwapStmtContext ctx) {
+        NormalQualifier qualifier = new NormalQualifier("ResolveBase");
+        CallStat assignCall =
+                new CallStat(qualifier, "swap", (Expr) built.get(ctx.left),
+                        (Expr) built.get(ctx.right));
+        built.put(ctx, assignCall);
+    }
+
+    @Override public void exitCallStmt(
+            @NotNull ResolveParser.CallStmtContext ctx) {
+        built.put(ctx, new CallStat((MethodCall) built.get(ctx.progParamExp())));
     }
 
     @Override public void exitProgPrimaryExp(
@@ -261,21 +267,62 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
+    protected Qualifier buildQualifier(Token symQualifier,
+            @NotNull Token symName) {
+        try {
+            //The user has chosen not to qualify their symbol, so at this point
+            //symName might refer to something local, or something accessible
+            //from an imported module...
+            //NOTE: In the language's present state, it CANNOT be referring to
+            //to something brought in via a facility--they would've had to
+            //explicitly qualify if this were the case.
+            if ( symQualifier == null ) {
+                Symbol s = moduleScope.resolve(null, symName.getText(), true);
+                NormalQualifier q;
+                if ( isLocallyAccessibleSymbol(s) ) {
+                    //this.<symName>
+                    q = new NormalQualifier("this");
+                }
+                else {
+                    //Test_Fac.<symName>
+                    q = new NormalQualifier(s.getRootModuleID());
+                }
+                return q;
+            }
+            //We're here: so the call was qualified... is the qualifier
+            //referring to a facility? Let's check.
+            Symbol s = moduleScope.resolve(null, symQualifier.getText(), true);
+            //Looks like it is!, let's see if what we found is actually a facility
+            if ( !(s instanceof FacilitySymbol) ) {
+                throw new RuntimeException("non-facility qualifier... "
+                        + "whats going on here?");
+            }
+            //Ok, so let's build a facility qualifier from the found 's'.
+            return new FacilityQualifier((FacilitySymbol) s);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
+            return new NormalQualifier(symQualifier.getText());
+        }
+    }
+
+    @Override public void exitProgParamExp(
+            @NotNull ResolveParser.ProgParamExpContext ctx) {
+        built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
+                ctx.name.getText()));
+    }
+
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-        String qualifier =
-                ctx.qualifier != null ? ctx.qualifier.getText() : "this";
-        built.put(ctx, new VarNameRef(qualifier, ctx.name.getText()));
+        System.out.println(ctx.getText());
+        // built.put(ctx, new VarNameRef(buildQualifier(ctx.qualifier, ctx.name),
+        //         ctx.name.getText()));
     }
 
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        FacilityDefinedTypeInit init =
-                new FacilityDefinedTypeInit(
-                        new FacilityDefinedTypeInit.FacilityQualifier(
-                                "Std_Integer_Fac", "Integer_Template"),
-                        "Integer", ctx.getText());
-        built.put(ctx, init);
+        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Integer_Fac",
+                "Integer_Template"), "Integer", ctx.getText()));
     }
 
     @Override public void exitConceptImplModule(
@@ -300,6 +347,7 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.convertAndAddSymsFromConcept(conceptScope.getSymbols());
         }
         catch (NoSuchSymbolException nsse) {
+            //Shouldn't happen, if it does, should've yelled it in semantics
             gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.concept, ctx.concept.getText());
         }
@@ -337,13 +385,10 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
-        for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
-            spec.funcs.add(new FunctionDef(generic));
-        }
-        for (ParameterSymbol s : moduleScope
-                .getSymbolsOfType(ParameterSymbol.class)) {
-            spec.funcs.add(new FunctionDef(s));
-        }
+        spec.funcs.addAll(ctx.genericType().stream().map(FunctionDef::new)
+                .collect(Collectors.toList()));
+        spec.funcs.addAll(moduleScope.getSymbolsOfType(ParameterSymbol.class)
+                .stream().map(FunctionDef::new).collect(Collectors.toList()));
         file.module = spec;
         built.put(ctx, file);
     }

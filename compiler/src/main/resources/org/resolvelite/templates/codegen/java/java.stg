@@ -45,19 +45,19 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 >>
 
 Concept(concept, types, funcs) ::= <<
-public interface <concept.name> extends ResolveInterface {
+public interface <concept.name> {
     <types; separator="\n">
     <funcs; separator="\n">
 }
 >>
 
 ConceptImplModule(impl, ctor, funcImpls, repClasses, memberVars, facilityVars) ::= <<
-public class <impl.name> extends ResolveBase implements <impl.concept> {
+public class <impl.name> implements <impl.concept> {
     <memberVars: {m|RType <m.var.name>;}; separator="\n">
     <facilityVars: {f|<f.facility.concept> <f.facility.name>;}; separator="\n">
     <repClasses; separator="\n">
     <ctor>
-    <funcImpls; separator="\n">
+    <funcImpls; separator="\n\n">
 }
 >>
 
@@ -97,12 +97,14 @@ public <if(func.isStatic)>static <endif><\\>
 <func.name>(<params; separator=", ">);
 >>
 
-FunctionImpl(func, params, vars) ::= <<
+FunctionImpl(func, params, vars, stats) ::= <<
 <if(func.implementsOper)>@Override <endif><\\>
 public <if(func.isStatic)>static <endif><\\>
 <if(func.hasReturn)>RType <else>void <endif><\\>
 <func.name>(<params; separator=", ">) {
     <vars; separator="\n">
+    <stats; separator="\n">
+    //Todo: add a return stat node to the model hierarchy.
     <if(func.hasReturn)>return null;//temp<endif>
 }
 >>
@@ -120,7 +122,7 @@ LayeredFacilityInstantiation(init, args, child) ::= <%
 
 MemberClassDef(clazz, fields) ::= <<
 <if(clazz.isStatic)>static <endif><\\>
-class <clazz.name> extends ResolveBase implements RType {
+class <clazz.name> implements RType {
     <clazz.name>_Rep rep;
     <clazz.name>() {
         rep = new <clazz.name>_Rep();
@@ -152,14 +154,16 @@ class <clazz.name>_Rep {
         return <fields: {f|<f.var.name>.toString()}; separator="+">;
     }
 }
-public <if(clazz.isStatic)>static<endif> RType init<clazz.name>() {
+public<if(clazz.isStatic)> static<endif> RType init<clazz.name>() {
     return new <clazz.name>();
 }
 
-public <if(clazz.isStatic)>static<endif> RType get<clazz.name>() {
+public<if(clazz.isStatic)> static<endif> RType get<clazz.name>() {
     return init<clazz.name>();
 }
 >>
+
+CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 
 VarNameRef(v) ::= "<if(v.qualifier)><v.qualifier>.<endif><v.name>()"
 
@@ -168,6 +172,8 @@ MethodCall(call) ::= "<if(call.qualifier)><call.qualifier>.<endif><call.name>()"
 MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>
 
+TypeInit(init, q) ::= "<q>.get<init.typeName>(<init.initialValue>)"
+
 FacilityDefinedTypeInit(init, qualifier) ::= <<
 <qualifier>.init<init.typeName>(<init.initialValue>)
 >>
@@ -175,6 +181,8 @@ FacilityDefinedTypeInit(init, qualifier) ::= <<
 FacilityQualifier(q) ::= <%
 ((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>
 <stdFacQualMap.(q.facilityName)><else><q.facilityName><endif>)%>
+
+NormalQualifier(q) ::= "<q.name>"
 
 toPrimitive ::= [
     "Boolean":"boolean",

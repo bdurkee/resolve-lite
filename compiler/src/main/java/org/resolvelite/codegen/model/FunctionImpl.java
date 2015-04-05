@@ -41,6 +41,7 @@ public class FunctionImpl extends FunctionDef {
     public boolean isStatic = false;
     public boolean implementsOper = false;
     @ModelElement public List<VariableDef> vars = new ArrayList<>();
+    @ModelElement public List<Stat> stats = new ArrayList<>();
 
     public FunctionImpl(String name) {
         super(name);

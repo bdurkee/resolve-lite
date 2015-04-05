@@ -43,14 +43,22 @@ public class AnnotatedTree {
     public ImportCollection imports;
 
     public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-            String fileName) {
+            String fileName, boolean hasErrors) {
+        this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
 
-        ImportListener l = new ImportListener();
-        ParseTreeWalker.DEFAULT.walk(l, root);
-        this.imports = l.getImports();
+        //if we have syntactic errors, better not risk processing imports with
+        //our tree (we usually get npe's).
+        if ( !hasErrors ) {
+            ImportListener l = new ImportListener();
+            ParseTreeWalker.DEFAULT.walk(l, root);
+            this.imports = l.getImports();
+        }
+        else {
+            this.imports = new ImportCollection();
+        }
     }
 
     @NotNull public String getName() {

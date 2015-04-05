@@ -1,15 +1,21 @@
 package org.resolvelite.codegen.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MethodCall extends Expr {
 
-    public String name, qualifier;
+    public String name;
+    @ModelElement public List<Expr> args = new ArrayList<>();
+    @ModelElement public Qualifier q;
 
-    public MethodCall(String qualifier, String name) {
+    public MethodCall(Qualifier qualifier, String name) {
         this.name = name;
-        this.qualifier = qualifier;
+        this.q = qualifier;
     }
 
     public MethodCall(VarNameRef nameRef) {
-        this(nameRef.qualifier, "get" + nameRef.name);
+        //this(nameRef.q, "get" + nameRef.name);
+        this(nameRef.q, "get" + nameRef.name);
     }
 }
