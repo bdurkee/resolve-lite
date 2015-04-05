@@ -44,12 +44,14 @@ import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ModelBuilder extends ResolveBaseListener {
     public ParseTreeProperty<OutputModelObject> built =
@@ -85,34 +87,39 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        FunctionImpl f = new FunctionImpl(ctx.name.getText());
-        f.hasReturn = ctx.type() != null;
-        f.isStatic = withinFacilityModule();
-        for (ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
-            f.params.addAll(collectModelsFor(ParameterDef.class,
-                    grp.Identifier(), built));
-        }
-        for (ResolveParser.VariableDeclGroupContext grp : ctx
-                .variableDeclGroup()) {
-            f.vars.addAll(collectModelsFor(VariableDef.class, grp.Identifier(),
-                    built));
-        }
+        FunctionImpl f =
+                buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
+                        .operationParameterList().parameterDeclGroup(),
+                        ctx.variableDeclGroup());
         built.put(ctx, f);
     }
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
-        FunctionImpl f = new FunctionImpl(ctx.name.getText());
-        f.hasReturn = ctx.type() != null;
-        f.isStatic = withinFacilityModule();
+        FunctionImpl f =
+                buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
+                        .operationParameterList().parameterDeclGroup(),
+                        ctx.variableDeclGroup());
         f.implementsOper = true;
-        for (ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
+        built.put(ctx, f);
+    }
+
+    protected FunctionImpl buildFunctionImpl(String name,
+            ResolveParser.TypeContext type,
+            List<ResolveParser.ParameterDeclGroupContext> formalGroupings,
+            List<ResolveParser.VariableDeclGroupContext> variableGroupings) {
+        FunctionImpl f = new FunctionImpl(name);
+        f.hasReturn = type != null;
+        f.isStatic = withinFacilityModule();
+        for (ResolveParser.ParameterDeclGroupContext grp : formalGroupings) {
             f.params.addAll(collectModelsFor(ParameterDef.class,
                     grp.Identifier(), built));
         }
-        built.put(ctx, f);
+        for (ResolveParser.VariableDeclGroupContext grp : variableGroupings) {
+            f.vars.addAll(collectModelsFor(VariableDef.class, grp.Identifier(),
+                    built));
+        }
+        return f;
     }
 
     @Override public void exitFacilityDecl(
@@ -238,7 +245,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
-        built.put(ctx, built.get(ctx.progExp()));
+        Expr e = (Expr) built.get(ctx.progExp());
+        if ( e instanceof VarNameRef ) e = new MethodCall((VarNameRef) e);
+        //operations n' shit will eventually go here.
+        built.put(ctx, e);
     }
 
     @Override public void exitProgPrimaryExp(
@@ -253,7 +263,9 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-
+        String qualifier =
+                ctx.qualifier != null ? ctx.qualifier.getText() : "this";
+        built.put(ctx, new VarNameRef(qualifier, ctx.name.getText()));
     }
 
     @Override public void exitProgIntegerExp(
@@ -270,8 +282,8 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
         ModuleFile file = buildFile();
         ConceptImplModule impl =
-                new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
-
+                new ConceptImplModule(ctx.name.getText(),
+                        ctx.concept.getText(), file);
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
@@ -285,9 +297,7 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
-            for (ParameterSymbol s : conceptScope.getFormalParameters()) {
-                impl.funcImpls.add(new FunctionImpl(s));
-            }
+            impl.convertAndAddSymsFromConcept(conceptScope.getSymbols());
         }
         catch (NoSuchSymbolException nsse) {
             gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -301,7 +311,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         ModuleFile file = buildFile();
-        FacilityImplModule impl = new FacilityImplModule(ctx.name.getText(), file);
+        FacilityImplModule impl =
+                new FacilityImplModule(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
             impl.facilities.addAll(collectModelsFor(FacilityDef.class, ctx
@@ -329,7 +340,8 @@ public class ModelBuilder extends ResolveBaseListener {
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             spec.funcs.add(new FunctionDef(generic));
         }
-        for (ParameterSymbol s : moduleScope.getFormalParameters()) {
+        for (ParameterSymbol s : moduleScope
+                .getSymbolsOfType(ParameterSymbol.class)) {
             spec.funcs.add(new FunctionDef(s));
         }
         file.module = spec;

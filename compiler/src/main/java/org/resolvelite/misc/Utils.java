@@ -51,20 +51,6 @@ public class Utils {
         T build();
     }
 
-    /**
-     * A two-parameter mapping.
-     */
-    public interface Mapping<I, O> {
-        public O map(I input);
-    }
-
-    /**
-     * A three-parameter mapping.
-     */
-    public interface Mapping3<P1, P2, P3, R> {
-        public R map(P1 p1, P2 p2, P3 p3);
-    }
-
     public static ParserRuleContext getAncestor(Parser parser,
             ParserRuleContext ctx, String ruleName) {
         int ruleIndex = parser.getRuleIndex(ruleName);
@@ -107,32 +93,6 @@ public class Utils {
         else {
             throw new IllegalArgumentException("Unrecognized module");
         }
-    }
-
-    public static <T> List<T> filter(List<T> data, Predicate<T> pred) {
-        List<T> output = new ArrayList<T>();
-        for (T x : data) {
-            if ( pred.test(x) ) {
-                output.add(x);
-            }
-        }
-        return output;
-    }
-
-    public static <T, R> List<R> map(List<T> data, Function<T, R> getter) {
-        List<R> output = new ArrayList<R>();
-        for (T x : data) {
-            output.add(getter.apply(x));
-        }
-        return output;
-    }
-
-    public static <T, R> List<R> map(T[] data, Function<T, R> getter) {
-        List<R> output = new ArrayList<R>();
-        for (T x : data) {
-            output.add(getter.apply(x));
-        }
-        return output;
     }
 
     public static <T> String join(Collection<T> data, String separator) {

@@ -51,7 +51,7 @@ public interface <concept.name> extends ResolveInterface {
 }
 >>
 
-ConceptImpl(impl, ctor, funcImpls, repClasses, memberVars, facilityVars) ::= <<
+ConceptImplModule(impl, ctor, funcImpls, repClasses, memberVars, facilityVars) ::= <<
 public class <impl.name> extends ResolveBase implements <impl.concept> {
     <memberVars: {m|RType <m.var.name>;}; separator="\n">
     <facilityVars: {f|<f.facility.concept> <f.facility.name>;}; separator="\n">
@@ -61,7 +61,7 @@ public class <impl.name> extends ResolveBase implements <impl.concept> {
 }
 >>
 
-FacilityImpl(impl, facilities, funcs, repClasses) ::= <<
+FacilityImplModule(impl, facilities, funcs, repClasses) ::= <<
 public class <impl.name> {
     <facilities; separator="\n">
     <repClasses; separator="\n">
@@ -161,7 +161,7 @@ public <if(clazz.isStatic)>static<endif> RType get<clazz.name>() {
 }
 >>
 
-VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
+VarNameRef(v) ::= "<if(v.qualifier)><v.qualifier>.<endif><v.name>()"
 
 MethodCall(call) ::= "<if(call.qualifier)><call.qualifier>.<endif><call.name>()"
 

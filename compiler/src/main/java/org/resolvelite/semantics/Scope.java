@@ -46,7 +46,7 @@ public interface Scope {
 
     public Set<String> getSymbolNames();
 
-    public List<ParameterSymbol> getFormalParameters();
+    public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
 
     public int getNumberOfSymbols();
 

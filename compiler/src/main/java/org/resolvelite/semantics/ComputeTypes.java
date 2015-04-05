@@ -255,22 +255,20 @@ public class ComputeTypes extends SetScopes {
     @SuppressWarnings("unchecked") protected Type checkCallArgs(
             @NotNull FunctionSymbol foundSym,
             @NotNull ResolveParser.ProgParamExpContext foundExp) {
-        List<? extends Symbol> raw =
-                Utils.filter(foundSym.getSymbols(),
-                        p -> (p instanceof ParameterSymbol));
-        List<ParameterSymbol> formals = (List)raw;
-        if (foundExp.progExp().size() != formals.size()) {
+        List<ParameterSymbol> formals =
+                foundSym.getSymbolsOfType(ParameterSymbol.class);
+        if ( foundExp.progExp().size() != formals.size() ) {
             symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.NO_SUCH_SYMBOL, foundExp.name,
                     foundExp.name.getText());
             return InvalidType.INSTANCE;
         }
-        int i=0;
+        int i = 0;
         for (ParameterSymbol p : formals) {
             Type actuaArgType = types.get(foundExp.progExp(i++));
             Type formalArgType = p.getType();
 
-            if (!actuaArgType.getName().equals(formalArgType.getName())) {
+            if ( !actuaArgType.getName().equals(formalArgType.getName()) ) {
                 symtab.getCompiler().errorManager.semanticError(
                         ErrorKind.NO_SUCH_SYMBOL, foundExp.name,
                         foundExp.name.getText());

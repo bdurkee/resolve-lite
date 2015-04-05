@@ -30,6 +30,9 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+
 public class VariableDef extends OutputModelObject {
     @ModelElement public Expr init; //in practice, usually MethodCall and FacilityDefinedTypeInit
     public String name;
@@ -38,4 +41,13 @@ public class VariableDef extends OutputModelObject {
         this.name = name;
         this.init = init;
     }
+
+    public VariableDef(ParameterSymbol s) {
+        this(s.getName(), null);
+    }
+
+    public VariableDef(GenericSymbol s) {
+        this(s.getName(), null);
+    }
+
 }

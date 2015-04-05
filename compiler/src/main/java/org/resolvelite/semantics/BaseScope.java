@@ -190,11 +190,11 @@ public abstract class BaseScope implements Scope {
                 .map(s -> (Scope)s).collect(Collectors.toList());
     }
 
-    @Override public List<ParameterSymbol> getFormalParameters() {
-        return getSymbols()
-                .stream()
-                .filter(s -> s instanceof ParameterSymbol)
-                .map(s -> (ParameterSymbol) s).collect(Collectors.toList());
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return symbols.values().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .collect(Collectors.toList());
     }
 
     @Override public int getNumberOfSymbols() {

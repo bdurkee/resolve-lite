@@ -30,8 +30,13 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+import org.resolvelite.semantics.symbol.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Module extends OutputModelObject {
     public String name;
@@ -45,5 +50,18 @@ public abstract class Module extends OutputModelObject {
     public Module(String name, ModuleFile file) {
         this.name = name;
         this.file = file;//who contains us?
+    }
+
+    public void convertAndAddSymsFromConcept(List<? extends Symbol> symbols) {
+        for (Symbol s : symbols) {
+            if ( s instanceof ParameterSymbol ) {
+                funcImpls.add(new FunctionImpl((ParameterSymbol) s));
+                memberVars.add(new VariableDef((ParameterSymbol) s));
+            }
+            else if ( s instanceof GenericSymbol ) {
+                funcImpls.add(new FunctionImpl((GenericSymbol) s));
+                memberVars.add(new VariableDef((GenericSymbol) s));
+            }
+        }
     }
 }

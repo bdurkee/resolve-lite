@@ -8,4 +8,8 @@ public class MethodCall extends Expr {
         this.name = name;
         this.qualifier = qualifier;
     }
+
+    public MethodCall(VarNameRef nameRef) {
+        this(nameRef.qualifier, "get" + nameRef.name);
+    }
 }
