@@ -36,8 +36,7 @@ import java.util.List;
 public class FacilityImpl extends Module {
     public String conceptName;
     private String definedMain;
-    @ModelElement public List<FacilityVariableDecl> facilities =
-            new ArrayList<>();
+    @ModelElement public List<FacilityDecl> facilities = new ArrayList<>();
 
     public FacilityImpl(String name, ModuleFile file) {
         super(name, file);

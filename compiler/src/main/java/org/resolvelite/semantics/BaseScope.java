@@ -82,14 +82,14 @@ public abstract class BaseScope implements Scope {
                 }
                 catch (NoSuchSymbolException nsse) {
                     //no dice for the name in the imported module we've just
-                    //searched? Ok then, lets check for it in any facilities.
+                    //searched? Ok then, lets check for it in any facilityVars.
                     //that might be available.
                     //no problem, just keep searching until we find a match.
                 }
             }
         }
         //Two options here.
-        // 1. Make this version work, where I can find facilities,
+        // 1. Make this version work, where I can find facilityVars,
         //search them in diff modules etc.
         // 2. Enforce qualification and make it so that you need to
         throw new NoSuchSymbolException();

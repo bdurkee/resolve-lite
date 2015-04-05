@@ -42,9 +42,9 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
-import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
@@ -118,8 +118,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        FacilityVariableDecl f =
-                new FacilityVariableDecl(ctx.name.getText(), ctx.spec.getText());
+        FacilityDecl f =
+                new FacilityDecl(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
         List<LayeredFacilityInstantiation> layers = new ArrayList<>();
 
@@ -182,11 +182,9 @@ public class ModelBuilder extends ResolveBaseListener {
                 Symbol s = moduleScope.resolve(null, ctx.name.getText(), true);
                 String qual =
                         s.getRootModuleID().equals(
-                                moduleScope.getRootModuleID()) ? null : s
+                                moduleScope.getRootModuleID()) ? "this" : s
                                 .getRootModuleID();
-                built.put(
-                        ctx,
-                        new LocallyDefinedTypeInit(ctx.name.getText(), qual));
+                built.put(ctx, new MethodCall(qual, "get" + ctx.name.getText()));
                 return;
             }
             Symbol s = moduleScope.resolve(null, ctx.qualifier, true);
@@ -204,7 +202,7 @@ public class ModelBuilder extends ResolveBaseListener {
             //couldn't find a facility for s? Then the qualifier must identify
             //a module, thus, we're dealing with a user defined type that
             //doesn't come through a facility.
-            built.put(ctx, new LocallyDefinedTypeInit(ctx.name.getText(),
+            built.put(ctx, new MemberClassDefinedTypeInit(ctx.name.getText(),
                     ctx.qualifier.getText()));
         }
     }
@@ -250,6 +248,11 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+
+    }
+
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         FacilityDefinedTypeInit init =
@@ -269,11 +272,12 @@ public class ModelBuilder extends ResolveBaseListener {
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
-            //private procedures...
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
             impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
                     .implBlock().typeRepresentationDecl(), built));
+            impl.facilityVars.addAll(collectModelsFor(FacilityDecl.class, ctx
+                    .implBlock().facilityDecl(), built));
         }
         try {
             ModuleScope conceptScope =
@@ -286,6 +290,7 @@ public class ModelBuilder extends ResolveBaseListener {
             gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.concept, ctx.concept.getText());
         }
+        impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
     }
@@ -296,8 +301,8 @@ public class ModelBuilder extends ResolveBaseListener {
         FacilityImpl impl = new FacilityImpl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(collectModelsFor(FacilityVariableDecl.class,
-                    ctx.facilityBlock().facilityDecl(), built));
+            impl.facilities.addAll(collectModelsFor(FacilityDecl.class, ctx
+                    .facilityBlock().facilityDecl(), built));
             impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
             impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx

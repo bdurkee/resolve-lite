@@ -51,12 +51,12 @@ public interface <concept.name> extends ResolveInterface {
 }
 >>
 
-ConceptImpl(impl, funcImpls, repClasses, memberVars) ::= <<
+ConceptImpl(impl, ctor, funcImpls, repClasses, memberVars, facilityVars) ::= <<
 public class <impl.name> extends ResolveBase implements <impl.concept> {
-    <memberVars: {m|RType <m.var.name>;};separator="\n">
+    <memberVars: {m|RType <m.var.name>;}; separator="\n">
+    <facilityVars: {f|<f.facility.concept> <f.facility.name>;}; separator="\n">
     <repClasses; separator="\n">
-    public <impl.name>() {
-    }
+    <ctor>
     <funcImpls; separator="\n">
 }
 >>
@@ -71,6 +71,13 @@ public class <impl.name> {
         <impl.definedMain>();
     }
     <endif>
+}
+>>
+
+CtorDef(ctor, facMems) ::= <<
+public <ctor.name>() {
+    <ctor.members: {c|this.<c> = <c>;}; separator="\n">
+    <facMems: {f|this.<f.facility.name> = <f.root>;}; separator="\n">
 }
 >>
 
@@ -100,7 +107,7 @@ public <if(func.isStatic)>static <endif><\\>
 }
 >>
 
-FacilityVariableDecl(facility, root) ::= <<
+FacilityDecl(facility, root) ::= <<
 public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
 <if(stdFacQualMap.(facility.name))>INSTANCE<else><facility.name><endif> =
     <root>;
@@ -148,11 +155,17 @@ class <clazz.name>_Rep {
 public <if(clazz.isStatic)>static <endif> RType init<clazz.name>() {
     return new <clazz.name>();
 }
+
+public <if(clazz.isStatic)>static <endif> RType get<clazz.name>() {
+    return init<clazz.name>();
+}
 >>
 
 VariableNameRef(var, qualifier) ::= "<qualifier>.create<var.name>()"
 
-LocallyDefinedTypeInit(init) ::= <%
+MethodCall(call) ::= "<if(call.qualifier)><call.qualifier><endif><call.name>()"
+
+MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>
 
 FacilityDefinedTypeInit(init, qualifier) ::= <<

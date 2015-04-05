@@ -51,6 +51,12 @@ public class Ceramic_Array_Impl extends ResolveBase
         return new Array();
     }
 
+    public Ceramic_Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
+        this.type = type;
+        this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).val;
+        this.upperBound = ((Integer_Impl.Integer)Upper_Bound).val;
+    }
+
     @Override public void Swap_Element(RType A, RType e, RType i) {
         int adj = ((Integer_Impl.Integer)i).val - lowerBound;
         RType[] temp1 = ((Array_Rep)A.getRep()).content;

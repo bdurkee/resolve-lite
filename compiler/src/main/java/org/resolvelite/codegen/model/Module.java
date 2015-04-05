@@ -39,6 +39,7 @@ public abstract class Module extends OutputModelObject {
     @ModelElement public List<FunctionImpl> funcImpls = new ArrayList<>();
     @ModelElement public List<MemberClassDef> repClasses = new ArrayList<>();
     @ModelElement public List<VariableDecl> memberVars = new ArrayList<>();
+
     //might need special list for
 
     public Module(String name, ModuleFile file) {
