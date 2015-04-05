@@ -165,18 +165,14 @@ public<if(clazz.isStatic)> static<endif> RType get<clazz.name>() {
 
 CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 
-VarNameRef(v) ::= "<if(v.qualifier)><v.qualifier>.<endif><v.name>()"
+MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 
-MethodCall(call) ::= "<if(call.qualifier)><call.qualifier>.<endif><call.name>()"
+VarNameRef(v, q) ::= "<q>.<v.name>"
 
 MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>
 
-TypeInit(init, q) ::= "<q>.get<init.typeName>(<init.initialValue>)"
-
-FacilityDefinedTypeInit(init, qualifier) ::= <<
-<qualifier>.init<init.typeName>(<init.initialValue>)
->>
+TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
 ((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>

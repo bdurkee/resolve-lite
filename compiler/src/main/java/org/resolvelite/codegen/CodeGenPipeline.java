@@ -62,7 +62,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
                     System.out.println(x.render());
-                    //gen.writeModuleFile(gen.generateModule());
+                    gen.writeModuleFile(gen.generateModule());
                 }
                 for (String external : unit.imports
                         .getImportsOfType(ImportCollection.ImportType.EXTERNAL)) {
@@ -76,8 +76,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     Path destPath =
                             new File(outputDir.getName() + "/"
                                     + srcFile.getName()).toPath();
-                    //      Files.copy(srcPath, destPath,
-                    //              StandardCopyOption.REPLACE_EXISTING);
+                          Files.copy(srcPath, destPath,
+                                  StandardCopyOption.REPLACE_EXISTING);
                 }
             }
             catch (IllegalStateException ise) {

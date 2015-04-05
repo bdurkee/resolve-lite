@@ -4,5 +4,4 @@ Facility Test;
         Procedure
             Var x: Std_Integer_Fac::Integer;
     end Main;
-
 end Test;

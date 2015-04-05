@@ -45,7 +45,6 @@ import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
-import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
@@ -54,7 +53,6 @@ import org.resolvelite.codegen.model.Qualifier.FacilityQualifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ModelBuilder extends ResolveBaseListener {
     public ParseTreeProperty<OutputModelObject> built =
@@ -193,7 +191,9 @@ public class ModelBuilder extends ResolveBaseListener {
     public boolean isLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
         ModuleScope module = symtab.getModuleScope(s.getRootModuleID());
-        return module.getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext;
+
+        return (moduleScope.getRootModuleID().equals(s.getRootModuleID()) || module
+                .getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);
     }
 
     @Override public void exitTypeRepresentationDecl(
@@ -236,20 +236,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitAssignStmt(
             @NotNull ResolveParser.AssignStmtContext ctx) {
-        NormalQualifier qualifier = new NormalQualifier("ResolveBase");
-        CallStat assignCall =
-                new CallStat(qualifier, "assign", (Expr) built.get(ctx.left),
-                        (Expr) built.get(ctx.right));
-        built.put(ctx, assignCall);
+        built.put(ctx, buildPrimitiveInfixStat("assign", ctx.left, ctx.right));
     }
 
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
-        NormalQualifier qualifier = new NormalQualifier("ResolveBase");
-        CallStat assignCall =
-                new CallStat(qualifier, "swap", (Expr) built.get(ctx.left),
-                        (Expr) built.get(ctx.right));
-        built.put(ctx, assignCall);
+        built.put(ctx, buildPrimitiveInfixStat("swap", ctx.left, ctx.right));
     }
 
     @Override public void exitCallStmt(
@@ -267,54 +259,18 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    protected Qualifier buildQualifier(Token symQualifier,
-            @NotNull Token symName) {
-        try {
-            //The user has chosen not to qualify their symbol, so at this point
-            //symName might refer to something local, or something accessible
-            //from an imported module...
-            //NOTE: In the language's present state, it CANNOT be referring to
-            //to something brought in via a facility--they would've had to
-            //explicitly qualify if this were the case.
-            if ( symQualifier == null ) {
-                Symbol s = moduleScope.resolve(null, symName.getText(), true);
-                NormalQualifier q;
-                if ( isLocallyAccessibleSymbol(s) ) {
-                    //this.<symName>
-                    q = new NormalQualifier("this");
-                }
-                else {
-                    //Test_Fac.<symName>
-                    q = new NormalQualifier(s.getRootModuleID());
-                }
-                return q;
-            }
-            //We're here: so the call was qualified... is the qualifier
-            //referring to a facility? Let's check.
-            Symbol s = moduleScope.resolve(null, symQualifier.getText(), true);
-            //Looks like it is!, let's see if what we found is actually a facility
-            if ( !(s instanceof FacilitySymbol) ) {
-                throw new RuntimeException("non-facility qualifier... "
-                        + "whats going on here?");
-            }
-            //Ok, so let's build a facility qualifier from the found 's'.
-            return new FacilityQualifier((FacilitySymbol) s);
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            return new NormalQualifier(symQualifier.getText());
-        }
-    }
-
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
+        List<Expr> args = collectModelsFor(Expr.class, ctx.progExp(), built);
         built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText()));
+                ctx.name.getText(), args));
     }
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-        System.out.println(ctx.getText());
+        if ( !(ctx.getParent() instanceof ResolveParser.ProgMemberExpContext) ) {
+            System.out.println(ctx.getText());
+        }
         // built.put(ctx, new VarNameRef(buildQualifier(ctx.qualifier, ctx.name),
         //         ctx.name.getText()));
     }
@@ -411,4 +367,50 @@ public class ModelBuilder extends ResolveBaseListener {
         return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
     }
 
+    protected CallStat buildPrimitiveInfixStat(@NotNull String name,
+                                               @NotNull ResolveParser.ProgExpContext left,
+                                               @NotNull ResolveParser.ProgExpContext right) {
+        NormalQualifier qualifier = new NormalQualifier("ResolveBase");
+        return new CallStat(qualifier, name, (Expr) built.get(left),
+                (Expr) built.get(right));
+    }
+
+    protected Qualifier buildQualifier(Token symQualifier,
+            @NotNull Token symName) {
+        try {
+            //The user has chosen not to qualify their symbol, so at this point
+            //symName might refer to something local, or something accessible
+            //from an imported module...
+            //NOTE: In the language's present state, it CANNOT be referring to
+            //to something brought in via a facility--they would've had to
+            //explicitly qualify if this were the case.
+            if ( symQualifier == null ) {
+                Symbol s = moduleScope.resolve(null, symName.getText(), true);
+                NormalQualifier q;
+                if ( isLocallyAccessibleSymbol(s) ) {
+                    //this.<symName>
+                    q = new NormalQualifier("this");
+                }
+                else {
+                    //Test_Fac.<symName>
+                    q = new NormalQualifier(s.getRootModuleID());
+                }
+                return q;
+            }
+            //We're here: so the call was qualified... is the qualifier
+            //referring to a facility? Let's check.
+            Symbol s = moduleScope.resolve(null, symQualifier.getText(), true);
+            //Looks like it is!, let's see if what we found is actually a facility
+            if ( !(s instanceof FacilitySymbol) ) {
+                throw new RuntimeException("non-facility qualifier... "
+                        + "whats going on here?");
+            }
+            //Ok, so let's build a facility qualifier from the found 's'.
+            return new FacilityQualifier((FacilitySymbol) s);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
+            return new NormalQualifier(symQualifier.getText());
+        }
+    }
 }
