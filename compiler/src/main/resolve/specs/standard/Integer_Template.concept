@@ -7,4 +7,6 @@ Concept Integer_Template;
     Operation Is_Zero (evaluates I: Integer): Std_Boolean_Fac::Boolean;
         ensures Is_Zero = (i = 0);
 
+    Operation Sum (evaluates I, J: Integer): Integer;
+
 end Integer_Template;

@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -52,24 +53,35 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, type);
     }
 
+    @Override public void exitOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
+    }
+
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
+    }
+
+    public Type typeFunctionLikeThing(Token name,
+            ResolveParser.TypeContext type) {
         try {
             FunctionSymbol func =
                     (FunctionSymbol) currentScope.resolve(null,
-                            ctx.name.getText(), false);
-            Type t = types.get(ctx.type());
+                            name, false);
+            Type t = types.get(type);
             if ( t == null ) {
                 t =
                         new ProgTypeSymbol("Void", symtab,
                                 currentScope.getRootModuleID());
             }
             func.setType(t);
-            types.put(ctx, t);
+            return t;
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText());
+                    ErrorKind.NO_SUCH_SYMBOL, name, name.getText());
+            return InvalidType.INSTANCE;
         }
     }
 
@@ -158,7 +170,8 @@ public class ComputeTypes extends SetScopes {
                                 .getClass().getSimpleName());
                 types.put(ctx, InvalidType.INSTANCE);
             }
-            types.put(ctx, checkCallArgs((FunctionSymbol) s, ctx));
+            Type foundType = checkCallArgs((FunctionSymbol) s, ctx);
+            types.put(ctx, foundType);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(

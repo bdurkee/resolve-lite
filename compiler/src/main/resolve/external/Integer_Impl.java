@@ -44,4 +44,9 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
     public RType Is_Zero(RType i) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer_Impl.Integer) i).val == 0);
     }
+
+    public RType Sum(RType i1, RType i2) {
+        return new Integer(((Integer_Impl.Integer)i1).val +
+                ((Integer_Impl.Integer)i2).val);
+    }
 }

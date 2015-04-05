@@ -9,7 +9,7 @@ Implementation Array_Impl for Bdd_Stack_Template;
         end;
 
     Procedure Push (restores e: T; updates S: Stack);
-        Var X: T;
+        S.Top := Std_Integer_Fac::Sum(S.Top,1);
     end Push;
 
     Procedure Pop (replaces e: T; updates S: Stack);

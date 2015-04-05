@@ -45,8 +45,6 @@ public abstract class Module extends OutputModelObject {
     @ModelElement public List<MemberClassDef> repClasses = new ArrayList<>();
     @ModelElement public List<VariableDef> memberVars = new ArrayList<>();
 
-    //might need special list for
-
     public Module(String name, ModuleFile file) {
         this.name = name;
         this.file = file;//who contains us?
