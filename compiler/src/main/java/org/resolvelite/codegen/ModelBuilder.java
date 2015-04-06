@@ -45,6 +45,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.semantics.Type;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
@@ -268,29 +269,29 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-        built.put(ctx, new VarNameRef(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText()));
+        built.put(ctx,
+                new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
     }
 
     @Override public void exitProgMemberExp(
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
-        if (ctx.progNamedExp() != null) {
-            List<TerminalNode> reversedAccesses = ctx.Identifier();
-            Collections.reverse(reversedAccesses);
-            List<MemberRef> refs = reversedAccesses.stream()
-                    .map(t -> new MemberRef(t.getText()))
-                    .collect(Collectors.toList());
-
-            for (int i = 0; i < refs.size(); i++) {
-                if (i + 1 < refs.size()) {
-                    refs.get(i).child = refs.get(i + 1);
-                } else {
-                    refs.get(i).child = new MemberRef(ctx.progNamedExp()
-                            .Identifier(0).getText());
-                }
+        System.out.println("Processing member exp: " + ctx.getText());
+        MemberRef firstRef = new MemberRef(ctx.progNamedExp().getText(),
+                symtab.types.get(ctx.progNamedExp()));
+        List<MemberRef> refs = ctx.Identifier()
+                .stream()
+                .map(t -> new MemberRef(t.getText(), symtab.types.get(t)))
+                .collect(Collectors.toList());
+        Collections.reverse(refs);
+        for (int i = 0; i < refs.size(); i++) {
+            if (i + 1 < refs.size()) {
+                refs.get(i).child = refs.get(i + 1);
+            } else {
+                refs.get(i).isOutermost = true;
+                refs.get(i).child = firstRef;
             }
-            built.put(ctx, refs.get(0));
         }
+        built.put(ctx, refs.get(0));
     }
 
     @Override public void exitProgIntegerExp(
@@ -386,8 +387,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected CallStat buildPrimitiveInfixStat(@NotNull String name,
-                                               @NotNull ResolveParser.ProgExpContext left,
-                                               @NotNull ResolveParser.ProgExpContext right) {
+            @NotNull ResolveParser.ProgExpContext left,
+            @NotNull ResolveParser.ProgExpContext right) {
         NormalQualifier qualifier = new NormalQualifier("ResolveBase");
         return new CallStat(qualifier, name, (Expr) built.get(left),
                 (Expr) built.get(right));

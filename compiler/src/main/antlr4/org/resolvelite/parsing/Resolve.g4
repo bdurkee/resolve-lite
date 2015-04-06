@@ -416,7 +416,8 @@ progParamExp
     ;
 
 progNamedExp
-    :   (qualifier=Identifier '::')? name=Identifier
+   // :   (qualifier=Identifier '::')? name=Identifier
+    :   name=Identifier //for now, unqualified.
     ;
 
 progLiteralExp

@@ -18,7 +18,7 @@ public class MethodCall extends Expr {
     /**
      * Used to create create getter calls for variables referencing things like
      * module level generics and formal params
-     *
+     * 
      * @param nameRef The referenced name of the parameter or generic.
      */
     public MethodCall(VarNameRef nameRef) {

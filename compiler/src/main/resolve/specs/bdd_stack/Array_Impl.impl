@@ -10,16 +10,29 @@ Implementation Array_Impl for Bdd_Stack_Template;
         end;
         --RType x = (((Array_Impl.Stack)S).rep.Contents).;
         --(()S).rep.Contents).rep.Fiz
-        --RType y = ((Test.Baz)((Array_Impl.Stack)S).rep.Contents).rep.Fiz;
+        --RType y = (((Test.Baz)((Array_Impl.Stack)S).rep.Info).rep.Top);
     --((Stack)S).rep.contents)
+
+    (**
+     * "((TYPE)<child>).rep.<ref.name>"
+     *)
+    --(((Array_Impl.Stack)S).rep.Top).;
+    --((TYPE)this.S).rep.Top)
+    --((TYPE) ((TYPE)this.S).rep.Info) ).rep.Top
+
+    --(((TYPE)(((TYPE)this.S).rep.Info)).rep.Top)
     Procedure Push (restores e: T; updates S: Stack);
         S.Top := Std_Integer_Fac::Sum(S.Top, 1);
         Array_Fac::Swap_Element(S.Contents, e, S.Info.Top);
     end Push;
-
+    --(((Test.Baz)((Array_Impl.Stack)S).rep.Info).rep.Top);
+    --((this.S Info).rep.Top)
+--((Test.Baz((Array_Impl.Stack)S) Info) Top)
     Procedure Pop (replaces e: T; updates S: Stack);
     end Pop;
 
+
+--(((((Stack)).rep.S)).rep.Top)
     Procedure Depth (restores S: Stack): Std_Integer_Fac::Integer;
     end Depth;
 

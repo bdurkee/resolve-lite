@@ -167,9 +167,10 @@ CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 
-VarNameRef(v, q) ::= "<q>.<v.name>"
+VarNameRef(v) ::= "<v.name>"
 
-MemberRef(ref, child) ::= "(<child> <ref.name>)"
+MemberRef(ref, child) ::=
+"((<if(!ref.isOutermost)>(<ref.typeName>)<endif><child>).rep.<ref.name>)"
 
 MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>

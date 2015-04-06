@@ -5,6 +5,10 @@ public class InvalidType implements Type {
 
     private InvalidType() {}
 
+    public String getRootModuleID() {
+        return "Invalid";
+    }
+
     @Override public String getName() {
         return "Invalid";
     }

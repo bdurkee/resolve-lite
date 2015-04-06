@@ -122,15 +122,14 @@ public class ComputeTypes extends SetScopes {
                 return; //already typed (as is the case for record member refs.
             }
             TypedSymbol sym =
-                    (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name,
-                            true); //search adjacent modules for it if we don't find it in this one
+                    (TypedSymbol) currentScope.resolve(null, ctx.name, true); //search adjacent modules for it if we don't find it in this one
             Type t = checkForInvalidType(sym.getType(), null);
             types.put(ctx, t);
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
                     ErrorKind.NO_SUCH_SYMBOL, ctx.name, ctx.name.getText(),
-                    ctx.qualifier);
+                    null);
             types.put(ctx, InvalidType.INSTANCE);
         }
     }
