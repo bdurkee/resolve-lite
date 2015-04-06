@@ -1,16 +1,20 @@
 Implementation Array_Impl for Bdd_Stack_Template;
-
+    uses Test;
     Facility Array_Fac is Bdd_Ceramic_Array_Template<T>(1, Max_Depth)
         externally implemented by Ceramic_Array_Impl;
 
     Type Stack = Record
             Contents: Array_Fac::Array;
             Top: Std_Integer_Fac::Integer;
+            Info: Baz;
         end;
-
+        --RType x = (((Array_Impl.Stack)S).rep.Contents).;
+        --(()S).rep.Contents).rep.Fiz
+        --RType y = ((Test.Baz)((Array_Impl.Stack)S).rep.Contents).rep.Fiz;
+    --((Stack)S).rep.contents)
     Procedure Push (restores e: T; updates S: Stack);
         S.Top := Std_Integer_Fac::Sum(S.Top, 1);
-        Array_Fac::Swap_Element(S.Contents, e, S.Top);
+        Array_Fac::Swap_Element(S.Contents, e, S.Info.Top);
     end Push;
 
     Procedure Pop (replaces e: T; updates S: Stack);

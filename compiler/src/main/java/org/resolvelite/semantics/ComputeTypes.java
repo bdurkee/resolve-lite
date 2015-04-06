@@ -17,11 +17,12 @@ import java.util.*;
 
 public class ComputeTypes extends SetScopes {
 
-    ParseTreeProperty<Type> types = new ParseTreeProperty<>();
+    ParseTreeProperty<Type> types;
 
     public ComputeTypes(@NotNull ResolveCompiler compiler,
             @NotNull SymbolTable symtab) {
         super(compiler, symtab);
+        this.types = symtab.types;
     }
 
     @Override public void exitVariableDeclGroup(

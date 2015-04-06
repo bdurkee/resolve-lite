@@ -32,6 +32,7 @@ package org.resolvelite.codegen;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -50,8 +51,7 @@ import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
 import org.resolvelite.codegen.model.Qualifier.FacilityQualifier;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
@@ -69,7 +69,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
-        built.put(ctx, new TypeDef(ctx.name.getText()));
+        built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
     @Override public void exitOperationDecl(
@@ -268,11 +268,29 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-        if ( !(ctx.getParent() instanceof ResolveParser.ProgMemberExpContext) ) {
-            System.out.println(ctx.getText());
+        built.put(ctx, new VarNameRef(buildQualifier(ctx.qualifier, ctx.name),
+                ctx.name.getText()));
+    }
+
+    @Override public void exitProgMemberExp(
+            @NotNull ResolveParser.ProgMemberExpContext ctx) {
+        if (ctx.progNamedExp() != null) {
+            List<TerminalNode> reversedAccesses = ctx.Identifier();
+            Collections.reverse(reversedAccesses);
+            List<MemberRef> refs = reversedAccesses.stream()
+                    .map(t -> new MemberRef(t.getText()))
+                    .collect(Collectors.toList());
+
+            for (int i = 0; i < refs.size(); i++) {
+                if (i + 1 < refs.size()) {
+                    refs.get(i).child = refs.get(i + 1);
+                } else {
+                    refs.get(i).child = new MemberRef(ctx.progNamedExp()
+                            .Identifier(0).getText());
+                }
+            }
+            built.put(ctx, refs.get(0));
         }
-        // built.put(ctx, new VarNameRef(buildQualifier(ctx.qualifier, ctx.name),
-        //         ctx.name.getText()));
     }
 
     @Override public void exitProgIntegerExp(
@@ -336,7 +354,7 @@ public class ModelBuilder extends ResolveBaseListener {
         SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
-            spec.types.addAll(collectModelsFor(TypeDef.class, ctx
+            spec.types.addAll(collectModelsFor(TypeInterfaceDef.class, ctx
                     .conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
@@ -375,7 +393,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(Token symQualifier,
+    protected Qualifier buildQualifier(@Nullable Token symQualifier,
             @NotNull Token symName) {
         try {
             //The user has chosen not to qualify their symbol, so at this point

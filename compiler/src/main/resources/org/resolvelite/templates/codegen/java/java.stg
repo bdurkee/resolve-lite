@@ -81,7 +81,7 @@ public <ctor.name>() {
 }
 >>
 
-TypeDef(type) ::= <<
+TypeInterfaceDef(type) ::= <<
 interface <type.name> extends RType { }
 public RType init<type.name>(<\\>
 <if(toPrimitive.(type.name))><toPrimitive.(type.name)>... e<endif>);
@@ -168,6 +168,8 @@ CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 
 VarNameRef(v, q) ::= "<q>.<v.name>"
+
+MemberRef(ref, child) ::= "(<child> <ref.name>)"
 
 MemberClassDefinedTypeInit(init) ::= <%
 <if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SpecModule extends Module {
-    @ModelElement public List<TypeDef> types = new ArrayList<>();
+    @ModelElement public List<TypeInterfaceDef> types = new ArrayList<>();
     @ModelElement public List<FunctionDef> funcs = new ArrayList<>();
 
     public SpecModule(String name, ModuleFile file) {

@@ -4,4 +4,8 @@ Facility Test;
         Procedure
             Var x: Std_Integer_Fac::Integer;
     end Main;
+
+    Type Baz = Record
+            Top: Std_Integer_Fac::Integer;
+        end;
 end Test;

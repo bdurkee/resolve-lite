@@ -14,6 +14,7 @@ public class SymbolTable {
 
     public Map<String, ModuleScope> moduleScopes = new HashMap<>();
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
+    public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
 
     private final ResolveCompiler compiler;
     private final TypeGraph typeGraph;
