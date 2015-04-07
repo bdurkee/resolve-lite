@@ -37,7 +37,7 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
     }
 
     public RType initBoolean(boolean ... e) {
-        if (e.length > 1) {
+        if (e.length >= 1) {
             return new Boolean(e[0]);
         }
         else {

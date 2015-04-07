@@ -31,6 +31,7 @@
 package org.resolvelite.codegen;
 
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.misc.FileLocator;
 import org.stringtemplate.v4.ST;
@@ -61,8 +62,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 compiler.info("generating code: " + unit.getName());
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
-                    System.out.println(x.render());
-                    gen.writeModuleFile(gen.generateModule());
+                    //System.out.println(x.render());
+                    gen.writeModuleFile(x);
                 }
                 for (String external : unit.imports
                         .getImportsOfType(ImportCollection.ImportType.EXTERNAL)) {
@@ -76,8 +77,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     Path destPath =
                             new File(outputDir.getName() + "/"
                                     + srcFile.getName()).toPath();
-                    Files.copy(srcPath, destPath,
-                            StandardCopyOption.REPLACE_EXISTING);
+                   Files.copy(srcPath, destPath,
+                           StandardCopyOption.REPLACE_EXISTING);
                 }
             }
             catch (IllegalStateException ise) {

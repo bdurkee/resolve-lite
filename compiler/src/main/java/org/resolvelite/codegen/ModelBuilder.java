@@ -89,10 +89,11 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        System.out.println("ProcedureOperationDecl: " + ctx.getText());
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
                         .operationParameterList().parameterDeclGroup(),
-                        ctx.variableDeclGroup());
+                        ctx.variableDeclGroup(), ctx.stmt());
         built.put(ctx, f);
     }
 
@@ -101,7 +102,7 @@ public class ModelBuilder extends ResolveBaseListener {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
                         .operationParameterList().parameterDeclGroup(),
-                        ctx.variableDeclGroup());
+                        ctx.variableDeclGroup(), ctx.stmt());
         f.implementsOper = true;
         f.stats.addAll(collectModelsFor(Stat.class, ctx.stmt(), built));
         built.put(ctx, f);
@@ -110,7 +111,8 @@ public class ModelBuilder extends ResolveBaseListener {
     protected FunctionImpl buildFunctionImpl(String name,
             ResolveParser.TypeContext type,
             List<ResolveParser.ParameterDeclGroupContext> formalGroupings,
-            List<ResolveParser.VariableDeclGroupContext> variableGroupings) {
+            List<ResolveParser.VariableDeclGroupContext> variableGroupings,
+            List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
@@ -121,6 +123,9 @@ public class ModelBuilder extends ResolveBaseListener {
         for (ResolveParser.VariableDeclGroupContext grp : variableGroupings) {
             f.vars.addAll(collectModelsFor(VariableDef.class, grp.Identifier(),
                     built));
+        }
+        for (ResolveParser.StmtContext s : stats) {
+            f.stats.addAll(collectModelsFor(Stat.class, stats, built));
         }
         return f;
     }
