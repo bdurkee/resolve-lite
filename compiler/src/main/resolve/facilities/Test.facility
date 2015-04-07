@@ -1,11 +1,10 @@
 Facility Test;
 
-    Operation Main();
-        Procedure
-            Var x: Std_Integer_Fac::Integer;
-    end Main;
-
     Type Baz = Record
+            Miz: Fiz;
+        end;
+
+    Type Fiz = Record
             Top: Std_Integer_Fac::Integer;
         end;
 end Test;

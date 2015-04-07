@@ -7,11 +7,14 @@ public class MemberRef extends Expr {
 
     @ModelElement public Expr child;
     public String typeName, typeQualifier;
-    public boolean isOutermost = false;
+    public boolean isBaseRef = false;
+    public boolean isLastRef = false;
+
     public MemberRef(String name, String typeName, String typeQualifier) {
         this.name = name;
         this.typeName = typeName;
         this.typeQualifier = typeQualifier;
+        this.isBaseRef = isBaseRef;
     }
 
     public MemberRef(String name, Type t) {

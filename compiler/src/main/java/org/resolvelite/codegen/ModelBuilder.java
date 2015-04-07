@@ -269,26 +269,27 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
+        //Todo..
         built.put(ctx,
                 new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
     }
 
     @Override public void exitProgMemberExp(
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
-        System.out.println("Processing member exp: " + ctx.getText());
-        MemberRef firstRef = new MemberRef(ctx.progNamedExp().getText(),
-                symtab.types.get(ctx.progNamedExp()));
         List<MemberRef> refs = ctx.Identifier()
                 .stream()
                 .map(t -> new MemberRef(t.getText(), symtab.types.get(t)))
                 .collect(Collectors.toList());
         Collections.reverse(refs);
+        refs.add(new MemberRef(ctx.progNamedExp().name.getText(),
+                symtab.types.get(ctx.progNamedExp())));
+
         for (int i = 0; i < refs.size(); i++) {
+            refs.get(i).isLastRef = i==0;
             if (i + 1 < refs.size()) {
                 refs.get(i).child = refs.get(i + 1);
             } else {
-                refs.get(i).isOutermost = true;
-                refs.get(i).child = firstRef;
+                refs.get(i).isBaseRef = true;
             }
         }
         built.put(ctx, refs.get(0));
@@ -401,14 +402,19 @@ public class ModelBuilder extends ResolveBaseListener {
             //symName might refer to something local, or something accessible
             //from an imported module...
             //NOTE: In the language's present state, it CANNOT be referring to
-            //to something brought in via a facility--they would've had to
+            //to something brought in via a facilitydecl--they would've had to
             //explicitly qualify if this were the case.
             if ( symQualifier == null ) {
                 Symbol s = moduleScope.resolve(null, symName.getText(), true);
                 NormalQualifier q;
                 if ( isLocallyAccessibleSymbol(s) ) {
                     //this.<symName>
-                    q = new NormalQualifier("this");
+                    if ( withinFacilityModule() ) {
+                        q = new NormalQualifier(moduleScope.getRootModuleID());
+                    }
+                    else {
+                        q = new NormalQualifier("this");
+                    }
                 }
                 else {
                     //Test_Fac.<symName>

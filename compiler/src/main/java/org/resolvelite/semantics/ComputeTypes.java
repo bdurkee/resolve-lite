@@ -122,7 +122,8 @@ public class ComputeTypes extends SetScopes {
                 return; //already typed (as is the case for record member refs.
             }
             TypedSymbol sym =
-                    (TypedSymbol) currentScope.resolve(null, ctx.name, true); //search adjacent modules for it if we don't find it in this one
+                    (TypedSymbol) currentScope.resolve(ctx.qualifier, ctx.name,
+                            true); //search adjacent modules for it if we don't find it in this one
             Type t = checkForInvalidType(sym.getType(), null);
             types.put(ctx, t);
         }

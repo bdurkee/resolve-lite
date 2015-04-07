@@ -234,8 +234,6 @@ procedureDecl
         'end' closename=Identifier ';'
     ;
 
-//todo: Procs.
-
 // facility decls
 
 facilityDecl
@@ -416,8 +414,7 @@ progParamExp
     ;
 
 progNamedExp
-   // :   (qualifier=Identifier '::')? name=Identifier
-    :   name=Identifier //for now, unqualified.
+    :   (qualifier=Identifier '::')? name=Identifier
     ;
 
 progLiteralExp
