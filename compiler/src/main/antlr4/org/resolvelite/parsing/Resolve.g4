@@ -154,6 +154,7 @@ stmt
     :   assignStmt
     |   swapStmt
     |   callStmt
+    |   whileStmt
     ;
 
 assignStmt
@@ -166,6 +167,15 @@ swapStmt
 
 callStmt
     :   progParamExp ';'
+    ;
+
+whileStmt
+    :   'While' progExp
+        (changingClause)?
+        (maintainingClause)?
+        (decreasingClause)? 'do'
+        (stmt)*
+        'end' ';'
     ;
 
 // type and record related rules
@@ -301,7 +311,7 @@ constraintClause
     ;
 
 changingClause
-    :   'changing' progExp (',' progExp)*
+    :   'changing' progExp (',' progExp)* ';'
     ;
 
 maintainingClause

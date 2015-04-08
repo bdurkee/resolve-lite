@@ -24,14 +24,14 @@ public class ConceptImplModule extends Module implements SpecImplModule {
     @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof ParameterSymbol) {
+            if ( s instanceof ParameterSymbol ) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 //Note that the variables representing these parameters
                 //do not have inits... they get assigned within ctor
                 //for this class (which is a separate model object)
                 memberVars.add(new VariableDef(s.getName(), null));
             }
-            else if ( s instanceof GenericSymbol) {
+            else if ( s instanceof GenericSymbol ) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));
             }

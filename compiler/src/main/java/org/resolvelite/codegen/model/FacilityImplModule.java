@@ -54,6 +54,5 @@ public class FacilityImplModule extends Module {
 
     //does nothing for impls. No module params or generics possible...
     @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
-            List<? extends Symbol> symbols) {
-    }
+            List<? extends Symbol> symbols) {}
 }

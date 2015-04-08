@@ -15,12 +15,13 @@ import org.resolvelite.semantics.symbol.*;
 
 import java.util.*;
 
-//Todo: This class should be refined so we're just storing the types of
-//exprs in the 'types' map. We'll have a separate pass for the math stuff eventually
-//(I'm thinking about it anyways).
+// Todo: This class should be refined so we're just storing the types of
+// exprs in the 'types' map. We'll have a separate pass for the math stuff
+// eventually
+// (I'm thinking about it anyways).
 public class ComputeTypes extends SetScopes {
 
-    ParseTreeProperty<Type> types;  //This should be used soley for exps.
+    ParseTreeProperty<Type> types; //This should be used soley for exps.
 
     public ComputeTypes(@NotNull ResolveCompiler compiler,
             @NotNull SymbolTable symtab) {
@@ -86,7 +87,8 @@ public class ComputeTypes extends SetScopes {
                 resultType =
                         new ProgTypeSymbol("Void", symtab,
                                 currentScope.getRootModuleID());
-            } else {
+            }
+            else {
                 resultType = resolveType(type.qualifier, type.name);
             }
             func.setType(resultType);
@@ -133,8 +135,8 @@ public class ComputeTypes extends SetScopes {
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, name, name.getText(),
-                    qualifier, nsse.getMessage());
+                    ErrorKind.NO_SUCH_SYMBOL, name, name.getText(), qualifier,
+                    nsse.getMessage());
             type = InvalidType.INSTANCE;
         }
         return type;

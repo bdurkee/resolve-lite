@@ -24,7 +24,7 @@ public class MethodCall extends Expr {
     }
 
     public MethodCall(TypeInit genericTypeInit) {
-        this(genericTypeInit.q, "get" + genericTypeInit.typeName,
-                Collections.emptyList());
+        this(genericTypeInit.q, "get" + genericTypeInit.typeName, Collections
+                .emptyList());
     }
 }

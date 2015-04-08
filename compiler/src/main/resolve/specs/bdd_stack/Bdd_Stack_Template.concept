@@ -8,6 +8,10 @@ Concept Bdd_Stack_Template<T>
 
     Operation Pop (replaces e: T; updates S: Stack);
 
+    Operation Rem_Capacity (restores S: Stack): Std_Integer_Fac::Integer;
+
     Operation Depth (restores S: Stack): Std_Integer_Fac::Integer;
+
+    Operation Clear(clears S: Stack);
 
 end Bdd_Stack_Template;

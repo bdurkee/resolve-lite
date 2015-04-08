@@ -40,6 +40,7 @@ import java.lang.reflect.*;
 fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 /**
  * Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>.
+ * This file should not be modified.
  */
 >>
 

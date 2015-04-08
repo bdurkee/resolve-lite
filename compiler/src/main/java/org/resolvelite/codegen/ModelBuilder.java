@@ -88,7 +88,6 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        System.out.println("ProcedureOperationDecl: " + ctx.getText());
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
                         .operationParameterList().parameterDeclGroup(),
@@ -126,9 +125,10 @@ public class ModelBuilder extends ResolveBaseListener {
             f.stats.add((Stat) built.get(s));
             //Resolve returns are buried in an assignment
             //(specifically those assignments whose lhs == funcname)
-            if (s.assignStmt() != null && s.assignStmt()
-                    .left.getText().equals(name) && f.hasReturn) {
-                Expr rhs = (Expr)built.get(s.assignStmt().right);
+            if ( s.assignStmt() != null
+                    && s.assignStmt().left.getText().equals(name)
+                    && f.hasReturn ) {
+                Expr rhs = (Expr) built.get(s.assignStmt().right);
                 f.vars.add(new VariableDef(name, rhs));
                 f.stats.add(new ReturnStat(name));
             }
@@ -328,8 +328,8 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
-            impl.addGetterMethodsAndVarsForParamsAndGenerics(
-                    conceptScope.getSymbols());
+            impl.addGetterMethodsAndVarsForParamsAndGenerics(conceptScope
+                    .getSymbols());
         }
         catch (NoSuchSymbolException nsse) {
             //Shouldn't happen, if it does, should've yelled about it in semantics

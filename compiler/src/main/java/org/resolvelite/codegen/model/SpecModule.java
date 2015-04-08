@@ -63,10 +63,10 @@ public abstract class SpecModule extends Module {
     @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof ParameterSymbol) {
+            if ( s instanceof ParameterSymbol ) {
                 funcImpls.add(buildGetterSignature(s.getName()));
             }
-            else if ( s instanceof GenericSymbol) {
+            else if ( s instanceof GenericSymbol ) {
                 funcImpls.add(buildGetterSignature(s.getName()));
             }
         }

@@ -1,0 +1,21 @@
+Facility Reverse_Stack;
+    Facility Stack_Fac is Bdd_Stack_Template
+        <Std_Integer_Fac::Integer>(1) implemented by Array_Impl;
+
+    Operation Read_Stack(replaces S: Stack_Fac::Stack);
+        Procedure
+            Var CS, RC: Std_Integer_Fac::Integer;
+            Stack_Fac::Clear(S);
+
+            RC := Stack_Fac::Rem_Capacity(S);
+            (*While (RC > 0)
+                changing CS, RC, S;
+                maintaining |S| = 1 - RC;
+                decreasing RC;
+            do
+                Read(CS);
+                Push(CS, S);
+                RC := Rem_Capacity(S);
+            end;*)
+    end Read_Stack;
+end Reverse_Stack;

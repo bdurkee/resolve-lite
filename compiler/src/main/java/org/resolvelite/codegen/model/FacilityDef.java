@@ -45,6 +45,5 @@ public class FacilityDef extends OutputModelObject {
     }
 
     public void addGettersForGenericsAndNamedVariableArguments(
-            List<? extends Symbol> symbols) {
-    }
+            List<? extends Symbol> symbols) {}
 }
