@@ -3,6 +3,8 @@ package org.resolvelite.semantics.symbol;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.Type;
 
+import java.util.Map;
+
 public abstract class BaseSymbol implements Symbol {
 
     public enum Quantification {
@@ -68,6 +70,11 @@ public abstract class BaseSymbol implements Symbol {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    @Override public Symbol substituteGenerics(
+            Map<GenericSymbol, Type> genericSubstitutions) {
+        return this;
     }
 
     @Override public boolean equals(Object obj) {

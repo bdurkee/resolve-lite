@@ -187,6 +187,11 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, types.get(ctx.progParamExp()));
     }
 
+    @Override public void exitWhileStmt(
+            @NotNull ResolveParser.WhileStmtContext ctx) {
+
+    }
+
     protected Type checkTypes(@NotNull ParserRuleContext parent,
             @NotNull ResolveParser.ProgExpContext t1,
             @NotNull ResolveParser.ProgExpContext t2) {
@@ -212,6 +217,7 @@ public class ComputeTypes extends SetScopes {
                                 .getClass().getSimpleName());
                 types.put(ctx, InvalidType.INSTANCE);
             }
+            System.out.println("HERE: " + ctx.getText());
             Type foundType = checkCallArgs((FunctionSymbol) s, ctx);
             types.put(ctx, foundType);
         }

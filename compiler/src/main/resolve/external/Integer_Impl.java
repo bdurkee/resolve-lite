@@ -1,6 +1,8 @@
 import org.resolvelite.runtime.*;
 import java.lang.reflect.*;
 
+import java.util.Scanner;
+
 public class Integer_Impl extends ResolveBase implements Integer_Template {
 
     public class Integer implements Integer_Template.Integer {
@@ -72,5 +74,10 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
     public RType Greater(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE
                 .initBoolean(((Integer) i1).rep.val > ((Integer) i2).rep.val);
+    }
+
+    public void Read(RType e) {
+        Scanner sc = new Scanner(System.in);
+        ((Integer)e).rep.val = sc.nextInt();
     }
 }

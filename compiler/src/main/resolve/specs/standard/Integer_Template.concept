@@ -13,4 +13,6 @@ Concept Integer_Template;
 
     Operation Greater (evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
 
+    Operation Read (replaces i: Integer);
+
 end Integer_Template;

@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.semantics.DuplicateSymbolException;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.semantics.Type;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,4 +56,8 @@ public class RecordReprSymbol extends AbstractReprSymbol {
         return (List<VariableSymbol>) super.getSymbols();
     }
 
+    @Override public Symbol substituteGenerics(
+            Map<GenericSymbol, Type> genericSubstitutions) {
+        return this;
+    }
 }

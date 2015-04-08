@@ -53,25 +53,25 @@ public class Ceramic_Array_Impl extends ResolveBase
 
     public Ceramic_Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
         this.type = type;
-        this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).rep.content;
-        this.upperBound = ((Integer_Impl.Integer)Upper_Bound).rep.content;
+        this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).rep.val;
+        this.upperBound = ((Integer_Impl.Integer)Upper_Bound).rep.val;
     }
 
     @Override public void Swap_Element(RType A, RType e, RType i) {
-        int adj = ((Integer_Impl.Integer)i).rep.content - lowerBound;
+        int adj = ((Integer_Impl.Integer)i).rep.val - lowerBound;
         RType[] temp1 = ((Array_Rep)A.getRep()).content;
         swap(e, temp1[adj]);
     }
 
     @Override public void Swap_Two_Elements(RType A, RType i, RType j) {
-        int adjI = ((Integer_Impl.Integer)i).rep.content - lowerBound;
-        int adjJ = ((Integer_Impl.Integer)j).rep.content - lowerBound;
+        int adjI = ((Integer_Impl.Integer)i).rep.val - lowerBound;
+        int adjJ = ((Integer_Impl.Integer)j).rep.val - lowerBound;
         RType[] temp1 = ((Array_Rep)A.getRep()).content;
         swap(temp1[adjI], temp1[adjJ]);
     }
 
     @Override public void Assign_Element(RType A, RType e, RType i) {
-        int adjI = ((Integer_Impl.Integer)i).rep.content - lowerBound;
+        int adjI = ((Integer_Impl.Integer)i).rep.val - lowerBound;
         RType[] temp1 = ((Array_Rep)A.getRep()).content;
         assign(temp1[adjI], e);
     }

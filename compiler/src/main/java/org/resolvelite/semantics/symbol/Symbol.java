@@ -1,6 +1,9 @@
 package org.resolvelite.semantics.symbol;
 
 import org.resolvelite.semantics.Scope;
+import org.resolvelite.semantics.Type;
+
+import java.util.Map;
 
 // Todo: Add a getRootModuleID() method (right now only SymbolsWithScope get
 // this
@@ -21,6 +24,6 @@ public interface Symbol {
 
     boolean equals(Object o);
 
-    //todo: this should be changed to ProgTypeSymbol in the future once we kill
-    //the hardcoded defs of Integer and Boolean.
+    public Symbol substituteGenerics(
+            Map<GenericSymbol, Type> genericSubstitutions);
 }

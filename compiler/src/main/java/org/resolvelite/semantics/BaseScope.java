@@ -4,10 +4,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.resolvelite.misc.Utils;
-import org.resolvelite.semantics.symbol.FacilitySymbol;
-import org.resolvelite.semantics.symbol.ParameterSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
-import org.resolvelite.semantics.symbol.TypedSymbol;
+import org.resolvelite.semantics.symbol.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -95,17 +92,6 @@ public abstract class BaseScope implements Scope {
         throw new NoSuchSymbolException();
     }
 
-    /*@Override public Symbol resolve(String name) throws NoSuchSymbolException {
-        Symbol s = symbols.get(name);
-        if ( s != null ) {
-            //System.out.println("found "+name+" in "+this.asScopeStackString());
-            return s;
-        }
-        Scope parent = getParentScope();
-        if ( parent != null ) return parent.resolve(name);
-        throw new NoSuchSymbolException(name);
-    }*/
-
     protected Symbol qualifiedSearch(String qualifier, String name,
             boolean searchImports) throws NoSuchSymbolException {
         FacilitySymbol referencedFacility = null;
@@ -135,25 +121,22 @@ public abstract class BaseScope implements Scope {
             }
         }
         if ( referencedFacility == null ) {
-            //ok maybe our qualifier is just referencing a named
-            //(imported) module.
-            //  if (scopeRepo.getModuleScope(this.getRootModuleID())
-            //         .getImports().contains(qualifier)) {
-
             //Todo: if the qualifier isn't in the list of module imports,
             //then we technically shouldn't grab the modulescope for it.
             return scopeRepo.getModuleScope(qualifier).resolve(null, name,
                     false);
-            //  }
-            //  else {
-            //      throw new NoSuchSymbolException();
-            //  }
         }
         else {
             //we've found the referenced facility, let's search it to see if we
             //can find the requested symbol, 'name'.
-            return scopeRepo.getModuleScope(referencedFacility.getSpecName())
-                    .resolve(null, name, false);
+            //Let's also instantiate any generics when doing so...
+            referencedFacility.getModuleScopeWithGenericsSubstituted().resolve()
+            Symbol result =
+                    scopeRepo.getModuleScope(referencedFacility.getSpecName())
+                            .resolve(null, name, false);
+            return result.substituteGenerics(referencedFacility
+                    .getGenericSubstitutions());
+            //returns a version of the Symbol with any generics substituted.
         }
     }
 

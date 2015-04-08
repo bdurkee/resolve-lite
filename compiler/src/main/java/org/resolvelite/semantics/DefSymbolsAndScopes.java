@@ -80,7 +80,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         try {
             currentScope.define(new FacilitySymbol(ctx.name.getText(), ctx.spec
                     .getText(), ctx.impl.getText(), currentScope
-                    .getRootModuleID()));
+                    .getRootModuleID(), symtab));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

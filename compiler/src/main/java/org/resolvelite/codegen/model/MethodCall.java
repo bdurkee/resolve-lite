@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class is different (and neccessary) even though we already have an
+ * {@link CallStat} class. This is intended to represent calls appearing within
+ * the context of an arbitrary expression and are not required
+ * Wheras
+ */
 public class MethodCall extends Expr {
     public String name;
     @ModelElement public List<Expr> args = new ArrayList<>();

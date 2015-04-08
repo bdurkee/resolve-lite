@@ -31,12 +31,10 @@
 
 Facility Integer_Exchange;
 
-    Operation Exchange(updates I, J: Integer);
-            requires Std_Integer_Fac::Min_Int <= I + J and
-                     I + J <= Std_Integer_Fac::Max_Int;
+    Operation Exchange(updates I, J: Std_Integer_Fac::Integer);
             ensures J = @I and I = @J;
         Procedure
-            Var Temp: Integer;
+            Var Temp: Std_Integer_Fac::Integer;
     end Exchange;
 
 end Integer_Exchange;

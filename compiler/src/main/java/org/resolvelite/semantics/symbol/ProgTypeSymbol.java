@@ -1,7 +1,10 @@
 package org.resolvelite.semantics.symbol;
 
+import org.resolvelite.semantics.DuplicateSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.Type;
+
+import java.util.Map;
 
 public class ProgTypeSymbol extends SymbolWithScope implements Type {
 
@@ -10,4 +13,8 @@ public class ProgTypeSymbol extends SymbolWithScope implements Type {
         super(name, scopeRepo, rootModuleID);
     }
 
+    @Override public Symbol substituteGenerics(
+            Map<GenericSymbol, Type> genericSubstitutions) {
+        return this;
+    }
 }
