@@ -14,7 +14,8 @@ Implementation Array_Impl for Bdd_Stack_Template;
     end Push;
 
     Procedure Pop (replaces e: T; updates S: Stack);
-
+        Array_Fac::Swap_Element(S.Contents, e, S.Top);
+        S.Top := Std_Integer_Fac::Difference(S.Top, 1);
     end Pop;
 
     Procedure Depth (restores S: Stack): Std_Integer_Fac::Integer;

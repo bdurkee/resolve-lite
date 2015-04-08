@@ -55,11 +55,17 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
     }
 
     public RType Is_Zero(RType i) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i).rep.content == 0);
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i)
+                .rep.content == 0);
     }
 
     public RType Sum(RType i1, RType i2) {
         return new Integer(((Integer_Impl.Integer)i1).rep.content +
+                ((Integer_Impl.Integer)i2).rep.content);
+    }
+
+    public RType Difference(RType i1, RType i2) {
+        return new Integer(((Integer_Impl.Integer)i1).rep.content -
                 ((Integer_Impl.Integer)i2).rep.content);
     }
 }

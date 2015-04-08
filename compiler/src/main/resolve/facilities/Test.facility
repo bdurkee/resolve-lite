@@ -9,6 +9,8 @@ Facility Test;
         end;
 
     Operation Main();
+        requires true;
+        ensures false;
         Procedure
             Var X: Baz;
             X.Miz.Top := 3;

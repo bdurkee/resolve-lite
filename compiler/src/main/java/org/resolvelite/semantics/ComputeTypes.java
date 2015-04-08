@@ -153,7 +153,6 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
-            System.out.println("NAMEDEXP: " + ctx.getText());
             if ( types.get(ctx) != null ) {
                 return; //already typed (as is the case for record member refs.
             }

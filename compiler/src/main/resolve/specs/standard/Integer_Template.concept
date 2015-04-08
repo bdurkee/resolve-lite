@@ -4,9 +4,11 @@ Concept Integer_Template;
         exemplar I;
         initialization ensures I = 0;
 
-    Operation Is_Zero (evaluates I: Integer): Std_Boolean_Fac::Boolean;
+    Operation Is_Zero (evaluates i: Integer): Std_Boolean_Fac::Boolean;
         ensures Is_Zero = (i = 0);
 
-    Operation Sum (evaluates I, J: Integer): Integer;
+    Operation Sum (evaluates i, j: Integer): Integer;
+
+    Operation Difference (evaluates i, j: Integer): Integer;
 
 end Integer_Template;

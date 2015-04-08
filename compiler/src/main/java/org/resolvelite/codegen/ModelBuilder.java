@@ -128,7 +128,9 @@ public class ModelBuilder extends ResolveBaseListener {
             //(specifically those assignments whose lhs == funcname)
             if (s.assignStmt() != null && s.assignStmt()
                     .left.getText().equals(name) && f.hasReturn) {
-                f.vars.add(new VariableDef(name, null));
+                Expr rhs = (Expr)built.get(s.assignStmt().right);
+                f.vars.add(new VariableDef(name, rhs));
+                f.stats.add(new ReturnStat(name));
             }
         }
         return f;
