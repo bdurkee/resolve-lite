@@ -2,6 +2,7 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.semantics.Scope;
+import org.resolvelite.semantics.Type;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,6 +82,21 @@ public class ParameterSymbol extends BaseSymbol implements TypedSymbol {
             Scope enclosingScope, String rootModuleID) {
         super(enclosingScope, name, rootModuleID);
         this.mode = mode;
+    }
+
+    @Override public Symbol substituteGenerics(
+            Map<GenericSymbol, Type> genericSubstitutions,
+            Scope scopeWithSubstitutions) {
+        ParameterSymbol p =
+                new ParameterSymbol(name, mode, scopeWithSubstitutions,
+                        rootModuleID);
+        if ( getType() instanceof GenericSymbol ) {
+            p.setType(genericSubstitutions.get(getType()));
+        }
+        else {
+            p.setType(this.getType()); //else make it the original type.
+        }
+        return p;
     }
 
     @NotNull public ParameterMode getMode() {

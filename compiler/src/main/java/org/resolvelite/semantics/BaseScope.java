@@ -130,13 +130,14 @@ public abstract class BaseScope implements Scope {
             //we've found the referenced facility, let's search it to see if we
             //can find the requested symbol, 'name'.
             //Let's also instantiate any generics when doing so...
-            referencedFacility.getModuleScopeWithGenericsSubstituted().resolve()
-            Symbol result =
-                    scopeRepo.getModuleScope(referencedFacility.getSpecName())
-                            .resolve(null, name, false);
-            return result.substituteGenerics(referencedFacility
-                    .getGenericSubstitutions());
-            //returns a version of the Symbol with any generics substituted.
+
+            return referencedFacility.getModuleScopeWithGenericsSubstituted()
+                    .resolve(null, name, false);
+            /*  Symbol result =
+                      scopeRepo.getModuleScope(referencedFacility.getSpecName())
+                              .resolve(null, name, false);
+              return result.substituteGenerics(referencedFacility
+                      .getGenericSubstitutions());*/
         }
     }
 

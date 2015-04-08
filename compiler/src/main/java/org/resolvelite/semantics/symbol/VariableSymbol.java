@@ -2,6 +2,8 @@ package org.resolvelite.semantics.symbol;
 
 import org.resolvelite.semantics.Scope;
 
+import java.util.List;
+
 public class VariableSymbol extends BaseSymbol implements TypedSymbol {
 
     public VariableSymbol(String name, Scope enclosingScope, String rootModuleID) {

@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.resolvelite.semantics.DuplicateSymbolException;
+import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.Type;
 
@@ -14,7 +15,8 @@ public class ProgTypeSymbol extends SymbolWithScope implements Type {
     }
 
     @Override public Symbol substituteGenerics(
-            Map<GenericSymbol, Type> genericSubstitutions) {
+            Map<GenericSymbol, Type> genericSubstitutions,
+            Scope enclosingSubstitutionScope) {
         return this;
     }
 }

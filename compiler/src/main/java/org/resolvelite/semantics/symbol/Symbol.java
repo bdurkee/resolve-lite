@@ -25,5 +25,6 @@ public interface Symbol {
     boolean equals(Object o);
 
     public Symbol substituteGenerics(
-            Map<GenericSymbol, Type> genericSubstitutions);
+            Map<GenericSymbol, Type> genericSubstitutions,
+            Scope scopeWithSubstitutions);
 }

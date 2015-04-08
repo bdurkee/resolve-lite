@@ -1,10 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.resolvelite.semantics.DuplicateSymbolException;
-import org.resolvelite.semantics.NoSuchSymbolException;
-import org.resolvelite.semantics.SymbolTable;
-import org.resolvelite.semantics.Type;
+import org.resolvelite.semantics.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +32,9 @@ public class RecordReprSymbol extends AbstractReprSymbol {
 
     /**
      * Resolves a reference to an {@link VariableSymbol} living within this
-     * record. We don't use {@link #resolve(String)} since we don't want to
-     * search for member references up the scope hierarchy---only here.
+     * record. We don't use the normal resolve methods defined in
+     * {@link BaseScope} since we don't want to search for member references
+     * up the scope hierarchy---only here.
      * 
      * @param name The member referenced
      * @return The {@link VariableSymbol} referenced by <code>name</code>.
@@ -57,7 +55,8 @@ public class RecordReprSymbol extends AbstractReprSymbol {
     }
 
     @Override public Symbol substituteGenerics(
-            Map<GenericSymbol, Type> genericSubstitutions) {
+            Map<GenericSymbol, Type> genericSubstitutions,
+            Scope enclosingSubstitutionScope) {
         return this;
     }
 }

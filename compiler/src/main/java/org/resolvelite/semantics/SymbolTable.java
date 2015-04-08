@@ -16,6 +16,8 @@ public class SymbolTable {
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
 
+    public static boolean definitionPhaseComplete = false;
+
     private final ResolveCompiler compiler;
     private final TypeGraph typeGraph;
     private final PredefinedScope globalScope;
@@ -26,6 +28,10 @@ public class SymbolTable {
         this.globalScope = new PredefinedScope(this);
         initMathTypeSystem();
         initProgramTypeSystem();
+    }
+
+    public static void seal() {
+        definitionPhaseComplete = true;
     }
 
     private void initProgramTypeSystem() {

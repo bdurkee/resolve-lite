@@ -73,7 +73,8 @@ public abstract class BaseSymbol implements Symbol {
     }
 
     @Override public Symbol substituteGenerics(
-            Map<GenericSymbol, Type> genericSubstitutions) {
+            Map<GenericSymbol, Type> genericSubstitutions,
+            Scope scopeWithSubstitutions) {
         return this;
     }
 

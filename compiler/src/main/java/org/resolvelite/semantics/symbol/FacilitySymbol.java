@@ -3,22 +3,18 @@ package org.resolvelite.semantics.symbol;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FacilitySymbol extends BaseSymbol {
-
-    private final Map<GenericSymbol, Type> genericSubstitutes = new HashMap<>();
     private final String specName, implName;
     private final SymbolTable symtab;
     private final List<ResolveParser.TypeContext> actualGenerics =
             new ArrayList<>();
 
     public FacilitySymbol(String name, String specName, String implName,
-            String rootModuleID, List<ResolveParser.TypeContext> actualGenerics,
-            SymbolTable symtab) {
+            String rootModuleID,
+            List<ResolveParser.TypeContext> actualGenerics, SymbolTable symtab) {
         super(name, rootModuleID);
         this.specName = specName;
         this.implName = implName;
@@ -27,41 +23,39 @@ public class FacilitySymbol extends BaseSymbol {
     }
 
     public ModuleScope getModuleScopeWithGenericsSubstituted() {
+        ModuleScope specScope = null;
+       /* if (!symtab.definitionPhaseComplete) {
+            throw new IllegalStateException("Can't instantiate generics before "
+                    + "the symbol definition phase is complete");
+        }*/
         try {
-            ModuleScope specScope = symtab.getModuleScope(specName);
-            List<GenericSymbol> formalGenerics =
-                    specScope.getSymbolsOfType(GenericSymbol.class);
-
+            specScope = symtab.getModuleScope(specName);
+            Iterator<GenericSymbol> formalGenerics =
+                    specScope.getSymbolsOfType(GenericSymbol.class).iterator();
+            Iterator<Type> actualTypeIter = actualGenerics.stream()
+                    .map(symtab.types::get).collect(Collectors.toList()).iterator();
+            Map<GenericSymbol, Type> genericSubstitutions = new HashMap<>();
+            while (actualTypeIter.hasNext()) {
+                genericSubstitutions.put(formalGenerics.next(),
+                        actualTypeIter.next());
+            }
             ModuleScope specScopeWithGenericsSubstituted =
                     new ModuleScope(symtab.getGlobalScope(), symtab,
                             specScope.getWrappedModuleTree());
-            for (ParameterSymbol p :
-                    specScope.getSymbolsOfType(ParameterSymbol.class)) {
+
+            for (Symbol s : specScope.getSymbols()) {
                 try {
-                    specScope.define()
+                    specScopeWithGenericsSubstituted.define(
+                            s.substituteGenerics(genericSubstitutions,
+                                    specScopeWithGenericsSubstituted));
                 } catch (DuplicateSymbolException dse) {
                     //shouldn't happen, working with a fresh scope.
                 }
             }
         }
         catch (NoSuchSymbolException nsse) {
-
         }
-    }
-
-    public Map<GenericSymbol, Type> getGenericSubstitutions() {
-        //first, get the scope of the specification
-        try {
-            ModuleScope specScope = symtab.getModuleScope(specName);
-            List<GenericSymbol> formalGenerics =
-                    specScope.getSymbolsOfType(GenericSymbol.class);
-
-            List<ResolveParser.TypeContext>
-        }
-        catch (NoSuchSymbolException nsse) {
-
-        }
-        return genericSubstitutes;
+        return specScope;
     }
 
     public String getSpecName() {
