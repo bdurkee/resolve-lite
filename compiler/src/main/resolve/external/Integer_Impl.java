@@ -32,16 +32,16 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
         }
     }
     class Integer_Rep {
-        int content;
+        int val;
         Integer_Rep() {
-            content = 0;
+            val = 0;
         }
         Integer_Rep(int i) {
-            content = i;
+            val = i;
         }
 
         @Override public String toString() {
-            return String.valueOf(content);
+            return String.valueOf(val);
         }
     }
 
@@ -56,16 +56,21 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
 
     public RType Is_Zero(RType i) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i)
-                .rep.content == 0);
+                .rep.val == 0);
     }
 
     public RType Sum(RType i1, RType i2) {
-        return new Integer(((Integer_Impl.Integer)i1).rep.content +
-                ((Integer_Impl.Integer)i2).rep.content);
+        return new Integer(((Integer)i1).rep.val +
+                ((Integer)i2).rep.val);
     }
 
     public RType Difference(RType i1, RType i2) {
-        return new Integer(((Integer_Impl.Integer)i1).rep.content -
-                ((Integer_Impl.Integer)i2).rep.content);
+        return new Integer(((Integer)i1).rep.val -
+                ((Integer)i2).rep.val);
+    }
+
+    public RType Greater(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE
+                .initBoolean(((Integer) i1).rep.val > ((Integer) i2).rep.val);
     }
 }

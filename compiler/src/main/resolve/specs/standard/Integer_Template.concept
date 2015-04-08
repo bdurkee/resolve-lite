@@ -11,4 +11,6 @@ Concept Integer_Template;
 
     Operation Difference (evaluates i, j: Integer): Integer;
 
+    Operation Greater (evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
 end Integer_Template;

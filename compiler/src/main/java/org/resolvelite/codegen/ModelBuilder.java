@@ -46,6 +46,7 @@ import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
@@ -149,8 +150,20 @@ public class ModelBuilder extends ResolveBaseListener {
 
         List<TypeInit> generics =
                 collectModelsFor(TypeInit.class, ctx.type(), built);
+        for (ResolveParser.TypeContext t : ctx.type()) {
+            try {
+                Symbol s = moduleScope.resolve(t.qualifier, t.name, true);
+                if ( s instanceof GenericSymbol ) {
+                    basePtr.args.add(new MethodCall((TypeInit) built.get(t)));
+                }
+                else {
+                    basePtr.args.add((TypeInit) built.get(t));
+                }
+            }
+            catch (NoSuchSymbolException nsse) {}
+        }
         for (TypeInit genericTypeInit : generics) {
-            basePtr.args.add(new MethodCall(genericTypeInit));
+
         }
         List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
@@ -256,6 +269,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitCallStmt(
             @NotNull ResolveParser.CallStmtContext ctx) {
         built.put(ctx, new CallStat((MethodCall) built.get(ctx.progParamExp())));
+    }
+
+    @Override public void exitWhileStmt(
+            @NotNull ResolveParser.WhileStmtContext ctx) {
+        WhileStat w = new WhileStat((Expr) built.get(ctx.progExp()));
+        w.stats.addAll(collectModelsFor(Stat.class, ctx.stmt(), built));
+        built.put(ctx, w);
     }
 
     @Override public void exitProgPrimaryExp(

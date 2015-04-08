@@ -75,7 +75,7 @@ public class <impl.name> {
 >>
 
 CtorDef(ctor, facMems) ::= <<
-public <ctor.name>() {
+public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
     <ctor.members: {c|this.<c> = <c>;}; separator="\n">
     <facMems: {f|this.<f.facility.name> = <f.root>;}; separator="\n">
 }
@@ -164,6 +164,12 @@ public<if(clazz.isStatic)> static<endif> RType get<clazz.name>() {
 CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 
 ReturnStat(ret) ::= "return <ret.name>;"
+
+WhileStat(while, cond, stats) ::= <<
+while (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
+    <stats; separator="\n">
+}
+>>
 
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 

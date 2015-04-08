@@ -4,23 +4,22 @@ import java.lang.reflect.*;
 public class Boolean_Impl extends ResolveBase implements Boolean_Template{
 
     public class Boolean implements Boolean_Template.Boolean {
-        public boolean val;
+        public Boolean_Rep rep;
 
         Boolean() {
-            val = true;
+            rep = new Boolean_Rep();
         }
 
-        Boolean(boolean b) {
-            val = b;
+        Boolean(boolean i) {
+            rep = new Boolean_Rep(i);
         }
 
-        // getRep is special case, this will never be called
         public Object getRep() {
             return this;
         }
 
-        // setRep is special case, this will never be called
         public void setRep(Object o) {
+            rep = (Boolean_Rep)o;
         }
 
         public RType initialValue() {
@@ -28,12 +27,24 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
         }
 
         public String toString() {
-            return new java.lang.Boolean(val).toString();
+            return rep.toString();
+        }
+    }
+    class Boolean_Rep {
+        boolean val;
+        Boolean_Rep() {
+            val = true;
+        }
+        Boolean_Rep(boolean e) {
+            val = e;
+        }
+        @Override public String toString() {
+            return String.valueOf(val);
         }
     }
 
     public RType replica(RType b) {
-        return new Boolean(((Boolean_Impl.Boolean)b).val);
+        return new Boolean(((Boolean)b).rep.val);
     }
 
     public RType initBoolean(boolean ... e) {
@@ -46,13 +57,11 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
     }
 
     public RType And(RType b1, RType b2) {
-        return new Boolean(((Boolean_Impl.Boolean)b1).val &&
-                ((Boolean_Impl.Boolean)b2).val);
+        return new Boolean(((Boolean)b1).rep.val && ((Boolean)b2).rep.val);
     }
 
     public RType Or(RType b1, RType b2) {
-        return new Boolean(((Boolean_Impl.Boolean)b1).val ||
-                ((Boolean_Impl.Boolean)b2).val);
+        return new Boolean(((Boolean)b1).rep.val || ((Boolean)b2).rep.val);
     }
 
     public RType True() {
