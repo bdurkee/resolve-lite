@@ -77,8 +77,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     Path destPath =
                             new File(outputDir.getName() + "/"
                                     + srcFile.getName()).toPath();
-                   Files.copy(srcPath, destPath,
-                           StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(srcPath, destPath,
+                            StandardCopyOption.REPLACE_EXISTING);
                 }
             }
             catch (IllegalStateException ise) {

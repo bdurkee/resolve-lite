@@ -104,7 +104,6 @@ public class ModelBuilder extends ResolveBaseListener {
                         .operationParameterList().parameterDeclGroup(),
                         ctx.variableDeclGroup(), ctx.stmt());
         f.implementsOper = true;
-        f.stats.addAll(collectModelsFor(Stat.class, ctx.stmt(), built));
         built.put(ctx, f);
     }
 
@@ -125,7 +124,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     built));
         }
         for (ResolveParser.StmtContext s : stats) {
-            f.stats.addAll(collectModelsFor(Stat.class, stats, built));
+            f.stats.add((Stat)built.get(s));
         }
         return f;
     }
