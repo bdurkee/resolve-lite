@@ -83,7 +83,7 @@ public <ctor.name>() {
 TypeInterfaceDef(type) ::= <<
 interface <type.name> extends RType { }
 public RType init<type.name>(<\\>
-<if(toPrimitive.(type.name))><toPrimitive.(type.name)>... e<endif>);
+<if(toJavaPrimitive.(type.name))><toJavaPrimitive.(type.name)>... e<endif>);
 >>
 
 ParameterDef(param) ::= "RType <param.name>"
@@ -103,14 +103,12 @@ public <if(func.isStatic)>static <endif><\\>
 <func.name>(<params; separator=", ">) {
     <vars; separator="\n">
     <stats; separator="\n">
-    //Todo: add a return stat node to the model hierarchy.
-    <if(func.hasReturn)>return null;//temp<endif>
 }
 >>
 
 FacilityDef(facility, root) ::= <<
 public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
-<if(stdFacQualMap.(facility.name))>INSTANCE<else><facility.name><endif> =
+<if(toStdFacilityName.(facility.name))>INSTANCE<else><facility.name><endif> =
     <root>;
 >>
 
@@ -164,6 +162,8 @@ public<if(clazz.isStatic)> static<endif> RType get<clazz.name>() {
 
 CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
 
+ReturnStat(ret) ::= "return <ret.name>;"
+
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 
 VarNameRef(v) ::= "<v.name>"
@@ -178,23 +178,20 @@ MemberRef(ref, child) ::= <%
 <endif>
 %>
 
-MemberClassDefinedTypeInit(init) ::= <%
-<if(init.moduleQualifier)><init.moduleQualifier>.<endif>init<init.typeName>()%>
-
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.facilitySpecName>)<if(stdFacQualMap.(q.facilityName))>
-<stdFacQualMap.(q.facilityName)><else><q.facilityName><endif>)%>
+((<q.facilitySpecName>)<if(toStdFacilityName.(q.facilityName))>
+<toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
 
 NormalQualifier(q) ::= "<q.name>"
 
-toPrimitive ::= [
+toJavaPrimitive ::= [
     "Boolean":"boolean",
     "Integer":"int"
 ]
 
-stdFacQualMap ::= [
+toStdFacilityName ::= [
     "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",
     "Std_Integer_Fac":"Standard_Integers.INSTANCE"
 ]

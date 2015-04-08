@@ -30,6 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.Symbol;
+
+import java.util.List;
+
 public class FacilityDef extends OutputModelObject {
     public boolean isStatic = false;
     public String name, concept;
@@ -40,4 +44,7 @@ public class FacilityDef extends OutputModelObject {
         this.concept = concept;
     }
 
+    public void addGettersForGenericsAndNamedVariableArguments(
+            List<? extends Symbol> symbols) {
+    }
 }

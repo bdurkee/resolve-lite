@@ -45,7 +45,6 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
-import org.resolvelite.semantics.Type;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
@@ -124,7 +123,13 @@ public class ModelBuilder extends ResolveBaseListener {
                     built));
         }
         for (ResolveParser.StmtContext s : stats) {
-            f.stats.add((Stat)built.get(s));
+            f.stats.add((Stat) built.get(s));
+            //Resolve returns are buried in an assignment
+            //(specifically those assignments whose lhs == funcname)
+            if (s.assignStmt() != null && s.assignStmt()
+                    .left.getText().equals(name) && f.hasReturn) {
+                f.vars.add(new VariableDef(name, null));
+            }
         }
         return f;
     }
@@ -140,12 +145,14 @@ public class ModelBuilder extends ResolveBaseListener {
                         ctx.impl.getText());
         basePtr.isProxied = false;
 
-        List<Expr> generics = collectModelsFor(Expr.class, ctx.type(), built);
+        List<TypeInit> generics =
+                collectModelsFor(TypeInit.class, ctx.type(), built);
+        for (TypeInit genericTypeInit : generics) {
+            basePtr.args.add(new MethodCall(genericTypeInit));
+        }
         List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
                         Expr.class, ctx.specArgs.moduleArgument(), built);
-
-        basePtr.args.addAll(generics);
         basePtr.args.addAll(specArgs);
 
         for (ResolveParser.EnhancementPairDeclContext pair : ctx
@@ -193,14 +200,6 @@ public class ModelBuilder extends ResolveBaseListener {
                 ctx.name.getText(), ""));
     }
 
-    public boolean isLocallyAccessibleSymbol(Symbol s)
-            throws NoSuchSymbolException {
-        ModuleScope module = symtab.getModuleScope(s.getRootModuleID());
-
-        return (moduleScope.getRootModuleID().equals(s.getRootModuleID()) || module
-                .getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);
-    }
-
     @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         MemberClassDef representationClass =
@@ -230,6 +229,9 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
         Expr e = (Expr) built.get(ctx.progExp());
+        //Todo: Because in most contexts the generics specializing a facility decl
+        //need to be turned into getter calls, I would just add (like ConceptImpl)
+        //a dedicated adder method to build and add these getters...
         if ( e instanceof VarNameRef ) e = new MethodCall((VarNameRef) e);
         //Todo: operations n' shit will eventually go here.
         built.put(ctx, e);
@@ -273,7 +275,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
-        //Todo..
+        //Todo: this ... isn't right yet..
         built.put(ctx,
                 new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
     }
@@ -324,10 +326,11 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
-            impl.convertAndAddSymsFromConcept(conceptScope.getSymbols());
+            impl.addGetterMethodsAndVarsForParamsAndGenerics(
+                    conceptScope.getSymbols());
         }
         catch (NoSuchSymbolException nsse) {
-            //Shouldn't happen, if it does, should've yelled it in semantics
+            //Shouldn't happen, if it does, should've yelled about it in semantics
             gen.compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.concept, ctx.concept.getText());
         }
@@ -365,6 +368,7 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
+        spec.addGetterMethodsAndVarsForParamsAndGenerics(moduleScope.getSymbols());
         spec.funcs.addAll(ctx.genericType().stream().map(FunctionDef::new)
                 .collect(Collectors.toList()));
         spec.funcs.addAll(moduleScope.getSymbolsOfType(ParameterSymbol.class)
@@ -386,9 +390,17 @@ public class ModelBuilder extends ResolveBaseListener {
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    public boolean withinFacilityModule() {
+    protected boolean withinFacilityModule() {
         ParseTree t = gen.getModule().getRoot();
         return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
+    }
+
+    protected boolean isLocallyAccessibleSymbol(Symbol s)
+            throws NoSuchSymbolException {
+        ModuleScope module = symtab.getModuleScope(s.getRootModuleID());
+
+        return (moduleScope.getRootModuleID().equals(s.getRootModuleID()) || module
+                .getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);
     }
 
     protected CallStat buildPrimitiveInfixStat(@NotNull String name,

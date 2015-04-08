@@ -42,12 +42,4 @@ public class VariableDef extends OutputModelObject {
         this.init = init;
     }
 
-    public VariableDef(ParameterSymbol s) {
-        this(s.getName(), null);
-    }
-
-    public VariableDef(GenericSymbol s) {
-        this(s.getName(), null);
-    }
-
 }

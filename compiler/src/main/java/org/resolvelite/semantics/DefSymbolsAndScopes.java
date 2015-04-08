@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
+    //Todo should symbols representing decls get typed here in this pass?
+
     Scope currentScope; // define symbols in this scope
     ResolveCompiler compiler;
     SymbolTable symtab;

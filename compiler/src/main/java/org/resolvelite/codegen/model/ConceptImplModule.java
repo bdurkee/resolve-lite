@@ -1,5 +1,9 @@
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+import org.resolvelite.semantics.symbol.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +17,32 @@ public class ConceptImplModule extends Module implements SpecImplModule {
         this.concept = concept;
     }
 
-    public void addCtor() {
+    @Override public void addCtor() {
         this.ctor = new CtorDef(this.name, facilityVars, memberVars);
+    }
+
+    @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
+            List<? extends Symbol> symbols) {
+        for (Symbol s : symbols) {
+            if ( s instanceof ParameterSymbol) {
+                funcImpls.add(buildGetterMethod(s.getName()));
+                //Note that the variables representing these parameters
+                //do not have inits... they get assigned within ctor
+                //for this class (which is a separate model object)
+                memberVars.add(new VariableDef(s.getName(), null));
+            }
+            else if ( s instanceof GenericSymbol) {
+                funcImpls.add(buildGetterMethod(s.getName()));
+                memberVars.add(new VariableDef(s.getName(), null));
+            }
+        }
+    }
+
+    private FunctionImpl buildGetterMethod(String name) {
+        FunctionImpl getterFunc = new FunctionImpl("get" + name);
+        getterFunc.implementsOper = true;
+        getterFunc.hasReturn = true;
+        getterFunc.stats.add(new ReturnStat(name));
+        return getterFunc;
     }
 }

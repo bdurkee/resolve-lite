@@ -18,6 +18,7 @@ Implementation Array_Impl for Bdd_Stack_Template;
     end Pop;
 
     Procedure Depth (restores S: Stack): Std_Integer_Fac::Integer;
+        Depth := S.Top;
     end Depth;
 
 end Array_Impl;

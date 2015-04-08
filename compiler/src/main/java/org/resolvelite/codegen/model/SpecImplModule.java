@@ -1,6 +1,10 @@
 package org.resolvelite.codegen.model;
 
-// Todo: Add this to enhancements.
+/**
+ * Forces implementation modules (specifically concept and enhancement impls)
+ * to implement a Ctor method.
+ */
 public interface SpecImplModule {
+
     public void addCtor();
 }

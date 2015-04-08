@@ -15,9 +15,12 @@ import org.resolvelite.semantics.symbol.*;
 
 import java.util.*;
 
+//Todo: This class should be refined so we're just storing the types of
+//exprs in the 'types' map. We'll have a separate pass for the math stuff eventually
+//(I'm thinking about it anyways).
 public class ComputeTypes extends SetScopes {
 
-    ParseTreeProperty<Type> types;
+    ParseTreeProperty<Type> types;  //This should be used soley for exps.
 
     public ComputeTypes(@NotNull ResolveCompiler compiler,
             @NotNull SymbolTable symtab) {
@@ -37,6 +40,7 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        //Todo: ! see enterProcedureDecl
         Type type = types.get(ctx.type());
         for (TerminalNode t : ctx.Identifier()) {
             try {
@@ -54,14 +58,22 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, type);
     }
 
+    //Todo: ! see enterProcedureDecl
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
     }
 
+    //Todo: ! see enterProcedureDecl
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
+    }
+
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        super.enterProcedureDecl(ctx); //make sure we keep our scope updated.
+        typeFunctionLikeThing(ctx.name, ctx.type());
     }
 
     public Type
@@ -69,14 +81,16 @@ public class ComputeTypes extends SetScopes {
         try {
             FunctionSymbol func =
                     (FunctionSymbol) currentScope.resolve(null, name, false);
-            Type t = types.get(type);
-            if ( t == null ) {
-                t =
+            Type resultType = null;
+            if ( type == null ) {
+                resultType =
                         new ProgTypeSymbol("Void", symtab,
                                 currentScope.getRootModuleID());
+            } else {
+                resultType = resolveType(type.qualifier, type.name);
             }
-            func.setType(t);
-            return t;
+            func.setType(resultType);
+            return resultType;
         }
         catch (NoSuchSymbolException nsse) {
             symtab.getCompiler().errorManager.semanticError(
@@ -105,6 +119,27 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, type);
     }
 
+    protected Type resolveType(Token qualifier, Token name) {
+        Type type = null;
+        Symbol foundSym = null;
+        try {
+            foundSym = currentScope.resolve(qualifier, name, true);
+            type = (Type) foundSym;
+        }
+        catch (ClassCastException cce) {
+            //foundSym won't be null here -- we would go to nsse instead...
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    name, "a type", foundSym.getClass().getSimpleName());
+        }
+        catch (NoSuchSymbolException nsse) {
+            symtab.getCompiler().errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, name, name.getText(),
+                    qualifier, nsse.getMessage());
+            type = InvalidType.INSTANCE;
+        }
+        return type;
+    }
+
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         types.put(ctx, types.get(ctx.progPrimary()));
@@ -118,6 +153,7 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
+            System.out.println("NAMEDEXP: " + ctx.getText());
             if ( types.get(ctx) != null ) {
                 return; //already typed (as is the case for record member refs.
             }

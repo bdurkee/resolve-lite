@@ -46,18 +46,4 @@ public class FunctionImpl extends FunctionDef {
     public FunctionImpl(String name) {
         super(name);
     }
-
-    public FunctionImpl(ParameterSymbol specParameter) {
-        this("get" + specParameter.getName());
-        implementsOper = true;
-        hasReturn = true;
-        //Todo: Add the statement object once we're there.
-    }
-
-    public FunctionImpl(GenericSymbol specGeneric) {
-        this("get" + specGeneric.getName());
-        implementsOper = true;
-        hasReturn = true;
-        //Todo: Add the statement object once we're there.
-    }
 }

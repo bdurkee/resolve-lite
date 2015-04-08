@@ -30,6 +30,8 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,5 +50,10 @@ public class FacilityImplModule extends Module {
             }
         }
         return null;
+    }
+
+    //does nothing for impls. No module params or generics possible...
+    @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
+            List<? extends Symbol> symbols) {
     }
 }

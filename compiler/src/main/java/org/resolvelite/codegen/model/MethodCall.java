@@ -16,12 +16,15 @@ public class MethodCall extends Expr {
     }
 
     /**
-     * Used to create create getter calls for variables referencing things like
-     * module level generics and formal params
-     * 
-     * @param nameRef The referenced name of the parameter or generic.
+     * Two special constructors used to create create getter calls for variables
+     * referencing things like module level generics and formal params
      */
     public MethodCall(VarNameRef nameRef) {
         this(nameRef.q, "get" + nameRef.name, Collections.emptyList());
+    }
+
+    public MethodCall(TypeInit genericTypeInit) {
+        this(genericTypeInit.q, "get" + genericTypeInit.typeName,
+                Collections.emptyList());
     }
 }

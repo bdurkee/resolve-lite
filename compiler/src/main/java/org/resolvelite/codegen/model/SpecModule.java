@@ -30,6 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.GenericSymbol;
+import org.resolvelite.semantics.symbol.ParameterSymbol;
+import org.resolvelite.semantics.symbol.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,5 +58,24 @@ public abstract class SpecModule extends Module {
             super(name, file);
             this.concept = concept;
         }
+    }
+
+    @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
+            List<? extends Symbol> symbols) {
+        for (Symbol s : symbols) {
+            if ( s instanceof ParameterSymbol) {
+                funcImpls.add(buildGetterSignature(s.getName()));
+            }
+            else if ( s instanceof GenericSymbol) {
+                funcImpls.add(buildGetterSignature(s.getName()));
+            }
+        }
+    }
+
+    private FunctionImpl buildGetterSignature(String name) {
+        FunctionImpl getterFunc = new FunctionImpl("get" + name);
+        getterFunc.implementsOper = true;
+        getterFunc.hasReturn = true;
+        return getterFunc;
     }
 }

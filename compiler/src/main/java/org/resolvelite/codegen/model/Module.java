@@ -50,16 +50,10 @@ public abstract class Module extends OutputModelObject {
         this.file = file;//who contains us?
     }
 
-    public void convertAndAddSymsFromConcept(List<? extends Symbol> symbols) {
-        for (Symbol s : symbols) {
-            if ( s instanceof ParameterSymbol ) {
-                funcImpls.add(new FunctionImpl((ParameterSymbol) s));
-                memberVars.add(new VariableDef((ParameterSymbol) s));
-            }
-            else if ( s instanceof GenericSymbol ) {
-                funcImpls.add(new FunctionImpl((GenericSymbol) s));
-                memberVars.add(new VariableDef((GenericSymbol) s));
-            }
-        }
-    }
+    /**
+     * Like the name suggests, adds getters for the formal items parameterizing
+     * a concept (or enhancement). Note the templates this method creat
+     */
+    public abstract void addGetterMethodsAndVarsForParamsAndGenerics(
+            List<? extends Symbol> symbols);
 }
