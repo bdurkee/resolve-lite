@@ -227,6 +227,32 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @Override public void exitProgApplicationExp(
+            @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+        String name = Utils.getNameFromProgrammingOp(ctx.op.getText());
+        try {
+            Symbol s = currentScope.resolve("Std_Integer_Fac", name, true);
+            if ( s.getClass() != FunctionSymbol.class ) {
+                compiler.errorManager.semanticError(
+                        ErrorKind.UNEXPECTED_SYMBOL, null, "a function", s
+                                .getClass().getSimpleName());
+                types.put(ctx, InvalidType.INSTANCE);
+            }
+            Type foundType = checkCallArgs((FunctionSymbol) s, name, ctx);
+            types.put(ctx, foundType);
+        }
+        catch (NoSuchSymbolException nsse) {
+            symtab.getCompiler().errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, null, name);
+            types.put(ctx, InvalidType.INSTANCE);
+        }
+    }
+
+    @Override public void exitProgNestedExp(
+            @NotNull ResolveParser.ProgNestedExpContext ctx) {
+        types.put(ctx, types.get(ctx.progExp()));
+    }
+
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         types.put(ctx, getProgramType(ctx, "Std_Integer_Fac", "Integer"));
@@ -312,26 +338,35 @@ public class ComputeTypes extends SetScopes {
         return InvalidType.INSTANCE;
     }
 
-    @SuppressWarnings("unchecked") protected Type checkCallArgs(
-            @NotNull FunctionSymbol foundSym,
-            @NotNull ResolveParser.ProgParamExpContext foundExp) {
+    protected Type checkCallArgs(FunctionSymbol foundSym, String name,
+            @NotNull ResolveParser.ProgApplicationExpContext foundExp) {
+        return checkCallArgs(foundSym, foundExp, name, foundExp.progExp());
+    }
+
+    protected Type checkCallArgs(FunctionSymbol foundSym,
+            ResolveParser.ProgParamExpContext foundExp) {
+        return checkCallArgs(foundSym, foundExp, foundExp.name.getText(),
+                foundExp.progExp());
+    }
+
+    protected Type checkCallArgs(@NotNull FunctionSymbol foundSym,
+                                 ParserRuleContext ctx, String name,
+            @NotNull List<ResolveParser.ProgExpContext> args) {
         List<ParameterSymbol> formals =
                 foundSym.getSymbolsOfType(ParameterSymbol.class);
-        if ( foundExp.progExp().size() != formals.size() ) {
+        if ( args.size() != formals.size() ) {
             symtab.getCompiler().errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, foundExp.name,
-                    foundExp.name.getText());
+                    ErrorKind.NO_SUCH_SYMBOL, null, name);
             return InvalidType.INSTANCE;
         }
         int i = 0;
         for (ParameterSymbol p : formals) {
-            Type actuaArgType = types.get(foundExp.progExp(i++));
+            Type actuaArgType = types.get(args.get(i++));
             Type formalArgType = p.getType();
 
             if ( !actuaArgType.getName().equals(formalArgType.getName()) ) {
                 symtab.getCompiler().errorManager.semanticError(
-                        ErrorKind.NO_SUCH_SYMBOL, foundExp.name,
-                        foundExp.name.getText());
+                        ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(), name);
                 return InvalidType.INSTANCE;
             }
         }

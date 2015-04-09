@@ -69,7 +69,9 @@ public abstract class BaseSymbol implements Symbol {
 
     @Override public Symbol substituteGenerics(
             Map<GenericSymbol, Type> genericSubstitutions,
-            Scope scopeWithSubstitutions) { return this; }
+            Scope scopeWithSubstitutions) {
+        return this;
+    }
 
     @Override public boolean equals(Object obj) {
         if ( !(obj instanceof Symbol) ) {

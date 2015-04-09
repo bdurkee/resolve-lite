@@ -8,7 +8,9 @@ Facility Reverse_Stack;
             SF::Clear(S);
             RC := SF::Rem_Capacity(S);
 
-            While Std_Integer_Fac::Greater(RC, 0) do
+            While RC > 0
+                maintaining true;
+            do
                 Std_Integer_Fac::Read(CS);
                 SF::Push(CS, S);
                 RC := SF::Rem_Capacity(S);
@@ -21,14 +23,12 @@ Facility Reverse_Stack;
             Var D: Std_Integer_Fac::Integer;
 
             D := SF::Depth(S);
-            While (D /= 0)
-                changing Temp, D, S;
-                maintaining D = |S|;
-                decreasing D;
+            While D /= 0
+                maintaining true;
             do
-                Pop(Temp, S);
-                Write_Line(CS);
-                D := Depth(S);
+                SF::Pop(Temp, S);
+                Std_Integer_Fac::Write_Line(Temp);
+                D := SF::Depth(S);
             end;
     end Write_Stack;
 
@@ -36,6 +36,6 @@ Facility Reverse_Stack;
     	Procedure
     		Var S: SF::Stack;
     		Read_Stack(S);
-
+    		Write_Stack(S);
     end Main;
 end Reverse_Stack;

@@ -278,6 +278,11 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, w);
     }
 
+    @Override public void exitProgNestedExp(
+            @NotNull ResolveParser.ProgNestedExpContext ctx) {
+        built.put(ctx, built.get(ctx.progExp()));
+    }
+
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         built.put(ctx, built.get(ctx.progPrimary()));
@@ -293,6 +298,15 @@ public class ModelBuilder extends ResolveBaseListener {
         List<Expr> args = collectModelsFor(Expr.class, ctx.progExp(), built);
         built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
                 ctx.name.getText(), args));
+    }
+
+    @Override public void exitProgApplicationExp(
+            @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+        String name = Utils.getNameFromProgrammingOp(ctx.op.getText());
+        List<Expr> args = collectModelsFor(Expr.class, ctx.progExp(), built);
+        built.put(ctx, new MethodCall(buildQualifier("Std_Integer_Fac", name),
+                name, args));
+
     }
 
     @Override public void exitProgNamedExp(
@@ -433,8 +447,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(@Nullable Token symQualifier,
-            @NotNull Token symName) {
+    protected Qualifier buildQualifier(String symQualifier, String symName) {
         try {
             //The user has chosen not to qualify their symbol, so at this point
             //symName might refer to something local, or something accessible
@@ -443,7 +456,7 @@ public class ModelBuilder extends ResolveBaseListener {
             //to something brought in via a facilitydecl--they would've had to
             //explicitly qualify if this were the case.
             if ( symQualifier == null ) {
-                Symbol s = moduleScope.resolve(null, symName.getText(), true);
+                Symbol s = moduleScope.resolve(null, symName, true);
                 NormalQualifier q;
                 if ( isLocallyAccessibleSymbol(s) ) {
                     //this.<symName>
@@ -462,7 +475,7 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             //We're here: so the call was qualified... is the qualifier
             //referring to a facility? Let's check.
-            Symbol s = moduleScope.resolve(null, symQualifier.getText(), true);
+            Symbol s = moduleScope.resolve(null, symQualifier, true);
             //Looks like it is!, let's see if what we found is actually a facility
             if ( !(s instanceof FacilitySymbol) ) {
                 throw new RuntimeException("non-facility qualifier... "
@@ -473,7 +486,14 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         catch (NoSuchSymbolException nsse) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            return new NormalQualifier(symQualifier.getText());
+            return new NormalQualifier(symQualifier);
         }
+    }
+
+    protected Qualifier buildQualifier(Token symQualifier,
+            @NotNull Token symName) {
+        return buildQualifier(
+                symQualifier != null ? symQualifier.getText() : null,
+                symName.getText());
     }
 }

@@ -36,14 +36,14 @@ public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
             Scope substitutionScope) {
         FunctionSymbol thisWithGenericsSubstituted =
                 new FunctionSymbol(name, tree, scopeRepo, rootModuleID);
-        if (!(getType() instanceof GenericSymbol)) {
+        if ( !(getType() instanceof GenericSymbol) ) {
             thisWithGenericsSubstituted.setType(getType());
         }
         thisWithGenericsSubstituted.setEnclosingScope(substitutionScope);
         for (Symbol nestedSyms : getSymbols()) {
             try {
-                thisWithGenericsSubstituted.define(
-                        nestedSyms.substituteGenerics(genericSubstitutions,
+                thisWithGenericsSubstituted.define(nestedSyms
+                        .substituteGenerics(genericSubstitutions,
                                 thisWithGenericsSubstituted));
             }
             catch (DuplicateSymbolException dse) {

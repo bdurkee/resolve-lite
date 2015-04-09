@@ -402,9 +402,13 @@ mathTupleExp
 // program expressions
 
 progExp
-    :   //progExp op='.' progExp                  #progMemberExp
-   // |   progPrimary                             #progPrimaryExp
-        progPrimary #progPrimaryExp
+    :   op=('not'|'-') progExp                  #progApplicationExp
+    |   progExp op=('*'|'/') progExp            #progApplicationExp
+    |   progExp op=('+'|'-') progExp            #progApplicationExp
+    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
+    |   progExp op=('='|'/=') progExp           #progApplicationExp
+    |   '(' progExp ')'                         #progNestedExp
+    |   progPrimary                             #progPrimaryExp
     ;
 
 progPrimary

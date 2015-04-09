@@ -61,6 +61,41 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
                 .rep.val == 0);
     }
 
+    @Override public RType Is_Not_Zero(RType i) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i)
+                .rep.val != 0);
+    }
+
+    public RType Are_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer)i1).rep.val ==
+                ((Integer)i2).rep.val);
+    }
+
+    public RType Are_Not_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val !=
+                ((Integer) i2).rep.val);
+    }
+
+    public RType Less_Or_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val <=
+                ((Integer) i2).rep.val);
+    }
+
+    public RType Less(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val <
+                ((Integer) i2).rep.val);
+    }
+
+    public RType Greater(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val >
+                ((Integer) i2).rep.val);
+    }
+
+    public RType Greater_Or_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val >=
+                ((Integer) i2).rep.val);
+    }
+
     @Override public RType Sum(RType i1, RType i2) {
         return new Integer(((Integer)i1).rep.val +
                 ((Integer)i2).rep.val);
@@ -71,9 +106,16 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
                 ((Integer)i2).rep.val);
     }
 
-    @Override public RType Greater(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE
-                .initBoolean(((Integer) i1).rep.val > ((Integer) i2).rep.val);
+    @Override public RType Product(RType i1, RType i2) {
+        return new Integer(((Integer)i1).rep.val * ((Integer)i2).rep.val);
+    }
+
+    @Override public void Divide(RType i, RType j, RType q) {
+        ((Integer)i).rep.val = (((Integer)i).rep.val / ((Integer)j).rep.val);
+    }
+
+    @Override public RType Negate(RType i1) {
+        return new Integer(-((Integer)i1).rep.val);
     }
 
     @Override public void Read(RType e) {
