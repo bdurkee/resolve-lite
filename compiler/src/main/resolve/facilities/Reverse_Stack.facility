@@ -1,16 +1,41 @@
 Facility Reverse_Stack;
     Facility SF is Bdd_Stack_Template
-        <Std_Integer_Fac::Integer>(1) implemented by Array_Impl;
+        <Std_Integer_Fac::Integer>(3) implemented by Array_Impl;
 
-    Operation Read_Stack(replaces S: SF::Stack);
+    Operation Read_Stack (replaces S: SF::Stack);
         Procedure
             Var CS, RC: Std_Integer_Fac::Integer;
             SF::Clear(S);
-
             RC := SF::Rem_Capacity(S);
-            SF::Push(CS, S);
 
-
+            While Std_Integer_Fac::Greater(RC, 0) do
+                Std_Integer_Fac::Read(CS);
+                SF::Push(CS, S);
+                RC := SF::Rem_Capacity(S);
+            end;
     end Read_Stack;
 
+    Operation Write_Stack (clears S: SF::Stack);
+        Procedure
+            Var Temp: Std_Integer_Fac::Integer;
+            Var D: Std_Integer_Fac::Integer;
+
+            D := SF::Depth(S);
+            While (D /= 0)
+                changing Temp, D, S;
+                maintaining D = |S|;
+                decreasing D;
+            do
+                Pop(Temp, S);
+                Write_Line(CS);
+                D := Depth(S);
+            end;
+    end Write_Stack;
+
+    Operation Main();
+    	Procedure
+    		Var S: SF::Stack;
+    		Read_Stack(S);
+
+    end Main;
 end Reverse_Stack;

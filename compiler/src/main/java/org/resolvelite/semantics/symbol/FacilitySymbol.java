@@ -22,14 +22,15 @@ public class FacilitySymbol extends BaseSymbol {
         this.actualGenerics.addAll(actualGenerics);
     }
 
-    public ModuleScope getModuleScopeWithGenericsSubstituted() {
-        ModuleScope specScope = null;
+    public ModuleScope getModuleScopeWithGenericsSubstituted()
+            throws IllegalStateException {
+        ModuleScope specScopeWithGenericsSubstituted = null;
        /* if (!symtab.definitionPhaseComplete) {
             throw new IllegalStateException("Can't instantiate generics before "
                     + "the symbol definition phase is complete");
         }*/
         try {
-            specScope = symtab.getModuleScope(specName);
+            ModuleScope specScope = symtab.getModuleScope(specName);
             Iterator<GenericSymbol> formalGenerics =
                     specScope.getSymbolsOfType(GenericSymbol.class).iterator();
             Iterator<Type> actualTypeIter = actualGenerics.stream()
@@ -39,7 +40,7 @@ public class FacilitySymbol extends BaseSymbol {
                 genericSubstitutions.put(formalGenerics.next(),
                         actualTypeIter.next());
             }
-            ModuleScope specScopeWithGenericsSubstituted =
+            specScopeWithGenericsSubstituted =
                     new ModuleScope(symtab.getGlobalScope(), symtab,
                             specScope.getWrappedModuleTree());
 
@@ -55,7 +56,7 @@ public class FacilitySymbol extends BaseSymbol {
         }
         catch (NoSuchSymbolException nsse) {
         }
-        return specScope;
+        return specScopeWithGenericsSubstituted;
     }
 
     public String getSpecName() {

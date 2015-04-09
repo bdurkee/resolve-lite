@@ -217,7 +217,6 @@ public class ComputeTypes extends SetScopes {
                                 .getClass().getSimpleName());
                 types.put(ctx, InvalidType.INSTANCE);
             }
-            System.out.println("HERE: " + ctx.getText());
             Type foundType = checkCallArgs((FunctionSymbol) s, ctx);
             types.put(ctx, foundType);
         }

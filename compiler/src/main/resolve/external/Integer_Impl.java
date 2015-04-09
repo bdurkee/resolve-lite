@@ -56,28 +56,32 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
         }
     }
 
-    public RType Is_Zero(RType i) {
+    @Override public RType Is_Zero(RType i) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i)
                 .rep.val == 0);
     }
 
-    public RType Sum(RType i1, RType i2) {
+    @Override public RType Sum(RType i1, RType i2) {
         return new Integer(((Integer)i1).rep.val +
                 ((Integer)i2).rep.val);
     }
 
-    public RType Difference(RType i1, RType i2) {
+    @Override public RType Difference(RType i1, RType i2) {
         return new Integer(((Integer)i1).rep.val -
                 ((Integer)i2).rep.val);
     }
 
-    public RType Greater(RType i1, RType i2) {
+    @Override public RType Greater(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE
                 .initBoolean(((Integer) i1).rep.val > ((Integer) i2).rep.val);
     }
 
-    public void Read(RType e) {
+    @Override public void Read(RType e) {
         Scanner sc = new Scanner(System.in);
         ((Integer)e).rep.val = sc.nextInt();
+    }
+
+    @Override public void Write_Line(RType i) {
+        System.out.println(((Integer) i).rep.val);
     }
 }
