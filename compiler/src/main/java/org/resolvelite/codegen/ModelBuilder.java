@@ -492,8 +492,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected Qualifier buildQualifier(Token symQualifier,
             @NotNull Token symName) {
-        return buildQualifier(
-                symQualifier != null ? symQualifier.getText() : null,
-                symName.getText());
+        return buildQualifier(symQualifier != null ? symQualifier.getText()
+                : null, symName.getText());
     }
 }

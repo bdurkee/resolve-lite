@@ -97,17 +97,28 @@ public class Utils {
 
     public static String getNameFromProgrammingOp(String op) {
         String name = null;
-        if (op.equals("+")) name = "Sum";
-        else if (op.equals("-")) name = "Difference";
-        else if (op.equals("*")) name = "Product";
-        else if (op.equals("/")) name = "Divide";
-        else if (op.equals("<=")) name = "Less_Or_Equal";
-        else if (op.equals("<")) name = "Less";
-        else if (op.equals("=")) name = "Are_Equal";
-        else if (op.equals("/=")) name = "Are_Not_Equal";
-        else if (op.equals(">")) name = "Greater";
-        else if (op.equals(">=")) name = "Greater_Or_Equal";
-        else throw new IllegalArgumentException("No template operation "
+        if ( op.equals("+") )
+            name = "Sum";
+        else if ( op.equals("-") )
+            name = "Difference";
+        else if ( op.equals("*") )
+            name = "Product";
+        else if ( op.equals("/") )
+            name = "Divide";
+        else if ( op.equals("<=") )
+            name = "Less_Or_Equal";
+        else if ( op.equals("<") )
+            name = "Less";
+        else if ( op.equals("=") )
+            name = "Are_Equal";
+        else if ( op.equals("/=") )
+            name = "Are_Not_Equal";
+        else if ( op.equals(">") )
+            name = "Greater";
+        else if ( op.equals(">=") )
+            name = "Greater_Or_Equal";
+        else
+            throw new IllegalArgumentException("No template operation "
                     + "corresponding to operator: " + op);
         return name;
     }

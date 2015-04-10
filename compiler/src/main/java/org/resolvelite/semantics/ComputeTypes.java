@@ -350,7 +350,7 @@ public class ComputeTypes extends SetScopes {
     }
 
     protected Type checkCallArgs(@NotNull FunctionSymbol foundSym,
-                                 ParserRuleContext ctx, String name,
+            ParserRuleContext ctx, String name,
             @NotNull List<ResolveParser.ProgExpContext> args) {
         List<ParameterSymbol> formals =
                 foundSym.getSymbolsOfType(ParameterSymbol.class);
