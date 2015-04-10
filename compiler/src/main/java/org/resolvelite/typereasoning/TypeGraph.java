@@ -1,8 +1,10 @@
 package org.resolvelite.typereasoning;
 
+import org.resolvelite.semantics.MathTypeProper;
+
 public class TypeGraph {
 
-    /* public final MathTypeProper CLS = new MathTypeProper(this, null, true,
+    public final MathTypeProper CLS = new MathTypeProper(this, null, true,
              "Cls");
      public final MathTypeProper SSET = new MathTypeProper(this, CLS, true,
              "SSet");
@@ -13,7 +15,7 @@ public class TypeGraph {
      public final MathTypeProper EMPTY_SET = new MathTypeProper(this, SSET,
              false, "Empty_Set");
 
-     public final MathTypeFunc POWERSET = //
+    /* public final MathTypeFunc POWERSET = //
              new MathTypeFuncBuilder(this, POWERSET_APPLICATION, SSET) //
                      .paramTypes(SSET) //
                      .elementsRestrict(true).build();

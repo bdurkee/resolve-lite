@@ -40,13 +40,10 @@ import java.util.Set;
 public class ModuleFile extends OutputModelObject {
     public String RESOLVEVersion;
     public String resolveFileName;
-    //   public Set<String> imports = new LinkedHashSet<>(); //not necessary atm
     @ModelElement public Module module;
 
     public ModuleFile(AnnotatedTree e, String resolveFileName) {
         this.resolveFileName = resolveFileName;
         this.RESOLVEVersion = ResolveCompiler.VERSION;
-        // this.imports.addAll(e.imports.getAllImports());
-        //this.targetDir = ImportRef.listifyFileString(e.getFileName());
     }
 }
