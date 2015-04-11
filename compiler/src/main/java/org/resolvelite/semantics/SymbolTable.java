@@ -27,7 +27,7 @@ public class SymbolTable {
 
     public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
-        this.typeGraph = new TypeGraph(rc);
+        this.typeGraph = new TypeGraph();
         this.globalScope = new PredefinedScope(this);
         initMathTypeSystem();
         initProgramTypeSystem();

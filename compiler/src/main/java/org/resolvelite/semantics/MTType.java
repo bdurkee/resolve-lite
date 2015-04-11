@@ -2,6 +2,8 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.List;
+
 public abstract class MTType {
 
     private final TypeGraph typeGraph;
@@ -13,6 +15,8 @@ public abstract class MTType {
     public TypeGraph getTypeGraph() {
         return typeGraph;
     }
+
+    public abstract List<MTType> getComponentTypes();
 
     /**
      * Indicates that this type is known to contain only elements <em>that

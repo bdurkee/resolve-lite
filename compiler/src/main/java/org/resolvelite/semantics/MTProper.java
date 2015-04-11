@@ -2,8 +2,10 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.typereasoning.TypeGraph;
 
-public class MTProper extends MTType {
+import java.util.Collections;
+import java.util.List;
 
+public class MTProper extends MTType {
     private String name;
     private MTType type = null;
     private final boolean knownToContainOnlyMathTypesFlag;
@@ -20,12 +22,16 @@ public class MTProper extends MTType {
         this(g, null, false, name);
     }
 
-    public MTProper(TypeGraph g, MTType type,
-                    boolean knownToContainOnlyMTypes, String name) {
+    public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
+            String name) {
         super(g);
         this.knownToContainOnlyMathTypesFlag = knownToContainOnlyMTypes;
         this.type = type;
         this.name = name;
+    }
+
+    @Override public List<MTType> getComponentTypes() {
+        return Collections.emptyList();
     }
 
     @Override public boolean isKnownToContainOnlyMathTypes() {

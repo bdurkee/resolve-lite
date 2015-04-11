@@ -3,32 +3,144 @@ package org.resolvelite.semantics;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 public class MTFunction extends MTType {
 
     private static final FunctionApplicationFactory DEFAULT_FACTORY =
             new VanillaFunctionApplicationFactory();
 
+    /**
+     * In cases where myDomain is an instance of MTCartesian, the names of
+     * the original parameters are stored in the tags of that cartesian product.
+     * However, when myDomain is another type, we represent a function with
+     * a SINGLE PARAMETER and we have no way to embed the name of our parameter.
+     * In the latter case, this field will reflect the parameter name (or be
+     * null if we represent a function with un-named parameters). In the former
+     * case, the value of this field is undefined.
+     */
+    private final String singleParameterName;
+
     private final MTType domain, range;
     private final boolean restrictionFlag;
     private final FunctionApplicationFactory functionApplicationFactory;
 
-    private List<MTType> components;
+    private final List<MTType> components = new ArrayList<>();
 
     private MTFunction(MTFunctionBuilder builder) {
         super(builder.g);
+
+        if ( builder.paramNames.size() == 1 ) {
+            this.singleParameterName = builder.paramNames.get(0);
+        }
+        else {
+            this.singleParameterName = null;
+        }
         this.range = builder.range;
+        this.domain =
+                buildParameterType(getTypeGraph(), builder.paramNames,
+                        builder.paramTypes);
+
+        this.components.add(domain);
+        this.components.add(range);
+        this.restrictionFlag = builder.restricts;
+        this.functionApplicationFactory = builder.factory;
+    }
+
+    public static MTType
+            buildParameterType(TypeGraph g, List<MTType> paramTypes) {
+        return buildParameterType(g,
+                buildNullNameListOfEqualLength(paramTypes), paramTypes);
+    }
+
+    private static List<String> buildNullNameListOfEqualLength(
+            List<MTType> original) {
+
+        List<String> names = new ArrayList<>();
+        for (MTType t : original) {
+            names.add(null);
+        }
+        return names;
+    }
+
+    public static MTType buildParameterType(TypeGraph g,
+            List<String> paramNames, List<MTType> paramTypes) {
+
+        MTType result;
+
+        switch (paramTypes.size()) {
+        case 0:
+            result = g.VOID;
+            break;
+        case 1:
+            result = paramTypes.get(0);
+            break;
+        default:
+            List<MTCartesian.Element> elements = new ArrayList<>();
+            Iterator<String> namesIter = paramNames.iterator();
+            Iterator<MTType> typesIter = paramTypes.iterator();
+            while (namesIter.hasNext()) {
+                elements.add(new MTCartesian.Element(namesIter.next(),
+                        typesIter.next()));
+            }
+
+            result = new MTCartesian(g, elements);
+        }
+
+        return result;
+    }
+
+    @Override public List<MTType> getComponentTypes() {
+        return components;
     }
 
     public static class MTFunctionBuilder implements Builder<MTFunction> {
         protected final TypeGraph g;
         protected final MTType range;
+        protected boolean restricts;
         protected MTType domain;
 
-        public MTFunctionBuilder(TypeGraph g, MTType range) {
+        protected final List<String> paramNames = new ArrayList<>();
+        protected final List<MTType> paramTypes = new ArrayList<>();
+        protected final FunctionApplicationFactory factory;
+
+        public MTFunctionBuilder(TypeGraph g,
+                FunctionApplicationFactory factory, MTType range) {
             this.g = g;
+            this.factory = factory;
             this.range = range;
+        }
+
+        public MTFunctionBuilder elementsRestrict(boolean e) {
+            this.restricts = e;
+            return this;
+        }
+
+        public MTFunctionBuilder domain(MTType e) {
+            this.domain = e;
+            return this;
+        }
+
+        public MTFunctionBuilder paramNames(List<String> names) {
+            this.paramNames.addAll(names);
+            return this;
+        }
+
+        public MTFunctionBuilder paramNames(String... names) {
+            return paramNames(Arrays.asList(names));
+        }
+
+        public MTFunctionBuilder paramTypes(List<MTType> types) {
+            this.paramTypes.addAll(types);
+            return this;
+        }
+
+        public MTFunctionBuilder paramTypes(MTType... types) {
+            return paramTypes(Arrays.asList(types));
         }
 
         @Override public MTFunction build() {
@@ -38,11 +150,10 @@ public class MTFunction extends MTType {
 
     private static class VanillaFunctionApplicationFactory
             implements
-            FunctionApplicationFactory {
+                FunctionApplicationFactory {
 
-        @Override
-        public MTType buildFunctionApplication(TypeGraph g, MTFunction f,
-                                               String calledAsName, List<MTType> arguments) {
+        @Override public MTType buildFunctionApplication(TypeGraph g,
+                MTFunction f, String calledAsName, List<MTType> arguments) {
             return new MTFunctionApplication(g, f, calledAsName, arguments);
         }
     }
@@ -53,6 +164,14 @@ public class MTFunction extends MTType {
 
     public MTType getRange() {
         return range;
+    }
+
+    public boolean applicationResultsKnownToContainOnlyRestrictions() {
+        return restrictionFlag;
+    }
+
+    @Override public String toString() {
+        return "(" + domain.toString() + " -> " + range.toString() + ")";
     }
 
 }

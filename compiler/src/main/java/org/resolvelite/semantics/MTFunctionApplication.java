@@ -2,72 +2,55 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class MTFunctionApplication extends MTType {
 
     private final MTFunction function;
-    private List<MTType> arguments;
+    protected final List<MTType> arguments = new ArrayList<>();
     private String name;
 
-    private List<MTType> components;
+    private List<MTType> components = new ArrayList<>();
 
     public MTFunctionApplication(TypeGraph g, MTFunction f, String name,
-                                 MTType... arguments) {
+            MTType... arguments) {
         super(g);
 
         this.function = f;
         this.name = name;
-        this.arguments = new ArrayList<>();
-        for (int i = 0; i < arguments.length; ++i) {
-            this.arguments.add(arguments[i]);
-        }
-
-        setUpComponents();
+        this.arguments.addAll(Arrays.asList(arguments));
+        this.components.add(function);
+        this.components.addAll(this.arguments);
     }
 
     public MTFunctionApplication(TypeGraph g, MTFunction f, String name,
-                                 List<MTType> arguments) {
+            List<MTType> arguments) {
         super(g);
 
         this.function = f;
         this.name = name;
-        this.arguments = new ArrayList<MTType>();
         this.arguments.addAll(arguments);
-
-        setUpComponents();
+        this.components.add(function);
+        this.components.addAll(arguments);
     }
 
-    private void setUpComponents() {
-        List<MTType> result = new ArrayList<MTType>();
-
-        result.add(function);
-        result.addAll(arguments);
-
-        components = Collections.unmodifiableList(result);
+    @Override public List<MTType> getComponentTypes() {
+        return components;
     }
 
-    @Override
-    public boolean isKnownToContainOnlyMTypes() {
+    @Override public boolean isKnownToContainOnlyMathTypes() {
         //Note that, effectively, we represent an instance of the range of our
         //function.  Thus, we're known to contain only MTypes if the function's
         //range's members are known only to contain MTypes.
-
-        return function.getRange().membersKnownToContainOnlyMTypes();
+        return function.getRange().membersKnownToContainOnlyMathTypes();
     }
 
-    @Override
-    public boolean membersKnownToContainOnlyMTypes() {
+    @Override public boolean membersKnownToContainOnlyMathTypes() {
         boolean result = true;
-        Iterator<MTType> arguments = arguments.iterator();
-        while (arguments.hasNext()) {
-            result &= arguments.next().isKnownToContainOnlyMathTypes();
+        for (MTType argument : this.arguments) {
+            result &= argument.isKnownToContainOnlyMathTypes();
         }
         return result
-                && myFunction
-                .applicationResultsKnownToContainOnlyRestrictions();
+                && function.applicationResultsKnownToContainOnlyRestrictions();
     }
 }
