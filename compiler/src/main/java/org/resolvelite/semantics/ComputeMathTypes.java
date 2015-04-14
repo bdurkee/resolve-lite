@@ -22,39 +22,4 @@ public class ComputeMathTypes extends ResolveBaseListener {
         this.g = symtab.getTypeGraph();
     }
 
-    @Override public void exitMathDefinitionDecl(
-            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
-
-    }
-
-    @Override public void exitMathTypeExp(
-            @NotNull ResolveParser.MathTypeExpContext ctx) {
-        symtab.mathExps.put(ctx, symtab.mathExps.get(ctx.mathExp()));
-    }
-
-    @Override public void exitMathAssertionExp(
-            @NotNull ResolveParser.MathAssertionExpContext ctx) {
-        symtab.mathExps.put(ctx, symtab.mathExps.get(ctx.mathExp()));
-    }
-
-    @Override public void exitMathPrimeExp(
-            @NotNull ResolveParser.MathPrimeExpContext ctx) {
-        symtab.mathExps.put(ctx, symtab.mathExps.get(ctx.mathPrimaryExp()));
-    }
-
-    @Override public void exitMathPrimaryExp(
-            @NotNull ResolveParser.MathPrimaryExpContext ctx) {
-        symtab.mathExps.put(ctx, symtab.mathExps.get(ctx.getChild(0)));
-    }
-
-    @Override public void exitMathBooleanExp(
-            @NotNull ResolveParser.MathBooleanExpContext ctx) {
-        MSymbolExp result =
-                new MSymbolExp.MSymbolExpBuilder(ctx.BooleanLiteral().getText())
-                        .literal(true) //
-                        .mathType(g.SSET) //
-                        .mathTypeValue(g.BOOLEAN) //
-                        .build();
-        symtab.mathExps.put(ctx, result);
-    }
 }
