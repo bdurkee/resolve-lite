@@ -166,8 +166,7 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     * <code>../Foo/facilityVars.Test.concept</code> grooms to
-     * <code>facilityVars.Test.concept</code>.
+     * {@code ../Foo/facilities/T.concept} grooms to {@code T.concept}.
      * 
      * @param name A file name with zero or more '/' delimited directories.
      * @return just the file name.
