@@ -1,7 +1,25 @@
 Facility Reverse_Stack;
     Facility SF is Bdd_Stack_Template
         <Std_Integer_Fac::Integer>(3) implemented by Array_Impl;
+    (*public static final Bdd_Stack_Template SF =
+        new Array_Impl(((Integer_Template)Standard_Integers.INSTANCE).initInteger(),
+         ((Integer_Template)Standard_Integers.INSTANCE).initInteger(3), new Array_Impl.Foo() {
+            @Override public Object getRep() {
+                return null;
+            }
 
+            @Override public void setRep(Object setRep) {
+            }
+
+            @Override public RType initialValue() {
+                return null;
+            }
+
+            @Override public RType Foo(RType x) {
+                return Eh(x);
+            }
+
+        });*)
     Operation Read_Stack (replaces S: SF::Stack);
         Procedure
             Var CS, RC: Std_Integer_Fac::Integer;

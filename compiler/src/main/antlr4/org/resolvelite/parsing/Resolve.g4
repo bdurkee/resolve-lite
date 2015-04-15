@@ -89,7 +89,7 @@ facilityBlock
         )+
     ;
 
-// realization module
+// implementation modules
 
 conceptImplModule
     :   'Implementation' name=Identifier (implModuleParameterList)?
@@ -384,6 +384,7 @@ mathExp
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
+    |   mathCrossTypeExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
@@ -397,6 +398,10 @@ mathLiteralExp
 mathFunctionApplicationExp
     :   ('@')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
     |   ('@')? name=Identifier    #mathVariableExp
+    ;
+
+mathCrossTypeExp
+    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
     ;
 
 mathOutfixExp

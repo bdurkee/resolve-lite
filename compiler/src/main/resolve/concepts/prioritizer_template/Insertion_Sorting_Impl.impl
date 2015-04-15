@@ -1,0 +1,7 @@
+Implementation Insertion_Sorting_Impl (
+        Operation Is_Lss_Eq(restores x, y: T): Std_Boolean_Fac::Boolean;
+            ensures Is_Lss_Eq = (leqv(x, y));)
+                        for Prioritizer_Template;
+
+
+end Insertion_Sorting_Impl;

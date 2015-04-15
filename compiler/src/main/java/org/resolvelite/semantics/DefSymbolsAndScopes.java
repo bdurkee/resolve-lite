@@ -26,6 +26,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     ResolveCompiler compiler;
     SymbolTable symtab;
     AnnotatedTree tree;
+    boolean walkingModuleParameters = false;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -73,6 +74,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         tree.imports.getImportsOfType(ImportType.NAMED))
                         .addImports(ctx.concept.getText());
         //concept impls implicitly import the concepts they impl
+    }
+
+    @Override public void enterImplModuleParameterList(
+            @NotNull ResolveParser.ImplModuleParameterListContext ctx) {
+        walkingModuleParameters = true;
+    }
+
+    @Override public void exitImplModuleParameterList(
+            @NotNull ResolveParser.ImplModuleParameterListContext ctx) {
+        walkingModuleParameters = false;
     }
 
     @Override public void enterFacilityDecl(
@@ -156,7 +167,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     new FunctionSymbol(name.getText(), ctx, symtab,
                             currentScope.getRootModuleID());
             symtab.scopes.put(ctx, func);
-            currentScope.define(func);
+            if (walkingModuleParameters) {
+                currentScope.define(new OperationParameterSymbol(func));
+            } else {
+                currentScope.define(func);
+            }
             currentScope = func;
         }
         catch (DuplicateSymbolException dse) {
