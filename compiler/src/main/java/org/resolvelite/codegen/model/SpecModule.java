@@ -60,21 +60,24 @@ public abstract class SpecModule extends Module {
         }
     }
 
-    @Override public void addGetterMethodsAndVarsForParamsAndGenerics(
+    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
             if ( s instanceof ParameterSymbol ) {
-                funcImpls.add(buildGetterSignature(s.getName()));
+                funcs.add(buildGetterSignature(s.getName()));
             }
             else if ( s instanceof GenericSymbol ) {
-                funcImpls.add(buildGetterSignature(s.getName()));
+                funcs.add(buildGetterSignature(s.getName()));
             }
         }
     }
 
-    private FunctionImpl buildGetterSignature(String name) {
-        FunctionImpl getterFunc = new FunctionImpl("get" + name);
-        getterFunc.implementsOper = true;
+    @Override
+    public void addOperationParameterModelObjects(FunctionDef wrappedFunction) {
+    }
+
+    private FunctionDef buildGetterSignature(String name) {
+        FunctionDef getterFunc = new FunctionDef("get" + name);
         getterFunc.hasReturn = true;
         return getterFunc;
     }

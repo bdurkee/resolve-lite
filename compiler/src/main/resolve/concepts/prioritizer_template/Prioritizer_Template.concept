@@ -1,11 +1,12 @@
 Concept Prioritizer_Template<T>(
-    evaluates Max_Capacity: Std_Integer_Fac::Integer;
-        Definition leqv(x, y : T) : B;);
+    evaluates Max_Capacity: Std_Integer_Fac::Integer);
 
     Type Family Keeper is modeled by Cart_Prod
-            Entry_Ct : T -> N;
-            Accepting : B;
+            T_Tally : FMSet(T);
+            Is_Accepting : B;
         end;
         exemplar K;
+
+    Oper Add (clears e: T; updates K: Keeper);
 
 end Prioritizer_Template;

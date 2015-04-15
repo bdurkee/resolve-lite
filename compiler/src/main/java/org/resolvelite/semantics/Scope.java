@@ -61,9 +61,6 @@ public interface Scope {
      */
     public void define(@NotNull Symbol sym) throws DuplicateSymbolException;
 
-    // @Nullable public Symbol resolve(String name, boolean searchImports)
-    //         throws NoSuchSymbolException;
-
     @Nullable public Symbol resolve(Token qualifier, Token name,
             boolean searchImports) throws NoSuchSymbolException;
 

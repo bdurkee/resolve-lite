@@ -32,7 +32,6 @@ package org.resolvelite.codegen;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -45,10 +44,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleScope;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
-import org.resolvelite.semantics.symbol.FacilitySymbol;
-import org.resolvelite.semantics.symbol.GenericSymbol;
-import org.resolvelite.semantics.symbol.ParameterSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
 import org.resolvelite.codegen.model.Qualifier.FacilityQualifier;
 
@@ -362,8 +358,17 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             ModuleScope conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
-            impl.addGetterMethodsAndVarsForParamsAndGenerics(conceptScope
+            impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(conceptScope
                     .getSymbols());
+
+            for (FunctionSymbol f : moduleScope
+                    .getSymbolsOfType(FunctionSymbol.class)) {
+                if (f.isFormalParameter)  {
+                    FunctionDef cx = (FunctionDef)built.get(f.getTree());
+                    impl.addOperationParameterModelObjects(cx
+                            );
+                }
+            }
         }
         catch (NoSuchSymbolException nsse) {
             //Shouldn't happen, if it does, should've yelled about it in semantics
@@ -404,11 +409,8 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
-        spec.addGetterMethodsAndVarsForParamsAndGenerics(moduleScope.getSymbols());
-        spec.funcs.addAll(ctx.genericType().stream().map(FunctionDef::new)
-                .collect(Collectors.toList()));
-        spec.funcs.addAll(moduleScope.getSymbolsOfType(ParameterSymbol.class)
-                .stream().map(FunctionDef::new).collect(Collectors.toList()));
+        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope.getSymbols());
+
         file.module = spec;
         built.put(ctx, file);
     }

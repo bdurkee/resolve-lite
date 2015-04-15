@@ -16,6 +16,7 @@ public abstract class SymbolWithScope extends BaseScope
             String rootModuleID) {
         super(scopeRepo, rootModuleID);
         this.name = name;
+
     }
 
     @Override public String getName() {

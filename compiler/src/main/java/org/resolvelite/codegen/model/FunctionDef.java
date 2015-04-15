@@ -52,11 +52,6 @@ public class FunctionDef extends OutputModelObject {
         hasReturn = true;
     }
 
-    public FunctionDef(GenericSymbol specGeneric) {
-        this("get" + specGeneric.getName());
-        hasReturn = true;
-    }
-
     public FunctionDef(ResolveParser.GenericTypeContext specGeneric) {
         this("get" + specGeneric.Identifier().getText());
         hasReturn = true;

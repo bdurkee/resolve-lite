@@ -30,6 +30,7 @@
  */
 package org.resolvelite.codegen.model;
 
+import org.resolvelite.semantics.symbol.FunctionSymbol;
 import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ParameterSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
@@ -54,6 +55,15 @@ public abstract class Module extends OutputModelObject {
      * Like the name suggests, adds getters and member variabes for the formal
      * parameters to a concept (or enhancement).
      */
-    public abstract void addGetterMethodsAndVarsForParamsAndGenerics(
+    public abstract void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
             List<? extends Symbol> symbols);
+
+    /**
+     * For implementations that take an operation as a parameter, this method
+     * adds both an RType member variable pointing to the interface wrapping
+     * the 'operation' as well as the interior interfaces wrapping calls to
+     * the operation.
+     * @param wrappedFunction
+     */
+    public abstract void addOperationParameterModelObjects(FunctionDef wrappedFunction);
 }

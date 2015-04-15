@@ -166,12 +166,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             FunctionSymbol func =
                     new FunctionSymbol(name.getText(), ctx, symtab,
                             currentScope.getRootModuleID());
+            func.isFormalParameter = walkingModuleParameters;
             symtab.scopes.put(ctx, func);
-            if (walkingModuleParameters) {
-                currentScope.define(new OperationParameterSymbol(func));
-            } else {
-                currentScope.define(func);
-            }
+            currentScope.define(func);
             currentScope = func;
         }
         catch (DuplicateSymbolException dse) {

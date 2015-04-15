@@ -16,11 +16,17 @@ import java.util.Map;
 public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
     protected ParserRuleContext tree;
     protected Type retType;
+    public SymbolTable scopeRepo;
+    public boolean isFormalParameter = false;
 
     public FunctionSymbol(String name, ParserRuleContext tree,
             SymbolTable scopeRepo, String rootModuleID) {
         super(name, scopeRepo, rootModuleID);
         this.tree = tree;
+        this.scopeRepo = scopeRepo;
+    }
+    public ParserRuleContext getTree() {
+        return tree;
     }
 
     @Override public Type getType() {

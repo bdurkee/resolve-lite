@@ -65,10 +65,10 @@ public class ComputeTypes extends SetScopes {
         types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
     }
 
-    //Todo: ! see enterProcedureDecl
-    @Override public void exitOperationProcedureDecl(
+    @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        types.put(ctx, typeFunctionLikeThing(ctx.name, ctx.type()));
+        super.enterOperationProcedureDecl(ctx); //make sure we keep our scope updated.
+        typeFunctionLikeThing(ctx.name, ctx.type());
     }
 
     @Override public void enterProcedureDecl(
@@ -105,6 +105,8 @@ public class ComputeTypes extends SetScopes {
         Type type = null;
         Symbol foundSym = null;
         try {
+            System.out.println(ctx.getText());
+
             foundSym = currentScope.resolve(ctx.qualifier, ctx.name, true);
             type = (Type) foundSym;
         }
