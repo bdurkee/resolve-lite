@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
-import org.resolvelite.semantics.absyn.MExp;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -17,7 +16,7 @@ public class SymbolTable {
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
 
-    public ParseTreeProperty<MExp> mathExps = new ParseTreeProperty<>();
+    //public ParseTreeProperty<MExp> mathExps = new ParseTreeProperty<>();
 
     public static boolean definitionPhaseComplete = false;
 

@@ -58,7 +58,7 @@ precisItem
 
 conceptModule
     :   'Concept' name=Identifier ('<' genericType (',' genericType)* '>')?
-        (moduleParameterList)? ';'
+        (specModuleParameterList)? ';'
         (importList)?
         (requiresClause)?
         (conceptBlock)?
@@ -92,7 +92,7 @@ facilityBlock
 // realization module
 
 conceptImplModule
-    :   'Implementation' name=Identifier (moduleParameterList)?
+    :   'Implementation' name=Identifier (implModuleParameterList)?
         'for' concept=Identifier ';'
         (importList)?
         (implBlock)?
@@ -107,29 +107,38 @@ implBlock
         )+
     ;
 
-enhancementModule
-    :   'Enhancement' name=Identifier (moduleParameterList)?
-        'for' concept=Identifier ';'
-        
-        'end' closename=Identifier ';'
 // uses, imports
 
 importList
     :   'uses' Identifier (',' Identifier)* ';'
     ;
 
-// parameter related rules
+// parameter and parameter-list related rules
 
 operationParameterList
     :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
-moduleParameterList
-    :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
+specModuleParameterList
+    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
+    ;
+
+implModuleParameterList
+    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
     ;
 
 moduleParameterDecl
     :   parameterDeclGroup
+    ;
+
+specModuleParameterDecl
+    :   parameterDeclGroup
+    |   mathDefinitionDecl
+    ;
+
+implModuleParameterDecl
+    :   parameterDeclGroup
+    |   operationDecl
     ;
 
 genericType
