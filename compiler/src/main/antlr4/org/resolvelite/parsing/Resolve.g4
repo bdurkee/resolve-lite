@@ -106,6 +106,12 @@ implBlock
         | facilityDecl
         )+
     ;
+
+enhancementModule
+    :   'Enhancement' name=Identifier (moduleParameterList)?
+        'for' concept=Identifier ';'
+        
+        'end' closename=Identifier ';'
 // uses, imports
 
 importList
