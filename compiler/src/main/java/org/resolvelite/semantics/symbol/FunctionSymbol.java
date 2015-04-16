@@ -25,6 +25,7 @@ public class FunctionSymbol extends SymbolWithScope implements TypedSymbol {
         this.tree = tree;
         this.scopeRepo = scopeRepo;
     }
+
     public ParserRuleContext getTree() {
         return tree;
     }

@@ -242,14 +242,18 @@ public class ModelBuilder extends ResolveBaseListener {
             //Todo: I think it's ok to do getChild(0) here; we know we're
             //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
             ResolveParser.ProgNamedExpContext argAsNamedExp =
-                    (ResolveParser.ProgNamedExpContext)
-                            ctx.progExp().getChild(0).getChild(0);
+                    (ResolveParser.ProgNamedExpContext) ctx.progExp()
+                            .getChild(0).getChild(0);
             try {
-                Symbol s = moduleScope.resolve(argAsNamedExp.qualifier,
-                        argAsNamedExp.name, true);
-                e = new AnonymousOpParameterInstance((FunctionSymbol)s);
-            } catch (NoSuchSymbolException nsse) {
-            } catch (ClassCastException cce) {
+                Symbol s =
+                        moduleScope.resolve(argAsNamedExp.qualifier,
+                                argAsNamedExp.name, true);
+                e = new AnonymousOpParameterInstance(buildQualifier(
+                        argAsNamedExp.qualifier, argAsNamedExp.name),
+                        (FunctionSymbol) s);
+            }
+            catch (NoSuchSymbolException nsse) {}
+            catch (ClassCastException cce) {
                 e = new MethodCall((VarNameRef) e);
             }
         }
@@ -371,9 +375,9 @@ public class ModelBuilder extends ResolveBaseListener {
 
             for (FunctionSymbol f : moduleScope
                     .getSymbolsOfType(FunctionSymbol.class)) {
-                if (f.isFormalParameter)  {
-                    impl.addOperationParameterModelObjects(
-                            (FunctionDef)built.get(f.getTree()));
+                if ( f.isFormalParameter ) {
+                    impl.addOperationParameterModelObjects((FunctionDef) built
+                            .get(f.getTree()));
                 }
             }
         }
@@ -416,7 +420,8 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
-        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope.getSymbols());
+        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope
+                .getSymbols());
 
         file.module = spec;
         built.put(ctx, file);

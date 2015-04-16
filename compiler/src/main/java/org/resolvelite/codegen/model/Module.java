@@ -63,7 +63,9 @@ public abstract class Module extends OutputModelObject {
      * adds both an RType member variable pointing to the interface wrapping
      * the 'operation' as well as the interior interfaces wrapping calls to
      * the operation.
+     * 
      * @param wrappedFunction
      */
-    public abstract void addOperationParameterModelObjects(FunctionDef wrappedFunction);
+    public abstract void addOperationParameterModelObjects(
+            FunctionDef wrappedFunction);
 }

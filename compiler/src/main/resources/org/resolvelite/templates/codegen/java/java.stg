@@ -195,14 +195,14 @@ MemberRef(ref, child) ::= <%
 <endif>
 %>
 
-AnonymousOpParameterInstance(wrappedFunc) ::= <<
+AnonymousOpParameterInstance(wrappedFunc, q) ::= <<
 new OperationParameter() {
         @Override public RType op(RType... e) {
             <if(!wrappedFunc.hasReturn)><\\>
-                <wrappedFunc.name>(<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
+                <q>.<wrappedFunc.name>(<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
                 return null;
             <else>
-                return <wrappedFunc.name><\\>
+                return <q>.<wrappedFunc.name><\\>
                 (<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
             <endif>
         }

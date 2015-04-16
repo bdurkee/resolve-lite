@@ -23,8 +23,9 @@ public class ConceptImplModule extends Module implements SpecImplModule {
         this.ctor = new CtorDef(this.name, facilityVars, memberVars);
     }
 
-    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
-            List<? extends Symbol> symbols) {
+    @Override public void
+            addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+                    List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
             if ( s instanceof ParameterSymbol ) {
                 funcImpls.add(buildGetterMethod(s.getName()));
