@@ -35,7 +35,5 @@ Facility Integer_Exchange;
             ensures J = @I and I = @J;
         Procedure
             Var Temp: Std_Integer_Fac::Integer;
-
     end Exchange;
-
 end Integer_Exchange;

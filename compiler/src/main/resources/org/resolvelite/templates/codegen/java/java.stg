@@ -63,20 +63,11 @@ public class <impl.name> implements <impl.concept> {
 >>
 
 OperationParameterDef(param, func) ::= <<
-public interface <param.name> extends RType {
-    <func>
-}
-
-/**
- * This little trick allows us to avoid yet another 'special-cased' qualifier
- * for calls to operation parameters. In other words, it lets us do this.Foo()
- * as opposed to ((Foo)FooParam).Foo.
- */
 public <if(func.func.hasReturn)>RType<else>void<endif> <\\>
 <func.func.name>(<func.params; separator=", ">) {
-    <if(func.func.hasReturn)>return <endif> <\\>
-    ((<func.func.name>)<func.func.name>)<\\>
-    .<func.func.name>(<func.func.params : {p|<p.name>};separator=", ">);
+    <if(func.func.hasReturn)>return <endif><\\>
+    ((OperationParameter)<func.func.name>).op<\\>
+    (<func.func.params : {p|<p.name>};separator=", ">);
 }
 >>
 
@@ -95,7 +86,7 @@ public class <impl.name> {
 
 CtorDef(ctor, facMems) ::= <<
 public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
-    <ctor.members: {c|this.<c> = (RType)<c>;}; separator="\n">
+    <ctor.members: {c|this.<c> = <c>;}; separator="\n">
     <facMems: {f|this.<f.facility.name> = <f.root>;}; separator="\n">
 }
 >>
@@ -203,6 +194,35 @@ MemberRef(ref, child) ::= <%
 ((<ref.typeQualifier>.<ref.typeName>)(<child>).rep.<ref.name>)
 <endif>
 %>
+
+AnonymousOpParameterInstance(wrappedFunc) ::= <<
+new OperationParameter() {
+        @Override public RType op(RType... e) {
+            <if(!wrappedFunc.hasReturn)><\\>
+                <wrappedFunc.name>(<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
+                return null;
+            <else>
+                return <wrappedFunc.name><\\>
+                (<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
+            <endif>
+        }
+
+        @Override public Object getRep() {
+            throw new UnsupportedOperationException("getRep() shouldn't be "
+                + "getting called from: " + this.getClass());
+        }
+
+        @Override public void setRep(Object setRep) {
+            throw new UnsupportedOperationException("setRep() shouldn't be "
+                + "getting called from: " + this.getClass());
+        }
+
+        @Override public RType initialValue() {
+            throw new UnsupportedOperationException("initialValue() shouldn't"
+                   + " be getting called from: " + this.getClass());
+        }
+    }
+>>
 
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 

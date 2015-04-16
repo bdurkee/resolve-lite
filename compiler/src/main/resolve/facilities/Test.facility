@@ -13,3 +13,53 @@ Facility Test;
             implemented by Insertion_Sorting_Impl(Integer_Lss_Eq);
 
 end Test;
+
+(* /**
+ * Generated from Test.facility by RESOLVE version 2.22.15a.
+ * This file should not be modified.
+ */
+import org.resolvelite.runtime.*;
+import java.lang.reflect.*;
+
+public class Test {
+    public static final Prioritizer_Template Priorit_Fac =
+        new Insertion_Sorting_Impl(((Integer_Template) Standard_Integers.INSTANCE).initInteger(),
+                ((Integer_Template) Standard_Integers.INSTANCE).initInteger(5),
+                new OperationParameter() {
+                    @Override
+                    public RType op(RType... e) {
+                        return Integer_Lss_Eq(e[0], e[1]);
+                    }
+
+                    @Override public Object getRep() {
+                        return null;
+                    }
+
+                    @Override public void setRep(Object setRep) {
+
+                    }
+
+                    @Override public RType initialValue() {
+                        return null;
+                    }
+                });
+    public static RType Integer_Lss_Eq(RType I, RType J) {
+        RType Integer_Lss_Eq =
+                ((Integer_Template)Standard_Integers.INSTANCE).Less_Or_Equal(I, J);
+        ResolveBase.assign(Integer_Lss_Eq,
+                ((Integer_Template)Standard_Integers.INSTANCE).Less_Or_Equal(I, J));
+        return Integer_Lss_Eq;
+    }
+
+    public static void main(String[] args) {
+
+        RType k = Priorit_Fac.initKeeper();
+        ((Prioritizer_Template)Priorit_Fac).Add(((Integer_Template)Standard_Integers.INSTANCE).initInteger(3),k,
+                ((Integer_Template)Standard_Integers.INSTANCE).initInteger(0));
+        ((Prioritizer_Template)Priorit_Fac).Add(((Integer_Template)Standard_Integers.INSTANCE).initInteger(4),k,
+                ((Integer_Template)Standard_Integers.INSTANCE).initInteger(1));
+        Priorit_Fac.Are_Ordered(k);
+
+
+    }
+}*)

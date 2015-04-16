@@ -8,8 +8,5 @@ Facility Copy_Stack;
 
     Operation Main();
         Procedure
-
-
     end Main;
-
 end Copy_Stack;

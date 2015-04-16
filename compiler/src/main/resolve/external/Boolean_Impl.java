@@ -15,7 +15,7 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
         }
 
         public Object getRep() {
-            return this;
+            return rep;
         }
 
         public void setRep(Object o) {

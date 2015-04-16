@@ -143,9 +143,6 @@ public class ModelBuilder extends ResolveBaseListener {
                 new LayeredFacilityInstantiation(ctx.spec.getText(),
                         ctx.impl.getText());
         basePtr.isProxied = false;
-
-        List<TypeInit> generics =
-                collectModelsFor(TypeInit.class, ctx.type(), built);
         for (ResolveParser.TypeContext t : ctx.type()) {
             try {
                 Symbol s = moduleScope.resolve(t.qualifier, t.name, true);
@@ -158,13 +155,14 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             catch (NoSuchSymbolException nsse) {}
         }
-        for (TypeInit genericTypeInit : generics) {
-
-        }
         List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
                         Expr.class, ctx.specArgs.moduleArgument(), built);
+        List<Expr> implArgs =
+                ctx.implArgs == null ? new ArrayList<>() : collectModelsFor(
+                        Expr.class, ctx.implArgs.moduleArgument(), built);
         basePtr.args.addAll(specArgs);
+        basePtr.args.addAll(implArgs);
 
         for (ResolveParser.EnhancementPairDeclContext pair : ctx
                 .enhancementPairDecl()) {
@@ -240,11 +238,21 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitModuleArgument(
             @NotNull ResolveParser.ModuleArgumentContext ctx) {
         Expr e = (Expr) built.get(ctx.progExp());
-        //Todo: Because in most contexts the generics specializing a facility decl
-        //need to be turned into getter calls, I would just add (like ConceptImpl)
-        //a dedicated adder method to build and add these getters...
-        if ( e instanceof VarNameRef ) e = new MethodCall((VarNameRef) e);
-        //Todo: operations n' shit will eventually go here.
+        if ( e instanceof VarNameRef ) {
+            //Todo: I think it's ok to do getChild(0) here; we know we're
+            //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
+            ResolveParser.ProgNamedExpContext argAsNamedExp =
+                    (ResolveParser.ProgNamedExpContext)
+                            ctx.progExp().getChild(0).getChild(0);
+            try {
+                Symbol s = moduleScope.resolve(argAsNamedExp.qualifier,
+                        argAsNamedExp.name, true);
+                e = new AnonymousOpParameterInstance((FunctionSymbol)s);
+            } catch (NoSuchSymbolException nsse) {
+            } catch (ClassCastException cce) {
+                e = new MethodCall((VarNameRef) e);
+            }
+        }
         built.put(ctx, e);
     }
 
@@ -364,9 +372,8 @@ public class ModelBuilder extends ResolveBaseListener {
             for (FunctionSymbol f : moduleScope
                     .getSymbolsOfType(FunctionSymbol.class)) {
                 if (f.isFormalParameter)  {
-                    FunctionDef cx = (FunctionDef)built.get(f.getTree());
-                    impl.addOperationParameterModelObjects(cx
-                            );
+                    impl.addOperationParameterModelObjects(
+                            (FunctionDef)built.get(f.getTree()));
                 }
             }
         }
