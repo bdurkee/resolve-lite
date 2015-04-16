@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.semantics.absyn.MExp;
+import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -15,8 +17,7 @@ public class SymbolTable {
     public Map<String, ModuleScope> moduleScopes = new HashMap<>();
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
-
-    //public ParseTreeProperty<MExp> mathExps = new ParseTreeProperty<>();
+    public ParseTreeProperty<MExp> mathExps = new ParseTreeProperty<>();
 
     public static boolean definitionPhaseComplete = false;
 
@@ -28,31 +29,30 @@ public class SymbolTable {
         this.compiler = rc;
         this.typeGraph = new TypeGraph();
         this.globalScope = new PredefinedScope(this);
-        initMathTypeSystem();
-        initProgramTypeSystem();
+        initMathTypeSystem(typeGraph);
     }
 
     public static void seal() {
         definitionPhaseComplete = true;
     }
 
-    private void initProgramTypeSystem() {
-
-    }
-
-    private void initMathTypeSystem() {
+    private void initMathTypeSystem(TypeGraph g) {
+        try {
+            globalScope.define(new MathSymbol("Cls", g.CLS, g.CLS, null,
+                    globalScope.rootModuleID));
+            globalScope.define(new MathSymbol("SSet", g.CLS, g.SSET, null,
+                    globalScope.rootModuleID));
+            globalScope.define(new MathSymbol("B", g.SSET, g.BOOLEAN, null,
+                    globalScope.rootModuleID));
+        }
+        catch (DuplicateSymbolException dse) {
+        }
         //   defineMathSymbol("B", typeGraph.SSET, typeGraph.BOOLEAN);
         //   defineMathSymbol("SSet", typeGraph.CLS, typeGraph.SSET);
         //   defineMathSymbol("Cls", typeGraph.CLS, typeGraph.CLS);
         //   defineMathSymbol("Powerset", typeGraph.POWERSET, null);
         //   defineMathSymbol("Empty_Set", typeGraph.EMPTY_SET, null);
     }
-
-    // public void
-    //         defineMathSymbol(String name, MathType type, MathType typeValue) {
-    //    MathSymbol result = new MathSymbol(typeGraph, name, type, typeValue);
-    //    definePredefinedSymbol(result);
-    //  }
 
     public ModuleScope getModuleScope(String name) throws NoSuchSymbolException {
         ModuleScope module = moduleScopes.get(name);
@@ -62,11 +62,6 @@ public class SymbolTable {
             throw new NoSuchSymbolException();
         }
         return module;
-    }
-
-    protected void definePredefinedSymbol(Symbol s)
-            throws DuplicateSymbolException {
-        globalScope.define(s);
     }
 
     @NotNull public PredefinedScope getGlobalScope() {

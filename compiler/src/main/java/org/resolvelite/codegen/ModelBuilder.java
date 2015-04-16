@@ -169,7 +169,6 @@ public class ModelBuilder extends ResolveBaseListener {
             LayeredFacilityInstantiation layer =
                     new LayeredFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
-            //layer.args.addAll(coreArgs);
             layers.add(layer);
         }
 
