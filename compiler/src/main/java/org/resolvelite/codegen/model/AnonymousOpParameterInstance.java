@@ -16,8 +16,9 @@ public class AnonymousOpParameterInstance extends Expr {
     public boolean hasReturn = false;
     public List<ParameterSymbol> params = new ArrayList<>();
     @ModelElement public Qualifier q;
+
     public AnonymousOpParameterInstance(Qualifier wrappedFunctionQualifier,
-                                        FunctionSymbol f) {
+            FunctionSymbol f) {
         this.name = f.getName();
         this.q = wrappedFunctionQualifier;
         this.hasReturn = !f.getType().getName().equals("Void");

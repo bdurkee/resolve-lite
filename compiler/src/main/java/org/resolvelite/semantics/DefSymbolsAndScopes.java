@@ -86,6 +86,18 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         walkingModuleParameters = false;
     }
 
+    @Override public void enterMathDefinitionDecl(
+            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+        try {
+            
+            currentScope.define(new MathSymbol(ctx.name.getText(), true, null ));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {

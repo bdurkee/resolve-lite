@@ -7,27 +7,6 @@ import java.util.Map;
 
 public abstract class BaseSymbol implements Symbol {
 
-    public enum Quantification {
-        NONE {
-
-            @Override public String toString() {
-                return "None";
-            }
-        },
-        UNIVERSAL {
-
-            @Override public String toString() {
-                return "Universal";
-            }
-        },
-        EXISTENTIAL {
-
-            @Override public String toString() {
-                return "Existential";
-            }
-        }
-    }
-
     protected final String name, rootModuleID;
     protected Scope scope;
     protected int lexicalOrder;

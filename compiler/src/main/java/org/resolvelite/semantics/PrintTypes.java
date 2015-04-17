@@ -13,6 +13,17 @@ public class PrintTypes extends ResolveBaseListener {
         this.types = types;
     }
 
+    @Override public void exitMathAssertionExp(
+            @NotNull ResolveParser.MathAssertionExpContext ctx) {
+        if ( types.get(ctx) == null ) {
+            throw new IllegalStateException("ctx: "
+                    + ctx.getClass().getSimpleName() + " null");
+        }
+        System.out.printf("%-17s", ctx.getText());
+        System.out.printf(" type %-8s\n", types.get(ctx).toString()
+                .toLowerCase());
+    }
+
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         if ( types.get(ctx) == null ) {

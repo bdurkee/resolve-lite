@@ -37,6 +37,7 @@ public interface Scope {
      * Set which <code>Scope</code> encloses this scope. E.g., if this scope is
      * a function, the enclosing scope could be a module. The {@link BaseScope}
      * class automatically adds this to nested scope list of s.
+     *
      * 
      * @param s The enclosing scope.
      */

@@ -247,9 +247,10 @@ public class ModelBuilder extends ResolveBaseListener {
                 Symbol s =
                         moduleScope.resolve(argAsNamedExp.qualifier,
                                 argAsNamedExp.name, true);
-                e = new AnonymousOpParameterInstance(buildQualifier(
-                        argAsNamedExp.qualifier, argAsNamedExp.name),
-                        (FunctionSymbol) s);
+                e =
+                        new AnonymousOpParameterInstance(buildQualifier(
+                                argAsNamedExp.qualifier, argAsNamedExp.name),
+                                (FunctionSymbol) s);
             }
             catch (NoSuchSymbolException nsse) {}
             catch (ClassCastException cce) {
