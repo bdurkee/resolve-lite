@@ -64,6 +64,9 @@ public abstract class BaseScope implements Scope {
         if ( parent != null && !(parent instanceof PredefinedScope) ) {
             return parent.resolve(null, name, searchImports);
         }
+        else if ( parent instanceof PredefinedScope ) {
+            return parent.resolve(null, name, searchImports);
+        }
         //if we get to here we were NOT able to find it locally...
         if ( !searchImports )
             throw new NoSuchSymbolException();

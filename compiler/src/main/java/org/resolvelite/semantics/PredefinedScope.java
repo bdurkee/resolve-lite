@@ -10,7 +10,7 @@ public class PredefinedScope extends BaseScope {
     public PredefinedScope(SymbolTable scopeRepo) {
         super(scopeRepo, "GLOBAL");
     }
-    
+
     @Override public String getScopeDescription() {
         return "predefined";
     }

@@ -4,8 +4,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
-import org.resolvelite.semantics.symbol.MathSymbol;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.symbol.MathType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +14,7 @@ public class SymbolTable {
     public Map<String, ModuleScope> moduleScopes = new HashMap<>();
     public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
     public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
+    public ParseTreeProperty<MathType> mathTypes = new ParseTreeProperty<>();
 
     public static boolean definitionPhaseComplete = false;
 
@@ -25,7 +25,7 @@ public class SymbolTable {
     public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
         this.globalScope = new PredefinedScope(this);
-        this.g = new TypeGraph();
+        this.g = new TypeGraph(globalScope);
         initMathTypeSystem(g, globalScope);
     }
 
@@ -39,11 +39,11 @@ public class SymbolTable {
 
     private static void initMathTypeSystem(TypeGraph g, PredefinedScope s) {
         try {
-            s.define(new MathSymbol("Cls", g.CLS, s.getScopeDescription()));
-            s.define(new MathSymbol("SSet", g.SSET, s.getScopeDescription()));
-            s.define(new MathSymbol("B", g.BOOLEAN, s.getScopeDescription()));
+            s.define(g.CLS);
+            s.define(g.SSET);
+            s.define(g.B);
         } catch (DuplicateSymbolException e) {
-            System.out.println("Duplicate symbol dse");
+            e.printStackTrace(); //shouldn't happen, we're first to introduce.
         }
     }
 
