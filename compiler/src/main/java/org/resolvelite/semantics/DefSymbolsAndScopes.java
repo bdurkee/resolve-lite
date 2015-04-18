@@ -89,8 +89,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterMathDefinitionDecl(
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
         try {
-            
-            currentScope.define(new MathSymbol(ctx.name.getText(), true, null ));
+            currentScope.define(new MathSymbol(ctx.name.getText(),
+                    currentScope.getRootModuleID()));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

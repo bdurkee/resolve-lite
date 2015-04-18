@@ -1,6 +1,4 @@
 Precis Test_Theory;
 
     Definition X : B;
-
-    Definition Y : X;
 end Test_Theory;

@@ -1,17 +1,19 @@
 package org.resolvelite.semantics.symbol;
 
 import org.resolvelite.semantics.MathType;
-import org.resolvelite.semantics.Type;
 
-public class MathSymbol extends BaseSymbol implements MathType {
+public class MathSymbol extends BaseSymbol implements MathTypedSymbol {
 
-    private boolean knownToContainOnlySets;
+    public MathType type;
     private String rootModule;
 
-    public MathSymbol(String name, boolean containsOnlySets,
-            String rootModuleID) {
+    public MathSymbol(String name, MathType type, String rootModuleID) {
         super(name, rootModuleID);
-        this.knownToContainOnlySets = containsOnlySets;
+        this.setMathType(type);
+    }
+
+    public MathSymbol(String name, String rootModuleID) {
+        super(name, rootModuleID);
     }
 
     @Override public String getName() {
@@ -22,12 +24,13 @@ public class MathSymbol extends BaseSymbol implements MathType {
         return rootModule;
     }
 
-    @Override public boolean isKnownToContainOnlySets() {
-        return knownToContainOnlySets;
+    @Override
+    public MathType getMathType() {
+        return type;
     }
 
-    @Override public MathSymbol getType() {
-        return this;
+    @Override
+    public void setMathType(MathType t) {
+        this.type = t;
     }
-
 }

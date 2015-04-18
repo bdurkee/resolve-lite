@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.semantics.symbol.MathSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,22 +20,28 @@ public class SymbolTable {
 
     private final ResolveCompiler compiler;
     private final PredefinedScope globalScope;
+    private final TypeGraph g;
 
     public SymbolTable(ResolveCompiler rc) {
         this.compiler = rc;
         this.globalScope = new PredefinedScope(this);
-        initMathTypeSystem(globalScope);
+        this.g = new TypeGraph();
+        initMathTypeSystem(g, globalScope);
+    }
+
+    public TypeGraph getTypeGraph() {
+        return g;
     }
 
     public static void seal() {
         definitionPhaseComplete = true;
     }
 
-    private static void initMathTypeSystem(PredefinedScope s) {
+    private static void initMathTypeSystem(TypeGraph g, PredefinedScope s) {
         try {
-            s.define(new MathSymbol("Cls", true, s.getScopeDescription()));
-            s.define(new MathSymbol("SSet", true, s.getScopeDescription()));
-            s.define(new MathSymbol("B", false, s.getScopeDescription()));
+            s.define(new MathSymbol("Cls", g.CLS, s.getScopeDescription()));
+            s.define(new MathSymbol("SSet", g.SSET, s.getScopeDescription()));
+            s.define(new MathSymbol("B", g.BOOLEAN, s.getScopeDescription()));
         } catch (DuplicateSymbolException e) {
             System.out.println("Duplicate symbol dse");
         }
