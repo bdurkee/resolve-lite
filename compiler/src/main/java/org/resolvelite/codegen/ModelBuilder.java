@@ -41,7 +41,7 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
-import org.resolvelite.semantics.ModuleScope;
+import org.resolvelite.semantics.ModuleScopeBuilder;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.*;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 public class ModelBuilder extends ResolveBaseListener {
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-    @NotNull private final ModuleScope moduleScope;
+    @NotNull private final ModuleScopeBuilder moduleScope;
     @NotNull private final CodeGenerator gen;
     @NotNull private final SymbolTable symtab;
 
@@ -368,7 +368,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     .implBlock().facilityDecl(), built));
         }
         try {
-            ModuleScope conceptScope =
+            ModuleScopeBuilder conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
             impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(conceptScope
                     .getSymbols());
@@ -447,7 +447,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        ModuleScope module = symtab.getModuleScope(s.getRootModuleID());
+        ModuleScopeBuilder module = symtab.getModuleScope(s.getRootModuleID());
 
         return (moduleScope.getRootModuleID().equals(s.getRootModuleID()) || module
                 .getWrappedModuleTree().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);

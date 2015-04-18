@@ -1,30 +1,46 @@
 package org.resolvelite.semantics.symbol;
 
-import org.resolvelite.semantics.Scope;
-import org.resolvelite.semantics.Type;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.Map;
+public abstract class Symbol {
 
-// Todo: Add a getRootModuleID() method (right now only SymbolsWithScope get
-// this
-public interface Symbol {
+    public enum Quantification {
+        NONE {
+            @Override public String toString() {
+                return "None";
+            }
+        },
+        UNIVERSAL {
+            @Override public String toString() {
+                return "Universal";
+            }
+        },
+        EXISTENTIAL {
+            @Override public String toString() {
+                return "Existential";
+            }
+        };
+    }
+    private final String name, moduleID;
+    private final ParseTree definingTree;
 
-    public String getName();
+    public Symbol(String name, ParseTree definingTree, String moduleID) {
+        this.name = name;
+        this.definingTree = definingTree;
+        this.moduleID = moduleID;
+    }
 
-    public Scope getScope();
+    public String getModuleID() {
+        return moduleID;
+    }
 
-    public void setScope(Scope scope);
+    public String getName() {
+        return name;
+    }
 
-    public String getRootModuleID();
+    public ParseTree getDefiningTree() {
+        return definingTree;
+    }
 
-    //force implementors to write equals and hashcode
-    //so symbols can be properly used in collections such
-    //as sets, etc.
-    int hashCode();
 
-    boolean equals(Object o);
-
-    public Symbol substituteGenerics(
-            Map<GenericSymbol, Type> genericSubstitutions,
-            Scope scopeWithSubstitutions);
 }

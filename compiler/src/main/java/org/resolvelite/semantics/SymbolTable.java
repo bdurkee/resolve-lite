@@ -1,68 +1,101 @@
 package org.resolvelite.semantics;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.resolvelite.compiler.ErrorKind;
-import org.resolvelite.compiler.ResolveCompiler;
-import org.resolvelite.semantics.symbol.MathType;
+import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class SymbolTable {
 
-    public Map<String, ModuleScope> moduleScopes = new HashMap<>();
-    public ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
-    public ParseTreeProperty<Type> types = new ParseTreeProperty<>();
-    public ParseTreeProperty<MathType> mathTypes = new ParseTreeProperty<>();
+    private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
 
-    public static boolean definitionPhaseComplete = false;
+    public final ParseTreeProperty<ScopeBuilder> scopes =
+            new ParseTreeProperty<>();
+    public final Map<String, ModuleScopeBuilder> myModuleScopes =
+            new HashMap<>();
 
-    private final ResolveCompiler compiler;
-    private final PredefinedScope globalScope;
-    private final TypeGraph g;
+    private ModuleScopeBuilder curModuleScope = null;
 
-    public SymbolTable(ResolveCompiler rc) {
-        this.compiler = rc;
-        this.globalScope = new PredefinedScope(this);
-        this.g = new TypeGraph(globalScope);
-        initMathTypeSystem(g, globalScope);
+    private final TypeGraph typeGraph;
+
+    public SymbolTable() {
+        this.typeGraph = new TypeGraph();
+
+        //The only things in global scope are built-in things
+        ScopeBuilder globalScope =
+                new ScopeBuilder(this, typeGraph, null, null, "GLOBAL");
+
+        //HardCoded.addBuiltInSymbols(typeGraph, globalScope);
+        lexicalScopeStack.push(globalScope);
     }
 
     public TypeGraph getTypeGraph() {
-        return g;
+        return typeGraph;
     }
 
-    public static void seal() {
-        definitionPhaseComplete = true;
+    public ModuleScopeBuilder startModuleScope(ParseTree module, String name) {
+
+        if (module == null) {
+            throw new IllegalArgumentException("module may not be null");
+        }
+        if (curModuleScope != null) {
+            throw new IllegalStateException("module scope already open");
+        }
+        ScopeBuilder parent = lexicalScopeStack.peek();
+        ModuleScopeBuilder s =
+                new ModuleScopeBuilder(typeGraph, name, module, parent, this);
+        curModuleScope = s;
+        addScope(s, parent);
+        myModuleScopes.put(s.getModuleID(), s);
+        return s;
     }
 
-    private static void initMathTypeSystem(TypeGraph g, PredefinedScope s) {
-        try {
-            s.define(g.CLS);
-            s.define(g.SSET);
-            s.define(g.B);
-        } catch (DuplicateSymbolException e) {
-            e.printStackTrace(); //shouldn't happen, we're first to introduce.
+    public ScopeBuilder startScope(ParseTree definingTree) {
+        if (definingTree == null) {
+            throw new IllegalArgumentException("defining tree may not be null");
+        }
+        checkModuleScopeOpen();
+        ScopeBuilder parent = lexicalScopeStack.peek();
+        ScopeBuilder s =
+                new ScopeBuilder(this, typeGraph, definingTree, parent,
+                        curModuleScope.getModuleID());
+
+        addScope(s, parent);
+        return s;
+    }
+
+    public ScopeBuilder endScope() {
+        checkScopeOpen();
+        lexicalScopeStack.pop();
+        ScopeBuilder result;
+        if (lexicalScopeStack.size() == 1) {
+            result = null;
+            curModuleScope = null;
+        }
+        else {
+            result = lexicalScopeStack.peek();
+        }
+        return result;
+    }
+
+    private void checkModuleScopeOpen() {
+        if (curModuleScope == null) {
+            throw new IllegalStateException("no open module scope");
         }
     }
 
-    public ModuleScope getModuleScope(String name) throws NoSuchSymbolException {
-        ModuleScope module = moduleScopes.get(name);
-        if ( module == null ) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MODULE, null,
-                    name);
-            throw new NoSuchSymbolException();
+    private void checkScopeOpen() {
+        if (lexicalScopeStack.size() == 1) {
+            throw new IllegalStateException("no open scope");
         }
-        return module;
     }
 
-    @NotNull public PredefinedScope getGlobalScope() {
-        return globalScope;
+    private void addScope(ScopeBuilder s, ScopeBuilder parent) {
+        lexicalScopeStack.push(s);
+        scopes.put(s.getDefiningTree(), s);
     }
-
-    @NotNull public ResolveCompiler getCompiler() {
-        return compiler;
-    }
-
 }
