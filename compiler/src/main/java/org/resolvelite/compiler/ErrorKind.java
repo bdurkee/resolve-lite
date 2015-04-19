@@ -172,6 +172,7 @@ public enum ErrorKind {
 
     NO_SUCH_MODULE(23, "no such module: <arg>", ErrorSeverity.ERROR);
 
+
     public final int code;
     public final String message;
 
