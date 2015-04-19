@@ -5,7 +5,9 @@ import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class BaseScope implements Scope {
 
@@ -17,7 +19,7 @@ public abstract class BaseScope implements Scope {
     protected final String moduleID;
 
     BaseScope(SymbolTable scopeRepo, ParseTree definingTree, Scope parent,
-                     String moduleID, Map<String, Symbol> bindingSyms) {
+            String moduleID, Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;
         this.parent = parent;
@@ -28,4 +30,18 @@ public abstract class BaseScope implements Scope {
         return definingTree;
     }
 
+    @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
+        if ( symbols.containsKey(s.getName()) ) {
+            throw new DuplicateSymbolException();
+        }
+        symbols.put(s.getName(), s);
+        return s;
+    }
+
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return symbols.values().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .collect(Collectors.toList());
+    }
 }

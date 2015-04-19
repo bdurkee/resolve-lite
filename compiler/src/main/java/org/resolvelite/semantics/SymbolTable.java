@@ -2,6 +2,7 @@ package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Deque;
@@ -39,11 +40,15 @@ public class SymbolTable {
 
     public ModuleScopeBuilder startModuleScope(ParseTree module, String name) {
 
-        if (module == null) {
+        if ( module == null ) {
             throw new IllegalArgumentException("module may not be null");
         }
-        if (curModuleScope != null) {
+        if ( curModuleScope != null ) {
             throw new IllegalStateException("module scope already open");
+        }
+        if ( !(module.getParent() instanceof ResolveParser.ModuleContext) ) {
+            throw new IllegalArgumentException("the rule context/parse tree "
+                    + "passed is does not encode a module");
         }
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s =
@@ -55,7 +60,7 @@ public class SymbolTable {
     }
 
     public ScopeBuilder startScope(ParseTree definingTree) {
-        if (definingTree == null) {
+        if ( definingTree == null ) {
             throw new IllegalArgumentException("defining tree may not be null");
         }
         checkModuleScopeOpen();
@@ -72,7 +77,7 @@ public class SymbolTable {
         checkScopeOpen();
         lexicalScopeStack.pop();
         ScopeBuilder result;
-        if (lexicalScopeStack.size() == 1) {
+        if ( lexicalScopeStack.size() == 1 ) {
             result = null;
             curModuleScope = null;
         }
@@ -82,14 +87,19 @@ public class SymbolTable {
         return result;
     }
 
+    public ScopeBuilder getInnermostActiveScope() {
+        checkScopeOpen();
+        return lexicalScopeStack.peek();
+    }
+
     private void checkModuleScopeOpen() {
-        if (curModuleScope == null) {
+        if ( curModuleScope == null ) {
             throw new IllegalStateException("no open module scope");
         }
     }
 
     private void checkScopeOpen() {
-        if (lexicalScopeStack.size() == 1) {
+        if ( lexicalScopeStack.size() == 1 ) {
             throw new IllegalStateException("no open scope");
         }
     }

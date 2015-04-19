@@ -14,7 +14,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     private final List<String> importedModules = new LinkedList<>();
 
     ModuleScopeBuilder(TypeGraph g, String name, ParseTree definingTree,
-                       Scope parent, SymbolTable symbolTable) {
+            Scope parent, SymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, name);
         this.symtab = symbolTable;
     }
@@ -23,13 +23,16 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return moduleID;
     }
 
-    public ModuleScopeBuilder addImports(String ... i) {
-        Arrays.asList(i).stream().filter(s ->
-                !importedModules.contains(s) && !moduleID.equals(s))
+    public ModuleScopeBuilder addImports(List<String> importList) {
+        importList.stream().filter(u ->
+                !importedModules.contains(u) && !moduleID.equals(u))
                 .forEach(importedModules::add);
         return this;
     }
 
+    public ModuleScopeBuilder addImports(String... i) {
+        return addImports(Arrays.asList(i));
+    }
 
     public boolean imports(String i) {
         return i.equals(getModuleID()) || importedModules.contains(i);

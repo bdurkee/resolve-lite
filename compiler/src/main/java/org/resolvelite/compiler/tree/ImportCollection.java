@@ -89,8 +89,8 @@ public class ImportCollection {
         return result;
     }
 
-    public Set<String> getImportsOfType(ImportType type) {
-        return imports.get(type);
+    public List<String> getImportsOfType(ImportType type) {
+        return new ArrayList<>(imports.get(type));
     }
 
     public void imports(ImportType type, String... t) {

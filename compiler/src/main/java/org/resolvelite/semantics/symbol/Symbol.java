@@ -6,21 +6,25 @@ public abstract class Symbol {
 
     public enum Quantification {
         NONE {
+
             @Override public String toString() {
                 return "None";
             }
         },
         UNIVERSAL {
+
             @Override public String toString() {
                 return "Universal";
             }
         },
         EXISTENTIAL {
+
             @Override public String toString() {
                 return "Existential";
             }
         };
     }
+
     private final String name, moduleID;
     private final ParseTree definingTree;
 
@@ -41,6 +45,5 @@ public abstract class Symbol {
     public ParseTree getDefiningTree() {
         return definingTree;
     }
-
 
 }

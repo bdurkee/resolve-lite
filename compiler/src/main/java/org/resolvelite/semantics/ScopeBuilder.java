@@ -9,10 +9,11 @@ import java.util.Map;
 
 /**
  * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
- *
- * <p>Note that {@code ScopeBuilder} has no public constructor.
- * Instances of this class can be acquired through calls to some of the methods
- * of {@link SymbolTable}.
+ * 
+ * <p>
+ * Note that {@code ScopeBuilder} has no public constructor. Instances of this
+ * class can be acquired through calls to some of the methods of
+ * {@link SymbolTable}.
  */
 public class ScopeBuilder extends BaseScope {
 
