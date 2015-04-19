@@ -5,6 +5,7 @@ import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A {@code TableSearcher} is a strategy for searching an {@link SymbolTable},
@@ -36,7 +37,7 @@ public interface TableSearcher<E extends Symbol> {
      * subclass should depend on the incoming value of the accumulator, save
      * that it will be non-{@code null} and mutable.</em>
      *
-     * @param entries The set of symbol table entries to consider.
+     * @param entries The symbol table entries to consider.
      * @param matches A non-{@code null} accumulator of matches.
      * @param l The context from which {@code entries} was drawn.
      *
@@ -49,6 +50,6 @@ public interface TableSearcher<E extends Symbol> {
      * @throws DuplicateSymbolException If more than one match is found in
      *         {@code entries} where no more than one was expected.
      */
-    public boolean addMatches(SymbolTable entries, List<E> matches,
+    public boolean addMatches(Map<String, Symbol> entries, List<E> matches,
                               SearchContext l) throws DuplicateSymbolException;
 }

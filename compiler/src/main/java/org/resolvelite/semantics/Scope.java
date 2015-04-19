@@ -28,6 +28,10 @@ public interface Scope {
             FacilitySymbol instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException;
 
+    public <E extends Symbol> List<E> getMatches(
+            TableSearcher<E> searcher, SearchContext l)
+            throws DuplicateSymbolException;
+
     public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
 
     public Symbol define(Symbol s) throws DuplicateSymbolException;

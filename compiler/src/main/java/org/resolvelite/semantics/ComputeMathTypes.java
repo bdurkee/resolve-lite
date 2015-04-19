@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
@@ -60,11 +61,12 @@ public class ComputeMathTypes extends SetScopes {
     }
 
     private MathSymbol getIntendedEntry(Token qualifier,
-                                             String symbolName, ParseTree ctx) {
+                                             String symbolName,
+                                             ParserRuleContext ctx) {
         try {
             return currentScope.queryForOne(
-                            new MathSymbolQuery(qualifier, symbolName, node
-                                    .getLocation()));
+                            new MathSymbolQuery(qualifier, symbolName,
+                                    ctx.getStart()));
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(); //This will never fire

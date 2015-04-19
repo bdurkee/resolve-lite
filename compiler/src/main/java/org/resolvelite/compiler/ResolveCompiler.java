@@ -118,7 +118,7 @@ public class ResolveCompiler {
 
     public final DefaultCompilerListener defaultListener =
             new DefaultCompilerListener(this);
-    public final SymbolTable symbolTable = new SymbolTable();
+    public final SymbolTable symbolTable = new SymbolTable(this);
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
