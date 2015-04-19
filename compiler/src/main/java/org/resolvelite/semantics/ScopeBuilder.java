@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -28,4 +29,42 @@ public class ScopeBuilder extends BaseScope {
         this.parent = parent;
     }
 
+    public MathSymbol addBinding(String name,
+                Symbol.Quantification q, ParseTree definingTree, MTType type,
+                MTType typeValue)
+            throws DuplicateSymbolException {
+
+        MathSymbol entry =
+                new MathSymbol(typeGraph, name, q, definingTree,
+                        type, typeValue, moduleID);
+        symbols.put(name, entry);
+        return entry;
+    }
+
+    public MathSymbol addBinding(String name,
+                                      Symbol.Quantification q,
+                                      ParseTree definingTree, MTType type)
+            throws DuplicateSymbolException {
+        return addBinding(name, q, definingTree, type, null);
+    }
+
+    public MathSymbol addBinding(String name,
+                                      ParseTree definingTree, MTType type,
+                                      MTType typeValue)
+            throws DuplicateSymbolException {
+
+        return addBinding(name, Symbol.Quantification.NONE,
+                definingTree, type, typeValue);
+    }
+
+    public MathSymbol addBinding(String name, ParseTree definingTree,
+                                 MTType type)
+            throws DuplicateSymbolException {
+        return addBinding(name, Symbol.Quantification.NONE, definingTree, type);
+    }
+
+    public MathSymbol addBinding(String name, MTType type, MTType typeValue)
+            throws DuplicateSymbolException {
+        return addBinding(name, null, type, typeValue);
+    }
 }
