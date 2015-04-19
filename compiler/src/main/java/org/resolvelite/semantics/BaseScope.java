@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public abstract class BaseScope implements Scope {
 
-    private final Map<String, Symbol> symbols;
+    protected final Map<String, Symbol> symbols;
     private final SymbolTable symtab;
 
     protected ParseTree definingTree;
@@ -24,10 +24,15 @@ public abstract class BaseScope implements Scope {
         this.symbols = bindingSyms;
         this.parent = parent;
         this.moduleID = moduleID;
+        this.definingTree = definingTree;
     }
 
     public ParseTree getDefiningTree() {
         return definingTree;
+    }
+
+    public String getModuleID() {
+        return moduleID;
     }
 
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
@@ -43,5 +48,9 @@ public abstract class BaseScope implements Scope {
                 .filter(type::isInstance)
                 .map(type::cast)
                 .collect(Collectors.toList());
+    }
+
+    @Override public String toString() {
+        return symbols.keySet() + "";
     }
 }

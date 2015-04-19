@@ -16,8 +16,7 @@ public class SymbolTable {
 
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
-    public final Map<String, ModuleScopeBuilder> myModuleScopes =
-            new HashMap<>();
+    public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
 
     private ModuleScopeBuilder curModuleScope = null;
 
@@ -55,7 +54,7 @@ public class SymbolTable {
                 new ModuleScopeBuilder(typeGraph, name, module, parent, this);
         curModuleScope = s;
         addScope(s, parent);
-        myModuleScopes.put(s.getModuleID(), s);
+        moduleScopes.put(s.getModuleID(), s);
         return s;
     }
 

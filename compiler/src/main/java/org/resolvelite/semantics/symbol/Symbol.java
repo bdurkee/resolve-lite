@@ -46,4 +46,6 @@ public abstract class Symbol {
         return definingTree;
     }
 
+    public abstract String getEntryTypeDescription();
+
 }

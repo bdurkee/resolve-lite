@@ -41,4 +41,9 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     public List<String> getImports() {
         return new LinkedList<String>(importedModules);
     }
+
+    @Override public String toString() {
+        return moduleID + ":" + symbols.keySet();
+    }
+
 }

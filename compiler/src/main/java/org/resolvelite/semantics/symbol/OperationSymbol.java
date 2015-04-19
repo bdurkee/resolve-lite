@@ -29,9 +29,12 @@ public class OperationSymbol extends Symbol {
         this.returnType = t;
     }
 
-    //@Override
-    public String getEntryTypeDescription() {
+    @Override public String getEntryTypeDescription() {
         return "an operation";
+    }
+
+    @Override public String toString() {
+        return getName() + ":" + parameters;
     }
 
 }

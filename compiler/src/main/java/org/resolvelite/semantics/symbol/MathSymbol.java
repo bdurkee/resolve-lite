@@ -44,4 +44,8 @@ public class MathSymbol extends Symbol {
         if ( typeValue == null ) throw new SymbolNotOfKindTypeException();
         return typeValue;
     }
+
+    @Override public String getEntryTypeDescription() {
+        return "a math symbol";
+    }
 }

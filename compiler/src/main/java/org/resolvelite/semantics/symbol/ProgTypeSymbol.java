@@ -46,4 +46,12 @@ public class ProgTypeSymbol extends Symbol {
         return new MathSymbol(g, getName(), Quantification.NONE,
                 getDefiningTree(), g.CLS, modelType, getModuleID());
     }
+
+    @Override public String toString() {
+        return getName();
+    }
+
+    @Override public String getEntryTypeDescription() {
+        return "a program type";
+    }
 }

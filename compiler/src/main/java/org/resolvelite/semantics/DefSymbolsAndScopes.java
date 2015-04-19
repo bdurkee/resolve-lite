@@ -3,6 +3,7 @@ package org.resolvelite.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
@@ -21,23 +22,19 @@ import java.util.List;
 
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
-    ResolveCompiler compiler;
-    SymbolTable symtab;
-    AnnotatedTree tree;
-    String rootModuleName;
-    TypeGraph g;
+    protected ResolveCompiler compiler;
+    protected SymbolTable symtab;
+    protected AnnotatedTree tree;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;
         this.tree = annotatedTree;
-        this.g = symtab.getTypeGraph();
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        rootModuleName = ctx.name.getText();
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
     }
@@ -52,8 +49,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
-                    new ProgTypeDefinitionSymbol(g, ctx.name.getText(), ctx,
-                            rootModuleName));
+                    new ProgTypeDefinitionSymbol(symtab.getTypeGraph(),
+                            ctx.name.getText(), ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -61,10 +58,27 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ProgParameterSymbol.ParameterMode mode =
+                        ProgParameterSymbol.getModeMapping().get(
+                                ctx.parameterMode().getText());
+                symtab.getInnermostActiveScope().define(
+                        new ProgParameterSymbol(t.getText(), mode, ctx,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
     @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
-        //
     }
 
     @Override public void exitOperationDecl(
@@ -84,7 +98,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
             symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, rootModuleName,
+                    new OperationSymbol(name.getText(), ctx, getRootModuleID(),
                             params));
         }
         catch (DuplicateSymbolException dse) {
@@ -93,4 +107,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    protected final String getRootModuleID() {
+        return symtab.getInnermostActiveScope().getModuleID();
+    }
 }

@@ -22,14 +22,15 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             DefSymbolsAndScopes definePhase =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
-            /* ComputeTypes typingPhase =
-                     new ComputeTypes(compiler, compiler.symbolTable);
-             walker.walk(definePhase, unit.getRoot());
-             walker.walk(typingPhase, unit.getRoot());
+            //ComputeTypes typingPhase =
+            //         new ComputeTypes(compiler, compiler.symbolTable);
+            walker.walk(definePhase, unit.getRoot());
+            //walker.walk(typingPhase, unit.getRoot());
 
-             PrintTypes pt = new PrintTypes(typingPhase.types);
-             walker.walk(pt, unit.getRoot());*/
-            int i = 0;
+            //PrintTypes pt = new PrintTypes(typingPhase.types);
+            //walker.walk(pt, unit.getRoot());
+            int i;
+            i = 0;
         }
     }
 }
