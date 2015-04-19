@@ -18,8 +18,18 @@ class SetScopes extends ResolveBaseListener {
         this.symtab = symtab;
     }
 
+    @Override public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        currentScope = symtab.moduleScopes.get(ctx.name.getText());
+    }
+
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
+        currentScope = symtab.moduleScopes.get(ctx.name.getText());
+    }
+
+    @Override public void enterPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
         currentScope = symtab.moduleScopes.get(ctx.name.getText());
     }
 

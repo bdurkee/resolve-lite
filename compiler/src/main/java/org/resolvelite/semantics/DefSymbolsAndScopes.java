@@ -13,9 +13,7 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.programtype.PTVoid;
-import org.resolvelite.semantics.symbol.OperationSymbol;
-import org.resolvelite.semantics.symbol.ProgParameterSymbol;
-import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
+import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.List;
@@ -33,15 +31,65 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         this.tree = annotatedTree;
     }
 
+    @Override public void enterPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
+        symtab.endScope();
+    }
+
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
+        for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new GenericSymbol(generic.getText(), generic,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.name, ctx.name.getText());
+            }
+        }
+    }
+
+    @Override public void exitConceptModule(
+            @NotNull ResolveParser.ConceptModuleContext ctx) {
+        symtab.endScope();
+    }
+
+    @Override public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.endScope();
     }
 
     @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         symtab.startScope(ctx);
+    }
+
+    @Override public void enterFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new FacilitySymbol(ctx, getRootModuleID(), symtab));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
     }
 
     @Override public void exitTypeModelDecl(
@@ -85,11 +133,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.endScope();
         insertFunction(ctx.name, ctx);
-    }
-
-    @Override public void exitConceptModule(
-            @NotNull ResolveParser.ConceptModuleContext ctx) {
-        symtab.endScope();
     }
 
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx) {

@@ -89,6 +89,6 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @Override public String toString() {
-        return "<" + mode + ">" + getName();
+        return "<" + mode.toString().toLowerCase() + ">" + getName();
     }
 }
