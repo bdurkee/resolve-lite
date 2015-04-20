@@ -12,14 +12,13 @@ import java.util.Map;
  */
 public interface MultimatchTableSearcher<E extends Symbol>
         extends
-        TableSearcher<E> {
+            TableSearcher<E> {
 
     /**
      * Refines {@link TableSearcher#addMatches} to guarantee that it will not
      * throw a {@link DuplicateSymbolException}. Otherwise, behaves
      * identically.
      */
-    @Override
-    public boolean addMatches(Map<String, Symbol> entries, List<E> matches,
-                              SearchContext l);
+    @Override public boolean addMatches(Map<String, Symbol> entries,
+            List<E> matches, SearchContext l);
 }

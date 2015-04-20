@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.misc.Hardcoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -15,21 +16,25 @@ import java.util.Map;
 
 public class SymbolTable {
 
+    private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
+
     /**
      * When starting a search from a particular scope, specifies how any
      * available facilities should be searched.
-     *
-     * <p>Available facilities are those facilities defined in a module searched
-     * by the search's {@code ImportStrategy} (which necessarily always
-     * includes the source module).
-     *
-     * <p>Note that facilities cannot be recursively searched. Imports and
+     * 
+     * <p>
+     * Available facilities are those facilities defined in a module searched by
+     * the search's {@code ImportStrategy} (which necessarily always includes
+     * the source module).
+     * 
+     * <p>
+     * Note that facilities cannot be recursively searched. Imports and
      * facilities appearing in available facilities will not be searched.
      */
     public static enum FacilityStrategy {
 
         /**
-         * Indicates that available facilities should not be searched.  The
+         * Indicates that available facilities should not be searched. The
          * default strategy.
          */
         FACILITY_IGNORE,
@@ -44,7 +49,7 @@ public class SymbolTable {
 
         /**
          * Indicates that available facilities should be searched with
-         * generic types intact.  That is, any types used by symbols inside the
+         * generic types intact. That is, any types used by symbols inside the
          * facility will appear exactly as listed in the source file--including
          * references to generics--even if we could use information from the
          * facility to "fill them in."
@@ -55,14 +60,15 @@ public class SymbolTable {
     /**
      * When starting a search from a particular scope, specifies which
      * additional modules should be searched, based on any imported modules.
-     *
-     * <p>Imported modules are those listed in the <em>uses</em> clause of the
-     * source module scope in which the scope is introduced.  For searches
+     * 
+     * <p>
+     * Imported modules are those listed in the <em>uses</em> clause of the
+     * source module scope in which the scope is introduced. For searches
      * originating directly in a module scope, the source module scope is the
-     * scope itself.  In addition to those scopes directly imported in the
+     * scope itself. In addition to those scopes directly imported in the
      * <em>uses</em> clause, any modules implicitly imported will also be
-     * searched.  Implicitly imported modules include the standard modules
-     * (<code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
+     * searched. Implicitly imported modules include the standard modules (
+     * <code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
      * of the source module (e.g., an enhancement realization implicitly imports
      * it's associate enhancement and concept.)
      */
@@ -99,8 +105,10 @@ public class SymbolTable {
         },
 
         /**
-         * <p>Indicates that the search should recursively search the closure
-         * of all imports and their own imports.</p>
+         * <p>
+         * Indicates that the search should recursively search the closure of
+         * all imports and their own imports.
+         * </p>
          */
         IMPORT_RECURSIVE {
 
@@ -116,7 +124,7 @@ public class SymbolTable {
         /**
          * Returns the strategy that should be used to recursively search
          * any imported modules.
-         *
+         * 
          * @return The strategy that should be used to recursively search any
          *         imported modules.
          */
@@ -125,7 +133,7 @@ public class SymbolTable {
         /**
          * Returns {@code true} <strong>iff</strong> this strategy
          * requires searching directly imported modules.
-         *
+         * 
          * @return {@code true} <strong>iff</strong> this strategy
          *         requires searching directly imported modules.
          */
@@ -147,9 +155,9 @@ public class SymbolTable {
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
-                new ScopeBuilder(this, typeGraph, null, null, "GLOBAL");
+                new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER, "GLOBAL");
 
-        //HardCoded.addBuiltInSymbols(typeGraph, globalScope);
+        Hardcoded.addBuiltInSymbols(typeGraph, rc, globalScope);
         lexicalScopeStack.push(globalScope);
     }
 

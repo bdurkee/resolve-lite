@@ -22,16 +22,16 @@ public class NameSearcher implements MultimatchTableSearcher<Symbol> {
     }
 
     @Override public boolean addMatches(Map<String, Symbol> entries,
-                                        List<Symbol> matches, SearchContext l) {
+            List<Symbol> matches, SearchContext l) {
 
         boolean result = entries.containsKey(searchString);
-        if (result) {
+        if ( result ) {
             Symbol e = entries.get(searchString);
 
             //Parameters of imported modules or facility instantiations ar not
             //exported and therefore should not be considered for results
-            if (l.equals(SearchContext.SOURCE_MODULE)
-                    || !(e instanceof ProgParameterSymbol)) {
+            if ( l.equals(SearchContext.SOURCE_MODULE)
+                    || !(e instanceof ProgParameterSymbol) ) {
                 matches.add(entries.get(searchString));
             }
         }

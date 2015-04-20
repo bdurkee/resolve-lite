@@ -13,10 +13,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     private final ScopeSearchPath actualSearchPath;
 
     public PossiblyQualifiedPath(Token qualifier,
-                                 ImportStrategy importStrategy,
-                                 FacilityStrategy facilityStrategy,
-                                 boolean localPriority) {
-
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         this.actualSearchPath =
                 getAppropriatePath(qualifier, importStrategy, facilityStrategy,
                         localPriority);
@@ -34,12 +32,11 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     }
 
     private static ScopeSearchPath getAppropriatePath(Token qualifier,
-                                                      ImportStrategy importStrategy,
-                                                      FacilityStrategy facilityStrategy,
-                                                      boolean localPriority) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         ScopeSearchPath result;
 
-        if (qualifier == null) {
+        if ( qualifier == null ) {
             result =
                     new UnqualifiedPath(importStrategy, facilityStrategy,
                             localPriority);
@@ -47,7 +44,6 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
         else {
             result = new QualifiedPath(qualifier, facilityStrategy);
         }
-
         return result;
     }
 }

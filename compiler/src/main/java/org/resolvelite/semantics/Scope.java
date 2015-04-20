@@ -14,23 +14,20 @@ import java.util.Set;
 
 public interface Scope {
 
-    public <E extends Symbol> List<E> query(
-             MultimatchSymbolQuery<E> query);
+    public <E extends Symbol> List<E> query(MultimatchSymbolQuery<E> query);
 
     public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
             throws NoSuchSymbolException,
-            DuplicateSymbolException;
+                DuplicateSymbolException;
 
-    public <E extends Symbol> boolean addMatches(
-            TableSearcher<E> searcher, List<E> matches,
-            Set<Scope> searchedScopes,
+    public <E extends Symbol> boolean addMatches(TableSearcher<E> searcher,
+            List<E> matches, Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException;
 
-    public <E extends Symbol> List<E> getMatches(
-            TableSearcher<E> searcher, SearchContext l)
-            throws DuplicateSymbolException;
+    public <E extends Symbol> List<E> getMatches(TableSearcher<E> searcher,
+            SearchContext l) throws DuplicateSymbolException;
 
     public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
 

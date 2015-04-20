@@ -48,4 +48,8 @@ public class MathSymbol extends Symbol {
     @Override public String getEntryTypeDescription() {
         return "a math symbol";
     }
+
+    @Override public MathSymbol toMathSymbol() {
+        return this;
+    }
 }

@@ -14,8 +14,7 @@ import java.util.List;
  * pairs a {@link ScopeSearchPath} with an {@link TableSearcher} to define a
  * fully parameterized strategy for searching a set of scopes.
  */
-public class BaseSymbolQuery<E extends Symbol> implements
-        SymbolQuery<E> {
+public class BaseSymbolQuery<E extends Symbol> implements SymbolQuery<E> {
 
     private final ScopeSearchPath searchPath;
     private final TableSearcher<E> searcher;
@@ -25,8 +24,7 @@ public class BaseSymbolQuery<E extends Symbol> implements
         this.searcher = searcher;
     }
 
-    @Override
-    public List<E> searchFromContext(Scope source, SymbolTable repo)
+    @Override public List<E> searchFromContext(Scope source, SymbolTable repo)
             throws DuplicateSymbolException {
         return searchPath.searchFromContext(searcher, source, repo);
     }

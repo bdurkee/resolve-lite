@@ -17,10 +17,10 @@ import java.util.List;
  */
 public class BaseMultimatchSymbolQuery<E extends Symbol>
         extends
-        BaseSymbolQuery<E> {
+            BaseSymbolQuery<E> {
 
     public BaseMultimatchSymbolQuery(ScopeSearchPath path,
-                                     MultimatchTableSearcher<E> searcher) {
+            MultimatchTableSearcher<E> searcher) {
         super(path, searcher);
     }
 
@@ -29,8 +29,7 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
      * will not throw a {@link DuplicateSymbolException}.
      * Otherwise, behaves identically.
      */
-    @Override
-    public List<E> searchFromContext(Scope source, SymbolTable repo) {
+    @Override public List<E> searchFromContext(Scope source, SymbolTable repo) {
         List<E> result;
         try {
             result = super.searchFromContext(source, repo);

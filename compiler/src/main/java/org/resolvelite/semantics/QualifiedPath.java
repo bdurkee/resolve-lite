@@ -8,7 +8,7 @@ import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class QualifiedPath implements ScopeSearchPath {
@@ -18,7 +18,7 @@ public class QualifiedPath implements ScopeSearchPath {
 
     public QualifiedPath(Token qualifier, FacilityStrategy facilityStrategy) {
 
-        if (facilityStrategy == FacilityStrategy.FACILITY_IGNORE) {
+        if ( facilityStrategy == FacilityStrategy.FACILITY_IGNORE ) {
             throw new IllegalArgumentException("can't use facility ignore "
                     + "strategy in performing a qualified search");
         }
@@ -26,27 +26,36 @@ public class QualifiedPath implements ScopeSearchPath {
         this.qualifier = qualifier;
     }
 
-    @Override
-    public <E extends Symbol> List<E> searchFromContext(
+    @Override public <E extends Symbol> List<E> searchFromContext(
             TableSearcher<E> searcher, Scope source, SymbolTable repo)
             throws DuplicateSymbolException {
-        List<E> result;
+        List<E> result = new ArrayList<>();
         try {
-            FacilitySymbol facilitySym =
-                    (FacilitySymbol)
-                            source.queryForOne(
-                                    new UnqualifiedNameQuery(qualifier.getText()));
-        } catch (NoSuchSymbolException e) {
+            FacilitySymbol facility =
+                    (FacilitySymbol) source
+                            .queryForOne(new UnqualifiedNameQuery(qualifier
+                                    .getText()));
+
+            Scope facilityScope =
+                    facility.getFacility()
+                            .getSpecification()
+                            .getScope(
+                                    facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
+
+            result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
+        }
+        catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
             try {
                 ModuleScopeBuilder moduleScope =
                         repo.getModuleScope(qualifier.getText());
 
-                result = moduleScope.getMatches(searcher, TableSearcher.SearchContext.IMPORT);
+                result =
+                        moduleScope.getMatches(searcher,
+                                TableSearcher.SearchContext.IMPORT);
             }
-            catch (NoSuchSymbolException nsse2) {
-                throw new NoSuchSymbolException();
-            }
+            catch (NoSuchSymbolException nsse2) {}
         }
+        return result;
     }
 }

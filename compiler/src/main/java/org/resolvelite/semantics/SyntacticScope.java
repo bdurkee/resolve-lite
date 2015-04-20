@@ -2,6 +2,8 @@ package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.query.MultimatchSymbolQuery;
+import org.resolvelite.semantics.query.SymbolQuery;
 import org.resolvelite.semantics.searchers.TableSearcher;
 import org.resolvelite.semantics.searchers.TableSearcher.SearchContext;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
@@ -11,7 +13,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class BaseScope implements Scope {
+public abstract class SyntacticScope extends AbstractScope {
 
     protected final Map<String, Symbol> symbols;
     private final SymbolTable symtab;
@@ -20,7 +22,7 @@ public abstract class BaseScope implements Scope {
     protected Scope parent;
     protected final String moduleID;
 
-    BaseScope(SymbolTable scopeRepo, ParseTree definingTree, Scope parent,
+    SyntacticScope(SymbolTable scopeRepo, ParseTree definingTree, Scope parent,
             String moduleID, Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;
@@ -45,6 +47,21 @@ public abstract class BaseScope implements Scope {
         return s;
     }
 
+    @Override public <E extends Symbol> List<E> query(
+            MultimatchSymbolQuery<E> query) {
+        return query.searchFromContext(this, symtab);
+    }
+
+    @Override public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
+            throws NoSuchSymbolException,
+                DuplicateSymbolException {
+        List<E> results = query.searchFromContext(this, symtab);
+        if ( results.isEmpty() )
+            throw new NoSuchSymbolException();
+        else if ( results.size() > 1 ) throw new DuplicateSymbolException();
+        return results.get(0);
+    }
+
     @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
         return symbols.values().stream()
                 .filter(type::isInstance)
@@ -56,15 +73,15 @@ public abstract class BaseScope implements Scope {
         return symbols.keySet() + "";
     }
 
-    @Override
-    public <E extends Symbol> boolean addMatches(TableSearcher<E> searcher,
-            List<E> matches, Set<Scope> searchedScopes,
+    @Override public <E extends Symbol> boolean addMatches(
+            TableSearcher<E> searcher, List<E> matches,
+            Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException {
         boolean finished = false;
 
-        if (!searchedScopes.contains(this)) {
+        if ( !searchedScopes.contains(this) ) {
             searchedScopes.add(this);
 
             Map<String, Symbol> symbolTableView = symbols;
@@ -75,27 +92,12 @@ public abstract class BaseScope implements Scope {
             }*/
             finished = searcher.addMatches(symbolTableView, matches, l);
 
-            if (!finished) {
+            if ( !finished ) {
                 finished =
                         parent.addMatches(searcher, matches, searchedScopes,
-                                genericInstantiations,
-                                instantiatingFacility, l);
+                                genericInstantiations, instantiatingFacility, l);
             }
         }
         return finished;
-    }
-
-    @Override
-    public final <E extends Symbol> List<E> getMatches(
-            TableSearcher<E> searcher, SearchContext l)
-            throws DuplicateSymbolException {
-        List<E> result = new ArrayList<>();
-        Set<Scope> searchedScopes = new HashSet<Scope>();
-        Map<String, PTType> genericInstantiations =
-                new HashMap<String, PTType>();
-
-        addMatches(searcher, result, searchedScopes, genericInstantiations,
-                null, l);
-        return result;
     }
 }

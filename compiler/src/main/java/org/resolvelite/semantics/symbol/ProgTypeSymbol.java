@@ -51,6 +51,10 @@ public class ProgTypeSymbol extends Symbol {
         return getName();
     }
 
+    @Override public ProgTypeSymbol toProgTypeSymbol() {
+        return this;
+    }
+
     @Override public String getEntryTypeDescription() {
         return "a program type";
     }

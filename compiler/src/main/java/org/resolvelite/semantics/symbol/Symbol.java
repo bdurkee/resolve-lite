@@ -1,6 +1,8 @@
 package org.resolvelite.semantics.symbol;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.UnexpectedSymbolException;
 
 public abstract class Symbol {
 
@@ -48,4 +50,33 @@ public abstract class Symbol {
 
     public abstract String getEntryTypeDescription();
 
+    public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public ProgTypeDefinitionSymbol toProgTypeDefinitionSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public ProgParameterSymbol toProgParameterSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
 }

@@ -6,7 +6,6 @@ import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
@@ -15,7 +14,7 @@ import java.util.Map;
  * class can be acquired through calls to some of the methods of
  * {@link SymbolTable}.
  */
-public class ScopeBuilder extends BaseScope {
+public class ScopeBuilder extends SyntacticScope {
 
     private final TypeGraph typeGraph;
 
@@ -29,37 +28,31 @@ public class ScopeBuilder extends BaseScope {
         this.parent = parent;
     }
 
-    public MathSymbol addBinding(String name,
-                Symbol.Quantification q, ParseTree definingTree, MTType type,
-                MTType typeValue)
+    public MathSymbol addBinding(String name, Symbol.Quantification q,
+            ParseTree definingTree, MTType type, MTType typeValue)
             throws DuplicateSymbolException {
 
         MathSymbol entry =
-                new MathSymbol(typeGraph, name, q, definingTree,
-                        type, typeValue, moduleID);
+                new MathSymbol(typeGraph, name, q, definingTree, type,
+                        typeValue, moduleID);
         symbols.put(name, entry);
         return entry;
     }
 
-    public MathSymbol addBinding(String name,
-                                      Symbol.Quantification q,
-                                      ParseTree definingTree, MTType type)
+    public MathSymbol addBinding(String name, Symbol.Quantification q,
+            ParseTree definingTree, MTType type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
-    public MathSymbol addBinding(String name,
-                                      ParseTree definingTree, MTType type,
-                                      MTType typeValue)
-            throws DuplicateSymbolException {
-
-        return addBinding(name, Symbol.Quantification.NONE,
-                definingTree, type, typeValue);
+    public MathSymbol addBinding(String name, ParseTree definingTree,
+            MTType type, MTType typeValue) throws DuplicateSymbolException {
+        return addBinding(name, Symbol.Quantification.NONE, definingTree, type,
+                typeValue);
     }
 
     public MathSymbol addBinding(String name, ParseTree definingTree,
-                                 MTType type)
-            throws DuplicateSymbolException {
+            MTType type) throws DuplicateSymbolException {
         return addBinding(name, Symbol.Quantification.NONE, definingTree, type);
     }
 

@@ -84,6 +84,10 @@ public class ProgParameterSymbol extends Symbol {
         return mode;
     }
 
+    @Override public ProgParameterSymbol toProgParameterSymbol() {
+        return this;
+    }
+
     @Override public String getEntryTypeDescription() {
         return "a parameter";
     }

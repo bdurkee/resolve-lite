@@ -11,4 +11,8 @@ public class GenericSymbol extends Symbol {
     @Override public String getEntryTypeDescription() {
         return "a generic";
     }
+
+    @Override public GenericSymbol toGenericSymbol() {
+        return this;
+    }
 }

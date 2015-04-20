@@ -69,4 +69,8 @@ public class FacilitySymbol extends Symbol {
     @Override public String toString() {
         return getName();
     }
+
+    @Override public FacilitySymbol toFacilitySymbol() {
+        return this;
+    }
 }
