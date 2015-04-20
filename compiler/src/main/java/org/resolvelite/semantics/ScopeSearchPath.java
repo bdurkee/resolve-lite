@@ -19,9 +19,9 @@ public interface ScopeSearchPath {
      * 
      * @param searcher A {@link TableSearcher} to apply to each scope along
      *        the search path.
-     * @param table A symbol table containing any referenced modules.
-     * @param context The current scope from which the search was spawned.
-     * 
+     * @param source The current scope from which the search was spawned.
+     * @param repo A symbol table containing any referenced modules.
+     *
      * @return A list of matches.
      */
     public <E extends Symbol> List<E> searchFromContext(

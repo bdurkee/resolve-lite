@@ -10,6 +10,7 @@ import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
+import org.resolvelite.semantics.symbol.MathInvalidSymbol;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
@@ -20,8 +21,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 /**
  * Computes math types for specifications and updates existing entries with
- * the computed math types. If the type is unable to be computed or erroneous,
- * {@link MTInvalid} is annotated in its place.
+ * the computed math types.
  */
 //Todo: Figure out if we want this to build PExps here as well.
 public class ComputeMathTypes extends SetScopes {
@@ -74,6 +74,11 @@ public class ComputeMathTypes extends SetScopes {
         exitMathSymbolExp(null, ctx.getText(), ctx);
     }
 
+    @Override public void exitMathVariableExp(
+            @NotNull ResolveParser.MathVariableExpContext ctx) {
+        exitMathSymbolExp(null, ctx.getText(), ctx);
+    }
+
     @Override public void enterMathTypeExp(
             @NotNull ResolveParser.MathTypeExpContext ctx) {
         typeValueDepth++;
@@ -99,15 +104,6 @@ public class ComputeMathTypes extends SetScopes {
 
         mathTypes.put(ctx, intendedEntry.getType());
         setSymbolTypeValue(ctx, symbolName, intendedEntry);
-        String typeValueDesc = "";
-
-        if ( mathTypeValues.get(ctx) != null ) {
-            typeValueDesc =
-                    ", referencing math type " + mathTypeValues.get(ctx) + " ("
-                            + mathTypeValues.get(ctx).getClass() + ")";
-        }
-        System.out.println("processed symbol " + symbolName + " with type "
-                + mathTypes.get(ctx) + typeValueDesc);
         return intendedEntry;
     }
 
@@ -124,8 +120,7 @@ public class ComputeMathTypes extends SetScopes {
         catch (NoSuchSymbolException nsse) {
             compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
                     qualifier, symbolName);
-            //return InvalidType.INSTANCE;
-            return null; //Todo: MTInvalid
+            return MathInvalidSymbol.getInstance(g, symbolName);
         }
     }
 
@@ -147,8 +142,12 @@ public class ComputeMathTypes extends SetScopes {
                 compiler.errorManager
                         .semanticError(ErrorKind.INVALID_MATH_TYPE,
                                 ctx.getStart(), symbolName);
-                // mathTypeValues.put(ctx, INVALID);
+                mathTypeValues.put(ctx, g.MALFORMED);
             }
         }
+    }
+
+    protected final String getRootModuleID() {
+        return symtab.getInnermostActiveScope().getModuleID();
     }
 }

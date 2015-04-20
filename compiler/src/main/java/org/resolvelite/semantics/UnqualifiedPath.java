@@ -24,11 +24,11 @@ import java.util.*;
  * <li>For each searched import, search any facilities declared inside.</li>
  * </ul>
  * </ol>
- *
+ * 
  * Instance of this class can be parameterized to search only direct imports or
  * to exclude all imports, as well as to exclude searching facilities, or change
  * how generics are handled when searching facilities.
- *
+ * 
  * Additionally, by setting the {@code localPriority} flag, the search can be
  * made to stop without considering imports (regardless of the import strategy)
  * if at least one local match is found. Note that any local facilities will

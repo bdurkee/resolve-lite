@@ -103,7 +103,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                                     getRootModuleID())).toMathSymbol();
         }
         catch (DuplicateSymbolException e) {
-            throw new RuntimeException("duplicate exemplar??");
+            throw new RuntimeException("duplicate exemplar!??");
         }
         symtab.endScope();
         try {
@@ -164,9 +164,5 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected final String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
-    }
-
-    protected final void dupSymbol(Token name) {
-
     }
 }

@@ -17,19 +17,8 @@ public class MathSymbol extends Symbol {
             String moduleID) {
         super(name, definingTree, moduleID);
         this.g = g;
-        this.type = type;
         this.quantification = q;
-        if ( typeValue != null ) {
-            this.typeValue = typeValue;
-        }
-        else if ( type.isKnownToContainOnlyMTypes() ) {
-            this.typeValue =
-                    new MTProper(g, type,
-                            type.membersKnownToContainOnlyMTypes(), name);
-        }
-        else {
-            this.typeValue = null;
-        }
+        this.setTypes(type, typeValue);
     }
 
     public MathSymbol(TypeGraph g, String name, Quantification q,
@@ -74,6 +63,10 @@ public class MathSymbol extends Symbol {
     public MTType getTypeValue() throws SymbolNotOfKindTypeException {
         if ( typeValue == null ) throw new SymbolNotOfKindTypeException();
         return typeValue;
+    }
+
+    @Override public String toString() {
+        return getName();
     }
 
     @Override public String getEntryTypeDescription() {

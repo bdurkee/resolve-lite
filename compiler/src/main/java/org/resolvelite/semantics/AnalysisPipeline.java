@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.compiler.AbstractCompilationPipeline;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
 
 import java.util.List;
 
@@ -27,8 +28,9 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             walker.walk(definePhase, unit.getRoot());
             walker.walk(mathTypingPhase, unit.getRoot());
 
-            //PrintTypes pt = new PrintTypes(typingPhase.types);
-            //walker.walk(pt, unit.getRoot());
+            PrintTypes pt = new PrintTypes(mathTypingPhase.mathTypes,
+                    mathTypingPhase.mathTypeValues);
+            walker.walk(pt, unit.getRoot());
             int i;
             i = 0;
         }

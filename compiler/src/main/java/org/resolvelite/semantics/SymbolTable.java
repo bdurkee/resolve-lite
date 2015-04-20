@@ -7,6 +7,7 @@ import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.misc.Hardcoded;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Deque;
@@ -22,12 +23,10 @@ public class SymbolTable {
      * When starting a search from a particular scope, specifies how any
      * available facilities should be searched.
      * 
-     * <p>
      * Available facilities are those facilities defined in a module searched by
      * the search's {@code ImportStrategy} (which necessarily always includes
      * the source module).
      * 
-     * <p>
      * Note that facilities cannot be recursively searched. Imports and
      * facilities appearing in available facilities will not be searched.
      */
@@ -61,7 +60,6 @@ public class SymbolTable {
      * When starting a search from a particular scope, specifies which
      * additional modules should be searched, based on any imported modules.
      * 
-     * <p>
      * Imported modules are those listed in the <em>uses</em> clause of the
      * source module scope in which the scope is introduced. For searches
      * originating directly in a module scope, the source module scope is the
@@ -105,10 +103,8 @@ public class SymbolTable {
         },
 
         /**
-         * <p>
          * Indicates that the search should recursively search the closure of
          * all imports and their own imports.
-         * </p>
          */
         IMPORT_RECURSIVE {
 
@@ -144,6 +140,7 @@ public class SymbolTable {
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
     public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
+    public final ParseTreeProperty<PExp> specASTs = new ParseTreeProperty<>();
 
     private ModuleScopeBuilder curModuleScope = null;
     private final TypeGraph typeGraph;
