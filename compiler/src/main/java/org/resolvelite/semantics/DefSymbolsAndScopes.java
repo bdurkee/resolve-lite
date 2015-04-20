@@ -94,11 +94,23 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
+        MathSymbol exemplar = null;
+        try {
+            exemplar =
+                    symtab.getInnermostActiveScope()
+                            .define(new MathSymbol(symtab.getTypeGraph(),
+                                    ctx.exemplar.getText(), ctx,
+                                    getRootModuleID())).toMathSymbol();
+        }
+        catch (DuplicateSymbolException e) {
+            throw new RuntimeException("duplicate exemplar??");
+        }
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgTypeDefinitionSymbol(symtab.getTypeGraph(),
-                            ctx.name.getText(), ctx, getRootModuleID()));
+                            ctx.name.getText(), exemplar, ctx,
+                            getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -152,5 +164,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected final String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
+    }
+
+    protected final void dupSymbol(Token name) {
+
     }
 }

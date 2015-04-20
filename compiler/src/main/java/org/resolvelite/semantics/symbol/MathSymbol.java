@@ -8,15 +8,15 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 public class MathSymbol extends Symbol {
 
-    private final MTType type;
-    private final MTType typeValue;
+    private MTType type, typeValue;
     private final Quantification quantification;
+    private final TypeGraph g;
 
     public MathSymbol(TypeGraph g, String name, Quantification q,
             ParseTree definingTree, MTType type, MTType typeValue,
             String moduleID) {
         super(name, definingTree, moduleID);
-
+        this.g = g;
         this.type = type;
         this.quantification = q;
         if ( typeValue != null ) {
@@ -26,6 +26,37 @@ public class MathSymbol extends Symbol {
             this.typeValue =
                     new MTProper(g, type,
                             type.membersKnownToContainOnlyMTypes(), name);
+        }
+        else {
+            this.typeValue = null;
+        }
+    }
+
+    public MathSymbol(TypeGraph g, String name, Quantification q,
+            ParseTree definingTree, String moduleID) {
+        super(name, definingTree, moduleID);
+        this.g = g;
+        this.quantification = q;
+    }
+
+    public MathSymbol(TypeGraph g, String name, ParseTree definingTree,
+            String moduleID) {
+        this(g, name, Quantification.NONE, definingTree, moduleID);
+    }
+
+    public void setTypes(MTType mathType, MTType mathTypeValue) {
+        if ( mathType == null ) {
+            throw new IllegalArgumentException(
+                    "passed math type cannot be null");
+        }
+        this.type = mathType;
+        if ( mathTypeValue != null ) {
+            this.typeValue = mathTypeValue;
+        }
+        else if ( type.isKnownToContainOnlyMTypes() ) {
+            this.typeValue =
+                    new MTProper(g, type,
+                            type.membersKnownToContainOnlyMTypes(), getName());
         }
         else {
             this.typeValue = null;

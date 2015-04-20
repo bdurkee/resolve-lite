@@ -155,7 +155,8 @@ public class SymbolTable {
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
-                new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER, "GLOBAL");
+                new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
+                        "GLOBAL");
 
         Hardcoded.addBuiltInSymbols(typeGraph, rc, globalScope);
         lexicalScopeStack.push(globalScope);

@@ -9,11 +9,21 @@ import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.query.MathSymbolQuery;
+import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.MathSymbol;
+import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
+import org.resolvelite.semantics.SymbolTable.ImportStrategy;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
+/**
+ * Computes math types for specifications and updates existing entries with
+ * the computed math types. If the type is unable to be computed or erroneous,
+ * {@link MTInvalid} is annotated in its place.
+ */
+//Todo: Figure out if we want this to build PExps here as well.
 public class ComputeMathTypes extends SetScopes {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
@@ -21,10 +31,42 @@ public class ComputeMathTypes extends SetScopes {
     protected TypeGraph g;
     protected int typeValueDepth = 0;
 
-    ComputeMathTypes(@NotNull ResolveCompiler rc,
-                     @NotNull SymbolTable symtab) {
+    ComputeMathTypes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
         super(rc, symtab);
         this.g = symtab.getTypeGraph();
+    }
+
+    @Override public void exitTypeModelDecl(
+            @NotNull ResolveParser.TypeModelDeclContext ctx) {
+        try {
+            ProgTypeDefinitionSymbol t =
+                    currentScope.queryForOne(
+                            new UnqualifiedNameQuery(ctx.name.getText(),
+                                    ImportStrategy.IMPORT_NONE,
+                                    FacilityStrategy.FACILITY_IGNORE, true,
+                                    true)).toProgTypeDefinitionSymbol();
+            MTType modelType = mathTypeValues.get(ctx.mathTypeExp());
+            t.setModelType(modelType);
+            t.getExemplar().setTypes(modelType, null);
+        }
+        catch (NoSuchSymbolException e) {
+            e.printStackTrace();
+        }
+        catch (DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override public void exitMathPrimeExp(
+            @NotNull ResolveParser.MathPrimeExpContext ctx) {
+        mathTypes.put(ctx, mathTypes.get(ctx.mathPrimaryExp()));
+        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathPrimaryExp()));
+    }
+
+    @Override public void exitMathPrimaryExp(
+            @NotNull ResolveParser.MathPrimaryExpContext ctx) {
+        mathTypes.put(ctx, mathTypes.get(ctx.getChild(0)));
+        mathTypeValues.put(ctx, mathTypeValues.get(ctx.getChild(0)));
     }
 
     @Override public void exitMathBooleanExp(
@@ -40,17 +82,26 @@ public class ComputeMathTypes extends SetScopes {
     @Override public void exitMathTypeExp(
             @NotNull ResolveParser.MathTypeExpContext ctx) {
         typeValueDepth--;
+
+        MTType type = mathTypes.get(ctx.mathExp());
+        MTType typeValue = mathTypeValues.get(ctx.mathExp());
+        if ( typeValue == null ) {
+            compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
+                    ctx.getStart(), ctx.mathExp().getText());
+        }
+        mathTypes.put(ctx, type);
+        mathTypeValues.put(ctx, typeValue);
     }
 
-    private MathSymbol exitMathSymbolExp(
-            Token qualifier, String symbolName, ParserRuleContext ctx) {
+    private MathSymbol exitMathSymbolExp(Token qualifier, String symbolName,
+            ParserRuleContext ctx) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
 
         mathTypes.put(ctx, intendedEntry.getType());
         setSymbolTypeValue(ctx, symbolName, intendedEntry);
         String typeValueDesc = "";
 
-        if (mathTypeValues.get(ctx) != null) {
+        if ( mathTypeValues.get(ctx) != null ) {
             typeValueDesc =
                     ", referencing math type " + mathTypeValues.get(ctx) + " ("
                             + mathTypeValues.get(ctx).getClass() + ")";
@@ -60,44 +111,43 @@ public class ComputeMathTypes extends SetScopes {
         return intendedEntry;
     }
 
-    private MathSymbol getIntendedEntry(Token qualifier,
-                                             String symbolName,
-                                             ParserRuleContext ctx) {
+    private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
+            ParserRuleContext ctx) {
         try {
-            MathSymbol x = currentScope.queryForOne(
-                            new MathSymbolQuery(qualifier, symbolName,
-                                    ctx.getStart())).toMathSymbol();
-            return x;
+            return currentScope.queryForOne(
+                    new MathSymbolQuery(qualifier, symbolName, ctx.getStart()))
+                    .toMathSymbol();
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(); //This will never fire
         }
         catch (NoSuchSymbolException nsse) {
-            compiler.errorManager.semanticError(
-                    ErrorKind.NO_SUCH_SYMBOL, qualifier, symbolName);
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                    qualifier, symbolName);
             //return InvalidType.INSTANCE;
-            return null;
+            return null; //Todo: MTInvalid
         }
     }
 
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
-                                    @NotNull MathSymbol intendedEntry) {
+            @NotNull MathSymbol intendedEntry) {
         try {
-            if (intendedEntry.getQuantification() == Quantification.NONE) {
+            if ( intendedEntry.getQuantification() == Quantification.NONE ) {
                 mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
             else {
-                if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
+                if ( intendedEntry.getType().isKnownToContainOnlyMTypes() ) {
                     //mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 }
             }
         }
         catch (SymbolNotOfKindTypeException snokte) {
-            if (typeValueDepth > 0) {
+            if ( typeValueDepth > 0 ) {
                 //I had better identify a type
-                compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
-                        ctx.getStart(), symbolName);
-               // mathTypeValues.put(ctx, INVALID);
+                compiler.errorManager
+                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                ctx.getStart(), symbolName);
+                // mathTypeValues.put(ctx, INVALID);
             }
         }
     }

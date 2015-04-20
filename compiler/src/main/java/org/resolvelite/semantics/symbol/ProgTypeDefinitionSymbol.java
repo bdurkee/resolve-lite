@@ -10,16 +10,13 @@ public class ProgTypeDefinitionSymbol extends ProgTypeSymbol {
     private MathSymbol exemplar;
 
     public ProgTypeDefinitionSymbol(TypeGraph g, String name,
-            ParseTree definingTree, String moduleID) {
+            MathSymbol exemplar, ParseTree definingTree, String moduleID) {
         super(g, name, definingTree, moduleID);
-    }
-
-    public void setExemplarSymbol(MathSymbol exemplar) {
         this.exemplar = exemplar;
     }
 
     public MathSymbol getExemplar() {
-        return this.exemplar;
+        return exemplar;
     }
 
     @Override public PTFamily getProgramType() {

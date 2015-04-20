@@ -24,13 +24,11 @@ import java.util.*;
  * <li>For each searched import, search any facilities declared inside.</li>
  * </ul>
  * </ol>
- * 
- * <p>
+ *
  * Instance of this class can be parameterized to search only direct imports or
  * to exclude all imports, as well as to exclude searching facilities, or change
  * how generics are handled when searching facilities.
- * 
- * <p>
+ *
  * Additionally, by setting the {@code localPriority} flag, the search can be
  * made to stop without considering imports (regardless of the import strategy)
  * if at least one local match is found. Note that any local facilities will
@@ -55,8 +53,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
-        Map<String, PTType> genericInstantiations =
-                new HashMap<String, PTType>();
+        Map<String, PTType> genericInstantiations = new HashMap<>();
 
         searchModule(searcher, source, repo, result, searchedScopes,
                 genericInstantiations, null, importStrategy, 0);
@@ -81,11 +78,12 @@ public class UnqualifiedPath implements ScopeSearchPath {
         //Next, if requested, we search any local facilities.
         if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
             throw new UnsupportedOperationException(
-                    "unqualified facility "
-                            + "searching is not currently permitted by the compiler. It"
+                    "searching for unqualified symbols using 'facility generic' or 'facility instantiate' "
+                            + "is not currently permitted by the compiler. It"
                             + "could be easily added, though for code generation reasons"
-                            + "we currently are disallowing this; qualify explicitly if"
-                            + " you wish to find a symbol");
+                            + "we currently are disallowing this; thus,"
+                            + "resolve programmers must  explicitly qualify any "
+                            + "facility-bound symbols");
             // finished =
             //         searchFacilities(searcher, results, source,
             //                 genericInstantiations, searchedScopes, repo);
