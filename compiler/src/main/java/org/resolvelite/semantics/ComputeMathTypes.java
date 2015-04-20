@@ -21,7 +21,8 @@ public class ComputeMathTypes extends SetScopes {
     protected TypeGraph g;
     protected int typeValueDepth = 0;
 
-    ComputeMathTypes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
+    ComputeMathTypes(@NotNull ResolveCompiler rc,
+                     @NotNull SymbolTable symtab) {
         super(rc, symtab);
         this.g = symtab.getTypeGraph();
     }
@@ -41,15 +42,15 @@ public class ComputeMathTypes extends SetScopes {
         typeValueDepth--;
     }
 
-    private MathSymbol exitMathSymbolExp(Token qualifier, String symbolName,
-            ParserRuleContext ctx) {
+    private MathSymbol exitMathSymbolExp(
+            Token qualifier, String symbolName, ParserRuleContext ctx) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
 
         mathTypes.put(ctx, intendedEntry.getType());
         setSymbolTypeValue(ctx, symbolName, intendedEntry);
         String typeValueDesc = "";
 
-        if ( mathTypeValues.get(ctx) != null ) {
+        if (mathTypeValues.get(ctx) != null) {
             typeValueDesc =
                     ", referencing math type " + mathTypeValues.get(ctx) + " ("
                             + mathTypeValues.get(ctx).getClass() + ")";
@@ -59,42 +60,44 @@ public class ComputeMathTypes extends SetScopes {
         return intendedEntry;
     }
 
-    private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
-            ParserRuleContext ctx) {
+    private MathSymbol getIntendedEntry(Token qualifier,
+                                             String symbolName,
+                                             ParserRuleContext ctx) {
         try {
-            return currentScope.queryForOne(new MathSymbolQuery(qualifier,
-                    symbolName, ctx.getStart()));
+            MathSymbol x = currentScope.queryForOne(
+                            new MathSymbolQuery(qualifier, symbolName,
+                                    ctx.getStart())).toMathSymbol();
+            return x;
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(); //This will never fire
         }
         catch (NoSuchSymbolException nsse) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                    qualifier, symbolName);
+            compiler.errorManager.semanticError(
+                    ErrorKind.NO_SUCH_SYMBOL, qualifier, symbolName);
             //return InvalidType.INSTANCE;
             return null;
         }
     }
 
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
-            @NotNull MathSymbol intendedEntry) {
+                                    @NotNull MathSymbol intendedEntry) {
         try {
-            if ( intendedEntry.getQuantification() == Quantification.NONE ) {
+            if (intendedEntry.getQuantification() == Quantification.NONE) {
                 mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
             else {
-                if ( intendedEntry.getType().isKnownToContainOnlyMTypes() ) {
+                if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
                     //mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 }
             }
         }
         catch (SymbolNotOfKindTypeException snokte) {
-            if ( typeValueDepth > 0 ) {
+            if (typeValueDepth > 0) {
                 //I had better identify a type
-                compiler.errorManager
-                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
-                                ctx.getStart(), symbolName);
-                // mathTypeValues.put(ctx, INVALID);
+                compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
+                        ctx.getStart(), symbolName);
+               // mathTypeValues.put(ctx, INVALID);
             }
         }
     }

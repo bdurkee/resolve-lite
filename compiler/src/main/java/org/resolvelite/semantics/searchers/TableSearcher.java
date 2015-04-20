@@ -26,12 +26,10 @@ public interface TableSearcher<E extends Symbol> {
      * Adds any symbol table entries from {@code entries} that match
      * this search to {@code matches}. The order that they are added is
      * determined by the concrete base-class.</p>
-     * 
-     * <p>
+     *
      * If no matches exist, the method will simply leave {@code matches}
      * unmodified.
-     * 
-     * <p>
+     *
      * The semantics of the incoming accumulator are only that it is the
      * appropriate place to add new matches, not that it will necessarily
      * contain all matches so far. This allows intermediate accumulators to be
