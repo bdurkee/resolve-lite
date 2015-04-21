@@ -48,11 +48,9 @@ public class ComputeMathTypes extends SetScopes {
             MTType modelType = mathTypeValues.get(ctx.mathTypeExp());
             t.setModelType(modelType);
             t.getExemplar().setTypes(modelType, null);
+            
         }
-        catch (NoSuchSymbolException e) {
-            e.printStackTrace();
-        }
-        catch (DuplicateSymbolException e) {
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             e.printStackTrace();
         }
     }
