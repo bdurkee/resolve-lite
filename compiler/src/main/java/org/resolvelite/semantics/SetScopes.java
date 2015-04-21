@@ -34,8 +34,7 @@ class SetScopes extends ResolveBaseListener {
     }
 
     /**
-     * Sets current scope ptr on pre-traversal; {@link ComputeMathTypes}
-     * resolves
+     * Sets current scope ptr on pre-traversal; {@link ComputeTypes} resolves
      * references to declared {@link Symbol}s on the post traversal.
      * 
      * @param ctx

@@ -5,9 +5,14 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
+import org.resolvelite.semantics.programtype.PTFamily;
+import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.MathInvalidSymbol;
@@ -24,14 +29,17 @@ import org.resolvelite.typereasoning.TypeGraph;
  * the computed math types.
  */
 //Todo: Figure out if we want this to build PExps here as well.
-public class ComputeMathTypes extends SetScopes {
+public class ComputeTypes extends SetScopes {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progType = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
+
     protected TypeGraph g;
     protected int typeValueDepth = 0;
 
-    ComputeMathTypes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
+    ComputeTypes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
         super(rc, symtab);
         this.g = symtab.getTypeGraph();
     }
@@ -45,14 +53,51 @@ public class ComputeMathTypes extends SetScopes {
                                     ImportStrategy.IMPORT_NONE,
                                     FacilityStrategy.FACILITY_IGNORE, true,
                                     true)).toProgTypeDefinitionSymbol();
+            PExp constraint =
+                    ctx.constraintClause() != null ? buildPExp(ctx
+                            .constraintClause()) : null;
+            PExp initRequires =
+                    ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
+                            .requiresClause()) : null;
+            PExp initEnsures =
+                    ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
+                            .ensuresClause()) : null;
+            PExp finalRequires =
+                    ctx.typeModelFinal() != null ? buildPExp(ctx
+                            .typeModelFinal().requiresClause()) : null;
+            PExp finalEnsures =
+                    ctx.typeModelFinal() != null ? buildPExp(ctx
+                            .typeModelFinal().ensuresClause()) : null;
             MTType modelType = mathTypeValues.get(ctx.mathTypeExp());
+            PTType familyType =
+                    new PTFamily(modelType, ctx.name.getText(),
+                            ctx.exemplar.getText(), constraint, initRequires,
+                            initEnsures, finalRequires, finalEnsures);
+            t.setProgramType(familyType);
             t.setModelType(modelType);
             t.getExemplar().setTypes(modelType, null);
-            
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override public void exitRequiresClause(
+            @NotNull ResolveParser.RequiresClauseContext ctx) {
+        mathTypes.put(ctx, mathTypes.get(ctx.mathAssertionExp()));
+        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitEnsuresClause(
+            @NotNull ResolveParser.EnsuresClauseContext ctx) {
+        mathTypes.put(ctx, mathTypes.get(ctx.mathAssertionExp()));
+        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitMathAssertionExp(
+            @NotNull ResolveParser.MathAssertionExpContext ctx) {
+        mathTypes.put(ctx, mathTypes.get(ctx.getChild(0)));
+        mathTypeValues.put(ctx, mathTypeValues.get(ctx.getChild(0)));
     }
 
     @Override public void exitMathPrimeExp(
@@ -117,7 +162,7 @@ public class ComputeMathTypes extends SetScopes {
         }
         catch (NoSuchSymbolException nsse) {
             compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                    qualifier, symbolName);
+                    ctx.getStart(), symbolName);
             return MathInvalidSymbol.getInstance(g, symbolName);
         }
     }
@@ -143,6 +188,14 @@ public class ComputeMathTypes extends SetScopes {
                 mathTypeValues.put(ctx, g.MALFORMED);
             }
         }
+    }
+
+    protected final PExp buildPExp(ParserRuleContext ctx) {
+        if ( ctx == null ) return null;
+        PExpBuildingListener builder =
+                new PExpBuildingListener(mathTypes, mathTypeValues);
+        ParseTreeWalker.DEFAULT.walk(builder, ctx);
+        return builder.getBuiltPExp(ctx);
     }
 
     protected final String getRootModuleID() {

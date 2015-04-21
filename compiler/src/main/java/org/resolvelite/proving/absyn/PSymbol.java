@@ -74,8 +74,8 @@ public class PSymbol extends PExp {
 
     @Override public boolean isObviouslyTrue() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("true"))
-                || (arguments.size() == 2 && name.equals("=") && arguments
-                .get(0).equals(arguments.get(1)));
+                || (arguments.size() == 2 && name.equals("=") && arguments.get(
+                        0).equals(arguments.get(1)));
     }
 
     @Override public boolean isVariable() {
@@ -89,11 +89,11 @@ public class PSymbol extends PExp {
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
 
-        if (result == null) {
+        if ( result == null ) {
             String newLeft = leftPrint, newRight = rightPrint;
             Symbol.Quantification newQuantification = quantification;
 
-            if (arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX)) {
+            if ( arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX) ) {
                 PSymbol asVariable = new PSymbolBuilder(leftPrint) //
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
@@ -101,7 +101,7 @@ public class PSymbol extends PExp {
                         .mathTypeValue(getTypeValue()).build();
                 PExp functionSubstitution = substitutions.get(asVariable);
 
-                if (functionSubstitution != null) {
+                if ( functionSubstitution != null ) {
                     newLeft = ((PSymbol) functionSubstitution).leftPrint;
                     newRight = ((PSymbol) functionSubstitution).rightPrint;
                     newQuantification =
@@ -110,10 +110,10 @@ public class PSymbol extends PExp {
             }
 
             result = new PSymbolBuilder(newLeft, newRight) //
-                        .mathType(getType()).mathType(getTypeValue()) //
-                        .quantification(newQuantification) //
-                        .style(dispStyle) //
-                        .incoming(incomingFlag).build();
+                    .mathType(getType()).mathType(getTypeValue()) //
+                    .quantification(newQuantification) //
+                    .style(dispStyle) //
+                    .incoming(incomingFlag).build();
         }
         return result;
     }
@@ -132,7 +132,7 @@ public class PSymbol extends PExp {
     }
 
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
-        if (arguments.size() == 2 && name.equals("and")) {
+        if ( arguments.size() == 2 && name.equals("and") ) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }

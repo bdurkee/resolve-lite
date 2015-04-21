@@ -21,7 +21,7 @@ public interface ScopeSearchPath {
      *        the search path.
      * @param source The current scope from which the search was spawned.
      * @param repo A symbol table containing any referenced modules.
-     *
+     * 
      * @return A list of matches.
      */
     public <E extends Symbol> List<E> searchFromContext(

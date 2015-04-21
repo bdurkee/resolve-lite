@@ -12,14 +12,9 @@ public class PrintTypes extends ResolveBaseListener {
     ParseTreeProperty<MTType> types, typeValues;
 
     public PrintTypes(ParseTreeProperty<MTType> types,
-                      ParseTreeProperty<MTType> typeValues) {
+            ParseTreeProperty<MTType> typeValues) {
         this.types = types;
         this.typeValues = typeValues;
-    }
-
-    @Override public void exitMathAssertionExp(
-            @NotNull ResolveParser.MathAssertionExpContext ctx) {
-        printMathTypeStuff(ctx);
     }
 
     @Override public void exitMathPrimaryExp(
@@ -42,6 +37,7 @@ public class PrintTypes extends ResolveBaseListener {
     }
 
     private String getTypeValueStr(ParseTree t) {
-        return typeValues.get(t) != null ? typeValues.get(t).toString() : "null";
+        return typeValues.get(t) != null ? typeValues.get(t).toString()
+                : "null";
     }
 }

@@ -10,6 +10,6 @@ public class TypeGraph {
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
     public final MTProper ENTITY = new MTProper(this, "Entity");
 
-    public final MTProper MALFORMED = new MTProper(this, "MALFORMED");
+    public final MTProper MALFORMED = new MTProper(this, "Malformed");
 
 }

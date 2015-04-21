@@ -19,14 +19,24 @@ public class PExpBuildingListener extends ResolveBaseListener {
     private final ParseTreeProperty<MTType> types, typeValues;
     private final ParseTreeProperty<PExp> built = new ParseTreeProperty<>();
 
-    public PExpBuildingListener(ParseTreeProperty<MTType> types,
-            ParseTreeProperty<MTType> typeValues) {
-        this.types = types;
-        this.typeValues = typeValues;
+    public PExpBuildingListener(ParseTreeProperty<MTType> mathTypes,
+            ParseTreeProperty<MTType> mathTypeValues) {
+        this.types = mathTypes;
+        this.typeValues = mathTypeValues;
     }
 
     @Nullable public final PExp getBuiltPExp(ParseTree t) {
         return built.get(t);
+    }
+
+    @Override public void exitRequiresClause(
+            @NotNull ResolveParser.RequiresClauseContext ctx) {
+        built.put(ctx, built.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitEnsuresClause(
+            @NotNull ResolveParser.EnsuresClauseContext ctx) {
+        built.put(ctx, built.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitMathTypeExp(
