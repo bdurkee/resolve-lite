@@ -12,7 +12,7 @@ import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 
 /**
  * Transforms concrete parse tree math exprs to an equivalent abstract-syntax
- * form, represented by {@link PExp}s.
+ * form, represented by an {@link PExp}.
  */
 public class PExpBuildingListener extends ResolveBaseListener {
 

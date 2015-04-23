@@ -34,6 +34,7 @@ public class PSymbol extends PExp {
         this.arguments.addAll(arguments);
         this.literalFlag = builder.literal;
         this.incomingFlag = builder.incoming;
+        this.quantification = builder.quantification;
         this.dispStyle = builder.style;
     }
 
@@ -196,7 +197,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder literal(boolean e) {
-            literal = e;
+            this.literal = e;
             return this;
         }
 
@@ -211,7 +212,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder quantification(Symbol.Quantification q) {
-            quantification = q;
+            this.quantification = q;
             return this;
         }
 

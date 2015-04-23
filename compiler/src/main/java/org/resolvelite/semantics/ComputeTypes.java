@@ -18,15 +18,14 @@ import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.MathInvalidSymbol;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
 /**
- * Computes math types for specifications and updates existing entries with
- * the computed math types.
+ * Computes types for math and programming expressions and updates stored
+ * with this computed type information.
  */
 //Todo: Figure out if we want this to build PExps here as well.
 public class ComputeTypes extends SetScopes {
@@ -78,38 +77,33 @@ public class ComputeTypes extends SetScopes {
             t.getExemplar().setTypes(modelType, null);
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            e.printStackTrace();
+            e.printStackTrace();//shouldnt happen
         }
     }
 
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
-        mathTypes.put(ctx, mathTypes.get(ctx.mathAssertionExp()));
-        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathAssertionExp()));
+        chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
     @Override public void exitEnsuresClause(
             @NotNull ResolveParser.EnsuresClauseContext ctx) {
-        mathTypes.put(ctx, mathTypes.get(ctx.mathAssertionExp()));
-        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathAssertionExp()));
+        chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
     @Override public void exitMathAssertionExp(
             @NotNull ResolveParser.MathAssertionExpContext ctx) {
-        mathTypes.put(ctx, mathTypes.get(ctx.getChild(0)));
-        mathTypeValues.put(ctx, mathTypeValues.get(ctx.getChild(0)));
+        chainMathTypes(ctx, ctx.getChild(0));
     }
 
     @Override public void exitMathPrimeExp(
             @NotNull ResolveParser.MathPrimeExpContext ctx) {
-        mathTypes.put(ctx, mathTypes.get(ctx.mathPrimaryExp()));
-        mathTypeValues.put(ctx, mathTypeValues.get(ctx.mathPrimaryExp()));
+        chainMathTypes(ctx, ctx.mathPrimaryExp());
     }
 
     @Override public void exitMathPrimaryExp(
             @NotNull ResolveParser.MathPrimaryExpContext ctx) {
-        mathTypes.put(ctx, mathTypes.get(ctx.getChild(0)));
-        mathTypeValues.put(ctx, mathTypeValues.get(ctx.getChild(0)));
+        chainMathTypes(ctx, ctx.getChild(0));
     }
 
     @Override public void exitMathBooleanExp(
@@ -188,6 +182,11 @@ public class ComputeTypes extends SetScopes {
                 mathTypeValues.put(ctx, g.MALFORMED);
             }
         }
+    }
+
+    protected final void chainMathTypes(ParseTree current, ParseTree child) {
+        mathTypes.put(current, mathTypes.get(child));
+        mathTypeValues.put(current, mathTypeValues.get(child));
     }
 
     protected final PExp buildPExp(ParserRuleContext ctx) {
