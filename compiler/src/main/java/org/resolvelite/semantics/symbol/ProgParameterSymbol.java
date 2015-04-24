@@ -1,6 +1,8 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,11 +75,38 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     private final ParameterMode mode;
+    private PTType declaredType;
+    private final TypeGraph typeGraph;
 
-    public ProgParameterSymbol(String name, ParameterMode mode,
+    private final MathSymbol mathSymbolAlterEgo;
+    //private final Prog progVariable;
+
+    public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
             ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
+        this.typeGraph = g;
         this.mode = mode;
+
+        this.mathSymbolAlterEgo = new MathSymbol(g, name,
+                Quantification.NONE, definingTree, moduleID);
+    }
+
+    private MathSymbol getMathTypeAlterEgo() {
+
+        if ( declaredType == null ) {
+            throw new IllegalStateException("no math type set yet");
+        }
+        this.mathSymbolAlterEgo.setTypes(declaredType.toMath(), );
+        return new MathSymbol(typeGraph, getName(), Quantification.NONE,
+                getDefiningTree(), g.SSET, modelType, getModuleID());
+    }
+
+    @Override
+    public MathSymbolEntry toMathSymbolEntry(Location l) {
+        return myMathSymbolAlterEgo;
+    }
+    public void setProgramType(PTType t) {
+        this.declaredType = t;
     }
 
     public ParameterMode getMode() {

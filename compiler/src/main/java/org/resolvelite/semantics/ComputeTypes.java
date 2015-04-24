@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
@@ -18,6 +19,7 @@ import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.MathSymbol;
+import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
@@ -39,6 +41,55 @@ public class ComputeTypes extends SetScopes {
     }
 
     //TODO make it so you can get AnnotatedTree from ModuleScope
+    /*@Override public void postParameterVarDec(ParameterVarDec dec) {
+
+        ParameterMode mode =
+                ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
+
+        if (mode == null) {
+            throw new RuntimeException("Unexpected parameter mode: "
+                    + dec.getMode());
+        }
+
+        try {
+            ProgramParameterEntry paramEntry =
+                    myBuilder.getInnermostActiveScope().addFormalParameter(
+                            dec.getName().getName(), dec, mode,
+                            dec.getTy().getProgramTypeValue());
+            myCurrentParameters.add(paramEntry);
+        }
+        catch (DuplicateSymbolException e) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        dec.setMathType(dec.getTy().getMathTypeValue());
+    }*/
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+
+        Type type = types.get(ctx.type());
+
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ProgParameterSymbol param =
+                        currentScope.queryForOne(
+                                new UnqualifiedNameQuery(t.getText()))
+                                .toProgParameterSymbol();
+                param.setType(type);
+            }
+            catch (NoSuchSymbolException nsse) {
+                compiler.errorManager.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, t.getSymbol(), t.getText());
+                types.put(ctx, InvalidType.INSTANCE);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+        types.put(ctx, type);
+    }
 
     @Override public void exitProgType(
             @NotNull ResolveParser.ProgTypeContext ctx) {
@@ -49,7 +100,6 @@ public class ComputeTypes extends SetScopes {
                     currentScope.queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name, true))
                             .toProgTypeSymbol();
-
             tree.mathTypes.put(ctx, g.SSET);
             progType = type.getProgramType();
             mathType = type.getModelType();
@@ -155,7 +205,7 @@ public class ComputeTypes extends SetScopes {
         if ( typeValue == null ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
-            typeValue = g.INVALID;
+            typeValue = g.INVALID;  // not a type? let's give it an invalid value then
         }
         tree.mathTypes.put(ctx, type);
         tree.mathTypeValues.put(ctx, typeValue);

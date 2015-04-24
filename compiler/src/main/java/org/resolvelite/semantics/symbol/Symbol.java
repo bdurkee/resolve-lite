@@ -83,4 +83,5 @@ public abstract class Symbol {
     public RepSymbol toRepresentationSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
+
 }
