@@ -60,8 +60,8 @@ public class ComputeTypes extends SetScopes {
                     ctx.name, ctx.name.getText());
         }
         catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
-                    ctx.name.getText());
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
         }
     }
 

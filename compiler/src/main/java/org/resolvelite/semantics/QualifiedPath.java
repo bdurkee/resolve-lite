@@ -27,7 +27,6 @@ public class QualifiedPath implements ScopeSearchPath {
             throws DuplicateSymbolException {
         List<E> result = new ArrayList<>();
         try {
-
             FacilitySymbol facility =
                     (FacilitySymbol) source
                             .queryForOne(new UnqualifiedNameQuery(qualifier
@@ -35,7 +34,6 @@ public class QualifiedPath implements ScopeSearchPath {
 
             Scope facilityScope = facility.getFacility().getSpecification() //
                     .getScope(instantiateGenerics);
-
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
         }
         catch (NoSuchSymbolException e) {
@@ -50,20 +48,6 @@ public class QualifiedPath implements ScopeSearchPath {
             }
             catch (NoSuchSymbolException nsse2) {}
         }
-        return result;
-    }
-
-    private <E extends Symbol> List<E> searchModule(TableSearcher<E> searcher,
-            Scope source, SymbolTable repo) throws DuplicateSymbolException {
-        List<E> result = new ArrayList<>();
-        try {
-            ModuleScopeBuilder moduleScope =
-                    repo.getModuleScope(qualifier.getText());
-            result =
-                    moduleScope.getMatches(searcher,
-                            TableSearcher.SearchContext.IMPORT);
-        }
-        catch (NoSuchSymbolException nsse2) {}
         return result;
     }
 }

@@ -20,6 +20,6 @@ public class UnqualifiedNameQuery extends BaseMultimatchSymbolQuery<Symbol> {
 
     public UnqualifiedNameQuery(String searchString) {
         this(searchString, ImportStrategy.IMPORT_NAMED,
-                FacilityStrategy.FACILITY_INSTANTIATE, true, true);
+                FacilityStrategy.FACILITY_IGNORE, true, true);
     }
 }
