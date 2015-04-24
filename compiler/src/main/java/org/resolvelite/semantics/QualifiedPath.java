@@ -27,7 +27,7 @@ public class QualifiedPath implements ScopeSearchPath {
             throws DuplicateSymbolException {
         List<E> result = new ArrayList<>();
         try {
-            
+
             FacilitySymbol facility =
                     (FacilitySymbol) source
                             .queryForOne(new UnqualifiedNameQuery(qualifier
@@ -53,9 +53,8 @@ public class QualifiedPath implements ScopeSearchPath {
         return result;
     }
 
-    private<E extends Symbol> List<E> searchModule(TableSearcher<E> searcher,
-                                       Scope source, SymbolTable repo)
-            throws DuplicateSymbolException {
+    private <E extends Symbol> List<E> searchModule(TableSearcher<E> searcher,
+            Scope source, SymbolTable repo) throws DuplicateSymbolException {
         List<E> result = new ArrayList<>();
         try {
             ModuleScopeBuilder moduleScope =
