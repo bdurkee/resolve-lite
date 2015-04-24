@@ -80,4 +80,12 @@ public class AnnotatedTree {
     @NotNull public ParseTree getRoot() {
         return root;
     }
+
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof AnnotatedTree);
+        if ( result ) {
+            result = this.name.equals(((AnnotatedTree) o).name);
+        }
+        return result;
+    }
 }

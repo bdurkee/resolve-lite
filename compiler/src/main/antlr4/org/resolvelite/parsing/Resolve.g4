@@ -147,7 +147,7 @@ genericType
     ;
 
 parameterDeclGroup
-    :   parameterMode Identifier (',' Identifier)* ':' progTypeExp
+    :   parameterMode Identifier (',' Identifier)* ':' progType
     ;
 
 parameterMode
@@ -161,7 +161,7 @@ parameterMode
     ;
 
 variableDeclGroup
-    :   'Var' Identifier (',' Identifier)* ':' progTypeExp ';'
+    :   'Var' Identifier (',' Identifier)* ':' progType ';'
     ;
 
 // statements
@@ -196,7 +196,7 @@ whileStmt
 
 // type and record related rules
 
-progTypeExp
+progType
     :   (qualifier=Identifier '::')? name=Identifier
     ;
 
@@ -205,7 +205,7 @@ record
     ;
 
 recordVariableDeclGroup
-    :   Identifier (',' Identifier)* ':' progTypeExp ';'
+    :   Identifier (',' Identifier)* ':' progType ';'
     ;
 
 typeModelDecl
@@ -217,7 +217,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=Identifier '=' (record|progTypeExp) ';'
+    :   'Type' name=Identifier '=' (record|progType) ';'
         (conventionClause)?
        // (correspondenceClause)?
       //  (typeRepresentationInit)?
@@ -238,12 +238,12 @@ typeModelFinal
 
 operationDecl
     :   ('Operation'|'Oper') name=Identifier operationParameterList
-        (':' progTypeExp)? ';' (requiresClause)? (ensuresClause)?
+        (':' progType)? ';' (requiresClause)? (ensuresClause)?
     ;
 
 operationProcedureDecl
     :   (recursive='Recursive')? ('Operation'|'Oper')
-        name=Identifier operationParameterList (':' progTypeExp)? ';'
+        name=Identifier operationParameterList (':' progType)? ';'
         (requiresClause)?
         (ensuresClause)?
         'Procedure'
@@ -254,7 +254,7 @@ operationProcedureDecl
 
 procedureDecl
     :   (recursive='Recursive')? ('Procedure'|'Proc') name=Identifier
-        operationParameterList (':' progTypeExp)? ';'
+        operationParameterList (':' progType)? ';'
         (variableDeclGroup)*
         (stmt)*
         'end' closename=Identifier ';'
@@ -264,7 +264,7 @@ procedureDecl
 
 facilityDecl
     :   'Facility' name=Identifier 'is' spec=Identifier
-        ('<' progTypeExp (',' progTypeExp)* '>')?
+        ('<' progType (',' progType)* '>')?
         (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
         'by' impl=Identifier (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'
