@@ -41,7 +41,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
         if ( symbols.containsKey(s.getName()) ) {
-            throw new DuplicateSymbolException();
+            throw new DuplicateSymbolException(symbols.get(s.getName()));
         }
         symbols.put(s.getName(), s);
         return s;

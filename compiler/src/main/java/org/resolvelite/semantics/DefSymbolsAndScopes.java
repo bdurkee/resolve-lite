@@ -130,8 +130,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         ProgParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
                 symtab.getInnermostActiveScope().define(
-                        new ProgParameterSymbol(t.getText(), mode, ctx,
-                                getRootModuleID()));
+                        new ProgParameterSymbol(symtab.getTypeGraph(), t
+                                .getText(), mode, ctx, getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -157,8 +157,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
             symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, getRootModuleID(),
-                            params));
+                    new OperationSymbol(symtab.getTypeGraph(), name.getText(),
+                            ctx, getRootModuleID(), params));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,

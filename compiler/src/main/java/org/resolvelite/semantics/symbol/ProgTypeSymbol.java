@@ -2,6 +2,7 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -10,12 +11,7 @@ public class ProgTypeSymbol extends Symbol {
     private final TypeGraph g;
     protected MTType modelType;
     protected PTType programType;
-
-    public ProgTypeSymbol(TypeGraph g, String name, ParseTree definingTree,
-            String moduleID) {
-        super(name, definingTree, moduleID);
-        this.g = g;
-    }
+    protected final MathSymbol mathTypeAlterEgo;
 
     public ProgTypeSymbol(TypeGraph g, String name, PTType progType,
             MTType modelType, ParseTree definingTree, String moduleID) {
@@ -23,6 +19,15 @@ public class ProgTypeSymbol extends Symbol {
         this.g = g;
         this.programType = progType;
         this.modelType = modelType;
+        this.mathTypeAlterEgo =
+                new MathSymbol(g, name, Quantification.NONE, definingTree,
+                        g.SSET, modelType, moduleID);
+    }
+
+    public ProgTypeSymbol(TypeGraph g, String name, ParseTree definingTree,
+            String moduleID) {
+        this(g, name, PTInvalid.getInstance(g), g.INVALID, definingTree,
+                moduleID);
     }
 
     public PTType getProgramType() {
@@ -41,22 +46,12 @@ public class ProgTypeSymbol extends Symbol {
         this.modelType = t;
     }
 
-    /**
-     * A program type can masquerade as a math type. This will represent the
-     * (non-existent) symbol table entry for the "program type" when viewed as
-     * a math type.
-     */
-    protected MathSymbol getMathTypeAlterEgo() {
+    @Override public MathSymbol toMathSymbol() {
         if ( modelType == null ) {
             throw new IllegalStateException("something is trying to call "
                     + "getMathTypeAlterEgo() prior to having a model type set");
         }
-        return new MathSymbol(g, getName(), Quantification.NONE,
-                getDefiningTree(), g.SSET, modelType, getModuleID());
-    }
-
-    @Override public MathSymbol toMathSymbol() {
-        return getMathTypeAlterEgo();
+        return mathTypeAlterEgo;
     }
 
     @Override public String toString() {

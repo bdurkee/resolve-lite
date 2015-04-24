@@ -18,8 +18,8 @@ public class Hardcoded {
             b.addBinding("Z", g.SSET, g.Z);
         }
         catch (DuplicateSymbolException e) {
-            rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null, e
-                    .getExistingEntry().getName());
+            rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,
+                    e.getExistingSymbol());
         }
     }
 }

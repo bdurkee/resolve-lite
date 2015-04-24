@@ -15,15 +15,13 @@ import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.PTFamily;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.programtype.PTVoid;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
-import org.resolvelite.semantics.symbol.MathSymbol;
-import org.resolvelite.semantics.symbol.ProgParameterSymbol;
-import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
+import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
-import org.resolvelite.semantics.symbol.ProgTypeSymbol;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -40,35 +38,8 @@ public class ComputeTypes extends SetScopes {
         this.tree = t;
     }
 
-    //TODO make it so you can get AnnotatedTree from ModuleScope
-    /*@Override public void postParameterVarDec(ParameterVarDec dec) {
-
-        ParameterMode mode =
-                ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
-
-        if (mode == null) {
-            throw new RuntimeException("Unexpected parameter mode: "
-                    + dec.getMode());
-        }
-
-        try {
-            ProgramParameterEntry paramEntry =
-                    myBuilder.getInnermostActiveScope().addFormalParameter(
-                            dec.getName().getName(), dec, mode,
-                            dec.getTy().getProgramTypeValue());
-            myCurrentParameters.add(paramEntry);
-        }
-        catch (DuplicateSymbolException e) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
-        }
-
-        dec.setMathType(dec.getTy().getMathTypeValue());
-    }*/
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
-
-        Type type = types.get(ctx.type());
 
         for (TerminalNode t : ctx.Identifier()) {
             try {
@@ -76,25 +47,19 @@ public class ComputeTypes extends SetScopes {
                         currentScope.queryForOne(
                                 new UnqualifiedNameQuery(t.getText()))
                                 .toProgParameterSymbol();
-                param.setType(type);
+                param.setProgramType(tree.progTypeValues.get(ctx.progType()));
             }
-            catch (NoSuchSymbolException nsse) {
-                compiler.errorManager.semanticError(
-                        ErrorKind.NO_SUCH_SYMBOL, t.getSymbol(), t.getText());
-                types.put(ctx, InvalidType.INSTANCE);
-            }
-            catch (DuplicateSymbolException dse) {
-                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                compiler.errorManager.semanticError(e.getErrorKind(),
                         t.getSymbol(), t.getText());
             }
         }
-        types.put(ctx, type);
     }
 
     @Override public void exitProgType(
             @NotNull ResolveParser.ProgTypeContext ctx) {
-        PTType progType = null;
-        MTType mathType = null;
+        PTType progType = PTInvalid.getInstance(g);
+        MTType mathType = g.INVALID;
         try {
             ProgTypeSymbol type =
                     currentScope.queryForOne(
@@ -104,14 +69,8 @@ public class ComputeTypes extends SetScopes {
             progType = type.getProgramType();
             mathType = type.getModelType();
         }
-        catch (NoSuchSymbolException nsse) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                    ctx.name, ctx.name.getText());
-            progType = PTInvalid.getInstance(g);
-            mathType = g.INVALID;
-        }
-        catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
                     ctx.name.getText());
         }
         tree.progTypeValues.put(ctx, progType);
@@ -153,6 +112,32 @@ public class ComputeTypes extends SetScopes {
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             e.printStackTrace();//shouldnt happen
+        }
+    }
+
+    @Override public void exitOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        typeFunctionLikeThing(ctx.name, ctx.progType());
+    }
+
+    private void typeFunctionLikeThing(@NotNull Token name,
+            ResolveParser.ProgTypeContext type) {
+        try {
+            OperationSymbol op =
+                    currentScope.queryForOne(new NameQuery(null, name, true))
+                            .toOperationSymbol();
+            PTType returnType;
+            if ( type == null ) {
+                returnType = PTVoid.getInstance(g);
+            }
+            else {
+                returnType = tree.progTypeValues.get(type);
+            }
+            op.setReturnType(returnType);
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException ex) {
+            compiler.errorManager.semanticError(ex.getErrorKind(), name,
+                    name.getText());
         }
     }
 
@@ -205,7 +190,7 @@ public class ComputeTypes extends SetScopes {
         if ( typeValue == null ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
-            typeValue = g.INVALID;  // not a type? let's give it an invalid value then
+            typeValue = g.INVALID; // not a type? let's give it an invalid value then
         }
         tree.mathTypes.put(ctx, type);
         tree.mathTypeValues.put(ctx, typeValue);

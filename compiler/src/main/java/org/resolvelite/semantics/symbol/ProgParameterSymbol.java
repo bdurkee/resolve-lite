@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -79,6 +80,7 @@ public class ProgParameterSymbol extends Symbol {
     private final TypeGraph typeGraph;
 
     private final MathSymbol mathSymbolAlterEgo;
+
     //private final Prog progVariable;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
@@ -86,25 +88,20 @@ public class ProgParameterSymbol extends Symbol {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
         this.mode = mode;
-
-        this.mathSymbolAlterEgo = new MathSymbol(g, name,
-                Quantification.NONE, definingTree, moduleID);
+        this.declaredType = PTInvalid.getInstance(g);
+        this.mathSymbolAlterEgo =
+                new MathSymbol(g, name, Quantification.NONE, definingTree,
+                        moduleID);
     }
 
-    private MathSymbol getMathTypeAlterEgo() {
-
+    @Override public MathSymbol toMathSymbol() {
         if ( declaredType == null ) {
             throw new IllegalStateException("no math type set yet");
         }
-        this.mathSymbolAlterEgo.setTypes(declaredType.toMath(), );
-        return new MathSymbol(typeGraph, getName(), Quantification.NONE,
-                getDefiningTree(), g.SSET, modelType, getModuleID());
+        this.mathSymbolAlterEgo.setTypes(declaredType.toMath(), null);
+        return mathSymbolAlterEgo;
     }
 
-    @Override
-    public MathSymbolEntry toMathSymbolEntry(Location l) {
-        return myMathSymbolAlterEgo;
-    }
     public void setProgramType(PTType t) {
         this.declaredType = t;
     }
