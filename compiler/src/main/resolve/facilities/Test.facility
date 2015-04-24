@@ -1,15 +1,4 @@
 Facility Test;
-    Definition leqv(x, y : Z) : B;
 
-    Operation Integer_Lss_Eq
-        (evaluates I, J: Std_Integer_Fac::Integer):
-                                Std_Boolean_Fac::Boolean;
-            ensures Integer_Lss_Eq = leqv(I, J);
-        Procedure Integer_Lss_Eq := (I <= J);
-    end Integer_Lss_Eq;
-
-    Facility Priorit_Fac is Prioritizer_Template
-        <Std_Integer_Fac::Integer>(5)
-            implemented by Insertion_Sorting_Impl(Integer_Lss_Eq);
 
 end Test;

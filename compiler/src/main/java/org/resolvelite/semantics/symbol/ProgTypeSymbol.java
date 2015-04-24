@@ -17,6 +17,14 @@ public class ProgTypeSymbol extends Symbol {
         this.g = g;
     }
 
+    public ProgTypeSymbol(TypeGraph g, String name, PTType progType,
+            MTType modelType, ParseTree definingTree, String moduleID) {
+        super(name, definingTree, moduleID);
+        this.g = g;
+        this.programType = progType;
+        this.modelType = modelType;
+    }
+
     public PTType getProgramType() {
         return programType;
     }
@@ -44,7 +52,11 @@ public class ProgTypeSymbol extends Symbol {
                     + "getMathTypeAlterEgo() prior to having a model type set");
         }
         return new MathSymbol(g, getName(), Quantification.NONE,
-                getDefiningTree(), g.CLS, modelType, getModuleID());
+                getDefiningTree(), g.SSET, modelType, getModuleID());
+    }
+
+    @Override public MathSymbol toMathSymbol() {
+        return getMathTypeAlterEgo();
     }
 
     @Override public String toString() {

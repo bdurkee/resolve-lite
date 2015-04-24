@@ -3,27 +3,30 @@ package org.resolvelite.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 
 public class PrintTypes extends ResolveBaseListener {
 
-    ParseTreeProperty<MTType> types, typeValues;
+    AnnotatedTree tree;
 
-    public PrintTypes(ParseTreeProperty<MTType> types,
-            ParseTreeProperty<MTType> typeValues) {
-        this.types = types;
-        this.typeValues = typeValues;
+    public PrintTypes(AnnotatedTree t) {
+        this.tree = t;
+    }
+
+    @Override public void exitProgPrimaryExp(
+            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
+        printTypes(ctx);
     }
 
     @Override public void exitMathPrimaryExp(
             @NotNull ResolveParser.MathPrimaryExpContext ctx) {
-        printMathTypeStuff(ctx);
+        printTypes(ctx);
     }
 
-    private void printMathTypeStuff(ParserRuleContext ctx) {
-        if ( types.get(ctx) == null ) {
+    private void printTypes(ParserRuleContext ctx) {
+        if ( tree.mathTypes.get(ctx) == null ) {
             throw new IllegalStateException("ctx: "
                     + ctx.getClass().getSimpleName() + " null");
         }
@@ -33,11 +36,11 @@ public class PrintTypes extends ResolveBaseListener {
     }
 
     private String getTypeStr(ParseTree t) {
-        return types.get(t).toString();
+        return tree.mathTypes.get(t).toString();
     }
 
     private String getTypeValueStr(ParseTree t) {
-        return typeValues.get(t) != null ? typeValues.get(t).toString()
-                : "null";
+        return tree.mathTypeValues.get(t) != null ? tree.mathTypeValues.get(t)
+                .toString() : "null";
     }
 }

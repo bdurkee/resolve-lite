@@ -167,10 +167,16 @@ public enum ErrorKind {
     INVALID_MATH_TYPE(21, "type '<arg>' is not known to be a type",
             ErrorSeverity.ERROR),
 
-    INCOMPATIBLE_TYPES(22, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
+    /**
+     * Compiler error 22: type <em>name</em> is not known to ba type".
+     */
+    INVALID_MATH_MODEL(22, "invalid math model '<arg>'; cannot model a type "
+            + "family in terms of itself", ErrorSeverity.ERROR),
+
+    INCOMPATIBLE_TYPES(23, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
             + "program types in <arg5>", ErrorSeverity.ERROR),
 
-    NO_SUCH_MODULE(23, "no such module: <arg>", ErrorSeverity.ERROR);
+    NO_SUCH_MODULE(24, "no such module: <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

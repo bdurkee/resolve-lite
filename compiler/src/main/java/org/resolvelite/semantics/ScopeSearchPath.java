@@ -12,7 +12,6 @@ public interface ScopeSearchPath {
      * s, given a source scope and a {@link SymbolTable} containing
      * any imports, returning a list of matching {@link Symbol}s.
      * 
-     * <p>
      * If there are no matches, returns an empty list. If more than one match is
      * found and {@code searcher} expects no more than one match, throws a
      * {@link DuplicateSymbolException}.

@@ -76,7 +76,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                         SearchContext.SOURCE_MODULE);
 
         //Next, if requested, we search any local facilities.
-        if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
+        /*if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
             throw new UnsupportedOperationException(
                     "searching for unqualified symbols using 'facility generic' or 'facility instantiate' "
                             + "is not currently permitted by the compiler. It"
@@ -87,7 +87,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             // finished =
             //         searchFacilities(searcher, results, source,
             //                 genericInstantiations, searchedScopes, repo);
-        }
+        }*/
 
         //Finally, if requested, we search imports
         if ( (results.isEmpty() || !localPriority)

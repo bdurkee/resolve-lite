@@ -13,16 +13,12 @@ import java.util.List;
 
 public class QualifiedPath implements ScopeSearchPath {
 
-    private final FacilityStrategy facilityStrategy;
+    private final boolean instantiateGenerics;
     private final Token qualifier;
 
     public QualifiedPath(Token qualifier, FacilityStrategy facilityStrategy) {
-
-        if ( facilityStrategy == FacilityStrategy.FACILITY_IGNORE ) {
-            throw new IllegalArgumentException("can't use facility ignore "
-                    + "strategy in performing a qualified search");
-        }
-        this.facilityStrategy = facilityStrategy;
+        this.instantiateGenerics =
+                facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
     }
 
@@ -31,16 +27,14 @@ public class QualifiedPath implements ScopeSearchPath {
             throws DuplicateSymbolException {
         List<E> result = new ArrayList<>();
         try {
+            
             FacilitySymbol facility =
                     (FacilitySymbol) source
                             .queryForOne(new UnqualifiedNameQuery(qualifier
                                     .getText()));
 
-            Scope facilityScope =
-                    facility.getFacility()
-                            .getSpecification()
-                            .getScope(
-                                    facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
+            Scope facilityScope = facility.getFacility().getSpecification() //
+                    .getScope(instantiateGenerics);
 
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
         }
@@ -56,6 +50,21 @@ public class QualifiedPath implements ScopeSearchPath {
             }
             catch (NoSuchSymbolException nsse2) {}
         }
+        return result;
+    }
+
+    private<E extends Symbol> List<E> searchModule(TableSearcher<E> searcher,
+                                       Scope source, SymbolTable repo)
+            throws DuplicateSymbolException {
+        List<E> result = new ArrayList<>();
+        try {
+            ModuleScopeBuilder moduleScope =
+                    repo.getModuleScope(qualifier.getText());
+            result =
+                    moduleScope.getMatches(searcher,
+                            TableSearcher.SearchContext.IMPORT);
+        }
+        catch (NoSuchSymbolException nsse2) {}
         return result;
     }
 }

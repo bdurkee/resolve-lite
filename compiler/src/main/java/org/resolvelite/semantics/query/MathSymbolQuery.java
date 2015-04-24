@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.Token;
 import org.resolvelite.semantics.PossiblyQualifiedPath;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
-import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.searchers.NameSearcher;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
@@ -19,7 +18,7 @@ public class MathSymbolQuery extends ResultProcessingQuery<Symbol, MathSymbol> {
 
     public MathSymbolQuery(Token qualifier, String name, Token l) {
         super(new BaseSymbolQuery<Symbol>(new PossiblyQualifiedPath(qualifier,
-                ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE,
+                ImportStrategy.IMPORT_NAMED, SymbolTable.FacilityStrategy.FACILITY_IGNORE,
                 true), new NameSearcher(name, true)), Symbol::toMathSymbol);
     }
 }

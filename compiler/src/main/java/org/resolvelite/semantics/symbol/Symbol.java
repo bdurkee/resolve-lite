@@ -79,4 +79,8 @@ public abstract class Symbol {
     public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
+
+    public RepSymbol toRepresentationSymbol() throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
 }

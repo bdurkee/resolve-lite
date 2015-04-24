@@ -15,12 +15,14 @@ import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.PTFamily;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.MathSymbolQuery;
+import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.MathInvalidSymbol;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
+import org.resolvelite.semantics.symbol.ProgTypeSymbol;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -31,13 +33,37 @@ public class ComputeTypes extends SetScopes {
     protected int typeValueDepth = 0;
 
     ComputeTypes(@NotNull ResolveCompiler rc, SymbolTable symtab,
-                 AnnotatedTree t) {
+            AnnotatedTree t) {
         super(rc, symtab);
         this.g = symtab.getTypeGraph();
         this.tree = t;
     }
 
     //TODO make it so you can get AnnotatedTree from ModuleScope
+
+    @Override public void exitProgTypeExp(
+            @NotNull ResolveParser.ProgTypeExpContext ctx) {
+        try {
+            ProgTypeSymbol type =
+                    currentScope.queryForOne(
+                            new NameQuery(ctx.qualifier, ctx.name.getText(),
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, true))
+                            .toProgTypeSymbol();
+
+            tree.progTypeValues.put(ctx, type.getProgramType());
+            tree.mathTypes.put(ctx, g.SSET);
+            tree.mathTypeValues.put(ctx, type.getModelType());
+        }
+        catch (NoSuchSymbolException nsse) {
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
 
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
@@ -134,7 +160,6 @@ public class ComputeTypes extends SetScopes {
     private MathSymbol exitMathSymbolExp(Token qualifier, String symbolName,
             ParserRuleContext ctx) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
-
         tree.mathTypes.put(ctx, intendedEntry.getType());
         setSymbolTypeValue(ctx, symbolName, intendedEntry);
         return intendedEntry;

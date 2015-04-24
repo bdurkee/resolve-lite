@@ -17,17 +17,18 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         for (AnnotatedTree unit : compilationUnits) {
-            compiler.info("populating: " + unit.getName());
+            compiler.info("defining syms: " + unit.getName());
             ParseTreeWalker walker = new ParseTreeWalker();
             DefSymbolsAndScopes definePhase =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
+            compiler.info("typing: " + unit.getName());
             ComputeTypes mathTypingPhase =
                     new ComputeTypes(compiler, compiler.symbolTable, unit);
             walker.walk(definePhase, unit.getRoot());
             walker.walk(mathTypingPhase, unit.getRoot());
 
-            PrintTypes pt = new PrintTypes(unit.mathTypes, unit.mathTypeValues);
+            PrintTypes pt = new PrintTypes(unit);
             walker.walk(pt, unit.getRoot());
             int i;
             i = 0;

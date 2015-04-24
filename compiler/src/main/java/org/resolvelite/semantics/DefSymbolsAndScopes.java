@@ -106,6 +106,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             throw new RuntimeException("duplicate exemplar!??");
         }
         symtab.endScope();
+        if ( ctx.mathTypeExp().getText().equals(ctx.name.getText()) ) {
+            compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
+                    ctx.mathTypeExp().getStart(), ctx.mathTypeExp().getText());
+        }
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgTypeDefinitionSymbol(symtab.getTypeGraph(),
