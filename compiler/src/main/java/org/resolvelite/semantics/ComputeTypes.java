@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
@@ -23,25 +24,20 @@ import org.resolvelite.semantics.SymbolTable.ImportStrategy;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
-/**
- * Computes types for math and programming expressions and updates stored
- * with this computed type information.
- */
-//Todo: Figure out if we want this to build PExps here as well.
 public class ComputeTypes extends SetScopes {
 
-    public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progType = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
-
     protected TypeGraph g;
+    protected AnnotatedTree tree;
     protected int typeValueDepth = 0;
 
-    ComputeTypes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
+    ComputeTypes(@NotNull ResolveCompiler rc, SymbolTable symtab,
+                 AnnotatedTree t) {
         super(rc, symtab);
         this.g = symtab.getTypeGraph();
+        this.tree = t;
     }
+
+    //TODO make it so you can get AnnotatedTree from ModuleScope
 
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
@@ -67,7 +63,7 @@ public class ComputeTypes extends SetScopes {
             PExp finalEnsures =
                     ctx.typeModelFinal() != null ? buildPExp(ctx
                             .typeModelFinal().ensuresClause()) : null;
-            MTType modelType = mathTypeValues.get(ctx.mathTypeExp());
+            MTType modelType = tree.mathTypeValues.get(ctx.mathTypeExp());
             PTType familyType =
                     new PTFamily(modelType, ctx.name.getText(),
                             ctx.exemplar.getText(), constraint, initRequires,
@@ -125,21 +121,21 @@ public class ComputeTypes extends SetScopes {
             @NotNull ResolveParser.MathTypeExpContext ctx) {
         typeValueDepth--;
 
-        MTType type = mathTypes.get(ctx.mathExp());
-        MTType typeValue = mathTypeValues.get(ctx.mathExp());
+        MTType type = tree.mathTypes.get(ctx.mathExp());
+        MTType typeValue = tree.mathTypeValues.get(ctx.mathExp());
         if ( typeValue == null ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
         }
-        mathTypes.put(ctx, type);
-        mathTypeValues.put(ctx, typeValue);
+        tree.mathTypes.put(ctx, type);
+        tree.mathTypeValues.put(ctx, typeValue);
     }
 
     private MathSymbol exitMathSymbolExp(Token qualifier, String symbolName,
             ParserRuleContext ctx) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
 
-        mathTypes.put(ctx, intendedEntry.getType());
+        tree.mathTypes.put(ctx, intendedEntry.getType());
         setSymbolTypeValue(ctx, symbolName, intendedEntry);
         return intendedEntry;
     }
@@ -165,7 +161,7 @@ public class ComputeTypes extends SetScopes {
             @NotNull MathSymbol intendedEntry) {
         try {
             if ( intendedEntry.getQuantification() == Quantification.NONE ) {
-                mathTypeValues.put(ctx, intendedEntry.getTypeValue());
+                tree.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
             else {
                 if ( intendedEntry.getType().isKnownToContainOnlyMTypes() ) {
@@ -179,20 +175,20 @@ public class ComputeTypes extends SetScopes {
                 compiler.errorManager
                         .semanticError(ErrorKind.INVALID_MATH_TYPE,
                                 ctx.getStart(), symbolName);
-                mathTypeValues.put(ctx, g.MALFORMED);
+                tree.mathTypeValues.put(ctx, g.MALFORMED);
             }
         }
     }
 
     protected final void chainMathTypes(ParseTree current, ParseTree child) {
-        mathTypes.put(current, mathTypes.get(child));
-        mathTypeValues.put(current, mathTypeValues.get(child));
+        tree.mathTypes.put(current, tree.mathTypes.get(child));
+        tree.mathTypeValues.put(current, tree.mathTypeValues.get(child));
     }
 
     protected final PExp buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) return null;
         PExpBuildingListener builder =
-                new PExpBuildingListener(mathTypes, mathTypeValues);
+                new PExpBuildingListener(tree.mathTypes, tree.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

@@ -32,13 +32,21 @@ package org.resolvelite.compiler.tree;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTType;
 
 public class AnnotatedTree {
 
-    @NotNull private final String name, fileName;
-    @NotNull private final ParseTree root;
+    public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
+    public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progType = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
+
+    private final String name, fileName;
+    private final ParseTree root;
     public boolean hasErrors;
     public ImportCollection imports;
 
