@@ -47,7 +47,7 @@ public class ComputeTypes extends SetScopes {
                         currentScope.queryForOne(
                                 new UnqualifiedNameQuery(t.getText()))
                                 .toProgParameterSymbol();
-                param.setProgramType(tree.progTypeValues.get(ctx.progType()));
+                param.setProgramType(tree.progTypeValues.get(ctx.type()));
             }
             catch (NoSuchSymbolException | DuplicateSymbolException e) {
                 compiler.errorManager.semanticError(e.getErrorKind(),
@@ -56,8 +56,7 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override public void exitProgType(
-            @NotNull ResolveParser.ProgTypeContext ctx) {
+    @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         PTType progType = PTInvalid.getInstance(g);
         MTType mathType = g.INVALID;
         try {
@@ -117,11 +116,11 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
-        typeFunctionLikeThing(ctx.name, ctx.progType());
+        typeFunctionLikeThing(ctx.name, ctx.type());
     }
 
     private void typeFunctionLikeThing(@NotNull Token name,
-            ResolveParser.ProgTypeContext type) {
+            ResolveParser.TypeContext type) {
         try {
             OperationSymbol op =
                     currentScope.queryForOne(new NameQuery(null, name, true))

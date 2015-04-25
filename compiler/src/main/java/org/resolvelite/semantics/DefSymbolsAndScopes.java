@@ -154,13 +154,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         String exemplarName =
                 typeDefinition != null ? typeDefinition.getExemplar().getName()
                         : ctx.getText().substring(0, 1).toUpperCase();
-        PTType representationType =
+        PTType reprType =
                 new PTRepresentation(symtab.getTypeGraph(),
                         PTInvalid.getInstance(g), typeDefinition);
         try {
             symtab.getInnermostActiveScope().define(
-                    new ProgVariableSymbol(exemplarName, ctx,
-                            getRootModuleID(), representationType));
+                    new ProgVariableSymbol(exemplarName, ctx, reprType,
+                            getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {}
         symtab.endScope();
@@ -168,7 +168,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             symtab.getInnermostActiveScope().define(
                     new ProgRepTypeSymbol(symtab.getTypeGraph(), ctx.name
                             .getText(), ctx, getRootModuleID(), typeDefinition,
-                            representationType, ctx.conventionClause(), null));
+                            reprType, ctx.conventionClause(), null));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -195,6 +195,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
     @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
@@ -204,6 +214,22 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.endScope();
         insertFunction(ctx.name, ctx);
+    }
+
+    private void insertVariables(List<TerminalNode> terminalGroup,
+            ResolveParser.TypeContext type) {
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), t,
+                                PTInvalid.getInstance(g), getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
     }
 
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx) {

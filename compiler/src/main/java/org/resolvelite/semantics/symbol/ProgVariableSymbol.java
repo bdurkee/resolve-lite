@@ -9,8 +9,8 @@ public class ProgVariableSymbol extends Symbol {
     private PTType type;
     private final MathSymbol mathSymbolAlterEgo;
 
-    public ProgVariableSymbol(String name, ParseTree definingTree,
-            String moduleID, PTType type) {
+    public ProgVariableSymbol(String name, ParseTree definingTree, PTType type,
+            String moduleID) {
         super(name, definingTree, moduleID);
         this.type = type;
         this.mathSymbolAlterEgo =
