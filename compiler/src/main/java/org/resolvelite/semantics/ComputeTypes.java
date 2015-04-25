@@ -12,18 +12,20 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
-import org.resolvelite.semantics.programtype.PTFamily;
-import org.resolvelite.semantics.programtype.PTInvalid;
-import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.programtype.PTVoid;
+import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
+import org.resolvelite.semantics.query.ProgVariableQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ComputeTypes extends SetScopes {
 
@@ -56,6 +58,16 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        typeVariableDeclGroup(ctx, ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        typeVariableDeclGroup(ctx, ctx.Identifier(), ctx.type());
+    }
+
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         PTType progType = PTInvalid.getInstance(g);
         MTType mathType = g.INVALID;
@@ -74,6 +86,21 @@ public class ComputeTypes extends SetScopes {
         }
         tree.progTypeValues.put(ctx, progType);
         tree.mathTypeValues.put(ctx, mathType);
+    }
+
+    @Override public void exitRecord(@NotNull ResolveParser.RecordContext ctx) {
+        Map<String, PTType> fields = new HashMap<>();
+        for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
+                .recordVariableDeclGroup()) {
+            System.out.println("prog type val: " + tree.progTypeValues.get(fieldGrp));
+            for (TerminalNode t : fieldGrp.Identifier()) {
+                fields.put(t.getText(), tree.progTypeValues.get(t));
+            }
+        }
+        PTRecord record = new PTRecord(g, fields);
+        tree.progTypeValues.put(ctx, record);
+        tree.mathTypes.put(ctx, g.SSET);
+        tree.mathTypeValues.put(ctx, record.toMath());
     }
 
     @Override public void exitTypeModelDecl(
@@ -114,30 +141,27 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        try {
+            ProgReprTypeSymbol repr =
+                    currentScope.queryForOne(
+                            new NameQuery(null, ctx.name, true))
+                            .toProgReprTypeSymbol();
+
+            PTType t = ctx.record() != null ?
+                    tree.progTypeValues.get(ctx.record()) :
+                    tree.progTypeValues.get(ctx.type());
+            repr.setRepresentationType(t);
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         typeFunctionLikeThing(ctx.name, ctx.type());
-    }
-
-    private void typeFunctionLikeThing(@NotNull Token name,
-            ResolveParser.TypeContext type) {
-        try {
-            OperationSymbol op =
-                    currentScope.queryForOne(new NameQuery(null, name, true))
-                            .toOperationSymbol();
-            PTType returnType;
-            if ( type == null ) {
-                returnType = PTVoid.getInstance(g);
-            }
-            else {
-                returnType = tree.progTypeValues.get(type);
-            }
-            op.setReturnType(returnType);
-        }
-        catch (NoSuchSymbolException | DuplicateSymbolException ex) {
-            compiler.errorManager.semanticError(ex.getErrorKind(), name,
-                    name.getText());
-        }
     }
 
     @Override public void exitRequiresClause(
@@ -246,6 +270,51 @@ public class ComputeTypes extends SetScopes {
                 tree.mathTypeValues.put(ctx, g.INVALID);
             }
         }
+    }
+
+    private void typeFunctionLikeThing(@NotNull Token name,
+            ResolveParser.TypeContext type) {
+        try {
+            OperationSymbol op =
+                    currentScope.queryForOne(new NameQuery(null, name, true))
+                            .toOperationSymbol();
+            PTType returnType;
+            if ( type == null ) {
+                returnType = PTVoid.getInstance(g);
+            }
+            else {
+                returnType = tree.progTypeValues.get(type);
+            }
+            op.setReturnType(returnType);
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException ex) {
+            compiler.errorManager.semanticError(ex.getErrorKind(), name,
+                    name.getText());
+        }
+    }
+
+    protected void typeVariableDeclGroup(ParserRuleContext ctx,
+            List<TerminalNode> terminalGroup,
+            @NotNull ResolveParser.TypeContext typeCtx) {
+        MTType mathTypeValue = tree.mathTypeValues.get(typeCtx);
+        PTType progTypeValue = tree.progTypeValues.get(typeCtx);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol variable =
+                        currentScope.queryForOne(
+                                new ProgVariableQuery(null, t.getSymbol()));
+                variable.setProgramType(progTypeValue);
+                tree.progTypeValues.put(t, progTypeValue);
+                tree.mathTypeValues.put(t, mathTypeValue);
+            }
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                compiler.errorManager.semanticError(e.getErrorKind(),
+                        t.getSymbol(), t.getSymbol().getText());
+            }
+        }
+        //guess we can set it for the overall group too.
+        tree.progTypeValues.put(ctx, progTypeValue);
+        tree.mathTypeValues.put(ctx, mathTypeValue);
     }
 
     protected final void chainMathTypes(ParseTree current, ParseTree child) {

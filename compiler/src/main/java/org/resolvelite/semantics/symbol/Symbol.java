@@ -79,12 +79,12 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException();
     }
 
-    public ProgRepTypeSymbol toRepresentationSymbol()
+    public ProgReprTypeSymbol toProgReprTypeSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
 
-    public ProgVariableSymbol toProgramVariableEntry()
+    public ProgVariableSymbol toProgVariableSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }

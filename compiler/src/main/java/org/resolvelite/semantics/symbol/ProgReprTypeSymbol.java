@@ -4,30 +4,34 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
-public class ProgRepTypeSymbol extends Symbol {
+public class ProgReprTypeSymbol extends Symbol {
 
     //Note: This is null in the case where we represent a standalone
     //representation (a record in a facility for instance)
     protected final ProgTypeDefinitionSymbol definition;
+    protected final ProgVariableSymbol reprVar;
 
     protected final ParseTree convention, correspondence;
     protected final TypeGraph typeGraph;
     protected PTType representation;
 
-    public ProgRepTypeSymbol(TypeGraph g, String name,
-            ParseTree definingElement, String moduleID,
-            ProgTypeDefinitionSymbol definition, PTType representation,
-            ParseTree convention, ParseTree correspondence) {
+    public ProgReprTypeSymbol(TypeGraph g, String name,
+                              ParseTree definingElement, String moduleID,
+                              ProgTypeDefinitionSymbol definition, ProgVariableSymbol repVar,
+                              PTType representation, ParseTree convention,
+                              ParseTree correspondence) {
         super(name, definingElement, moduleID);
 
         this.definition = definition;
         this.representation = representation;
         this.convention = convention;
         this.correspondence = correspondence;
+        this.reprVar = repVar;
         this.typeGraph = g;
     }
 
     public void setRepresentationType(PTType t) {
+        this.reprVar.setProgramType(t); //update the 'exemplar' variable too.
         this.representation = t;
     }
 
@@ -37,12 +41,16 @@ public class ProgRepTypeSymbol extends Symbol {
                 getDefiningTree(), getModuleID());
     }
 
-    @Override public ProgRepTypeSymbol toRepresentationSymbol() {
+    @Override public ProgReprTypeSymbol toProgReprTypeSymbol() {
         return this;
     }
 
     @Override public String getEntryTypeDescription() {
         return "a program type representation definition";
+    }
+
+    @Override public String toString() {
+        return getName();
     }
 
 }

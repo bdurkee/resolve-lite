@@ -26,8 +26,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected AnnotatedTree tree;
     protected TypeGraph g;
 
-    private boolean inFacilityModule = false;
-
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
@@ -73,7 +71,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
-        inFacilityModule = true;
     }
 
     @Override public void exitFacilityModule(
@@ -137,6 +134,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
 
         ProgTypeDefinitionSymbol typeDefinition = null;
+        ProgVariableSymbol reprVar = null;
         try {
             typeDefinition =
                     symtab.getInnermostActiveScope()
@@ -158,17 +156,17 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 new PTRepresentation(symtab.getTypeGraph(),
                         PTInvalid.getInstance(g), typeDefinition);
         try {
-            symtab.getInnermostActiveScope().define(
-                    new ProgVariableSymbol(exemplarName, ctx, reprType,
-                            getRootModuleID()));
+            reprVar = new ProgVariableSymbol(exemplarName, ctx, reprType,
+                    getRootModuleID());
+            symtab.getInnermostActiveScope().define(reprVar);
         }
         catch (DuplicateSymbolException e) {}
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
-                    new ProgRepTypeSymbol(symtab.getTypeGraph(), ctx.name
+                    new ProgReprTypeSymbol(symtab.getTypeGraph(), ctx.name
                             .getText(), ctx, getRootModuleID(), typeDefinition,
-                            reprType, ctx.conventionClause(), null));
+                            reprVar, reprType, ctx.conventionClause(), null));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

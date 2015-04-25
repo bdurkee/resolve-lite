@@ -18,8 +18,16 @@ public class ProgVariableSymbol extends Symbol {
                         type.toMath(), null, definingTree, moduleID);
     }
 
+    public void setProgramType(PTType t) {
+        this.type = t;
+    }
+
     @Override public String getEntryTypeDescription() {
         return "a program variable";
+    }
+
+    @Override public ProgVariableSymbol toProgVariableSymbol() {
+        return this;
     }
 
     @Override public MathSymbol toMathSymbol() {
