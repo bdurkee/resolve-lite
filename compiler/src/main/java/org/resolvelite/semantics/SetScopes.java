@@ -9,9 +9,9 @@ import org.resolvelite.semantics.symbol.Symbol;
 
 class SetScopes extends ResolveBaseListener {
 
-    @NotNull protected ResolveCompiler compiler;
-    @NotNull protected SymbolTable symtab;
-    @NotNull protected Scope currentScope;
+    protected ResolveCompiler compiler;
+    protected SymbolTable symtab;
+    protected Scope currentScope;
 
     SetScopes(@NotNull ResolveCompiler rc, @NotNull SymbolTable symtab) {
         this.compiler = rc;

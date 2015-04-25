@@ -122,6 +122,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        try {
+            symtab.getInnermostActiveScope().define(new )
+        }
+    }
+
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
