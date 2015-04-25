@@ -92,7 +92,6 @@ public class ComputeTypes extends SetScopes {
         Map<String, PTType> fields = new HashMap<>();
         for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
                 .recordVariableDeclGroup()) {
-            System.out.println("prog type val: " + tree.progTypeValues.get(fieldGrp));
             for (TerminalNode t : fieldGrp.Identifier()) {
                 fields.put(t.getText(), tree.progTypeValues.get(t));
             }
@@ -149,11 +148,13 @@ public class ComputeTypes extends SetScopes {
                             new NameQuery(null, ctx.name, true))
                             .toProgReprTypeSymbol();
 
-            PTType t = ctx.record() != null ?
-                    tree.progTypeValues.get(ctx.record()) :
-                    tree.progTypeValues.get(ctx.type());
+            PTType t =
+                    ctx.record() != null ? tree.progTypeValues
+                            .get(ctx.record()) : tree.progTypeValues.get(ctx
+                            .type());
             repr.setRepresentationType(t);
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
                     ctx.name.getText());
         }
@@ -301,8 +302,8 @@ public class ComputeTypes extends SetScopes {
         for (TerminalNode t : terminalGroup) {
             try {
                 ProgVariableSymbol variable =
-                        currentScope.queryForOne(
-                                new ProgVariableQuery(null, t.getSymbol()));
+                        currentScope.queryForOne(new ProgVariableQuery(null, t
+                                .getSymbol()));
                 variable.setProgramType(progTypeValue);
                 tree.progTypeValues.put(t, progTypeValue);
                 tree.mathTypeValues.put(t, mathTypeValue);

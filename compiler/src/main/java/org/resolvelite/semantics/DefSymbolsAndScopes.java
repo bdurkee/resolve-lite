@@ -156,8 +156,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 new PTRepresentation(symtab.getTypeGraph(),
                         PTInvalid.getInstance(g), typeDefinition);
         try {
-            reprVar = new ProgVariableSymbol(exemplarName, ctx, reprType,
-                    getRootModuleID());
+            reprVar =
+                    new ProgVariableSymbol(exemplarName, ctx, reprType,
+                            getRootModuleID());
             symtab.getInnermostActiveScope().define(reprVar);
         }
         catch (DuplicateSymbolException e) {}

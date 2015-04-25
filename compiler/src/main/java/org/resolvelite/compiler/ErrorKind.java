@@ -176,7 +176,10 @@ public enum ErrorKind {
     INCOMPATIBLE_TYPES(23, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
             + "program types in <arg5>", ErrorSeverity.ERROR),
 
-    NO_SUCH_MODULE(24, "no such module: <arg>", ErrorSeverity.ERROR);
+    NO_SUCH_MODULE(24, "no such module: <arg>", ErrorSeverity.ERROR),
+
+    DANGLING_INVALID_TYPEREF(25, "sym=<arg> contains a dangling invalid typeref",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

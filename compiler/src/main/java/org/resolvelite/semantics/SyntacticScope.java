@@ -69,6 +69,10 @@ public abstract class SyntacticScope extends AbstractScope {
                 .collect(Collectors.toList());
     }
 
+    @Override public List<? extends Symbol> getAllSymbols() {
+        return new ArrayList<>(symbols.values());
+    }
+
     @Override public String toString() {
         return symbols.keySet() + "";
     }

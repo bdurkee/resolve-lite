@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -16,10 +17,10 @@ public class ProgReprTypeSymbol extends Symbol {
     protected PTType representation;
 
     public ProgReprTypeSymbol(TypeGraph g, String name,
-                              ParseTree definingElement, String moduleID,
-                              ProgTypeDefinitionSymbol definition, ProgVariableSymbol repVar,
-                              PTType representation, ParseTree convention,
-                              ParseTree correspondence) {
+            ParseTree definingElement, String moduleID,
+            ProgTypeDefinitionSymbol definition, ProgVariableSymbol repVar,
+            PTType representation, ParseTree convention,
+            ParseTree correspondence) {
         super(name, definingElement, moduleID);
 
         this.definition = definition;
@@ -47,6 +48,10 @@ public class ProgReprTypeSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a program type representation definition";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        return !representation.getClass().equals(PTInvalid.class);
     }
 
     @Override public String toString() {

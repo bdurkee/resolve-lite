@@ -62,6 +62,10 @@ public class FacilitySymbol extends Symbol {
         return type;
     }
 
+    @Override public boolean containsOnlyValidTypes() {
+        return true;
+    }
+
     @Override public String getEntryTypeDescription() {
         return "a facility";
     }

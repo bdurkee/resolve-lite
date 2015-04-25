@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.MTProper;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.SymbolNotOfKindTypeException;
+import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.typereasoning.TypeGraph;
 
 public class MathSymbol extends Symbol {
@@ -64,6 +65,14 @@ public class MathSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a math symbol";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        boolean result = !type.getClass().equals(g.INVALID.getClass());
+        if ( result && typeValue != null ) {
+            result = typeValue.getClass().equals(g.INVALID.getClass());
+        }
+        return result;
     }
 
     @Override public MathSymbol toMathSymbol() {

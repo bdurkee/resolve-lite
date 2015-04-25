@@ -10,14 +10,14 @@ public class ProgTypeSymbol extends Symbol {
 
     private final TypeGraph g;
     protected MTType modelType;
-    protected PTType programType;
+    protected PTType type;
     protected final MathSymbol mathTypeAlterEgo;
 
     public ProgTypeSymbol(TypeGraph g, String name, PTType progType,
             MTType modelType, ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.g = g;
-        this.programType = progType;
+        this.type = progType;
         this.modelType = modelType;
         this.mathTypeAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, g.SSET, modelType,
@@ -31,7 +31,7 @@ public class ProgTypeSymbol extends Symbol {
     }
 
     public PTType getProgramType() {
-        return programType;
+        return type;
     }
 
     public MTType getModelType() {
@@ -39,10 +39,11 @@ public class ProgTypeSymbol extends Symbol {
     }
 
     public void setProgramType(PTType t) {
-        this.programType = t;
+        this.type = t;
     }
 
     public void setModelType(MTType t) {
+        mathTypeAlterEgo.setTypes(t, null);
         this.modelType = t;
     }
 
@@ -64,5 +65,10 @@ public class ProgTypeSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a program type";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        return mathTypeAlterEgo.containsOnlyValidTypes()
+                && !type.getClass().equals(PTInvalid.class);
     }
 }

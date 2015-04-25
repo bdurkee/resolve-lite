@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -98,11 +99,11 @@ public class ProgParameterSymbol extends Symbol {
         if ( declaredType == null ) {
             throw new IllegalStateException("no math type set yet");
         }
-        this.mathSymbolAlterEgo.setTypes(declaredType.toMath(), null);
         return mathSymbolAlterEgo;
     }
 
     public void setProgramType(PTType t) {
+        this.mathSymbolAlterEgo.setTypes(t.toMath(), null);
         this.declaredType = t;
     }
 
@@ -116,6 +117,10 @@ public class ProgParameterSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a parameter";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        return false;
     }
 
     @Override public String toString() {

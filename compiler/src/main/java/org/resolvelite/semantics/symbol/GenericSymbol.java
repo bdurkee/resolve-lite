@@ -16,7 +16,12 @@ public class GenericSymbol extends Symbol {
         return "a generic";
     }
 
+    @Override public boolean containsOnlyValidTypes() {
+        return true;
+    }
+
     @Override public GenericSymbol toGenericSymbol() {
         return this;
     }
+
 }

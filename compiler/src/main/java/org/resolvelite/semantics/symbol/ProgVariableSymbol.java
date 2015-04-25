@@ -19,11 +19,17 @@ public class ProgVariableSymbol extends Symbol {
     }
 
     public void setProgramType(PTType t) {
+        this.mathSymbolAlterEgo.setTypes(t.toMath(), null);
         this.type = t;
     }
 
     @Override public String getEntryTypeDescription() {
         return "a program variable";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        return !type.getClass().equals(PTInvalid.class)
+                && mathSymbolAlterEgo.containsOnlyValidTypes();
     }
 
     @Override public ProgVariableSymbol toProgVariableSymbol() {

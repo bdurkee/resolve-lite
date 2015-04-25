@@ -40,6 +40,10 @@ public class OperationSymbol extends Symbol {
         return "an operation";
     }
 
+    @Override public boolean containsOnlyValidTypes() {
+        return !returnType.getClass().equals(PTInvalid.class);
+    }
+
     @Override public String toString() {
         return getName() + ":" + parameters;
     }

@@ -1,5 +1,6 @@
 package org.resolvelite.semantics;
 
+import org.resolvelite.compiler.ErrorManager;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -27,8 +28,9 @@ public class MTCartesian extends MTType {
 
         if ( elementCount < 2 ) {
             //We assert this isn't possible, but who knows?
-            throw new IllegalArgumentException(
-                    "Unexpected cartesian product size.");
+            ErrorManager.fatalInternalError(
+                    "unexpected cartesian product size",
+                    new IllegalArgumentException());
         }
         int workingSize = 0;
         Element first;
@@ -101,7 +103,7 @@ public class MTCartesian extends MTType {
             elementTypes.add(element);
             if ( tag != null ) {
                 if ( tagsToElements.containsKey(tag) ) {
-                    throw new IllegalArgumentException("Duplicate tag: " + tag);
+                    throw new IllegalArgumentException("duplicate tag: " + tag);
                 }
                 tagsToElements.put(tag, this);
                 elementsToTags.put(this, tag);
