@@ -23,10 +23,10 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
             compiler.info("typing: " + unit.getName());
-            ComputeTypes mathTypingPhase =
+            ComputeTypes typingPhase =
                     new ComputeTypes(compiler, compiler.symbolTable, unit);
             walker.walk(definePhase, unit.getRoot());
-            walker.walk(mathTypingPhase, unit.getRoot());
+            walker.walk(typingPhase, unit.getRoot());
 
             PrintTypes pt = new PrintTypes(unit);
             walker.walk(pt, unit.getRoot());

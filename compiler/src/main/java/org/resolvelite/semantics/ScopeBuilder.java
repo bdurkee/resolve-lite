@@ -33,8 +33,8 @@ public class ScopeBuilder extends SyntacticScope {
             throws DuplicateSymbolException {
 
         MathSymbol entry =
-                new MathSymbol(typeGraph, name, q, definingTree, type,
-                        typeValue, moduleID);
+                new MathSymbol(typeGraph, name, q, type, typeValue,
+                        definingTree, moduleID);
         symbols.put(name, entry);
         return entry;
     }

@@ -1,6 +1,5 @@
 package org.resolvelite.semantics.symbol;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.UnexpectedSymbolException;
 
@@ -80,7 +79,13 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException();
     }
 
-    public RepSymbol toRepresentationSymbol() throws UnexpectedSymbolException {
+    public ProgRepTypeSymbol toRepresentationSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
+    public ProgVariableSymbol toProgramVariableEntry()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
 

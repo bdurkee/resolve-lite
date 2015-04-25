@@ -20,8 +20,8 @@ public class ProgTypeSymbol extends Symbol {
         this.programType = progType;
         this.modelType = modelType;
         this.mathTypeAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, definingTree,
-                        g.SSET, modelType, moduleID);
+                new MathSymbol(g, name, Quantification.NONE, g.SSET, modelType,
+                        definingTree, moduleID);
     }
 
     public ProgTypeSymbol(TypeGraph g, String name, ParseTree definingTree,

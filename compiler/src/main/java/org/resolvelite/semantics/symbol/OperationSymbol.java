@@ -14,10 +14,10 @@ public class OperationSymbol extends Symbol {
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
     public OperationSymbol(TypeGraph g, String name, ParseTree definingTree,
-            String moduleID, List<ProgParameterSymbol> params) {
+            PTType type, String moduleID, List<ProgParameterSymbol> params) {
         super(name, definingTree, moduleID);
         this.parameters.addAll(params);
-        this.returnType = PTInvalid.getInstance(g);
+        this.returnType = type;
     }
 
     public List<ProgParameterSymbol> getParameters() {

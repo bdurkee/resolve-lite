@@ -84,14 +84,14 @@ public class ProgParameterSymbol extends Symbol {
     //private final Prog progVariable;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
-            ParseTree definingTree, String moduleID) {
+            PTType type, ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
         this.mode = mode;
-        this.declaredType = PTInvalid.getInstance(g);
+        this.declaredType = type;
         this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, definingTree,
-                        moduleID);
+                new MathSymbol(g, name, Quantification.NONE, type.toMath(),
+                        null, definingTree, moduleID);
     }
 
     @Override public MathSymbol toMathSymbol() {
