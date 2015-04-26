@@ -215,6 +215,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         insertFunction(ctx.name, ctx);
     }
 
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.endScope();
+    }
+
     private void insertVariables(List<TerminalNode> terminalGroup,
             ResolveParser.TypeContext type) {
         for (TerminalNode t : terminalGroup) {

@@ -2,7 +2,6 @@ package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.AbstractCompilationPipeline;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
@@ -31,22 +30,28 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             walker.walk(definePhase, unit.getRoot());
             walker.walk(typingPhase, unit.getRoot());
             try {
-                ModuleScopeBuilder curModuleScope =
-                        compiler.symbolTable.getModuleScope(unit.getName());
-                for (Symbol s : curModuleScope.getAllSymbols()) {
-                    if (!s.containsOnlyValidTypes()) {
-                        compiler.errorManager.semanticError(
-                                ErrorKind.DANGLING_INVALID_TYPEREF,
-                                null, s.getName());
-                        unit.hasErrors = true;
-                    }
-                }
+                checkSymbolTypes(unit,
+                        compiler.symbolTable.getModuleScope(unit.getName()));
             } catch (NoSuchSymbolException e) {
             }
             PrintTypes pt = new PrintTypes(unit);
             walker.walk(pt, unit.getRoot());
             int i;
             i = 0;
+        }
+    }
+
+    private void checkSymbolTypes(AnnotatedTree unit, ScopeBuilder s) {
+        for (Symbol sym : s.getAllSymbols()) {
+            if (!sym.containsOnlyValidTypes()) {
+                compiler.errorManager.semanticError(
+                        ErrorKind.DANGLING_INVALID_TYPEREF,
+                        null, sym.getName());
+                unit.hasErrors = true;
+            }
+        }
+        for (ScopeBuilder node : s.getChildren()) {
+            checkSymbolTypes(unit, node);
         }
     }
 }

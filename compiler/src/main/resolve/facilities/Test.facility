@@ -3,5 +3,8 @@ Facility Test;
     Type Point = Record
             x, y: Std_Integer_Fac::Integer;
         end;
+        convention x;
+
+
 
 end Test;

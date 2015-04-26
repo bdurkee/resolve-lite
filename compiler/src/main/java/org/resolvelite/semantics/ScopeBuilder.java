@@ -5,7 +5,9 @@ import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
@@ -16,6 +18,7 @@ import java.util.HashMap;
  */
 public class ScopeBuilder extends SyntacticScope {
 
+    protected final List<ScopeBuilder> children = new ArrayList<>();
     private final TypeGraph typeGraph;
 
     ScopeBuilder(SymbolTable s, TypeGraph g, ParseTree definingTree,
@@ -26,6 +29,14 @@ public class ScopeBuilder extends SyntacticScope {
 
     void setParent(Scope parent) {
         this.parent = parent;
+    }
+
+    void addChild(ScopeBuilder b) {
+        children.add(b);
+    }
+
+    public List<ScopeBuilder> getChildren() {
+        return new ArrayList<>(children);
     }
 
     public MathSymbol addBinding(String name, Symbol.Quantification q,
