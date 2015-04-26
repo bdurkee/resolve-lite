@@ -19,10 +19,6 @@ public class ProgTypeDefinitionSymbol extends ProgTypeSymbol {
         return exemplar;
     }
 
-    @Override public PTFamily getProgramType() {
-        return (PTFamily) super.getProgramType();
-    }
-
     @Override public ProgTypeDefinitionSymbol toProgTypeDefinitionSymbol() {
         return this;
     }

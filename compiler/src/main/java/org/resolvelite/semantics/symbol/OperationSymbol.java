@@ -12,6 +12,7 @@ public class OperationSymbol extends Symbol {
 
     private PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
+    private ProgTypeSymbol ty;
 
     public OperationSymbol(TypeGraph g, String name, ParseTree definingTree,
             PTType type, String moduleID, List<ProgParameterSymbol> params) {
@@ -30,6 +31,10 @@ public class OperationSymbol extends Symbol {
 
     public void setReturnType(PTType t) {
         this.returnType = t;
+    }
+
+    public void setProgramTypeSym(ProgTypeSymbol t) {
+        ty = t;
     }
 
     @Override public OperationSymbol toOperationSymbol() {

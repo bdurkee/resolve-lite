@@ -160,8 +160,15 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override public void exitOperationDecl(
+    @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
+        super.enterOperationDecl(ctx);
+        typeFunctionLikeThing(ctx.name, ctx.type());
+    }
+
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        super.enterOperationProcedureDecl(ctx);
         typeFunctionLikeThing(ctx.name, ctx.type());
     }
 
@@ -284,7 +291,7 @@ public class ComputeTypes extends SetScopes {
                 returnType = PTVoid.getInstance(g);
             }
             else {
-                returnType = tree.progTypeValues.get(type);
+                returnType = resolveType(type.qualifier, type.name);
             }
             op.setReturnType(returnType);
         }
@@ -316,6 +323,35 @@ public class ComputeTypes extends SetScopes {
         //guess we can set it for the overall group too.
         tree.progTypeValues.put(ctx, progTypeValue);
         tree.mathTypeValues.put(ctx, mathTypeValue);
+    }
+
+    protected PTType resolveType(Token qualifier, Token name) {
+        ProgTypeSymbol result = null;
+        try {
+            return currentScope.queryForOne(
+                    new NameQuery(qualifier, name, true))
+                            .toProgTypeSymbol().getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            nsse.printStackTrace();
+        } catch (DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
+        return PTInvalid.getInstance(g);
+    }
+
+    protected ProgTypeSymbol resolveType2(Token qualifier, Token name) {
+        try {
+            return currentScope.queryForOne(
+                    new NameQuery(qualifier, name, true))
+                    .toProgTypeSymbol();
+        }
+        catch (NoSuchSymbolException nsse) {
+            nsse.printStackTrace();
+        } catch (DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected final void chainMathTypes(ParseTree current, ParseTree child) {

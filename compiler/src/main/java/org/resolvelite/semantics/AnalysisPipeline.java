@@ -46,7 +46,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             if (!sym.containsOnlyValidTypes()) {
                 compiler.errorManager.semanticError(
                         ErrorKind.DANGLING_INVALID_TYPEREF,
-                        null, sym.getName());
+                        null, sym.getClass().getSimpleName(), sym.getName());
                 unit.hasErrors = true;
             }
         }

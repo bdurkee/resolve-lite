@@ -37,8 +37,8 @@ import java.util.List;
 
 public abstract class AbstractCompilationPipeline {
 
-    @NotNull protected final List<AnnotatedTree> compilationUnits;
-    @NotNull protected final ResolveCompiler compiler;
+    protected final List<AnnotatedTree> compilationUnits;
+    protected final ResolveCompiler compiler;
 
     public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
             @NotNull List<AnnotatedTree> compilationUnits) {

@@ -223,6 +223,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         symtab.endScope();
+        insertFunction(ctx.name, ctx);
     }
 
     private void insertVariables(List<TerminalNode> terminalGroup,

@@ -1,13 +1,14 @@
 Concept Boolean_Template;
 
+    Oper And (evaluates a, b: Boolean): Boolean;
+
     Type Family Boolean is modeled by B;
         exemplar b;
+
 
     Oper True (): Boolean;
 
     Oper False (): Boolean;
-
-    Oper And (evaluates a, b: Boolean): Boolean;
 
     Oper Or (evaluates a, b: Boolean): Boolean;
 
