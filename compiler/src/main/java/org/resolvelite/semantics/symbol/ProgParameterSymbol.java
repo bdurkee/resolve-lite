@@ -120,8 +120,8 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @Override public boolean containsOnlyValidTypes() {
-        return !declaredType.getClass().equals(PTInvalid.class) &&
-                mathSymbolAlterEgo.containsOnlyValidTypes();
+        return !declaredType.getClass().equals(PTInvalid.class)
+                && mathSymbolAlterEgo.containsOnlyValidTypes();
     }
 
     @Override public String toString() {

@@ -42,7 +42,7 @@ public class AnnotatedTree {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progType = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
     private final String name, fileName;

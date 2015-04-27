@@ -15,6 +15,13 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     public PossiblyQualifiedPath(Token qualifier,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             boolean localPriority) {
+        this(qualifier.getText(), importStrategy, facilityStrategy,
+                localPriority);
+    }
+
+    public PossiblyQualifiedPath(String qualifier,
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         this.actualSearchPath =
                 getAppropriatePath(qualifier, importStrategy, facilityStrategy,
                         localPriority);
@@ -31,7 +38,7 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
         return actualSearchPath.searchFromContext(searcher, source, repo);
     }
 
-    private static ScopeSearchPath getAppropriatePath(Token qualifier,
+    private static ScopeSearchPath getAppropriatePath(String qualifier,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             boolean localPriority) {
         ScopeSearchPath result;

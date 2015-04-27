@@ -179,10 +179,12 @@ public enum ErrorKind {
     NO_SUCH_MODULE(24, "no such module: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 25: <em>symbolclassname</em> = <em>symbolname</em> contains
+     * Compiler error 25: <em>symbolclassname</em> = <em>symbolname</em>
+     * contains
      * a dangling invalid typeref".
      */
-    DANGLING_INVALID_TYPEREF(25, "<arg>=<arg2> contains a dangling invalid typeref",
+    DANGLING_INVALID_TYPEREF(25,
+            "<arg>=<arg2> contains a dangling ref to invalidtype",
             ErrorSeverity.ERROR);
 
     public final int code;

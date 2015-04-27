@@ -8,10 +8,8 @@ import java.util.*;
 
 public class MTCartesian extends MTType {
 
-    private List<Element> elements = new LinkedList<Element>();
-    private List<MTType> elementTypes = new LinkedList<MTType>();
-    private Map<String, Element> tagsToElementsTable = new LinkedHashMap<>();
-    private Map<Element, String> elementsToTagsTable = new LinkedHashMap<>();
+    private List<Element> elements = new LinkedList<>();
+    private List<MTType> elementTypes = new LinkedList<>();
 
     private final int size;
 
@@ -51,6 +49,8 @@ public class MTCartesian extends MTType {
         Element second = new Element(elements[elementCount - 1]);
         workingSize += 1;
 
+        Map<String, Element> tagsToElementsTable = new LinkedHashMap<>();
+        Map<Element, String> elementsToTagsTable = new LinkedHashMap<>();
         first.addTo(this.elements, elementTypes, tagsToElementsTable,
                 elementsToTagsTable);
         second.addTo(this.elements, elementTypes, tagsToElementsTable,

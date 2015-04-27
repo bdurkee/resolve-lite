@@ -14,9 +14,9 @@ import java.util.List;
 public class QualifiedPath implements ScopeSearchPath {
 
     private final boolean instantiateGenerics;
-    private final Token qualifier;
+    private final String qualifier;
 
-    public QualifiedPath(Token qualifier, FacilityStrategy facilityStrategy) {
+    public QualifiedPath(String qualifier, FacilityStrategy facilityStrategy) {
         this.instantiateGenerics =
                 facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
@@ -29,8 +29,7 @@ public class QualifiedPath implements ScopeSearchPath {
         try {
             FacilitySymbol facility =
                     (FacilitySymbol) source
-                            .queryForOne(new UnqualifiedNameQuery(qualifier
-                                    .getText()));
+                            .queryForOne(new UnqualifiedNameQuery(qualifier));
 
             Scope facilityScope = facility.getFacility().getSpecification() //
                     .getScope(instantiateGenerics);
@@ -39,9 +38,7 @@ public class QualifiedPath implements ScopeSearchPath {
         catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
             try {
-                ModuleScopeBuilder moduleScope =
-                        repo.getModuleScope(qualifier.getText());
-
+                ModuleScopeBuilder moduleScope = repo.getModuleScope(qualifier);
                 result =
                         moduleScope.getMatches(searcher,
                                 TableSearcher.SearchContext.IMPORT);
