@@ -29,6 +29,7 @@ public class ComputeTypes extends SetScopes {
     protected TypeGraph g;
     protected AnnotatedTree tree;
     protected int typeValueDepth = 0;
+    protected ProgTypeModelSymbol curTypeModel = null;
 
     ComputeTypes(@NotNull ResolveCompiler rc, SymbolTable symtab,
             AnnotatedTree t) {
@@ -98,15 +99,29 @@ public class ComputeTypes extends SetScopes {
         tree.mathTypeValues.put(ctx, record.toMath());
     }
 
+    @Override public void enterTypeModelDecl(
+            @NotNull ResolveParser.TypeModelDeclContext ctx) {
+        super.enterTypeModelDecl(ctx);
+        try {
+            curTypeModel = currentScope.queryForOne(new NameQuery(null,
+                    ctx.name.getText(), true)).toProgTypeModelSymbol();
+        }
+        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
+        curTypeModel = null;
         try {
-            ProgTypeDefinitionSymbol t =
+            ProgTypeModelSymbol t =
                     currentScope.queryForOne(
                             new UnqualifiedNameQuery(ctx.name.getText(),
                                     ImportStrategy.IMPORT_NONE,
                                     FacilityStrategy.FACILITY_IGNORE, true,
-                                    true)).toProgTypeDefinitionSymbol();
+                                    true)).toProgTypeModelSymbol();
             PExp constraint =
                     ctx.constraintClause() != null ? buildPExp(ctx
                             .constraintClause()) : null;
@@ -129,7 +144,6 @@ public class ComputeTypes extends SetScopes {
                             initEnsures, finalRequires, finalEnsures);
             t.setProgramType(familyType);
             t.setModelType(modelType);
-            t.getExemplar().setTypes(modelType, null);
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             e.printStackTrace();//shouldnt happen
@@ -158,15 +172,13 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    @Override public void enterOperationDecl(
+    @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
-        super.enterOperationDecl(ctx);
         typeFunctionLikeThing(ctx, ctx.name, ctx.type());
     }
 
-    @Override public void enterOperationProcedureDecl(
+    @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        super.enterOperationProcedureDecl(ctx);
         typeFunctionLikeThing(ctx, ctx.name, ctx.type());
     }
 
@@ -304,45 +316,23 @@ public class ComputeTypes extends SetScopes {
         }
         tree.mathTypes.put(ctx, type);
         tree.mathTypeValues.put(ctx, typeValue);
+
+        //we've just processed the 'model' exp portion of type model definition.
+        //Let's update the examplar with this newfound type
+        if (ctx.getParent().getClass()
+                .equals(ResolveParser.TypeModelDeclContext.class)) {
+            curTypeModel.getExemplar().setTypes(typeValue, null);
+        }
+    }
+
+    @Override public void exitMathInfixExp(
+            @NotNull ResolveParser.MathInfixExpContext ctx) {
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
     }
 
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
-        MTFunction foundExpType;
-        foundExpType =
-                PSymbol.getConservativePreApplicationType(g, ctx.mathExp(),
-                        tree.mathTypes);
-        MathSymbol intendedEntry = getIntendedFunction(ctx);
-
-        if ( intendedEntry == null ) {
-            tree.mathTypes.put(ctx, g.INVALID);
-            return;
-        }
-        MTFunction expectedType = (MTFunction) intendedEntry.getType();
-
-        //We know we match expectedType--otherwise the above would have thrown
-        //an exception.
-        tree.mathTypes.put(ctx, expectedType.getRange());
-
-        if (typeValueDepth > 0) {
-            //I had better identify a type
-            MTFunction entryType = (MTFunction) intendedEntry.getType();
-
-            List<MTType> arguments = new ArrayList<>();
-            MTType argTypeValue;
-            for (ParserRuleContext arg : ctx.mathExp()) {
-                argTypeValue = tree.mathTypeValues.get(arg);
-                if (argTypeValue == null) {
-                    compiler.errorManager.semanticError(
-                            ErrorKind.INVALID_MATH_TYPE,
-                            arg.getStart(), arg.getText());
-                }
-                arguments.add(argTypeValue);
-            }
-            tree.mathTypeValues.put(ctx,
-                    entryType.getApplicationType(intendedEntry.getName(),
-                            arguments));
-        }
+        typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
     }
 
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
@@ -356,22 +346,6 @@ public class ComputeTypes extends SetScopes {
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
         }
         return intendedEntry;
-    }
-
-    private MathSymbol getIntendedFunction(
-            @NotNull ResolveParser.MathUnaryExpContext ctx) {
-        return getIntendedFunction(ctx, null, ctx.op,
-                Arrays.asList(ctx.mathExp()));
-    }
-
-    private MathSymbol getIntendedFunction(
-            @NotNull ResolveParser.MathInfixExpContext ctx) {
-        return getIntendedFunction(ctx, null, ctx.op, ctx.mathExp());
-    }
-
-    private MathSymbol getIntendedFunction(
-            @NotNull ResolveParser.MathFunctionExpContext ctx) {
-        return getIntendedFunction(ctx, null, ctx.name, ctx.mathExp());
     }
 
     private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
@@ -436,6 +410,46 @@ public class ComputeTypes extends SetScopes {
                                 ctx.getStart(), symbolName);
                 tree.mathTypeValues.put(ctx, g.INVALID);
             }
+        }
+    }
+
+    private void typeMathFunctionLikeThing(
+            @NotNull ParserRuleContext ctx, @Nullable Token qualifier,
+            @NotNull Token name, List<ResolveParser.MathExpContext> args) {
+        MTFunction foundExpType;
+        foundExpType =
+                PSymbol.getConservativePreApplicationType(g, args,
+                        tree.mathTypes);
+        MathSymbol intendedEntry = getIntendedFunction(
+                ctx, qualifier, name, args);
+
+        if ( intendedEntry == null ) {
+            tree.mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        MTFunction expectedType = (MTFunction) intendedEntry.getType();
+
+        //We know we match expectedType--otherwise the above would have thrown
+        //an exception.
+        tree.mathTypes.put(ctx, expectedType.getRange());
+
+        if ( typeValueDepth > 0 ) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
+
+            List<MTType> arguments = new ArrayList<>();
+            MTType argTypeValue;
+            for (ParserRuleContext arg : args) {
+                argTypeValue = tree.mathTypeValues.get(arg);
+                if ( argTypeValue == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
+                            arg.getText());
+                }
+                arguments.add(argTypeValue);
+            }
+            tree.mathTypeValues.put(ctx, entryType.getApplicationType(
+                    intendedEntry.getName(), arguments));
         }
     }
 

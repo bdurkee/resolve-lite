@@ -1,7 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
+import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 /**
@@ -19,10 +19,10 @@ public class PTRepresentation extends PTType {
      * This will be {@code null} for standalone representations (i.e. those that
      * would appear in the context of a facility module.
      */
-    private final ProgTypeDefinitionSymbol family;
+    private final ProgTypeModelSymbol family;
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            ProgTypeDefinitionSymbol family) {
+            ProgTypeModelSymbol family) {
         super(g);
         this.name = name;
         this.baseType = baseType;
@@ -33,7 +33,7 @@ public class PTRepresentation extends PTType {
         return baseType;
     }
 
-    public ProgTypeDefinitionSymbol getFamily() {
+    public ProgTypeModelSymbol getFamily() {
         return family;
     }
 

@@ -5,5 +5,4 @@ Concept Bdd_Search_Store_Template<Key>
     Type Family Store is modeled by Powerset(Key);
         exemplar S;
 
-
 end Bdd_Search_Store_Template;

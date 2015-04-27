@@ -3,6 +3,7 @@ package org.resolvelite.misc;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.semantics.DuplicateSymbolException;
+import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
 import org.resolvelite.semantics.ScopeBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -19,6 +20,9 @@ public class Hardcoded {
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("Powerset", null, g.POWERSET);
+
+            b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.ENTITY).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,

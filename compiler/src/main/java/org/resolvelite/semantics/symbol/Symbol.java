@@ -6,7 +6,6 @@ import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.UnexpectedSymbolException;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
 
 public abstract class Symbol {
 
@@ -73,7 +72,7 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException();
     }
 
-    public ProgTypeDefinitionSymbol toProgTypeDefinitionSymbol()
+    public ProgTypeModelSymbol toProgTypeModelSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }

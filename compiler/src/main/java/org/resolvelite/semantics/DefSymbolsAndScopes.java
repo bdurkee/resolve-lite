@@ -11,8 +11,6 @@ import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.programtype.PTInvalid;
-import org.resolvelite.semantics.programtype.PTRepresentation;
-import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -116,7 +114,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         try {
             symtab.getInnermostActiveScope().define(
-                    new ProgTypeDefinitionSymbol(symtab.getTypeGraph(),
+                    new ProgTypeModelSymbol(symtab.getTypeGraph(),
                             ctx.name.getText(), exemplar, ctx,
                             getRootModuleID()));
         }
@@ -134,13 +132,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
 
-        ProgTypeDefinitionSymbol typeDefinition = null;
+        ProgTypeModelSymbol typeDefinition = null;
         ProgVariableSymbol reprVar = null;
         try {
             typeDefinition =
                     symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(null, ctx.name, false))
-                            .toProgTypeDefinitionSymbol();
+                            .toProgTypeModelSymbol();
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

@@ -40,7 +40,8 @@ public class MTFunction extends MTType {
         }
         this.range = builder.range;
         this.domain =
-                buildParameterType(getTypeGraph(), builder.paramNames,
+                buildParameterType(getTypeGraph(),
+                        buildNullNameListOfEqualLength(builder.paramTypes),
                         builder.paramTypes);
 
         this.components.add(domain);
@@ -57,7 +58,6 @@ public class MTFunction extends MTType {
 
     private static List<String> buildNullNameListOfEqualLength(
             List<MTType> original) {
-
         List<String> names = new ArrayList<>();
         for (MTType t : original) {
             names.add(null);
@@ -69,7 +69,6 @@ public class MTFunction extends MTType {
             List<String> paramNames, List<MTType> paramTypes) {
 
         MTType result;
-
         switch (paramTypes.size()) {
         case 0:
             result = g.VOID;
@@ -85,10 +84,8 @@ public class MTFunction extends MTType {
                 elements.add(new MTCartesian.Element(namesIter.next(),
                         typesIter.next()));
             }
-
             result = new MTCartesian(g, elements);
         }
-
         return result;
     }
 
@@ -104,8 +101,8 @@ public class MTFunction extends MTType {
         return restrictionFlag;
     }
 
-    public MTType getApplicationType(String calledAsName,
-                         List<MTType> arguments) {
+    public MTType
+            getApplicationType(String calledAsName, List<MTType> arguments) {
         return functionApplicationFactory.buildFunctionApplication(
                 getTypeGraph(), this, calledAsName, arguments);
     }

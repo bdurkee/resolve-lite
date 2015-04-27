@@ -2,7 +2,6 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.programtype.PTInvalid;
-import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -10,7 +9,7 @@ public class ProgReprTypeSymbol extends Symbol {
 
     //Note: This is null in the case where we represent a standalone
     //representation (a record in a facility for instance)
-    protected final ProgTypeDefinitionSymbol definition;
+    protected final ProgTypeModelSymbol definition;
     protected final ProgVariableSymbol reprVar;
 
     protected final ParseTree convention, correspondence;
@@ -19,7 +18,7 @@ public class ProgReprTypeSymbol extends Symbol {
 
     public ProgReprTypeSymbol(TypeGraph g, String name,
             ParseTree definingElement, String moduleID,
-            ProgTypeDefinitionSymbol definition, ProgVariableSymbol repVar,
+            ProgTypeModelSymbol definition, ProgVariableSymbol repVar,
             PTType representation, ParseTree convention,
             ParseTree correspondence) {
         super(name, definingElement, moduleID);
@@ -36,7 +35,7 @@ public class ProgReprTypeSymbol extends Symbol {
         this.representation = t;
     }
 
-    public ProgTypeDefinitionSymbol getDefinition() {
+    public ProgTypeModelSymbol getDefinition() {
         return definition;
     }
 
