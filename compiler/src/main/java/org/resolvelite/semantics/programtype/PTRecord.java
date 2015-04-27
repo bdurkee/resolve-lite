@@ -31,7 +31,15 @@ public class PTRecord extends PTType {
         return fields.get(name);
     }
 
+    @Override public boolean isAggregateType() {
+        return true;
+    }
+
     @Override public MTType toMath() {
         return mathTypeAlterEgo;
+    }
+
+    @Override public String toString() {
+        return "record " + fields;
     }
 }

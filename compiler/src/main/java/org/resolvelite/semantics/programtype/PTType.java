@@ -19,6 +19,10 @@ public abstract class PTType {
 
     public abstract MTType toMath();
 
+    public boolean isAggregateType() {
+        return false;
+    }
+
     // public abstract PTType instantiateGenerics(
     //         Map<String, PTType> genericInstantiations,
     //         FacilityEntry instantiatingFacility);

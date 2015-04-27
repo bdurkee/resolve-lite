@@ -24,10 +24,7 @@ import org.resolvelite.semantics.SymbolTable.ImportStrategy;
 import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ComputeTypes extends SetScopes {
 
@@ -90,7 +87,7 @@ public class ComputeTypes extends SetScopes {
     }
 
     @Override public void exitRecord(@NotNull ResolveParser.RecordContext ctx) {
-        Map<String, PTType> fields = new HashMap<>();
+        Map<String, PTType> fields = new LinkedHashMap<>();
         for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
                 .recordVariableDeclGroup()) {
             for (TerminalNode t : fieldGrp.Identifier()) {
@@ -148,12 +145,14 @@ public class ComputeTypes extends SetScopes {
                     currentScope.queryForOne(
                             new NameQuery(null, ctx.name, true))
                             .toProgReprTypeSymbol();
-
-            PTType t =
+            PTType baseType =
                     ctx.record() != null ? tree.progTypeValues
                             .get(ctx.record()) : tree.progTypeValues.get(ctx
                             .type());
-            repr.setRepresentationType(t);
+            PTType wrappingRepresentation =
+                    new PTRepresentation(g, baseType, ctx.name.getText(),
+                            repr.getDefinition());
+            repr.setRepresentationType(wrappingRepresentation);
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
@@ -200,53 +199,57 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitProgMemberExp(
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
-        //The first spot had better be a record
-        Iterator<TerminalNode> memberIter = ctx.Identifier().iterator();
         ParseTree firstRecordRef = ctx.getChild(0);
-        PTType t = tree.progTypes.get(firstRecordRef);
+        PTType first = tree.progTypes.get(firstRecordRef);
 
-        if ( !(t instanceof PTRepresentation) ) {
-            System.err.println("illegal access expression: " + ctx.getText()
-                    + "; " + t + " is not a record");
+        //first we sanity check the first to ensure we're dealing with a record
+        if ( !first.isAggregateType() ) {
+            compiler.errorManager.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
+                    ctx.getText(), ctx.getChild(0).getText());
             tree.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tree.mathTypes.put(ctx, g.INVALID);
             return;
         }
+        PTRepresentation curAggregateType = (PTRepresentation)first;
 
-        /*RecordReprSymbol currentRecordRef = (RecordReprSymbol) t;
-        //now type and make sure each of the members is correct..
-        Type curType = null;
-        while (memberIter.hasNext()) {
-            TerminalNode curTerm = memberIter.next();
-            try {
-                VariableSymbol s = (VariableSymbol)
-                        currentRecordRef.resolveMember(curTerm.getText());
-                curType = s.getType();
-                types.put(curTerm, curType);
-                if (curType instanceof RecordReprSymbol) {
-                    currentRecordRef = (RecordReprSymbol) curType;
-                }
+        //note this will represent the rightmost field type when finished.
+        PTType curFieldType = curAggregateType;
+
+        //now make sure our mem accesses aren't nonsense.
+        for (TerminalNode term : ctx.Identifier()) {
+            PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
+            curFieldType = recordType.getFieldType(term.getText());
+
+            if (curFieldType == null) {
+                compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                        term.getSymbol(), term.getText());
+                curFieldType = PTInvalid.getInstance(g);
+                break;
             }
-            catch (NoSuchSymbolException nsse) {
-                symtab.getCompiler().errorManager.semanticError(
-                        ErrorKind.NO_SUCH_SYMBOL, curTerm.getSymbol(),
-                        curTerm.getSymbol().getText());
-                types.put(curTerm, InvalidType.INSTANCE);
-                curType = InvalidType.INSTANCE;
+            if (curFieldType.isAggregateType()) {
+                curAggregateType = (PTRepresentation)curFieldType;
             }
         }
-        //effectively setting it to the type of the last member access.
-        types.put(ctx, curType);*/
+        tree.progTypes.put(ctx, curFieldType);
+        tree.mathTypes.put(ctx, curFieldType.toMath());
     }
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
-            ProgVariableSymbol variable = currentScope.queryForOne(
-                    new ProgVariableQuery(ctx.qualifier, ctx.name, true))
-                        .toProgVariableSymbol();
+            ProgVariableSymbol variable =
+                    currentScope
+                            .queryForOne(
+                                    new ProgVariableQuery(ctx.qualifier,
+                                            ctx.name, true))
+                            .toProgVariableSymbol();
             tree.progTypes.put(ctx, variable.getProgramType());
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
-            e.printStackTrace();
+            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
         }
     }
 
@@ -277,12 +280,12 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
-        exitMathSymbolExp(null, ctx.getText(), ctx);
+        exitMathSymbolExp(ctx, null, ctx.getText());
     }
 
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        exitMathSymbolExp(null, ctx.getText(), ctx);
+        exitMathSymbolExp(ctx, null, ctx.getText());
     }
 
     @Override public void enterMathTypeExp(
@@ -305,8 +308,8 @@ public class ComputeTypes extends SetScopes {
         tree.mathTypeValues.put(ctx, typeValue);
     }
 
-    private MathSymbol exitMathSymbolExp(Token qualifier, String symbolName,
-            ParserRuleContext ctx) {
+    private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
+            @Nullable Token qualifier, @NotNull String symbolName) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
         if ( intendedEntry == null ) {
             tree.mathTypes.put(ctx, g.INVALID);
@@ -388,7 +391,7 @@ public class ComputeTypes extends SetScopes {
             try {
                 ProgVariableSymbol variable =
                         currentScope.queryForOne(new ProgVariableQuery(null, t
-                                .getSymbol()));
+                                .getSymbol().getText()));
                 variable.setProgramType(progTypeValue);
                 tree.progTypeValues.put(t, progTypeValue);
                 tree.mathTypeValues.put(t, mathTypeValue);

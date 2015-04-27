@@ -152,13 +152,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         String exemplarName =
                 typeDefinition != null ? typeDefinition.getExemplar().getName()
                         : ctx.getText().substring(0, 1).toUpperCase();
-        PTType reprType =
-                new PTRepresentation(symtab.getTypeGraph(),
-                        PTInvalid.getInstance(g), typeDefinition);
         try {
             reprVar =
-                    new ProgVariableSymbol(exemplarName, ctx, reprType,
-                            getRootModuleID());
+                    new ProgVariableSymbol(exemplarName, ctx,
+                            PTInvalid.getInstance(g), getRootModuleID());
             symtab.getInnermostActiveScope().define(reprVar);
         }
         catch (DuplicateSymbolException e) {}
@@ -167,7 +164,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             symtab.getInnermostActiveScope().define(
                     new ProgReprTypeSymbol(symtab.getTypeGraph(), ctx.name
                             .getText(), ctx, getRootModuleID(), typeDefinition,
-                            reprVar, reprType, ctx.conventionClause(), null));
+                            reprVar, PTInvalid.getInstance(g), ctx
+                                    .conventionClause(), null));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

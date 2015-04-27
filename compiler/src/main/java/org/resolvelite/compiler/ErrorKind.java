@@ -180,12 +180,18 @@ public enum ErrorKind {
 
     /**
      * Compiler error 25: <em>symbolclassname</em> = <em>symbolname</em>
-     * contains
-     * a dangling invalid typeref".
+     * contains a dangling invalid typeref".
      */
     DANGLING_INVALID_TYPEREF(25,
             "<arg>=<arg2> contains a dangling ref to invalidtype",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 26: "illegal member access expression: <em>exp</em>;
+     * <em>exp first-component</em> must refer to a record".
+     */
+    ILLEGAL_MEMBER_ACCESS(26, "illegal member access expression: <arg>; <arg2>"
+            + " must refer to a record", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

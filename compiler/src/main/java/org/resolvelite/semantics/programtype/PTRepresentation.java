@@ -5,22 +5,26 @@ import org.resolvelite.semantics.symbol.ProgTypeDefinitionSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 /**
- * <p>
- * A <code>PTRepresentation</code> wraps an existing {@link PTType PTType} with
+ * A {@code PTRepresentation} wraps an existing {@link PTType PTType} with
  * additional information about a {@link PTFamily PTFamily} this type
- * represents. An instance of <code>PTRepresentation</code> is thus a special
+ * represents. An instance of {@code PTRepresentation} is thus a special
  * case of its wrapped type that happens to be functioning as a representation
  * type.
- * </p>
  */
 public class PTRepresentation extends PTType {
 
     private final PTType baseType;
+    private final String name;
+    /**
+     * This will be {@code null} for standalone representations (i.e. those that
+     * would appear in the context of a facility module.
+     */
     private final ProgTypeDefinitionSymbol family;
 
-    public PTRepresentation(TypeGraph g, PTType baseType,
+    public PTRepresentation(TypeGraph g, PTType baseType, String name,
             ProgTypeDefinitionSymbol family) {
         super(g);
+        this.name = name;
         this.baseType = baseType;
         this.family = family;
     }
@@ -37,8 +41,11 @@ public class PTRepresentation extends PTType {
         return baseType.toMath();
     }
 
+    @Override public boolean isAggregateType() {
+        return baseType.isAggregateType();
+    }
     /*@Override
-    public PTType instantiateGenerics(
+    public PTType instantiatseGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
@@ -58,6 +65,6 @@ public class PTRepresentation extends PTType {
     }*/
 
     @Override public String toString() {
-        return family.getName() + " as " + baseType;
+        return name + " as " + baseType;
     }
 }

@@ -2,6 +2,7 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.programtype.PTInvalid;
+import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -31,8 +32,12 @@ public class ProgReprTypeSymbol extends Symbol {
     }
 
     public void setRepresentationType(PTType t) {
-        this.reprVar.setProgramType(t); //update the 'exemplar' variable too.
+        this.reprVar.setProgramType(t); //update our 'exemplar' variable too.
         this.representation = t;
+    }
+
+    public ProgTypeDefinitionSymbol getDefinition() {
+        return definition;
     }
 
     @Override public ProgTypeSymbol toProgTypeSymbol() {
