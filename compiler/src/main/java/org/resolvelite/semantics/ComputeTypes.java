@@ -44,7 +44,6 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
-
         for (TerminalNode t : ctx.Identifier()) {
             try {
                 ProgParameterSymbol param =
@@ -237,6 +236,18 @@ public class ComputeTypes extends SetScopes {
         }
         //effectively setting it to the type of the last member access.
         types.put(ctx, curType);*/
+    }
+
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+        try {
+            ProgVariableSymbol variable = currentScope.queryForOne(
+                    new ProgVariableQuery(ctx.qualifier, ctx.name, true))
+                        .toProgVariableSymbol();
+            tree.progTypes.put(ctx, variable.getProgramType());
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override public void exitRequiresClause(

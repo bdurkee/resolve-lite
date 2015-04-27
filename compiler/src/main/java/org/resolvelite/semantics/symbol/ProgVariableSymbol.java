@@ -18,6 +18,10 @@ public class ProgVariableSymbol extends Symbol {
                         type.toMath(), null, definingTree, moduleID);
     }
 
+    public PTType getProgramType() {
+        return type;
+    }
+
     public void setProgramType(PTType t) {
         this.mathSymbolAlterEgo.setTypes(t.toMath(), null);
         this.type = t;

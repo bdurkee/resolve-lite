@@ -22,7 +22,6 @@ public class ProgReprTypeSymbol extends Symbol {
             PTType representation, ParseTree convention,
             ParseTree correspondence) {
         super(name, definingElement, moduleID);
-
         this.definition = definition;
         this.representation = representation;
         this.convention = convention;

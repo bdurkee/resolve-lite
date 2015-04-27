@@ -15,8 +15,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     public PossiblyQualifiedPath(Token qualifier,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
             boolean localPriority) {
-        this(qualifier.getText(), importStrategy, facilityStrategy,
-                localPriority);
+        this(qualifier != null ? qualifier.getText() : null, importStrategy,
+                facilityStrategy, localPriority);
     }
 
     public PossiblyQualifiedPath(String qualifier,

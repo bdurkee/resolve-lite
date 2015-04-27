@@ -14,7 +14,7 @@ public class ProgVariableQuery
         extends
             ResultProcessingQuery<Symbol, ProgVariableSymbol> {
 
-    public ProgVariableQuery(Token qualifier, Token name) {
+    public ProgVariableQuery(Token qualifier, Token name, boolean b) {
         this(qualifier, name.getText());
     }
 
