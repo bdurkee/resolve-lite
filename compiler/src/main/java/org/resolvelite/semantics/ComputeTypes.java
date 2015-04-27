@@ -211,7 +211,7 @@ public class ComputeTypes extends SetScopes {
             tree.mathTypes.put(ctx, g.INVALID);
             return;
         }
-        PTRepresentation curAggregateType = (PTRepresentation)first;
+        PTRepresentation curAggregateType = (PTRepresentation) first;
 
         //note this will represent the rightmost field type when finished.
         PTType curFieldType = curAggregateType;
@@ -221,14 +221,14 @@ public class ComputeTypes extends SetScopes {
             PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
             curFieldType = recordType.getFieldType(term.getText());
 
-            if (curFieldType == null) {
+            if ( curFieldType == null ) {
                 compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
                         term.getSymbol(), term.getText());
                 curFieldType = PTInvalid.getInstance(g);
                 break;
             }
-            if (curFieldType.isAggregateType()) {
-                curAggregateType = (PTRepresentation)curFieldType;
+            if ( curFieldType.isAggregateType() ) {
+                curAggregateType = (PTRepresentation) curFieldType;
             }
         }
         tree.progTypes.put(ctx, curFieldType);

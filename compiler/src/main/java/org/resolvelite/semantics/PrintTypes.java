@@ -65,8 +65,8 @@ public class PrintTypes extends ResolveBaseListener {
                     + " has a null prog type");
         }
         System.out.printf("%-17s", ctx.getText());
-        System.out.printf(" progtype %-8s  mathtype %-8s\n", tree.progTypes.get(ctx),
-                tree.mathTypes.get(ctx));
+        System.out.printf(" progtype %-8s  mathtype %-8s\n",
+                tree.progTypes.get(ctx), tree.mathTypes.get(ctx));
     }
 
     private void printMathTypesForExp(ParserRuleContext ctx) {
@@ -75,8 +75,8 @@ public class PrintTypes extends ResolveBaseListener {
                     + " has a null math type");
         }
         System.out.printf("%-17s", ctx.getText());
-        System.out.printf(" mathtype %-8s  mathtype value %-8s\n", tree.mathTypes.get(ctx),
-                tree.mathTypeValues.get(ctx));
+        System.out.printf(" mathtype %-8s  mathtype value %-8s\n",
+                tree.mathTypes.get(ctx), tree.mathTypeValues.get(ctx));
     }
 
 }
