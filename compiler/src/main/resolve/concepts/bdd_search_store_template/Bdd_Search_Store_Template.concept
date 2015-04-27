@@ -1,0 +1,9 @@
+Concept Bdd_Search_Store_Template<Key>
+        (evaluates Max_Capacity: Std_Integer_Fac::Integer);
+    --requires Max_Capacity > 0;
+
+    Type Family Store is modeled by Powerset(Key);
+        exemplar S;
+
+
+end Bdd_Search_Store_Template;

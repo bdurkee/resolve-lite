@@ -102,8 +102,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             exemplar =
                     symtab.getInnermostActiveScope()
                             .define(new MathSymbol(symtab.getTypeGraph(),
-                                    ctx.exemplar.getText(), g.INVALID, null,
-                                    ctx, getRootModuleID())).toMathSymbol();
+                                    ctx.exemplar.getText(), MTInvalid
+                                            .getInstance(g), null, ctx,
+                                    getRootModuleID())).toMathSymbol();
         }
         catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate exemplar!??");

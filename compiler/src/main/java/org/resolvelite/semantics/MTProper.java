@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class MTProper extends MTType {
 
-    private String myName;
-    private MTType myType = null;
-    private final boolean myKnownToContainOnlyMTypesFlag;
+    private String name;
+    private MTType type = null;
+    private final boolean knownToContainOnlyTypesFlag;
 
     public MTProper(TypeGraph g) {
         this(g, null, false, null);
@@ -30,31 +30,35 @@ public class MTProper extends MTType {
     public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
             String name) {
         super(g);
-        myKnownToContainOnlyMTypesFlag = knownToContainOnlyMTypes;
-        myType = type;
-        myName = name;
+        knownToContainOnlyTypesFlag = knownToContainOnlyMTypes;
+        this.type = type;
+        this.name = name;
     }
 
-    @Override public boolean isKnownToContainOnlyMTypes() {
-        return myKnownToContainOnlyMTypesFlag;
+    @Override public boolean isKnownToContainOnlyMathTypes() {
+        return knownToContainOnlyTypesFlag;
+    }
+
+    @Override public List<? extends MTType> getComponentTypes() {
+        return Collections.emptyList();
     }
 
     public String getName() {
-        return myName;
+        return name;
     }
 
     public MTType getType() {
-        return myType;
+        return type;
     }
 
     @Override public String toString() {
         String result;
 
-        if ( myName == null ) {
+        if ( name == null ) {
             result = super.toString();
         }
         else {
-            result = myName;
+            result = name;
         }
         return result;
     }

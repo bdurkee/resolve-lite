@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.MTProper;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.SymbolNotOfKindTypeException;
-import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.typereasoning.TypeGraph;
 
 public class MathSymbol extends Symbol {
@@ -36,7 +35,7 @@ public class MathSymbol extends Symbol {
         if ( mathTypeValue != null ) {
             this.typeValue = mathTypeValue;
         }
-        else if ( type.isKnownToContainOnlyMTypes() ) {
+        else if ( type.isKnownToContainOnlyMathTypes() ) {
             this.typeValue =
                     new MTProper(g, type,
                             type.membersKnownToContainOnlyMTypes(), getName());
@@ -70,7 +69,7 @@ public class MathSymbol extends Symbol {
     @Override public boolean containsOnlyValidTypes() {
         boolean result = !type.getClass().equals(g.INVALID.getClass());
         if ( result && typeValue != null ) {
-            result = typeValue.getClass().equals(g.INVALID.getClass());
+            result = !typeValue.getClass().equals(g.INVALID.getClass());
         }
         return result;
     }

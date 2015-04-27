@@ -2,6 +2,8 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.List;
+
 public abstract class MTType {
 
     private final TypeGraph typeGraph;
@@ -14,12 +16,14 @@ public abstract class MTType {
         return typeGraph;
     }
 
+    public abstract List<? extends MTType> getComponentTypes();
+
     /**
      * Indicates that this type is known to contain only elements <em>that
      * are themselves</em> types. Practically, this answers the question, "can
      * an instance of this type itself be used as a type?"
      */
-    public boolean isKnownToContainOnlyMTypes() {
+    public boolean isKnownToContainOnlyMathTypes() {
         return false;
     }
 

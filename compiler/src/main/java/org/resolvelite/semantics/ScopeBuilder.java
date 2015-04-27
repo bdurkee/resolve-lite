@@ -66,9 +66,4 @@ public class ScopeBuilder extends SyntacticScope {
             MTType type) throws DuplicateSymbolException {
         return addBinding(name, Symbol.Quantification.NONE, definingTree, type);
     }
-
-    public MathSymbol addBinding(String name, MTType type, MTType typeValue)
-            throws DuplicateSymbolException {
-        return addBinding(name, null, type, typeValue);
-    }
 }

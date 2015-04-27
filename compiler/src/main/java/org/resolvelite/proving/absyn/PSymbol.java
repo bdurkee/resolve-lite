@@ -1,11 +1,16 @@
 package org.resolvelite.proving.absyn;
 
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.misc.Utils.Builder;
+import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A {@link PSymbol} represents a reference to a named element such as a
@@ -57,13 +62,21 @@ public class PSymbol extends PExp {
      * function the RESOLVE programmer intends (assuming she has called it
      * correctly.)
      */
-    /*public MTFunction getConservativePreApplicationType(TypeGraph g) {
-        List<MTType> subTypes = new LinkedList<MTType>();
-        for (ExprAST arg : arguments) {
-            subTypes.add(arg.getMathType());
-        }
-        return new MTFunction(g, g.EMPTY_SET, subTypes);
-    }*/
+    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+         return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+                .paramTypes(arguments.stream()
+                        .map(PExp::getType)
+                        .collect(Collectors.toList())).build();
+    }
+
+    public static MTFunction getConservativePreApplicationType(TypeGraph g,
+                       List<? extends ParseTree> arguments,
+                       ParseTreeProperty<MTType> types) {
+        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+                .paramTypes(arguments.stream()
+                        .map(types::get)
+                        .collect(Collectors.toList())).build();
+    }
 
     public boolean isFunction() {
         return arguments.size() > 0;

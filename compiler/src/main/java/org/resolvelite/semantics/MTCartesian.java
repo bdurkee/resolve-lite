@@ -10,7 +10,6 @@ public class MTCartesian extends MTType {
 
     private List<Element> elements = new LinkedList<>();
     private List<MTType> elementTypes = new LinkedList<>();
-
     private final int size;
 
     public MTCartesian(TypeGraph g, Element... elements) {
@@ -61,6 +60,10 @@ public class MTCartesian extends MTType {
 
     public int size() {
         return size;
+    }
+
+    @Override public List<? extends MTType> getComponentTypes() {
+        return elementTypes;
     }
 
     @Override public String toString() {

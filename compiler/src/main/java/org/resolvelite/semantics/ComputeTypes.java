@@ -13,11 +13,9 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
+import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
-import org.resolvelite.semantics.query.MathSymbolQuery;
-import org.resolvelite.semantics.query.NameQuery;
-import org.resolvelite.semantics.query.ProgVariableQuery;
-import org.resolvelite.semantics.query.UnqualifiedNameQuery;
+import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.semantics.SymbolTable.FacilityStrategy;
 import org.resolvelite.semantics.SymbolTable.ImportStrategy;
@@ -308,6 +306,45 @@ public class ComputeTypes extends SetScopes {
         tree.mathTypeValues.put(ctx, typeValue);
     }
 
+    @Override public void exitMathFunctionExp(
+            @NotNull ResolveParser.MathFunctionExpContext ctx) {
+        MTFunction foundExpType;
+        foundExpType =
+                PSymbol.getConservativePreApplicationType(g, ctx.mathExp(),
+                        tree.mathTypes);
+        MathSymbol intendedEntry = getIntendedFunction(ctx);
+
+        if ( intendedEntry == null ) {
+            tree.mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        MTFunction expectedType = (MTFunction) intendedEntry.getType();
+
+        //We know we match expectedType--otherwise the above would have thrown
+        //an exception.
+        tree.mathTypes.put(ctx, expectedType.getRange());
+
+        if (typeValueDepth > 0) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
+
+            List<MTType> arguments = new ArrayList<>();
+            MTType argTypeValue;
+            for (ParserRuleContext arg : ctx.mathExp()) {
+                argTypeValue = tree.mathTypeValues.get(arg);
+                if (argTypeValue == null) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.INVALID_MATH_TYPE,
+                            arg.getStart(), arg.getText());
+                }
+                arguments.add(argTypeValue);
+            }
+            tree.mathTypeValues.put(ctx,
+                    entryType.getApplicationType(intendedEntry.getName(),
+                            arguments));
+        }
+    }
+
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull String symbolName) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
@@ -319,6 +356,47 @@ public class ComputeTypes extends SetScopes {
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
         }
         return intendedEntry;
+    }
+
+    private MathSymbol getIntendedFunction(
+            @NotNull ResolveParser.MathUnaryExpContext ctx) {
+        return getIntendedFunction(ctx, null, ctx.op,
+                Arrays.asList(ctx.mathExp()));
+    }
+
+    private MathSymbol getIntendedFunction(
+            @NotNull ResolveParser.MathInfixExpContext ctx) {
+        return getIntendedFunction(ctx, null, ctx.op, ctx.mathExp());
+    }
+
+    private MathSymbol getIntendedFunction(
+            @NotNull ResolveParser.MathFunctionExpContext ctx) {
+        return getIntendedFunction(ctx, null, ctx.name, ctx.mathExp());
+    }
+
+    private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
+            @Nullable Token qualifier, @NotNull Token name,
+            @NotNull List<ResolveParser.MathExpContext> args) {
+        MTFunction eType =
+                PSymbol.getConservativePreApplicationType(g, args,
+                        tree.mathTypes);
+        String operatorStr = name.getText();
+
+        List<MathSymbol> sameNameFunctions =
+                currentScope.query(new MathFunctionNamedQuery(qualifier, name));
+        MathSymbol result = null;
+        //Hand waving it for now.
+        if ( sameNameFunctions.size() == 1 ) {
+            result = sameNameFunctions.get(0);
+        }
+        else if ( sameNameFunctions.size() > 0 ) {
+            System.err.println("ambiguous function: " + operatorStr);
+        }
+        else {
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                    ctx.getStart(), name.getText());
+        }
+        return result;
     }
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
@@ -345,7 +423,7 @@ public class ComputeTypes extends SetScopes {
                 tree.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
             else {
-                if ( intendedEntry.getType().isKnownToContainOnlyMTypes() ) {
+                if ( intendedEntry.getType().isKnownToContainOnlyMathTypes() ) {
                     //mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 }
             }

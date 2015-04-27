@@ -2,6 +2,8 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.WeakHashMap;
 
 public class MTInvalid extends MTType {
@@ -24,5 +26,9 @@ public class MTInvalid extends MTType {
 
     private MTInvalid(TypeGraph g) {
         super(g);
+    }
+
+    @Override public List<? extends MTType> getComponentTypes() {
+        return Collections.emptyList();
     }
 }

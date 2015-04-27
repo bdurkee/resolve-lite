@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.MTInvalid;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
@@ -69,6 +70,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @Override public boolean containsOnlyValidTypes() {
         return mathTypeAlterEgo.containsOnlyValidTypes()
+                && !modelType.getClass().equals(MTInvalid.class)
                 && !type.getClass().equals(PTInvalid.class);
     }
 }
