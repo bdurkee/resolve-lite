@@ -19,6 +19,11 @@ public abstract class PTType {
 
     public abstract MTType toMath();
 
+    /**
+     * Returns {@code true} if this program type is a 'typed container' of
+     * other program types. Basically makes it much easier for us to determine
+     * if objects typed with this have members capable of being accessed.
+     */
     public boolean isAggregateType() {
         return false;
     }

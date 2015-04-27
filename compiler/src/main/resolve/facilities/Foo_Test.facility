@@ -1,0 +1,8 @@
+Facility Foo_Test;
+
+    Type Blah = Record
+            v, b: Std_Boolean_Fac::Boolean;
+        end;
+
+
+end Foo_Test;
