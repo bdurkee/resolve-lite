@@ -1,15 +1,15 @@
-Concept Bdd_Search_Store_Template<T>
+Concept Bdd_Search_Store_Template<Key>
         (evaluates Max_Capacity: Std_Integer_Fac::Integer);
     requires Max_Capacity > 0;
 
     Type Family Store is modeled by Powerset(Key);
         exemplar S;
 
-    Operation Add (restores e: T; updates S: Store);
+    Operation Add (restores e: Key; updates S: Store);
 
-    Operation Remove (restores e: T; updates S: Store);
+    Operation Remove (restores e: Key; updates S: Store);
 
-    Oper Is_Present (restores e: T;
+    Oper Is_Present (restores e: Key;
             restores S: Store): Std_Boolean_Fac::Boolean;
 
 end Bdd_Search_Store_Template;
