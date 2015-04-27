@@ -1,33 +1,24 @@
 package org.resolvelite.semantics;
 
+import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.semantics.symbol.Symbol;
 
 @SuppressWarnings("serial")
 public class DuplicateSymbolException extends SymbolTableException {
 
-    private final Symbol existingSymbol;
+    private Symbol existingSymbol;
+
+    public DuplicateSymbolException(Symbol existingSym) {
+        super(ErrorKind.DUP_SYMBOL);
+        this.existingSymbol = existingSym;
+    }
 
     public DuplicateSymbolException() {
-        super();
-        this.existingSymbol = null;
+        this(null);
     }
 
-    public DuplicateSymbolException(String s) {
-        super(s);
-        this.existingSymbol = null;
-    }
-
-    public DuplicateSymbolException(Symbol existing) {
-        super();
-        this.existingSymbol = existing;
-    }
-
-    public DuplicateSymbolException(Symbol existing, String msg) {
-        super(msg);
-        this.existingSymbol = existing;
-    }
-
-    public Symbol getExistingEntry() {
+    public Symbol getExistingSymbol() {
         return existingSymbol;
     }
+
 }

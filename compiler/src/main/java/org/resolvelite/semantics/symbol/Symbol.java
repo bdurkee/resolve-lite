@@ -1,8 +1,12 @@
 package org.resolvelite.semantics.symbol;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.ComputeTypes;
+import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.UnexpectedSymbolException;
+import org.resolvelite.semantics.programtype.PTInvalid;
+import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.typereasoning.TypeGraph;
 
 public abstract class Symbol {
 
@@ -50,6 +54,17 @@ public abstract class Symbol {
 
     public abstract String getEntryTypeDescription();
 
+    /**
+     * Returns {@code true} if all {@link PTType}s and {@link MTType}s
+     * referenced in this {@code Symbol} do not point to {@link PTInvalid} or
+     * the {@code Invalid} math type (respectively). This simply enables us to
+     * easily sanity check all entries after {@link ComputeTypes} finishes.
+     * 
+     * @return true if this {@link Symbol} lacks a reference to an
+     *         'invalid' type.
+     */
+    public abstract boolean containsOnlyValidTypes();
+
     public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
@@ -80,7 +95,14 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException();
     }
 
-    public RepSymbol toRepresentationSymbol() throws UnexpectedSymbolException {
+    public ProgReprTypeSymbol toProgReprTypeSymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();
     }
+
+    public ProgVariableSymbol toProgVariableSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException();
+    }
+
 }

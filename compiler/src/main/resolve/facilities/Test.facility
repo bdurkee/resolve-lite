@@ -1,4 +1,21 @@
 Facility Test;
 
+    Type Point = Record
+            x, y: Std_Integer_Fac::Integer;
+            v: Std_Boolean_Fac::Boolean;
+        end;
+
+    Type Baz = Record
+            a, b: Std_Boolean_Fac::Boolean;
+            VV: Point;
+        end;
+
+    Operation Main();
+        Procedure
+            Var P: Point;
+            Var b: Std_Boolean_Fac::Boolean;
+            Var x: Baz;
+            b := x.a;
+    end Main;
 
 end Test;

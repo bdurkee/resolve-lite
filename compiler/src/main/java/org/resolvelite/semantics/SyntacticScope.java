@@ -41,7 +41,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
         if ( symbols.containsKey(s.getName()) ) {
-            throw new DuplicateSymbolException();
+            throw new DuplicateSymbolException(symbols.get(s.getName()));
         }
         symbols.put(s.getName(), s);
         return s;
@@ -67,6 +67,10 @@ public abstract class SyntacticScope extends AbstractScope {
                 .filter(type::isInstance)
                 .map(type::cast)
                 .collect(Collectors.toList());
+    }
+
+    @Override public List<? extends Symbol> getAllSymbols() {
+        return new ArrayList<>(symbols.values());
     }
 
     @Override public String toString() {

@@ -2,7 +2,7 @@ Concept Bdd_Stack_Template<T>
         (evaluates Max_Depth: Std_Integer_Fac::Integer);
 
     Type Family Stack is modeled by Str(T);
-        exemplar s;
+        exemplar S;
 
     Operation Push (restores e: T; updates S: Stack);
 

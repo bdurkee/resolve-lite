@@ -230,6 +230,7 @@ public class SymbolTable {
     }
 
     private void addScope(ScopeBuilder s, ScopeBuilder parent) {
+        parent.addChild(s);
         lexicalScopeStack.push(s);
         scopes.put(s.getDefiningTree(), s);
     }

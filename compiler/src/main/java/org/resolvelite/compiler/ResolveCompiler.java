@@ -71,7 +71,6 @@ public class ResolveCompiler {
             .unmodifiableList(Arrays.asList("java"));
 
     public static class Option {
-
         String fieldName;
         String name;
         OptionArgType argType;
@@ -358,6 +357,7 @@ public class ResolveCompiler {
 
     private File findResolveFile(String baseName, List<String> extensions)
             throws IOException {
+
         FileLocator l = new FileLocator(baseName, extensions);
         Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();
@@ -474,7 +474,7 @@ public class ResolveCompiler {
                 outputDir = new File(outputDirectory);
             }
             else {
-                // -o /tmp subdir/t.g4 => /tmp/subdir/t.g4
+                // -o /tmp subdir/t.facility => /tmp/subdir/t.facility
                 if ( fileDirectory != null ) {
                     outputDir = new File(outputDirectory, fileDirectory);
                 }

@@ -95,7 +95,7 @@ public class Utils {
         }
     }
 
-    public static String getNameFromProgrammingOp(String op) {
+    public static String getNameFromProgramOp(String op) {
         String name = null;
         if ( op.equals("+") )
             name = "Sum";

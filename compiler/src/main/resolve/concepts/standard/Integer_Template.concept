@@ -3,10 +3,10 @@ Concept Integer_Template;
     Type Family Integer is modeled by Z;
         exemplar i;
 
-    Operation Sum (evaluates i, j: Integer): Integer;
+    Oper Sum (evaluates i, j: Integer): Integer;
 
-    Operation Difference (evaluates i, j: Integer): Integer;
+    Oper Difference (evaluates i, j: Integer): Integer;
 
-    Operation Less_Or_Equal(evaluates i, j: Integer): Std_Booean_Fac::Boolean;
+    Oper Less_Or_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
 
 end Integer_Template;

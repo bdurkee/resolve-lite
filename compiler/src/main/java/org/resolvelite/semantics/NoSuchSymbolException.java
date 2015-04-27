@@ -1,17 +1,12 @@
 package org.resolvelite.semantics;
 
+import org.resolvelite.compiler.ErrorKind;
+
 @SuppressWarnings("serial")
 public class NoSuchSymbolException extends SymbolTableException {
 
     public NoSuchSymbolException() {
-        super();
+        super(ErrorKind.NO_SUCH_SYMBOL);
     }
 
-    public NoSuchSymbolException(String msg) {
-        super(msg);
-    }
-
-    public NoSuchSymbolException(Exception causedBy) {
-        super(causedBy);
-    }
 }

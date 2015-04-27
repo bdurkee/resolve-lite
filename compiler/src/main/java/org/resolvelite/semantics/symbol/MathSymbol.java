@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.MTProper;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.SymbolNotOfKindTypeException;
+import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.typereasoning.TypeGraph;
 
 public class MathSymbol extends Symbol {
@@ -12,25 +13,18 @@ public class MathSymbol extends Symbol {
     private final Quantification quantification;
     private final TypeGraph g;
 
-    public MathSymbol(TypeGraph g, String name, Quantification q,
-            ParseTree definingTree, MTType type, MTType typeValue,
-            String moduleID) {
+    public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
+            MTType typeValue, ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.g = g;
         this.quantification = q;
         this.setTypes(type, typeValue);
     }
 
-    public MathSymbol(TypeGraph g, String name, Quantification q,
+    public MathSymbol(TypeGraph g, String name, MTType type, MTType typeValue,
             ParseTree definingTree, String moduleID) {
-        super(name, definingTree, moduleID);
-        this.g = g;
-        this.quantification = q;
-    }
-
-    public MathSymbol(TypeGraph g, String name, ParseTree definingTree,
-            String moduleID) {
-        this(g, name, Quantification.NONE, definingTree, moduleID);
+        this(g, name, Quantification.NONE, type, typeValue, definingTree,
+                moduleID);
     }
 
     public void setTypes(MTType mathType, MTType mathTypeValue) {
@@ -71,6 +65,14 @@ public class MathSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a math symbol";
+    }
+
+    @Override public boolean containsOnlyValidTypes() {
+        boolean result = !type.getClass().equals(g.INVALID.getClass());
+        if ( result && typeValue != null ) {
+            result = typeValue.getClass().equals(g.INVALID.getClass());
+        }
+        return result;
     }
 
     @Override public MathSymbol toMathSymbol() {

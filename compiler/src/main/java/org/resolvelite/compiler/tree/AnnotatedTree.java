@@ -42,7 +42,7 @@ public class AnnotatedTree {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progType = new ParseTreeProperty<>();
+    public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
     private final String name, fileName;
@@ -79,5 +79,13 @@ public class AnnotatedTree {
 
     @NotNull public ParseTree getRoot() {
         return root;
+    }
+
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof AnnotatedTree);
+        if ( result ) {
+            result = this.name.equals(((AnnotatedTree) o).name);
+        }
+        return result;
     }
 }

@@ -15,32 +15,68 @@ public class PrintTypes extends ResolveBaseListener {
         this.tree = t;
     }
 
-    @Override public void exitProgPrimaryExp(
-            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
-        printTypes(ctx);
+    @Override public void exitProgIntegerExp(
+            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
+        printProgTypesForExp(ctx);
     }
 
-    @Override public void exitMathPrimaryExp(
-            @NotNull ResolveParser.MathPrimaryExpContext ctx) {
-        printTypes(ctx);
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+        printProgTypesForExp(ctx);
     }
 
-    private void printTypes(ParserRuleContext ctx) {
+    @Override public void exitProgMemberExp(
+            @NotNull ResolveParser.ProgMemberExpContext ctx) {
+        printProgTypesForExp(ctx);
+    }
+
+    @Override public void exitMathInfixExp(
+            @NotNull ResolveParser.MathInfixExpContext ctx) {
+        printMathTypesForExp(ctx);
+    }
+
+    @Override public void exitMathFunctionExp(
+            @NotNull ResolveParser.MathFunctionExpContext ctx) {
+        printMathTypesForExp(ctx);
+    }
+
+    @Override public void exitMathVariableExp(
+            @NotNull ResolveParser.MathVariableExpContext ctx) {
+        printMathTypesForExp(ctx);
+    }
+
+    @Override public void exitMathTupleExp(
+            @NotNull ResolveParser.MathTupleExpContext ctx) {
+        printMathTypesForExp(ctx);
+    }
+
+    @Override public void exitMathBooleanExp(
+            @NotNull ResolveParser.MathBooleanExpContext ctx) {
+        printMathTypesForExp(ctx);
+    }
+
+    private void printProgTypesForExp(ParserRuleContext ctx) {
         if ( tree.mathTypes.get(ctx) == null ) {
-            throw new IllegalStateException("ctx: "
-                    + ctx.getClass().getSimpleName() + " null");
+            throw new IllegalStateException("node: " + ctx.getText()
+                    + " has a null math type");
+        }
+        if ( tree.progTypes.get(ctx) == null ) {
+            throw new IllegalStateException("node: " + ctx.getText()
+                    + " has a null prog type");
         }
         System.out.printf("%-17s", ctx.getText());
-        System.out.printf(" type %-8s  typevalue %-8s\n", getTypeStr(ctx),
-                getTypeValueStr(ctx));
+        System.out.printf(" progtype %-8s  mathtype %-8s\n", tree.progTypes.get(ctx),
+                tree.mathTypes.get(ctx));
     }
 
-    private String getTypeStr(ParseTree t) {
-        return tree.mathTypes.get(t).toString();
+    private void printMathTypesForExp(ParserRuleContext ctx) {
+        if ( tree.mathTypes.get(ctx) == null ) {
+            throw new IllegalStateException("node: " + ctx.getText()
+                    + " has a null math type");
+        }
+        System.out.printf("%-17s", ctx.getText());
+        System.out.printf(" mathtype %-8s  mathtype value %-8s\n", tree.mathTypes.get(ctx),
+                tree.mathTypeValues.get(ctx));
     }
 
-    private String getTypeValueStr(ParseTree t) {
-        return tree.mathTypeValues.get(t) != null ? tree.mathTypeValues.get(t)
-                .toString() : "null";
-    }
 }

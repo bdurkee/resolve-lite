@@ -7,12 +7,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.programtype.PTInvalid;
+import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.programtype.PTVoid;
+import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -23,12 +24,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected ResolveCompiler compiler;
     protected SymbolTable symtab;
     protected AnnotatedTree tree;
+    protected TypeGraph g;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;
         this.tree = annotatedTree;
+        this.g = symtab.getTypeGraph();
     }
 
     @Override public void enterPrecisModule(
@@ -49,7 +52,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
-                        new GenericSymbol(generic.getText(), generic,
+                        new GenericSymbol(g, generic.getText(), generic,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
@@ -75,11 +78,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
     }
 
-    @Override public void enterTypeModelDecl(
-            @NotNull ResolveParser.TypeModelDeclContext ctx) {
-        symtab.startScope(ctx);
-    }
-
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {
@@ -92,6 +90,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void enterTypeModelDecl(
+            @NotNull ResolveParser.TypeModelDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
     @Override public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         MathSymbol exemplar = null;
@@ -99,8 +102,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             exemplar =
                     symtab.getInnermostActiveScope()
                             .define(new MathSymbol(symtab.getTypeGraph(),
-                                    ctx.exemplar.getText(), ctx,
-                                    getRootModuleID())).toMathSymbol();
+                                    ctx.exemplar.getText(), g.INVALID, null,
+                                    ctx, getRootModuleID())).toMathSymbol();
         }
         catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate exemplar!??");
@@ -122,6 +125,54 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void enterTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+
+        ProgTypeDefinitionSymbol typeDefinition = null;
+        ProgVariableSymbol reprVar = null;
+        try {
+            typeDefinition =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toProgTypeDefinitionSymbol();
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+        catch (NoSuchSymbolException nsse) {
+            //it's ok if we didn't find one, we'll just function as a standalone
+            //representation then (think record, etc)
+        }
+        String exemplarName =
+                typeDefinition != null ? typeDefinition.getExemplar().getName()
+                        : ctx.getText().substring(0, 1).toUpperCase();
+        try {
+            reprVar =
+                    new ProgVariableSymbol(exemplarName, ctx,
+                            PTInvalid.getInstance(g), getRootModuleID());
+            symtab.getInnermostActiveScope().define(reprVar);
+        }
+        catch (DuplicateSymbolException e) {}
+        symtab.endScope();
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProgReprTypeSymbol(symtab.getTypeGraph(), ctx.name
+                            .getText(), ctx, getRootModuleID(), typeDefinition,
+                            reprVar, PTInvalid.getInstance(g), ctx
+                                    .conventionClause(), null));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.Identifier()) {
@@ -130,14 +181,25 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         ProgParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
                 symtab.getInnermostActiveScope().define(
-                        new ProgParameterSymbol(t.getText(), mode, ctx,
-                                getRootModuleID()));
+                        new ProgParameterSymbol(symtab.getTypeGraph(), t
+                                .getText(), mode, PTInvalid.getInstance(g),
+                                ctx, getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                         t.getSymbol(), t.getText());
             }
         }
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
     }
 
     @Override public void enterOperationDecl(
@@ -151,13 +213,41 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         insertFunction(ctx.name, ctx);
     }
 
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.endScope();
+        insertFunction(ctx.name, ctx);
+    }
+
+    private void insertVariables(List<TerminalNode> terminalGroup,
+            ResolveParser.TypeContext type) {
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), t,
+                                PTInvalid.getInstance(g), getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx) {
         try {
             List<ProgParameterSymbol> params =
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
             symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, getRootModuleID(),
+                    new OperationSymbol(symtab.getTypeGraph(), name.getText(),
+                            ctx, PTInvalid.getInstance(g), getRootModuleID(),
                             params));
         }
         catch (DuplicateSymbolException dse) {
