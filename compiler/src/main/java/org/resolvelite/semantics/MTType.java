@@ -38,7 +38,9 @@ public abstract class MTType {
     }
 
     @Override public boolean equals(Object o) {
-        if (this == o) {
+        System.err
+                .println("mttype: " + this.toString() + " == " + o.toString());
+        if ( this == o ) {
             return true;
         }
         else {

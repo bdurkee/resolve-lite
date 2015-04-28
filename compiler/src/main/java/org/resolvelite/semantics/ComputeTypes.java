@@ -23,6 +23,7 @@ import org.resolvelite.semantics.symbol.Symbol.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ComputeTypes extends SetScopes {
 
@@ -363,26 +364,85 @@ public class ComputeTypes extends SetScopes {
     private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull Token name,
             @NotNull List<ResolveParser.MathExpContext> args) {
-        MTFunction eType =
-                PSymbol.getConservativePreApplicationType(g, args,
-                        tree.mathTypes);
+        tree.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
+                args, tree.mathTypes));
+        PSymbol e = (PSymbol)buildPExp(ctx);
+        MTFunction eType = (MTFunction)e.getMathType();
         String operatorStr = name.getText();
 
         List<MathSymbol> sameNameFunctions =
-                currentScope.query(new MathFunctionNamedQuery(qualifier, name));
-        MathSymbol result = null;
-        //Hand waving it for now.
-        if ( sameNameFunctions.size() == 1 ) {
-            result = sameNameFunctions.get(0);
-        }
-        else if ( sameNameFunctions.size() > 0 ) {
-            System.err.println("ambiguous function: " + operatorStr);
-        }
-        else {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                currentScope.query(new MathFunctionNamedQuery(qualifier, name))
+                        .stream()
+                        .filter(s -> s.getType() instanceof MTFunction)
+                        .collect(Collectors.toList());
+
+        List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
+                .map(MathSymbol::getType).collect(Collectors.toList());
+
+        if (sameNameFunctions.isEmpty()) {
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
         }
-        return result;
+        MathSymbol intendedFunction = null;
+        try {
+            intendedFunction = getExactDomainTypeMatch(e, sameNameFunctions);
+        }
+        catch (NoSolutionException nse) {
+            compiler.errorManager.semanticError(ErrorKind.NO_MATH_FUNC_FOR_DOMAIN,
+                    ctx.getStart(), eType.getDomain(), sameNameFunctions,
+                    sameNameFunctionTypes);
+        }
+        return intendedFunction;
+    }
+
+    private MathSymbol getExactDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
+    }
+
+    private MathSymbol getDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates,
+            TypeComparison<PSymbol, MTFunction> comparison)
+            throws NoSolutionException {
+        MTFunction eType = e.getConservativePreApplicationType(g);
+        MathSymbol match = null;
+
+        MTFunction candidateType;
+        for (MathSymbol candidate : candidates) {
+            try {
+                candidate =
+                        candidate.deschematize(e.getArguments(), currentScope);
+                candidateType = (MTFunction) candidate.getType();
+                emitDebug(candidate.getType() + " deschematizes to "
+                        + candidateType);
+
+                if (comparison.compare(e, eType, candidateType)) {
+
+                    if (match != null) {
+                        throw new SourceErrorException("Multiple "
+                                + comparison.description() + " domain "
+                                + "matches.  For example, "
+                                + match.getName() + " : " + match.getType()
+                                + " and " + candidate.getName() + " : "
+                                + candidate.getType()
+                                + ".  Consider explicitly qualifying.", e
+                                .getLocation());
+                    }
+
+                    match = candidate;
+                 }
+
+            }
+            catch (NoSolutionException nse) {
+                //couldn't deschematize--try the next one
+                emitDebug(candidate.getType() + " doesn't deschematize "
+                        + "against " + e.getParameters());
+            }*/
+        }
+        if ( match == null ) {
+            throw NoSolutionException.INSTANCE;
+        }
+        return match;
     }
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
@@ -410,7 +470,7 @@ public class ComputeTypes extends SetScopes {
             }
             else {
                 if ( intendedEntry.getType().isKnownToContainOnlyMathTypes() ) {
-                    //mathTypeValues.put(ctx, new MTNamed(g, symbolName));
+                    tree.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 }
             }
         }
@@ -545,10 +605,10 @@ public class ComputeTypes extends SetScopes {
         tree.progTypeValues.put(current, tree.progTypeValues.get(child));
     }
 
-    protected final PExp buildPExp(ParserRuleContext ctx) {
+    protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) return null;
-        PExpBuildingListener builder =
-                new PExpBuildingListener(tree.mathTypes, tree.mathTypeValues);
+        PExpBuildingListener<T> builder =
+                new PExpBuildingListener<T>(tree.mathTypes, tree.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }
@@ -587,7 +647,6 @@ public class ComputeTypes extends SetScopes {
 
         @Override public boolean compare(PSymbol foundValue,
                 MTFunction foundType, MTFunction expectedType) {
-
             return false;
         }
 
@@ -596,13 +655,17 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    private class InexactParameterMatch
-            implements TypeComparison<PExp, MTType> {
+    private class InexactParameterMatch implements TypeComparison<PExp, MTType> {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
-                               MTType expectedType) {
+                MTType expectedType) {
             return g.isKnownToBeIn(foundValue, expectedType);
         }
+
+        @Override public String description() {
+            return "inexact";
+        }
+    }
 
     protected final String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();

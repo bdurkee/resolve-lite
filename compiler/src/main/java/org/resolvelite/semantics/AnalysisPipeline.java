@@ -56,7 +56,6 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                 else if ( t instanceof TerminalNode ) {
                     start = ((TerminalNode) t).getSymbol();
                 }
-
                 compiler.errorManager.semanticError(
                         ErrorKind.DANGLING_INVALID_TYPEREF, start, sym
                                 .getClass().getSimpleName(), sym.getName());

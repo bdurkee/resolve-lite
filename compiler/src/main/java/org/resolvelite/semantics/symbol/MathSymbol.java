@@ -1,10 +1,13 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.semantics.MTProper;
-import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.SymbolNotOfKindTypeException;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.semantics.*;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
 
@@ -70,6 +73,50 @@ public class MathSymbol extends Symbol {
         boolean result = !type.getClass().equals(g.INVALID.getClass());
         if ( result && typeValue != null ) {
             result = !typeValue.getClass().equals(g.INVALID.getClass());
+        }
+        return result;
+    }
+
+    public MathSymbol deschematize(List<PExp> arguments,
+        Scope callingContext)
+            throws NoSolutionException {
+        if (!(type instanceof MTFunction)) throw NoSolutionException.INSTANCE;
+
+        List<MTType> formalParameterTypes =
+                getParameterTypes(((MTFunction) type));
+
+        List<MTType> actualArgumentTypes = arguments.stream()
+                .map(PExp::getMathType)
+                .collect(Collectors.toList());
+
+        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
+            throw NoSolutionException.INSTANCE;
+        }
+
+        List<ProgTypeSymbol> callingContextProgramGenerics =
+                callingContext.query(GenericQuery.INSTANCE);
+       // Map<String, MTType> callingContextMathGenerics =
+       //         new HashMap<String, MTType>(definitionSchematicTypes);
+        return null;
+    }
+
+    private static List<MTType> getParameterTypes(MTFunction source) {
+        return expandAsNeeded(source.getDomain());
+    }
+
+    private static List<MTType> expandAsNeeded(MTType t) {
+        List<MTType> result = new ArrayList<>();
+        if (t instanceof MTCartesian) {
+            MTCartesian domainAsMTCartesian = (MTCartesian) t;
+
+            for (int i = 0; i < domainAsMTCartesian.size(); i++) {
+                result.add(domainAsMTCartesian.getFactor(i));
+            }
+        }
+        else {
+            if (!t.equals(t.getTypeGraph().VOID)) {
+                result.add(t);
+            }
         }
         return result;
     }

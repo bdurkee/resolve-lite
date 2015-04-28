@@ -15,11 +15,11 @@ public abstract class PExp {
         this.typeValue = typeValue;
     }
 
-    public final MTType getType() {
+    public final MTType getMathType() {
         return type;
     }
 
-    public final MTType getTypeValue() {
+    public final MTType getMathTypeValue() {
         return typeValue;
     }
 
@@ -34,6 +34,8 @@ public abstract class PExp {
     public abstract boolean isVariable();
 
     public abstract boolean isLiteral();
+
+    public abstract boolean isFunction();
 
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();

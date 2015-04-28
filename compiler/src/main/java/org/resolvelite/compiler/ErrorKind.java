@@ -191,7 +191,21 @@ public enum ErrorKind {
      * <em>exp first-component</em> must refer to a record".
      */
     ILLEGAL_MEMBER_ACCESS(26, "illegal member access expression: <arg>; <arg2>"
-            + " must refer to a record", ErrorSeverity.ERROR);
+            + " must refer to a record", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 27: "no such function: <em>name</em>".
+     */
+    NO_SUCH_MATH_FUNCTION(27, "no such function: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 28: "no function applicable for domain <em>domain</em>;
+     * candidates: <em>candidatename</em> : <em>candidatetype</em>.
+     */
+    NO_MATH_FUNC_FOR_DOMAIN(28, "no function applicable for domain <arg>;"
+            + " candidates: "
+            + "<arg2, arg3 : {name,domain|('<name>' : <domain>)};separator={,\n}>",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

@@ -1,6 +1,5 @@
 package org.resolvelite.proving.absyn;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.misc.Utils.Builder;
@@ -36,7 +35,7 @@ public class PSymbol extends PExp {
         this.name = builder.name;
         this.leftPrint = builder.lprint;
         this.rightPrint = builder.rprint;
-        this.arguments.addAll(arguments);
+        this.arguments.addAll(builder.arguments);
         this.literalFlag = builder.literal;
         this.incomingFlag = builder.incoming;
         this.quantification = builder.quantification;
@@ -63,9 +62,9 @@ public class PSymbol extends PExp {
      * correctly.)
      */
     public MTFunction getConservativePreApplicationType(TypeGraph g) {
-         return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
                 .paramTypes(arguments.stream()
-                        .map(PExp::getType)
+                        .map(PExp::getMathType)
                         .collect(Collectors.toList())).build();
     }
 
@@ -78,12 +77,16 @@ public class PSymbol extends PExp {
                         .collect(Collectors.toList())).build();
     }
 
-    public boolean isFunction() {
-        return arguments.size() > 0;
+    public List<PExp> getArguments() {
+        return arguments;
     }
 
     public boolean isIncoming() {
         return incomingFlag;
+    }
+
+    @Override public boolean isFunction() {
+        return arguments.size() > 0;
     }
 
     @Override public boolean isObviouslyTrue() {
@@ -111,8 +114,8 @@ public class PSymbol extends PExp {
                 PSymbol asVariable = new PSymbolBuilder(leftPrint) //
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
-                        .mathType(getType()) //
-                        .mathTypeValue(getTypeValue()).build();
+                        .mathType(getMathType()) //
+                        .mathTypeValue(getMathTypeValue()).build();
                 PExp functionSubstitution = substitutions.get(asVariable);
 
                 if ( functionSubstitution != null ) {
@@ -124,7 +127,7 @@ public class PSymbol extends PExp {
             }
 
             result = new PSymbolBuilder(newLeft, newRight) //
-                    .mathType(getType()).mathType(getTypeValue()) //
+                    .mathType(getMathType()).mathType(getMathTypeValue()) //
                     .quantification(newQuantification) //
                     .style(dispStyle) //
                     .incoming(incomingFlag).build();
