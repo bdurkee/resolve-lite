@@ -26,6 +26,16 @@ import java.util.*;
 
 public class ComputeTypes extends SetScopes {
 
+    private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
+            new ExactDomainMatch();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
+            new ExactParameterMatch();
+
+    private final TypeComparison<PSymbol, MTFunction> INEXACT_DOMAIN_MATCH =
+            new InexactDomainMatch();
+    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
+            new InexactParameterMatch();
+
     protected TypeGraph g;
     protected AnnotatedTree tree;
     protected int typeValueDepth = 0;
@@ -103,10 +113,12 @@ public class ComputeTypes extends SetScopes {
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         super.enterTypeModelDecl(ctx);
         try {
-            curTypeModel = currentScope.queryForOne(new NameQuery(null,
-                    ctx.name.getText(), true)).toProgTypeModelSymbol();
+            curTypeModel =
+                    currentScope.queryForOne(
+                            new NameQuery(null, ctx.name.getText(), true))
+                            .toProgTypeModelSymbol();
         }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
                     ctx.name.getText());
         }
@@ -319,8 +331,8 @@ public class ComputeTypes extends SetScopes {
 
         //we've just processed the 'model' exp portion of type model definition.
         //Let's update the examplar with this newfound type
-        if (ctx.getParent().getClass()
-                .equals(ResolveParser.TypeModelDeclContext.class)) {
+        if ( ctx.getParent().getClass()
+                .equals(ResolveParser.TypeModelDeclContext.class) ) {
             curTypeModel.getExemplar().setTypes(typeValue, null);
         }
     }
@@ -413,15 +425,15 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
-    private void typeMathFunctionLikeThing(
-            @NotNull ParserRuleContext ctx, @Nullable Token qualifier,
-            @NotNull Token name, List<ResolveParser.MathExpContext> args) {
+    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
+            @Nullable Token qualifier, @NotNull Token name,
+            List<ResolveParser.MathExpContext> args) {
         MTFunction foundExpType;
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args,
                         tree.mathTypes);
-        MathSymbol intendedEntry = getIntendedFunction(
-                ctx, qualifier, name, args);
+        MathSymbol intendedEntry =
+                getIntendedFunction(ctx, qualifier, name, args);
 
         if ( intendedEntry == null ) {
             tree.mathTypes.put(ctx, g.INVALID);
@@ -540,6 +552,57 @@ public class ComputeTypes extends SetScopes {
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }
+
+    private static class ExactParameterMatch implements Comparator<MTType> {
+
+        @Override public int compare(MTType o1, MTType o2) {
+            int result;
+            if ( o1.equals(o2) ) {
+                result = 0;
+            }
+            else {
+                result = 1;
+            }
+            return result;
+        }
+    }
+
+    private static class ExactDomainMatch
+            implements
+                TypeComparison<PSymbol, MTFunction> {
+        @Override public boolean compare(PSymbol foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+            return foundType.parameterTypesMatch(expectedType,
+                    EXACT_PARAMETER_MATCH);
+        }
+
+        @Override public String description() {
+            return "exact";
+        }
+    }
+
+    private class InexactDomainMatch
+            implements
+                TypeComparison<PSymbol, MTFunction> {
+
+        @Override public boolean compare(PSymbol foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+
+            return false;
+        }
+
+        @Override public String description() {
+            return "inexact";
+        }
+    }
+
+    private class InexactParameterMatch
+            implements TypeComparison<PExp, MTType> {
+
+        @Override public boolean compare(PExp foundValue, MTType foundType,
+                               MTType expectedType) {
+            return g.isKnownToBeIn(foundValue, expectedType);
+        }
 
     protected final String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();

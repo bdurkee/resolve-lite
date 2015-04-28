@@ -29,11 +29,16 @@ public class TypeGraph {
 
     private static class PowersetApplicationFactory
             implements
-                FunctionApplicationFactory {
+            FunctionApplicationFactory {
 
-        @Override public MTType buildFunctionApplication(TypeGraph g,
-                MTFunction f, String refName, List<MTType> args) {
+        @Override
+        public MTType buildFunctionApplication(TypeGraph g,
+                                               MTFunction f, String refName, List<MTType> args) {
             return new MTPowersetApplication(g, args.get(0));
         }
+    }
+
+    public boolean isKnownToBeIn(MTType value, MTType expected) {
+
     }
 }

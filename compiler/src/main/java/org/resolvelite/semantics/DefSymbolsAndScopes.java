@@ -114,9 +114,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         try {
             symtab.getInnermostActiveScope().define(
-                    new ProgTypeModelSymbol(symtab.getTypeGraph(),
-                            ctx.name.getText(), exemplar, ctx,
-                            getRootModuleID()));
+                    new ProgTypeModelSymbol(symtab.getTypeGraph(), ctx.name
+                            .getText(), exemplar, ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,

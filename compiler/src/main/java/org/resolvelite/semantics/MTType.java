@@ -36,4 +36,13 @@ public abstract class MTType {
     public boolean membersKnownToContainOnlyMTypes() {
         return false;
     }
+
+    @Override public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }

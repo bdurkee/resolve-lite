@@ -3,10 +3,7 @@ package org.resolvelite.semantics;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class MTFunction extends MTType {
 
@@ -85,6 +82,44 @@ public class MTFunction extends MTType {
                         typesIter.next()));
             }
             result = new MTCartesian(g, elements);
+        }
+        return result;
+    }
+
+    public boolean parameterTypesMatch(MTFunction other,
+            Comparator<MTType> comparison) {
+
+        MTType otherDomain = other.getDomain();
+        boolean result;
+
+        if ( domain instanceof MTCartesian ) {
+            result = otherDomain instanceof MTCartesian;
+
+            if ( result ) {
+                MTCartesian domainAsMTCartesian = (MTCartesian) domain;
+                MTCartesian otherDomainAsMTCartesian =
+                        (MTCartesian) otherDomain;
+
+                int domainSize = domainAsMTCartesian.size();
+                int otherDomainSize = otherDomainAsMTCartesian.size();
+
+                result = (domainSize == otherDomainSize);
+
+                if ( result ) {
+                    int i = 0;
+                    while (result && i < domainSize) {
+                        result =
+                                (comparison.compare(
+                                        domainAsMTCartesian.getFactor(i),
+                                        otherDomainAsMTCartesian.getFactor(i)) == 0);
+
+                        i++;
+                    }
+                }
+            }
+        }
+        else {
+            result = (comparison.compare(this.domain, otherDomain) == 0);
         }
         return result;
     }

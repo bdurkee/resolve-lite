@@ -4,5 +4,12 @@ Facility Foo_Test;
             v, b: Std_Boolean_Fac::Boolean;
         end;
 
+    Oper Foo();
+        Procedure
 
+    end Foo;
+
+    Oper Main();
+        Procedure
+    end Main;
 end Foo_Test;

@@ -62,6 +62,37 @@ public class MTCartesian extends MTType {
         return size;
     }
 
+    private Element getElement(int index) {
+        Element result;
+        if ( index < 0 || index >= size ) {
+            throw new IndexOutOfBoundsException("" + index);
+        }
+        if ( index == (size - 1) ) {
+            result = elements.get(1);
+        }
+        else {
+            if ( size == 2 ) {
+                //ASSERT: myElements.get(0) cannot be an instance of MTCartesian
+                if ( index != 0 ) {
+                    throw new IndexOutOfBoundsException("" + index);
+                }
+
+                result = elements.get(0);
+            }
+            else {
+                //ASSERT: myElements.get(0) MUST be an instance of MTCartesian
+                result =
+                        ((MTCartesian) elements.get(0).element)
+                                .getElement(index);
+            }
+        }
+        return result;
+    }
+
+    public MTType getFactor(int index) {
+        return getElement(index).element;
+    }
+
     @Override public List<? extends MTType> getComponentTypes() {
         return elementTypes;
     }
