@@ -64,10 +64,6 @@ public class MathSymbol extends Symbol {
         return typeValue;
     }
 
-    @Override public String toString() {
-        return getName();
-    }
-
     @Override public String getEntryTypeDescription() {
         return "a math symbol";
     }
@@ -145,5 +141,11 @@ public class MathSymbol extends Symbol {
 
     @Override public MathSymbol toMathSymbol() {
         return this;
+    }
+
+    @Override public String toString() {
+        return getModuleID() + "::" + getName() + "\t\t"
+                + quantification + "\t\tof type: " + type
+                + "\t\t defines type: " + typeValue;
     }
 }

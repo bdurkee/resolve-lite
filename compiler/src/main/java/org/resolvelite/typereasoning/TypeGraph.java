@@ -4,6 +4,7 @@ import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class TypeGraph {
     public final MTInvalid INVALID = MTInvalid.getInstance(this);
@@ -39,10 +40,33 @@ public class TypeGraph {
     }
 
     public boolean isKnownToBeIn(MTType value, MTType expected) {
-        return false;
+        boolean result;
+
+        result = (value != CLS) && (value != ENTITY)
+                        && isSubtype(value.getType(), expected);
+        return result;
     }
 
     public boolean isKnownToBeIn(PExp value, MTType expected) {
         return false;
+    }
+
+    public boolean isSubtype(MTType subtype, MTType supertype) {
+        boolean result;
+
+        try {
+            result =
+                    supertype == ENTITY || supertype == CLS
+                           // || myEstablishedSubtypes.contains(r)
+                            || subtype.equals(supertype);
+                           // || subtype.isSyntacticSubtypeOf(supertype);
+        }
+        catch (NoSuchElementException nsee) {
+            //Syntactic subtype checker freaks out (rightly) if there are
+            //free variables in the expression, but the next check will deal
+            //correctly with them.
+            result = false;
+        }
+        return result;
     }
 }

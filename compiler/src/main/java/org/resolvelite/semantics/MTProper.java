@@ -47,7 +47,7 @@ public class MTProper extends MTType {
         return name;
     }
 
-    public MTType getType() {
+    @Override public MTType getType() {
         return type;
     }
 

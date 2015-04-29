@@ -19,6 +19,15 @@ public abstract class MTType {
 
     public abstract List<? extends MTType> getComponentTypes();
 
+    public MTType getType() {
+        //TODO : Each MTType should really contain it's declared type.  I.e.,
+        //       if I say "Definition X : Set", I should store that X is
+        //       of type Set someplace.  That's not currently available, so for
+        //       the moment we say that all types are of type MType, the parent
+        //       type of all types.
+        return typeGraph.CLS;
+    }
+
     public abstract void accept(TypeVisitor v);
 
     public abstract void acceptOpen(TypeVisitor v);

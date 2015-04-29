@@ -74,7 +74,9 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @Override public String toString() {
-        return symbols.keySet() + "";
+        String s = "";
+        if (definingTree != null) s += definingTree.getClass().getSimpleName();
+        return s + symbols.keySet() + "";
     }
 
     @Override public <E extends Symbol> boolean addMatches(
