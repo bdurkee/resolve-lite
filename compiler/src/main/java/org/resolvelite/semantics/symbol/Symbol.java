@@ -1,7 +1,6 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.semantics.ComputeTypes;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.UnexpectedSymbolException;
 import org.resolvelite.semantics.programtype.PTInvalid;
@@ -56,8 +55,7 @@ public abstract class Symbol {
     /**
      * Returns {@code true} if all {@link PTType}s and {@link MTType}s
      * referenced in this {@code Symbol} do not point to {@link PTInvalid} or
-     * the {@code Invalid} math type (respectively). This simply enables us to
-     * easily sanity check all entries after {@link ComputeTypes} finishes.
+     * the {@code Invalid} math type (respectively).
      * 
      * @return true if this {@link Symbol} lacks a reference to an
      *         'invalid' type.

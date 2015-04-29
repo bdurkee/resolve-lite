@@ -42,4 +42,9 @@ public class GenericSymbol extends Symbol {
         return mathSymbolAlterEgo;
     }
 
+    @Override public ProgTypeSymbol toProgTypeSymbol() {
+        return new ProgTypeSymbol(g, getName(), new PTGeneric(g, getName()),
+                new MTNamed(g, getName()), getDefiningTree(), getModuleID());
+    }
+
 }

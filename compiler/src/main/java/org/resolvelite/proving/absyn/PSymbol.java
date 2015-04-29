@@ -2,6 +2,7 @@ package org.resolvelite.proving.absyn;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.misc.Utils;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
@@ -178,6 +179,29 @@ public class PSymbol extends PExp {
             }
         }
         return result;
+    }
+
+    @Override public String toString() {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        if (isFunction()) {
+            if (dispStyle == DisplayStyle.INFIX) {
+                result.append(arguments.get(0)).append(" " + name + " ")
+                        .append(arguments.get(1));
+            }
+            else if (dispStyle == DisplayStyle.OUTFIX) {
+                result.append(leftPrint).append(arguments.get(0)).append(
+                        rightPrint);
+            }
+            else {
+                result.append(name).append("(");
+                result.append(Utils.join(arguments, ", ")).append(")");
+            }
+        }
+        else {
+            result.append(name);
+        }
+        return result.toString();
     }
 
     public static class PSymbolBuilder implements Builder<PSymbol> {

@@ -31,4 +31,23 @@ public class MTInvalid extends MTType {
     @Override public List<? extends MTType> getComponentTypes() {
         return Collections.emptyList();
     }
+
+    @Override public void acceptOpen(TypeVisitor v) {
+        v.beginMTType(this);
+        v.beginMTInvalid(this);
+    }
+
+    @Override public void accept(TypeVisitor v) {
+        acceptOpen(v);
+
+        v.beginChildren(this);
+        v.endChildren(this);
+
+        acceptClose(v);
+    }
+
+    @Override public void acceptClose(TypeVisitor v) {
+        v.endMTInvalid(this);
+        v.endMTType(this);
+    }
 }

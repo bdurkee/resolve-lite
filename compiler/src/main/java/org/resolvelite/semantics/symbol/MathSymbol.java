@@ -3,10 +3,13 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.*;
+import org.resolvelite.semantics.query.GenericQuery;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
@@ -95,9 +98,28 @@ public class MathSymbol extends Symbol {
 
         List<ProgTypeSymbol> callingContextProgramGenerics =
                 callingContext.query(GenericQuery.INSTANCE);
-       // Map<String, MTType> callingContextMathGenerics =
-       //         new HashMap<String, MTType>(definitionSchematicTypes);
-        return null;
+        Map<String, MTType> callingContextMathGenerics =
+                new HashMap<String, MTType>();
+        Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
+
+        MathSymbol mathGeneric;
+        for (ProgTypeSymbol e : callingContextProgramGenerics) {
+            //This is guaranteed not to fail--all program types can be coerced
+            //to math types, so the passed location is irrelevant
+            mathGeneric = e.toMathSymbol();
+            callingContextMathGenerics.put(mathGeneric.getName(),
+                    mathGeneric.type);
+        }
+
+        MTType newTypeValue = null;
+        MTType newType =
+                ((MTFunction) type
+                        .getCopyWithVariablesSubstituted(bindingsSoFar))
+                        .deschematize(arguments);
+
+        return new MathSymbol(type.getTypeGraph(), getName(),
+                getQuantification(), newType, newTypeValue, getDefiningTree(),
+                getModuleID());
     }
 
     private static List<MTType> getParameterTypes(MTFunction source) {
@@ -106,7 +128,7 @@ public class MathSymbol extends Symbol {
 
     private static List<MTType> expandAsNeeded(MTType t) {
         List<MTType> result = new ArrayList<>();
-        if (t instanceof MTCartesian) {
+        if ( t instanceof MTCartesian ) {
             MTCartesian domainAsMTCartesian = (MTCartesian) t;
 
             for (int i = 0; i < domainAsMTCartesian.size(); i++) {
@@ -114,7 +136,7 @@ public class MathSymbol extends Symbol {
             }
         }
         else {
-            if (!t.equals(t.getTypeGraph().VOID)) {
+            if ( !t.equals(t.getTypeGraph().VOID) ) {
                 result.add(t);
             }
         }

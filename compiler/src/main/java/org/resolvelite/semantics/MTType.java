@@ -3,6 +3,7 @@ package org.resolvelite.semantics;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class MTType {
 
@@ -17,6 +18,12 @@ public abstract class MTType {
     }
 
     public abstract List<? extends MTType> getComponentTypes();
+
+    public abstract void accept(TypeVisitor v);
+
+    public abstract void acceptOpen(TypeVisitor v);
+
+    public abstract void acceptClose(TypeVisitor v);
 
     /**
      * Indicates that this type is known to contain only elements <em>that
@@ -35,6 +42,14 @@ public abstract class MTType {
      */
     public boolean membersKnownToContainOnlyMTypes() {
         return false;
+    }
+
+    public final MTType getCopyWithVariablesSubstituted(
+            Map<String, MTType> substitutions) {
+        VariableReplacingVisitor renamer =
+                new VariableReplacingVisitor(substitutions);
+        accept(renamer);
+        return renamer.getFinalExpression();
     }
 
     @Override public boolean equals(Object o) {

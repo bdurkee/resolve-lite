@@ -202,10 +202,21 @@ public enum ErrorKind {
      * Compiler error 28: "no function applicable for domain <em>domain</em>;
      * candidates: <em>candidatename</em> : <em>candidatetype</em>.
      */
-    NO_MATH_FUNC_FOR_DOMAIN(28, "no function applicable for domain <arg>;"
-            + " candidates: "
-            + "<arg2, arg3 : {name,domain|('<name>' : <domain>)};separator={,\n}>",
-            ErrorSeverity.ERROR);
+    NO_MATH_FUNC_FOR_DOMAIN(
+            28,
+            "no function applicable for domain <arg>;"
+                    + "\ncandidates: "
+                    + "<arg2, arg3 : {name,domain|('<name>' : <domain>)};separator={,\n}>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 29: "multiple domain matches: <em>match1name</em> :
+     * <em>match1type</em> and <em>match2name</em> : <em>match2type</em>;
+     * consider explicitly qualifying."
+     */
+    AMBIGIOUS_DOMAIN(29, "multiple domain matches; for example: "
+            + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
+            + "qualifying", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

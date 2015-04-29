@@ -6,7 +6,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 
-public class MTCartesian extends MTType {
+public class MTCartesian extends MTAbstract<MTCartesian> {
 
     private List<Element> elements = new LinkedList<>();
     private List<MTType> elementTypes = new LinkedList<>();
@@ -60,6 +60,10 @@ public class MTCartesian extends MTType {
 
     public int size() {
         return size;
+    }
+
+    public String getTag(int index) {
+        return getElement(index).tag;
     }
 
     private Element getElement(int index) {
@@ -143,5 +147,27 @@ public class MTCartesian extends MTType {
                 elementsToTags.put(this, tag);
             }
         }
+    }
+
+    @Override public void acceptOpen(TypeVisitor v) {
+        v.beginMTType(this);
+        v.beginMTAbstract(this);
+        v.beginMTCartesian(this);
+    }
+
+    @Override public void accept(TypeVisitor v) {
+        acceptOpen(v);
+        v.beginChildren(this);
+        for (Element t : this.elements) {
+            t.element.accept(v);
+        }
+        v.endChildren(this);
+        acceptClose(v);
+    }
+
+    @Override public void acceptClose(TypeVisitor v) {
+        v.endMTCartesian(this);
+        v.endMTAbstract(this);
+        v.endMTType(this);
     }
 }

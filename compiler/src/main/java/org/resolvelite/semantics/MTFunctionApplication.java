@@ -5,9 +5,10 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class MTFunctionApplication extends MTType {
+public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     private final MTFunction function;
     protected final List<MTType> arguments;
@@ -52,6 +53,14 @@ public class MTFunctionApplication extends MTType {
         return components;
     }
 
+    public MTFunction getFunction() {
+        return function;
+    }
+
+    public List<MTType> getArguments() {
+        return Collections.unmodifiableList(arguments);
+    }
+
     @Override public String toString() {
         StringBuffer sb = new StringBuffer();
         if ( arguments.size() == 2 ) {
@@ -71,4 +80,30 @@ public class MTFunctionApplication extends MTType {
         }
         return sb.toString();
     }
+
+    @Override public void acceptOpen(TypeVisitor v) {
+        v.beginMTType(this);
+        v.beginMTAbstract(this);
+        v.beginMTFunctionApplication(this);
+    }
+
+    @Override public void accept(TypeVisitor v) {
+        acceptOpen(v);
+        v.beginChildren(this);
+        function.accept(v);
+
+        for (MTType arg : arguments) {
+            arg.accept(v);
+        }
+
+        v.endChildren(this);
+        acceptClose(v);
+    }
+
+    @Override public void acceptClose(TypeVisitor v) {
+        v.endMTFunctionApplication(this);
+        v.endMTAbstract(this);
+        v.endMTType(this);
+    }
+
 }

@@ -17,14 +17,14 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.List;
 
-public class DefSymbolsAndScopes extends ResolveBaseListener {
+class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected ResolveCompiler compiler;
     protected SymbolTable symtab;
     protected AnnotatedTree tree;
     protected TypeGraph g;
 
-    public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
+    DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;

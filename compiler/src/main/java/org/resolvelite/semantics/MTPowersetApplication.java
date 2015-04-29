@@ -17,4 +17,26 @@ public class MTPowersetApplication extends MTFunctionApplication {
         //are containers of members from the original argument.
         return arguments.get(0).isKnownToContainOnlyMathTypes();
     }*/
+
+    @Override public void accept(TypeVisitor v) {
+        v.beginMTType(this);
+        v.beginMTAbstract(this);
+        v.beginMTFunctionApplication(this);
+        v.beginMTPowersetApplication(this);
+
+        v.beginChildren(this);
+
+        getFunction().accept(v);
+
+        for (MTType arg : getArguments()) {
+            arg.accept(v);
+        }
+
+        v.endChildren(this);
+
+        v.endMTPowersetApplication(this);
+        v.endMTFunctionApplication(this);
+        v.endMTAbstract(this);
+        v.endMTType(this);
+    }
 }

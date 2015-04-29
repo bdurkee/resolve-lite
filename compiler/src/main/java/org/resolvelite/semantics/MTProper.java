@@ -30,7 +30,7 @@ public class MTProper extends MTType {
     public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
             String name) {
         super(g);
-        knownToContainOnlyTypesFlag = knownToContainOnlyMTypes;
+        this.knownToContainOnlyTypesFlag = knownToContainOnlyMTypes;
         this.type = type;
         this.name = name;
     }
@@ -61,6 +61,25 @@ public class MTProper extends MTType {
             result = name;
         }
         return result;
+    }
+
+    @Override public void acceptOpen(TypeVisitor v) {
+        v.beginMTType(this);
+        v.beginMTProper(this);
+    }
+
+    @Override public void accept(TypeVisitor v) {
+        acceptOpen(v);
+
+        v.beginChildren(this);
+        v.endChildren(this);
+
+        acceptClose(v);
+    }
+
+    @Override public void acceptClose(TypeVisitor v) {
+        v.endMTProper(this);
+        v.endMTType(this);
     }
 
 }

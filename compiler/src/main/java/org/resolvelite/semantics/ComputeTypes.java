@@ -25,7 +25,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ComputeTypes extends SetScopes {
+class ComputeTypes extends SetScopes {
 
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
@@ -387,10 +387,15 @@ public class ComputeTypes extends SetScopes {
         try {
             intendedFunction = getExactDomainTypeMatch(e, sameNameFunctions);
         }
-        catch (NoSolutionException nse) {
-            compiler.errorManager.semanticError(ErrorKind.NO_MATH_FUNC_FOR_DOMAIN,
-                    ctx.getStart(), eType.getDomain(), sameNameFunctions,
-                    sameNameFunctionTypes);
+        catch (NoSolutionException nsee) {
+            try {
+                intendedFunction = getInexactDomainTypeMatch(e, sameNameFunctions);
+            }
+            catch (NoSolutionException nsee2) {
+                compiler.errorManager.semanticError(ErrorKind.NO_MATH_FUNC_FOR_DOMAIN,
+                        ctx.getStart(), eType.getDomain(), sameNameFunctions,
+                        sameNameFunctionTypes);
+            }
         }
         return intendedFunction;
     }
@@ -398,6 +403,11 @@ public class ComputeTypes extends SetScopes {
     private MathSymbol getExactDomainTypeMatch(PSymbol e,
             List<MathSymbol> candidates) throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
+    }
+
+    private MathSymbol getInexactDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
     private MathSymbol getDomainTypeMatch(PSymbol e,
@@ -413,31 +423,24 @@ public class ComputeTypes extends SetScopes {
                 candidate =
                         candidate.deschematize(e.getArguments(), currentScope);
                 candidateType = (MTFunction) candidate.getType();
-                emitDebug(candidate.getType() + " deschematizes to "
+                compiler.info(candidate.getType() + " deschematizes to "
                         + candidateType);
 
-                if (comparison.compare(e, eType, candidateType)) {
-
-                    if (match != null) {
-                        throw new SourceErrorException("Multiple "
-                                + comparison.description() + " domain "
-                                + "matches.  For example, "
-                                + match.getName() + " : " + match.getType()
-                                + " and " + candidate.getName() + " : "
-                                + candidate.getType()
-                                + ".  Consider explicitly qualifying.", e
-                                .getLocation());
+                if ( comparison.compare(e, eType, candidateType) ) {
+                    if ( match != null ) {
+                        compiler.errorManager.semanticError(
+                                ErrorKind.AMBIGIOUS_DOMAIN, null,
+                                match.getName(), match.getType(),
+                                candidate.getName(), candidate.getType());
                     }
-
                     match = candidate;
-                 }
-
+                }
             }
             catch (NoSolutionException nse) {
                 //couldn't deschematize--try the next one
-                emitDebug(candidate.getType() + " doesn't deschematize "
-                        + "against " + e.getParameters());
-            }*/
+                compiler.info(candidate.getType() + " doesn't deschematize "
+                        + "against " + e.getArguments());
+            }
         }
         if ( match == null ) {
             throw NoSolutionException.INSTANCE;
@@ -647,7 +650,8 @@ public class ComputeTypes extends SetScopes {
 
         @Override public boolean compare(PSymbol foundValue,
                 MTFunction foundType, MTFunction expectedType) {
-            return false;
+            return expectedType.parametersMatch(foundValue.getArguments(),
+                    INEXACT_PARAMETER_MATCH);
         }
 
         @Override public String description() {

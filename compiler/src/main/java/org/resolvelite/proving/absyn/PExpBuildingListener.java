@@ -64,9 +64,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
-        PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText())   //
+        PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText()) //
                 .arguments(collectPExpsFor(PExp.class, ctx.mathExp())) //
                 .style(PSymbol.DisplayStyle.INFIX) //
+                .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
     }
@@ -75,6 +76,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
+                .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
     }
@@ -83,6 +85,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
                 .arguments(collectPExpsFor(PExp.class, ctx.mathExp(), built))//
+                .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
     }
@@ -95,8 +98,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         built.put(ctx, result.build());
     }
 
-    private <E extends PExp> List<E> collectPExpsFor(
-            Class<E> expectedExpType, List<? extends ParseTree> nodes) {
+    private <E extends PExp> List<E> collectPExpsFor(Class<E> expectedExpType,
+            List<? extends ParseTree> nodes) {
         return collectPExpsFor(expectedExpType, nodes, built);
     }
 
