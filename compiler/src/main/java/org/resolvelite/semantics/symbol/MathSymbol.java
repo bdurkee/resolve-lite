@@ -94,9 +94,8 @@ public class MathSymbol extends Symbol {
 
         List<ProgTypeSymbol> callingContextProgramGenerics =
                 callingContext.query(GenericQuery.INSTANCE);
-        Map<String, MTType> callingContextMathGenerics =
-                new HashMap<String, MTType>();
-        Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
+        Map<String, MTType> callingContextMathGenerics = new HashMap<>();
+        Map<String, MTType> bindingsSoFar = new HashMap<>();
 
         MathSymbol mathGeneric;
         for (ProgTypeSymbol e : callingContextProgramGenerics) {

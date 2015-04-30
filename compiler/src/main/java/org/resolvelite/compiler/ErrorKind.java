@@ -206,7 +206,7 @@ public enum ErrorKind {
             28,
             "no function applicable for domain <arg>;"
                     + "\ncandidates: "
-                    + "<arg2, arg3 : {name,domain|('<name>' : <domain>)};separator={,\n}>",
+                    + "<arg2, arg3 : {name,domain|('<name.name>' : <domain>)};separator={,\n}>",
             ErrorSeverity.ERROR),
 
     /**

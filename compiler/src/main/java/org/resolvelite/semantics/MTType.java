@@ -63,7 +63,7 @@ public abstract class MTType {
 
     @Override public boolean equals(Object o) {
         System.err
-                .println("mttype: " + this.toString() + " == " + o.toString());
+                .println("mttype: " + this.toString() + " alph equiv to " + o.toString() + "?");
         if ( this == o ) {
             return true;
         }
