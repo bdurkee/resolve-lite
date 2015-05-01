@@ -1,6 +1,8 @@
 package org.resolvelite.typereasoning;
 
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PSymbol;
+import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.*;
 
 import java.util.List;
@@ -48,7 +50,35 @@ public class TypeGraph {
     }
 
     public boolean isKnownToBeIn(PExp value, MTType expected) {
-        return false;
+        boolean result;
+        try {
+            PExp conditions = getValidTypeConditions(value, expected);
+            result = conditions.isObviouslyTrue();
+        }
+        catch (TypeMismatchException e) {
+            result = false;
+        }
+        return result;
+    }
+
+    public PExp getValidTypeConditions(PExp value, MTType expected)
+            throws TypeMismatchException {
+        PExp result;
+        MTType valueTypeValue = value.getMathTypeValue();
+
+        if (expected == ENTITY && valueTypeValue != CLS
+                && valueTypeValue != ENTITY) {
+            result = getTrueExp();
+        }
+        else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
+            //MType and Entity aren't in anything
+            throw TypeMismatchException.INSTANCE;
+        }
+        else {
+            throw TypeMismatchException.INSTANCE;
+        }
+
+        return result;
     }
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
@@ -68,5 +98,15 @@ public class TypeGraph {
             result = false;
         }
         return result;
+    }
+
+    public final PSymbol getTrueExp() {
+        return new PSymbolBuilder("true")
+                .literal(true).mathType(BOOLEAN).build();
+    }
+
+    public final PSymbol getFalseExp() {
+        return new PSymbolBuilder("false")
+                .literal(true).mathType(BOOLEAN).build();
     }
 }
