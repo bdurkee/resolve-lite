@@ -348,6 +348,54 @@ class ComputeTypes extends SetScopes {
         typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
     }
 
+    @Override public void exitMathSetCollectionExp(
+            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+        tree.mathTypes.put(ctx, g.SSET);
+        if (ctx.mathExp().isEmpty()) {
+            tree.mathTypeValues.put(ctx, g.EMPTY_SET);
+        }
+        if (typeValueDepth > 0) {
+
+            // construct a union chain and see if all the component types
+            // are known to contain only sets.
+            List<MTType> elementTypes = ctx.mathExp().stream()
+                    .map(tree.mathTypes::get)
+                    .collect(Collectors.toList());
+
+            MTUnion chainedTypes = new MTUnion(g, elementTypes);
+
+            if (!chainedTypes.isKnownToContainOnlyMathTypes() ||
+                    ctx.mathExp().isEmpty()) {
+                compiler.errorManager
+                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                ctx.getStart(), ctx.getText());
+                tree.mathTypeValues.put(ctx, g.INVALID);
+                return;
+            }
+            tree.mathTypeValues.put(ctx, chainedTypes);
+
+        }
+
+        /*if ( typeValueDepth > 0 ) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
+
+            List<MTType> arguments = new ArrayList<>();
+            MTType argTypeValue;
+            for (ParserRuleContext arg : args) {
+                argTypeValue = tree.mathTypeValues.get(arg);
+                if ( argTypeValue == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
+                            arg.getText());
+                }
+                arguments.add(argTypeValue);
+            }
+            tree.mathTypeValues.put(ctx, entryType.getApplicationType(
+                    intendedEntry.getName(), arguments));
+        }*/
+    }
+
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull String symbolName) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);

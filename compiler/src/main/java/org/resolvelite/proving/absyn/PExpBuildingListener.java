@@ -10,6 +10,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,11 +84,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
-        PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .arguments(collectPExpsFor(PExp.class, ctx.mathExp(), built))//
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
+    }
+
+    @Override public void exitMathSetCollectionExp(
+            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+        List<PExp> elements = ctx.mathExp().stream()
+                .map(built::get)
+                .collect(Collectors.toList());
+        built.put(ctx, new PSet(types.get(ctx), typeValues.get(ctx), elements));
     }
 
     @Override public void exitMathBooleanExp(

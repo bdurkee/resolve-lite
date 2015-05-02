@@ -157,7 +157,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 int otherDomainSize = otherDomainAsMTCartesian.size();
 
                 result = (domainSize == otherDomainSize);
-
                 if ( result ) {
                     int i = 0;
                     while (result && i < domainSize) {

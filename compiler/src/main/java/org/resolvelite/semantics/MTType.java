@@ -49,7 +49,7 @@ public abstract class MTType {
      * "if a function returns an instance of this type, can that instance itself
      * be said to contain only types?"
      */
-    public boolean membersKnownToContainOnlyMTypes() {
+    public boolean membersKnownToContainOnlyMathTypes() {
         return false;
     }
 
@@ -62,8 +62,8 @@ public abstract class MTType {
     }
 
     @Override public boolean equals(Object o) {
-       // System.err.println("mttype: " + this.toString() + " alph equiv to "
-       //         + o.toString() + "?");
+        // System.err.println("mttype: " + this.toString() + " alph equiv to "
+        //         + o.toString() + "?");
         if ( this == o ) {
             return true;
         }

@@ -379,7 +379,6 @@ mathExp
     |   mathExp op=('='|'/=') mathExp                   #mathInfixExp
     |   mathExp op='implies' mathExp                    #mathInfixExp
     |   mathExp op=('and'|'or') mathExp                 #mathInfixExp
-    |   mathExp (':') mathExp                           #mathTypeAssertExp
     |   '(' mathAssertionExp ')'                        #mathNestedExp
     ;
 

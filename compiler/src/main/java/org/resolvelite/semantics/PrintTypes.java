@@ -45,8 +45,8 @@ public class PrintTypes extends ResolveBaseListener {
         printMathTypesForExp(ctx);
     }
 
-    @Override public void exitMathTupleExp(
-            @NotNull ResolveParser.MathTupleExpContext ctx) {
+    @Override public void exitMathSetCollectionExp(
+            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
         printMathTypesForExp(ctx);
     }
 
@@ -77,6 +77,9 @@ public class PrintTypes extends ResolveBaseListener {
         System.out.printf("%-17s", ctx.getText());
         System.out.printf(" mathtype %-8s  mathtypevalue %-8s\n",
                 tree.mathTypes.get(ctx), tree.mathTypeValues.get(ctx));
+        if ( tree.mathTypeValues.get(ctx) != null ) {
+            // System.out.print(" value class: (" + tree.mathTypeValues.get(ctx).getClass() + ")");
+        }
     }
 
 }

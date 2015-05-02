@@ -24,11 +24,9 @@ public abstract class TypeVisitor {
 
     //public void beginMTSetRestriction(MTSetRestriction t) {}
 
-    //public void beginMTUnion(MTUnion t) {}
+    public void beginMTUnion(MTUnion t) {}
 
     public void beginMTNamed(MTNamed t) {}
-
-    //public void beginMTGeneric(MTGeneric t) {}
 
     public void beginChildren(MTType t) {}
 
@@ -54,11 +52,9 @@ public abstract class TypeVisitor {
 
     //public void endMTSetRestriction(MTSetRestriction t) {}
 
-    //public void endMTUnion(MTUnion t) {}
+    public void endMTUnion(MTUnion t) {}
 
     public void endMTNamed(MTNamed t) {}
 
     public void endMTInvalid(MTInvalid t) {}
-
-    //public void endMTGeneric(MTGeneric t) {}
 }

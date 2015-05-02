@@ -12,11 +12,11 @@ public class MTPowersetApplication extends MTFunctionApplication {
         return true;
     }
 
-    /*@Override public boolean membersKnownToContainOnlyMathTypes() {
+    @Override public boolean membersKnownToContainOnlyMathTypes() {
         //I'm the container of all sub-containers of my argument.  My members
         //are containers of members from the original argument.
         return arguments.get(0).isKnownToContainOnlyMathTypes();
-    }*/
+    }
 
     @Override public void accept(TypeVisitor v) {
         v.beginMTType(this);

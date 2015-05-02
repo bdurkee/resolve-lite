@@ -46,7 +46,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         //function.  Thus, we're known to contain only MTypes if the function's
         //range's members are known only to contain MTypes.
 
-        return function.getRange().membersKnownToContainOnlyMTypes();
+        return function.getRange().membersKnownToContainOnlyMathTypes();
     }
 
     @Override public List<? extends MTType> getComponentTypes() {

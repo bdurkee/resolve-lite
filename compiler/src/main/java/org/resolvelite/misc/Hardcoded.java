@@ -14,12 +14,15 @@ public class Hardcoded {
         try {
             b.addBinding("Cls", null, g.CLS, g.CLS);
             b.addBinding("SSet", null, g.CLS, g.SSET);
+            b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
+
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("Powerset", null, g.POWERSET);
+            b.addBinding("union", null, g.UNION);
 
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());

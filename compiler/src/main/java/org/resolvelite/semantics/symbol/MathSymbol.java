@@ -44,7 +44,8 @@ public class MathSymbol extends Symbol {
         else if ( type.isKnownToContainOnlyMathTypes() ) {
             this.typeValue =
                     new MTProper(g, type,
-                            type.membersKnownToContainOnlyMTypes(), getName());
+                            type.membersKnownToContainOnlyMathTypes(),
+                            getName());
         }
         else {
             this.typeValue = null;

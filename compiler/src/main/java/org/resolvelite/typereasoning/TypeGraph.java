@@ -23,13 +23,19 @@ public class TypeGraph {
     public final MTProper EMPTY_SET = new MTProper(this, SSET, false,
             "Empty_Set");
 
+    private final static FunctionApplicationFactory POWERSET_APPLICATION =
+            new PowersetApplicationFactory();
+    private final static FunctionApplicationFactory UNION_APPLICATION =
+            new UnionApplicationFactory();
+
     public final MTFunction POWERSET = //
             new MTFunction.MTFunctionBuilder(this, POWERSET_APPLICATION, SSET) //
                     .paramTypes(SSET) //
                     .elementsRestrict(true).build();
 
-    private final static FunctionApplicationFactory POWERSET_APPLICATION =
-            new PowersetApplicationFactory();
+    public final MTFunction UNION = new MTFunction.MTFunctionBuilder(this,
+            UNION_APPLICATION, SSET).paramTypes(SSET, SSET) //
+            .build();
 
     private static class PowersetApplicationFactory
             implements
@@ -38,6 +44,16 @@ public class TypeGraph {
         @Override public MTType buildFunctionApplication(TypeGraph g,
                 MTFunction f, String refName, List<MTType> args) {
             return new MTPowersetApplication(g, args.get(0));
+        }
+    }
+
+    private static class UnionApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        @Override public MTType buildFunctionApplication(TypeGraph g,
+                MTFunction f, String calledAsName, List<MTType> arguments) {
+            return new MTUnion(g, arguments);
         }
     }
 
@@ -86,7 +102,7 @@ public class TypeGraph {
             throws TypeMismatchException {
         PExp result = getFalseExp();
 
-        if (expected == SSET ) {
+        if ( expected == SSET ) {
             //Every MTType is in SSet except for Entity and Cls
             result = getTrueExp();
         }
@@ -113,9 +129,9 @@ public class TypeGraph {
         }*/
 
         //If we've already established it statically, no need for further work
-        if (!result.isLiteralTrue()) {
-            throw new UnsupportedOperationException("Cannot statically " +
-                    "establish math subtype.");
+        if ( !result.isLiteralTrue() ) {
+            throw new UnsupportedOperationException("Cannot statically "
+                    + "establish math subtype.");
         }
         return result;
     }
