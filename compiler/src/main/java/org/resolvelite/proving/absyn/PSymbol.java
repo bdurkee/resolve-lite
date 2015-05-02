@@ -92,7 +92,7 @@ public class PSymbol extends PExp {
 
     //Todo: This should really check to make sure this.mathType == BOOLEAN.
     //But to do that we need a reference to the typegraph in this hierarchy..
-    @Override public boolean isObviouslyTrue() {
+    @Override public boolean isLiteralTrue() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("true"));
     }
 

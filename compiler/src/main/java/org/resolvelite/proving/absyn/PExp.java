@@ -29,7 +29,7 @@ public abstract class PExp {
 
     public abstract List<PExp> getSubExpressions();
 
-    public abstract boolean isObviouslyTrue();
+    public abstract boolean isLiteralTrue();
 
     public abstract boolean isVariable();
 

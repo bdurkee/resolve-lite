@@ -54,7 +54,7 @@ public class TypeGraph {
         boolean result;
         try {
             PExp conditions = getValidTypeConditions(value, expected);
-            result = conditions.isObviouslyTrue();
+            result = conditions.isLiteralTrue();
         }
         catch (TypeMismatchException e) {
             result = false;
@@ -72,13 +72,51 @@ public class TypeGraph {
             result = getTrueExp();
         }
         else if ( valueTypeValue == CLS || valueTypeValue == ENTITY ) {
-            //MType and Entity aren't in anything
+            //Cls and Entity aren't in anything (expect hyper-whatever, which we aren't concerned with)
             throw TypeMismatchException.INSTANCE;
         }
         else {
-            throw TypeMismatchException.INSTANCE;
+            result = getValidTypeConditions(valueTypeValue, expected);
         }
 
+        return result;
+    }
+
+    private PExp getValidTypeConditions(MTType value, MTType expected)
+            throws TypeMismatchException {
+        PExp result = getFalseExp();
+
+        if (expected == SSET ) {
+            //Every MTType is in SSet except for Entity and Cls
+            result = getTrueExp();
+        }
+        /*else if (expected instanceof MTPowertypeApplication) {
+            if (value.equals(EMPTY_SET)) {
+                //The empty set is in all powertypes
+                result = getTrueVarExp();
+            }
+            else {
+                //If "expected" happens to be Power(t) for some t, we can
+                //"demote" value to an INSTANCE of itself (provided it is not
+                //the empty set), and expected to just t
+                MTPowertypeApplication expectedAsPowertypeApplication =
+                        (MTPowertypeApplication) expected;
+
+                DummyExp memberOfValue = new DummyExp(value);
+
+                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                        .getArgument(0))) {
+
+                    result = getTrueVarExp();
+                }
+            }
+        }*/
+
+        //If we've already established it statically, no need for further work
+        if (!result.isLiteralTrue()) {
+            throw new UnsupportedOperationException("Cannot statically " +
+                    "establish math subtype.");
+        }
         return result;
     }
 
