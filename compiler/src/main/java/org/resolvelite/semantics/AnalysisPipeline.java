@@ -23,12 +23,12 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         for (AnnotatedTree unit : compilationUnits) {
-            compiler.info("defining syms: " + unit.getName());
+            System.out.println("----------------------\nModule: "
+                    + unit.getName() + "\n----------------------");
             ParseTreeWalker walker = new ParseTreeWalker();
             DefSymbolsAndScopes definePhase =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
-            compiler.info("typing: " + unit.getName());
             ComputeTypes typingPhase =
                     new ComputeTypes(compiler, compiler.symbolTable, unit);
             walker.walk(definePhase, unit.getRoot());

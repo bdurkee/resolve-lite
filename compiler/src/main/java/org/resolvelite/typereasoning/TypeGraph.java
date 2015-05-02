@@ -44,7 +44,8 @@ public class TypeGraph {
     public boolean isKnownToBeIn(MTType value, MTType expected) {
         boolean result;
 
-        result = (value != CLS) && (value != ENTITY)
+        result =
+                (value != CLS) && (value != ENTITY)
                         && isSubtype(value.getType(), expected);
         return result;
     }
@@ -66,11 +67,11 @@ public class TypeGraph {
         PExp result;
         MTType valueTypeValue = value.getMathTypeValue();
 
-        if (expected == ENTITY && valueTypeValue != CLS
-                && valueTypeValue != ENTITY) {
+        if ( expected == ENTITY && valueTypeValue != CLS
+                && valueTypeValue != ENTITY ) {
             result = getTrueExp();
         }
-        else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
+        else if ( valueTypeValue == CLS || valueTypeValue == ENTITY ) {
             //MType and Entity aren't in anything
             throw TypeMismatchException.INSTANCE;
         }
@@ -85,11 +86,10 @@ public class TypeGraph {
         boolean result;
 
         try {
-            result =
-                    supertype == ENTITY || supertype == CLS
-                           // || myEstablishedSubtypes.contains(r)
-                            || subtype.equals(supertype);
-                           // || subtype.isSyntacticSubtypeOf(supertype);
+            result = supertype == ENTITY || supertype == CLS
+            // || myEstablishedSubtypes.contains(r)
+                    || subtype.equals(supertype);
+            // || subtype.isSyntacticSubtypeOf(supertype);
         }
         catch (NoSuchElementException nsee) {
             //Syntactic subtype checker freaks out (rightly) if there are
@@ -101,12 +101,12 @@ public class TypeGraph {
     }
 
     public final PSymbol getTrueExp() {
-        return new PSymbolBuilder("true")
-                .literal(true).mathType(BOOLEAN).build();
+        return new PSymbolBuilder("true").literal(true).mathType(BOOLEAN)
+                .build();
     }
 
     public final PSymbol getFalseExp() {
-        return new PSymbolBuilder("false")
-                .literal(true).mathType(BOOLEAN).build();
+        return new PSymbolBuilder("false").literal(true).mathType(BOOLEAN)
+                .build();
     }
 }

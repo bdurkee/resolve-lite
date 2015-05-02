@@ -184,14 +184,14 @@ public class PSymbol extends PExp {
     @Override public String toString() {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        if (isFunction()) {
-            if (dispStyle == DisplayStyle.INFIX) {
+        if ( isFunction() ) {
+            if ( dispStyle == DisplayStyle.INFIX ) {
                 result.append(arguments.get(0)).append(" " + name + " ")
                         .append(arguments.get(1));
             }
-            else if (dispStyle == DisplayStyle.OUTFIX) {
-                result.append(leftPrint).append(arguments.get(0)).append(
-                        rightPrint);
+            else if ( dispStyle == DisplayStyle.OUTFIX ) {
+                result.append(leftPrint).append(arguments.get(0))
+                        .append(rightPrint);
             }
             else {
                 result.append(name).append("(");

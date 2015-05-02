@@ -143,8 +143,7 @@ public class MathSymbol extends Symbol {
     }
 
     @Override public String toString() {
-        return getModuleID() + "::" + getName() + "\t\t"
-                + quantification + "\t\tof type: " + type
-                + "\t\t defines type: " + typeValue;
+        return getModuleID() + "::" + getName() + "\t\t" + quantification
+                + "\t\tof type: " + type + "\t\t defines type: " + typeValue;
     }
 }

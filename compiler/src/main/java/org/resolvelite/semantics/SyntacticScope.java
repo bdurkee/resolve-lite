@@ -75,7 +75,8 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @Override public String toString() {
         String s = "";
-        if (definingTree != null) s += definingTree.getClass().getSimpleName();
+        if ( definingTree != null )
+            s += definingTree.getClass().getSimpleName();
         return s + symbols.keySet() + "";
     }
 

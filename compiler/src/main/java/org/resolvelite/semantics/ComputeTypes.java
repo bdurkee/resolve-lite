@@ -357,6 +357,18 @@ class ComputeTypes extends SetScopes {
         else {
             tree.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
+
+            MTType typeValue = tree.mathTypeValues.get(ctx);
+            MTType type = tree.mathTypes.get(ctx);
+            String typeValueDesc = "";
+
+            if ( typeValue != null ) {
+                typeValueDesc =
+                        ", referencing math type " + typeValue + " ("
+                                + typeValue.getClass() + ")";
+            }
+            compiler.info("processed symbol " + symbolName + " with type "
+                    + type + typeValueDesc);
         }
         return intendedEntry;
     }
@@ -397,6 +409,12 @@ class ComputeTypes extends SetScopes {
                         sameNameFunctionTypes);
             }
         }
+        if (intendedFunction == null) return null;
+        MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
+
+        compiler.info("matching " + name.getText() + " : " + eType
+                + " to " + intendedFunction.getName() + " : " + intendedEntryType);
+
         return intendedFunction;
     }
 
@@ -495,6 +513,12 @@ class ComputeTypes extends SetScopes {
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args,
                         tree.mathTypes);
+
+        compiler.info("expression: " + ctx.getText() + "("
+                + ctx.getStart().getLine() + ","
+                + ctx.getStop().getCharPositionInLine() + ") of type "
+                + foundExpType.toString());
+
         MathSymbol intendedEntry =
                 getIntendedFunction(ctx, qualifier, name, args);
 
