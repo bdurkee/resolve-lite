@@ -6,7 +6,7 @@ import org.resolvelite.semantics.programtype.PTType;
 
 public class ProgVariableSymbol extends Symbol {
 
-    private PTType type;
+    private final PTType type;
     private final MathSymbol mathSymbolAlterEgo;
 
     public ProgVariableSymbol(String name, ParseTree definingTree, PTType type,

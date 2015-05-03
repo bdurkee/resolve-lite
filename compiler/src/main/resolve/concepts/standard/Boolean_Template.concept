@@ -2,10 +2,18 @@ Concept Boolean_Template;
 
     Type Family Boolean is modeled by B;
         exemplar b;
-        initialization ensures true;
+        initialization ensures b = true;
 
     Oper True (): Boolean;
+        ensures True = true;
 
+    Oper False (): Boolean;
+        ensures False = false;
 
+    Oper And (evaluates a, b: Boolean): Boolean;
+
+    Oper Or (evaluates a, b: Boolean): Boolean;
+
+    Oper Foo (evaluates a: Boolean);
 
 end Boolean_Template;

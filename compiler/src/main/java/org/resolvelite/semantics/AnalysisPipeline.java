@@ -30,8 +30,8 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
             walker.walk(populator, unit.getRoot());
-            //PrintTypes pt = new PrintTypes(unit);
-            //walker.walk(pt, unit.getRoot());
+            PrintTypes pt = new PrintTypes(unit);
+            walker.walk(pt, unit.getRoot());
             int i;
             i = 0;
         }

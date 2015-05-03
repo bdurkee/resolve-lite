@@ -10,9 +10,11 @@ import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.query.MathFunctionNamedQuery;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.MathSymbol;
@@ -21,9 +23,24 @@ import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+// Todo: If we want to be more efficient about this we could use a visitor,
+// which would allow us to be more specific as to which subexpressions we
+// descend into (i.e. not those that already seem typed).
 public class ComputeTypes extends ResolveBaseListener {
+
+    private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
+            new ExactDomainMatch();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
+            new ExactParameterMatch();
+
+    private final TypeComparison<PSymbol, MTFunction> INEXACT_DOMAIN_MATCH =
+            new InexactDomainMatch();
+    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
+            new InexactParameterMatch();
 
     private final AnnotatedTree tr;
     private final ResolveCompiler compiler;
@@ -89,6 +106,13 @@ public class ComputeTypes extends ResolveBaseListener {
         exitMathSymbolExp(ctx, null, ctx.getText());
     }
 
+    @Override public void exitProgIntegerExp(
+            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
+        // tr.progTypes.put(ctx,
+        //         getProgramType(ctx, "Std_Integer_Fac", "Integer"));
+        tr.mathTypes.put(ctx, g.Z);
+    }
+
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
@@ -97,6 +121,33 @@ public class ComputeTypes extends ResolveBaseListener {
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
         typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
+    }
+
+    @Override public void exitMathSetCollectionExp(
+            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+        tr.mathTypes.put(ctx, g.SSET);
+        if (ctx.mathExp().isEmpty()) {
+            tr.mathTypeValues.put(ctx, g.EMPTY_SET);
+        }
+        if (typeValueDepth > 0) {
+
+            // construct a union chain and see if all the component types
+            // are known to contain only sets.
+            List<MTType> elementTypes = ctx.mathExp().stream()
+                    .map(tr.mathTypes::get).collect(Collectors.toList());
+
+            MTUnion chainedTypes = new MTUnion(g, elementTypes);
+
+            if (!chainedTypes.isKnownToContainOnlyMathTypes() ||
+                    ctx.mathExp().isEmpty()) {
+                compiler.errorManager
+                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                ctx.getStart(), ctx.getText());
+                tr.mathTypeValues.put(ctx, g.INVALID);
+                return;
+            }
+            tr.mathTypeValues.put(ctx, chainedTypes);
+        }
     }
 
     @Override public void exitMathVariableExp(
@@ -113,18 +164,6 @@ public class ComputeTypes extends ResolveBaseListener {
         else {
             tr.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
-
-            MTType typeValue = tr.mathTypeValues.get(ctx);
-            MTType type = tr.mathTypes.get(ctx);
-            String typeValueDesc = "";
-
-            if ( typeValue != null ) {
-                typeValueDesc =
-                        ", referencing math type " + typeValue + " ("
-                                + typeValue.getClass() + ")";
-            }
-            compiler.info("processed symbol " + symbolName + " with type "
-                    + type + typeValueDesc);
         }
         return intendedEntry;
     }
@@ -171,6 +210,52 @@ public class ComputeTypes extends ResolveBaseListener {
         }
     }
 
+    private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
+                                           @Nullable Token qualifier, @NotNull Token name,
+                                           @NotNull List<ResolveParser.MathExpContext> args) {
+        tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
+                args, tr.mathTypes));
+        PSymbol e = (PSymbol)DefSymbolsAndScopes.buildPExp(ctx, tr);
+        MTFunction eType = (MTFunction)e.getMathType();
+        String operatorStr = name.getText();
+
+        List<MathSymbol> sameNameFunctions =
+                symtab.getInnermostActiveScope() //
+                        .query(new MathFunctionNamedQuery(qualifier, name))
+                        .stream()
+                        .filter(s -> s.getType() instanceof MTFunction)
+                        .collect(Collectors.toList());
+
+        List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
+                .map(MathSymbol::getType).collect(Collectors.toList());
+
+        if (sameNameFunctions.isEmpty()) {
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
+                    ctx.getStart(), name.getText());
+        }
+        MathSymbol intendedFunction = null;
+        try {
+            intendedFunction = getExactDomainTypeMatch(e, sameNameFunctions);
+        }
+        catch (NoSolutionException nsee) {
+            try {
+                intendedFunction = getInexactDomainTypeMatch(e, sameNameFunctions);
+            }
+            catch (NoSolutionException nsee2) {
+                compiler.errorManager.semanticError(ErrorKind.NO_MATH_FUNC_FOR_DOMAIN,
+                        ctx.getStart(), eType.getDomain(), sameNameFunctions,
+                        sameNameFunctionTypes);
+            }
+        }
+        if (intendedFunction == null) return null;
+        MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
+
+        compiler.info("matching " + name.getText() + " : " + eType
+                + " to " + intendedFunction.getName() + " : " + intendedEntryType);
+
+        return intendedFunction;
+    }
+
     private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull Token name,
             List<ResolveParser.MathExpContext> args) {
@@ -182,41 +267,144 @@ public class ComputeTypes extends ResolveBaseListener {
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
                 + foundExpType.toString());
-        MathSymbol intendedEntry = null;
-        // getIntendedFunction(ctx, qualifier, name, args);
+        MathSymbol intendedEntry =
+                getIntendedFunction(ctx, qualifier, name, args);
 
-        // if ( intendedEntry == null ) {
-        tr.mathTypes.put(ctx, g.INVALID);
-        //return;
-        // }
-        /* MTFunction expectedType = (MTFunction) intendedEntry.getType();
+        if ( intendedEntry == null ) {
+            tr.mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        MTFunction expectedType = (MTFunction) intendedEntry.getType();
 
-         //We know we match expectedType--otherwise the above would have thrown
-         //an exception.
-         tr.mathTypes.put(ctx, expectedType.getRange());
+        //We know we match expectedType--otherwise the above would have thrown
+        //an exception.
+        tr.mathTypes.put(ctx, expectedType.getRange());
+        if ( typeValueDepth > 0 ) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
 
-         if ( typeValueDepth > 0 ) {
-             //I had better identify a type
-             MTFunction entryType = (MTFunction) intendedEntry.getType();
-
-             List<MTType> arguments = new ArrayList<>();
-             MTType argTypeValue;
-             for (ParserRuleContext arg : args) {
-                 argTypeValue = tr.mathTypeValues.get(arg);
-                 if ( argTypeValue == null ) {
-                     compiler.errorManager.semanticError(
-                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
-                             arg.getText());
-                 }
-                 arguments.add(argTypeValue);
-             }
-             tr.mathTypeValues.put(ctx, entryType.getApplicationType(
-                     intendedEntry.getName(), arguments));
-         }*/
+            List<MTType> arguments = new ArrayList<>();
+            MTType argTypeValue;
+            for (ParserRuleContext arg : args) {
+                argTypeValue = tr.mathTypeValues.get(arg);
+                if ( argTypeValue == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
+                            arg.getText());
+                }
+                arguments.add(argTypeValue);
+            }
+            tr.mathTypeValues.put(ctx, entryType.getApplicationType(
+                    intendedEntry.getName(), arguments));
+        }
     }
 
     protected final void chainMathTypes(ParseTree current, ParseTree child) {
         tr.mathTypes.put(current, tr.mathTypes.get(child));
         tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
+    }
+
+    private MathSymbol getExactDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
+    }
+
+    private MathSymbol getInexactDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates) throws NoSolutionException {
+        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
+    }
+
+    private MathSymbol getDomainTypeMatch(PSymbol e,
+            List<MathSymbol> candidates,
+            TypeComparison<PSymbol, MTFunction> comparison)
+            throws NoSolutionException {
+        MTFunction eType = e.getConservativePreApplicationType(g);
+        MathSymbol match = null;
+
+        MTFunction candidateType;
+        for (MathSymbol candidate : candidates) {
+            try {
+                candidate =
+                        candidate.deschematize(e.getArguments(),
+                                symtab.getInnermostActiveScope());
+                candidateType = (MTFunction) candidate.getType();
+                compiler.info(candidate.getType() + " deschematizes to "
+                        + candidateType);
+
+                if ( comparison.compare(e, eType, candidateType) ) {
+                    if ( match != null ) {
+                        compiler.errorManager.semanticError(
+                                ErrorKind.AMBIGIOUS_DOMAIN, null,
+                                match.getName(), match.getType(),
+                                candidate.getName(), candidate.getType());
+                    }
+                    match = candidate;
+                }
+            }
+            catch (NoSolutionException nse) {
+                //couldn't deschematize--try the next one
+                compiler.info(candidate.getType() + " doesn't deschematize "
+                        + "against " + e.getArguments());
+            }
+        }
+        if ( match == null ) {
+            throw NoSolutionException.INSTANCE;
+        }
+        return match;
+    }
+
+    private static class ExactParameterMatch implements Comparator<MTType> {
+
+        @Override public int compare(MTType o1, MTType o2) {
+            int result;
+            if ( o1.equals(o2) ) {
+                result = 0;
+            }
+            else {
+                result = 1;
+            }
+            return result;
+        }
+    }
+
+    private static class ExactDomainMatch
+            implements
+                TypeComparison<PSymbol, MTFunction> {
+        @Override public boolean compare(PSymbol foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+            return foundType.parameterTypesMatch(expectedType,
+                    EXACT_PARAMETER_MATCH);
+        }
+
+        @Override public String description() {
+            return "exact";
+        }
+    }
+
+    private class InexactDomainMatch
+            implements
+                TypeComparison<PSymbol, MTFunction> {
+
+        @Override public boolean compare(PSymbol foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+            return expectedType.parametersMatch(foundValue.getArguments(),
+                    INEXACT_PARAMETER_MATCH);
+        }
+
+        @Override public String description() {
+            return "inexact";
+        }
+    }
+
+    private class InexactParameterMatch implements TypeComparison<PExp, MTType> {
+
+        @Override public boolean compare(PExp foundValue, MTType foundType,
+                MTType expectedType) {
+            return g.isKnownToBeIn(foundValue, expectedType);
+        }
+
+        @Override public String description() {
+            return "inexact";
+        }
     }
 }

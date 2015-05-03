@@ -28,6 +28,8 @@ public class Hardcoded {
 
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
                     .paramTypes(g.SSET).build());
         }

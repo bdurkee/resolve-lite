@@ -31,9 +31,9 @@
 
 Facility Integer_Exchange;
 
-    Oper Exchange(upd I, J: Std_Integer_Fac::Integer);
+    Oper Exchange (updates I, J: Std_Integer_Fac::Integer);
             ensures J = @I and I = @J;
         Procedure
-            Var Temp: Std_Integer_Fac::Integer;
+            --I :=: J;
     end Exchange;
 end Integer_Exchange;

@@ -4,11 +4,14 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ImportCollection;
+import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
@@ -29,22 +32,19 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected SymbolTable symtab;
     protected AnnotatedTree tree;
     protected TypeGraph g;
-    private final ComputeTypes exps;
 
     DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
         this.symtab = symtab;
         this.tree = annotatedTree;
-        this.exps = new ComputeTypes(rc, symtab, annotatedTree);
         this.g = symtab.getTypeGraph();
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports
-                        .getImportsOfType(ImportCollection.ImportType.NAMED));
+                tree.imports.getImportsOfType(ImportType.NAMED));
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
@@ -63,6 +63,29 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
     }
 
+    @Override public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.endScope();
+    }
+
+    @Override public void exitFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new FacilitySymbol(ctx, getRootModuleID(), symtab));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
     @Override public void enterTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
         symtab.startScope(ctx);
@@ -73,11 +96,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         MathSymbol exemplar = null;
         MTType modelType = null;
         try {
-            //Can't walk the whole ctx here. Say exemplar is 'b', and the
-            //initialization stipulates that b = true. Since we just get around
+            //NOTE:
+            //Can't walk the whole ctx here just yet. Say exemplar is 'b', and the
+            //initialization stipulates that b = true. Since we only just get around
             //to adding the (typed) binding for exemplar 'b' below, we won't be
             //able to properly type all of 'ctx's subexpressions right here.
-            ParseTreeWalker.DEFAULT.walk(exps, ctx.mathTypeExp());
+            annotateExps(ctx.mathTypeExp());
             modelType = tree.mathTypeValues.get(ctx.mathTypeExp());
             exemplar =
                     symtab.getInnermostActiveScope()
@@ -88,29 +112,29 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate exemplar!??");
         }
+        //now annotate types for all subexpressions within the typeModelDecl
+        //tree (e.g. contraints, init, final, etc) before leaving the scope.
+        annotateExps(ctx);
         symtab.endScope();
         if ( ctx.mathTypeExp().getText().equals(ctx.name.getText()) ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
                     ctx.mathTypeExp().getStart(), ctx.mathTypeExp().getText());
         }
-        //now annotate types for all subexpressions within the typeModelDecl
-        //tree including contraints, init, final, etc.
-        ParseTreeWalker.DEFAULT.walk(exps, ctx);
         PExp constraint =
-                ctx.constraintClause() != null ? buildPExp(ctx
-                        .constraintClause()) : null;
+                ctx.constraintClause() != null ? buildPExp(
+                        ctx.constraintClause(), tree) : null;
         PExp initRequires =
                 ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
-                        .requiresClause()) : null;
+                        .requiresClause(), tree) : null;
         PExp initEnsures =
                 ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
-                        .ensuresClause()) : null;
+                        .ensuresClause(), tree) : null;
         PExp finalRequires =
                 ctx.typeModelFinal() != null ? buildPExp(ctx.typeModelFinal()
-                        .requiresClause()) : null;
+                        .requiresClause(), tree) : null;
         PExp finalEnsures =
                 ctx.typeModelFinal() != null ? buildPExp(ctx.typeModelFinal()
-                        .ensuresClause()) : null;
+                        .ensuresClause(), tree) : null;
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgTypeModelSymbol(symtab.getTypeGraph(), ctx.name
@@ -126,17 +150,39 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
     }
 
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        try {
+            if ( ctx.type() != null ) {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                getProgramType(ctx.type()), getRootModuleID()));
+            }
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        annotateExps(ctx); //annotate all exps before we leave
+        symtab.endScope();
+        insertFunction(ctx.name, ctx, ctx.type());
+    }
+
     @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
         try {
-            PTType programmaticReturnType =
-                    getProgramType(ctx.type(), ctx.type().qualifier,
-                            ctx.type().name);
-            symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, ctx.name.getText(),
-                            programmaticReturnType.toMath(), null, ctx,
-                            getRootModuleID()));
+            if ( ctx.type() != null ) {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, ctx.name.getText(), getProgramType(
+                                ctx.type()).toMath(), null, ctx,
+                                getRootModuleID()));
+            }
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -146,8 +192,56 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
+        annotateExps(ctx); //annotate all exps before we leave
         symtab.endScope();
         insertFunction(ctx.name, ctx, ctx.type());
+    }
+
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        PTType programType = getProgramType(ctx.type());
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ProgParameterSymbol.ParameterMode mode =
+                        ProgParameterSymbol.getModeMapping().get(
+                                ctx.parameterMode().getText());
+                symtab.getInnermostActiveScope().define(
+                        new ProgParameterSymbol(symtab.getTypeGraph(), t
+                                .getText(), mode, programType, ctx,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    private void insertVariables(List<TerminalNode> terminalGroup,
+            ResolveParser.TypeContext type) {
+        PTType programType = getProgramType(type);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), t, programType,
+                                getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
     }
 
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx,
@@ -158,7 +252,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             ProgParameterSymbol.class);
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(symtab.getTypeGraph(), name.getText(),
-                            ctx, getProgramType(type), getRootModuleID(), params));
+                            ctx, getProgramType(type), getRootModuleID(),
+                            params));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -196,12 +291,24 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         return PTInvalid.getInstance(g);
     }
 
-    protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
+    protected static <T extends PExp> T buildPExp(ParserRuleContext ctx,
+            AnnotatedTree t) {
         if ( ctx == null ) return null;
         PExpBuildingListener<T> builder =
-                new PExpBuildingListener<T>(tree.mathTypes, tree.mathTypeValues);
+                new PExpBuildingListener<T>(t.mathTypes, t.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
+    }
+
+    /**
+     * Annotates all expressions (and subexpressions) in ({@link ParseTree} ctx
+     * with type info.
+     * 
+     * @param ctx The subtree to annotate.
+     */
+    protected final void annotateExps(@NotNull ParseTree ctx) {
+        ComputeTypes annotator = new ComputeTypes(compiler, symtab, tree);
+        ParseTreeWalker.DEFAULT.walk(annotator, ctx);
     }
 
     protected final String getRootModuleID() {
