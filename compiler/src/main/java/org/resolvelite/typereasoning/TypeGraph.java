@@ -143,10 +143,11 @@ public class TypeGraph {
         boolean result;
 
         try {
-            result = supertype == ENTITY || supertype == CLS ||
-                    supertype == SSET
-            // || myEstablishedSubtypes.contains(r)
-                    || subtype.equals(supertype);
+            result =
+                    supertype == ENTITY || supertype == CLS
+                            || supertype == SSET
+                            // || myEstablishedSubtypes.contains(r)
+                            || subtype.equals(supertype);
             // || subtype.isSyntacticSubtypeOf(supertype);
         }
         catch (NoSuchElementException nsee) {

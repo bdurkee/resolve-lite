@@ -18,7 +18,6 @@ public class Hardcoded {
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
             b.addBinding("Card", null, g.CLS, g.CARD);
 
-
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);

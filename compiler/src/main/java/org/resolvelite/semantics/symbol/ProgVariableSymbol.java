@@ -22,18 +22,8 @@ public class ProgVariableSymbol extends Symbol {
         return type;
     }
 
-    public void setProgramType(PTType t) {
-        this.mathSymbolAlterEgo.setTypes(t.toMath(), null);
-        this.type = t;
-    }
-
     @Override public String getEntryTypeDescription() {
         return "a program variable";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        return !type.getClass().equals(PTInvalid.class)
-                && mathSymbolAlterEgo.containsOnlyValidTypes();
     }
 
     @Override public ProgVariableSymbol toProgVariableSymbol() {
@@ -41,7 +31,6 @@ public class ProgVariableSymbol extends Symbol {
     }
 
     @Override public MathSymbol toMathSymbol() {
-        mathSymbolAlterEgo.setTypes(type.toMath(), null);
         return mathSymbolAlterEgo;
     }
 }

@@ -10,11 +10,9 @@ public class ProgReprTypeSymbol extends Symbol {
     //Note: This is null in the case where we represent a standalone
     //representation (a record in a facility for instance)
     protected final ProgTypeModelSymbol definition;
-    protected final ProgVariableSymbol reprVar;
-
     protected final ParseTree convention, correspondence;
     protected final TypeGraph typeGraph;
-    protected PTType representation;
+    protected final PTType representation;
 
     public ProgReprTypeSymbol(TypeGraph g, String name,
             ParseTree definingElement, String moduleID,
@@ -26,13 +24,7 @@ public class ProgReprTypeSymbol extends Symbol {
         this.representation = representation;
         this.convention = convention;
         this.correspondence = correspondence;
-        this.reprVar = repVar;
         this.typeGraph = g;
-    }
-
-    public void setRepresentationType(PTType t) {
-        this.reprVar.setProgramType(t); //update our 'exemplar' variable too.
-        this.representation = t;
     }
 
     public ProgTypeModelSymbol getDefinition() {

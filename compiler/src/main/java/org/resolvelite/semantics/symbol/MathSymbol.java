@@ -14,32 +14,18 @@ import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
 
-    private MTType type, typeValue;
+    private final MTType type, typeValue;
     private final Quantification quantification;
-    private final TypeGraph g;
 
     public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
             MTType typeValue, ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
-        this.g = g;
+
+        this.type = type;
         this.quantification = q;
-        this.setTypes(type, typeValue);
-    }
 
-    public MathSymbol(TypeGraph g, String name, MTType type, MTType typeValue,
-            ParseTree definingTree, String moduleID) {
-        this(g, name, Quantification.NONE, type, typeValue, definingTree,
-                moduleID);
-    }
-
-    public void setTypes(MTType mathType, MTType mathTypeValue) {
-        if ( mathType == null ) {
-            throw new IllegalArgumentException(
-                    "passed math type cannot be null");
-        }
-        this.type = mathType;
-        if ( mathTypeValue != null ) {
-            this.typeValue = mathTypeValue;
+        if ( typeValue != null ) {
+            this.typeValue = typeValue;
         }
         else if ( type.isKnownToContainOnlyMathTypes() ) {
             this.typeValue =
@@ -50,6 +36,12 @@ public class MathSymbol extends Symbol {
         else {
             this.typeValue = null;
         }
+    }
+
+    public MathSymbol(TypeGraph g, String name, MTType type, MTType typeValue,
+            ParseTree definingTree, String moduleID) {
+        this(g, name, Quantification.NONE, type, typeValue, definingTree,
+                moduleID);
     }
 
     public MTType getType() {
@@ -67,14 +59,6 @@ public class MathSymbol extends Symbol {
 
     @Override public String getEntryTypeDescription() {
         return "a math symbol";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        boolean result = !type.getClass().equals(g.INVALID.getClass());
-        if ( result && typeValue != null ) {
-            result = !typeValue.getClass().equals(g.INVALID.getClass());
-        }
-        return result;
     }
 
     public MathSymbol deschematize(List<PExp> arguments,

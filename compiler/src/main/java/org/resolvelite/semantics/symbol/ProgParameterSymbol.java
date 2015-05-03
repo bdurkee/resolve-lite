@@ -77,7 +77,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     private final ParameterMode mode;
-    private PTType declaredType;
+    private final PTType declaredType;
     private final TypeGraph typeGraph;
 
     private final MathSymbol mathSymbolAlterEgo;
@@ -96,15 +96,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @Override public MathSymbol toMathSymbol() {
-        if ( declaredType == null ) {
-            throw new IllegalStateException("no math type set yet");
-        }
         return mathSymbolAlterEgo;
-    }
-
-    public void setProgramType(PTType t) {
-        this.mathSymbolAlterEgo.setTypes(t.toMath(), null);
-        this.declaredType = t;
     }
 
     public ParameterMode getMode() {

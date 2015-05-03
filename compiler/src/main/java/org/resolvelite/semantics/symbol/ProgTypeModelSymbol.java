@@ -1,15 +1,22 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTFamily;
 import org.resolvelite.typereasoning.TypeGraph;
 
+/**
+ * Describes a "Type Family" introduction as would be found in a concept
+ * file.
+ */
 public class ProgTypeModelSymbol extends ProgTypeSymbol {
 
-    private MathSymbol exemplar;
+    private final MathSymbol exemplar;
 
-    public ProgTypeModelSymbol(TypeGraph g, String name, MathSymbol exemplar,
-            ParseTree definingTree, String moduleID) {
-        super(g, name, definingTree, moduleID);
+    public ProgTypeModelSymbol(TypeGraph g, String name, MTType modelType,
+            PTFamily programType, MathSymbol exemplar, ParseTree definingTree,
+            String moduleID) {
+        super(g, name, programType, modelType, definingTree, moduleID);
         this.exemplar = exemplar;
     }
 

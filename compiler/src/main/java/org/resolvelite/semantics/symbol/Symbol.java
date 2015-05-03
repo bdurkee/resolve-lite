@@ -60,7 +60,9 @@ public abstract class Symbol {
      * @return true if this {@link Symbol} lacks a reference to an
      *         'invalid' type.
      */
-    public abstract boolean containsOnlyValidTypes();
+    public boolean containsOnlyValidTypes() {
+        return true;
+    }
 
     public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException();

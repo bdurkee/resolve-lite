@@ -10,9 +10,8 @@ import java.util.List;
 
 public class OperationSymbol extends Symbol {
 
-    private PTType returnType;
+    private final PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
-    private ProgTypeSymbol ty;
 
     public OperationSymbol(TypeGraph g, String name, ParseTree definingTree,
             PTType type, String moduleID, List<ProgParameterSymbol> params) {
@@ -29,24 +28,12 @@ public class OperationSymbol extends Symbol {
         return returnType;
     }
 
-    public void setReturnType(PTType t) {
-        this.returnType = t;
-    }
-
-    public void setProgramTypeSym(ProgTypeSymbol t) {
-        ty = t;
-    }
-
     @Override public OperationSymbol toOperationSymbol() {
         return this;
     }
 
     @Override public String getEntryTypeDescription() {
         return "an operation";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        return !returnType.getClass().equals(PTInvalid.class);
     }
 
     @Override public String toString() {
