@@ -2,11 +2,14 @@ Concept Bdd_Search_Store_Template<Key>
         (evaluates Max_Capacity: Std_Integer_Fac::Integer);
     --requires Max_Capacity > 0;
 
-    Type Family Store is modeled by Powerset(Key);
+    Type Family Store is
+                modeled by Powerset(Key);
         exemplar S;
         initialization
                 ensures S = {};
 
-
+	Oper Add (restores k: Key; updates S: Store);
+		--requires ||S|| < Max_Capacity;
+		ensures S = @S union k;
 
 end Bdd_Search_Store_Template;

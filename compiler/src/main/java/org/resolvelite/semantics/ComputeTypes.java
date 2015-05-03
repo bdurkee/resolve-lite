@@ -308,7 +308,7 @@ class ComputeTypes extends SetScopes {
 
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        exitMathSymbolExp(ctx, null, ctx.getText());
+        exitMathSymbolExp(ctx, null, ctx.name.getText());
     }
 
     @Override public void enterMathTypeExp(

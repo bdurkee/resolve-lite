@@ -14,7 +14,7 @@ public class TypeGraph {
     public final MTProper ENTITY = new MTProper(this, "Entity");
 
     public final MTProper CLS = new MTProper(this, null, true, "Cls");
-    public final MTProper SSET = new MTProper(this, CLS, true, "SSet");
+    public final MTProper SSET = new MTProper(this, CLS, false, "SSet");
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
@@ -140,7 +140,8 @@ public class TypeGraph {
         boolean result;
 
         try {
-            result = supertype == ENTITY || supertype == CLS
+            result = supertype == ENTITY || supertype == CLS ||
+                    supertype == SSET
             // || myEstablishedSubtypes.contains(r)
                     || subtype.equals(supertype);
             // || subtype.isSyntacticSubtypeOf(supertype);
