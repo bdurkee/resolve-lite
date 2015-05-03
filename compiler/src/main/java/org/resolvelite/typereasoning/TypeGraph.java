@@ -16,6 +16,7 @@ public class TypeGraph {
     public final MTProper CLS = new MTProper(this, null, true, "Cls");
     public final MTProper SSET = new MTProper(this, CLS, false, "SSet");
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
+    public final MTProper CARD = new MTProper(this, CLS, false, "Card");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
     public final MTProper Z = new MTProper(this, SSET, false, "Z");
@@ -106,6 +107,7 @@ public class TypeGraph {
             //Every MTType is in SSet except for Entity and Cls
             result = getTrueExp();
         }
+
         /*else if (expected instanceof MTPowertypeApplication) {
             if (value.equals(EMPTY_SET)) {
                 //The empty set is in all powertypes
@@ -134,6 +136,7 @@ public class TypeGraph {
                     + "establish math subtype.");
         }
         return result;
+
     }
 
     public boolean isSubtype(MTType subtype, MTType supertype) {

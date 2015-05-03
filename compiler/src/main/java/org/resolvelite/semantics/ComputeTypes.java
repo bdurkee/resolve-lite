@@ -375,25 +375,6 @@ class ComputeTypes extends SetScopes {
             tree.mathTypeValues.put(ctx, chainedTypes);
 
         }
-
-        /*if ( typeValueDepth > 0 ) {
-            //I had better identify a type
-            MTFunction entryType = (MTFunction) intendedEntry.getType();
-
-            List<MTType> arguments = new ArrayList<>();
-            MTType argTypeValue;
-            for (ParserRuleContext arg : args) {
-                argTypeValue = tree.mathTypeValues.get(arg);
-                if ( argTypeValue == null ) {
-                    compiler.errorManager.semanticError(
-                            ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
-                            arg.getText());
-                }
-                arguments.add(argTypeValue);
-            }
-            tree.mathTypeValues.put(ctx, entryType.getApplicationType(
-                    intendedEntry.getName(), arguments));
-        }*/
     }
 
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,

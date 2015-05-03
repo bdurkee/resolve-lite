@@ -3,6 +3,7 @@ package org.resolvelite.misc;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.semantics.DuplicateSymbolException;
+import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
 import org.resolvelite.semantics.ScopeBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -15,6 +16,8 @@ public class Hardcoded {
             b.addBinding("Cls", null, g.CLS, g.CLS);
             b.addBinding("SSet", null, g.CLS, g.SSET);
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
+            b.addBinding("Card", null, g.CLS, g.CARD);
+
 
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
@@ -26,6 +29,8 @@ public class Hardcoded {
 
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,

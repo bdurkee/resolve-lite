@@ -5,11 +5,12 @@ Concept Bdd_Search_Store_Template<Key>
     Type Family Store is
                 modeled by Powerset(Key);
         exemplar S;
+        --constraint ||S|| <= Max_Capacity;
         initialization
                 ensures S = {};
 
 	Oper Add (restores k: Key; updates S: Store);
 		--requires ||S|| < Max_Capacity;
-		ensures S = @S union k;
+		ensures S = @S union {k};
 
 end Bdd_Search_Store_Template;
