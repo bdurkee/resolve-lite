@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 // Todo: If we want to be more efficient about this we could use a visitor,
 // which would allow us to be more specific as to which subexpressions we
-// descend into (i.e. not those that already seem typed).
+// descend into (e.g.: those lacking types).
 public class ComputeTypes extends ResolveBaseListener {
 
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =

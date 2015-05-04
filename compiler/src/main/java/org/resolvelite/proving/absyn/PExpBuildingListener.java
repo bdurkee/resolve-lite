@@ -29,6 +29,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.typeValues = mathTypeValues;
     }
 
+    public ParseTreeProperty<PExp> getFinalMapping() {
+        return built;
+    }
+
     @SuppressWarnings("unchecked") @Nullable public T getBuiltPExp(ParseTree t) {
         return (T) built.get(t);
     }

@@ -186,7 +186,8 @@ public class PSymbol extends PExp {
         boolean first = true;
         if ( isFunction() ) {
             if ( dispStyle == DisplayStyle.INFIX ) {
-                result.append(arguments.get(0)).append(" " + name + " ")
+                result.append(arguments.get(0))
+                        .append(" ").append(name).append(" ")
                         .append(arguments.get(1));
             }
             else if ( dispStyle == DisplayStyle.OUTFIX ) {
@@ -279,7 +280,7 @@ public class PSymbol extends PExp {
         @Override public PSymbol build() {
             if ( this.mathType == null ) {
                 throw new IllegalStateException("mathtype == null; cannot "
-                        + "build mexp with null mathtype");
+                        + "build PExp with null mathtype");
             }
             return new PSymbol(this);
         }

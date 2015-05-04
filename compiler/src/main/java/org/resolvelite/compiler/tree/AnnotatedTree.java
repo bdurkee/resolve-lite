@@ -35,6 +35,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTType;
 
@@ -44,6 +45,7 @@ public class AnnotatedTree {
     public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
+    public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
 
     private final String name, fileName;
     private final ParseTree root;

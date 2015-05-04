@@ -10,6 +10,8 @@ import org.resolvelite.compiler.AbstractCompilationPipeline;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -29,7 +31,12 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             DefSymbolsAndScopes populator =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
+            PExpBuildingListener<PExp> pexpAnnotator =
+                    new PExpBuildingListener<>(unit.mathTypes,
+                            unit.mathTypeValues);
             walker.walk(populator, unit.getRoot());
+            walker.walk(pexpAnnotator, unit.getRoot());
+            unit.mathPExps = pexpAnnotator.getFinalMapping();
             PrintTypes pt = new PrintTypes(unit);
             walker.walk(pt, unit.getRoot());
             int i;
