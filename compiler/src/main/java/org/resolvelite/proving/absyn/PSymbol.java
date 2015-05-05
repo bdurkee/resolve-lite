@@ -1,5 +1,7 @@
 package org.resolvelite.proving.absyn;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.misc.Utils;
@@ -90,10 +92,28 @@ public class PSymbol extends PExp {
         return arguments.size() > 0;
     }
 
+    @Override public PExp copy() {
+        List<PExp> newArguments = arguments.stream()
+                .map(PExp::copy).collect(Collectors.toList());
+        return new PSymbolBuilder(leftPrint, rightPrint)    //
+                .arguments(newArguments)                    //
+                .incoming(incomingFlag)                     //
+                .literal(literalFlag)                       //
+                .mathType(getMathType())                    //
+                .mathTypeValue(getMathTypeValue())          //
+                .quantification(quantification)             //
+                .style(dispStyle)                           //
+                .build();
+    }
+
     //Todo: This should really check to make sure this.mathType == BOOLEAN.
     //But to do that we need a reference to the typegraph in this hierarchy..
     @Override public boolean isLiteralTrue() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("true"));
+    }
+
+    @Override public boolean isLiteralFalse() {
+        return (arguments.size() == 0 && name.equalsIgnoreCase("false"));
     }
 
     @Override public boolean isVariable() {
@@ -186,9 +206,8 @@ public class PSymbol extends PExp {
         boolean first = true;
         if ( isFunction() ) {
             if ( dispStyle == DisplayStyle.INFIX ) {
-                result.append(arguments.get(0))
-                        .append(" ").append(name).append(" ")
-                        .append(arguments.get(1));
+                result.append(arguments.get(0)).append(" ").append(name)
+                        .append(" ").append(arguments.get(1));
             }
             else if ( dispStyle == DisplayStyle.OUTFIX ) {
                 result.append(leftPrint).append(arguments.get(0))
@@ -209,11 +228,11 @@ public class PSymbol extends PExp {
         protected final String name, lprint, rprint;
         protected boolean incoming = false;
         protected boolean literal = false;
-
+        protected String description;
         protected DisplayStyle style = DisplayStyle.PREFIX;
         protected Symbol.Quantification quantification =
                 Symbol.Quantification.NONE;
-
+        protected Token loc;
         protected MTType mathType, mathTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
 
@@ -260,6 +279,16 @@ public class PSymbol extends PExp {
         public PSymbolBuilder style(DisplayStyle e) {
             style = e;
             return this;
+        }
+
+        public PSymbolBuilder desc(String desc, Token location) {
+            this.description = desc;
+            this.loc = location;
+            return this;
+        }
+
+        public PSymbolBuilder desc(String desc, ParserRuleContext ctx) {
+            return desc(desc, ctx != null ? ctx.getStart() : null);
         }
 
         public PSymbolBuilder incoming(boolean e) {

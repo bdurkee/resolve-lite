@@ -120,28 +120,24 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
                     ctx.mathTypeExp().getStart(), ctx.mathTypeExp().getText());
         }
-        PExp constraint =
-                ctx.constraintClause() != null ? buildPExp(
-                        ctx.constraintClause(), tree) : null;
-        PExp initRequires =
-                ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
-                        .requiresClause(), tree) : null;
-        PExp initEnsures =
-                ctx.typeModelInit() != null ? buildPExp(ctx.typeModelInit()
-                        .ensuresClause(), tree) : null;
-        PExp finalRequires =
-                ctx.typeModelFinal() != null ? buildPExp(ctx.typeModelFinal()
-                        .requiresClause(), tree) : null;
-        PExp finalEnsures =
-                ctx.typeModelFinal() != null ? buildPExp(ctx.typeModelFinal()
-                        .ensuresClause(), tree) : null;
+        ParserRuleContext constraint = ctx.constraintClause() != null ?
+                ctx.constraintClause() : null;
+        ParserRuleContext initRequires = ctx.typeModelInit() != null ?
+                ctx.typeModelInit().requiresClause() : null;
+        ParserRuleContext initEnsures = ctx.typeModelInit() != null ?
+                ctx.typeModelInit().ensuresClause() : null;
+        ParserRuleContext finalRequires = ctx.typeModelFinal() != null ?
+                ctx.typeModelFinal().requiresClause() : null;
+        ParserRuleContext finalEnsures = ctx.typeModelFinal() != null ?
+                ctx.typeModelFinal().ensuresClause() : null;
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgTypeModelSymbol(symtab.getTypeGraph(), ctx.name
                             .getText(), modelType, new PTFamily(modelType,
                             ctx.name.getText(), ctx.exemplar.getText(),
-                            constraint, initRequires, initEnsures,
-                            finalRequires, finalEnsures), exemplar, ctx,
+                            buildPExp(constraint), buildPExp(initRequires),
+                            buildPExp(initEnsures), buildPExp(finalRequires),
+                            buildPExp(finalEnsures)), exemplar, ctx,
                             getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
@@ -291,11 +287,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         return PTInvalid.getInstance(g);
     }
 
-    protected static <T extends PExp> T buildPExp(ParserRuleContext ctx,
-            AnnotatedTree t) {
-        if ( ctx == null ) return null;
-        PExpBuildingListener<T> builder =
-                new PExpBuildingListener<T>(t.mathTypes, t.mathTypeValues);
+    protected PExp buildPExp(ParserRuleContext ctx) {
+        if ( ctx == null ) {
+            return g.getTrueExp();
+        }
+        PExpBuildingListener<PExp> builder =
+                new PExpBuildingListener<PExp>(tree.mathTypes,
+                        tree.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

@@ -3,6 +3,7 @@ package org.resolvelite.proving.absyn;
 import org.resolvelite.semantics.MTType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,12 @@ public abstract class PExp {
         return typeValue;
     }
 
+    public PExp substitute(PExp current, PExp replacement) {
+        Map<PExp, PExp> e = new HashMap<>();
+        e.put(current, replacement);
+        return substitute(e);
+    }
+
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 
     public abstract boolean containsName(String name);
@@ -31,11 +38,15 @@ public abstract class PExp {
 
     public abstract boolean isLiteralTrue();
 
+    public abstract boolean isLiteralFalse();
+
     public abstract boolean isVariable();
 
     public abstract boolean isLiteral();
 
     public abstract boolean isFunction();
+
+    public abstract PExp copy();
 
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();

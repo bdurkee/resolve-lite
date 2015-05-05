@@ -62,4 +62,23 @@ public class PTFamily extends PTType {
     @Override public String toString() {
         return name;
     }
+
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof PTFamily);
+
+        if ( result ) {
+            PTFamily oAsPTFamily = (PTFamily) o;
+
+            result =
+                    (model.equals(oAsPTFamily.model))
+                            && (name.equals(oAsPTFamily.name))
+                            && (exemplarName.equals(oAsPTFamily.exemplarName))
+                            && (constraint.equals(oAsPTFamily.constraint))
+                            && (initRequires.equals(oAsPTFamily.initRequires))
+                            && (initEnsures.equals(oAsPTFamily.initEnsures))
+                            && (finalRequires.equals(oAsPTFamily.finalRequires))
+                            && (finalEnsures.equals(oAsPTFamily.finalEnsures));
+        }
+        return result;
+    }
 }

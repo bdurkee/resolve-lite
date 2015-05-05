@@ -2,6 +2,7 @@ package org.resolvelite.typereasoning;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
+import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.*;
 
@@ -157,6 +158,11 @@ public class TypeGraph {
             result = false;
         }
         return result;
+    }
+
+    public PSymbol formConjunct(PExp c1, PExp c2) {
+        return new PSymbolBuilder("and").arguments(c1, c2)
+                .style(DisplayStyle.INFIX).mathType(BOOLEAN).build();
     }
 
     public final PSymbol getTrueExp() {

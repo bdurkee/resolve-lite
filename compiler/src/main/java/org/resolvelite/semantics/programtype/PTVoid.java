@@ -8,7 +8,7 @@ import java.util.WeakHashMap;
 public class PTVoid extends PTType {
 
     private static WeakHashMap<TypeGraph, PTVoid> instances =
-            new WeakHashMap<TypeGraph, PTVoid>();
+            new WeakHashMap<>();
 
     public static PTVoid getInstance(TypeGraph g) {
         PTVoid result = instances.get(g);
@@ -25,5 +25,10 @@ public class PTVoid extends PTType {
 
     @Override public MTType toMath() {
         return getTypeGraph().VOID;
+    }
+
+    @Override public boolean equals(Object o) {
+        //We override this simply to show that we've given it some thought
+        return super.equals(o);
     }
 }

@@ -35,6 +35,10 @@ public class PSet extends PExp {
         return false;
     }
 
+    @Override public boolean isLiteralFalse() {
+        return false;
+    }
+
     @Override public boolean isVariable() {
         return false;
     }
@@ -45,6 +49,10 @@ public class PSet extends PExp {
 
     @Override public boolean isFunction() {
         return false;
+    }
+
+    @Override public PExp copy() {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {

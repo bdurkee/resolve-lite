@@ -95,12 +95,16 @@ public class ProgParameterSymbol extends Symbol {
                         null, definingTree, moduleID);
     }
 
-    @Override public MathSymbol toMathSymbol() {
-        return mathSymbolAlterEgo;
+    public PTType getDeclaredType() {
+        return declaredType;
     }
 
     public ParameterMode getMode() {
         return mode;
+    }
+
+    @Override public MathSymbol toMathSymbol() {
+        return mathSymbolAlterEgo;
     }
 
     @Override public ProgParameterSymbol toProgParameterSymbol() {

@@ -1,5 +1,6 @@
 package org.resolvelite.semantics.programtype;
 
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -31,4 +32,18 @@ public abstract class PTType {
     // public abstract PTType instantiateGenerics(
     //         Map<String, PTType> genericInstantiations,
     //         FacilityEntry instantiatingFacility);
+
+    /**
+     * Returns {@code true} <strong>iff</strong> an value of this type
+     * would be acceptable where one of type {@code t} were required.</p>
+     * 
+     * @param t The required type.
+     * 
+     * @return {@code true} <strong>iff</strong> an value of this type
+     *         would be acceptable where one of type {@code t} were
+     *         required.
+     */
+    public boolean acceptableFor(PTType t) {
+        return equals(t);
+    }
 }
