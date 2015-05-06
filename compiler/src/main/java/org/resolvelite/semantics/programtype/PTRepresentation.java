@@ -14,17 +14,10 @@ import org.resolvelite.typereasoning.TypeGraph;
  * case of its wrapped type that happens to be functioning as a representation
  * type.
  */
-public class PTRepresentation extends PTType {
+public class PTRepresentation extends PTNamed {
 
     private final PTType baseType;
     private final String name;
-
-    /**
-     * Note that PTRepresentations encompass family-less facility type
-     * representations. Rather than making a PTFacilityRepresentation class --
-     * for now we'll simply store the necessary PExps here as well.
-     */
-    private final PExp initRequires, initEnsures, finalRequires, finalEnsures;
 
     /**
      * This will be {@code null} for standalone representations (i.e. those that
@@ -35,27 +28,19 @@ public class PTRepresentation extends PTType {
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
             @Nullable ProgTypeModelSymbol family, PExp initRequires,
             PExp initEnsures, PExp finalRequires, PExp finalEnsures) {
-        super(g);
+        super(g, name, initRequires, initEnsures, finalRequires, finalEnsures);
         this.name = name;
         this.baseType = baseType;
         this.family = family;
-        this.initRequires = initRequires;
-        this.initEnsures = initEnsures;
-        this.finalRequires = finalRequires;
-        this.finalEnsures = finalEnsures;
     }
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-                            @NotNull ProgTypeModelSymbol family) {
-        this(g, baseType, name, family,
-                family.getProgramType().getInitializationRequires(),
-                family.getProgramType().getInitializationEnsures(),
-                family.getProgramType().getFinalizationRequires(),
-                family.getProgramType().getFinalizationEnsures());
-    }
-
-    public PExp getInitializationEnsures() {
-        return initEnsures;
+            @NotNull ProgTypeModelSymbol family) {
+        this(g, baseType, name, family, family.getProgramType()
+                .getInitializationRequires(), family.getProgramType()
+                .getInitializationEnsures(), family.getProgramType()
+                .getFinalizationRequires(), family.getProgramType()
+                .getFinalizationEnsures());
     }
 
     public PTType getBaseType() {
@@ -67,6 +52,9 @@ public class PTRepresentation extends PTType {
     }
 
     public String getExemplarName() {
+        if ( family != null ) {
+            return family.getExemplar().getName();
+        }
         return name.substring(0, 1);
     }
 
@@ -86,10 +74,9 @@ public class PTRepresentation extends PTType {
                 + "be instantiated.");
     }*/
 
-    @Override
-    public boolean acceptableFor(PTType t) {
+    @Override public boolean acceptableFor(PTType t) {
         boolean result = super.acceptableFor(t);
-        if (!result && family != null) {
+        if ( !result && family != null ) {
             result = family.getProgramType().acceptableFor(t);
         }
         return result;

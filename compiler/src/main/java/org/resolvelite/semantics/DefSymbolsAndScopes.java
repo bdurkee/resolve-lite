@@ -120,16 +120,20 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
                     ctx.mathTypeExp().getStart(), ctx.mathTypeExp().getText());
         }
-        ParserRuleContext constraint = ctx.constraintClause() != null ?
-                ctx.constraintClause() : null;
-        ParserRuleContext initRequires = ctx.typeModelInit() != null ?
-                ctx.typeModelInit().requiresClause() : null;
-        ParserRuleContext initEnsures = ctx.typeModelInit() != null ?
-                ctx.typeModelInit().ensuresClause() : null;
-        ParserRuleContext finalRequires = ctx.typeModelFinal() != null ?
-                ctx.typeModelFinal().requiresClause() : null;
-        ParserRuleContext finalEnsures = ctx.typeModelFinal() != null ?
-                ctx.typeModelFinal().ensuresClause() : null;
+        ParserRuleContext constraint =
+                ctx.constraintClause() != null ? ctx.constraintClause() : null;
+        ParserRuleContext initRequires =
+                ctx.typeModelInit() != null ? ctx.typeModelInit()
+                        .requiresClause() : null;
+        ParserRuleContext initEnsures =
+                ctx.typeModelInit() != null ? ctx.typeModelInit()
+                        .ensuresClause() : null;
+        ParserRuleContext finalRequires =
+                ctx.typeModelFinal() != null ? ctx.typeModelFinal()
+                        .requiresClause() : null;
+        ParserRuleContext finalEnsures =
+                ctx.typeModelFinal() != null ? ctx.typeModelFinal()
+                        .ensuresClause() : null;
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgTypeModelSymbol(symtab.getTypeGraph(), ctx.name

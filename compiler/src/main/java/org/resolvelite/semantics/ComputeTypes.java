@@ -5,12 +5,14 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
@@ -215,7 +217,7 @@ public class ComputeTypes extends ResolveBaseListener {
                                            @NotNull List<ResolveParser.MathExpContext> args) {
         tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
                 args, tr.mathTypes));
-        PSymbol e = (PSymbol)DefSymbolsAndScopes.buildPExp(ctx, tr);
+        PSymbol e = buildPExp(ctx);
         MTFunction eType = (MTFunction)e.getMathType();
         String operatorStr = name.getText();
 
@@ -406,5 +408,13 @@ public class ComputeTypes extends ResolveBaseListener {
         @Override public String description() {
             return "inexact";
         }
+    }
+
+    protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
+        if ( ctx == null ) return null;
+        PExpBuildingListener<T> builder =
+                new PExpBuildingListener<T>(tr.mathTypes, tr.mathTypeValues);
+        ParseTreeWalker.DEFAULT.walk(builder, ctx);
+        return builder.getBuiltPExp(ctx);
     }
 }
