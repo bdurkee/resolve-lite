@@ -15,16 +15,31 @@ import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
+import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.AssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Generates verification conditions (VCs) for all constructs in a given
+ * module.
+ */
 public class VCGenerator extends ResolveBaseListener {
 
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
     private final ResolveCompiler compiler;
     private final TypeGraph g;
+
+    private final Deque<VCAssertiveBlock> assertiveBlockStack =
+            new LinkedList<>();
+    private PExp moduleLevelRequires, moduleLevelConstraint = null;
+
+    //private VCAssertiveBlock curAssertiveBlock = null;
 
     public VCGenerator(@NotNull ResolveCompiler compiler,
             @NotNull SymbolTable symtab, @NotNull AnnotatedTree tree)
@@ -36,11 +51,20 @@ public class VCGenerator extends ResolveBaseListener {
     }
 
     @Override public void enterFacilityModule(
-            @NotNull ResolveParser.FacilityModuleContext ctx) {}
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        moduleLevelRequires = normalizePExp(ctx.requiresClause());
+    }
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        //implicitly applying proceduredecl rule
+        AssertiveBlockBuilder builder =
+                new AssertiveBlockBuilder(g, ctx).assume(moduleLevelRequires);
 
+        /*curAssertiveBlock.a
+        Exp ensures =
+                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name,
+                        isLocal);*/
     }
 
     private PExp modifyEnsuresByParams(String functionName,
@@ -49,7 +73,7 @@ public class VCGenerator extends ResolveBaseListener {
         List<ProgParameterSymbol> params =
                 symtab.scopes.get(functionCtx).getSymbolsOfType(
                         ProgParameterSymbol.class);
-        PExp existingEnsures = getPExpFor(ensures);
+        PExp existingEnsures = normalizePExp(ensures);
         for (ProgParameterSymbol p : params) {
             PSymbolBuilder paramTemp =
                     new PSymbolBuilder(p.getName()).mathType(p
@@ -97,8 +121,10 @@ public class VCGenerator extends ResolveBaseListener {
         return existingEnsures;
     }
 
-    private PExp getPExpFor(ParserRuleContext ctx) {
-        PExp e = tr.mathPExps.get(ctx);
+    //private PExp getModuleLevelConstraint(
+
+    private PExp normalizePExp(ParserRuleContext ctx) {
+        PExp e = tr.mathPExps.get(ctx).copy();
         return e != null ? e : g.getTrueExp();
     }
 

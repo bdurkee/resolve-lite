@@ -26,7 +26,7 @@ public abstract class PExp {
 
     public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new HashMap<>();
-        e.put(current, replacement);
+        e.put(current, substitute);
         return substitute(e);
     }
 

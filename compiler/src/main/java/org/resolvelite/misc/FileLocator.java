@@ -90,8 +90,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      */
     public File getFile() throws IOException {
         if ( myMatches.size() == 0 ) {
-            throw new NoSuchFileException("File matching name '" + myPattern
-                    + "' could not be found.");
+            throw new NoSuchFileException("file matching name '" + myPattern
+                    + "' could not be found");
         }
         return myMatches.get(0);
     }
