@@ -22,7 +22,7 @@ public class ProgVariableSymbol extends Symbol {
         return type;
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "a program variable";
     }
 

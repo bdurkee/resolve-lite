@@ -111,13 +111,8 @@ public class ProgParameterSymbol extends Symbol {
         return this;
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "a parameter";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        return !declaredType.getClass().equals(PTInvalid.class)
-                && mathSymbolAlterEgo.containsOnlyValidTypes();
     }
 
     @Override public String toString() {

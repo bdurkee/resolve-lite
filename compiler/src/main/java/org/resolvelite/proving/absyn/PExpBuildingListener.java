@@ -111,6 +111,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         built.put(ctx, result.build());
     }
 
+    @Override public void exitMathIntegerExp(
+            @NotNull ResolveParser.MathIntegerExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
+                .mathType(types.get(ctx)) //
+                .literal(true);
+        built.put(ctx, result.build());
+    }
+
     private <E extends PExp> List<E> collectPExpsFor(Class<E> expectedExpType,
             List<? extends ParseTree> nodes) {
         return collectPExpsFor(expectedExpType, nodes, built);

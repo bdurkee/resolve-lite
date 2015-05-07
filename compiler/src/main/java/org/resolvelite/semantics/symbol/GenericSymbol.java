@@ -26,12 +26,8 @@ public class GenericSymbol extends Symbol {
                         typeValue, definingTree, moduleID);
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "a generic";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        return true;
     }
 
     @Override public GenericSymbol toGenericSymbol() {

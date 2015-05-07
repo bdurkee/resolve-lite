@@ -39,7 +39,7 @@ public class OperationSymbol extends Symbol {
         return this;
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "an operation";
     }
 

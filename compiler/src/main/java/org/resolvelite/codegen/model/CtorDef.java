@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
  */
 public class CtorDef extends OutputModelObject {
     public String name;
-    public boolean includesBaseConcept = false;
     public List<String> members = new ArrayList<>();
     @ModelElement public List<FacilityDef> facMems = new ArrayList<>();
 

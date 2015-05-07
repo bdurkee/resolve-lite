@@ -19,24 +19,20 @@ import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTRecord;
 import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.query.MathFunctionNamedQuery;
-import org.resolvelite.semantics.query.MathSymbolQuery;
-import org.resolvelite.semantics.query.NameQuery;
-import org.resolvelite.semantics.query.ProgVariableQuery;
-import org.resolvelite.semantics.symbol.MathSymbol;
-import org.resolvelite.semantics.symbol.ProgTypeSymbol;
-import org.resolvelite.semantics.symbol.ProgVariableSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.semantics.query.*;
+import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Todo: If we want to be more efficient about this we could use a visitor,
+// Todo: If we want to be more efficient about this we could probably use a
+// visitor,
 // which would allow us to be more specific as to which subexpressions we
-// descend into (e.g.: those lacking types).
+// descend into (e.g.: only those lacking type info).
 public class ComputeTypes extends ResolveBaseListener {
 
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
@@ -90,7 +86,7 @@ public class ComputeTypes extends ResolveBaseListener {
         ParseTree firstRecordRef = ctx.getChild(0);
         PTType first = tr.progTypes.get(firstRecordRef);
 
-        //first we sanity check the first to ensure we're dealing with a record
+        //start by checking the first to ensure we're dealing with a record
         if ( !first.isAggregateType() ) {
             compiler.errorManager.semanticError(
                     ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
@@ -104,7 +100,7 @@ public class ComputeTypes extends ResolveBaseListener {
         //note this will represent the rightmost field type when finished.
         PTType curFieldType = curAggregateType;
 
-        //now make sure our mem accesses aren't nonsense.
+        //now we need to make sure our mem accesses aren't nonsense.
         for (TerminalNode term : ctx.Identifier()) {
             PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
             curFieldType = recordType.getFieldType(term.getText());
@@ -115,6 +111,7 @@ public class ComputeTypes extends ResolveBaseListener {
                 curFieldType = PTInvalid.getInstance(g);
                 break;
             }
+            tr.progTypes.put(term, curFieldType);
             if ( curFieldType.isAggregateType() ) {
                 curAggregateType = (PTRepresentation) curFieldType;
             }
@@ -130,22 +127,59 @@ public class ComputeTypes extends ResolveBaseListener {
                     symtab.getInnermostActiveScope()
                             .queryForOne(
                                     new ProgVariableQuery(ctx.qualifier,
-                                            ctx.name, true))
-                            .toProgVariableSymbol();
+                                            ctx.name, true));
             tr.progTypes.put(ctx, variable.getProgramType());
             exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+            return;
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
                     ctx.name.getText());
         }
+        catch (UnexpectedSymbolException use) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a variable reference", ctx.name.getText(),
+                    use.getActualSymbolDescription());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
     }
 
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        // tr.progTypes.put(ctx,
-        //         getProgramType(ctx, "Std_Integer_Fac", "Integer"));
+        PTType progType =
+                DefSymbolsAndScopes.getProgramType(compiler, ctx,
+                        "Std_Integer_Fac", "Integer");
+        tr.progTypes.put(ctx, progType);
         tr.mathTypes.put(ctx, g.Z);
+    }
+
+    @Override public void exitProgParamExp(
+            @NotNull ResolveParser.ProgParamExpContext ctx) {
+        List<PTType> argTypes = ctx.progExp().stream().map(tr.progTypes::get)
+                .collect(Collectors.toList());
+        try {
+            OperationSymbol opSym =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(ctx.qualifier, ctx.name,
+                                    argTypes));
+            tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
+            return;
+        }
+        catch (NoSuchSymbolException nsse) {
+            List<String> argStrList = ctx.progExp().stream()
+                    .map(ResolveParser.ProgExpContext::getText)
+                    .collect(Collectors.toList());
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_OPERATION,
+                    ctx.getStart(), ctx.name.getText(), argStrList, argTypes);
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
     }
 
     //-----------------------------------------------------------
@@ -200,6 +234,11 @@ public class ComputeTypes extends ResolveBaseListener {
     @Override public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
+    }
+
+    @Override public void exitMathIntegerExp(
+            @NotNull ResolveParser.MathIntegerExpContext ctx) {
+        tr.mathTypes.put(ctx, g.Z);
     }
 
     @Override public void exitMathInfixExp(

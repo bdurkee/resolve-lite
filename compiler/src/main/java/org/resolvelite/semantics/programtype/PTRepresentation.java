@@ -36,15 +36,6 @@ public class PTRepresentation extends PTNamed {
         this.family = family;
     }
 
-    public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            @NotNull ProgTypeModelSymbol family, String enclosingModuleID) {
-        this(g, baseType, name, family, family.getProgramType()
-                .getInitializationRequires(), family.getProgramType()
-                .getInitializationEnsures(), family.getProgramType()
-                .getFinalizationRequires(), family.getProgramType()
-                .getFinalizationEnsures(), enclosingModuleID);
-    }
-
     public PTType getBaseType() {
         return baseType;
     }

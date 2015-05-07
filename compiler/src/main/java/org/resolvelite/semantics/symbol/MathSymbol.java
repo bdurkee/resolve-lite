@@ -57,7 +57,7 @@ public class MathSymbol extends Symbol {
         return typeValue;
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "a math symbol";
     }
 

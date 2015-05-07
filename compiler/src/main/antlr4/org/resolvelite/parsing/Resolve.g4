@@ -220,9 +220,9 @@ typeModelDecl
 typeRepresentationDecl
     :   'Type' name=Identifier '=' (record|type) ';'
         (conventionClause)?
-        (typeModelInit)?
-        (typeModelFinal)?
         //(correspondenceClause)?
+        (typeImplInit)?
+        (typeImplFinal)?
     ;
 
 // initialization, finalization rules
@@ -233,6 +233,16 @@ typeModelInit
 
 typeModelFinal
     :   'finalization' (requiresClause)? (ensuresClause)?
+    ;
+
+typeImplInit
+    :   'initialization' (requiresClause)? (ensuresClause)?
+        (variableDeclGroup)* (stmt)*
+    ;
+
+typeImplFinal
+    :   'finalization' (requiresClause)? (ensuresClause)?
+        (variableDeclGroup)* (stmt)*
     ;
 
 // functions

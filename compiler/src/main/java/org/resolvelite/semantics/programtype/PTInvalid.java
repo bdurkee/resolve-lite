@@ -26,4 +26,9 @@ public class PTInvalid extends PTType {
     @Override public MTType toMath() {
         return getTypeGraph().INVALID;
     }
+
+    @Override public String toString() {
+        return "Invalid";
+    }
+
 }

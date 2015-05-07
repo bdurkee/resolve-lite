@@ -19,6 +19,10 @@ public class PTVoid extends PTType {
         return result;
     }
 
+    @Override public String toString() {
+        return "Void";
+    }
+
     private PTVoid(TypeGraph g) {
         super(g);
     }

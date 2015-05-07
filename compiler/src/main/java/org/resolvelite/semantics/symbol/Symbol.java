@@ -1,10 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.UnexpectedSymbolException;
-import org.resolvelite.semantics.programtype.PTInvalid;
-import org.resolvelite.semantics.programtype.PTType;
 
 public abstract class Symbol {
 
@@ -50,58 +47,46 @@ public abstract class Symbol {
         return definingTree;
     }
 
-    public abstract String getEntryTypeDescription();
-
-    /**
-     * Returns {@code true} if all {@link PTType}s and {@link MTType}s
-     * referenced in this {@code Symbol} do not point to {@link PTInvalid} or
-     * the {@code Invalid} math type (respectively).
-     * 
-     * @return true if this {@link Symbol} lacks a reference to an
-     *         'invalid' type.
-     */
-    public boolean containsOnlyValidTypes() {
-        return true;
-    }
+    public abstract String getSymbolDescription();
 
     public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public ProgTypeModelSymbol toProgTypeModelSymbol()
             throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public ProgParameterSymbol toProgParameterSymbol()
             throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public ProgReprTypeSymbol toProgReprTypeSymbol()
             throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     public ProgVariableSymbol toProgVariableSymbol()
             throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException();
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
 }

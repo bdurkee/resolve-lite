@@ -47,4 +47,9 @@ public class PTGeneric extends PTType {
         }
         return result;
     }
+
+    @Override public String toString() {
+        return name;
+    }
+
 }

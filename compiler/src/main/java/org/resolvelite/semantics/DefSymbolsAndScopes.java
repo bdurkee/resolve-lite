@@ -107,11 +107,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         MathSymbol exemplar = null;
         MTType modelType = null;
         try {
-            //NOTE:
-            //Can't walk the whole ctx here just yet. Say exemplar is 'b', and the
-            //initialization stipulates that b = true. Since we only just get around
-            //to adding the (typed) binding for exemplar 'b' below, we won't be
-            //able to properly type all of 'ctx's subexpressions right here.
+            //NOTE: Can't walk the whole ctx here just yet. Say exemplar is 'b',
+            //and initialization stipulates that b = true. Since we only just get
+            //around to adding the (typed) binding for exemplar 'b' below, we
+            //won't be able to properly type all of 'ctx's subexpressions right
+            //here.
             annotateExps(ctx.mathTypeExp());
             modelType = tree.mathTypeValues.get(ctx.mathTypeExp());
             exemplar =
@@ -168,7 +168,65 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        ProgTypeModelSymbol typeDefn = null;
+        try {
+            typeDefn =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toProgTypeModelSymbol();
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+        catch (NoSuchSymbolException|UnexpectedSymbolException e) {
+            //if we don't find the type model at all (or we find something
+            //that ISN'T a type model) -- it doesn't matter, we'll proceed under
+            //the assumption that the thing isn't actually
+        }
+        String exemplarName =
+                typeDefn != null ? typeDefn.getExemplar().getName() : ctx
+                        .getText().substring(0, 1).toUpperCase();
+        PTType baseType =
+                ctx.record() != null ? getProgramType(ctx.record())
+                        : getProgramType(ctx.type());
+        annotateExps(ctx);
+
+        ParserRuleContext initRequires =
+                ctx.typeImplInit() != null ? ctx.typeImplInit()
+                        .requiresClause() : null;
+        ParserRuleContext initEnsures =
+                ctx.typeImplInit() != null ? ctx.typeImplInit().ensuresClause()
+                        : null;
+        ParserRuleContext finalRequires =
+                ctx.typeImplFinal() != null ? ctx.typeImplFinal()
+                        .requiresClause() : null;
+        ParserRuleContext finalEnsures =
+                ctx.typeImplFinal() != null ? ctx.typeImplFinal()
+                        .ensuresClause() : null;
+
+        PTRepresentation reprType =
+                new PTRepresentation(g, baseType, ctx.name.getText(), typeDefn,
+                        buildPExp(initRequires), buildPExp(initEnsures),
+                        buildPExp(finalRequires), buildPExp(finalEnsures),
+                        getRootModuleID());
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProgVariableSymbol(exemplarName, ctx, reprType,
+                            getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {}
         symtab.endScope();
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProgReprTypeSymbol(g, ctx.name.getText(), ctx,
+                            getRootModuleID(), typeDefn, reprType, ctx
+                                    .conventionClause(), null));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
     }
 
     @Override public void enterOperationProcedureDecl(
@@ -289,19 +347,21 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected PTType getProgramType(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull Token typeName) {
-        return getProgramType(ctx, qualifier != null ? qualifier.getText()
-                : null, typeName.getText());
+        return getProgramType(compiler, ctx,
+                qualifier != null ? qualifier.getText() : null,
+                typeName.getText());
     }
 
     /**
-     * For returning symbols representing a basic type such as Integer,
-     * Boolean, Character, etc
+     * Returns a {@link PTType} based on context {@code ctx}; {@link PTInvalid}
+     * if the symbol retrieved was not typed properly.
      */
-    protected PTType getProgramType(@NotNull ParserRuleContext ctx,
-            @Nullable String qualifier, @NotNull String typeName) {
+    protected static PTType getProgramType(ResolveCompiler compiler,
+            @NotNull ParserRuleContext ctx, @Nullable String qualifier,
+            @NotNull String typeName) {
         ProgTypeSymbol result = null;
         try {
-            return symtab.getInnermostActiveScope()
+            return compiler.symbolTable.getInnermostActiveScope()
                     .queryForOne(new NameQuery(qualifier, typeName, true))
                     .toProgTypeSymbol().getProgramType();
         }
@@ -309,7 +369,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(e.getErrorKind(),
                     ctx.getStart(), typeName);
         }
-        return PTInvalid.getInstance(g);
+        return PTInvalid.getInstance(compiler.symbolTable.getTypeGraph());
     }
 
     protected PTType getProgramType(@NotNull ResolveParser.RecordContext ctx) {
@@ -335,7 +395,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     }
 
     /**
-     * Annotates all expressions (and subexpressions) in ({@link ParseTree} ctx
+     * Annotates all expressions (and subexpressions) in parsetree {@code ctx}
      * with type info.
      * 
      * @param ctx The subtree to annotate.

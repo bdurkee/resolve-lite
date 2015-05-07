@@ -56,4 +56,8 @@ public abstract class PTNamed extends PTType {
         return finalEnsures;
     }
 
+    @Override public String toString() {
+        return name;
+    }
+
 }

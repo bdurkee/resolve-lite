@@ -8,7 +8,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 public class ProgReprTypeSymbol extends Symbol {
 
     //Note: This is null in the case where we represent a standalone
-    //representation (a record in a facility for instance)
+    //representation (e.g.: a facility module bound record)
     protected final ProgTypeModelSymbol definition;
     protected final ParseTree convention, correspondence;
     protected final TypeGraph typeGraph;
@@ -16,9 +16,8 @@ public class ProgReprTypeSymbol extends Symbol {
 
     public ProgReprTypeSymbol(TypeGraph g, String name,
             ParseTree definingElement, String moduleID,
-            ProgTypeModelSymbol definition, ProgVariableSymbol repVar,
-            PTType representation, ParseTree convention,
-            ParseTree correspondence) {
+            ProgTypeModelSymbol definition, PTType representation,
+            ParseTree convention, ParseTree correspondence) {
         super(name, definingElement, moduleID);
         this.definition = definition;
         this.representation = representation;
@@ -41,12 +40,8 @@ public class ProgReprTypeSymbol extends Symbol {
         return this;
     }
 
-    @Override public String getEntryTypeDescription() {
+    @Override public String getSymbolDescription() {
         return "a program type representation definition";
-    }
-
-    @Override public boolean containsOnlyValidTypes() {
-        return !representation.getClass().equals(PTInvalid.class);
     }
 
     @Override public String toString() {

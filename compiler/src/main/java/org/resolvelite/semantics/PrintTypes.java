@@ -30,6 +30,11 @@ public class PrintTypes extends ResolveBaseListener {
         printProgTypesForExp(ctx);
     }
 
+    @Override public void exitProgParamExp(
+            @NotNull ResolveParser.ProgParamExpContext ctx) {
+        printProgTypesForExp(ctx);
+    }
+
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         printMathTypesForExp(ctx);

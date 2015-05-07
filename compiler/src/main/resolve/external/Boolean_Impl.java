@@ -1,6 +1,8 @@
 import org.resolvelite.runtime.*;
 import java.lang.reflect.*;
 
+import java.util.Scanner;
+
 public class Boolean_Impl extends ResolveBase implements Boolean_Template{
 
     public class Boolean implements Boolean_Template.Boolean {
@@ -72,4 +74,12 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
         return new Boolean(false);
     }
 
+    @Override public void Read(RType e) {
+        Scanner sc = new Scanner(System.in);
+        ((Boolean)e).rep.val = sc.nextBoolean();
+    }
+
+    @Override public void Write_Line(RType i) {
+        System.out.println(((Boolean) i).rep.val);
+    }
 }

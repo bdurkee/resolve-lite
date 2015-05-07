@@ -2,15 +2,14 @@ package org.resolvelite.semantics;
 
 public class UnexpectedSymbolException extends RuntimeException {
 
-    public UnexpectedSymbolException() {
+    private final String actualSymbolDescription;
+
+    public UnexpectedSymbolException(String actualSymbolDescription) {
         super();
+        this.actualSymbolDescription = actualSymbolDescription;
     }
 
-    public UnexpectedSymbolException(String msg) {
-        super(msg);
-    }
-
-    public UnexpectedSymbolException(Exception causedBy) {
-        super(causedBy);
+    public String getActualSymbolDescription() {
+        return actualSymbolDescription;
     }
 }

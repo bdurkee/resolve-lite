@@ -2,11 +2,36 @@ Concept Integer_Template;
 
     Type Family Integer is modeled by Z;
         exemplar i;
+        initialization ensures i = 0;
 
-    Oper Sum (evaluates i, j: Integer): Integer;
+    Operation Sum (evaluates i, j: Integer): Integer;
 
-    Oper Difference (evaluates i, j: Integer): Integer;
+    Operation Difference (evaluates i, j: Integer): Integer;
 
-    Oper Less_Or_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+    Operation Less_Or_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Less(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Greater(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Greater_Or_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Is_Zero (evaluates i: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Is_Not_Zero (evaluates i: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Product(evaluates i, j: Integer): Integer;
+
+    Operation Divide(evaluates i, j: Integer; replaces q: Integer);
+
+    Operation Negate(evaluates i: Integer): Integer;
+
+    Operation Are_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Are_Not_Equal(evaluates i, j: Integer): Std_Boolean_Fac::Boolean;
+
+    Operation Read (replaces i: Integer);
+
+    Operation Write_Line(evaluates i: Integer);
 
 end Integer_Template;

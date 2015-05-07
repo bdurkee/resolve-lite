@@ -4,16 +4,18 @@ Concept Boolean_Template;
         exemplar b;
         initialization ensures b = true;
 
-    Oper True (): Boolean;
+    Operation True(): Boolean;
         ensures True = true;
 
-    Oper False (): Boolean;
+    Operation False(): Boolean;
         ensures False = false;
 
-    Oper And (evaluates a, b: Boolean): Boolean;
+    Operation And(evaluates a, b: Boolean): Boolean;
 
-    Oper Or (evaluates a, b: Boolean): Boolean;
+    Operation Or(evaluates a, b: Boolean): Boolean;
 
-    Oper Foo (evaluates a: Boolean);
+    Operation Read (replaces a: Boolean);
+
+    Operation Write_Line(evaluates a: Boolean);
 
 end Boolean_Template;

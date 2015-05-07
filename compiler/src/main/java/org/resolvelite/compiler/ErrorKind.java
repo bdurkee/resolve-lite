@@ -76,10 +76,11 @@ public enum ErrorKind {
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 8: unexpected symboltablentry: <em>expectedentry</em>,
-     * <em>foundentry</em>.
+     * Compiler error 8: expecting <em>entrytype</em>: found
+     * <em>foundentrytype</em>.
      */
-    UNEXPECTED_SYMBOL(8, "expecting <arg>; found <arg2>", ErrorSeverity.ERROR),
+    UNEXPECTED_SYMBOL(8, "expecting <arg> on '<arg2>', found <arg3>",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler error 9: duplicate symbol: <em>name</em>.
@@ -216,7 +217,14 @@ public enum ErrorKind {
      */
     AMBIGIOUS_DOMAIN(29, "multiple domain matches; for example: "
             + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
-            + "qualifying", ErrorSeverity.ERROR);
+            + "qualifying", ErrorSeverity.ERROR),
+
+    NO_SUCH_OPERATION(30, "no operation found corresponding to call " +
+            "<arg> <if(arg2)>" +
+            "with the following arguments: " +
+            "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]" +
+            "<endif>",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
