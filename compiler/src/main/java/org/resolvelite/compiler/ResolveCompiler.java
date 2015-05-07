@@ -39,6 +39,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.resolvelite.codegen.CodeGenPipeline;
 import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ResolveTokenFactory;
@@ -243,13 +244,13 @@ public class ResolveCompiler {
         List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errorManager.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
 
         analysisPipe.process();
         if ( analysisPipe.compiler.errorManager.getErrorCount() > initialErrCt ) {
             return;
         }
-        // codegenPipe.process();
+        codegenPipe.process();
     }
 
     public List<AnnotatedTree> sortTargetModulesByUsesReferences() {

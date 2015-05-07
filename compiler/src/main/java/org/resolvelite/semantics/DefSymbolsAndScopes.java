@@ -16,15 +16,14 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
-import org.resolvelite.semantics.programtype.PTFamily;
-import org.resolvelite.semantics.programtype.PTInvalid;
-import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.programtype.PTVoid;
+import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
@@ -153,13 +152,23 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             ctx.name.getText(), ctx.exemplar.getText(),
                             buildPExp(constraint), buildPExp(initRequires),
                             buildPExp(initEnsures), buildPExp(finalRequires),
-                            buildPExp(finalEnsures)), exemplar, ctx,
-                            getRootModuleID()));
+                            buildPExp(finalEnsures), getRootModuleID()),
+                            exemplar, ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
+    }
+
+    @Override public void enterTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        symtab.endScope();
     }
 
     @Override public void enterOperationProcedureDecl(
@@ -303,13 +312,24 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         return PTInvalid.getInstance(g);
     }
 
+    protected PTType getProgramType(@NotNull ResolveParser.RecordContext ctx) {
+        Map<String, PTType> fields = new LinkedHashMap<>();
+        for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
+                .recordVariableDeclGroup()) {
+            PTType grpType = getProgramType(fieldGrp.type());
+            for (TerminalNode t : fieldGrp.Identifier()) {
+                fields.put(t.getText(), grpType);
+            }
+        }
+        return new PTRecord(g, fields);
+    }
+
     protected PExp buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) {
             return g.getTrueExp();
         }
         PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<PExp>(tree.mathTypes,
-                        tree.mathTypeValues);
+                new PExpBuildingListener<>(tree.mathTypes, tree.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

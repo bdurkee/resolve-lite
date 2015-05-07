@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
@@ -15,12 +16,16 @@ import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.PTInvalid;
+import org.resolvelite.semantics.programtype.PTRecord;
+import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.MathFunctionNamedQuery;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
+import org.resolvelite.semantics.query.ProgVariableQuery;
 import org.resolvelite.semantics.symbol.MathSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeSymbol;
+import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -57,6 +62,95 @@ public class ComputeTypes extends ResolveBaseListener {
         this.symtab = symtab;
         this.g = symtab.getTypeGraph();
     }
+
+    //-----------------------------------------------------------
+    // BEGIN PROG EXP TYPING
+    //-----------------------------------------------------------
+
+    @Override public void exitProgNestedExp(
+            @NotNull ResolveParser.ProgNestedExpContext ctx) {
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
+    }
+
+    @Override public void exitProgPrimaryExp(
+            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progPrimary()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progPrimary()));
+    }
+
+    @Override public void exitProgPrimary(
+            @NotNull ResolveParser.ProgPrimaryContext ctx) {
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitProgMemberExp(
+            @NotNull ResolveParser.ProgMemberExpContext ctx) {
+        ParseTree firstRecordRef = ctx.getChild(0);
+        PTType first = tr.progTypes.get(firstRecordRef);
+
+        //first we sanity check the first to ensure we're dealing with a record
+        if ( !first.isAggregateType() ) {
+            compiler.errorManager.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
+                    ctx.getText(), ctx.getChild(0).getText());
+            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        PTRepresentation curAggregateType = (PTRepresentation) first;
+
+        //note this will represent the rightmost field type when finished.
+        PTType curFieldType = curAggregateType;
+
+        //now make sure our mem accesses aren't nonsense.
+        for (TerminalNode term : ctx.Identifier()) {
+            PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
+            curFieldType = recordType.getFieldType(term.getText());
+
+            if ( curFieldType == null ) {
+                compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                        term.getSymbol(), term.getText());
+                curFieldType = PTInvalid.getInstance(g);
+                break;
+            }
+            if ( curFieldType.isAggregateType() ) {
+                curAggregateType = (PTRepresentation) curFieldType;
+            }
+        }
+        tr.progTypes.put(ctx, curFieldType);
+        tr.mathTypes.put(ctx, curFieldType.toMath());
+    }
+
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+        try {
+            ProgVariableSymbol variable =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(
+                                    new ProgVariableQuery(ctx.qualifier,
+                                            ctx.name, true))
+                            .toProgVariableSymbol();
+            tr.progTypes.put(ctx, variable.getProgramType());
+            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
+    @Override public void exitProgIntegerExp(
+            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
+        // tr.progTypes.put(ctx,
+        //         getProgramType(ctx, "Std_Integer_Fac", "Integer"));
+        tr.mathTypes.put(ctx, g.Z);
+    }
+
+    //-----------------------------------------------------------
+    // BEGIN MATH EXP TYPING
+    //-----------------------------------------------------------
 
     @Override public void enterMathTypeExp(
             @NotNull ResolveParser.MathTypeExpContext ctx) {
@@ -106,13 +200,6 @@ public class ComputeTypes extends ResolveBaseListener {
     @Override public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
-    }
-
-    @Override public void exitProgIntegerExp(
-            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        // tr.progTypes.put(ctx,
-        //         getProgramType(ctx, "Std_Integer_Fac", "Integer"));
-        tr.mathTypes.put(ctx, g.Z);
     }
 
     @Override public void exitMathInfixExp(

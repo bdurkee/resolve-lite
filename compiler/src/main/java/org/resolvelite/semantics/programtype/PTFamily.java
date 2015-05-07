@@ -12,9 +12,9 @@ public class PTFamily extends PTNamed {
 
     public PTFamily(MTType model, String familyName, String exemplarName,
             PExp constraint, PExp initRequires, PExp initEnsures,
-            PExp finalRequires, PExp finalEnsures) {
+            PExp finalRequires, PExp finalEnsures, String enclosingModuleID) {
         super(model.getTypeGraph(), familyName, initRequires, initEnsures,
-                finalRequires, finalEnsures);
+                finalRequires, finalEnsures, enclosingModuleID);
         this.model = model;
         this.name = familyName;
         this.exemplarName = exemplarName;

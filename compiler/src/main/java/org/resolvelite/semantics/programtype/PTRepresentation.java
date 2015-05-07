@@ -27,20 +27,22 @@ public class PTRepresentation extends PTNamed {
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
             @Nullable ProgTypeModelSymbol family, PExp initRequires,
-            PExp initEnsures, PExp finalRequires, PExp finalEnsures) {
-        super(g, name, initRequires, initEnsures, finalRequires, finalEnsures);
+            PExp initEnsures, PExp finalRequires, PExp finalEnsures,
+            String enclosingModuleID) {
+        super(g, name, initRequires, initEnsures, finalRequires, finalEnsures,
+                enclosingModuleID);
         this.name = name;
         this.baseType = baseType;
         this.family = family;
     }
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            @NotNull ProgTypeModelSymbol family) {
+            @NotNull ProgTypeModelSymbol family, String enclosingModuleID) {
         this(g, baseType, name, family, family.getProgramType()
                 .getInitializationRequires(), family.getProgramType()
                 .getInitializationEnsures(), family.getProgramType()
                 .getFinalizationRequires(), family.getProgramType()
-                .getFinalizationEnsures());
+                .getFinalizationEnsures(), enclosingModuleID);
     }
 
     public PTType getBaseType() {

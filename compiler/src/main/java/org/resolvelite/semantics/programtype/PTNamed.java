@@ -13,15 +13,25 @@ public abstract class PTNamed extends PTType {
     private final String name;
     protected final PExp initRequires, initEnsures, finalRequires,
             finalEnsures;
+    /**
+     * Which module does this {@code PTType}s reference appear in?
+     */
+    private final String enclosingModuleID;
 
     public PTNamed(TypeGraph g, String name, PExp initRequires,
-            PExp initEnsures, PExp finalRequires, PExp finalEnsures) {
+            PExp initEnsures, PExp finalRequires, PExp finalEnsures,
+            String enclosingModuleID) {
         super(g);
         this.name = name;
         this.initRequires = initRequires;
         this.initEnsures = initEnsures;
         this.finalRequires = finalRequires;
         this.finalEnsures = finalEnsures;
+        this.enclosingModuleID = enclosingModuleID;
+    }
+
+    public String getEnclosingModuleID() {
+        return enclosingModuleID;
     }
 
     public String getName() {

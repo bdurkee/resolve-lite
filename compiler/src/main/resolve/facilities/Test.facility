@@ -1,8 +1,17 @@
 Facility Test;
 
-    Operation Main();
-        Procedure
-            Var P: Std_Integer_Fac::Integer;
-    end Main;
+    Type Blah = Record
+            v, b: Std_Boolean_Fac::Boolean;
+        end;
 
+    Oper Foo();
+        Procedure
+
+    end Foo;
+
+    Oper Main();
+        Procedure
+            Var X: Blah;
+            
+    end Main;
 end Test;

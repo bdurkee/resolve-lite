@@ -1,6 +1,8 @@
 package org.resolvelite.codegen.model;
 
-// import org.resolvelite.semantics.Type;
+import org.resolvelite.codegen.ModelBuilder;
+import org.resolvelite.semantics.programtype.PTNamed;
+import org.resolvelite.semantics.programtype.PTType;
 
 public class MemberRef extends Expr {
     public String name;
@@ -17,7 +19,8 @@ public class MemberRef extends Expr {
         this.isBaseRef = isBaseRef;
     }
 
-    public MemberRef(String name, Type t) {
-        this(name, t.getName(), t.getRootModuleID());
+    public MemberRef(String name, PTType t) {
+        this(name, ModelBuilder.getTypeName(t), ((PTNamed) t)
+                .getEnclosingModuleID());
     }
 }

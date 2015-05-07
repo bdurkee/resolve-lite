@@ -59,14 +59,16 @@ import java.util.stream.Collectors;
 public class ModelBuilder extends ResolveBaseListener {
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-    @NotNull private final ModuleScopeBuilder moduleScope;
-    @NotNull private final CodeGenerator gen;
-    @NotNull private final SymbolTable symtab;
+    private final ModuleScopeBuilder moduleScope;
+    private final CodeGenerator gen;
+    private final SymbolTable symtab;
+    private final AnnotatedTree tr;
 
     public ModelBuilder(@NotNull CodeGenerator g, @NotNull SymbolTable symtab) {
         this.gen = g;
         this.moduleScope = symtab.moduleScopes.get(g.getModule().getName());
         this.symtab = symtab;
+        this.tr = g.getModule();
     }
 
     @Override public void exitTypeModelDecl(
@@ -150,8 +152,9 @@ public class ModelBuilder extends ResolveBaseListener {
         basePtr.isProxied = false;
         for (ResolveParser.TypeContext t : ctx.type()) {
             try {
-                Symbol s = moduleScope.queryForOne(new NameQuery(
-                        t.qualifier, t.name, true));
+                Symbol s =
+                        moduleScope.queryForOne(new NameQuery(t.qualifier,
+                                t.name, true));
                 if ( s instanceof GenericSymbol ) {
                     basePtr.args.add(new MethodCall((TypeInit) built.get(t)));
                 }
@@ -159,7 +162,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     basePtr.args.add((TypeInit) built.get(t));
                 }
             }
-            catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
                 e.printStackTrace();
             }
         }
@@ -253,12 +256,15 @@ public class ModelBuilder extends ResolveBaseListener {
                             .getChild(0).getChild(0);
             try {
                 OperationSymbol s =
-                        moduleScope.queryForOne(new NameQuery(argAsNamedExp.qualifier,
-                                argAsNamedExp.name, true)).toOperationSymbol();
-                e = new AnonOpParameterClassInstance(buildQualifier(
+                        moduleScope.queryForOne(
+                                new NameQuery(argAsNamedExp.qualifier,
+                                        argAsNamedExp.name, true))
+                                .toOperationSymbol();
+                e =
+                        new AnonOpParameterClassInstance(buildQualifier(
                                 argAsNamedExp.qualifier, argAsNamedExp.name), s);
             }
-            catch (NoSuchSymbolException|DuplicateSymbolException e1) {
+            catch (NoSuchSymbolException | DuplicateSymbolException e1) {
                 e1.printStackTrace();
             }
         }
@@ -333,11 +339,11 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
         List<MemberRef> refs = ctx.Identifier()
                 .stream()
-                .map(t -> new MemberRef(t.getText(), symtab.types.get(t)))
+                .map(t -> new MemberRef(t.getText(), tr.progTypes.get(t)))
                 .collect(Collectors.toList());
         Collections.reverse(refs);
         refs.add(new MemberRef(ctx.progNamedExp().name.getText(),
-                symtab.types.get(ctx.progNamedExp())));
+                tr.progTypes.get(ctx.progNamedExp())));
 
         for (int i = 0; i < refs.size(); i++) {
             refs.get(i).isLastRef = i==0;
@@ -454,9 +460,8 @@ public class ModelBuilder extends ResolveBaseListener {
             throws NoSuchSymbolException {
         ModuleScopeBuilder module = symtab.getModuleScope(s.getModuleID());
 
-        return (moduleScope.getModuleID().equals(s.getModuleID()) || module
-                .getWrappedModuleTree().getRoot().getChild(0) instanceof
-                ResolveParser.ConceptModuleContext);
+        return (moduleScope.getModuleID().equals(s.getModuleID()) || gen
+                .getModule().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);
     }
 
     protected CallStat buildPrimitiveInfixStat(@NotNull String name,
@@ -476,8 +481,9 @@ public class ModelBuilder extends ResolveBaseListener {
             //to something brought in via a facilitydecl--they would've had to
             //explicitly qualify if this were the case.
             if ( symQualifier == null ) {
-                Symbol s = moduleScope.queryForOne(
-                        new NameQuery(null, symName, true));
+                Symbol s =
+                        moduleScope.queryForOne(new NameQuery(null, symName,
+                                true));
                 NormalQualifier q;
                 if ( isLocallyAccessibleSymbol(s) ) {
                     //this.<symName>
@@ -496,17 +502,18 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             //We're here: so the call was qualified... is the qualifier
             //referring to a facility? Let's check.
-            Symbol s = moduleScope.queryForOne(
-                    new NameQuery(null, symQualifier, true));
+            Symbol s =
+                    moduleScope.queryForOne(new NameQuery(null, symQualifier,
+                            true));
             //Looks like it is!, let's see if what we found is actually a facility
             if ( !(s instanceof FacilitySymbol) ) {
                 throw new RuntimeException("non-facility qualifier... "
-                        + "whats going on here?");
+                        + "what's going on here?");
             }
             //Ok, so let's build a facility qualifier from the found 's'.
             return new FacilityQualifier((FacilitySymbol) s);
         }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
             return new NormalQualifier(symQualifier);
         }
@@ -520,24 +527,24 @@ public class ModelBuilder extends ResolveBaseListener {
 
     /**
      * Returns the 'name' component of a {@link PTType}
-     *
+     * 
      * @param type A program type.
-     *
+     * 
      * @return {@code type}s actual name rather than its more easily
      *         accessible {@code toString} representation.
      */
     public static String getTypeName(PTType type) {
         String result;
 
-        if (type instanceof PTGeneric) {
+        if ( type instanceof PTGeneric ) {
             result = ((PTGeneric) type).getName();
         }
-        else if (type instanceof PTNamed) {
+        else if ( type instanceof PTNamed ) {
             result = ((PTNamed) type).getName();
         }
         else {
             throw new UnsupportedOperationException("translation has "
-                    + "encountered an unrecognized PTType: " + type.toString()
+                    + "encountered an unsupported pttype: " + type.toString()
                     + "; backing out");
         }
         return result;

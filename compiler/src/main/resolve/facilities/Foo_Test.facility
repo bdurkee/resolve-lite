@@ -11,5 +11,7 @@ Facility Foo_Test;
 
     Oper Main();
         Procedure
+            Var X: Blah;
+
     end Main;
 end Foo_Test;

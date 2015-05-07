@@ -172,7 +172,7 @@ public class SymbolTable {
         if ( curModuleScope != null ) {
             throw new IllegalStateException("module scope already open");
         }
-        if (module instanceof ResolveParser.ModuleContext) {
+        if ( module instanceof ResolveParser.ModuleContext ) {
             module = module.getChild(0);
         }
         if ( !(module.getParent() instanceof ResolveParser.ModuleContext) ) {
