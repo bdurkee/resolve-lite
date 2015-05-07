@@ -20,6 +20,7 @@ import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.AssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,8 +59,8 @@ public class VCGenerator extends ResolveBaseListener {
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         //implicitly applying proceduredecl rule
-        AssertiveBlockBuilder builder =
-                new AssertiveBlockBuilder(g, ctx).assume(moduleLevelRequires);
+        AssertiveBlockBuilder builder = new AssertiveBlockBuilder(g, ctx) //
+                .assume(moduleLevelRequires);
 
         /*curAssertiveBlock.a
         Exp ensures =

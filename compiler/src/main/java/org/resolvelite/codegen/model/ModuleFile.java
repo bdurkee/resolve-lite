@@ -30,4 +30,20 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class OutputModelObject {}
+import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.compiler.tree.AnnotatedTree;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+public class ModuleFile extends OutputModelObject {
+    public String RESOLVEVersion;
+    public String resolveFileName;
+    @ModelElement public Module module;
+
+    public ModuleFile(AnnotatedTree e, String resolveFileName) {
+        this.resolveFileName = resolveFileName;
+        this.RESOLVEVersion = ResolveCompiler.VERSION;
+    }
+}

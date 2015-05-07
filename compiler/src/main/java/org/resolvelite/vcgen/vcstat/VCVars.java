@@ -8,8 +8,14 @@ public class VCVars
         extends
             VCRuleTargetedStat<ResolveParser.VariableDeclGroupContext> {
     public VCVars(
-            @NotNull ResolveParser.VariableDeclGroupContext contents,
-            @NotNull RuleApplicationStrategy<ResolveParser.VariableDeclGroupContext> apply) {
-        super(contents, apply);
+            ResolveParser.VariableDeclGroupContext contents,
+            RuleApplicationStrategy<ResolveParser.VariableDeclGroupContext> apply,
+            AssertiveCode enclosingBlock) {
+        super(contents, enclosingBlock, apply);
+    }
+
+    public VCVars(ResolveParser.VariableDeclGroupContext contents,
+            AssertiveCode enclosingBlock) {
+        super(contents, enclosingBlock, null);
     }
 }

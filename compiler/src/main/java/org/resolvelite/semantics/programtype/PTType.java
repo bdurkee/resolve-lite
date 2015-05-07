@@ -9,9 +9,11 @@ import java.util.Map;
 public abstract class PTType {
 
     private final TypeGraph typeGraph;
+    private final String name;
 
-    public PTType(TypeGraph g) {
+    public PTType(TypeGraph g, String name) {
         this.typeGraph = g;
+        this.name = name;
     }
 
     public final TypeGraph getTypeGraph() {

@@ -30,4 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class OutputModelObject {}
+public class ParameterDef extends OutputModelObject {
+    public String name;
+
+    public ParameterDef(String name) {
+        this.name = name;
+    }
+}

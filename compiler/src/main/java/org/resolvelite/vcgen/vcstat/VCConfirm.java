@@ -7,14 +7,12 @@ import org.resolvelite.vcgen.applicationstrategies.ConfirmApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public class VCConfirm extends VCRuleTargetedStat<PExp> {
-    public VCConfirm(@NotNull PExp contents,
-                    @NotNull RuleApplicationStrategy<PExp> apply,
-                    @NotNull AssertiveCode enclosingBlock) {
+    public VCConfirm(PExp contents, RuleApplicationStrategy<PExp> apply,
+            AssertiveCode enclosingBlock) {
         super(contents, enclosingBlock, apply);
     }
 
-    public VCConfirm(@NotNull PExp contents,
-                    @NotNull AssertiveCode enclosingBlock) {
+    public VCConfirm(PExp contents, AssertiveCode enclosingBlock) {
         this(contents, new ConfirmApplicationStrategy(), enclosingBlock);
     }
 }

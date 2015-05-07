@@ -1,24 +1,20 @@
 package org.resolvelite.vcgen.vcstat;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.resolvelite.codegen.model.ModelElement;
-import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.typereasoning.TypeGraph;
-import org.resolvelite.vcgen.applicationstrategies.AssumeApplicationStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VCAssertiveBlock extends AbstractAssertiveCode {
+public class VCAssertiveBlock extends AssertiveCode {
 
     private VCAssertiveBlock(AssertiveBlockBuilder builder) {
-        super(builder.getTypeGraph(), builder.getDefiningCtx(),
-                builder.getConfirm());
+        super(builder.getTypeGraph(), builder.getDefiningCtx());
     }
 
-    public static class AssertiveBlockBuilder extends AbstractAssertiveCode
+    public static class AssertiveBlockBuilder extends AssertiveCode
             implements
                 Utils.Builder<VCAssertiveBlock> {
 
@@ -33,6 +29,8 @@ public class VCAssertiveBlock extends AbstractAssertiveCode {
             verificationStats.add(new VCAssume(assume, this));
             return this;
         }
+
+        //public AssertiveBlockBuilder statements(List<ParserRuleContext>)
 
         /**
          * Applies the appropriate rule to each

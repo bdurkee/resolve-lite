@@ -64,6 +64,10 @@ public class ModuleParameterization {
         return result;
     }
 
+    public String getName() {
+        return moduleID;
+    }
+
     public String getModuleID() {
         return moduleID;
     }

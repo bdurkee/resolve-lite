@@ -30,4 +30,10 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class OutputModelObject {}
+public class TypeInterfaceDef extends OutputModelObject {
+    public String name;
+
+    public TypeInterfaceDef(String name) {
+        this.name = name;
+    }
+}

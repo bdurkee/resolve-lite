@@ -123,7 +123,7 @@ public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
     <root>;
 >>
 
-LayeredFacilityInstantiation(init, args, child) ::= <%
+DecoratedFacilityInstantiation(init, args, child) ::= <%
 <if(init.isProxied)><init.specRealizName>.createProxy<\\>
 <else>new <init.specRealizName><endif>(<[args, child]; separator=",\n ">)
 %>
@@ -195,7 +195,7 @@ MemberRef(ref, child) ::= <%
 <endif>
 %>
 
-AnonymousOpParameterInstance(wrappedFunc, q) ::= <<
+AnonOpParameterClassInstance(wrappedFunc, q) ::= <<
 new OperationParameter() {
         @Override public RType op(RType... e) {
             <if(!wrappedFunc.hasReturn)><\\>

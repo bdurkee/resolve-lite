@@ -6,14 +6,12 @@ import org.resolvelite.vcgen.applicationstrategies.AssumeApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public class VCAssume extends VCRuleTargetedStat<PExp> {
-    public VCAssume(@NotNull PExp contents,
-            @NotNull RuleApplicationStrategy<PExp> apply,
-            @NotNull AssertiveCode enclosingBlock) {
+    public VCAssume(PExp contents, RuleApplicationStrategy<PExp> apply,
+            AssertiveCode enclosingBlock) {
         super(contents, enclosingBlock, apply);
     }
 
-    public VCAssume(@NotNull PExp contents,
-                    @NotNull AssertiveCode enclosingBlock) {
+    public VCAssume(PExp contents, AssertiveCode enclosingBlock) {
         this(contents, new AssumeApplicationStrategy(), enclosingBlock);
     }
 }

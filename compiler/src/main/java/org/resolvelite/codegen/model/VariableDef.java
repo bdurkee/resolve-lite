@@ -30,4 +30,15 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class OutputModelObject {}
+import org.resolvelite.semantics.symbol.GenericSymbol;
+
+public class VariableDef extends OutputModelObject {
+    @ModelElement public Expr init; //in practice, usually MethodCall and FacilityDefinedTypeInit
+    public String name;
+
+    public VariableDef(String name, Expr init) {
+        this.name = name;
+        this.init = init;
+    }
+
+}

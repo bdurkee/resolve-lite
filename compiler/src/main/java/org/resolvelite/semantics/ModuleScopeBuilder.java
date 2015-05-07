@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Arrays;
@@ -12,11 +13,18 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     private SymbolTable symtab;
     private final List<String> importedModules = new LinkedList<>();
+    private final AnnotatedTree annotatedTree;
 
     ModuleScopeBuilder(TypeGraph g, String name, ParseTree definingTree,
+                       AnnotatedTree annotatedTree,
             Scope parent, SymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, name);
         this.symtab = symbolTable;
+        this.annotatedTree = annotatedTree;
+    }
+
+    public AnnotatedTree getWrappedModuleTree() {
+        return annotatedTree;
     }
 
     public String getModuleID() {

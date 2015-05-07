@@ -33,6 +33,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected AnnotatedTree tree;
     protected TypeGraph g;
 
+    boolean walkingModuleParameter = false;
+
     DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.compiler = rc;
@@ -43,7 +45,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+        symtab.startModuleScope(tree).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
@@ -65,7 +67,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+        symtab.startModuleScope(tree).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
@@ -84,6 +86,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
+    }
+
+    @Override public void enterModuleParameterDecl(
+            @NotNull ResolveParser.ModuleParameterDeclContext ctx) {
+        walkingModuleParameter = true;
+    }
+
+    @Override public void exitModuleParameterDecl(
+            @NotNull ResolveParser.ModuleParameterDeclContext ctx) {
+        walkingModuleParameter = false;
     }
 
     @Override public void enterTypeModelDecl(
@@ -253,7 +265,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(symtab.getTypeGraph(), name.getText(),
                             ctx, getProgramType(type), getRootModuleID(),
-                            params));
+                            params, walkingModuleParameter));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,

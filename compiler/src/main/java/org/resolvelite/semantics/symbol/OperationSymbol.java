@@ -12,12 +12,19 @@ public class OperationSymbol extends Symbol {
 
     private final PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
+    private final boolean moduleParameter;
 
     public OperationSymbol(TypeGraph g, String name, ParseTree definingTree,
-            PTType type, String moduleID, List<ProgParameterSymbol> params) {
+            PTType type, String moduleID, List<ProgParameterSymbol> params,
+            boolean moduleParameter) {
         super(name, definingTree, moduleID);
         this.parameters.addAll(params);
         this.returnType = type;
+        this.moduleParameter = moduleParameter;
+    }
+
+    public boolean isModuleParameter() {
+        return moduleParameter;
     }
 
     public List<ProgParameterSymbol> getParameters() {

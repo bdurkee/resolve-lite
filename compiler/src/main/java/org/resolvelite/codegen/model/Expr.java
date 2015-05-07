@@ -30,4 +30,7 @@
  */
 package org.resolvelite.codegen.model;
 
-public abstract class OutputModelObject {}
+/**
+ * Created by daniel on 3/15/15.
+ */
+public abstract class Expr extends OutputModelObject {}

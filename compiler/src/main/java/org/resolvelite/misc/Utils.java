@@ -40,13 +40,17 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-/** A collection of general purposes classes, interfaces, and methods.
- *  @author dtwelch <dtw.welch@gmail.com>
+/**
+ * A collection of general purposes classes, interfaces, and methods.
+ * 
+ * @author dtwelch <dtw.welch@gmail.com>
  */
 public class Utils {
 
-    /** A builder of objects of type {@code T}.
-     *  @param <T> The type object to be created.
+    /**
+     * A builder of objects of type {@code T}.
+     * 
+     * @param <T> The type object to be created.
      */
     public interface Builder<T> {
         T build();
@@ -58,8 +62,9 @@ public class Utils {
         return getAncestor(ctx, ruleIndex);
     }
 
-    /** Returns first ancestor node up the chain towards the root that has the
-     *  rule index. Search includes the current node.
+    /**
+     * Returns first ancestor node up the chain towards the root that has the
+     * rule index. Search includes the current node.
      */
     public static ParserRuleContext getAncestor(ParserRuleContext ctx,
             int ruleIndex) {

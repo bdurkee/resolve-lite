@@ -10,9 +10,8 @@ public abstract class VCRuleTargetedStat<T> extends OutputModelObject {
     private final RuleApplicationStrategy<T> applicationStrategy;
     private final AssertiveCode enclosingBlock;
 
-    public VCRuleTargetedStat(@NotNull T contents,
-            @NotNull AssertiveCode block,
-            @NotNull RuleApplicationStrategy<T> apply) {
+    public VCRuleTargetedStat(T contents, AssertiveCode block,
+            RuleApplicationStrategy<T> apply) {
         this.contents = contents;
         this.applicationStrategy = apply;
         this.enclosingBlock = block;

@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Hardcoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
@@ -163,21 +164,26 @@ public class SymbolTable {
         return typeGraph;
     }
 
-    public ModuleScopeBuilder startModuleScope(ParseTree module, String name) {
-
-        if ( module == null ) {
+    public ModuleScopeBuilder startModuleScope(AnnotatedTree t) {
+        ParseTree module = t.getRoot();
+        if ( t == null ) {
             throw new IllegalArgumentException("module may not be null");
         }
         if ( curModuleScope != null ) {
             throw new IllegalStateException("module scope already open");
         }
+        if (module instanceof ResolveParser.ModuleContext) {
+            module = module.getChild(0);
+        }
         if ( !(module.getParent() instanceof ResolveParser.ModuleContext) ) {
             throw new IllegalArgumentException("the rule context/parse tree "
                     + "passed is does not encode a module");
         }
+
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s =
-                new ModuleScopeBuilder(typeGraph, name, module, parent, this);
+                new ModuleScopeBuilder(typeGraph, t.getName(), module, parent,
+                        this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleID(), s);
