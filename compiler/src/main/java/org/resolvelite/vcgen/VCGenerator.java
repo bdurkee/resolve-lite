@@ -3,8 +3,11 @@ package org.resolvelite.vcgen;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
@@ -21,11 +24,14 @@ import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.AssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.vcgen.vcstat.VCRuleTargetedStat;
+import org.resolvelite.vcgen.vcstat.VCSwap;
 
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Generates verification conditions (VCs) for all constructs in a given
@@ -38,15 +44,16 @@ public class VCGenerator extends ResolveBaseListener {
     private final ResolveCompiler compiler;
     private final TypeGraph g;
 
+    private final ParseTreeProperty<VCRuleTargetedStat> vcStats =
+            new ParseTreeProperty<>();
     private final Deque<VCAssertiveBlock> assertiveBlockStack =
             new LinkedList<>();
     private PExp moduleLevelRequires, moduleLevelConstraint = null;
 
-    //private VCAssertiveBlock curAssertiveBlock = null;
+    private AssertiveBlockBuilder curAssertiveBuilder = null;
 
     public VCGenerator(@NotNull ResolveCompiler compiler,
-            @NotNull SymbolTable symtab, @NotNull AnnotatedTree tree)
-            throws NoSuchSymbolException {
+            @NotNull SymbolTable symtab, @NotNull AnnotatedTree tree) {
         this.compiler = compiler;
         this.symtab = symtab;
         this.tr = tree;
@@ -61,26 +68,43 @@ public class VCGenerator extends ResolveBaseListener {
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
-        //implicitly applying proceduredecl rule
-        AssertiveBlockBuilder builder = new AssertiveBlockBuilder(g, ctx, tr) //
-                .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
-                .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
-                .assume(moduleLevelRequires);
+        List<VCRuleTargetedStat> code =
+                Utils.collect(VCRuleTargetedStat.class, ctx.stmt(), vcStats);
+        List<VCRuleTargetedStat> varsCode =
+                Utils.collect(VCRuleTargetedStat.class,
+                        ctx.variableDeclGroup(), vcStats);
+        PExp conf = modifyEnsuresByParams(ctx, ctx.ensuresClause());
 
+        curAssertiveBuilder =
+                new AssertiveBlockBuilder(g, ctx, tr)
+                        .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
+                        .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
+                        .assume(moduleLevelRequires) //
+                        .remember() //
+                        .stats(code).stats(varsCode) //
+                        .confirm(conf);
 
-        /*curAssertiveBlock.a
-        Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name,
-                        isLocal);*/
+        System.out.println("Procedure decl rule applied:");
+        System.out.println(curAssertiveBuilder.build());
+
+        int i = 0;
+        i = 0;
     }
 
     private PExp modifyRequiresByParams(String functionName) {
-
-        return null;
+        throw new UnsupportedOperationException("not yet");
     }
 
-    private PExp modifyEnsuresByParams(String functionName,
-            @NotNull ParserRuleContext functionCtx,
+    @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
+        vcStats.put(ctx, vcStats.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitSwapStmt(
+            @NotNull ResolveParser.SwapStmtContext ctx) {
+        vcStats.put(ctx, new VCSwap(ctx, curAssertiveBuilder));
+    }
+
+    private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.EnsuresClauseContext ensures) {
         List<ProgParameterSymbol> params =
                 symtab.scopes.get(functionCtx).getSymbolsOfType(
@@ -91,19 +115,15 @@ public class VCGenerator extends ResolveBaseListener {
                     new PSymbolBuilder(p.getName()).mathType(p
                             .getDeclaredType().toMath());
 
-            PExp paramExp = paramTemp.incoming(true).build();
-            PExp oldParamExp = paramTemp.build();
+            PExp incParamExp = paramTemp.incoming(true).build();
+            PExp paramExp = paramTemp.incoming(false).build();
             if ( p.getMode() == ParameterMode.PRESERVES
                     || p.getMode() == ParameterMode.RESTORES ) {
                 PExp equalsExp =
                         new PSymbolBuilder("=")
-                                .arguments(oldParamExp, paramExp)
-                                .style(DisplayStyle.INFIX)
-                                .mathType(g.BOOLEAN)
-                                .desc("ensures of " + functionName + "(from "
-                                        + p.getMode().toString().toLowerCase()
-                                        + "parameter mode on: " + p.getName()
-                                        + ")", functionCtx).build();
+                                .arguments(paramExp, incParamExp)
+                                .style(DisplayStyle.INFIX).mathType(g.BOOLEAN)
+                                .build();
 
                 existingEnsures =
                         !existingEnsures.isLiteral() ? g.formConjunct(
@@ -136,8 +156,8 @@ public class VCGenerator extends ResolveBaseListener {
     //private PExp getModuleLevelConstraint(
 
     private PExp normalizePExp(ParserRuleContext ctx) {
-        PExp e = tr.mathPExps.get(ctx).copy();
-        return e != null ? e : g.getTrueExp();
+        PExp e = tr.mathPExps.get(ctx);
+        return e != null ? e.copy() : g.getTrueExp();
     }
 
 }

@@ -179,7 +179,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
-        catch (NoSuchSymbolException|UnexpectedSymbolException e) {
+        catch (NoSuchSymbolException | UnexpectedSymbolException e) {
             //if we don't find the type model at all (or we find something
             //that ISN'T a type model) -- it doesn't matter, we'll proceed under
             //the assumption that the thing isn't actually

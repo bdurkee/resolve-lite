@@ -219,12 +219,10 @@ public enum ErrorKind {
             + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
             + "qualifying", ErrorSeverity.ERROR),
 
-    NO_SUCH_OPERATION(30, "no operation found corresponding to call " +
-            "<arg> <if(arg2)>" +
-            "with the following arguments: " +
-            "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]" +
-            "<endif>",
-            ErrorSeverity.ERROR);
+    NO_SUCH_OPERATION(30, "no operation found corresponding to call "
+            + "<arg> <if(arg2)>" + "with the following arguments: "
+            + "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]"
+            + "<endif>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

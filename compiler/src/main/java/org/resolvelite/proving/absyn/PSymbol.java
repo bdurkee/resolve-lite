@@ -95,7 +95,7 @@ public class PSymbol extends PExp {
     @Override public PExp copy() {
         List<PExp> newArguments = arguments.stream()
                 .map(PExp::copy).collect(Collectors.toList());
-        return new PSymbolBuilder(leftPrint, rightPrint)    //
+        return new PSymbolBuilder(name)    //
                 .arguments(newArguments)                    //
                 .incoming(incomingFlag)                     //
                 .literal(literalFlag)                       //
@@ -203,7 +203,7 @@ public class PSymbol extends PExp {
 
     @Override public String toString() {
         StringBuilder result = new StringBuilder();
-        boolean first = true;
+        if (incomingFlag) result.append("@");
         if ( isFunction() ) {
             if ( dispStyle == DisplayStyle.INFIX ) {
                 result.append(arguments.get(0)).append(" ").append(name)

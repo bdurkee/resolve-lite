@@ -79,7 +79,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));

@@ -50,6 +50,7 @@ import org.resolvelite.parsing.ResolveLexer;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.AnalysisPipeline;
 import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.vcgen.VCGenPipeline;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -102,6 +103,8 @@ public class ResolveCompiler {
                             "specify location of grammars, tokens files"),
                     new Option("genCode", "-genCode", OptionArgType.STRING,
                             "generate code"),
+                    new Option("vcs", "-vcs",
+                            "generate verification conditions (VCs)"),
                     new Option("log", "-Xlog",
                             "dump lots of logging info to resolve-timestamp.log") };
 
@@ -111,6 +114,7 @@ public class ResolveCompiler {
     public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
+    public boolean vcs = false;
     public boolean longMessages = false;
     public String genCode;
     public String workspaceDir;
@@ -245,12 +249,14 @@ public class ResolveCompiler {
         int initialErrCt = errorManager.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
 
         analysisPipe.process();
-        if ( analysisPipe.compiler.errorManager.getErrorCount() > initialErrCt ) {
+        if ( errorManager.getErrorCount() > initialErrCt ) {
             return;
         }
         codegenPipe.process();
+        vcsPipe.process();
     }
 
     public List<AnnotatedTree> sortTargetModulesByUsesReferences() {

@@ -82,7 +82,7 @@ public class ProgParameterSymbol extends Symbol {
 
     private final MathSymbol mathSymbolAlterEgo;
 
-    //private final Prog progVariable;
+    private final ProgVariableSymbol progVariableAlterEgo;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
             PTType type, ParseTree definingTree, String moduleID) {
@@ -93,6 +93,9 @@ public class ProgParameterSymbol extends Symbol {
         this.mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
                         null, definingTree, moduleID);
+        this.progVariableAlterEgo =
+                new ProgVariableSymbol(getName(), getDefiningTree(),
+                        declaredType, getModuleID());
     }
 
     public PTType getDeclaredType() {
@@ -105,6 +108,10 @@ public class ProgParameterSymbol extends Symbol {
 
     @Override public MathSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
+    }
+
+    @Override public ProgVariableSymbol toProgVariableSymbol() {
+        return progVariableAlterEgo;
     }
 
     @Override public ProgParameterSymbol toProgParameterSymbol() {

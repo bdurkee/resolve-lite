@@ -18,7 +18,7 @@ Facility Test;
         Var y: Std_Boolean_Fac::Boolean;
         Var b: Blah;
         y := x.enrolled;
-        Foo := x.gpa;
+        Foo := v.something.b;
     end Foo;
 
     Oper Main();

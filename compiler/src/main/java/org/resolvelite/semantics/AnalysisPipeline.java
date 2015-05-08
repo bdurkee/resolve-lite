@@ -34,6 +34,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(unit.mathTypes,
                             unit.mathTypeValues);
+            //Todo: run "sanitycheckusages" here
             walker.walk(populator, unit.getRoot());
             walker.walk(pexpAnnotator, unit.getRoot());
             unit.mathPExps = pexpAnnotator.getFinalMapping();

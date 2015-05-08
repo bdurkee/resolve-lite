@@ -34,11 +34,14 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.vcgen.vcstat.VCRuleTargetedStat;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A collection of general purposes classes, interfaces, and methods.
@@ -60,6 +63,27 @@ public class Utils {
             ParserRuleContext ctx, String ruleName) {
         int ruleIndex = parser.getRuleIndex(ruleName);
         return getAncestor(ctx, ruleIndex);
+    }
+
+    /**
+     * Returns a list of {@code E} given an expected type {@code T}, some number
+     * of concrete syntax {@code nodes}, and an up-to-date mapping from rule
+     * contexts to elements descending from {@code E}.
+     * 
+     * @param expectedType The class of expected type
+     * @param nodes A list of concrete syntax nodes, as obtained through
+     *        a visitor, listener, etc.
+     * @param annotations A map from rule context to the primary supertype
+     *        of {@code expectedType} ({@code E}).
+     * @param <E> Super type of {@code expectedType}.
+     * @param <T> The expected type.
+     * @return A list of {@code T}.
+     */
+    public static <E, T extends E> List<T> collect(
+            Class<T> expectedType, List<? extends ParseTree> nodes,
+            ParseTreeProperty<? extends E> annotations) {
+        return nodes.stream().map(x -> expectedType
+                .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
     /**

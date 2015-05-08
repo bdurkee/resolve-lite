@@ -8,17 +8,20 @@ import org.resolvelite.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AssertiveCode extends OutputModelObject {
+public abstract class AssertiveCode extends OutputModelObject {
 
-    @ModelElement private final List<VCRuleTargetedStat> verificationStats =
+    @ModelElement private final List<VCRuleTargetedStat> stats =
             new ArrayList<>();
     @ModelElement private final VCConfirm confirm;
     private final TypeGraph g;
     private final ParserRuleContext ctx;
 
-    public AssertiveCode(TypeGraph g, ParserRuleContext ctx) {
+    public AssertiveCode(TypeGraph g, ParserRuleContext ctx,
+                         List<VCRuleTargetedStat> stats,
+                         VCConfirm confirm) {
         this.g = g;
         this.ctx = ctx;
+        this.stats.addAll(stats);
         this.confirm = new VCConfirm(g.getTrueExp(), this);
     }
 
