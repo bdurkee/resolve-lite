@@ -28,7 +28,7 @@ Facility Test;
             Var c: Student_Info;
             Var x : Blah;
             c.enrolled := Std_Boolean_Fac::False();
-            b := Foo(a, x);
+            b := Foo(a, c);
     end Main;
 
 end Test;

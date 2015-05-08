@@ -10,11 +10,13 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.semantics.NoSuchSymbolException;
+import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.AssertiveBlockBuilder;
@@ -58,14 +60,23 @@ public class VCGenerator extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
         //implicitly applying proceduredecl rule
-        AssertiveBlockBuilder builder = new AssertiveBlockBuilder(g, ctx) //
+        AssertiveBlockBuilder builder = new AssertiveBlockBuilder(g, ctx, tr) //
+                .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
+                .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
                 .assume(moduleLevelRequires);
+
 
         /*curAssertiveBlock.a
         Exp ensures =
                 modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name,
                         isLocal);*/
+    }
+
+    private PExp modifyRequiresByParams(String functionName) {
+
+        return null;
     }
 
     private PExp modifyEnsuresByParams(String functionName,
