@@ -38,12 +38,19 @@ import java.util.List;
 import java.util.Set;
 
 public class ModuleFile extends OutputModelObject {
+    public static enum VERSION {
+
+        B11, B12, B13
+    }
+
+    public VERSION ver;
     public String RESOLVEVersion;
     public String resolveFileName;
     @ModelElement public Module module;
 
     public ModuleFile(AnnotatedTree e, String resolveFileName) {
         this.resolveFileName = resolveFileName;
+        this.ver = VERSION.B11;
         this.RESOLVEVersion = ResolveCompiler.VERSION;
     }
 }

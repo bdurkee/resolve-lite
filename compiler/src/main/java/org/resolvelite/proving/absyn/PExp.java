@@ -9,11 +9,23 @@ import java.util.Map;
 
 public abstract class PExp {
 
+    public final int structureHash;
+    public final int valueHash;
     private MTType type, typeValue;
 
-    public PExp(MTType type, MTType typeValue) {
+    public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
+        this(hashes.structureHash, hashes.valueHash, type, typeValue);
+    }
+
+    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
         this.type = type;
         this.typeValue = typeValue;
+        this.structureHash = structureHash;
+        this.valueHash = valueHash;
+    }
+
+    @Override public int hashCode() {
+        return valueHash;
     }
 
     public final MTType getMathType() {
@@ -46,6 +58,9 @@ public abstract class PExp {
 
     public abstract boolean isFunction();
 
+    //Todo: I don't think this is terribly necessary. This hierarchy is already
+    //immutable and I don't see why we really need a 'copy' anymore. Substitute
+    //for instance already makes a copy with the substitutions made.
     public abstract PExp copy();
 
     public final List<PExp> splitIntoConjuncts() {
@@ -55,4 +70,14 @@ public abstract class PExp {
     }
 
     protected abstract void splitIntoConjuncts(List<PExp> accumulator);
+
+    public static class HashDuple {
+        public int structureHash;
+        public int valueHash;
+
+        public HashDuple(int structureHash, int valueHash) {
+            this.structureHash = structureHash;
+            this.valueHash = valueHash;
+        }
+    }
 }

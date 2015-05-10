@@ -1,16 +1,10 @@
 package org.resolvelite.vcgen.vcstat;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.resolvelite.codegen.model.Stat;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
-import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
-import org.resolvelite.semantics.symbol.ProgParameterSymbol;
-import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -19,57 +13,56 @@ import java.util.stream.Collectors;
 
 public class VCAssertiveBlock extends AssertiveCode {
 
-    private VCAssertiveBlock(AssertiveBlockBuilder builder) {
-        super(builder., builder.getDefiningCtx(),
-                builder.verificationStats, builder.getConfirm());
+    private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
+        super(builder.g, builder.definingTree, builder.finalConfirm,
+                builder.annotations, builder.stats, builder.freeVars,
+                builder.applicationSteps);
     }
 
-    public static class AssertiveBlockBuilder
+    public static class VCAssertiveBlockBuilder
             implements
                 Utils.Builder<VCAssertiveBlock> {
 
         public final TypeGraph g;
-        public final ParserRuleContext definingTree
+        public final ParserRuleContext definingTree;
         public final AnnotatedTree annotations;
         public final Set<PExp> freeVars = new LinkedHashSet<>();
-        public final List<VCRuleTargetedStat> verificationStats =
-                new ArrayList<>();
-        public PExp finalConfirm;
+        public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        public VCConfirm finalConfirm;
 
-        public AssertiveBlockBuilder(TypeGraph g, ParserRuleContext ctx,
+        public List<AssertiveCode> applicationSteps = new ArrayList<>();
+
+        public VCAssertiveBlockBuilder(TypeGraph g, ParserRuleContext ctx,
                 AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
             this.annotations = annotations;
         }
 
-        public AssertiveBlockBuilder assume(PExp assume) {
-            verificationStats.add(new VCAssume(assume, this));
+        public VCAssertiveBlockBuilder assume(PExp assume) {
+            stats.add(new VCAssume(assume, this));
             return this;
         }
 
-        public AssertiveBlockBuilder remember() {
+        public VCAssertiveBlockBuilder remember() {
             return this;
         }
 
-        public AssertiveBlockBuilder confirm(PExp confirm) {
-            verificationStats.add(new VCConfirm(confirm, this));
+        public VCAssertiveBlockBuilder confirm(PExp confirm) {
+            stats.add(new VCConfirm(confirm, this));
             return this;
         }
 
-        public AssertiveBlockBuilder finalConfirm(PExp confirm) {
-            if (finalConfirm != null) {
-                throw new IllegalArgumentException("final confirm already set");
-            }
-            if (confirm == null) {
+        public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
+            if ( confirm == null ) {
                 throw new IllegalArgumentException(
                         "final confirm cannot be null");
             }
-            this.finalConfirm = confirm;
+            this.finalConfirm = new VCConfirm(confirm, this);
             return this;
         }
 
-        public AssertiveBlockBuilder freeVars(List<? extends Symbol> symbols) {
+        public VCAssertiveBlockBuilder freeVars(List<? extends Symbol> symbols) {
             List<PExp> asExps =
                     symbols.stream().map(s -> new PSymbolBuilder(s.getName())
                             .mathType(s.toMathSymbol().getType())
@@ -78,19 +71,38 @@ public class VCAssertiveBlock extends AssertiveCode {
             return this;
         }
 
-        public AssertiveBlockBuilder stats(List<VCRuleTargetedStat> stats) {
-            verificationStats.addAll(stats);
+        public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {
+            this.stats.addAll(e);
             return this;
+        }
+
+        public VCAssertiveBlock snapshot() {
+            return new VCAssertiveBlock(this);
         }
 
         /**
          * Applies the appropriate rule to each
          */
         @Override public VCAssertiveBlock build() {
-            for (VCRuleTargetedStat rulestat : verificationStats) {
-                rulestat.reduce();
+            applicationSteps.add(this.snapshot());
+            while (!stats.isEmpty()) {
+                VCRuleBackedStat currentStat = stats.removeLast();
+                applicationSteps.add(currentStat.reduce());
             }
             return new VCAssertiveBlock(this);
+        }
+
+        @Override public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("free vars: ");
+            for (PExp var : freeVars) {
+                sb.append(var + " : " + var.getMathType()).append(", ");
+            }
+            sb.append("\n");
+            for (VCRuleBackedStat s : stats) {
+                sb.append(s).append("\n");
+            }
+            return sb.append(finalConfirm).toString();
         }
     }
 }

@@ -19,11 +19,15 @@ public class VCGenPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         for (AnnotatedTree unit : compilationUnits) {
-            VCGenerator gen =
-                    new VCGenerator(compiler, compiler.symbolTable, unit);
-            if ( compiler.vcs ) {
-                ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
+            if (compiler.targetNames.contains(unit.getName())) {
+                compiler.info("generating vcs for: " + unit.getName());
+                VCGenerator gen =
+                        new VCGenerator(compiler, compiler.symbolTable, unit);
+                if ( compiler.vcs ) {
+                    ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
+                }
             }
+
         }
 
     }

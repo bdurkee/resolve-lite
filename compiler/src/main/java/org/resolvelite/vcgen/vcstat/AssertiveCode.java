@@ -1,40 +1,74 @@
 package org.resolvelite.vcgen.vcstat;
 
-import org.antlr.v4.codegen.model.OutputModelObject;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.codegen.model.ModelElement;
+import org.resolvelite.codegen.model.OutputModelObject;
+import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public abstract class AssertiveCode extends OutputModelObject {
 
-    @ModelElement private final List<VCRuleTargetedStat> stats =
-            new ArrayList<>();
-    @ModelElement private final VCConfirm confirm;
+    private final Set<PExp> freeVars = new LinkedHashSet<>();
+    private final AnnotatedTree annotations;
+    private final ParserRuleContext definingTree;
     private final TypeGraph g;
-    private final ParserRuleContext ctx;
 
-    public AssertiveCode(TypeGraph g, ParserRuleContext ctx,
-                         List<VCRuleTargetedStat> stats,
-                         VCConfirm confirm) {
+    @ModelElement private final VCConfirm finalConfirm;
+    @ModelElement private final List<VCRuleBackedStat> stats =
+            new ArrayList<>();
+    @ModelElement private final List<AssertiveCode> applicationSteps =
+            new ArrayList<>();
+
+    public AssertiveCode(TypeGraph g, ParserRuleContext definingTree,
+            VCConfirm finalConfirm, AnnotatedTree annotations,
+            List<VCRuleBackedStat> stats, Collection<? extends PExp> freeVars,
+            List<AssertiveCode> applicationSteps) {
         this.g = g;
-        this.ctx = ctx;
+        this.definingTree = definingTree;
+        this.annotations = annotations;
+        this.finalConfirm = finalConfirm;
         this.stats.addAll(stats);
-        this.confirm = new VCConfirm(g.getTrueExp(), this);
+        this.freeVars.addAll(freeVars);
+        this.applicationSteps.addAll(applicationSteps);
     }
 
     public TypeGraph getTypeGraph() {
         return g;
     }
 
+    public AnnotatedTree getAnnotations() {
+        return annotations;
+    }
+
     public ParserRuleContext getDefiningCtx() {
-        return ctx;
+        return definingTree;
     }
 
-    public VCConfirm getConfirm() {
-        return confirm;
+    public VCConfirm getFinalConfirm() {
+        return finalConfirm;
     }
 
+    public List<? extends VCRuleBackedStat> getStats() {
+        return stats;
+    }
+
+    public List<AssertiveCode> getApplicationSteps() {
+        return applicationSteps;
+    }
+
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("free vars: ");
+        for (PExp var : freeVars) {
+            sb.append(var + " : " + var.getMathType()).append(", ");
+        }
+        sb.append("\n");
+        for (VCRuleBackedStat s : stats) {
+            sb.append(s).append("\n");
+        }
+        return sb.append(finalConfirm).toString();
+    }
 }

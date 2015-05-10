@@ -524,29 +524,4 @@ public class ModelBuilder extends ResolveBaseListener {
         return buildQualifier(symQualifier != null ? symQualifier.getText()
                 : null, symName.getText());
     }
-
-    /**
-     * Returns the 'name' component of a {@link PTType}
-     * 
-     * @param type A program type.
-     * 
-     * @return {@code type}s actual name rather than its more easily
-     *         accessible {@code toString} representation.
-     */
-    public static String getTypeName(PTType type) {
-        String result;
-
-        if ( type instanceof PTGeneric ) {
-            result = ((PTGeneric) type).getName();
-        }
-        else if ( type instanceof PTNamed ) {
-            result = ((PTNamed) type).getName();
-        }
-        else {
-            throw new UnsupportedOperationException("translation has "
-                    + "encountered an unsupported pttype: " + type.toString()
-                    + "; backing out");
-        }
-        return result;
-    }
 }

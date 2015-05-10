@@ -3,7 +3,6 @@ package org.resolvelite.vcgen;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
@@ -12,7 +11,6 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
-import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.programtype.*;
@@ -21,17 +19,18 @@ import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
+import org.resolvelite.vcgen.vcstat.AssertiveCode;
 import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.AssertiveBlockBuilder;
+import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
-import org.resolvelite.vcgen.vcstat.VCRuleTargetedStat;
-import org.resolvelite.vcgen.vcstat.VCSwap;
+import org.resolvelite.vcgen.vcstat.VCCode;
+import org.resolvelite.vcgen.vcstat.VCRuleBackedStat;
 
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Generates verification conditions (VCs) for all constructs in a given
@@ -44,13 +43,16 @@ public class VCGenerator extends ResolveBaseListener {
     private final ResolveCompiler compiler;
     private final TypeGraph g;
 
-    private final ParseTreeProperty<VCRuleTargetedStat> vcStats =
+    private final ParseTreeProperty<VCRuleBackedStat> stats =
             new ParseTreeProperty<>();
     private final Deque<VCAssertiveBlock> assertiveBlockStack =
             new LinkedList<>();
     private PExp moduleLevelRequires, moduleLevelConstraint = null;
+    private VCAssertiveBlockBuilder curAssertiveBuilder = null;
+    private final List<AssertiveCode> assertiveCodeChunks = new ArrayList<>();
 
-    private AssertiveBlockBuilder curAssertiveBuilder = null;
+    private final static RuleApplicationStrategy<ResolveParser.SwapStmtContext> SWAP_APPLICATION =
+            new SwapApplicationStrategy();
 
     public VCGenerator(@NotNull ResolveCompiler compiler,
             @NotNull SymbolTable symtab, @NotNull AnnotatedTree tree) {
@@ -60,48 +62,60 @@ public class VCGenerator extends ResolveBaseListener {
         this.g = symtab.getTypeGraph();
     }
 
+    @Override public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
+        for (AssertiveCode a : assertiveCodeChunks.get(0).getApplicationSteps()) {
+            System.out.println("HERE: " + a);
+            System.out.println("------------------------------");
+
+        }
+    }
+
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         moduleLevelRequires = normalizePExp(ctx.requiresClause());
     }
 
-    @Override public void exitOperationProcedureDecl(
+    @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
-        List<VCRuleTargetedStat> code =
-                Utils.collect(VCRuleTargetedStat.class, ctx.stmt(), vcStats);
-        List<VCRuleTargetedStat> varsCode =
-                Utils.collect(VCRuleTargetedStat.class,
-                        ctx.variableDeclGroup(), vcStats);
-        PExp conf = modifyEnsuresByParams(ctx, ctx.ensuresClause());
+        PExp topAssume = modifyRequiresByParams(ctx, ctx.requiresClause());
+        PExp bottomConfirm = modifyEnsuresByParams(ctx, ctx.ensuresClause());
 
         curAssertiveBuilder =
-                new AssertiveBlockBuilder(g, ctx, tr)
+                new VCAssertiveBlockBuilder(g, ctx, tr)
                         .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
                         .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
-                        .assume(moduleLevelRequires) //
-                        .remember() //
-                        .stats(code).stats(varsCode) //
-                        .confirm(conf);
+                        .assume(moduleLevelRequires).remember() //
+                        .assume(topAssume) //
+                        .finalConfirm(bottomConfirm);
+    }
 
-        System.out.println("Procedure decl rule applied:");
-        System.out.println(curAssertiveBuilder.build());
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        curAssertiveBuilder.stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+                .stats(Utils.collect(VCRuleBackedStat.class,
+                        ctx.variableDeclGroup(), stats));
 
+        assertiveCodeChunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
         int i = 0;
         i = 0;
     }
 
-    private PExp modifyRequiresByParams(String functionName) {
-        throw new UnsupportedOperationException("not yet");
-    }
-
     @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
-        vcStats.put(ctx, vcStats.get(ctx.getChild(0)));
+        stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
-        vcStats.put(ctx, new VCSwap(ctx, curAssertiveBuilder));
+        stats.put(ctx, new VCCode<ResolveParser.SwapStmtContext>(ctx,
+                SWAP_APPLICATION, curAssertiveBuilder));
+    }
+
+    private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,
+            @Nullable ResolveParser.RequiresClauseContext requires) {
+        return normalizePExp(requires);
     }
 
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
@@ -111,12 +125,13 @@ public class VCGenerator extends ResolveBaseListener {
                         ProgParameterSymbol.class);
         PExp existingEnsures = normalizePExp(ensures);
         for (ProgParameterSymbol p : params) {
-            PSymbolBuilder paramTemp =
+            PSymbolBuilder temp =
                     new PSymbolBuilder(p.getName()).mathType(p
                             .getDeclaredType().toMath());
 
-            PExp incParamExp = paramTemp.incoming(true).build();
-            PExp paramExp = paramTemp.incoming(false).build();
+            PExp incParamExp = temp.incoming(true).build();
+            PExp paramExp = temp.incoming(false).build();
+
             if ( p.getMode() == ParameterMode.PRESERVES
                     || p.getMode() == ParameterMode.RESTORES ) {
                 PExp equalsExp =
@@ -132,10 +147,10 @@ public class VCGenerator extends ResolveBaseListener {
             else if ( p.getMode() == ParameterMode.CLEARS ) {
                 PExp init = null;
                 if ( p.getDeclaredType() instanceof PTNamed ) {
+                    PTNamed t = (PTNamed) p.getDeclaredType();
                     PExp exemplar =
-                            new PSymbolBuilder(
-                                    ((PTNamed) p.getDeclaredType())
-                                            .getExemplarName()).build();
+                            new PSymbolBuilder(t.getExemplarName()).mathType(
+                                    t.toMath()).build();
                     init = ((PTNamed) p.getDeclaredType()) //
                             .getInitializationEnsures() //
                             .copy() //

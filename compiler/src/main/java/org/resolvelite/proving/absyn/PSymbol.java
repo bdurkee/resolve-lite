@@ -34,7 +34,10 @@ public class PSymbol extends PExp {
     private final DisplayStyle dispStyle;
 
     private PSymbol(PSymbolBuilder builder) {
-        super(builder.mathType, builder.mathTypeValue);
+        super(calculateHashes(builder.lprint, builder.rprint,
+                builder.arguments.iterator()), builder.mathType,
+                builder.mathTypeValue);
+
         this.name = builder.name;
         this.leftPrint = builder.lprint;
         this.rightPrint = builder.rprint;
@@ -43,6 +46,41 @@ public class PSymbol extends PExp {
         this.incomingFlag = builder.incoming;
         this.quantification = builder.quantification;
         this.dispStyle = builder.style;
+    }
+
+    private static HashDuple calculateHashes(String left, String right,
+            Iterator<PExp> args) {
+
+        int structureHash;
+
+        int leftHashCode = left.hashCode();
+        int valueHash = leftHashCode;
+
+        valueHash *= 59;
+        if ( right == null ) {
+            valueHash += leftHashCode;
+        }
+        else {
+            valueHash += right.hashCode();
+        }
+
+        if ( args.hasNext() ) {
+            structureHash = 17;
+
+            int argMod = 2;
+            PExp arg;
+            while (args.hasNext()) {
+                arg = args.next();
+                structureHash += arg.structureHash * argMod;
+                valueHash += arg.valueHash * argMod;
+                argMod++;
+            }
+        }
+        else {
+            structureHash = 0;
+        }
+
+        return new HashDuple(structureHash, valueHash);
     }
 
     /**
@@ -95,7 +133,7 @@ public class PSymbol extends PExp {
     @Override public PExp copy() {
         List<PExp> newArguments = arguments.stream()
                 .map(PExp::copy).collect(Collectors.toList());
-        return new PSymbolBuilder(name)    //
+        return new PSymbolBuilder(name)                     //
                 .arguments(newArguments)                    //
                 .incoming(incomingFlag)                     //
                 .literal(literalFlag)                       //
@@ -132,7 +170,7 @@ public class PSymbol extends PExp {
             Symbol.Quantification newQuantification = quantification;
 
             if ( arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX) ) {
-                PSymbol asVariable = new PSymbolBuilder(leftPrint) //
+                PSymbol asVariable = new PSymbolBuilder(name) //
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
                         .mathType(getMathType()) //
@@ -147,10 +185,22 @@ public class PSymbol extends PExp {
                 }
             }
 
-            result = new PSymbolBuilder(newLeft, newRight) //
-                    .mathType(getMathType()).mathType(getMathTypeValue()) //
+            boolean argumentChanged = false;
+            int argIndex = 0;
+            Iterator<PExp> argumentsIter = arguments.iterator();
+
+            PExp argument;
+            List<PExp> newArgs = new ArrayList<>();
+            while (argumentsIter.hasNext()) {
+                argument = argumentsIter.next();
+                PExp mm = argument.substitute(substitutions);
+                newArgs.add(mm);
+            }
+
+            result = new PSymbolBuilder(name) //
+                    .mathType(getMathType()).mathTypeValue(getMathTypeValue()) //
                     .quantification(newQuantification) //
-                    .style(dispStyle) //
+                    .arguments(newArgs).style(dispStyle) //
                     .incoming(incomingFlag).build();
         }
         return result;
@@ -181,20 +231,25 @@ public class PSymbol extends PExp {
 
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
-
         if ( result ) {
             PSymbol oAsPSymbol = (PSymbol) o;
-            result = name.equals(oAsPSymbol.name);
+
+            result =
+                    (oAsPSymbol.valueHash == valueHash)
+                            && name.equals(oAsPSymbol.name)
+                            && literalFlag == oAsPSymbol.literalFlag
+                            && incomingFlag == oAsPSymbol.incomingFlag;
 
             if ( result ) {
-                Iterator<PExp> thisArgs = arguments.iterator();
+
+                Iterator<PExp> localArgs = arguments.iterator();
                 Iterator<PExp> oArgs = oAsPSymbol.arguments.iterator();
 
-                while (result && thisArgs.hasNext() && oArgs.hasNext()) {
-                    result = thisArgs.next().equals(oArgs.next());
+                while (result && localArgs.hasNext() && oArgs.hasNext()) {
+                    result = localArgs.next().equals(oArgs.next());
                 }
                 if ( result ) {
-                    result = !(thisArgs.hasNext() || oArgs.hasNext());
+                    result = !(localArgs.hasNext() || oArgs.hasNext());
                 }
             }
         }
@@ -203,7 +258,7 @@ public class PSymbol extends PExp {
 
     @Override public String toString() {
         StringBuilder result = new StringBuilder();
-        if (incomingFlag) result.append("@");
+        if ( incomingFlag ) result.append("@");
         if ( isFunction() ) {
             if ( dispStyle == DisplayStyle.INFIX ) {
                 result.append(arguments.get(0)).append(" ").append(name)
@@ -314,4 +369,5 @@ public class PSymbol extends PExp {
             return new PSymbol(this);
         }
     }
+
 }

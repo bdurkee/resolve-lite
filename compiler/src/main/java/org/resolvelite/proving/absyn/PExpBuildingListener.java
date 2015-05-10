@@ -119,6 +119,24 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         built.put(ctx, result.build());
     }
 
+    @Override public void exitProgPrimaryExp(
+            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
+        built.put(ctx, built.get(ctx.progPrimary()));
+    }
+
+    @Override public void exitProgPrimary(
+            @NotNull ResolveParser.ProgPrimaryContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitProgNamedExp(
+            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
+                .mathTypeValue(typeValues.get(ctx)) //
+                .mathType(types.get(ctx));
+        built.put(ctx, result.build());
+    }
+
     private <E extends PExp> List<E> collectPExpsFor(Class<E> expectedExpType,
             List<? extends ParseTree> nodes) {
         return collectPExpsFor(expectedExpType, nodes, built);
