@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveBaseVisitor;
 import org.resolvelite.parsing.ResolveParser;
@@ -70,7 +71,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText()) //
-                .arguments(collectPExpsFor(PExp.class, ctx.mathExp())) //
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), built)) //
                 .style(PSymbol.DisplayStyle.INFIX) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
@@ -89,7 +90,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
-                .arguments(collectPExpsFor(PExp.class, ctx.mathExp(), built))//
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), built))//
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
@@ -135,17 +136,5 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
-    }
-
-    private <E extends PExp> List<E> collectPExpsFor(Class<E> expectedExpType,
-            List<? extends ParseTree> nodes) {
-        return collectPExpsFor(expectedExpType, nodes, built);
-    }
-
-    public static <E extends PExp> List<E> collectPExpsFor(
-            Class<E> expectedExpType, List<? extends ParseTree> nodes,
-            ParseTreeProperty<PExp> annotations) {
-        return nodes.stream().map(x -> expectedExpType
-                .cast(annotations.get(x))).collect(Collectors.toList());
     }
 }

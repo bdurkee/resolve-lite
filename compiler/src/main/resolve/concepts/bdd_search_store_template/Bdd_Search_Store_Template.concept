@@ -9,8 +9,8 @@ Concept Bdd_Search_Store_Template<T>
         initialization
                 ensures S = {};
 
-	Oper Add (restores e : T; updates S : Store);
-		--requires ||S|| < Max_Capacity;
-		ensures S = @S union {e};
+        Oper Add (restores e : T; updates S : Store);
+            --requires ||S|| < Max_Capacity;
+            ensures S = @S union {e};
 
 end Bdd_Search_Store_Template;

@@ -1,9 +1,0 @@
-AssertiveCode(assertiveCode, stats, finalConfirm) ::= <<
-free vars: <assertiveCode.freeVars: {f|<f.name> : <f.type>}; separator=", ">
-<stats; separator="\n">
-<finalConfirm>
->>
-
-VCAssume(assume) ::= "assume <assume.assertion>;"
-
-VCConfirm(confirm) ::= "confirm <confirm.assertion>;"

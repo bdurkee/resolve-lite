@@ -63,7 +63,8 @@ public class Utils {
     }
 
     /**
-     * Returns a list of {@code E} given an expected type {@code T}, some number
+     * Returns a list of {@code E} given: an expected type {@code T}, some
+     * number
      * of concrete syntax {@code nodes}, and an up-to-date mapping from rule
      * contexts to elements descending from {@code E}.
      * 

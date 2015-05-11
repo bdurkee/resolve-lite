@@ -1,8 +1,7 @@
-package org.resolvelite.vcgen.vcstat;
+package org.resolvelite.vcgen.model;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.codegen.model.OutputModelObject;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public abstract class VCRuleBackedStat<T> extends OutputModelObject {
@@ -24,6 +23,10 @@ public abstract class VCRuleBackedStat<T> extends OutputModelObject {
 
     public T getContents() {
         return contents;
+    }
+
+    public String getApplicationDescription() {
+        return applicationStrategy.getDescription();
     }
 
     public VCAssertiveBlockBuilder getEnclosingBlock() {

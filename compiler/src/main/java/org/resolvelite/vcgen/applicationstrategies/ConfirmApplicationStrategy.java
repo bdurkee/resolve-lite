@@ -1,10 +1,8 @@
 package org.resolvelite.vcgen.applicationstrategies;
 
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.vcstat.AssertiveCode;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.vcgen.vcstat.VCConfirm;
+import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
 public class ConfirmApplicationStrategy
         implements
@@ -15,4 +13,7 @@ public class ConfirmApplicationStrategy
         return block.snapshot();
     }
 
+    @Override public String getDescription() {
+        return "confirm rule application";
+    }
 }

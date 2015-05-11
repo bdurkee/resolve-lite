@@ -57,6 +57,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
+
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
     private final ModuleScopeBuilder moduleScope;
@@ -118,11 +119,11 @@ public class ModelBuilder extends ResolveBaseListener {
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
         for (ResolveParser.ParameterDeclGroupContext grp : formalGroupings) {
-            f.params.addAll(collectModelsFor(ParameterDef.class,
-                    grp.Identifier(), built));
+            f.params.addAll(Utils.collect(ParameterDef.class, grp.Identifier(),
+                    built));
         }
         for (ResolveParser.VariableDeclGroupContext grp : variableGroupings) {
-            f.vars.addAll(collectModelsFor(VariableDef.class, grp.Identifier(),
+            f.vars.addAll(Utils.collect(VariableDef.class, grp.Identifier(),
                     built));
         }
         for (ResolveParser.StmtContext s : stats) {
@@ -167,10 +168,10 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         List<Expr> specArgs =
-                ctx.specArgs == null ? new ArrayList<>() : collectModelsFor(
+                ctx.specArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.specArgs.moduleArgument(), built);
         List<Expr> implArgs =
-                ctx.implArgs == null ? new ArrayList<>() : collectModelsFor(
+                ctx.implArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.implArgs.moduleArgument(), built);
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
@@ -227,7 +228,7 @@ public class ModelBuilder extends ResolveBaseListener {
         if ( ctx.record() != null ) {
             for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
                     .record().recordVariableDeclGroup()) {
-                representationClass.fields.addAll(collectModelsFor(
+                representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.Identifier(), built));
             }
         }
@@ -293,7 +294,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitWhileStmt(
             @NotNull ResolveParser.WhileStmtContext ctx) {
         WhileStat w = new WhileStat((Expr) built.get(ctx.progExp()));
-        w.stats.addAll(collectModelsFor(Stat.class, ctx.stmt(), built));
+        w.stats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
         built.put(ctx, w);
     }
 
@@ -314,7 +315,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
-        List<Expr> args = collectModelsFor(Expr.class, ctx.progExp(), built);
+        List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
         built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
                 ctx.name.getText(), args));
     }
@@ -322,7 +323,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
         String name = Utils.getNameFromProgramOp(ctx.op.getText());
-        List<Expr> args = collectModelsFor(Expr.class, ctx.progExp(), built);
+        List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
         built.put(ctx, new MethodCall(buildQualifier("Std_Integer_Fac", name),
                 name, args));
 
@@ -369,13 +370,13 @@ public class ModelBuilder extends ResolveBaseListener {
                 new ConceptImplModule(ctx.name.getText(),
                         ctx.concept.getText(), file);
         if ( ctx.implBlock() != null ) {
-            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
-            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
-            impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
                     .implBlock().typeRepresentationDecl(), built));
-            impl.facilityVars.addAll(collectModelsFor(FacilityDef.class, ctx
+            impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx
                     .implBlock().facilityDecl(), built));
         }
         try {
@@ -409,11 +410,11 @@ public class ModelBuilder extends ResolveBaseListener {
                 new FacilityImplModule(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(collectModelsFor(FacilityDef.class, ctx
+            impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx
                     .facilityBlock().facilityDecl(), built));
-            impl.funcImpls.addAll(collectModelsFor(FunctionImpl.class, ctx
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
-            impl.repClasses.addAll(collectModelsFor(MemberClassDef.class, ctx
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
                     .facilityBlock().typeRepresentationDecl(), built));
         }
         file.module = impl;
@@ -426,9 +427,9 @@ public class ModelBuilder extends ResolveBaseListener {
         SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
-            spec.types.addAll(collectModelsFor(TypeInterfaceDef.class, ctx
+            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
                     .conceptBlock().typeModelDecl(), built));
-            spec.funcs.addAll(collectModelsFor(FunctionDef.class, ctx
+            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
         spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope
@@ -442,13 +443,6 @@ public class ModelBuilder extends ResolveBaseListener {
         AnnotatedTree annotatedTree = gen.getModule();
         return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
                 .getFileName()));
-    }
-
-    protected static <T extends OutputModelObject> List<T> collectModelsFor(
-            Class<T> expectedModelType, List<? extends ParseTree> nodes,
-            ParseTreeProperty<OutputModelObject> annotations) {
-        return nodes.stream().map(x -> expectedModelType
-                .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
     protected boolean withinFacilityModule() {

@@ -3,8 +3,8 @@ package org.resolvelite.vcgen.applicationstrategies;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
-import org.resolvelite.vcgen.vcstat.AssertiveCode;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock;
+import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.VCAssertiveBlock;
 
 public class SwapApplicationStrategy
         implements
@@ -25,7 +25,10 @@ public class SwapApplicationStrategy
         workingConfirm = workingConfirm.substitute(swapLeft, swapRight);
         workingConfirm = workingConfirm.substitute(temp, swapLeft);
         block.finalConfirm(workingConfirm);
-        System.out.println("swap rule applied to: " + statement.getText());
         return block.snapshot();
+    }
+
+    @Override public String getDescription() {
+        return "swap rule application";
     }
 }

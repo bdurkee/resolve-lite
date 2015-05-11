@@ -1,9 +1,10 @@
-package org.resolvelite.vcgen.vcstat;
+package org.resolvelite.vcgen.model;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class VCAssertiveBlock extends AssertiveCode {
 
+    //Todo: Rename this VCAssertiveContext? -- maybe make it act as a mini 'scope'
+    //where all of our shit needs to go -- involved operations, typedecls, etc.
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
         super(builder.g, builder.definingTree, builder.finalConfirm,
                 builder.annotations, builder.stats, builder.freeVars,
@@ -26,11 +29,11 @@ public class VCAssertiveBlock extends AssertiveCode {
         public final TypeGraph g;
         public final ParserRuleContext definingTree;
         public final AnnotatedTree annotations;
-        public final Set<PExp> freeVars = new LinkedHashSet<>();
+        public final Set<PSymbol> freeVars = new LinkedHashSet<>();
         public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
         public VCConfirm finalConfirm;
 
-        public List<AssertiveCode> applicationSteps = new ArrayList<>();
+        public List<RuleApplicationStep> applicationSteps = new ArrayList<>();
 
         public VCAssertiveBlockBuilder(TypeGraph g, ParserRuleContext ctx,
                 AnnotatedTree annotations) {
@@ -63,11 +66,11 @@ public class VCAssertiveBlock extends AssertiveCode {
         }
 
         public VCAssertiveBlockBuilder freeVars(List<? extends Symbol> symbols) {
-            List<PExp> asExps =
+            List<PSymbol> asPSyms =
                     symbols.stream().map(s -> new PSymbolBuilder(s.getName())
                             .mathType(s.toMathSymbol().getType())
                             .build()).collect(Collectors.toList());
-            freeVars.addAll(asExps);
+            freeVars.addAll(asPSyms);
             return this;
         }
 
@@ -76,33 +79,28 @@ public class VCAssertiveBlock extends AssertiveCode {
             return this;
         }
 
+        /**
+         * Same as {@link #build()} but this one doesn't automatically apply
+         * proof rules to the stats within this block.
+         */
         public VCAssertiveBlock snapshot() {
             return new VCAssertiveBlock(this);
         }
 
         /**
-         * Applies the appropriate rule to each
+         * Applies the appropriate rule to each stat within this builder. In
+         * other words, a call to this will fully develop the final confirm
+         * for this particular block of assertive code.
          */
         @Override public VCAssertiveBlock build() {
-            applicationSteps.add(this.snapshot());
+
+            applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(currentStat.reduce());
+                applicationSteps.add(new RuleApplicationStep(currentStat
+                        .reduce(), currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);
-        }
-
-        @Override public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("free vars: ");
-            for (PExp var : freeVars) {
-                sb.append(var + " : " + var.getMathType()).append(", ");
-            }
-            sb.append("\n");
-            for (VCRuleBackedStat s : stats) {
-                sb.append(s).append("\n");
-            }
-            return sb.append(finalConfirm).toString();
         }
     }
 }

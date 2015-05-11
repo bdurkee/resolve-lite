@@ -103,7 +103,7 @@ public class ResolveCompiler {
                     new Option("longMessages", "-long-messages",
                             "show exception details when available for errors and warnings"),
                     new Option("libDirectory", "-lib", OptionArgType.STRING,
-                            "specify location of grammars, tokens files"),
+                            "specify location of resolve source files"),
                     new Option("genCode", "-genCode", OptionArgType.STRING,
                             "generate code"),
                     new Option("vcs", "-vcs",
@@ -428,8 +428,8 @@ public class ResolveCompiler {
         if ( outputDirectory == null ) {
             return new StringWriter();
         }
-        // output directory is a function of where the grammar file lives
-        // for subdir/T.g4, you get subdir here.  Well, depends on -o etc...
+        // output directory is a function of where the file lives
+        // for subdir/T.facility, you get subdir here.  Well, depends on -o etc...
         File outputDir = getOutputDirectory(t.getFileName());
         File outputFile = new File(outputDir, fileName);
 
@@ -445,8 +445,7 @@ public class ResolveCompiler {
 
     /**
      * Return the location where the compiler will generate output files for a
-     * given
-     * file. This is a base directory and output files will be relative to
+     * given file. This is a base directory and output files will be relative to
      * here in some cases such as when -o option is used and input files are
      * given relative to the input directory.
      * 
@@ -459,12 +458,10 @@ public class ResolveCompiler {
         // Some files are given to us without a PATH but should should
         // still be written to the output directory in the relative path of
         // the output directory. The file directory is either the set of sub directories
-        // or just or the relative path recorded for the parent grammar. This means
-        // that when we write the tokens files, or the .java files for imported grammars
-        // taht we will write them in the correct place.
+        // or just or the relative path recorded for the parent file.
         if ( fileNameWithPath.lastIndexOf(File.separatorChar) == -1 ) {
             // No path is included in the file name, so make the file
-            // directory the same as the parent grammar (which might sitll be just ""
+            // directory the same as the parent module (which might sitll be just ""
             // but when it is not, we will write the file in the correct place.
             fileDirectory = ".";
 
@@ -496,7 +493,7 @@ public class ResolveCompiler {
         }
         else {
             // they didn't specify a -o dir so just write to location
-            // where grammar is, absolute or relative, this will only happen
+            // where module is, absolute or relative, this will only happen
             // with command line invocation as build tools will always
             // supply an output directory.
             outputDir = new File(fileDirectory);

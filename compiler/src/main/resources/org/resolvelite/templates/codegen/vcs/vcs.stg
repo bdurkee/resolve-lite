@@ -2,21 +2,21 @@
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. The name of the author may not be used to endorse or promote products
  * derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -28,23 +28,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.resolvelite.codegen.model;
 
-import org.resolvelite.compiler.ResolveCompiler;
-import org.resolvelite.compiler.tree.AnnotatedTree;
+VCOutputFile(vcs, chunks) ::= <<
+<chunks.applicationSteps; separator="\n">
+>>
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+RuleApplicationStep(app, step) ::= <<
+<app.description>
+<step>
+--------------------
+>>
 
-public class ModuleFile extends OutputModelObject {
+VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<
+free vars: <assertCode.freeVars: {f|<f.name> : <f.mathType>}; separator=", ">
+<first(stats)>
+    <rest(stats); separator="\n">
+<finalConfirm>
+>>
 
-    public String RESOLVEVersion;
-    public String resolveFileName;
-    @ModelElement public Module module;
+VCAssume(assume) ::= "assume <assume.contents>;"
 
-    public ModuleFile(AnnotatedTree e, String resolveFileName) {
-        this.resolveFileName = resolveFileName;
-        this.RESOLVEVersion = ResolveCompiler.VERSION;
-    }
-}
+VCConfirm(confirm) ::= "confirm <confirm.contents>;"
+
+// Note: VCStat really is intended to apply to statements, and it's the
+//       getText() method that's automatically being invoked here. So the .text
+//       will automatically add the semicolon--so it's not necessary.
+VCStat(code) ::= "<code.contents.text>"
+
+assertiveFileExtension() ::= ".assert"

@@ -22,6 +22,30 @@ import java.util.stream.Collectors;
  */
 public class PSymbol extends PExp {
 
+    public static enum Quantification {
+
+        NONE {
+
+            protected Quantification flipped() {
+                return NONE;
+            }
+        },
+        FOR_ALL {
+
+            protected Quantification flipped() {
+                return THERE_EXISTS;
+            }
+        },
+        THERE_EXISTS {
+
+            protected Quantification flipped() {
+                return FOR_ALL;
+            }
+        };
+
+        protected abstract Quantification flipped();
+    }
+
     public static enum DisplayStyle {
         INFIX, OUTFIX, PREFIX
     }
@@ -30,7 +54,7 @@ public class PSymbol extends PExp {
 
     private final List<PExp> arguments = new ArrayList<>();
     private final boolean literalFlag, incomingFlag;
-    private Symbol.Quantification quantification;
+    private Quantification quantification;
     private final DisplayStyle dispStyle;
 
     private PSymbol(PSymbolBuilder builder) {
@@ -118,6 +142,10 @@ public class PSymbol extends PExp {
                         .collect(Collectors.toList())).build();
     }
 
+    public String getName() {
+        return name;
+    }
+
     public List<PExp> getArguments() {
         return arguments;
     }
@@ -128,20 +156,6 @@ public class PSymbol extends PExp {
 
     @Override public boolean isFunction() {
         return arguments.size() > 0;
-    }
-
-    @Override public PExp copy() {
-        List<PExp> newArguments = arguments.stream()
-                .map(PExp::copy).collect(Collectors.toList());
-        return new PSymbolBuilder(name)                     //
-                .arguments(newArguments)                    //
-                .incoming(incomingFlag)                     //
-                .literal(literalFlag)                       //
-                .mathType(getMathType())                    //
-                .mathTypeValue(getMathTypeValue())          //
-                .quantification(quantification)             //
-                .style(dispStyle)                           //
-                .build();
     }
 
     //Todo: This should really check to make sure this.mathType == BOOLEAN.
@@ -167,7 +181,7 @@ public class PSymbol extends PExp {
 
         if ( result == null ) {
             String newLeft = leftPrint, newRight = rightPrint;
-            Symbol.Quantification newQuantification = quantification;
+            Quantification newQuantification = quantification;
 
             if ( arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX) ) {
                 PSymbol asVariable = new PSymbolBuilder(name) //
@@ -206,6 +220,12 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    @Override public boolean isObviouslyTrue() {
+        return (arguments.size() == 0 && name.equalsIgnoreCase("true"))
+                || (arguments.size() == 2 && name.equals("=") && arguments.get(
+                        0).equals(arguments.get(1)));
+    }
+
     @Override public boolean containsName(String name) {
         boolean result = this.name.equals(name);
         Iterator<PExp> argumentIterator = arguments.iterator();
@@ -229,11 +249,76 @@ public class PSymbol extends PExp {
         }
     }
 
+    //Todo.
+    @Override public PExp flipQuantifiers() {
+        return this;
+    }
+
+    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+
+        if ( quantification != Quantification.NONE ) {
+            if ( arguments.size() == 0 ) {
+                result.add(this);
+            }
+            else {
+                result.add(new PSymbolBuilder(name).mathType(getMathType())
+                        .quantification(quantification).build());
+            }
+        }
+        Iterator<PExp> argumentIter = arguments.iterator();
+        Set<PSymbol> argumentVariables;
+        while (argumentIter.hasNext()) {
+            argumentVariables = argumentIter.next().getQuantifiedVariables();
+            result.addAll(argumentVariables);
+        }
+        return result;
+    }
+
+    @Override protected Set<String> getSymbolNamesNoCache() {
+        Set<String> result = new HashSet<>();
+
+        if ( quantification == Quantification.NONE ) {
+            result.add(getCanonicalName());
+        }
+        Iterator<PExp> argumentIter = arguments.iterator();
+        Set<String> argumentSymbols;
+        while (argumentIter.hasNext()) {
+            argumentSymbols = argumentIter.next().getSymbolNames();
+            result.addAll(argumentSymbols);
+        }
+        return result;
+    }
+
+    @Override public List<PExp> getFunctionApplicationsNoCache() {
+        List<PExp> result = new LinkedList<PExp>();
+        if ( this.arguments.size() > 0 ) {
+            result.add(this);
+        }
+        Iterator<PExp> argumentIter = arguments.iterator();
+        List<PExp> argumentFunctions;
+        while (argumentIter.hasNext()) {
+            argumentFunctions = argumentIter.next().getFunctionApplications();
+            result.addAll(argumentFunctions);
+        }
+        return result;
+    }
+
+    private String getCanonicalName() {
+        String result;
+        if ( dispStyle.equals(DisplayStyle.OUTFIX) ) {
+            result = leftPrint + "_" + rightPrint;
+        }
+        else {
+            result = name;
+        }
+        return result;
+    }
+
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
         if ( result ) {
             PSymbol oAsPSymbol = (PSymbol) o;
-
             result =
                     (oAsPSymbol.valueHash == valueHash)
                             && name.equals(oAsPSymbol.name)
@@ -241,7 +326,6 @@ public class PSymbol extends PExp {
                             && incomingFlag == oAsPSymbol.incomingFlag;
 
             if ( result ) {
-
                 Iterator<PExp> localArgs = arguments.iterator();
                 Iterator<PExp> oArgs = oAsPSymbol.arguments.iterator();
 
@@ -285,8 +369,7 @@ public class PSymbol extends PExp {
         protected boolean literal = false;
         protected String description;
         protected DisplayStyle style = DisplayStyle.PREFIX;
-        protected Symbol.Quantification quantification =
-                Symbol.Quantification.NONE;
+        protected Quantification quantification = Quantification.NONE;
         protected Token loc;
         protected MTType mathType, mathTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
@@ -326,7 +409,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder quantification(Symbol.Quantification q) {
+        public PSymbolBuilder quantification(Quantification q) {
             this.quantification = q;
             return this;
         }

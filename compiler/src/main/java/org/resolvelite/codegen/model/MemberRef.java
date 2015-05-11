@@ -20,6 +20,6 @@ public class MemberRef extends Expr {
     }
 
     public MemberRef(String name, PTType t) {
-        this(name, t.toString(), ((PTNamed) t).getEnclosingModuleID());
+        this(name, ((PTNamed)t).getName(), ((PTNamed) t).getEnclosingModuleID());
     }
 }

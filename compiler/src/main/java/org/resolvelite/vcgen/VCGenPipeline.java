@@ -2,11 +2,10 @@ package org.resolvelite.vcgen;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.resolvelite.codegen.CodeGenerator;
 import org.resolvelite.compiler.AbstractCompilationPipeline;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.semantics.NoSuchSymbolException;
+import org.stringtemplate.v4.ST;
 
 import java.util.List;
 
@@ -19,16 +18,12 @@ public class VCGenPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         for (AnnotatedTree unit : compilationUnits) {
-            if (compiler.targetNames.contains(unit.getName())) {
+            if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
                 compiler.info("generating vcs for: " + unit.getName());
-                VCGenerator gen =
-                        new VCGenerator(compiler, compiler.symbolTable, unit);
-                if ( compiler.vcs ) {
-                    ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
-                }
+                VCGenerator gen = new VCGenerator(compiler, unit);
+                ST x = gen.generateAssertions();
+                System.out.println(x.render());
             }
-
         }
-
     }
 }

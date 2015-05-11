@@ -13,12 +13,13 @@ Facility Test;
 
     Oper Foo(evaluates g: Std_Boolean_Fac::Boolean;
              evaluates h: Student_Info): Std_Integer_Fac::Integer;
-        Procedure
-        Var x: Student_Info;
-        Var y: Std_Boolean_Fac::Boolean;
-        Var b: Blah;
-        y := x.enrolled;
-    end Foo;
+            Procedure
+                Var x: Student_Info;
+                Var y: Std_Boolean_Fac::Boolean;
+                Var b: Blah;
+                y := x.enrolled;
+                Foo := 3;
+        end Foo;
 
     Oper Main();
         Procedure

@@ -2,16 +2,17 @@ package org.resolvelite.proving.absyn;
 
 import org.resolvelite.semantics.MTType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class PExp {
 
     public final int structureHash;
     public final int valueHash;
     private MTType type, typeValue;
+
+    private Set<String> cachedSymbolNames = null;
+    private List<PExp> cachedFunctionApplications = null;
+    private Set<PSymbol> cachedQuantifiedVariables = null;
 
     public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
         this(hashes.structureHash, hashes.valueHash, type, typeValue);
@@ -42,11 +43,20 @@ public abstract class PExp {
         return substitute(e);
     }
 
+    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
+        /* PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
+         PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
+
+         this.accept(finalVisitor);*/
+    }
+
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 
     public abstract boolean containsName(String name);
 
     public abstract List<PExp> getSubExpressions();
+
+    public abstract boolean isObviouslyTrue();
 
     public abstract boolean isLiteralTrue();
 
@@ -58,11 +68,6 @@ public abstract class PExp {
 
     public abstract boolean isFunction();
 
-    //Todo: I don't think this is terribly necessary. This hierarchy is already
-    //immutable and I don't see why we really need a 'copy' anymore. Substitute
-    //for instance already makes a copy with the substitutions made.
-    public abstract PExp copy();
-
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
         splitIntoConjuncts(conjuncts);
@@ -70,6 +75,41 @@ public abstract class PExp {
     }
 
     protected abstract void splitIntoConjuncts(List<PExp> accumulator);
+
+    public abstract PExp flipQuantifiers();
+
+    public final Set<PSymbol> getQuantifiedVariables() {
+        if ( cachedQuantifiedVariables == null ) {
+            //We're immutable, so only do this once
+            cachedQuantifiedVariables =
+                    Collections
+                            .unmodifiableSet(getQuantifiedVariablesNoCache());
+        }
+        return cachedQuantifiedVariables;
+    }
+
+    public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
+
+    public final List<PExp> getFunctionApplications() {
+        if ( cachedFunctionApplications == null ) {
+            //We're immutable, so only do this once
+            cachedFunctionApplications = getFunctionApplicationsNoCache();
+        }
+        return cachedFunctionApplications;
+    }
+
+    public abstract List<PExp> getFunctionApplicationsNoCache();
+
+    public final Set<String> getSymbolNames() {
+        if ( cachedSymbolNames == null ) {
+            //We're immutable, so only do this once
+            cachedSymbolNames =
+                    Collections.unmodifiableSet(getSymbolNamesNoCache());
+        }
+        return cachedSymbolNames;
+    }
+
+    protected abstract Set<String> getSymbolNamesNoCache();
 
     public static class HashDuple {
         public int structureHash;

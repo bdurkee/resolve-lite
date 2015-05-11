@@ -54,13 +54,13 @@ public class CodeGenerator {
     protected final AnnotatedTree module;
     private final STGroup templates;
 
-    public final int myLineWidth = 72;
+    public final int lineWidth = 72;
 
     public CodeGenerator(@NotNull ResolveCompiler rc,
             @NotNull AnnotatedTree rootTarget) throws IllegalStateException {
         this.compiler = rc;
         this.module = rootTarget;
-        this.templates = loadTemplates();
+        this.templates = loadTemplates(compiler, DEFAULT_LANGUAGE);
         if ( templates == null ) {
             throw new IllegalStateException();
         }
@@ -98,7 +98,7 @@ public class CodeGenerator {
         try {
             Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);
-            wr.setLineWidth(myLineWidth);
+            wr.setLineWidth(lineWidth);
             code.write(wr);
             w.close();
         }
@@ -114,10 +114,11 @@ public class CodeGenerator {
         return moduleName + extST.render();
     }
 
-    @Nullable protected STGroup loadTemplates() {
+    @Nullable public static STGroup loadTemplates(ResolveCompiler compiler,
+            String defaultLang) {
         String groupFileName =
-                CodeGenerator.TEMPLATE_ROOT + "/" + DEFAULT_LANGUAGE + "/"
-                        + DEFAULT_LANGUAGE + STGroup.GROUP_FILE_EXTENSION;
+                CodeGenerator.TEMPLATE_ROOT + "/" + defaultLang + "/"
+                        + defaultLang + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);

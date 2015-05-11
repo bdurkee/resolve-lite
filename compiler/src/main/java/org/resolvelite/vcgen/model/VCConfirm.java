@@ -1,8 +1,8 @@
-package org.resolvelite.vcgen.vcstat;
+package org.resolvelite.vcgen.model;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.applicationstrategies.ConfirmApplicationStrategy;
-import org.resolvelite.vcgen.vcstat.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public class VCConfirm extends VCRuleBackedStat<PExp> {
@@ -13,9 +13,5 @@ public class VCConfirm extends VCRuleBackedStat<PExp> {
 
     public VCConfirm(PExp contents, VCAssertiveBlockBuilder enclosingBlock) {
         this(contents, new ConfirmApplicationStrategy(), enclosingBlock);
-    }
-
-    @Override public String toString() {
-        return "confirm: " + getContents() + ";";
     }
 }

@@ -6,6 +6,7 @@ import org.resolvelite.semantics.MTType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PSet extends PExp {
@@ -32,6 +33,10 @@ public class PSet extends PExp {
         return elements;
     }
 
+    @Override public boolean isObviouslyTrue() {
+        return false;
+    }
+
     @Override public boolean isLiteralTrue() {
         return false;
     }
@@ -52,12 +57,24 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override public PExp copy() {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
 
+    }
+
+    @Override public PExp flipQuantifiers() {
+        return null;
+    }
+
+    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+        return null;
+    }
+
+    @Override public List<PExp> getFunctionApplicationsNoCache() {
+        return null;
+    }
+
+    @Override protected Set<String> getSymbolNamesNoCache() {
+        return null;
     }
 
     @Override public String toString() {
