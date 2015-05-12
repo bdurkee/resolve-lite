@@ -21,6 +21,8 @@ public abstract class VCRuleBackedStat<T> extends OutputModelObject {
         return applicationStrategy.applyRule(contents, enclosingBlock);
     }
 
+    public abstract String getText();
+
     public T getContents() {
         return contents;
     }

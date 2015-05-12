@@ -8,6 +8,7 @@ public class ConfirmApplicationStrategy
         implements
             RuleApplicationStrategy<PExp> {
 
+    //stub impl for now
     @Override public AssertiveCode applyRule(PExp statement,
             VCAssertiveBlockBuilder block) {
         return block.snapshot();

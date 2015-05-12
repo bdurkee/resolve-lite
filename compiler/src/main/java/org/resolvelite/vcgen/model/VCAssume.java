@@ -14,4 +14,9 @@ public class VCAssume extends VCRuleBackedStat<PExp> {
     public VCAssume(PExp contents, VCAssertiveBlockBuilder enclosingBlock) {
         this(contents, new AssumeApplicationStrategy(), enclosingBlock);
     }
+
+    @Override public String getText() {
+        return getContents().toString();
+    }
+
 }

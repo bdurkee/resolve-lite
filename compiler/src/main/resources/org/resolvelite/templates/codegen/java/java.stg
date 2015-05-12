@@ -242,4 +242,4 @@ toStdFacilityName ::= [
     "Std_Integer_Fac":"Standard_Integers.INSTANCE"
 ]
 
-moduleFileExtension() ::= ".java"
+fileExtension() ::= ".java"

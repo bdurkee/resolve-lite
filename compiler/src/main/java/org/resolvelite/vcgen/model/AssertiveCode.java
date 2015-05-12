@@ -1,9 +1,11 @@
 package org.resolvelite.vcgen.model;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
 import org.resolvelite.codegen.model.ModelElement;
 import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -42,8 +44,12 @@ public abstract class AssertiveCode extends OutputModelObject {
         return annotations;
     }
 
-    public ParserRuleContext getDefiningCtx() {
+    public ParserRuleContext getDefiningTree() {
         return definingTree;
+    }
+
+    public String getText() {
+        return Utils.getRawText(definingTree);
     }
 
     public VCConfirm getFinalConfirm() {

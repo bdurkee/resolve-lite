@@ -64,6 +64,13 @@ public class ModelBuilder extends ResolveBaseListener {
         moduleLevelRequires = normalizePExp(ctx.requiresClause());
     }
 
+    @Override public void enterFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        curAssertiveBuilder =
+                new VCAssertiveBlockBuilder(g, ctx, tr)
+                        .freeVars();
+    }
+
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
@@ -96,7 +103,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
-        stats.put(ctx, new VCStat<ResolveParser.SwapStmtContext>(ctx,
+        stats.put(ctx, new VCCode<ResolveParser.SwapStmtContext>(ctx,
                 SWAP_APPLICATION, curAssertiveBuilder));
     }
 
@@ -138,8 +145,8 @@ public class ModelBuilder extends ResolveBaseListener {
                     PExp exemplar =
                             new PSymbolBuilder(t.getExemplarName()).mathType(
                                     t.toMath()).build();
-                    init = ((PTNamed) p.getDeclaredType())  //
-                            .getInitializationEnsures()     //
+                    init = ((PTNamed) p.getDeclaredType()) //
+                            .getInitializationEnsures() //
                             .substitute(exemplar, paramExp);
                 }
                 else { //we're dealing with a generic

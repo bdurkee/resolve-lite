@@ -12,6 +12,4 @@ public class RuleApplicationStep extends OutputModelObject {
         this.step = step;
         this.description = description;
     }
-
-    @Override public String toString() { return "a rule application step"; }
 }

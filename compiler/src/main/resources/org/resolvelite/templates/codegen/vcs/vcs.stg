@@ -30,7 +30,9 @@
  */
 
 VCOutputFile(vcs, chunks) ::= <<
-<chunks.applicationSteps; separator="\n">
+<chunks : {c|<c.assertCode.text>
+
+<c.applicationSteps; separator="\n">}; separator="\n">
 >>
 
 RuleApplicationStep(app, step) ::= <<
@@ -46,13 +48,15 @@ free vars: <assertCode.freeVars: {f|<f.name> : <f.mathType>}; separator=", ">
 <finalConfirm>
 >>
 
-VCAssume(assume) ::= "assume <assume.contents>;"
+VCRemember(remember) ::= "remember;"
 
-VCConfirm(confirm) ::= "confirm <confirm.contents>;"
+VCAssume(assume) ::= "assume <assume.text>;"
 
-// Note: VCStat really is intended to apply to statements, and it's the
-//       getText() method that's automatically being invoked here. So the .text
-//       will automatically add the semicolon--so it's not necessary.
-VCStat(code) ::= "<code.contents.text>"
+VCConfirm(confirm) ::= "confirm <confirm.text>;"
 
-assertiveFileExtension() ::= ".assert"
+// Note: VCCode really is intended to apply to statements (code), and it's the
+//       getText() method that's being invoked here by ST. So .text will
+//       automatically add the semicolon.
+VCCode(code) ::= "<code.text>"
+
+fileExtension() ::= ".assert"

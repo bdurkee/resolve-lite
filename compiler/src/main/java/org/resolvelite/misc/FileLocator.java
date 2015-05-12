@@ -51,12 +51,12 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     private List<File> myMatches = new ArrayList<>();
 
     /**
-     * Constructs a new <code>FileLocator</code> that will match based on the
-     * <code>pattern</code> (or, name) and <code>extension</code> pair provided.
+     * Constructs a new {@code FileLocator} that will match based on the
+     * {@code pattern, extensions} pair provided.
      * 
      * @param pattern An <em>extensionless</em> pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *        pattern is matched (i.e.<code>["java", "cpp", "groovy"]</code>).
+     *        pattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
         myPattern = pattern;
@@ -81,10 +81,10 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     /**
-     * Returns a single file matching <code>myPattern</code>.
+     * Returns a single file matching {@code this.pattern}.
      * 
-     * @throws NoSuchFileException If a file matching <code>myPattern</code>
-     *         could not be found.
+     * @throws NoSuchFileException If a file matching {@code this.pattern} could
+     *         not be found.
      * 
      * @return The matching file.
      */

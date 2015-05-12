@@ -61,6 +61,10 @@ public class PSet extends PExp {
 
     }
 
+    @Override public PExp withIncomingVariablesRemoved() {
+        return null;
+    }
+
     @Override public PExp flipQuantifiers() {
         return null;
     }

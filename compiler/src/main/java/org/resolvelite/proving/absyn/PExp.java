@@ -76,6 +76,14 @@ public abstract class PExp {
 
     protected abstract void splitIntoConjuncts(List<PExp> accumulator);
 
+    /**
+     * Returns a copy of this {@code PExp} with all occurences of variables
+     * prefixed with <tt>@</tt> are replaced by just the variable.
+     * 
+     * @return A <tt>@</tt>-clean version of this {@code PExp}.
+     */
+    public abstract PExp withIncomingVariablesRemoved();
+
     public abstract PExp flipQuantifiers();
 
     public final Set<PSymbol> getQuantifiedVariables() {

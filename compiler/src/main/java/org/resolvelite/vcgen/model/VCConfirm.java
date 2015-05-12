@@ -14,4 +14,8 @@ public class VCConfirm extends VCRuleBackedStat<PExp> {
     public VCConfirm(PExp contents, VCAssertiveBlockBuilder enclosingBlock) {
         this(contents, new ConfirmApplicationStrategy(), enclosingBlock);
     }
+
+    @Override public String getText() {
+        return getContents().toString();
+    }
 }

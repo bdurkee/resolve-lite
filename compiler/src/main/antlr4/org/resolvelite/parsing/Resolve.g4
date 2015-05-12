@@ -324,6 +324,9 @@ definitionParameterList
     ;
 
 // mathematical clauses
+rememberClause
+    :   'remember'
+    ;
 
 requiresClause
     :   'requires' mathAssertionExp ';'

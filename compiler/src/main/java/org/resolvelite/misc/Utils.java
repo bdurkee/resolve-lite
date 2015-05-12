@@ -32,6 +32,7 @@ package org.resolvelite.misc;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -182,6 +183,12 @@ public class Utils {
             }
         }
         return builder.toString();
+    }
+
+    public static String getRawText(ParserRuleContext ctx) {
+        Interval interval =
+                new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        return ctx.start.getInputStream().getText(interval);
     }
 
     public static String tab(int n) {

@@ -3,19 +3,19 @@ package org.resolvelite.vcgen.model;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.vcgen.applicationstrategies.RememberApplicationStrategy;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class VCAssertiveBlock extends AssertiveCode {
 
-    //Todo: Rename this VCAssertiveContext? -- maybe make it act as a mini 'scope'
-    //where all of our shit needs to go -- involved operations, typedecls, etc.
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
         super(builder.g, builder.definingTree, builder.finalConfirm,
                 builder.annotations, builder.stats, builder.freeVars,
@@ -32,7 +32,6 @@ public class VCAssertiveBlock extends AssertiveCode {
         public final Set<PSymbol> freeVars = new LinkedHashSet<>();
         public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
         public VCConfirm finalConfirm;
-
         public List<RuleApplicationStep> applicationSteps = new ArrayList<>();
 
         public VCAssertiveBlockBuilder(TypeGraph g, ParserRuleContext ctx,
@@ -40,6 +39,7 @@ public class VCAssertiveBlock extends AssertiveCode {
             this.g = g;
             this.definingTree = ctx;
             this.annotations = annotations;
+            this.finalConfirm = new VCConfirm(g.getTrueExp(), this);
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
@@ -48,6 +48,15 @@ public class VCAssertiveBlock extends AssertiveCode {
         }
 
         public VCAssertiveBlockBuilder remember() {
+            VCRemember remember = new VCRemember(null, this);
+            //Todo: not too sure if it's important where remember falls in
+            //the stat sequence..
+            if ( stats.size() > 1 ) {
+                stats.add(1, remember);
+            }
+            else {
+                stats.add(remember);
+            }
             return this;
         }
 
@@ -93,7 +102,6 @@ public class VCAssertiveBlock extends AssertiveCode {
          * for this particular block of assertive code.
          */
         @Override public VCAssertiveBlock build() {
-
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();

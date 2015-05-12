@@ -249,7 +249,25 @@ public class PSymbol extends PExp {
         }
     }
 
-    //Todo.
+    @Override public PExp withIncomingVariablesRemoved() {
+        if ( arguments.isEmpty() ) {
+            //literal is false by default, so no need to explicitly state it.
+            return new PSymbolBuilder(this.name).mathType(getMathType())
+                    .mathTypeValue(getMathTypeValue()).style(dispStyle)
+                    .literal(literalFlag).build();
+        }
+        else {
+            PSymbolBuilder result =
+                    new PSymbolBuilder(name).mathType(getMathType())
+                            .mathTypeValue(getMathTypeValue()).style(dispStyle)
+                            .quantification(quantification);
+            for (PExp arg : arguments) {
+                result.arguments(arg.withIncomingVariablesRemoved());
+            }
+            return result.build();
+        }
+    }
+
     @Override public PExp flipQuantifiers() {
         return this;
     }

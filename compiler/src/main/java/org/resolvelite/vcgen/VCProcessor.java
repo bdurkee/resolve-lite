@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class VCCollector implements Iterable<VC> {
+public class VCProcessor implements Iterable<VC> {
 
     /**
      * The final list of {@link VC}s from which to spawn Iterators as requested.
@@ -16,7 +16,7 @@ public class VCCollector implements Iterable<VC> {
      */
     private final List<VC> finalVCs = new ArrayList<>();
 
-    public VCCollector(Collection<AssertiveCode> source) {
+    public VCProcessor(Collection<AssertiveCode> source) {
         int sectionNumber = 0;
 
         //VCs come in batches that all refer to the same cluster of variables.

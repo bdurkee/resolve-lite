@@ -8,4 +8,5 @@ public interface RuleApplicationStrategy<T> {
     public AssertiveCode applyRule(T statement, VCAssertiveBlockBuilder block);
 
     public String getDescription();
+
 }

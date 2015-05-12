@@ -44,26 +44,13 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import java.io.IOException;
 import java.io.Writer;
 
-public class CodeGenerator {
-    public static final String TEMPLATE_ROOT =
-            "org/resolvelite/templates/codegen";
+public class CodeGenerator extends AbstractCodeGenerator {
 
     public static final String DEFAULT_LANGUAGE = "java";
 
-    protected final ResolveCompiler compiler;
-    protected final AnnotatedTree module;
-    private final STGroup templates;
-
-    public final int lineWidth = 72;
-
     public CodeGenerator(@NotNull ResolveCompiler rc,
             @NotNull AnnotatedTree rootTarget) throws IllegalStateException {
-        this.compiler = rc;
-        this.module = rootTarget;
-        this.templates = loadTemplates(compiler, DEFAULT_LANGUAGE);
-        if ( templates == null ) {
-            throw new IllegalStateException();
-        }
+        super(rc, rootTarget, DEFAULT_LANGUAGE);
     }
 
     private OutputModelObject buildModuleOutputModel() {
@@ -73,25 +60,12 @@ public class CodeGenerator {
         return builder.built.get(root);
     }
 
-    private ST walk(OutputModelObject outputModel) {
-        ModelConverter walker = new ModelConverter(compiler, templates);
-        return walker.walk(outputModel);
-    }
-
     @Nullable public ST generateModule() {
         return walk(buildModuleOutputModel());
     }
 
-    @NotNull public AnnotatedTree getModule() {
-        return module;
-    }
-
-    @NotNull public ResolveCompiler getCompiler() {
-        return compiler;
-    }
-
-    public void writeModuleFile(ST outputFileST) {
-        write(outputFileST, getModuleFileName());
+    public void writeFile(ST outputFileST) {
+        write(outputFileST, getFileName());
     }
 
     private void write(ST code, String fileName) {
@@ -108,55 +82,9 @@ public class CodeGenerator {
         }
     }
 
-    public String getModuleFileName() {
-        ST extST = templates.getInstanceOf("moduleFileExtension");
+    public String getFileName() {
+        ST extST = templates.getInstanceOf("fileExtension");
         String moduleName = module.getName();
         return moduleName + extST.render();
-    }
-
-    @Nullable public static STGroup loadTemplates(ResolveCompiler compiler,
-            String defaultLang) {
-        String groupFileName =
-                CodeGenerator.TEMPLATE_ROOT + "/" + defaultLang + "/"
-                        + defaultLang + STGroup.GROUP_FILE_EXTENSION;
-        STGroup result = null;
-        try {
-            result = new STGroupFile(groupFileName);
-        }
-        catch (IllegalArgumentException iae) {
-            compiler.errorManager
-                    .toolError(ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae,
-                            DEFAULT_LANGUAGE);
-        }
-        if ( result == null ) {
-            return null;
-        }
-        result.registerRenderer(Integer.class, new NumberRenderer());
-        result.registerRenderer(String.class, new StringRenderer());
-        result.setListener(new STErrorListener() {
-
-            @Override public void compileTimeError(STMessage msg) {
-                reportError(msg);
-            }
-
-            @Override public void runTimeError(STMessage msg) {
-                reportError(msg);
-            }
-
-            @Override public void IOError(STMessage msg) {
-                reportError(msg);
-            }
-
-            @Override public void internalError(STMessage msg) {
-                reportError(msg);
-            }
-
-            private void reportError(STMessage msg) {
-                compiler.errorManager.toolError(
-                        ErrorKind.STRING_TEMPLATE_WARNING, msg.cause,
-                        msg.toString());
-            }
-        });
-        return result;
     }
 }
