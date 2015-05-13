@@ -7,6 +7,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 import org.resolvelite.vcgen.applicationstrategies.RememberApplicationStrategy;
@@ -28,18 +29,23 @@ public class VCAssertiveBlock extends AssertiveCode {
 
         public final TypeGraph g;
         public final ParserRuleContext definingTree;
+        public final Scope scope;
         public final AnnotatedTree annotations;
+        public VCConfirm finalConfirm;
+
         public final Set<PSymbol> freeVars = new LinkedHashSet<>();
         public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
-        public VCConfirm finalConfirm;
-        public List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+        public final List<RuleApplicationStep> applicationSteps =
+                new ArrayList<>();
 
-        public VCAssertiveBlockBuilder(TypeGraph g, ParserRuleContext ctx,
+        public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
+                                       ParserRuleContext ctx,
                 AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
             this.annotations = annotations;
             this.finalConfirm = new VCConfirm(g.getTrueExp(), this);
+            this.scope = contextScope;
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {

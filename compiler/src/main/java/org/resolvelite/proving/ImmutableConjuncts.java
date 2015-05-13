@@ -169,14 +169,14 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
     /**
      * Treats the provided List of {@code PExp}s as a boolean expression
-     * that is the <em>and</em> of each of the elements in that iterable object.
+     * that is the and of each of the elements in that iterable object.
      * Tests if that boolean expression contains equal conjuncts in the same
      * order as {@code this}.
      * 
      * @param otherConjuncts The set of conjuncts to test for ordered
      *        equality.
      * 
-     * @return True <strong>iff</strong> the given expression is order-equal.
+     * @return True iff the given expression is order-equal.
      */
     public boolean orderEqual(Iterable<PExp> otherConjuncts) {
 
@@ -221,7 +221,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Answers the question, "Does each <code>PExp</code> in {@code query} have
+     * Answers the question, "Does each {@code PExp} in {@code query} have
      * an equal {@code PExp} in {@code base}?"
      * 
      * @param query The expressions to test.
@@ -242,14 +242,13 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns {@code true} <strong>iff</strong> at least one of the
-     * conjuncts in {@code source} is equal to {@code e}.
+     * Returns {@code true} iff at least one of the conjuncts in {@code source}
+     * is equal to {@code e}.
      * 
      * @param source A list of conjuncts to test against.
      * @param e The {@code PExp}s to test for equality.
      * 
-     * @return True <strong>iff</strong> <code>source</code> contains an
-     *         equal conjunct.
+     * @return True iff {@code source} contains an equal conjunct.
      * 
      * @throws NullPointerException If {@code source} or {@code e} is null.
      */
@@ -264,15 +263,14 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns {@code true} <strong>iff</strong> at least one of the
-     * conjuncts in {@code this} is equal to {@code e}.
+     * Returns {@code true} iff at least one of the conjuncts in {@code this}
+     * is equal to {@code e}.
      * 
      * @param e The {@code PExp} to test for equality.
      * 
-     * @return {@code true} <strong>iff</strong> {@code this} contains an
-     *         equal conjunct.
+     * @return {@code true} iff {@code this} contains an equal conjunct.
      * 
-     * @throws NullPointerException If {@code e} is <code>null</code>.
+     * @throws NullPointerException If {@code e} is null.
      */
     public boolean containsEqual(PExp e) {
         return containsEqual(this, e);

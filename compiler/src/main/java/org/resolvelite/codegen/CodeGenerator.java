@@ -63,28 +63,4 @@ public class CodeGenerator extends AbstractCodeGenerator {
     @Nullable public ST generateModule() {
         return walk(buildModuleOutputModel());
     }
-
-    public void writeFile(ST outputFileST) {
-        write(outputFileST, getFileName());
-    }
-
-    private void write(ST code, String fileName) {
-        try {
-            Writer w = compiler.getOutputFileWriter(module, fileName);
-            STWriter wr = new AutoIndentWriter(w);
-            wr.setLineWidth(lineWidth);
-            code.write(wr);
-            w.close();
-        }
-        catch (IOException ioe) {
-            compiler.errorManager.toolError(ErrorKind.CANNOT_WRITE_FILE, ioe,
-                    fileName);
-        }
-    }
-
-    public String getFileName() {
-        ST extST = templates.getInstanceOf("fileExtension");
-        String moduleName = module.getName();
-        return moduleName + extST.render();
-    }
 }

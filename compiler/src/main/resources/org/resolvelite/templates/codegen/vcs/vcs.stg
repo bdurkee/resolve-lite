@@ -59,4 +59,4 @@ VCConfirm(confirm) ::= "confirm <confirm.text>;"
 //       automatically add the semicolon.
 VCCode(code) ::= "<code.text>"
 
-fileExtension() ::= ".assert"
+fileExtension() ::= ".asrt_dan"

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Represents an anonymous class that wraps the invocation of an operation
- * that we wish to another module.
+ * that we wish to pass into another module (via a facility, etc).
  */
 public class AnonOpParameterClassInstance extends Expr {
 

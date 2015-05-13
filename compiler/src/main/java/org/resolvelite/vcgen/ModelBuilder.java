@@ -10,6 +10,7 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
+import org.resolvelite.semantics.ModuleScopeBuilder;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.programtype.*;
@@ -20,6 +21,7 @@ import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.vcgen.applicationstrategies.FunctionAssignApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
@@ -50,9 +52,15 @@ public class ModelBuilder extends ResolveBaseListener {
     private PExp moduleLevelRequires, moduleLevelConstraint = null;
     private VCAssertiveBlockBuilder curAssertiveBuilder = null;
     private final VCOutputFile outputCollector = new VCOutputFile();
+    private ModuleScopeBuilder moduleScope = null;
 
-    private final static RuleApplicationStrategy<ResolveParser.SwapStmtContext> SWAP_APPLICATION =
+    private final static RuleApplicationStrategy //
+    <ResolveParser.SwapStmtContext> SWAP_APPLICATION =
             new SwapApplicationStrategy();
+
+    private final static RuleApplicationStrategy //
+    <ResolveParser.AssignStmtContext> FUNCTION_ASSIGN_APPLICATION =
+            new FunctionAssignApplicationStrategy();
 
     public ModelBuilder(VCGenerator gen, SymbolTable symtab) {
         this.gen = gen;
@@ -65,13 +73,19 @@ public class ModelBuilder extends ResolveBaseListener {
         return outputCollector;
     }
 
+    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+        moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
+    }
+
+    @Override public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
+        moduleLevelRequires = null;
+        moduleLevelConstraint = null;
+    }
+
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         moduleLevelRequires = normalizePExp(ctx.requiresClause());
         moduleLevelConstraint = conjunctGlobalConstraints(ctx);
-        int i = 0;
-        i = 0;
-
     }
 
     private PExp conjunctGlobalConstraints(ParserRuleContext scopedCtx) {
@@ -89,12 +103,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        curAssertiveBuilder = new VCAssertiveBlockBuilder(g, ctx, tr);
-
+        //curAssertiveBuilder =
+        //        new VCAssertiveBlockBuilder(g, moduleScope, ctx, tr);
     }
 
     @Override public void exitFacilityDecl(
-            @NotNull ResolveParser.FacilityDeclContext ctx) {}
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+    }
 
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
@@ -103,7 +118,7 @@ public class ModelBuilder extends ResolveBaseListener {
         PExp bottomConfirm = modifyEnsuresByParams(ctx, ctx.ensuresClause());
 
         curAssertiveBuilder =
-                new VCAssertiveBlockBuilder(g, ctx, tr)
+                new VCAssertiveBlockBuilder(g, s, ctx, tr)
                         .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
                         .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
                         .assume(moduleLevelRequires).assume(topAssume) //
@@ -130,6 +145,12 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.SwapStmtContext ctx) {
         stats.put(ctx, new VCCode<ResolveParser.SwapStmtContext>(ctx,
                 SWAP_APPLICATION, curAssertiveBuilder));
+    }
+
+    @Override public void exitAssignStmt(
+            @NotNull ResolveParser.AssignStmtContext ctx) {
+        stats.put(ctx, new VCCode<ResolveParser.AssignStmtContext>(ctx,
+                FUNCTION_ASSIGN_APPLICATION, curAssertiveBuilder));
     }
 
     private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,

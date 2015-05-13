@@ -10,7 +10,7 @@ public class AssumeApplicationStrategy implements RuleApplicationStrategy<PExp> 
     @Override public AssertiveCode applyRule(PExp statement,
             VCAssertiveBlockBuilder block) {
         PExp curFinalConfirm = block.finalConfirm.getContents();
-        if (statement != null && !statement.equals(block.g.getTrueExp())) {
+        if ( statement != null && !statement.equals(block.g.getTrueExp()) ) {
             block.finalConfirm(block.g.formImplies(statement, curFinalConfirm));
         }
         return block.snapshot();

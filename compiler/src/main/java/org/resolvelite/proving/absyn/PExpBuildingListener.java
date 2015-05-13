@@ -123,6 +123,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         built.put(ctx, result.build());
     }
 
+    @Override public void exitProgParamExp(
+            @NotNull ResolveParser.ProgParamExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
+                .arguments(Utils.collect(PExp.class, ctx.progExp(), built))//
+                .mathTypeValue(typeValues.get(ctx)) //
+                .mathType(types.get(ctx));
+        built.put(ctx, result.build());
+    }
+
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         built.put(ctx, built.get(ctx.progPrimary()));
@@ -138,6 +147,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
+        built.put(ctx, result.build());
+    }
+
+    @Override public void exitProgIntegerExp(
+            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
+                .mathTypeValue(typeValues.get(ctx)) //
+                .mathType(types.get(ctx))   //
+                .literal(true);
         built.put(ctx, result.build());
     }
 }

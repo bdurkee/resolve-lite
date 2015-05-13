@@ -31,10 +31,18 @@
 
 Facility Integer_Exchange;
 
-Oper Exchange (updates I, J: Std_Integer_Fac::Integer);
-        ensures J = @I and I = @J;
-    Procedure
-        I :=: J;
-end Exchange;
+    Oper Foo(updates P: Std_Integer_Fac::Integer): Std_Integer_Fac::Integer;
+        Procedure
+            Foo := 3;
+    end Foo;
+
+    Oper Exchange (updates I, J: Std_Integer_Fac::Integer);
+            ensures J = @I and I = @J;
+        Procedure
+            I :=: J;
+            I := Foo(J);
+    end Exchange;
+
+
 
 end Integer_Exchange;

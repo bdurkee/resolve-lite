@@ -18,7 +18,7 @@ public class SwapApplicationStrategy
         PExp swapRight = block.annotations.mathPExps.get(statement.right);
 
         PExp temp =
-                new PSymbolBuilder("_t").mathType(swapLeft.getMathType())
+                new PSymbolBuilder("_t;").mathType(swapLeft.getMathType())
                         .build();
 
         workingConfirm = workingConfirm.substitute(swapRight, temp);
