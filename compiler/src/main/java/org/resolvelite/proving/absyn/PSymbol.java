@@ -8,6 +8,7 @@ import org.resolvelite.misc.Utils;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -59,7 +60,7 @@ public class PSymbol extends PExp {
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.lprint, builder.rprint,
                 builder.arguments.iterator()), builder.mathType,
-                builder.mathTypeValue);
+                builder.mathTypeValue, builder.progType, builder.progTypeValue);
 
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -389,6 +390,7 @@ public class PSymbol extends PExp {
         protected Quantification quantification = Quantification.NONE;
         protected Token loc;
         protected MTType mathType, mathTypeValue;
+        protected PTType progType, progTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
 
         public PSymbolBuilder(String name) {
@@ -423,6 +425,16 @@ public class PSymbol extends PExp {
 
         public PSymbolBuilder mathTypeValue(MTType e) {
             this.mathTypeValue = e;
+            return this;
+        }
+
+        public PSymbolBuilder progType(PTType e) {
+            this.progType = e;
+            return this;
+        }
+
+        public PSymbolBuilder progTypeValue(PTType e) {
+            this.progTypeValue = e;
             return this;
         }
 

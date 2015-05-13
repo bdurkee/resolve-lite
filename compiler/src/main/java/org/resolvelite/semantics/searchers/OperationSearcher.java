@@ -15,7 +15,11 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
     private final List<PTType> actualArgTypes;
 
     public OperationSearcher(Token name, List<PTType> argumentTypes) {
-        this.queryName = name.getText();
+        this(name.getText(), argumentTypes);
+    }
+
+    public OperationSearcher(String name, List<PTType> argumentTypes) {
+        this.queryName = name;
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
 

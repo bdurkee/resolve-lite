@@ -395,8 +395,7 @@ public class ResolveCompiler {
 
             AnnotatedTree result =
                     new AnnotatedTree(start, Utils.getModuleName(start),
-                            parser.getSourceName(),
-                            parser.getNumberOfSyntaxErrors() > 0);
+                            parser.getSourceName(), parser);
             return result;
         }
         catch (IOException ioe) {

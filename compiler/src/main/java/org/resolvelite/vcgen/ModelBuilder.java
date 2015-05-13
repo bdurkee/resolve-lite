@@ -108,8 +108,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitFacilityDecl(
-            @NotNull ResolveParser.FacilityDeclContext ctx) {
-    }
+            @NotNull ResolveParser.FacilityDeclContext ctx) {}
 
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {

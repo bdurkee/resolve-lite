@@ -30,6 +30,7 @@
  */
 package org.resolvelite.compiler.tree;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -38,6 +39,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.typereasoning.TypeGraph;
 
 public class AnnotatedTree {
 
@@ -55,13 +57,18 @@ public class AnnotatedTree {
     public boolean hasErrors;
     public ImportCollection imports;
 
+    /**
+     * Keep a reference to the parser so xpath can be used more easily
+     */
+    private final ResolveParser parser;
+
     public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-            String fileName, boolean hasErrors) {
-        this.hasErrors = hasErrors;
+            String fileName, ResolveParser parser) {
+        this.hasErrors = parser.getNumberOfSyntaxErrors() > 0;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
-
+        this.parser = parser;
         //if we have syntactic errors, better not risk processing imports with
         //our tree (we usually get npe's).
         if ( !hasErrors ) {
@@ -72,6 +79,15 @@ public class AnnotatedTree {
         else {
             this.imports = new ImportCollection();
         }
+    }
+
+    public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
+        PExp result = mathPExps.get(ctx);
+        return result != null ? result : g.getTrueExp();
+    }
+
+    @NotNull public ResolveParser getParser() {
+        return parser;
     }
 
     @NotNull public String getName() {

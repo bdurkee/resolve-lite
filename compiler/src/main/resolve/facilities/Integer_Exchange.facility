@@ -40,7 +40,7 @@ Facility Integer_Exchange;
             ensures J = @I and I = @J;
         Procedure
             I :=: J;
-            I := Foo(J);
+            I := Foo(Foo(J));
     end Exchange;
 
 

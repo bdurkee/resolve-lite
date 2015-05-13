@@ -15,7 +15,7 @@ public class PSet extends PExp {
 
     //Todo: hash correctly.
     public PSet(MTType type, MTType typeValue, List<PExp> elements) {
-        super(0, 0, type, typeValue);
+        super(0, 0, type, typeValue, null, null);
         this.elements.addAll(elements);
     }
 

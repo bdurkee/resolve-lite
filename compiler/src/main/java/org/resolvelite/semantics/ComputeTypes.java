@@ -544,8 +544,7 @@ public class ComputeTypes extends ResolveBaseListener {
     protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) return null;
         PExpBuildingListener<T> builder =
-                new PExpBuildingListener<T>(symtab.mathPExps, tr.mathTypes,
-                        tr.mathTypeValues);
+                new PExpBuildingListener<T>(symtab.mathPExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

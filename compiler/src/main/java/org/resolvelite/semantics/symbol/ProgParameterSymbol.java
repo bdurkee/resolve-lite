@@ -1,6 +1,8 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
@@ -116,6 +118,11 @@ public class ProgParameterSymbol extends Symbol {
 
     @Override public ProgParameterSymbol toProgParameterSymbol() {
         return this;
+    }
+
+    public PExp asPExp() {
+        return new PSymbol.PSymbolBuilder(getName()).progType(declaredType)
+                .mathType(declaredType.toMath()).build();
     }
 
     @Override public String getSymbolDescription() {

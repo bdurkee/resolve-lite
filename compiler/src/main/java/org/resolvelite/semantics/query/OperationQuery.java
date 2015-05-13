@@ -12,16 +12,21 @@ import org.resolvelite.semantics.symbol.OperationSymbol;
 import java.util.List;
 
 /**
- * <p>
- * An <code>OperationQuery</code> searched for a (possibly-qualified) operation.
+ * An {@code OperationQuery} searches for a (possibly-qualified) operation.
  * If a qualifier is provided, the named facility or module is searched.
  * Otherwise, the operation is searched for in any directly imported modules and
  * in instantiated versions of any available facilities.
- * </p>
  */
 public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
 
     public OperationQuery(Token qualifier, Token name,
+            List<PTType> argumentTypes) {
+        super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
+                FacilityStrategy.FACILITY_IGNORE, false),
+                new OperationSearcher(name, argumentTypes));
+    }
+
+    public OperationQuery(Token qualifier, String name,
             List<PTType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_IGNORE, false),

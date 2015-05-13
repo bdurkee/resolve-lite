@@ -4,12 +4,14 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveBaseVisitor;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +24,15 @@ import java.util.stream.Collectors;
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final ParseTreeProperty<MTType> types, typeValues;
+    private final ParseTreeProperty<PTType> progTypes, progTypeValues;
     private final ParseTreeProperty<PExp> built;
 
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
-            ParseTreeProperty<MTType> mathTypes,
-            ParseTreeProperty<MTType> mathTypeValues) {
-        this.types = mathTypes;
-        this.typeValues = mathTypeValues;
+            AnnotatedTree annotations) {
+        this.types = annotations.mathTypes;
+        this.typeValues = annotations.mathTypeValues;
+        this.progTypes = annotations.progTypes;
+        this.progTypeValues = annotations.progTypeValues;
         this.built = repo;
     }
 
@@ -127,6 +131,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), built))//
+                .progType(progTypes.get(ctx)) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
@@ -146,6 +151,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .mathTypeValue(typeValues.get(ctx)) //
+                .progType(progTypes.get(ctx)) //
                 .mathType(types.get(ctx));
         built.put(ctx, result.build());
     }
@@ -154,7 +160,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
                 .mathTypeValue(typeValues.get(ctx)) //
-                .mathType(types.get(ctx))   //
+                .progType(progTypes.get(ctx)) //
+                .mathType(types.get(ctx)) //
                 .literal(true);
         built.put(ctx, result.build());
     }

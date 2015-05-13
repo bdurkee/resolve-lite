@@ -263,8 +263,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns {@code true} iff at least one of the conjuncts in {@code this}
-     * is equal to {@code e}.
+     * Returns {@code true} iff at least one of the conjuncts in {@code this} is
+     * equal to {@code e}.
      * 
      * @param e The {@code PExp} to test for equality.
      * 

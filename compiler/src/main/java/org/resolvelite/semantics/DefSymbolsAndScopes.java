@@ -269,7 +269,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         annotateExps(ctx); //annotate all exps before we leave
         symtab.endScope();
-        insertFunction(ctx.name, ctx, ctx.type());
+        insertFunction(ctx.name, ctx, ctx.requiresClause(),
+                ctx.ensuresClause(), ctx.type());
     }
 
     @Override public void enterOperationDecl(
@@ -293,7 +294,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.OperationDeclContext ctx) {
         annotateExps(ctx); //annotate all exps before we leave
         symtab.endScope();
-        insertFunction(ctx.name, ctx, ctx.type());
+        insertFunction(ctx.name, ctx, ctx.requiresClause(),
+                ctx.ensuresClause(), ctx.type());
     }
 
     @Override public void exitParameterDeclGroup(
@@ -344,6 +346,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     }
 
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx,
+            ResolveParser.RequiresClauseContext requires,
+            ResolveParser.EnsuresClauseContext ensures,
             @Nullable ResolveParser.TypeContext type) {
         try {
             List<ProgParameterSymbol> params =
@@ -351,8 +355,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             ProgParameterSymbol.class);
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(symtab.getTypeGraph(), name.getText(),
-                            ctx, getProgramType(type), getRootModuleID(),
-                            params, walkingModuleParameter));
+                            ctx, requires, ensures, getProgramType(type),
+                            getRootModuleID(), params, walkingModuleParameter));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -409,8 +413,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             return g.getTrueExp();
         }
         PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<>(symtab.mathPExps, tree.mathTypes,
-                        tree.mathTypeValues);
+                new PExpBuildingListener<>(symtab.mathPExps, tree);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

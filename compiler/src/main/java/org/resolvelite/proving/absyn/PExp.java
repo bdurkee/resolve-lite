@@ -1,6 +1,8 @@
 package org.resolvelite.proving.absyn;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.*;
 
@@ -8,25 +10,51 @@ public abstract class PExp {
 
     public final int structureHash;
     public final int valueHash;
-    private MTType type, typeValue;
+    private final MTType type, typeValue;
+
+    /**
+     * Since the removal of the PExp hierarchy, the role of PExp has expanded
+     * somewhat and because we now build PExps for the vcgen that are from
+     * stricly programmatic things, it also seems fitting to add (optional)
+     * pttype info to this hierachy.
+     */
+    private final PTType progType, progTypeValue;
 
     private Set<String> cachedSymbolNames = null;
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
 
     public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
-        this(hashes.structureHash, hashes.valueHash, type, typeValue);
+        this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
+                null);
     }
 
-    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
+    public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue,
+            PTType progType, PTType progTypeValue) {
+        this(hashes.structureHash, hashes.valueHash, type, typeValue, progType,
+                progTypeValue);
+    }
+
+    public PExp(int structureHash, int valueHash, MTType type,
+            MTType typeValue, PTType progType, PTType progTypeValue) {
         this.type = type;
         this.typeValue = typeValue;
+        this.progType = progType;
+        this.progTypeValue = progTypeValue;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
     }
 
     @Override public int hashCode() {
         return valueHash;
+    }
+
+    public final PTType getProgType() {
+        return progType;
+    }
+
+    public final PTType getProgTypeValue() {
+        return progTypeValue;
     }
 
     public final MTType getMathType() {
