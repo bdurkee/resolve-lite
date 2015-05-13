@@ -6,6 +6,8 @@ import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.*;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -160,18 +162,44 @@ public class TypeGraph {
         return result;
     }
 
-    public PSymbol formConjunct(PExp c1, PExp c2) {
-        return new PSymbolBuilder("and").arguments(c1, c2)
-                .style(DisplayStyle.INFIX).mathType(BOOLEAN).build();
+    public PExp formConjuncts(PExp... e) {
+        return formConjuncts(Arrays.asList(e));
+    }
+
+    public PExp formConjuncts(List<PExp> e) {
+        if ( e == null || e.isEmpty() ) {
+            throw new IllegalArgumentException("can't conjunct an empty or "
+                    + "null list");
+        }
+        Iterator<PExp> segsIter = e.iterator();
+        PExp result = segsIter.next();
+        if ( e.size() == 1 ) {
+            return e.get(0);
+        }
+        while (segsIter.hasNext()) {
+            PExp current = segsIter.next();
+            result = formConjunct(result, current);
+        }
+        return result;
+    }
+
+    public PSymbol formConjunct(PExp p, PExp q) {
+        return new PSymbolBuilder("and").mathType(BOOLEAN).arguments(p, q)
+                .style(DisplayStyle.INFIX).build();
     }
 
     public final PSymbol getTrueExp() {
-        return new PSymbolBuilder("true").literal(true).mathType(BOOLEAN)
+        return new PSymbolBuilder("true").mathType(BOOLEAN).literal(true)
                 .build();
     }
 
     public final PSymbol getFalseExp() {
-        return new PSymbolBuilder("false").literal(true).mathType(BOOLEAN)
+        return new PSymbolBuilder("false").mathType(BOOLEAN).literal(true)
                 .build();
+    }
+
+    public final PSymbol formImplies(PExp p, PExp q) {
+        return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
+                .style(DisplayStyle.INFIX).build();
     }
 }

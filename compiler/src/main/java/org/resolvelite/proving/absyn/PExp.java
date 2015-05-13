@@ -77,12 +77,13 @@ public abstract class PExp {
     protected abstract void splitIntoConjuncts(List<PExp> accumulator);
 
     /**
-     * Returns a copy of this {@code PExp} with all occurences of variables
-     * prefixed with <tt>@</tt> are replaced by just the variable.
+     * Returns a copy of this {@code PExp} where all variables prefixed with
+     * an '@' are replaced by just the variable. This is essentially applying
+     * the 'remember' rule useful in {@link org.resolvelite.vcgen.VCGenerator}.
      * 
-     * @return A <tt>@</tt>-clean version of this {@code PExp}.
+     * @return A '@-clean' version of this {@code PExp}.
      */
-    public abstract PExp withIncomingVariablesRemoved();
+    public abstract PExp withIncomingSignsErased();
 
     public abstract PExp flipQuantifiers();
 

@@ -32,16 +32,17 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
             PExpBuildingListener<PExp> pexpAnnotator =
-                    new PExpBuildingListener<>(unit.mathTypes,
-                            unit.mathTypeValues);
+                    new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
+                            unit.mathTypes, unit.mathTypeValues);
             //Todo: run "sanitycheckusages" here
             walker.walk(populator, unit.getRoot());
             walker.walk(pexpAnnotator, unit.getRoot());
-            unit.mathPExps = pexpAnnotator.getFinalMapping();
+            unit.mathPExps = compiler.symbolTable.mathPExps;
             PrintTypes pt = new PrintTypes(unit);
             walker.walk(pt, unit.getRoot());
-            int i;
-            i = 0;
+
         }
+        int i;
+        i = 0;
     }
 }

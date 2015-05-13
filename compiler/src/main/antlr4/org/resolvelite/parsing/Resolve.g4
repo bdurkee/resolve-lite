@@ -70,6 +70,7 @@ conceptBlock
     :   ( operationDecl
         | typeModelDecl
         | mathDefinitionDecl
+        | constraintClause
         )+
     ;
 

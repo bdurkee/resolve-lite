@@ -6,6 +6,7 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public class VCAssume extends VCRuleBackedStat<PExp> {
+
     public VCAssume(PExp contents, RuleApplicationStrategy<PExp> apply,
             VCAssertiveBlock.VCAssertiveBlockBuilder enclosingBlock) {
         super(contents, enclosingBlock, apply);

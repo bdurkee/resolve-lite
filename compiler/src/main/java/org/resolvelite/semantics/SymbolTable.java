@@ -1,5 +1,6 @@
 package org.resolvelite.semantics;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -11,10 +12,8 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SymbolTable {
 
@@ -138,10 +137,10 @@ public class SymbolTable {
     }
 
     private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
+    public final ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
     public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
-    public final ParseTreeProperty<PExp> specASTs = new ParseTreeProperty<>();
 
     private ModuleScopeBuilder curModuleScope = null;
     private final TypeGraph typeGraph;

@@ -22,20 +22,23 @@ import java.util.stream.Collectors;
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final ParseTreeProperty<MTType> types, typeValues;
-    private final ParseTreeProperty<PExp> built = new ParseTreeProperty<>();
+    private final ParseTreeProperty<PExp> built;
 
-    public PExpBuildingListener(ParseTreeProperty<MTType> mathTypes,
+    public PExpBuildingListener(ParseTreeProperty<PExp> repo,
+            ParseTreeProperty<MTType> mathTypes,
             ParseTreeProperty<MTType> mathTypeValues) {
         this.types = mathTypes;
         this.typeValues = mathTypeValues;
-    }
-
-    public ParseTreeProperty<PExp> getFinalMapping() {
-        return built;
+        this.built = repo;
     }
 
     @SuppressWarnings("unchecked") @Nullable public T getBuiltPExp(ParseTree t) {
         return (T) built.get(t);
+    }
+
+    @Override public void exitConstraintClause(
+            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        built.put(ctx, built.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitRequiresClause(

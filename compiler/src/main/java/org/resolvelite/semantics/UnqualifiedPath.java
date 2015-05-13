@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.searchers.SymbolTypeSearcher;
 import org.resolvelite.semantics.searchers.TableSearcher;
 import org.resolvelite.semantics.searchers.TableSearcher.SearchContext;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
@@ -76,18 +77,11 @@ public class UnqualifiedPath implements ScopeSearchPath {
                         SearchContext.SOURCE_MODULE);
 
         //Next, if requested, we search any local facilities.
-        /*if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
-            throw new UnsupportedOperationException(
-                    "searching for unqualified symbols using 'facility generic' or 'facility instantiate' "
-                            + "is not currently permitted by the compiler. It"
-                            + "could be easily added, though for code generation reasons"
-                            + "we currently are disallowing this; thus,"
-                            + "resolve programmers must  explicitly qualify any "
-                            + "facility-bound symbols");
-            // finished =
-            //         searchFacilities(searcher, results, source,
-            //                 genericInstantiations, searchedScopes, repo);
-        }*/
+        if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
+            finished =
+                    searchFacilities(searcher, results, source,
+                            genericInstantiations, searchedScopes, repo);
+        }
 
         //Finally, if requested, we search imports
         if ( (results.isEmpty() || !localPriority)
@@ -117,6 +111,59 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 throw new RuntimeException(nsse);
             }
         }
+        return finished;
+    }
+
+    public <E extends Symbol> boolean searchFacilities(
+            TableSearcher<E> searcher, List<E> result, Scope source,
+            Map<String, PTType> genericInstantiations,
+            Set<Scope> searchedScopes, SymbolTable repo)
+            throws DuplicateSymbolException {
+
+        List<FacilitySymbol> facilities =
+                source.getMatches(SymbolTypeSearcher.FACILITY_SEARCHER,
+                        SearchContext.SOURCE_MODULE);
+
+        FacilitySymbol facility;
+
+        boolean finished = false;
+        Iterator<FacilitySymbol> facilitiesIter = facilities.iterator();
+        ModuleParameterization facilityConcept;
+        Scope facilityScope;
+        while (!finished && facilitiesIter.hasNext()) {
+            facility = facilitiesIter.next();
+            facilityConcept = facility.getFacility().getSpecification();
+
+            facilityScope =
+                    facilityConcept.getScope(facilityStrategy
+                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+
+            finished =
+                    facilityScope.addMatches(searcher, result, searchedScopes,
+                            new HashMap<String, PTType>(), null,
+                            SearchContext.FACILITY);
+
+            // YS Edits
+            // Search any enhancements in this facility declaration
+            /*  if (!finished) {
+                  List<ModuleParameterization> enhancementList =
+                          facility.getEnhancements();
+                  for (ModuleParameterization facEnh : enhancementList) {
+                      // Obtain the scope for the enhancement
+                      facilityScope =
+                              facEnh
+                                      .getScope(myFacilityStrategy
+                                              .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                      // Search and add matches.
+                      finished =
+                              facilityScope.addMatches(searcher, result,
+                                      searchedScopes,
+                                      new HashMap<String, PTType>(), null,
+                                      SearchContext.FACILITY);
+                  }
+              }*/
+        }
+
         return finished;
     }
 }

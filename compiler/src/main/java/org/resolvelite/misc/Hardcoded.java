@@ -25,7 +25,11 @@ public class Hardcoded {
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("Powerset", null, g.POWERSET);
             b.addBinding("union", null, g.UNION);
+            b.addBinding("min_int", null, g.Z, null);
+            b.addBinding("max_int", null, g.Z, null);
 
+            b.addBinding("<", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.Z, g.Z).build());
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
             b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)

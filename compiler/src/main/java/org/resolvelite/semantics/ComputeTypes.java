@@ -206,6 +206,11 @@ public class ComputeTypes extends ResolveBaseListener {
         tr.mathTypeValues.put(ctx, typeValue);
     }
 
+    @Override public void exitConstraintClause(
+            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+    }
+
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
@@ -539,7 +544,8 @@ public class ComputeTypes extends ResolveBaseListener {
     protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) return null;
         PExpBuildingListener<T> builder =
-                new PExpBuildingListener<T>(tr.mathTypes, tr.mathTypeValues);
+                new PExpBuildingListener<T>(symtab.mathPExps, tr.mathTypes,
+                        tr.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

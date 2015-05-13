@@ -89,4 +89,9 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
+    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
 }

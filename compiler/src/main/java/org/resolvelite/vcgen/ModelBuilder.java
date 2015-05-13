@@ -13,19 +13,25 @@ import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.semantics.programtype.*;
+import org.resolvelite.semantics.query.SymbolTypeQuery;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.ProgVariableSymbol;
+import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol;
+import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Builds assertive code and applies proof rules to the code within.
@@ -62,14 +68,33 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         moduleLevelRequires = normalizePExp(ctx.requiresClause());
+        moduleLevelConstraint = conjunctGlobalConstraints(ctx);
+        int i = 0;
+        i = 0;
+
+    }
+
+    private PExp conjunctGlobalConstraints(ParserRuleContext scopedCtx) {
+        List<GlobalMathAssertionSymbol> wrappedAssertions =
+                symtab.scopes.get(scopedCtx).query(
+                        new SymbolTypeQuery<GlobalMathAssertionSymbol>(
+                                GlobalMathAssertionSymbol.class));
+        if (wrappedAssertions.isEmpty()) {
+            return g.getTrueExp();
+        }
+        return g.formConjuncts(wrappedAssertions.stream().filter(isConstraint())
+                .map(e -> symtab.mathPExps.get(e.getAssertion()))
+                .collect(Collectors.toList()));
     }
 
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        curAssertiveBuilder =
-                new VCAssertiveBlockBuilder(g, ctx, tr)
-                        .freeVars();
+        curAssertiveBuilder = new VCAssertiveBlockBuilder(g, ctx, tr);
+
     }
+
+    @Override public void exitFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {}
 
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
@@ -81,8 +106,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, ctx, tr)
                         .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
                         .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
-                        .assume(moduleLevelRequires).remember() //
-                        .assume(topAssume) //
+                        .assume(moduleLevelRequires).assume(topAssume) //
+                        .assume(moduleLevelConstraint).remember() //
                         .finalConfirm(bottomConfirm);
     }
 
@@ -161,9 +186,12 @@ public class ModelBuilder extends ResolveBaseListener {
         return existingEnsures;
     }
 
-    private PExp normalizePExp(ParserRuleContext ctx) {
-        PExp e = tr.mathPExps.get(ctx);
-        return e != null ? e : g.getTrueExp();
+    public static Predicate<Symbol> isConstraint() {
+        return s -> s.getDefiningTree() instanceof ResolveParser.ConstraintClauseContext;
     }
 
+    private PExp normalizePExp(ParserRuleContext ctx) {
+        PExp e = symtab.mathPExps.get(ctx);
+        return e != null ? e : g.getTrueExp();
+    }
 }

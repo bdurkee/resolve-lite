@@ -61,7 +61,7 @@ public class PSet extends PExp {
 
     }
 
-    @Override public PExp withIncomingVariablesRemoved() {
+    @Override public PExp withIncomingSignsErased() {
         return null;
     }
 

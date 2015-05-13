@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
@@ -33,6 +32,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected TypeGraph g;
 
     boolean walkingModuleParameter = false;
+    int globalSpecCount = 0;
 
     DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -56,6 +56,26 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.name, ctx.name.getText());
             }
+        }
+    }
+
+    @Override public void exitConstraintClause(
+            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        String name = ctx.getText() + "_" + globalSpecCount;
+        globalSpecCount++;
+        //if we're a global constraint, let's make sure our expression recieves
+        //appropriate types
+        if ( !(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext) ) {
+            annotateExps(ctx);
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GlobalMathAssertionSymbol(name, ctx.mathAssertionExp(),
+                            ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
         }
     }
 
@@ -389,7 +409,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             return g.getTrueExp();
         }
         PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<>(tree.mathTypes, tree.mathTypeValues);
+                new PExpBuildingListener<>(symtab.mathPExps, tree.mathTypes,
+                        tree.mathTypeValues);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

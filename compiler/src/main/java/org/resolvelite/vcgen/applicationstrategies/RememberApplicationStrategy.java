@@ -11,8 +11,7 @@ public class RememberApplicationStrategy
     @Override public AssertiveCode applyRule(Void statement,
             VCAssertiveBlock.VCAssertiveBlockBuilder block) {
         PExp confirm = block.finalConfirm.getContents();
-        return block.finalConfirm(confirm.withIncomingVariablesRemoved())
-                .snapshot();
+        return block.finalConfirm(confirm.withIncomingSignsErased()).snapshot();
     }
 
     @Override public String getDescription() {

@@ -8,7 +8,6 @@ import org.resolvelite.misc.Utils;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -249,7 +248,7 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override public PExp withIncomingVariablesRemoved() {
+    @Override public PExp withIncomingSignsErased() {
         if ( arguments.isEmpty() ) {
             //literal is false by default, so no need to explicitly state it.
             return new PSymbolBuilder(this.name).mathType(getMathType())
@@ -262,7 +261,7 @@ public class PSymbol extends PExp {
                             .mathTypeValue(getMathTypeValue()).style(dispStyle)
                             .quantification(quantification);
             for (PExp arg : arguments) {
-                result.arguments(arg.withIncomingVariablesRemoved());
+                result.arguments(arg.withIncomingSignsErased());
             }
             return result.build();
         }

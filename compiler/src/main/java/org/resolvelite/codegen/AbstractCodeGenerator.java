@@ -23,8 +23,7 @@ public abstract class AbstractCodeGenerator {
     public final int lineWidth = 72;
 
     public AbstractCodeGenerator(ResolveCompiler rc, AnnotatedTree rootTarget,
-                                 String language)
-            throws IllegalStateException {
+            String language) throws IllegalStateException {
         this.compiler = rc;
         this.module = rootTarget;
         this.language = language;
@@ -49,16 +48,15 @@ public abstract class AbstractCodeGenerator {
 
     @Nullable public STGroup loadTemplates() {
         String groupFileName =
-                CodeGenerator.TEMPLATE_ROOT + "/" + language + "/"
-                        + language + STGroup.GROUP_FILE_EXTENSION;
+                CodeGenerator.TEMPLATE_ROOT + "/" + language + "/" + language
+                        + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);
         }
         catch (IllegalArgumentException iae) {
-            compiler.errorManager
-                    .toolError(ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae,
-                            language);
+            compiler.errorManager.toolError(
+                    ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, language);
         }
         if ( result == null ) {
             return null;
@@ -92,4 +90,3 @@ public abstract class AbstractCodeGenerator {
         return result;
     }
 }
-
