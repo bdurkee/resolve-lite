@@ -39,8 +39,7 @@ public class VCAssertiveBlock extends AssertiveCode {
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
 
-        public VCAssertiveBlockBuilder(TypeGraph g,
-                Scope contextScope,
+        public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
                 ParserRuleContext ctx, AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;

@@ -4,8 +4,7 @@ import java.util.*;
 
 public class BoundVariableVisitor extends TypeVisitor {
 
-    private Deque<Map<String, BindingInfo>> boundVariables =
-            new LinkedList<>();
+    private Deque<Map<String, BindingInfo>> boundVariables = new LinkedList<>();
 
     public MTType getInnermostBinding(String name) {
         return getInnermostBindingInfo(name).type;

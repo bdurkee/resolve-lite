@@ -3,10 +3,7 @@ package org.resolvelite.proving.absyn;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.semantics.MTType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PSet extends PExp {
@@ -67,6 +64,10 @@ public class PSet extends PExp {
 
     @Override public PExp flipQuantifiers() {
         return null;
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+        return new HashSet<>();
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {

@@ -224,8 +224,10 @@ public enum ErrorKind {
             + "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]"
             + "<endif>", ErrorSeverity.ERROR),
 
-    MALFORMED_ENSURES_CLAUSE(31, "malformed ensures clause on return-valued " +
-            "operation '<arg>'; found '<arg2>', but should be of the form '<arg>=[expr]'",
+    MALFORMED_ENSURES_CLAUSE(
+            31,
+            "malformed ensures clause on return-valued "
+                    + "operation '<arg>'; found '<arg2>', but should be of the form '<arg>=[expr]'",
             ErrorSeverity.ERROR);
 
     public final int code;

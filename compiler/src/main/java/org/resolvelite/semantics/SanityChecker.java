@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
@@ -13,8 +14,8 @@ import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.symbol.OperationSymbol;
 
-//Todo: Sanity checker jason was gonna write.
-//Todo: Note that there should be no type assignment in here. Only checking.
+// Todo: Sanity checker jason was gonna write.
+// Todo: Note that there should be no type assignment in here. Only checking.
 public class SanityChecker extends ResolveBaseListener {
 
     private final ResolveCompiler compiler;
@@ -27,14 +28,34 @@ public class SanityChecker extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    @Override public void exitOperationDecl(
-            @NotNull ResolveParser.OperationDeclContext ctx) {
+    @Override public void exitConceptModule(
+            @NotNull ResolveParser.ConceptModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
 
+    @Override public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
+
+    @Override public void exitPrecisModule(
+            @NotNull ResolveParser.PrecisModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
+
+    @Override public void exitOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {}
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        if (ctx.ensuresClause() != null) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+
+        if ( ctx.ensuresClause() != null ) {
 
         }
     }
@@ -50,8 +71,8 @@ public class SanityChecker extends ResolveBaseListener {
     }
 
     protected void checkTypes(@NotNull ParserRuleContext parent,
-                              @NotNull ResolveParser.ProgExpContext t1,
-                              @NotNull ResolveParser.ProgExpContext t2) {
+            @NotNull ResolveParser.ProgExpContext t1,
+            @NotNull ResolveParser.ProgExpContext t2) {
         PTType leftType = tr.progTypes.get(t1);
         PTType rightType = tr.progTypes.get(t2);
         if ( !leftType.acceptableFor(rightType) ) {
@@ -61,23 +82,37 @@ public class SanityChecker extends ResolveBaseListener {
         }
     }
 
-    protected void sanityCheckEnsuresClause(OperationSymbol op,
-                                          PExp ensures) {
+    protected void sanityCheckEnsuresClause(OperationSymbol op, PExp ensures) {
         boolean result = ensures.isFunction() && op.getEnsures() != null;
-        if (result) {
-            PSymbol s = ((PSymbol)ensures);
-            result = s.getName().equals("=")
-                    && s.getArguments().get(0).toString().equals(op.getName());
+        if ( result ) {
+            PSymbol s = ((PSymbol) ensures);
+            result =
+                    s.getName().equals("=")
+                            && s.getArguments().get(0).toString()
+                                    .equals(op.getName());
         }
 
-        if (!result) {
+        if ( !result ) {
             ResolveParser.EnsuresClauseContext ens = op.getEnsures();
-            compiler.errorManager.semanticError(ErrorKind.MALFORMED_ENSURES_CLAUSE,
-                    ((ParserRuleContext) op.getDefiningTree()).getStart(),
-                    op.getName(), ens == null ? "null" :
-                            ens.mathAssertionExp().getText());
+            compiler.errorManager.semanticError(
+                    ErrorKind.MALFORMED_ENSURES_CLAUSE, ((ParserRuleContext) op
+                            .getDefiningTree()).getStart(), op.getName(),
+                    ens == null ? "null" : ens.mathAssertionExp().getText());
         }
     }
 
-    //protected void sanityCheckEnsuresClause();
+    /**
+     * Checks if {@code topName.equals(endName)}; issuing a warning if not.
+     * 
+     * @param topName The name at the top that introduces a block.
+     * 
+     * @param endName The name following the end portion of a named block.
+     */
+    private void sanityCheckBlockEnds(Token topName, Token endName) {
+        if ( !topName.equals(endName) ) {
+            compiler.errorManager.semanticError(
+                    ErrorKind.MISMATCHED_BLOCK_NAMES, endName,
+                    topName.getText(), endName.getText());
+        }
+    }
 }

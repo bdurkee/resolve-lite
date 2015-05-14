@@ -14,8 +14,10 @@ import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.vcgen.model.AssertiveCode;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FunctionAssignApplicationStrategy
@@ -35,7 +37,7 @@ public class FunctionAssignApplicationStrategy
                     .substitute(leftReplacee, rightReplacer));
             return block.snapshot();
         }
-        //At this point the rhs of the assign must be a function call.
+        //At this point the rhs of the assign is necessarily a function call.
         PSymbol asPSym = (PSymbol) rightReplacer;
         OperationSymbol op = getOperation(block.scope, asPSym);
 
@@ -54,21 +56,29 @@ public class FunctionAssignApplicationStrategy
                 .substitute(formals, actuals);
         block.confirm(opRequires);
 
-        PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures())
-                .substitute(formals, actuals);
+        PSymbol opEnsures = (PSymbol)annotations
+                .getPExpFor(block.g, op.getEnsures());
+        if (opEnsures.isLiteralTrue()) return block.snapshot();
 
-        //update our list of formal vars to account for incoming vars in the
-        //ensures clause
-        for (PSymbol f : opEnsures.getIncomingVariables()) {
+        PExp ensuresLeft = opEnsures.getArguments().get(0);
+        PExp ensuresRight = opEnsures.getArguments().get(1);
+
+        //update our list of formal params to account for incoming refs to
+        //themselves in the ensures clause
+        for (PSymbol f : ensuresRight.getIncomingVariables()) {
             Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
         }
+
         /**
-         * Now we substitute the formals for actuals in the ensures clause
-         * {@code f}, and replace all occurences of {@code v} in {@code Q}
+         * Now we substitute the formals for actuals in the rhs of the ensures
+         * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
          * with the modified {@code f} (formally, {@code Q[v -> f[x -> u]]}).
          */
+        ensuresRight = ensuresRight.substitute(formals, actuals);
 
-
+        block.finalConfirm(block.finalConfirm.getContents()
+                .substitute(formals.stream().map(PExp::withIncomingSignsErased)
+                        .collect(Collectors.toList()), ensuresRight));
         return block.snapshot();
     }
 
@@ -76,8 +86,7 @@ public class FunctionAssignApplicationStrategy
         List<PTType> argTypes = rhs.getArguments().stream()
                 .map(PExp::getProgType).collect(Collectors.toList());
         try {
-            //Todo: Pass in the qualifier once I add it to PSymbol
-            return s.queryForOne(new OperationQuery(null,
+            return s.queryForOne(new OperationQuery(rhs.getQualifier(),
                     rhs.getName(), argTypes));
         }
         catch (NoSuchSymbolException|DuplicateSymbolException e) {

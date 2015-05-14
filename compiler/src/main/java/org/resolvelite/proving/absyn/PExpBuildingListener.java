@@ -7,13 +7,11 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
-import org.resolvelite.parsing.ResolveBaseVisitor;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.programtype.PTType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +23,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final ParseTreeProperty<MTType> types, typeValues;
     private final ParseTreeProperty<PTType> progTypes, progTypeValues;
-    private final ParseTreeProperty<PExp> built;
+    private final ParseTreeProperty<PExp> repo;
 
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
             AnnotatedTree annotations) {
@@ -33,56 +31,56 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
         this.progTypeValues = annotations.progTypeValues;
-        this.built = repo;
+        this.repo = repo;
     }
 
     @SuppressWarnings("unchecked") @Nullable public T getBuiltPExp(ParseTree t) {
-        return (T) built.get(t);
+        return (T) repo.get(t);
     }
 
     @Override public void exitConstraintClause(
             @NotNull ResolveParser.ConstraintClauseContext ctx) {
-        built.put(ctx, built.get(ctx.mathAssertionExp()));
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
-        built.put(ctx, built.get(ctx.mathAssertionExp()));
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitEnsuresClause(
             @NotNull ResolveParser.EnsuresClauseContext ctx) {
-        built.put(ctx, built.get(ctx.mathAssertionExp()));
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitMathTypeExp(
             @NotNull ResolveParser.MathTypeExpContext ctx) {
-        built.put(ctx, built.get(ctx.mathExp()));
+        repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
     @Override public void exitMathAssertionExp(
             @NotNull ResolveParser.MathAssertionExpContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
+        repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
     @Override public void exitMathPrimeExp(
             @NotNull ResolveParser.MathPrimeExpContext ctx) {
-        built.put(ctx, built.get(ctx.mathPrimaryExp()));
+        repo.put(ctx, repo.get(ctx.mathPrimaryExp()));
     }
 
     @Override public void exitMathPrimaryExp(
             @NotNull ResolveParser.MathPrimaryExpContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
+        repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText()) //
-                .arguments(Utils.collect(PExp.class, ctx.mathExp(), built)) //
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo)) //
                 .style(PSymbol.DisplayStyle.INFIX) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathVariableExp(
@@ -91,24 +89,24 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
-                .arguments(Utils.collect(PExp.class, ctx.mathExp(), built))//
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))//
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathSetCollectionExp(
             @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
         List<PExp> elements = ctx.mathExp().stream()
-                .map(built::get)
+                .map(repo::get)
                 .collect(Collectors.toList());
-        built.put(ctx, new PSet(types.get(ctx), typeValues.get(ctx), elements));
+        repo.put(ctx, new PSet(types.get(ctx), typeValues.get(ctx), elements));
     }
 
     @Override public void exitMathBooleanExp(
@@ -116,7 +114,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
                 .mathType(types.get(ctx)) //
                 .literal(true);
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathIntegerExp(
@@ -124,36 +122,36 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbolBuilder(ctx.getText()) //
                 .mathType(types.get(ctx)) //
                 .literal(true);
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
-                .arguments(Utils.collect(PExp.class, ctx.progExp(), built))//
-                .progType(progTypes.get(ctx)) //
+                .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))//
+                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
-        built.put(ctx, built.get(ctx.progPrimary()));
+        repo.put(ctx, repo.get(ctx.progPrimary()));
     }
 
     @Override public void exitProgPrimary(
             @NotNull ResolveParser.ProgPrimaryContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
+        repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .mathTypeValue(typeValues.get(ctx)) //
-                .progType(progTypes.get(ctx)) //
+                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
                 .mathType(types.get(ctx));
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitProgIntegerExp(
@@ -163,6 +161,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .progType(progTypes.get(ctx)) //
                 .mathType(types.get(ctx)) //
                 .literal(true);
-        built.put(ctx, result.build());
+        repo.put(ctx, result.build());
     }
 }

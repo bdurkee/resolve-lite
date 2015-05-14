@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 /**
  * A {@code LazyMappingIterator} wraps an {@code Iterator} that iterates over
- * objects of type {@code I} and presents an interface for  mapping over
+ * objects of type {@code I} and presents an interface for mapping over
  * objects of type {@code O}. A {@code Mapping} from {@code I} to {@code O} is
  * used to transform each object as it is requested.
  * 

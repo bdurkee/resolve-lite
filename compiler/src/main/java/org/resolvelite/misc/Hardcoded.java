@@ -28,7 +28,15 @@ public class Hardcoded {
             b.addBinding("min_int", null, g.Z, null);
             b.addBinding("max_int", null, g.Z, null);
 
+            b.addBinding("+", null,
+                    new MTFunctionBuilder(g, g.Z).paramTypes(g.Z, g.Z).build());
             b.addBinding("<", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.Z, g.Z).build());
+            b.addBinding("<=", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.Z, g.Z).build());
+            b.addBinding(">", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.Z, g.Z).build());
+            b.addBinding(">=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.Z, g.Z).build());
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());

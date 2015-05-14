@@ -32,4 +32,11 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
                 FacilityStrategy.FACILITY_IGNORE, false),
                 new OperationSearcher(name, argumentTypes));
     }
+
+    public OperationQuery(String qualifier, String name,
+            List<PTType> argumentTypes) {
+        super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
+                FacilityStrategy.FACILITY_IGNORE, false),
+                new OperationSearcher(name, argumentTypes));
+    }
 }

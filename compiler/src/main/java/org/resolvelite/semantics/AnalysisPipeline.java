@@ -40,8 +40,8 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;
-           // PrintTypes pt = new PrintTypes(unit);
-           // walker.walk(pt, unit.getRoot());
+            // PrintTypes pt = new PrintTypes(unit);
+            // walker.walk(pt, unit.getRoot());
         }
     }
 }

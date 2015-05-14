@@ -17,7 +17,7 @@ public abstract class PExp {
      * somewhat and because we now build PExps for the vcgen that are from
      * stricly programmatic things, it also seems fitting to add (optional)
      * pttype info to this hierachy.
-     *
+     * 
      * In other words, if this mathematical PExp was born out of a programmatic
      * expression, program type info should be present, if not, then these
      * should/will be null.
@@ -28,7 +28,6 @@ public abstract class PExp {
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
-
 
     public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
         this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
@@ -71,15 +70,19 @@ public abstract class PExp {
         return typeValue;
     }
 
+    public PExp substitute(List<? extends PExp> currents, PExp... repls) {
+        return substitute(currents, Arrays.asList(repls));
+    }
+
     public PExp substitute(List<? extends PExp> currents,
-                           List<? extends PExp> replacements) {
-        if (currents.size() != replacements.size()) {
+            List<? extends PExp> replacements) {
+        if ( currents.size() != replacements.size() ) {
             throw new IllegalArgumentException("substitution lists must be"
                     + "the same length");
         }
         Iterator<? extends PExp> replIter = replacements.iterator();
         Iterator<? extends PExp> currIter = currents.iterator();
-        Map<PExp, PExp> result = new HashMap<>();
+        Map<PExp, PExp> result = new LinkedHashMap<>();
         while (replIter.hasNext()) {
             result.put(currIter.next(), replIter.next());
         }
@@ -87,7 +90,7 @@ public abstract class PExp {
     }
 
     public PExp substitute(PExp current, PExp replacement) {
-        Map<PExp, PExp> e = new HashMap<>();
+        Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
         return substitute(e);
     }
@@ -137,10 +140,9 @@ public abstract class PExp {
     public abstract PExp flipQuantifiers();
 
     public final Set<PSymbol> getIncomingVariables() {
-        if ( cachedIncomingVariables == null) {
-            cachedQuantifiedVariables =
-                    Collections
-                            .unmodifiableSet(getIncomingVariablesNoCache());
+        if ( cachedIncomingVariables == null ) {
+            cachedIncomingVariables =
+                    Collections.unmodifiableSet(getIncomingVariablesNoCache());
         }
         return cachedIncomingVariables;
     }

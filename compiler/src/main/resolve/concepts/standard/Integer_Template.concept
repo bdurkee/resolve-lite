@@ -1,6 +1,6 @@
 Concept Integer_Template;
 
-    Constraint min_int < 0 and 0 < max_int;
+    Constraint min_int <= 0 and 0 <= max_int;
 
     Type Family Integer is modeled by Z;
         exemplar i;

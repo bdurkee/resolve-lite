@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
  * as function calls, with the former two represented as functions with no
  * arguments.
  */
-
-//Todo: Add qualifier info to this class (eventually we'll need a PDot subclass too)
 public class PSymbol extends PExp {
 
     public static enum Quantification {
@@ -52,7 +50,7 @@ public class PSymbol extends PExp {
         INFIX, OUTFIX, PREFIX
     }
 
-    private final String leftPrint, rightPrint, name;
+    private final String qualifier, leftPrint, rightPrint, name;
 
     private final List<PExp> arguments = new ArrayList<>();
     private final boolean literalFlag, incomingFlag;
@@ -64,9 +62,11 @@ public class PSymbol extends PExp {
                 builder.arguments.iterator()), builder.mathType,
                 builder.mathTypeValue, builder.progType, builder.progTypeValue);
 
+        this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
         this.rightPrint = builder.rprint;
+
         this.arguments.addAll(builder.arguments);
         this.literalFlag = builder.literal;
         this.incomingFlag = builder.incoming;
@@ -146,6 +146,10 @@ public class PSymbol extends PExp {
 
     public String getName() {
         return name;
+    }
+
+    public String getQualifier() {
+        return qualifier;
     }
 
     public List<PExp> getArguments() {
@@ -288,15 +292,18 @@ public class PSymbol extends PExp {
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new HashSet<>();
-        if (incomingFlag) {
-            if (arguments.size() == 0) {
+        if ( incomingFlag ) {
+            if ( arguments.size() == 0 ) {
                 result.add(this);
             }
-            else {
-                result.add(new PSymbolBuilder(name).mathType(getMathType())
-                        .quantification(quantification).build());
-            }
         }
+        Iterator<PExp> argumentIter = arguments.iterator();
+        Set<PSymbol> argumentVariables;
+        while (argumentIter.hasNext()) {
+            argumentVariables = argumentIter.next().getIncomingVariables();
+            result.addAll(argumentVariables);
+        }
+        return result;
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
@@ -410,12 +417,12 @@ public class PSymbol extends PExp {
 
     public static class PSymbolBuilder implements Builder<PSymbol> {
         protected final String name, lprint, rprint;
+        protected String qualifier;
+
         protected boolean incoming = false;
         protected boolean literal = false;
-        protected String description;
         protected DisplayStyle style = DisplayStyle.PREFIX;
         protected Quantification quantification = Quantification.NONE;
-        protected Token loc;
         protected MTType mathType, mathTypeValue;
         protected PTType progType, progTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
@@ -438,6 +445,15 @@ public class PSymbol extends PExp {
             }
             this.lprint = lprint;
             this.rprint = rprint;
+        }
+
+        public PSymbolBuilder qualifier(Token q) {
+            return qualifier(q != null ? q.getText() : null);
+        }
+
+        public PSymbolBuilder qualifier(String q) {
+            this.qualifier = q;
+            return this;
         }
 
         public PSymbolBuilder literal(boolean e) {
@@ -473,16 +489,6 @@ public class PSymbol extends PExp {
         public PSymbolBuilder style(DisplayStyle e) {
             style = e;
             return this;
-        }
-
-        public PSymbolBuilder desc(String desc, Token location) {
-            this.description = desc;
-            this.loc = location;
-            return this;
-        }
-
-        public PSymbolBuilder desc(String desc, ParserRuleContext ctx) {
-            return desc(desc, ctx != null ? ctx.getStart() : null);
         }
 
         public PSymbolBuilder incoming(boolean e) {
