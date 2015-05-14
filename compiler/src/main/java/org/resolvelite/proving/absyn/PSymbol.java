@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
  * as function calls, with the former two represented as functions with no
  * arguments.
  */
+
+//Todo: Add qualifier info to this class (eventually we'll need a PDot subclass too)
 public class PSymbol extends PExp {
 
     public static enum Quantification {
@@ -188,7 +190,9 @@ public class PSymbol extends PExp {
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
                         .mathType(getMathType()) //
-                        .mathTypeValue(getMathTypeValue()).build();
+                        .mathTypeValue(getMathTypeValue()) //
+                        .progType(getProgType()) //
+                        .progTypeValue(getProgTypeValue()).build();
                 PExp functionSubstitution = substitutions.get(asVariable);
 
                 if ( functionSubstitution != null ) {
@@ -211,11 +215,18 @@ public class PSymbol extends PExp {
                 newArgs.add(mm);
             }
 
-            result = new PSymbolBuilder(name) //
-                    .mathType(getMathType()).mathTypeValue(getMathTypeValue()) //
-                    .quantification(newQuantification) //
-                    .arguments(newArgs).style(dispStyle) //
-                    .incoming(incomingFlag).build();
+            result =
+                    new PSymbolBuilder(name)
+                            //
+                            .mathType(getMathType())
+                            .mathTypeValue(getMathTypeValue())
+                            //
+                            .quantification(newQuantification)
+                            //
+                            .arguments(newArgs).style(dispStyle)
+                            //
+                            .incoming(incomingFlag).progType(getProgType())
+                            .progTypeValue(getProgTypeValue()).build();
         }
         return result;
     }
@@ -254,13 +265,16 @@ public class PSymbol extends PExp {
             //literal is false by default, so no need to explicitly state it.
             return new PSymbolBuilder(this.name).mathType(getMathType())
                     .mathTypeValue(getMathTypeValue()).style(dispStyle)
-                    .literal(literalFlag).build();
+                    .literal(literalFlag).progType(getProgType())
+                    .progTypeValue(getProgTypeValue()).build();
         }
         else {
             PSymbolBuilder result =
                     new PSymbolBuilder(name).mathType(getMathType())
                             .mathTypeValue(getMathTypeValue()).style(dispStyle)
-                            .quantification(quantification);
+                            .quantification(quantification)
+                            .progType(getProgType())
+                            .progTypeValue(getProgTypeValue());
             for (PExp arg : arguments) {
                 result.arguments(arg.withIncomingSignsErased());
             }
@@ -270,6 +284,19 @@ public class PSymbol extends PExp {
 
     @Override public PExp flipQuantifiers() {
         return this;
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+        if (incomingFlag) {
+            if (arguments.size() == 0) {
+                result.add(this);
+            }
+            else {
+                result.add(new PSymbolBuilder(name).mathType(getMathType())
+                        .quantification(quantification).build());
+            }
+        }
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {

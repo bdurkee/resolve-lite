@@ -5,13 +5,10 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 /**
- * <p>
- * A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
- * iterates over objects of type <code>I</code> and presents an interface for
- * mapping over objects of type <code>O</code>. A <code>Mapping</code> from
- * <code>I</code> to <code>O</code> is used to transform each object as it is
- * requested.
- * </p>
+ * A {@code LazyMappingIterator} wraps an {@code Iterator} that iterates over
+ * objects of type {@code I} and presents an interface for  mapping over
+ * objects of type {@code O}. A {@code Mapping} from {@code I} to {@code O} is
+ * used to transform each object as it is requested.
  * 
  * @param <I> The type of the objects in the source iterator.
  * @param <O> The type of the final objects.

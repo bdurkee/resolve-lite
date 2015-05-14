@@ -202,7 +202,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (NoSuchSymbolException | UnexpectedSymbolException e) {
             //if we don't find the type model at all (or we find something
             //that ISN'T a type model) -- it doesn't matter, we'll proceed under
-            //the assumption that the thing isn't actually
+            //the assumption that the thing is a local, standalone type rep.
         }
         String exemplarName =
                 typeDefn != null ? typeDefn.getExemplar().getName() : ctx

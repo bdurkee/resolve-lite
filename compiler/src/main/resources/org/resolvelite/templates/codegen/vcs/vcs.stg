@@ -30,9 +30,9 @@
  */
 
 VCOutputFile(vcs, chunks) ::= <<
-<chunks : {c|<c.assertCode.text>
+<chunks : {c|<c.assertCode.text>    <!print out the big, starting construct!>
 
-<c.applicationSteps; separator="\n">}; separator="\n">
+<c.applicationSteps; separator="\n">}; separator="\n"> <!now print the steps!>
 >>
 
 RuleApplicationStep(app, step) ::= <<

@@ -120,7 +120,7 @@ public class ProgParameterSymbol extends Symbol {
         return this;
     }
 
-    public PExp asPExp() {
+    public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName()).progType(declaredType)
                 .mathType(declaredType.toMath()).build();
     }

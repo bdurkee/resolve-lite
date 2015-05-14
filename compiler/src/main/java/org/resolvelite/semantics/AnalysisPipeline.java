@@ -34,12 +34,14 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             unit);
-            //Todo: run "sanitycheckusages" here
+            SanityChecker sanityChecker = new SanityChecker(compiler, unit);
+
             walker.walk(populator, unit.getRoot());
             walker.walk(pexpAnnotator, unit.getRoot());
+            walker.walk(sanityChecker, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;
-            PrintTypes pt = new PrintTypes(unit);
-            walker.walk(pt, unit.getRoot());
+           // PrintTypes pt = new PrintTypes(unit);
+           // walker.walk(pt, unit.getRoot());
         }
     }
 }

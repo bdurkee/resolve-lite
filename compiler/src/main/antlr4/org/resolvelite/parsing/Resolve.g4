@@ -30,7 +30,6 @@
  */
 grammar Resolve;
 
-
 module
     :   precisModule
     |   conceptModule

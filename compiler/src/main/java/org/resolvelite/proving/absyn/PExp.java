@@ -17,12 +17,18 @@ public abstract class PExp {
      * somewhat and because we now build PExps for the vcgen that are from
      * stricly programmatic things, it also seems fitting to add (optional)
      * pttype info to this hierachy.
+     *
+     * In other words, if this mathematical PExp was born out of a programmatic
+     * expression, program type info should be present, if not, then these
+     * should/will be null.
      */
     private final PTType progType, progTypeValue;
 
     private Set<String> cachedSymbolNames = null;
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
+    private Set<PSymbol> cachedIncomingVariables = null;
+
 
     public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
         this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
@@ -63,6 +69,21 @@ public abstract class PExp {
 
     public final MTType getMathTypeValue() {
         return typeValue;
+    }
+
+    public PExp substitute(List<? extends PExp> currents,
+                           List<? extends PExp> replacements) {
+        if (currents.size() != replacements.size()) {
+            throw new IllegalArgumentException("substitution lists must be"
+                    + "the same length");
+        }
+        Iterator<? extends PExp> replIter = replacements.iterator();
+        Iterator<? extends PExp> currIter = currents.iterator();
+        Map<PExp, PExp> result = new HashMap<>();
+        while (replIter.hasNext()) {
+            result.put(currIter.next(), replIter.next());
+        }
+        return substitute(result);
     }
 
     public PExp substitute(PExp current, PExp replacement) {
@@ -114,6 +135,17 @@ public abstract class PExp {
     public abstract PExp withIncomingSignsErased();
 
     public abstract PExp flipQuantifiers();
+
+    public final Set<PSymbol> getIncomingVariables() {
+        if ( cachedIncomingVariables == null) {
+            cachedQuantifiedVariables =
+                    Collections
+                            .unmodifiableSet(getIncomingVariablesNoCache());
+        }
+        return cachedIncomingVariables;
+    }
+
+    public abstract Set<PSymbol> getIncomingVariablesNoCache();
 
     public final Set<PSymbol> getQuantifiedVariables() {
         if ( cachedQuantifiedVariables == null ) {

@@ -1,6 +1,7 @@
 package org.resolvelite.vcgen.model;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveParser;
@@ -38,7 +39,8 @@ public class VCAssertiveBlock extends AssertiveCode {
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
 
-        public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
+        public VCAssertiveBlockBuilder(TypeGraph g,
+                Scope contextScope,
                 ParserRuleContext ctx, AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
@@ -72,8 +74,7 @@ public class VCAssertiveBlock extends AssertiveCode {
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
             if ( confirm == null ) {
-                throw new IllegalArgumentException(
-                        "final confirm cannot be null");
+                throw new IllegalArgumentException("finalconfirm==null");
             }
             this.finalConfirm = new VCConfirm(confirm, this);
             return this;

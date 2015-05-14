@@ -17,6 +17,13 @@ public abstract class VCRuleBackedStat<T> extends OutputModelObject {
         this.enclosingBlock = block;
     }
 
+    /**
+     * Applies the provided {@link RuleApplicationStrategy} to this statement
+     * and returns an immutable view of the current {@link AssertiveCode}
+     * proceeding its application.
+     *
+     * @return
+     */
     public AssertiveCode reduce() {
         return applicationStrategy.applyRule(contents, enclosingBlock);
     }

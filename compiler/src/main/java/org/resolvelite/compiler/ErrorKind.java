@@ -175,7 +175,7 @@ public enum ErrorKind {
             + "family in terms of itself", ErrorSeverity.ERROR),
 
     INCOMPATIBLE_TYPES(23, "<arg>:<arg2>, <arg3>:<arg4> have incompatible "
-            + "program types in <arg5>", ErrorSeverity.ERROR),
+            + "types in <arg5>", ErrorSeverity.ERROR),
 
     NO_SUCH_MODULE(24, "no such module: <arg>", ErrorSeverity.ERROR),
 
@@ -222,7 +222,11 @@ public enum ErrorKind {
     NO_SUCH_OPERATION(30, "no operation found corresponding to call "
             + "<arg> <if(arg2)>" + "with the following arguments: "
             + "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]"
-            + "<endif>", ErrorSeverity.ERROR);
+            + "<endif>", ErrorSeverity.ERROR),
+
+    MALFORMED_ENSURES_CLAUSE(31, "malformed ensures clause on return-valued " +
+            "operation '<arg>'; found '<arg2>', but should be of the form '<arg>=[expr]'",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
