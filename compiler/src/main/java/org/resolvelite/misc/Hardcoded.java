@@ -3,10 +3,9 @@ package org.resolvelite.misc;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.semantics.DuplicateSymbolException;
-import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
 import org.resolvelite.semantics.ScopeBuilder;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 public class Hardcoded {
 
@@ -29,6 +28,8 @@ public class Hardcoded {
             b.addBinding("max_int", null, g.Z, null);
 
             b.addBinding("+", null,
+                    new MTFunctionBuilder(g, g.Z).paramTypes(g.Z, g.Z).build());
+            b.addBinding("-", null,
                     new MTFunctionBuilder(g, g.Z).paramTypes(g.Z, g.Z).build());
             b.addBinding("<", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.Z, g.Z).build());

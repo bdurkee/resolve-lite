@@ -6,7 +6,7 @@ import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTElement;
 import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 public class GenericSymbol extends Symbol {
     private final PTType type;

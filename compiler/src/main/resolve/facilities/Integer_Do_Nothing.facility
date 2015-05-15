@@ -1,0 +1,9 @@
+Facility Integer_Do_Nothing;
+
+    Oper Do_Nothing (restores I: Std_Integer_Fac::Integer);
+        Procedure
+            Std_Integer_Fac::Increment(I);
+            Std_Integer_Fac::Decrement(I);
+    end Do_Nothing;
+
+end Integer_Do_Nothing;

@@ -1,11 +1,8 @@
 package org.resolvelite.semantics;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 

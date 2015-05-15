@@ -48,11 +48,8 @@ import org.resolvelite.misc.LogManager;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveLexer;
 import org.resolvelite.parsing.ResolveParser;
-import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.AnalysisPipeline;
 import org.resolvelite.semantics.SymbolTable;
-import org.resolvelite.typereasoning.TypeGraph;
 import org.resolvelite.vcgen.VCGenPipeline;
 
 import java.io.*;
@@ -392,11 +389,9 @@ public class ResolveCompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errorManager);
             ParserRuleContext start = parser.module();
-
-            AnnotatedTree result =
-                    new AnnotatedTree(start, Utils.getModuleName(start),
-                            parser.getSourceName(), parser);
-            return result;
+            return new AnnotatedTree(start, Utils.getModuleName(start),
+                    parser.getSourceName(),
+                    parser.getNumberOfSyntaxErrors() > 0);
         }
         catch (IOException ioe) {
             errorManager.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);

@@ -1,6 +1,5 @@
 package org.resolvelite.proving.absyn;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -9,7 +8,7 @@ import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;

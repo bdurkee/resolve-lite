@@ -31,18 +31,10 @@
 
 Facility Integer_Exchange;
 
-    Oper Incr (updates I: Std_Integer_Fac::Integer): Std_Integer_Fac::Integer;
-            requires I + 1 <= max_int;
-            ensures	Incr = @I + 1;
-        Procedure
-            Incr := Std_Integer_Fac::Sum(I, 1);
-    end Incr;
-
     Oper Exchange (updates I, J: Std_Integer_Fac::Integer);
             ensures J = @I and I = @J;
         Procedure
             I :=: J;
-            I := Incr(J);
     end Exchange;
 
 end Integer_Exchange;

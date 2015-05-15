@@ -18,7 +18,6 @@ import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
-import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -200,7 +199,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     ctx.name.getText());
         }
         catch (NoSuchSymbolException | UnexpectedSymbolException e) {
-            //if we don't find the type model at all (or we find something
+            //if we don't find the type model (or we find something
             //that ISN'T a type model) -- it doesn't matter, we'll proceed under
             //the assumption that the thing is a local, standalone type rep.
         }

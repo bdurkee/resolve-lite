@@ -1,6 +1,5 @@
 package org.resolvelite.semantics;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -10,10 +9,8 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Hardcoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SymbolTable {
 

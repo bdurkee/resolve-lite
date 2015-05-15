@@ -6,6 +6,14 @@ Concept Integer_Template;
         exemplar i;
         initialization ensures i = 0;
 
+    Oper Increment (updates i: Integer);
+        requires i + 1 <= max_int;
+        ensures	i = @i + 1;
+
+    Oper Decrement (updates i: Integer);
+        requires min_int <= i - 1;
+        ensures	i = @i - 1;
+
     Operation Sum (evaluates i, j: Integer): Integer;
 
     Operation Difference (evaluates i, j: Integer): Integer;

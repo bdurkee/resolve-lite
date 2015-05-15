@@ -6,9 +6,9 @@ import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
 public abstract class VCRuleBackedStat<T> extends OutputModelObject {
 
-    private final T contents;
-    private final RuleApplicationStrategy<T> applicationStrategy;
-    private final VCAssertiveBlockBuilder enclosingBlock;
+    protected final T contents;
+    protected final RuleApplicationStrategy<T> applicationStrategy;
+    protected final VCAssertiveBlockBuilder enclosingBlock;
 
     public VCRuleBackedStat(T contents, VCAssertiveBlockBuilder block,
             RuleApplicationStrategy<T> apply) {

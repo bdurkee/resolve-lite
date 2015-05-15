@@ -21,14 +21,14 @@ import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.symbol.ProgVariableSymbol;
 import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.vcgen.applicationstrategies.ExplicitCallApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.FunctionAssignApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +53,12 @@ public class ModelBuilder extends ResolveBaseListener {
     private VCAssertiveBlockBuilder curAssertiveBuilder = null;
     private final VCOutputFile outputCollector = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
+
+    //Todo: Write an adaptor for this guy so we can reuse its logic in
+    //'function assign application'
+    private final static RuleApplicationStrategy //
+    <ResolveParser.CallStmtContext> EXPLICIT_CALL_APPLICATION =
+            new ExplicitCallApplicationStrategy<ResolveParser.CallStmtContext>();
 
     private final static RuleApplicationStrategy //
     <ResolveParser.SwapStmtContext> SWAP_APPLICATION =
@@ -150,6 +156,12 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.AssignStmtContext ctx) {
         stats.put(ctx, new VCCode<ResolveParser.AssignStmtContext>(ctx,
                 FUNCTION_ASSIGN_APPLICATION, curAssertiveBuilder));
+    }
+
+    @Override public void exitCallStmt(
+            @NotNull ResolveParser.CallStmtContext ctx) {
+        stats.put(ctx, new VCCode<ResolveParser.CallStmtContext>(ctx,
+                EXPLICIT_CALL_APPLICATION, curAssertiveBuilder));
     }
 
     private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,

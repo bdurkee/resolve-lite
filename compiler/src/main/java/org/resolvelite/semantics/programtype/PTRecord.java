@@ -3,7 +3,7 @@ package org.resolvelite.semantics.programtype;
 import org.resolvelite.semantics.MTCartesian;
 import org.resolvelite.semantics.MTCartesian.Element;
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,5 @@
 Concept Bdd_Search_Store_Template<T>
-        (evaluates Max_Capacity: Std_Integer_Fac :: Integer);
+        (evaluates Max_Capacity: Std_Integer_Fac::Integer);
     --requires Max_Capacity > 0;
 
     Type Family Store is

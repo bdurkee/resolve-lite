@@ -1,11 +1,7 @@
 package org.resolvelite.semantics;
 
-import org.resolvelite.typereasoning.TypeGraph;
-
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a type that is simply a named reference to some bound variable.

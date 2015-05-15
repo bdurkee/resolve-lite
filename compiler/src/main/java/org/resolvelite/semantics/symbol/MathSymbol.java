@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.*;
 import org.resolvelite.semantics.query.GenericQuery;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;

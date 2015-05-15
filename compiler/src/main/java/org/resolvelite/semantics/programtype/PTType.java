@@ -1,10 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
-import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.typereasoning.TypeGraph;
-
-import java.util.Map;
+import org.resolvelite.semantics.TypeGraph;
 
 public abstract class PTType {
 

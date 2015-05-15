@@ -1,17 +1,14 @@
 package org.resolvelite.vcgen.model;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
-import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.symbol.Symbol;
-import org.resolvelite.typereasoning.TypeGraph;
-import org.resolvelite.vcgen.applicationstrategies.RememberApplicationStrategy;
+import org.resolvelite.semantics.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,6 +86,11 @@ public class VCAssertiveBlock extends AssertiveCode {
         }
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {
+            for (VCRuleBackedStat stat : e) {
+                if ( stat == null ) {
+                    throw new IllegalArgumentException("null rule app stat");
+                }
+            }
             this.stats.addAll(e);
             return this;
         }

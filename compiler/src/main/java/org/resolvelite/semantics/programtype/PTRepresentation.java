@@ -1,11 +1,10 @@
 package org.resolvelite.semantics.programtype;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 /**
  * A {@code PTRepresentation} wraps an existing {@link PTType PTType} with

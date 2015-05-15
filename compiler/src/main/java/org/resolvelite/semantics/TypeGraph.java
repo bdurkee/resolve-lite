@@ -1,10 +1,9 @@
-package org.resolvelite.typereasoning;
+package org.resolvelite.semantics;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
-import org.resolvelite.semantics.*;
 
 import java.util.Arrays;
 import java.util.Iterator;

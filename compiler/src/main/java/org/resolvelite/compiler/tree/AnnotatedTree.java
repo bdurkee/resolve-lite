@@ -39,7 +39,7 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 public class AnnotatedTree {
 
@@ -48,7 +48,7 @@ public class AnnotatedTree {
     public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
-    //Yes, this also exists in SymbolTable.java, but we keep a pointer her for
+    //Yes, this also exists in SymbolTable.java, but we keep a pointer here for
     //convenience too. We'll see...
     public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
 
@@ -57,20 +57,14 @@ public class AnnotatedTree {
     public boolean hasErrors;
     public ImportCollection imports;
 
-    /**
-     * Keep a reference to the parser so xpath can be used more easily
-     */
-    private final ResolveParser parser;
-
     public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-            String fileName, ResolveParser parser) {
-        this.hasErrors = parser.getNumberOfSyntaxErrors() > 0;
+            String fileName, boolean hasErrors) {
+        this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
-        this.parser = parser;
         //if we have syntactic errors, better not risk processing imports with
-        //our tree (we usually get npe's).
+        //our tree (as it usually will result in a flurry of npe's).
         if ( !hasErrors ) {
             ImportListener l = new ImportListener();
             ParseTreeWalker.DEFAULT.walk(l, root);
@@ -84,10 +78,6 @@ public class AnnotatedTree {
     public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
         PExp result = mathPExps.get(ctx);
         return result != null ? result : g.getTrueExp();
-    }
-
-    @NotNull public ResolveParser getParser() {
-        return parser;
     }
 
     @NotNull public String getName() {

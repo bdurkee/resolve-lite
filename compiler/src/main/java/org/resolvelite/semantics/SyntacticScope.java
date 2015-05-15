@@ -8,7 +8,6 @@ import org.resolvelite.semantics.searchers.TableSearcher;
 import org.resolvelite.semantics.searchers.TableSearcher.SearchContext;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.Symbol;
-import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;

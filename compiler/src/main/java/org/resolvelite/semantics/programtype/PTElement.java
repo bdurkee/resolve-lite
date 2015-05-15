@@ -1,7 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.resolvelite.semantics.TypeGraph;
 
 /**
  * The program-type corresponding to TypeGraph.ELEMENT, i.e., the type of

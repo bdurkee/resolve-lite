@@ -13,6 +13,7 @@ public class SwapApplicationStrategy
     @Override public AssertiveCode applyRule(
             ResolveParser.SwapStmtContext statement,
             VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+
         PExp workingConfirm = block.finalConfirm.getContents();
         PExp swapLeft = block.annotations.mathPExps.get(statement.left);
         PExp swapRight = block.annotations.mathPExps.get(statement.right);

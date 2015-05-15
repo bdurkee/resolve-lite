@@ -1,7 +1,5 @@
 package org.resolvelite.semantics;
 
-import org.resolvelite.typereasoning.TypeGraph;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.WeakHashMap;
