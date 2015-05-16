@@ -10,6 +10,8 @@ import java.util.*;
 
 public class TypeGraph {
 
+    private final HashMap<MTType, TypeNode> typeNodes;
+
     public final MTInvalid INVALID = MTInvalid.getInstance(this);
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTProper ENTITY = new MTProper(this, "Entity");
@@ -58,6 +60,10 @@ public class TypeGraph {
                 MTFunction f, String calledAsName, List<MTType> arguments) {
             return new MTUnion(g, arguments);
         }
+    }
+
+    public TypeGraph() {
+        this.typeNodes = new HashMap<>();
     }
 
     public boolean isKnownToBeIn(MTType value, MTType expected) {
