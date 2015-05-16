@@ -21,6 +21,7 @@ import org.resolvelite.semantics.programtype.PTRepresentation;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.Comparator;

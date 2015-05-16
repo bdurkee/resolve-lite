@@ -29,6 +29,7 @@ public class FunctionAssignApplicationStrategy
     @Override public AssertiveCode applyRule(
             ResolveParser.AssignStmtContext statement,
             VCAssertiveBlockBuilder block) {
+
         AnnotatedTree annotations = block.annotations;
         PExp leftReplacee = annotations.mathPExps.get(statement.left);
         PExp rightReplacer = annotations.mathPExps.get(statement.right);

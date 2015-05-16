@@ -1,6 +1,7 @@
 package org.resolvelite.semantics;
 
 import org.resolvelite.misc.Utils;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 

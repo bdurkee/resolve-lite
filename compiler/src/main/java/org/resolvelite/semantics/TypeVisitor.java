@@ -8,7 +8,7 @@ public abstract class TypeVisitor {
 
     public void beginMTAbstract(MTAbstract<?> t) {}
 
-    //public void beginMTBigUnion(MTBigUnion t) {}
+    public void beginMTBigUnion(MTBigUnion t) {}
 
     public void beginMTCartesian(MTCartesian t) {}
 
@@ -36,7 +36,7 @@ public abstract class TypeVisitor {
 
     public void endMTAbstract(MTAbstract<?> t) {}
 
-    //public void endMTBigUnion(MTBigUnion t) {}
+    public void endMTBigUnion(MTBigUnion t) {}
 
     public void endMTCartesian(MTCartesian t) {}
 

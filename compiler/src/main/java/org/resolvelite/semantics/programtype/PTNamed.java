@@ -1,7 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 /**
  * Named types for which we know initialization and exemplar info. Note then

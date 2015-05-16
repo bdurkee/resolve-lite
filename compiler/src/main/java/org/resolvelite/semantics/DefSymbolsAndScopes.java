@@ -18,6 +18,7 @@ import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.LinkedHashMap;
 import java.util.List;

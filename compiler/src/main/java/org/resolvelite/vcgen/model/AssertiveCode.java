@@ -6,7 +6,7 @@ import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PSymbol;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 

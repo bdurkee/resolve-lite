@@ -1,5 +1,7 @@
 package org.resolvelite.semantics;
 
+import org.resolvelite.typereasoning.TypeGraph;
+
 public class MTPowersetApplication extends MTFunctionApplication {
     public MTPowersetApplication(TypeGraph g, MTType argument) {
         super(g, g.POWERSET, "Powerset", argument);

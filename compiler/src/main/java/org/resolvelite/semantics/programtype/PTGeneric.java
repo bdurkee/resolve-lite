@@ -2,7 +2,7 @@ package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 public class PTGeneric extends PTType {
 

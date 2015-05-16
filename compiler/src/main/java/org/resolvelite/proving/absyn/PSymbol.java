@@ -8,7 +8,7 @@ import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;

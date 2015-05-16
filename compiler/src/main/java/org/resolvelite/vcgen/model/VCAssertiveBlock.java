@@ -8,7 +8,7 @@ import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.Scope;
 import org.resolvelite.semantics.symbol.Symbol;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;

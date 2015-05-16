@@ -1,5 +1,7 @@
 package org.resolvelite.semantics;
 
+import org.resolvelite.typereasoning.TypeGraph;
+
 import java.util.List;
 
 public interface FunctionApplicationFactory {

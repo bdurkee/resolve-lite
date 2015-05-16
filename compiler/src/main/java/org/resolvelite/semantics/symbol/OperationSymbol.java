@@ -3,7 +3,7 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.List;

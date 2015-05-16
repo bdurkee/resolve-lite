@@ -1,16 +1,15 @@
-package org.resolvelite.semantics;
+package org.resolvelite.typereasoning;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.semantics.*;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class TypeGraph {
+
     public final MTInvalid INVALID = MTInvalid.getInstance(this);
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTProper ENTITY = new MTProper(this, "Entity");
@@ -22,6 +21,7 @@ public class TypeGraph {
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
     public final MTProper Z = new MTProper(this, SSET, false, "Z");
+    public final MTProper N = new MTProper(this, SSET, false, "N");
 
     public final MTProper EMPTY_SET = new MTProper(this, SSET, false,
             "Empty_Set");
@@ -94,11 +94,65 @@ public class TypeGraph {
             //Cls and Entity aren't in anything (expect hyper-whatever, which we aren't concerned with)
             throw TypeMismatchException.INSTANCE;
         }
+        else if (valueTypeValue == null) {
+            result =
+                    getValidTypeConditions(value, value.getMathType(),
+                            expected);
+        }
         else {
             result = getValidTypeConditions(valueTypeValue, expected);
         }
-
         return result;
+    }
+
+    private <V> PExp getValidTypeConditions(V foundValue, MTType foundType,
+                                           MTType expected)
+            throws TypeMismatchException {
+
+        if (foundType == null) {
+            throw new IllegalArgumentException(foundValue + " has no type");
+        }
+        PExp result = getFalseExp();
+
+        boolean foundPath = false;
+        boolean foundTrivialPath = foundType.equals(expected);
+
+        if (foundTrivialPath) {
+            result = getTrueExp();
+        }
+        else if (!foundPath) {
+            throw TypeMismatchException.INSTANCE;
+        }
+        return result;
+    }
+
+    public void addRelationship(PExp bindingExpression, MTType destination,
+                                Scope environment) {
+
+        if (destination == null) {
+            throw new IllegalArgumentException("destination type==null");
+        }
+
+        MTType source = bindingExpression.getMathType();
+        if (source == null) {
+            throw new IllegalArgumentException("bindingExpression type==null");
+        }
+
+        CanonicalizationResult sourceCanonicalResult =
+                canonicalize(source, environment, "s");
+        CanonicalizationResult destinationCanonicalResult =
+                canonicalize(destination, environment, "d");
+
+       /* TypeRelationship relationship =
+                new TypeRelationship(this,
+                        destinationCanonicalResult.canonicalType,
+                        bindingCondition, bindingExpression, finalPredicates);
+
+        TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
+        sourceNode.addRelationship(relationship);*/
+
+        //We'd like to force the presence of the destination node
+        //getTypeNode(destinationCanonicalResult.canonicalType);
     }
 
     private PExp getValidTypeConditions(MTType value, MTType expected)
@@ -159,6 +213,32 @@ public class TypeGraph {
             result = false;
         }
         return result;
+    }
+
+    private CanonicalizationResult canonicalize(MTType t, Scope environment,
+                                                String suffix) {
+        //CanonicalizingVisitor canonicalizer =
+        //        new CanonicalizingVisitor(this, environment, suffix);
+        //t.accept(canonicalizer);
+
+        //TEMP. Use the visitor when ready..
+        Map<String, MTType> quantifiedVariables = new HashMap<>();
+        if (quantifiedVariables.isEmpty()) {
+            quantifiedVariables.put("", CLS);
+        }
+        MTType finalExpression = new MTBigUnion(this, quantifiedVariables, t);
+        return new CanonicalizationResult(finalExpression, new HashMap<>());
+    }
+
+    private class CanonicalizationResult {
+        public final MTType canonicalType;
+        public final Map<String, String> canonicalToEnvironmental;
+
+        public CanonicalizationResult(MTType canonicalType,
+                                      Map<String, String> canonicalToOriginal) {
+            this.canonicalType = canonicalType;
+            this.canonicalToEnvironmental = canonicalToOriginal;
+        }
     }
 
     public PExp formConjuncts(PExp... e) {

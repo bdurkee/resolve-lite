@@ -1,7 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 public abstract class PTType {
 

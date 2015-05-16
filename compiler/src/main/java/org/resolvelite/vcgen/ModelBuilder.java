@@ -27,7 +27,7 @@ import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.semantics.TypeGraph;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Deque;
 import java.util.LinkedList;

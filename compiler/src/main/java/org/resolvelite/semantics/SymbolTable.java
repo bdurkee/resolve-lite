@@ -9,6 +9,7 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Hardcoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 

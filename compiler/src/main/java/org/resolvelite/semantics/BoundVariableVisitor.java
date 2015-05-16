@@ -10,6 +10,14 @@ public class BoundVariableVisitor extends TypeVisitor {
         return getInnermostBindingInfo(name).type;
     }
 
+    @Override public final void beginMTBigUnion(MTBigUnion u) {
+        boundVariables.push(toBindingInfoMap(u.getQuantifiedVariables()));
+    }
+
+    @Override public final void endMTBigUnion(MTBigUnion u) {
+        boundVariables.pop();
+    }
+
     public void annotateInnermostBinding(String name, Object key, Object value) {
 
         getInnermostBindingInfo(name).annotations.put(key, value);
@@ -33,8 +41,17 @@ public class BoundVariableVisitor extends TypeVisitor {
         return binding;
     }
 
-    protected class BindingInfo {
+    protected Map<String, BindingInfo> toBindingInfoMap(Map<String, MTType> vars) {
+        Map<String, BindingInfo> result = new HashMap<>();
 
+        for (Map.Entry<String, MTType> entry : vars.entrySet()) {
+            result.put(entry.getKey(), new BindingInfo(entry.getValue()));
+        }
+
+        return result;
+    }
+
+    protected class BindingInfo {
         public final MTType type;
         public final Map<Object, Object> annotations;
 

@@ -2,6 +2,7 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.compiler.ErrorManager;
 import org.resolvelite.misc.Utils;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 

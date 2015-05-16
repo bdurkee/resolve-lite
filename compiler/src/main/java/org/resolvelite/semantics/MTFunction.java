@@ -2,6 +2,7 @@ package org.resolvelite.semantics;
 
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 
