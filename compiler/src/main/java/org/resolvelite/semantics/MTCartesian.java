@@ -101,6 +101,13 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         return elementTypes;
     }
 
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        List<Element> newElements = new LinkedList<>(elements);
+        newElements
+                .set(index, new Element(newElements.get(index).tag, newType));
+        return new MTCartesian(getTypeGraph(), newElements);
+    }
+
     @Override public String toString() {
         return "(" + Utils.join(elements, " * ") + ")";
     }

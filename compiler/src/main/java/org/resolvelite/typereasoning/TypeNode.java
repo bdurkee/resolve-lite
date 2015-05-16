@@ -3,11 +3,9 @@ package org.resolvelite.typereasoning;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.NoSolutionException;
+import org.resolvelite.semantics.TypeMismatchException;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class TypeNode {
 
@@ -30,21 +28,19 @@ public class TypeNode {
     }
 
     private <V> PExp getValidTypeConditionsTo(V value, MTType dst,
-                                             Map<String, MTType> bindings,
-                                             RelationshipPathStrategy<V> pathStrategy)
-            throws TypeMismatchException {
+            Map<String, MTType> bindings) throws TypeMismatchException {
 
-        if (!myRelationships.containsKey(dst)) {
+        if ( !relationships.containsKey(dst) ) {
             throw TypeMismatchException.INSTANCE;
         }
 
-        Exp finalConditions = myTypeGraph.getFalseVarExp();
-        Set<TypeRelationship> relationships = myRelationships.get(dst);
+        PExp finalConditions = typeGraph.getFalseExp();
+        Set<TypeRelationship> relationships = this.relationships.get(dst);
         boolean foundTrivialPath = false;
         Iterator<TypeRelationship> relationshipIter = relationships.iterator();
         TypeRelationship relationship;
-        Exp relationshipConditions;
-        while (!foundTrivialPath && relationshipIter.hasNext()) {
+        PExp relationshipConditions;
+        /*while (!foundTrivialPath && relationshipIter.hasNext()) {
             relationship = relationshipIter.next();
 
             try {
@@ -55,38 +51,25 @@ public class TypeNode {
                 foundTrivialPath = (relationshipConditions.isLiteralTrue());
 
                 finalConditions =
-                        myTypeGraph.formDisjunct(relationshipConditions,
+                        typeGraph.formDisjunct(relationshipConditions,
                                 finalConditions);
             }
             catch (NoSolutionException nse) {}
+        }*/
+        if ( foundTrivialPath ) {
+            finalConditions = typeGraph.getTrueExp();
         }
-
-        if (foundTrivialPath) {
-            finalConditions = myTypeGraph.getTrueVarExp();
-        }
-
         return finalConditions;
     }
 
-    public static interface RelationshipPathStrategy<V> {
-
-        public PExp getValidTypeConditionsAlong(TypeRelationship relationship,
-                                               V value, Map<String, MTType> bindings)
-                throws NoSolutionException;
-    }
-
-    public static class ExpValuePathStrategy
-            implements
-            RelationshipPathStrategy<PExp> {
-
-        @Override
-        public PExp getValidTypeConditionsAlong(TypeRelationship relationship,
-                                               PExp value,
-                                               Map<String, MTType> bindings)
-                throws NoSolutionException {
-
-            return relationship.getValidTypeConditionsTo(value, bindings);
+    void addRelationship(TypeRelationship relationship) {
+        Set<TypeRelationship> bucket =
+                relationships.get(relationship.getDestinationType());
+        if ( bucket == null ) {
+            bucket = new HashSet<TypeRelationship>();
+            relationships.put(relationship.getDestinationType(), bucket);
         }
+        bucket.add(relationship);
     }
 
     @Override public String toString() {
@@ -97,7 +80,6 @@ public class TypeNode {
                 str.append(rel);
             }
         }
-
         return str.toString();
     }
 }

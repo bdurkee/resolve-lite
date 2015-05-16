@@ -3,10 +3,7 @@ package org.resolvelite.semantics;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
@@ -31,6 +28,17 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         this.function = f;
         this.name = name;
         this.arguments = new ArrayList<MTType>(arguments);
+        setUpComponents();
+    }
+
+    public MTFunctionApplication(TypeGraph g, MTFunction f,
+            List<MTType> arguments) {
+        super(g);
+
+        this.function = f;
+        this.arguments = new LinkedList<MTType>(arguments);
+        this.name = "\\lambda";
+
         setUpComponents();
     }
 
@@ -59,6 +67,22 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     public List<MTType> getArguments() {
         return Collections.unmodifiableList(arguments);
+    }
+
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        MTFunction newFunction = function;
+        List<MTType> newArguments = arguments;
+
+        if ( index == 0 ) {
+            newFunction = (MTFunction) newType;
+        }
+        else {
+            newArguments = new LinkedList<MTType>(newArguments);
+            newArguments.set(index - 1, newType);
+        }
+
+        return new MTFunctionApplication(getTypeGraph(), newFunction, name,
+                newArguments);
     }
 
     @Override public String toString() {

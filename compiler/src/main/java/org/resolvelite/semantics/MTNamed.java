@@ -20,9 +20,12 @@ public class MTNamed extends MTType {
         this.name = name;
     }
 
-    @SuppressWarnings("unchecked") @Override public List<MTType>
-            getComponentTypes() {
-        return (List<MTType>) Collections.EMPTY_LIST;
+    @Override public List<MTType> getComponentTypes() {
+        return Collections.emptyList();
+    }
+
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        throw new IndexOutOfBoundsException();
     }
 
     @Override public String toString() {

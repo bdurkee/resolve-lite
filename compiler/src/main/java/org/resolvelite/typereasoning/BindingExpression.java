@@ -3,6 +3,8 @@ package org.resolvelite.typereasoning;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 
+import java.util.Map;
+
 public class BindingExpression {
 
     private final TypeGraph typeGraph;
@@ -23,5 +25,10 @@ public class BindingExpression {
 
     @Override public String toString() {
         return expression.toString();
+    }
+
+    private MTType getTypeUnderBinding(MTType original,
+            Map<String, MTType> typeBindings) {
+        return original.getCopyWithVariablesSubstituted(typeBindings);
     }
 }

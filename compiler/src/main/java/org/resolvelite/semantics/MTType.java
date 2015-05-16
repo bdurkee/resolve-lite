@@ -61,6 +61,20 @@ public abstract class MTType {
         return renamer.getFinalExpression();
     }
 
+    public abstract MTType withComponentReplaced(int index, MTType newType);
+
+    public MTType withComponentsReplaced(Map<Integer, MTType> newTypes) {
+
+        MTType target = this;
+        for (Map.Entry<Integer, MTType> entry : newTypes.entrySet()) {
+            target =
+                    target.withComponentReplaced(entry.getKey(),
+                            entry.getValue());
+        }
+
+        return target;
+    }
+
     @Override public boolean equals(Object o) {
         // System.err.println("mttype: " + this.toString() + " alph equiv to "
         //         + o.toString() + "?");

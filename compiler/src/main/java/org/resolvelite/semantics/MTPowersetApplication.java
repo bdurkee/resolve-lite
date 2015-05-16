@@ -31,12 +31,30 @@ public class MTPowersetApplication extends MTFunctionApplication {
         for (MTType arg : getArguments()) {
             arg.accept(v);
         }
-
         v.endChildren(this);
 
         v.endMTPowersetApplication(this);
         v.endMTFunctionApplication(this);
         v.endMTAbstract(this);
         v.endMTType(this);
+    }
+
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        MTType result;
+
+        switch (index) {
+        case 0:
+            result =
+                    new MTFunctionApplication(getTypeGraph(),
+                            (MTFunction) newType, getArguments());
+            break;
+        case 1:
+            result = new MTPowersetApplication(getTypeGraph(), newType);
+            break;
+        default:
+            throw new IndexOutOfBoundsException("" + index);
+        }
+
+        return result;
     }
 }

@@ -255,6 +255,24 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return components;
     }
 
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        MTType newDomain = domain;
+        MTType newRange = range;
+
+        switch (index) {
+        case 0:
+            newDomain = newType;
+            break;
+        case 1:
+            newRange = newType;
+            break;
+        default:
+            throw new IndexOutOfBoundsException();
+        }
+        return new MTFunctionBuilder(getTypeGraph(), newRange)
+                .domain(newDomain).elementsRestrict(restrictionFlag).build();
+    }
+
     @Override public String toString() {
         return "(" + domain.toString() + " -> " + range.toString() + ")";
     }

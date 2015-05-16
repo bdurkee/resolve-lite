@@ -50,4 +50,9 @@ public class MTInvalid extends MTType {
         v.endMTInvalid(this);
         v.endMTType(this);
     }
+
+    @Override
+    public MTType withComponentReplaced(int index, MTType newType) {
+        throw new IndexOutOfBoundsException();
+    }
 }

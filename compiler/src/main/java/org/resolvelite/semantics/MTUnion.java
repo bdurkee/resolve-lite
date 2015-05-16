@@ -35,6 +35,12 @@ public class MTUnion extends MTAbstract<MTUnion> {
         return true;
     }
 
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        List<MTType> newMembers = new LinkedList<>(members);
+        newMembers.set(index, newType);
+        return new MTUnion(getTypeGraph(), newMembers);
+    }
+
     @Override public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);

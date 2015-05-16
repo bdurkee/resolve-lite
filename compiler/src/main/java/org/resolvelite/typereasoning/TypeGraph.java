@@ -100,10 +100,9 @@ public class TypeGraph {
             //Cls and Entity aren't in anything (expect hyper-whatever, which we aren't concerned with)
             throw TypeMismatchException.INSTANCE;
         }
-        else if (valueTypeValue == null) {
+        else if ( valueTypeValue == null ) {
             result =
-                    getValidTypeConditions(value, value.getMathType(),
-                            expected);
+                    getValidTypeConditions(value, value.getMathType(), expected);
         }
         else {
             result = getValidTypeConditions(valueTypeValue, expected);
@@ -112,10 +111,9 @@ public class TypeGraph {
     }
 
     private <V> PExp getValidTypeConditions(V foundValue, MTType foundType,
-                                           MTType expected)
-            throws TypeMismatchException {
+            MTType expected) throws TypeMismatchException {
 
-        if (foundType == null) {
+        if ( foundType == null ) {
             throw new IllegalArgumentException(foundValue + " has no type");
         }
         PExp result = getFalseExp();
@@ -123,24 +121,24 @@ public class TypeGraph {
         boolean foundPath = false;
         boolean foundTrivialPath = foundType.equals(expected);
 
-        if (foundTrivialPath) {
+        if ( foundTrivialPath ) {
             result = getTrueExp();
         }
-        else if (!foundPath) {
+        else if ( !foundPath ) {
             throw TypeMismatchException.INSTANCE;
         }
         return result;
     }
 
     public void addRelationship(PExp bindingExpression, MTType destination,
-                                Scope environment) {
+            Scope environment) {
 
-        if (destination == null) {
+        if ( destination == null ) {
             throw new IllegalArgumentException("destination type==null");
         }
 
         MTType source = bindingExpression.getMathType();
-        if (source == null) {
+        if ( source == null ) {
             throw new IllegalArgumentException("bindingExpression type==null");
         }
 
@@ -149,16 +147,27 @@ public class TypeGraph {
         CanonicalizationResult destinationCanonicalResult =
                 canonicalize(destination, environment, "d");
 
-       /* TypeRelationship relationship =
+        TypeRelationship relationship =
                 new TypeRelationship(this,
                         destinationCanonicalResult.canonicalType,
-                        bindingCondition, bindingExpression, finalPredicates);
+                        bindingExpression);
 
         TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
-        sourceNode.addRelationship(relationship);*/
+        sourceNode.addRelationship(relationship);
 
         //We'd like to force the presence of the destination node
         //getTypeNode(destinationCanonicalResult.canonicalType);
+    }
+
+    private TypeNode getTypeNode(MTType t) {
+        TypeNode result = typeNodes.get(t);
+
+        if ( result == null ) {
+            result = new TypeNode(this, t);
+            typeNodes.put(t, result);
+        }
+
+        return result;
     }
 
     private PExp getValidTypeConditions(MTType value, MTType expected)
@@ -222,14 +231,14 @@ public class TypeGraph {
     }
 
     private CanonicalizationResult canonicalize(MTType t, Scope environment,
-                                                String suffix) {
+            String suffix) {
         //CanonicalizingVisitor canonicalizer =
         //        new CanonicalizingVisitor(this, environment, suffix);
         //t.accept(canonicalizer);
 
         //TEMP. Use the visitor when ready..
         Map<String, MTType> quantifiedVariables = new HashMap<>();
-        if (quantifiedVariables.isEmpty()) {
+        if ( quantifiedVariables.isEmpty() ) {
             quantifiedVariables.put("", CLS);
         }
         MTType finalExpression = new MTBigUnion(this, quantifiedVariables, t);
@@ -241,7 +250,7 @@ public class TypeGraph {
         public final Map<String, String> canonicalToEnvironmental;
 
         public CanonicalizationResult(MTType canonicalType,
-                                      Map<String, String> canonicalToOriginal) {
+                Map<String, String> canonicalToOriginal) {
             this.canonicalType = canonicalType;
             this.canonicalToEnvironmental = canonicalToOriginal;
         }
@@ -270,6 +279,11 @@ public class TypeGraph {
 
     public PSymbol formConjunct(PExp p, PExp q) {
         return new PSymbolBuilder("and").mathType(BOOLEAN).arguments(p, q)
+                .style(DisplayStyle.INFIX).build();
+    }
+
+    public PSymbol formDisjunct(PExp p, PExp q) {
+        return new PSymbolBuilder("or").mathType(BOOLEAN).arguments(p, q)
                 .style(DisplayStyle.INFIX).build();
     }
 

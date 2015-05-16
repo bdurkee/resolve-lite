@@ -37,11 +37,11 @@ public class BoundVariableVisitor extends TypeVisitor {
         if ( binding == null ) {
             throw new NoSuchElementException();
         }
-
         return binding;
     }
 
-    protected Map<String, BindingInfo> toBindingInfoMap(Map<String, MTType> vars) {
+    protected Map<String, BindingInfo>
+            toBindingInfoMap(Map<String, MTType> vars) {
         Map<String, BindingInfo> result = new HashMap<>();
 
         for (Map.Entry<String, MTType> entry : vars.entrySet()) {

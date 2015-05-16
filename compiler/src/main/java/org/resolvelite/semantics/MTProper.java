@@ -63,6 +63,10 @@ public class MTProper extends MTType {
         return result;
     }
 
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
+        throw new IndexOutOfBoundsException();
+    }
+
     @Override public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTProper(this);
