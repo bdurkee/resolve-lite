@@ -2,9 +2,12 @@ package org.resolvelite.misc;
 
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
+import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.DuplicateSymbolException;
 import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
 import org.resolvelite.semantics.ScopeBuilder;
+import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.typereasoning.TypeGraph;
 
 public class Hardcoded {
@@ -20,7 +23,7 @@ public class Hardcoded {
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
-            b.addBinding("N", null, g.SSET, g.Z);
+
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("Powerset", null, g.POWERSET);

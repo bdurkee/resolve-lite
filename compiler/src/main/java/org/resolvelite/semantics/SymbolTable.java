@@ -136,6 +136,8 @@ public class SymbolTable {
 
     private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
     public final ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
+    public final ParseTreeProperty<Quantification> quantifiedExps =
+            new ParseTreeProperty<>();
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
     public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();

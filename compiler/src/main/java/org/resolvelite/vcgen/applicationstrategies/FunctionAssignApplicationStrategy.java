@@ -40,6 +40,8 @@ public class FunctionAssignApplicationStrategy
                     rightReplacer));
             return block.snapshot();
         }
+
+        //apply explicit call rule to the exp-call-thing on the rhs.
         return new ExplicitCallApplicationStrategy<ParserRuleContext>()
                 .applyRule(statement.right, block);
     }

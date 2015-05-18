@@ -10,8 +10,11 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
+import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,13 +28,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final ParseTreeProperty<PTType> progTypes, progTypeValues;
     private final ParseTreeProperty<PExp> repo;
 
+    private final ParseTreeProperty<Quantification> quantifiedExps;
+
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
+            ParseTreeProperty<Quantification> quantRepo,
             AnnotatedTree annotations) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
         this.progTypeValues = annotations.progTypeValues;
         this.repo = repo;
+        this.quantifiedExps = quantRepo;
     }
 
     @SuppressWarnings("unchecked") @Nullable public T getBuiltPExp(ParseTree t) {
@@ -87,6 +94,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
+                .quantification(quantifiedExps.get(ctx)) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         repo.put(ctx, result.build());
@@ -96,6 +104,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))//
+                .quantification(quantifiedExps.get(ctx)) //
                 .mathTypeValue(typeValues.get(ctx)) //
                 .mathType(types.get(ctx));
         repo.put(ctx, result.build());

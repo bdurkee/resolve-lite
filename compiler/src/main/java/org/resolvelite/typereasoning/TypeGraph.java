@@ -10,6 +10,19 @@ import java.util.*;
 
 public class TypeGraph {
 
+    /**
+     * A set of non-thread-safe resources to be used during general type
+     * reasoning. This really doesn't belong here, but anything that's reasoning
+     * about types should already have access to a type graph, and only one type
+     * graph is created per thread, so this is a convenient place to put it.
+     */
+    public final PerThreadReasoningResources threadResources =
+            new PerThreadReasoningResources();
+    private final ExpValuePathStrategy EXP_VALUE_PATH =
+            new ExpValuePathStrategy();
+    private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
+            new MTTypeValuePathStrategy();
+
     private final HashMap<MTType, TypeNode> typeNodes;
 
     public final MTInvalid INVALID = MTInvalid.getInstance(this);
@@ -23,7 +36,6 @@ public class TypeGraph {
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
     public final MTProper Z = new MTProper(this, SSET, false, "Z");
-    public final MTProper N = new MTProper(this, SSET, false, "N");
 
     public final MTProper EMPTY_SET = new MTProper(this, SSET, false,
             "Empty_Set");
@@ -97,12 +109,13 @@ public class TypeGraph {
             result = getTrueExp();
         }
         else if ( valueTypeValue == CLS || valueTypeValue == ENTITY ) {
-            //Cls and Entity aren't in anything (expect hyper-whatever, which we aren't concerned with)
+            //Cls and Entity aren't in anything (except hyper-whatever, which we aren't concerned with)
             throw TypeMismatchException.INSTANCE;
         }
         else if ( valueTypeValue == null ) {
             result =
-                    getValidTypeConditions(value, value.getMathType(), expected);
+                    getValidTypeConditions(value, value.getMathType(),
+                            expected, EXP_VALUE_PATH);
         }
         else {
             result = getValidTypeConditions(valueTypeValue, expected);
@@ -111,15 +124,50 @@ public class TypeGraph {
     }
 
     private <V> PExp getValidTypeConditions(V foundValue, MTType foundType,
-            MTType expected) throws TypeMismatchException {
+            MTType expected, NodePairPathStrategy<V> pathStrategy)
+            throws TypeMismatchException {
 
         if ( foundType == null ) {
             throw new IllegalArgumentException(foundValue + " has no type");
         }
+
+        Map<MTType, Map<String, MTType>> potentialFoundNodes =
+                getSyntacticSubtypesWithRelationships(foundType);
+        Map<MTType, Map<String, MTType>> potentialExpectedNodes =
+                getSyntacticSubtypesWithRelationships(expected);
+
         PExp result = getFalseExp();
+        PExp newCondition;
+
+        Iterator<Map.Entry<MTType, Map<String, MTType>>> expectedEntries;
+        Iterator<Map.Entry<MTType, Map<String, MTType>>> foundEntries =
+                potentialFoundNodes.entrySet().iterator();
+        Map.Entry<MTType, Map<String, MTType>> foundEntry, expectedEntry;
 
         boolean foundPath = false;
+
+        //If foundType equals expected, we're done
         boolean foundTrivialPath = foundType.equals(expected);
+
+        while (!foundTrivialPath && foundEntries.hasNext()) {
+            foundEntry = foundEntries.next();
+
+            expectedEntries = potentialExpectedNodes.entrySet().iterator();
+
+            while (!foundTrivialPath && expectedEntries.hasNext()) {
+                expectedEntry = expectedEntries.next();
+                try {
+                    newCondition =
+                            getPathConditions(foundValue, foundEntry,
+                                    expectedEntry, pathStrategy);
+
+                    foundPath = foundPath | !newCondition.isLiteralFalse();
+                    foundTrivialPath = newCondition.isLiteralTrue();
+                    result = formDisjunct(newCondition, result);
+                }
+                catch (TypeMismatchException e) {}
+            }
+        }
 
         if ( foundTrivialPath ) {
             result = getTrueExp();
@@ -127,7 +175,52 @@ public class TypeGraph {
         else if ( !foundPath ) {
             throw TypeMismatchException.INSTANCE;
         }
+
         return result;
+    }
+
+    /**
+     * <p>
+     * Returns the conditions required to establish that <code>foundValue</code>
+     * is a member of the type represented by <code>expectedEntry</code> along
+     * the path from <code>foundEntry</code> to <code>expectedEntry</code>. If
+     * no such conditions exist (i.e., if the conditions would be
+     * <code>false</code>), throws a <code>TypeMismatchException</code>.
+     * </p>
+     * 
+     * @param foundValue The value we'd like to establish is in the type
+     *        represented by <code>expectedEntry</code>.
+     * @param foundEntry A node in the type graph of which
+     *        <code>foundValue</code> is a syntactic subtype.
+     * @param expectedEntry A node in the type graph of which representing a
+     *        type in which we would like to establish <code>foundValue</code>
+     *        resides.
+     * @param pathStrategy The strategy for following the path between
+     *        <code>foundEntry</code> and <code>expectedEntry</code>.
+     * 
+     * @return The conditions under which the path can be followed.
+     * 
+     * @throws TypeMismatchException If the conditions under which the path can
+     *         be followed would be <code>false</code>.
+     */
+    private <V> PExp getPathConditions(V foundValue,
+            Map.Entry<MTType, Map<String, MTType>> foundEntry,
+            Map.Entry<MTType, Map<String, MTType>> expectedEntry,
+            NodePairPathStrategy<V> pathStrategy) throws TypeMismatchException {
+
+        Map<String, MTType> combinedBindings = new HashMap<String, MTType>();
+
+        combinedBindings.clear();
+        combinedBindings.putAll(updateMapLabels(foundEntry.getValue(), "_s"));
+        combinedBindings
+                .putAll(updateMapLabels(expectedEntry.getValue(), "_d"));
+
+        PExp newCondition =
+                pathStrategy.getValidTypeConditionsBetween(foundValue,
+                        foundEntry.getKey(), expectedEntry.getKey(),
+                        combinedBindings);
+
+        return newCondition;
     }
 
     public void addRelationship(PExp bindingExpression, MTType destination,
@@ -156,7 +249,7 @@ public class TypeGraph {
         sourceNode.addRelationship(relationship);
 
         //We'd like to force the presence of the destination node
-        //getTypeNode(destinationCanonicalResult.canonicalType);
+        getTypeNode(destinationCanonicalResult.canonicalType);
     }
 
     private TypeNode getTypeNode(MTType t) {
@@ -166,7 +259,6 @@ public class TypeGraph {
             result = new TypeNode(this, t);
             typeNodes.put(t, result);
         }
-
         return result;
     }
 
@@ -237,6 +329,7 @@ public class TypeGraph {
         //t.accept(canonicalizer);
 
         //TEMP. Use the visitor when ready..
+        //TODO: Learn how to canonicalize MTType's properly by reading the visitor file for it
         Map<String, MTType> quantifiedVariables = new HashMap<>();
         if ( quantifiedVariables.isEmpty() ) {
             quantifiedVariables.put("", CLS);
@@ -254,6 +347,73 @@ public class TypeGraph {
             this.canonicalType = canonicalType;
             this.canonicalToEnvironmental = canonicalToOriginal;
         }
+    }
+
+    private Map<MTType, Map<String, MTType>>
+            getSyntacticSubtypesWithRelationships(MTType query) {
+
+        Map<MTType, Map<String, MTType>> result = new HashMap<>();
+        Map<String, MTType> bindings;
+
+        for (MTType potential : typeNodes.keySet()) {
+            try {
+                bindings = query.getSyntacticSubtypeBindings(potential);
+                result.put(potential, new HashMap<String, MTType>(bindings));
+            }
+            catch (NoSolutionException nse) {}
+        }
+
+        return result;
+    }
+
+    public static MTType getCopyWithVariablesSubstituted(MTType original,
+            Map<String, MTType> substitutions) {
+        VariableReplacingVisitor renamer =
+                new VariableReplacingVisitor(substitutions);
+        original.accept(renamer);
+        return renamer.getFinalExpression();
+    }
+
+    private interface NodePairPathStrategy<V> {
+
+        public PExp getValidTypeConditionsBetween(V sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException;
+    }
+
+    private class ExpValuePathStrategy implements NodePairPathStrategy<PExp> {
+
+        @Override public PExp getValidTypeConditionsBetween(PExp sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+
+            return typeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
+    }
+
+    private class MTTypeValuePathStrategy
+            implements
+                NodePairPathStrategy<MTType> {
+
+        @Override public PExp getValidTypeConditionsBetween(MTType sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+
+            return typeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
+    }
+
+    private <T> Map<String, T> updateMapLabels(Map<String, T> original,
+            String suffix) {
+
+        Map<String, T> result = new HashMap<String, T>();
+        for (Map.Entry<String, T> entry : original.entrySet()) {
+            result.put(entry.getKey() + suffix, entry.getValue());
+        }
+
+        return result;
     }
 
     public PExp formConjuncts(PExp... e) {

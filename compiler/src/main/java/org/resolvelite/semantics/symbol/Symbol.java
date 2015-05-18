@@ -3,28 +3,9 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.UnexpectedSymbolException;
 
+import java.util.Map;
+
 public abstract class Symbol {
-
-    public enum Quantification {
-        NONE {
-
-            @Override public String toString() {
-                return "None";
-            }
-        },
-        UNIVERSAL {
-
-            @Override public String toString() {
-                return "Universal";
-            }
-        },
-        EXISTENTIAL {
-
-            @Override public String toString() {
-                return "Existential";
-            }
-        };
-    }
 
     private final String name, moduleID;
     private final ParseTree definingTree;

@@ -27,11 +27,10 @@ public class MathSymbol extends Symbol {
         if ( typeValue != null ) {
             this.typeValue = typeValue;
         }
-        else if ( type.isKnownToContainOnlyMathTypes() ) {
+        else if ( type.isKnownToContainOnlyMTypes() ) {
             this.typeValue =
                     new MTProper(g, type,
-                            type.membersKnownToContainOnlyMathTypes(),
-                            getName());
+                            type.membersKnownToContainOnlyMTypes(), getName());
         }
         else {
             this.typeValue = null;

@@ -7,7 +7,8 @@ import java.util.List;
 
 /**
  * Represents a type that is simply a named reference to some bound variable.
- * For example, in BigUnion{t : MType}{t}, the second "t" is a named type.
+ * For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
+ * named type.
  */
 public class MTNamed extends MTType {
 
@@ -30,6 +31,10 @@ public class MTNamed extends MTType {
 
     @Override public String toString() {
         return "'" + name + "'";
+    }
+
+    @Override public int getHashCode() {
+        return BASE_HASH;
     }
 
     @Override public void acceptOpen(TypeVisitor v) {

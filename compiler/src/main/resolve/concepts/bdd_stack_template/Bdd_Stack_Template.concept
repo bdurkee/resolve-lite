@@ -5,6 +5,8 @@ Concept Bdd_Stack_Template<T>
         exemplar S;
 
     Operation Push (restores e: T; updates S: Stack);
+        requires ...
+        ensures ...
 
     Operation Pop (replaces e: T; updates S: Stack);
 

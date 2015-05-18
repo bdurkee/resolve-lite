@@ -52,6 +52,7 @@ precisItems
 
 precisItem
     :   mathDefinitionDecl
+    |   mathTypeTheoremDecl
     ;
 
 // concept module
@@ -302,7 +303,7 @@ mathVariableDeclGroup
     ;
 
 mathVariableDecl
-    :   Identifier ':' mathTypeExp
+    :   name=Identifier ':' mathTypeExp
     ;
 
 // mathematical theorems, corollaries, etc
@@ -310,6 +311,19 @@ mathVariableDecl
 mathTheoremDecl
     :   ('Theorem'|'Lemma'|'Corollary') name=Identifier
         ':' mathAssertionExp ';'
+    ;
+
+// mathematical type theorem
+
+mathTypeTheoremDecl
+    :   'Type' 'Theorem' name=Identifier ':'
+        (mathTypeTheoremUniversalVars)+
+        (bindingExp=mathFunctionApplicationExp ':'
+         typeExp=mathFunctionApplicationExp) ';'
+    ;
+
+mathTypeTheoremUniversalVars
+    :   ('Forall'|'Exists') mathVariableDeclGroup ','
     ;
 
 // mathematical definitions
@@ -376,8 +390,11 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   'For' 'all' mathVariableDeclGroup (whereClause)? ','
-         mathAssertionExp
+    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathQuantifiedExpBody
+    ;
+
+mathQuantifiedExpBody
+    :   mathAssertionExp
     ;
 
 mathExp

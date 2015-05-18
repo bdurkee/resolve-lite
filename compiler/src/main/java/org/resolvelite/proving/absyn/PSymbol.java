@@ -7,6 +7,7 @@ import org.resolvelite.misc.Utils;
 import org.resolvelite.misc.Utils.Builder;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -20,30 +21,6 @@ import java.util.stream.Collectors;
  * arguments.
  */
 public class PSymbol extends PExp {
-
-    public static enum Quantification {
-
-        NONE {
-
-            protected Quantification flipped() {
-                return NONE;
-            }
-        },
-        FOR_ALL {
-
-            protected Quantification flipped() {
-                return THERE_EXISTS;
-            }
-        },
-        THERE_EXISTS {
-
-            protected Quantification flipped() {
-                return FOR_ALL;
-            }
-        };
-
-        protected abstract Quantification flipped();
-    }
 
     public static enum DisplayStyle {
         INFIX, OUTFIX, PREFIX

@@ -3,6 +3,7 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTElement;
 import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTType;

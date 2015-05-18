@@ -3,19 +3,20 @@ package org.resolvelite.semantics;
 import org.resolvelite.typereasoning.TypeGraph;
 
 public class MTPowersetApplication extends MTFunctionApplication {
+
     public MTPowersetApplication(TypeGraph g, MTType argument) {
         super(g, g.POWERSET, "Powerset", argument);
     }
 
-    @Override public boolean isKnownToContainOnlyMathTypes() {
+    @Override public boolean isKnownToContainOnlyMTypes() {
         //The powertype is, by definition, a container of containers
         return true;
     }
 
-    @Override public boolean membersKnownToContainOnlyMathTypes() {
+    @Override public boolean membersKnownToContainOnlyMTypes() {
         //I'm the container of all sub-containers of my argument.  My members
         //are containers of members from the original argument.
-        return arguments.get(0).isKnownToContainOnlyMathTypes();
+        return arguments.get(0).isKnownToContainOnlyMTypes();
     }
 
     @Override public void accept(TypeVisitor v) {
@@ -56,5 +57,9 @@ public class MTPowersetApplication extends MTFunctionApplication {
         }
 
         return result;
+    }
+
+    @Override public int getHashCode() {
+        return 0;
     }
 }

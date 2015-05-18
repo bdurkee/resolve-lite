@@ -7,6 +7,8 @@ import java.util.*;
 
 public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
+    private static final int BASE_HASH = "MTFunctionApplication".hashCode();
+
     private final MTFunction function;
     protected final List<MTType> arguments;
     private String name;
@@ -49,15 +51,19 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         this.components = result;
     }
 
-    @Override public boolean isKnownToContainOnlyMathTypes() {
+    @Override public boolean isKnownToContainOnlyMTypes() {
         //Note that, effectively, we represent an instance of the range of our
         //function.  Thus, we're known to contain only MTypes if the function's
         //range's members are known only to contain MTypes.
 
-        return function.getRange().membersKnownToContainOnlyMathTypes();
+        return function.getRange().membersKnownToContainOnlyMTypes();
     }
 
-    @Override public List<? extends MTType> getComponentTypes() {
+    public String getName() {
+        return name;
+    }
+
+    @Override public List<MTType> getComponentTypes() {
         return components;
     }
 
@@ -128,6 +134,15 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         v.endMTFunctionApplication(this);
         v.endMTAbstract(this);
         v.endMTType(this);
+    }
+
+    @Override public int getHashCode() {
+        int result = BASE_HASH + function.getHashCode() + name.hashCode();
+        for (MTType t : arguments) {
+            result *= 73;
+            result += t.getHashCode();
+        }
+        return result;
     }
 
 }

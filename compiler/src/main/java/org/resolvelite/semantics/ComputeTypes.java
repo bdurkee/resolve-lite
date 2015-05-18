@@ -28,11 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Todo: If we want to be more efficient about this we could probably use a
-// visitor,
-// which would allow us to be more specific as to which subexpressions we
-// descend into (e.g.: only those lacking type info).
-public class ComputeTypes extends ResolveBaseListener {
+public class ComputeTypes extends SetScopes {
 
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
@@ -45,17 +41,18 @@ public class ComputeTypes extends ResolveBaseListener {
             new InexactParameterMatch();
 
     private final AnnotatedTree tr;
-    private final ResolveCompiler compiler;
     private final TypeGraph g;
-    private final SymbolTable symtab;
     protected int typeValueDepth = 0;
 
     ComputeTypes(ResolveCompiler rc, SymbolTable symtab,
             AnnotatedTree annotations) {
+        super(rc, symtab);
         this.tr = annotations;
-        this.compiler = rc;
-        this.symtab = symtab;
         this.g = symtab.getTypeGraph();
+    }
+
+    public void setCurrentScope(Scope s) {
+        this.currentScope = s;
     }
 
     //-----------------------------------------------------------
@@ -123,10 +120,8 @@ public class ComputeTypes extends ResolveBaseListener {
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
             ProgVariableSymbol variable =
-                    symtab.getInnermostActiveScope()
-                            .queryForOne(
-                                    new ProgVariableQuery(ctx.qualifier,
-                                            ctx.name, true));
+                    currentScope.queryForOne(new ProgVariableQuery(
+                            ctx.qualifier, ctx.name, true));
             tr.progTypes.put(ctx, variable.getProgramType());
             exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return;
@@ -159,7 +154,7 @@ public class ComputeTypes extends ResolveBaseListener {
                 .collect(Collectors.toList());
         try {
             OperationSymbol opSym =
-                    symtab.getInnermostActiveScope().queryForOne(
+                    currentScope.queryForOne(
                             new OperationQuery(ctx.qualifier, ctx.name,
                                     argTypes));
             tr.progTypes.put(ctx, opSym.getReturnType());
@@ -270,7 +265,7 @@ public class ComputeTypes extends ResolveBaseListener {
 
             MTUnion chainedTypes = new MTUnion(g, elementTypes);
 
-            if (!chainedTypes.isKnownToContainOnlyMathTypes() ||
+            if (!chainedTypes.isKnownToContainOnlyMTypes() ||
                     ctx.mathExp().isEmpty()) {
                 compiler.errorManager
                         .semanticError(ErrorKind.INVALID_MATH_TYPE,
@@ -303,11 +298,9 @@ public class ComputeTypes extends ResolveBaseListener {
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
             ParserRuleContext ctx) {
         try {
-            return symtab
-                    .getInnermostActiveScope()
-                    .queryForOne(
-                            new MathSymbolQuery(qualifier, symbolName, ctx
-                                    .getStart())).toMathSymbol();
+            return currentScope.queryForOne(
+                    new MathSymbolQuery(qualifier, symbolName, ctx.getStart()))
+                    .toMathSymbol();
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException();
@@ -322,11 +315,11 @@ public class ComputeTypes extends ResolveBaseListener {
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
             @NotNull MathSymbol intendedEntry) {
         try {
-            if ( intendedEntry.getQuantification() == Symbol.Quantification.NONE ) {
+            if ( intendedEntry.getQuantification() == Quantification.NONE ) {
                 tr.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
             else {
-                if ( intendedEntry.getType().isKnownToContainOnlyMathTypes() ) {
+                if ( intendedEntry.getType().isKnownToContainOnlyMTypes() ) {
                     tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 }
             }
@@ -352,7 +345,7 @@ public class ComputeTypes extends ResolveBaseListener {
         String operatorStr = name.getText();
 
         List<MathSymbol> sameNameFunctions =
-                symtab.getInnermostActiveScope() //
+                currentScope //
                         .query(new MathFunctionNamedQuery(qualifier, name))
                         .stream()
                         .filter(s -> s.getType() instanceof MTFunction)
@@ -457,8 +450,7 @@ public class ComputeTypes extends ResolveBaseListener {
         for (MathSymbol candidate : candidates) {
             try {
                 candidate =
-                        candidate.deschematize(e.getArguments(),
-                                symtab.getInnermostActiveScope());
+                        candidate.deschematize(e.getArguments(), currentScope);
                 candidateType = (MTFunction) candidate.getType();
                 compiler.info(candidate.getType() + " deschematizes to "
                         + candidateType);
@@ -543,7 +535,8 @@ public class ComputeTypes extends ResolveBaseListener {
     protected <T extends PExp> T buildPExp(ParserRuleContext ctx) {
         if ( ctx == null ) return null;
         PExpBuildingListener<T> builder =
-                new PExpBuildingListener<T>(symtab.mathPExps, tr);
+                new PExpBuildingListener<T>(symtab.mathPExps,
+                        symtab.quantifiedExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

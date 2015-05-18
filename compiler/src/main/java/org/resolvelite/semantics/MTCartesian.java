@@ -8,6 +8,8 @@ import java.util.*;
 
 public class MTCartesian extends MTAbstract<MTCartesian> {
 
+    private static final int BASE_HASH = "MTCartesian".hashCode();
+
     private List<Element> elements = new LinkedList<>();
     private List<MTType> elementTypes = new LinkedList<>();
     private final int size;
@@ -97,7 +99,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         return getElement(index).element;
     }
 
-    @Override public List<? extends MTType> getComponentTypes() {
+    @Override public List<MTType> getComponentTypes() {
         return elementTypes;
     }
 
@@ -154,6 +156,16 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
                 elementsToTags.put(this, tag);
             }
         }
+    }
+
+    @Override public int getHashCode() {
+        int result = BASE_HASH;
+
+        for (Element t : elements) {
+            result *= 37;
+            result += t.element.hashCode();
+        }
+        return result;
     }
 
     @Override public void acceptOpen(TypeVisitor v) {

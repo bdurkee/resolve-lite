@@ -1,7 +1,5 @@
 Concept Boolean_Template;
 
-    Constraint true;
-
     Type Family Boolean is modeled by B;
         exemplar b;
         initialization ensures b = true;

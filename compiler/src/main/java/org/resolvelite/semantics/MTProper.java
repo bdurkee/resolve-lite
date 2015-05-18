@@ -35,11 +35,11 @@ public class MTProper extends MTType {
         this.name = name;
     }
 
-    @Override public boolean isKnownToContainOnlyMathTypes() {
+    @Override public boolean isKnownToContainOnlyMTypes() {
         return knownToContainOnlyTypesFlag;
     }
 
-    @Override public List<? extends MTType> getComponentTypes() {
+    @Override public List<MTType> getComponentTypes() {
         return Collections.emptyList();
     }
 
@@ -84,6 +84,10 @@ public class MTProper extends MTType {
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTProper(this);
         v.endMTType(this);
+    }
+
+    @Override public int getHashCode() {
+        return objectReferenceHashCode();
     }
 
 }

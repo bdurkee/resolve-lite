@@ -4,6 +4,7 @@ import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.BindingException;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.NoSolutionException;
+import org.resolvelite.semantics.TypeMismatchException;
 
 import java.util.*;
 
@@ -43,4 +44,15 @@ public class TypeRelationship {
         return true;
     }
 
+    public PExp getValidTypeConditionsTo(MTType value,
+            Map<String, MTType> typeBindings) throws NoSolutionException {
+        //TODO: stub for now.
+        return typeGraph.getTrueExp();
+    }
+
+    public PExp getValidTypeConditionsTo(PExp value,
+            Map<String, MTType> typeBindings) throws NoSolutionException {
+        //TODO: stub for now.
+        return typeGraph.getTrueExp();
+    }
 }

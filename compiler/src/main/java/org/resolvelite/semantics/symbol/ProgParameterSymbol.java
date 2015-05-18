@@ -2,6 +2,7 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.proving.absyn.PSymbol;
+import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 

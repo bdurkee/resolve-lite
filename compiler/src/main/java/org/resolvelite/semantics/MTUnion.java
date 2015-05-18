@@ -7,6 +7,8 @@ import java.util.*;
 
 public class MTUnion extends MTAbstract<MTUnion> {
 
+    private final static int BASE_HASH = "MTUnion".hashCode();
+
     private List<MTType> members = new ArrayList<>();
 
     public MTUnion(TypeGraph g, List<MTType> members) {
@@ -26,9 +28,9 @@ public class MTUnion extends MTAbstract<MTUnion> {
         return members.contains(member);
     }
 
-    @Override public boolean isKnownToContainOnlyMathTypes() {
+    @Override public boolean isKnownToContainOnlyMTypes() {
         for (MTType member : members) {
-            if ( !member.isKnownToContainOnlyMathTypes() ) {
+            if ( !member.isKnownToContainOnlyMTypes() ) {
                 return false;
             }
         }
@@ -39,6 +41,17 @@ public class MTUnion extends MTAbstract<MTUnion> {
         List<MTType> newMembers = new LinkedList<>(members);
         newMembers.set(index, newType);
         return new MTUnion(getTypeGraph(), newMembers);
+    }
+
+    @Override public int getHashCode() {
+        int result = BASE_HASH;
+
+        for (MTType t : members) {
+            result *= 61;
+            result += t.hashCode();
+        }
+
+        return result;
     }
 
     @Override public void acceptOpen(TypeVisitor v) {

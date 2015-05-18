@@ -9,6 +9,12 @@ import java.util.*;
 
 public class TypeNode {
 
+    private static final ExpValuePathStrategy EXP_VALUE_PATH =
+            new ExpValuePathStrategy();
+
+    private static final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
+            new MTTypeValuePathStrategy();
+
     private MTType type;
     private Map<MTType, Set<TypeRelationship>> relationships;
     private final TypeGraph typeGraph;
@@ -28,7 +34,9 @@ public class TypeNode {
     }
 
     private <V> PExp getValidTypeConditionsTo(V value, MTType dst,
-            Map<String, MTType> bindings) throws TypeMismatchException {
+            Map<String, MTType> bindings,
+            RelationshipPathStrategy<V> pathStrategy)
+            throws TypeMismatchException {
 
         if ( !relationships.containsKey(dst) ) {
             throw TypeMismatchException.INSTANCE;
@@ -40,7 +48,7 @@ public class TypeNode {
         Iterator<TypeRelationship> relationshipIter = relationships.iterator();
         TypeRelationship relationship;
         PExp relationshipConditions;
-        /*while (!foundTrivialPath && relationshipIter.hasNext()) {
+        while (!foundTrivialPath && relationshipIter.hasNext()) {
             relationship = relationshipIter.next();
 
             try {
@@ -55,11 +63,55 @@ public class TypeNode {
                                 finalConditions);
             }
             catch (NoSolutionException nse) {}
-        }*/
+
+        }
         if ( foundTrivialPath ) {
             finalConditions = typeGraph.getTrueExp();
         }
         return finalConditions;
+    }
+
+    public PExp getValidTypeConditionsTo(PExp value, MTType dst,
+            Map<String, MTType> bindings) throws TypeMismatchException {
+
+        return getValidTypeConditionsTo(value, dst, bindings, EXP_VALUE_PATH);
+    }
+
+    public PExp getValidTypeConditionsTo(MTType value, MTType dst,
+            Map<String, MTType> bindings) throws TypeMismatchException {
+
+        return getValidTypeConditionsTo(value, dst, bindings, MTTYPE_VALUE_PATH);
+    }
+
+    public static interface RelationshipPathStrategy<V> {
+
+        public PExp getValidTypeConditionsAlong(TypeRelationship relationship,
+                V value, Map<String, MTType> bindings)
+                throws NoSolutionException;
+    }
+
+    public static class ExpValuePathStrategy
+            implements
+                RelationshipPathStrategy<PExp> {
+
+        @Override public PExp getValidTypeConditionsAlong(
+                TypeRelationship relationship, PExp value,
+                Map<String, MTType> bindings) throws NoSolutionException {
+
+            return relationship.getValidTypeConditionsTo(value, bindings);
+        }
+    }
+
+    public static class MTTypeValuePathStrategy
+            implements
+                RelationshipPathStrategy<MTType> {
+
+        @Override public PExp getValidTypeConditionsAlong(
+                TypeRelationship relationship, MTType value,
+                Map<String, MTType> bindings) throws NoSolutionException {
+
+            return relationship.getValidTypeConditionsTo(value, bindings);
+        }
     }
 
     void addRelationship(TypeRelationship relationship) {

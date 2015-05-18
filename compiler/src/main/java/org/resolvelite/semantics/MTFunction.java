@@ -8,6 +8,8 @@ import java.util.*;
 
 public class MTFunction extends MTAbstract<MTFunction> {
 
+    private static final int BASE_HASH = "MTFunction".hashCode();
+
     private static final FunctionApplicationFactory DEFAULT_FACTORY =
             new VanillaFunctionApplicationFactory();
 
@@ -219,7 +221,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 formalParameterType
                         .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
 
-        if ( formalParameterType.isKnownToContainOnlyMathTypes() ) {
+        if ( formalParameterType.isKnownToContainOnlyMTypes() ) {
             MTType actualParameterMathTypeValue =
                     actualParameter.getMathTypeValue();
 
@@ -251,7 +253,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 getTypeGraph(), this, calledAsName, arguments);
     }
 
-    @Override public List<? extends MTType> getComponentTypes() {
+    @Override public List<MTType> getComponentTypes() {
         return components;
     }
 
@@ -275,6 +277,10 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
     @Override public String toString() {
         return "(" + domain.toString() + " -> " + range.toString() + ")";
+    }
+
+    @Override public int getHashCode() {
+        return BASE_HASH + (domain.hashCode() * 31) + range.hashCode();
     }
 
     public static class MTFunctionBuilder implements Builder<MTFunction> {

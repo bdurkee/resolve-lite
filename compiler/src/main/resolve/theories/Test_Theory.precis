@@ -1,4 +1,7 @@
 Precis Test_Theory;
 
-    Definition X : B;
+    Type Theorem N_Subset_of_Z:
+    Forall n : N,
+           n : Z;
+
 end Test_Theory;

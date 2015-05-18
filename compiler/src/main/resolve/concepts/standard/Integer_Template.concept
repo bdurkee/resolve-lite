@@ -15,6 +15,7 @@ Concept Integer_Template;
         ensures	i = @i - 1;
 
     Operation Sum (evaluates i, j: Integer): Integer;
+        --ensures temp + i;
 
     Operation Difference (evaluates i, j: Integer): Integer;
 

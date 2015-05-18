@@ -28,7 +28,7 @@ public class MTInvalid extends MTType {
         super(g);
     }
 
-    @Override public List<? extends MTType> getComponentTypes() {
+    @Override public List<MTType> getComponentTypes() {
         return Collections.emptyList();
     }
 
@@ -39,10 +39,8 @@ public class MTInvalid extends MTType {
 
     @Override public void accept(TypeVisitor v) {
         acceptOpen(v);
-
         v.beginChildren(this);
         v.endChildren(this);
-
         acceptClose(v);
     }
 
@@ -51,8 +49,11 @@ public class MTInvalid extends MTType {
         v.endMTType(this);
     }
 
-    @Override
-    public MTType withComponentReplaced(int index, MTType newType) {
+    @Override public MTType withComponentReplaced(int index, MTType newType) {
         throw new IndexOutOfBoundsException();
+    }
+
+    @Override public int getHashCode() {
+        return objectReferenceHashCode();
     }
 }

@@ -39,7 +39,7 @@ public class ScopeBuilder extends SyntacticScope {
         return new ArrayList<>(children);
     }
 
-    public MathSymbol addBinding(String name, Symbol.Quantification q,
+    public MathSymbol addBinding(String name, Quantification q,
             ParseTree definingTree, MTType type, MTType typeValue)
             throws DuplicateSymbolException {
 
@@ -50,7 +50,7 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
-    public MathSymbol addBinding(String name, Symbol.Quantification q,
+    public MathSymbol addBinding(String name, Quantification q,
             ParseTree definingTree, MTType type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
@@ -58,12 +58,12 @@ public class ScopeBuilder extends SyntacticScope {
 
     public MathSymbol addBinding(String name, ParseTree definingTree,
             MTType type, MTType typeValue) throws DuplicateSymbolException {
-        return addBinding(name, Symbol.Quantification.NONE, definingTree, type,
+        return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
     }
 
     public MathSymbol addBinding(String name, ParseTree definingTree,
             MTType type) throws DuplicateSymbolException {
-        return addBinding(name, Symbol.Quantification.NONE, definingTree, type);
+        return addBinding(name, Quantification.NONE, definingTree, type);
     }
 }
