@@ -210,8 +210,25 @@ public class ComputeTypes extends SetScopes {
         chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
+    @Override public void exitMathEntailsExp(
+            @NotNull ResolveParser.MathEntailsExpContext ctx) {
+        try {
+            currentScope.queryForOne(
+                    new MathSymbolQuery(null, ctx.variableName)).setMathType(
+                    g.N);
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override public void exitEnsuresClause(
             @NotNull ResolveParser.EnsuresClauseContext ctx) {
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public void exitMathNestedExp(
+            @NotNull ResolveParser.MathNestedExpContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
@@ -404,7 +421,9 @@ public class ComputeTypes extends SetScopes {
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());
-        if ( typeValueDepth > 0 ) {
+        if ( typeValueDepth > 0 || name.getText().equals("Powerset") ) {
+            //  if ( typeValueDepth > 0 ) {
+
             //I had better identify a type
             MTFunction entryType = (MTFunction) intendedEntry.getType();
 
@@ -419,8 +438,10 @@ public class ComputeTypes extends SetScopes {
                 }
                 arguments.add(argTypeValue);
             }
-            tr.mathTypeValues.put(ctx, entryType.getApplicationType(
-                    intendedEntry.getName(), arguments));
+            MTType applicationType =
+                    entryType.getApplicationType(intendedEntry.getName(),
+                            arguments);
+            tr.mathTypeValues.put(ctx, applicationType);
         }
     }
 

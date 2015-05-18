@@ -13,7 +13,7 @@ public class MTProper extends MTType {
 
     private String name;
     private MTType type = null;
-    private final boolean knownToContainOnlyTypesFlag;
+    private final boolean knownToContainOnlyMTypesFlag;
 
     public MTProper(TypeGraph g) {
         this(g, null, false, null);
@@ -30,13 +30,13 @@ public class MTProper extends MTType {
     public MTProper(TypeGraph g, MTType type, boolean knownToContainOnlyMTypes,
             String name) {
         super(g);
-        this.knownToContainOnlyTypesFlag = knownToContainOnlyMTypes;
+        this.knownToContainOnlyMTypesFlag = knownToContainOnlyMTypes;
         this.type = type;
         this.name = name;
     }
 
     @Override public boolean isKnownToContainOnlyMTypes() {
-        return knownToContainOnlyTypesFlag;
+        return knownToContainOnlyMTypesFlag;
     }
 
     @Override public List<MTType> getComponentTypes() {

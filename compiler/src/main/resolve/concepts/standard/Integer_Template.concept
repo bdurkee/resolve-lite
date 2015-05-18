@@ -1,17 +1,17 @@
 Concept Integer_Template;
 
-    Constraint min_int <= 0 and 0 <= max_int;
+    --Constraint min_int <= 0 and 0 <= max_int;
 
     Type Family Integer is modeled by Z;
         exemplar i;
         initialization ensures i = 0;
 
     Oper Increment (updates i: Integer);
-        requires i + 1 <= max_int;
+     --   requires i + 1 <= max_int;
         ensures	i = @i + 1;
 
     Oper Decrement (updates i: Integer);
-        requires min_int <= i - 1;
+      --  requires min_int <= i - 1;
         ensures	i = @i - 1;
 
     Operation Sum (evaluates i, j: Integer): Integer;

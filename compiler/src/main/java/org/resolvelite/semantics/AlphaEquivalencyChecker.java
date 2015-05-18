@@ -96,7 +96,8 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }*/
 
     @Override public boolean mismatch(MTType t1, MTType t2) {
-        return false;
+        myResult = false;
+        return myResult;
     }
 
     private AlphaEquivalencyChecker getChecker() {

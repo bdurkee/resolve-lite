@@ -58,7 +58,6 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
     public int getQuantifiedVariablesSize() {
         int result;
-
         if ( quantifiedVariables == null ) {
             result = uniqueQuantifiedVariableCount;
         }
@@ -70,7 +69,6 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
     public Map<String, MTType> getQuantifiedVariables() {
         ensureQuantifiedTypes();
-
         return quantifiedVariables;
     }
 
@@ -82,12 +80,11 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
     @Override public void accept(TypeVisitor v) {
         acceptOpen(v);
-
         v.beginChildren(this);
 
         if ( quantifiedVariables == null ) {
             for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                myTypeGraph.CLS.accept(v);
+                myTypeGraph.MTYPE.accept(v);
             }
         }
         else {
@@ -95,11 +92,8 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
                 t.accept(v);
             }
         }
-
         expression.accept(v);
-
         v.endChildren(this);
-
         acceptClose(v);
     }
 
@@ -116,7 +110,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
                         new ArrayList<MTType>(uniqueQuantifiedVariableCount);
 
                 for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                    myComponents.add(myTypeGraph.CLS);
+                    myComponents.add(myTypeGraph.MTYPE);
                 }
             }
             else {
@@ -189,7 +183,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
             quantifiedVariables = new TreeMap<String, MTType>();
 
             for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                quantifiedVariables.put("*" + i, myTypeGraph.CLS);
+                quantifiedVariables.put("*" + i, myTypeGraph.MTYPE);
             }
         }
     }

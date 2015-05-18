@@ -307,6 +307,27 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
     }
 
+    @Override public void enterMathDefinitionDecl(
+            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void enterDefinitionParameterList(
+            @NotNull ResolveParser.DefinitionParameterListContext ctx) {
+        activeQuantifications.push(Quantification.UNIVERSAL);
+    }
+
+    @Override public void exitDefinitionParameterList(
+            @NotNull ResolveParser.DefinitionParameterListContext ctx) {
+        activeQuantifications.pop();
+    }
+
+    @Override public void exitMathDefinitionDecl(
+            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+        symtab.endScope();
+
+    }
+
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         symtab.startScope(ctx);
@@ -415,22 +436,15 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         annotateExpTypesFor(type, symtab.getInnermostActiveScope());
         for (TerminalNode t : terms) {
             MTType mathTypeValue = tree.mathTypeValues.get(type);
-            String varName = t.getText();
-
-            Quantification q;
-            if ( walkingDefnParameters ) {//&& myTypeValueDepth == 0) {
-                q = Quantification.UNIVERSAL;
-            }
-            else {
-                q = activeQuantifications.peek();
-            }
             try {
                 symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, varName, q, mathTypeValue, null, ctx,
+                        new MathSymbol(g, t.getText(), activeQuantifications
+                                .peek(), mathTypeValue, null, ctx,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException e) {
-                e.printStackTrace();
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
             }
         }
     }

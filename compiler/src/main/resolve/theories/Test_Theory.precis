@@ -4,4 +4,8 @@ Precis Test_Theory;
     Forall n : N,
            n : Z;
 
+    Type Theorem N_Subset_of_Card:
+    Forall n : N,
+           n : Card;
+
 end Test_Theory;

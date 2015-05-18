@@ -29,13 +29,14 @@ public class TypeGraph {
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTProper ENTITY = new MTProper(this, "Entity");
 
-    public final MTProper CLS = new MTProper(this, null, true, "Cls");
-    public final MTProper SSET = new MTProper(this, CLS, false, "SSet");
+    public final MTProper MTYPE = new MTProper(this, null, true, "MType");
+    public final MTProper SSET = new MTProper(this, MTYPE, true, "SSet");
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
-    public final MTProper CARD = new MTProper(this, CLS, false, "Card");
+    public final MTProper CARD = new MTProper(this, MTYPE, false, "Card");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
     public final MTProper Z = new MTProper(this, SSET, false, "Z");
+    public final MTProper N = new MTProper(this, SSET, false, "N");
 
     public final MTProper EMPTY_SET = new MTProper(this, SSET, false,
             "Empty_Set");
@@ -82,7 +83,7 @@ public class TypeGraph {
         boolean result;
 
         result =
-                (value != CLS) && (value != ENTITY)
+                (value != MTYPE) && (value != ENTITY)
                         && isSubtype(value.getType(), expected);
         return result;
     }
@@ -104,11 +105,11 @@ public class TypeGraph {
         PExp result;
         MTType valueTypeValue = value.getMathTypeValue();
 
-        if ( expected == ENTITY && valueTypeValue != CLS
+        if ( expected == ENTITY && valueTypeValue != MTYPE
                 && valueTypeValue != ENTITY ) {
             result = getTrueExp();
         }
-        else if ( valueTypeValue == CLS || valueTypeValue == ENTITY ) {
+        else if ( valueTypeValue == MTYPE || valueTypeValue == ENTITY ) {
             //Cls and Entity aren't in anything (except hyper-whatever, which we aren't concerned with)
             throw TypeMismatchException.INSTANCE;
         }
@@ -180,28 +181,26 @@ public class TypeGraph {
     }
 
     /**
-     * <p>
-     * Returns the conditions required to establish that <code>foundValue</code>
-     * is a member of the type represented by <code>expectedEntry</code> along
-     * the path from <code>foundEntry</code> to <code>expectedEntry</code>. If
-     * no such conditions exist (i.e., if the conditions would be
-     * <code>false</code>), throws a <code>TypeMismatchException</code>.
-     * </p>
+     * Returns the conditions required to establish that {@code foundValue} is a
+     * member of the type represented by {@code expectedEntry} along
+     * the path from {@code foundEntry} to {@code expectedEntry}. If
+     * no such conditions exist (i.e., if the conditions would be false),
+     * throws a {@code TypeMismatchException}.
      * 
      * @param foundValue The value we'd like to establish is in the type
-     *        represented by <code>expectedEntry</code>.
-     * @param foundEntry A node in the type graph of which
-     *        <code>foundValue</code> is a syntactic subtype.
+     *        represented by {@code expectedEntry}.
+     * @param foundEntry A node in the type graph of which {@code foundValue} is
+     *        a syntactic subtype.
      * @param expectedEntry A node in the type graph of which representing a
-     *        type in which we would like to establish <code>foundValue</code>
+     *        type in which we would like to establish {@code foundValue}
      *        resides.
      * @param pathStrategy The strategy for following the path between
-     *        <code>foundEntry</code> and <code>expectedEntry</code>.
+     *        {@code foundEntry} and {@code expectedEntry}.
      * 
      * @return The conditions under which the path can be followed.
      * 
      * @throws TypeMismatchException If the conditions under which the path can
-     *         be followed would be <code>false</code>.
+     *         be followed would be false.
      */
     private <V> PExp getPathConditions(V foundValue,
             Map.Entry<MTType, Map<String, MTType>> foundEntry,
@@ -307,7 +306,7 @@ public class TypeGraph {
 
         try {
             result =
-                    supertype == ENTITY || supertype == CLS
+                    supertype == ENTITY || supertype == MTYPE
                             || supertype == SSET
                             // || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype);
@@ -332,7 +331,7 @@ public class TypeGraph {
         //TODO: Learn how to canonicalize MTType's properly by reading the visitor file for it
         Map<String, MTType> quantifiedVariables = new HashMap<>();
         if ( quantifiedVariables.isEmpty() ) {
-            quantifiedVariables.put("", CLS);
+            quantifiedVariables.put("", MTYPE);
         }
         MTType finalExpression = new MTBigUnion(this, quantifiedVariables, t);
         return new CanonicalizationResult(finalExpression, new HashMap<>());

@@ -343,7 +343,7 @@ rememberClause
     ;
 
 requiresClause
-    :   'requires' mathAssertionExp ';'
+    :   'requires' mathAssertionExp (mathEntailsExp)? ';'
     ;
 
 ensuresClause
@@ -448,6 +448,10 @@ mathSetExp
 
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
+    ;
+
+mathEntailsExp
+    :   'which_entails' variableName=Identifier ':' mathTypeExp
     ;
 
 // program expressions

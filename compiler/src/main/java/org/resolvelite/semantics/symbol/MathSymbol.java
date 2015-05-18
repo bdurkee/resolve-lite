@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
 
-    private final MTType type, typeValue;
+    private MTType type, typeValue;
     private final Quantification quantification;
 
     public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
@@ -56,6 +56,14 @@ public class MathSymbol extends Symbol {
         return typeValue;
     }
 
+    public void setMathType(MTType t) {
+        this.type = t;
+    }
+
+    public void setMathTypeValue(MTType t) {
+        this.typeValue = t;
+    }
+
     @Override public String getSymbolDescription() {
         return "a math symbol";
     }
@@ -89,6 +97,7 @@ public class MathSymbol extends Symbol {
             callingContextMathGenerics.put(mathGeneric.getName(),
                     mathGeneric.type);
         }
+
 
         MTType newTypeValue = null;
         MTType newType =
