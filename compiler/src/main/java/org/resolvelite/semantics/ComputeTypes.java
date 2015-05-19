@@ -430,8 +430,8 @@ public class ComputeTypes extends SetScopes {
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());
-        if ( typeValueDepth > 0 || name.getText().equals("Powerset") ||
-                name.getText().equals("union") ) {
+        if ( typeValueDepth > 0 || name.getText().equals("Powerset")
+                || name.getText().equals("union") ) {
             //  if ( typeValueDepth > 0 ) {
 
             //I had better identify a type

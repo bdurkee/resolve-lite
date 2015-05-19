@@ -62,7 +62,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
-        symtab.startModuleScope(tree).addImports(
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
@@ -82,9 +82,32 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
     }
 
+    @Override public void enterEnhancementModule(
+            @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitEnhancementModule(
+            @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        symtab.endScope();
+    }
+    //just add the named imports already found in ImportListener. Module compile
+    //order needs the importlist way before now. So just use it.
+    @Override public void enterEnhancementImplModule(
+            @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitEnhancementImplModule(
+            @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
+        symtab.endScope();
+    }
+
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        symtab.startModuleScope(tree).addImports(
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
@@ -95,7 +118,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterPrecisModule(
             @NotNull ResolveParser.PrecisModuleContext ctx) {
-        symtab.startModuleScope(tree).addImports(
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tree.imports.getImportsOfType(ImportType.NAMED));
     }
 
@@ -541,7 +564,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected static PTType getProgramType(ResolveCompiler compiler,
             @NotNull ParserRuleContext ctx, @Nullable String qualifier,
             @NotNull String typeName) {
-        ProgTypeSymbol result = null;
         try {
             return compiler.symbolTable.getInnermostActiveScope()
                     .queryForOne(new NameQuery(qualifier, typeName, true))
@@ -550,6 +572,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(),
                     ctx.getStart(), typeName);
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a prog type symbol", typeName,
+                    use.getActualSymbolDescription());
         }
         return PTInvalid.getInstance(compiler.symbolTable.getTypeGraph());
     }

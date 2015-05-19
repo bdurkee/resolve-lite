@@ -101,6 +101,17 @@ public class ImportListener extends ResolveBaseListener {
         importCollection.imports(ImportType.NAMED, ctx.concept.getText());
     }
 
+    @Override public void enterEnhancementModule(
+            @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        importCollection.imports(ImportType.NAMED, ctx.concept.getText());
+    }
+
+    @Override public void enterEnhancementImplModule(
+            @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
+        importCollection.imports(ImportType.NAMED, ctx.enhancement.getText(),
+                ctx.concept.getText());
+    }
+
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.Identifier());

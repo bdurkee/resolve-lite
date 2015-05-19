@@ -118,6 +118,14 @@ public class Utils {
             return ((ResolveParser.ConceptImplModuleContext) ctx).name
                     .getText();
         }
+        else if ( ctx instanceof ResolveParser.EnhancementModuleContext ) {
+            return ((ResolveParser.EnhancementModuleContext) ctx).name
+                    .getText();
+        }
+        else if ( ctx instanceof ResolveParser.EnhancementImplModuleContext ) {
+            return ((ResolveParser.EnhancementImplModuleContext) ctx).name
+                    .getText();
+        }
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

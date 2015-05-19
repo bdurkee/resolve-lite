@@ -34,6 +34,7 @@ module
     :   precisModule
     |   conceptModule
     |   enhancementModule
+    |   enhancementImplModule
     |   facilityModule
     |   conceptImplModule
     ;
@@ -78,7 +79,8 @@ conceptBlock
 // enhancement module
 
 enhancementModule
-    :   'Enhancement' name=Identifier (specModuleParameterList)? ';'
+    :   'Enhancement' name=Identifier (specModuleParameterList)?
+        'for' concept=Identifier ';'
         (importList)?
         (requiresClause)?
         (enhancementBlock)?
@@ -115,6 +117,14 @@ facilityBlock
 conceptImplModule
     :   'Implementation' name=Identifier (implModuleParameterList)?
         'for' concept=Identifier ';'
+        (importList)?
+        (implBlock)?
+        'end' closename=Identifier ';'
+    ;
+
+enhancementImplModule
+    :   'Implementation' name=Identifier (specModuleParameterList)?
+        'for' enhancement=Identifier 'of' concept=Identifier ';'
         (importList)?
         (implBlock)?
         'end' closename=Identifier ';'

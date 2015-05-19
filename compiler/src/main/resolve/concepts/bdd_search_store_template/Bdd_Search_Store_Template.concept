@@ -14,4 +14,8 @@ Concept Bdd_Search_Store_Template<T>
             requires ||S|| < Max_Capacity;
             ensures S = @S union {e};
 
+        Oper Count (restores S : Store) :
+                    Std_Integer_Fac :: Integer;
+            ensures Count = (||S||);
+
 end Bdd_Search_Store_Template;

@@ -67,7 +67,7 @@ public class ResolveCompiler {
 
     public static final List<String> NATIVE_EXT = Collections
             .unmodifiableList(Arrays.asList("concept", "precis", "facility",
-                    "impl"));
+                    "impl", "enhancement"));
 
     public static final List<String> NON_NATIVE_EXT = Collections
             .unmodifiableList(Arrays.asList("java"));

@@ -1,5 +1,6 @@
 package org.resolvelite.semantics;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -163,26 +164,22 @@ public class SymbolTable {
         return typeGraph;
     }
 
-    public ModuleScopeBuilder startModuleScope(AnnotatedTree t) {
-        ParseTree module = t.getRoot();
-        if ( t == null ) {
-            throw new IllegalArgumentException("module may not be null");
-        }
+    public ModuleScopeBuilder startModuleScope(ParseTree ctx, String name) {
+
         if ( curModuleScope != null ) {
             throw new IllegalStateException("module scope already open");
         }
-        if ( module instanceof ResolveParser.ModuleContext ) {
-            module = module.getChild(0);
+        if ( ctx instanceof ResolveParser.ModuleContext ) {
+            ctx = ctx.getChild(0);
         }
-        if ( !(module.getParent() instanceof ResolveParser.ModuleContext) ) {
+        if ( !(ctx.getParent() instanceof ResolveParser.ModuleContext) ) {
             throw new IllegalArgumentException("the rule context/parse tree "
                     + "passed is does not encode a module");
         }
 
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s =
-                new ModuleScopeBuilder(typeGraph, t.getName(), module, parent,
-                        this);
+                new ModuleScopeBuilder(typeGraph, name, ctx, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleID(), s);
