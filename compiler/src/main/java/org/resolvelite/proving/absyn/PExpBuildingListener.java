@@ -95,6 +95,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitMathOutfixExp(
+            @NotNull ResolveParser.MathOutfixExpContext ctx) {
+        PSymbolBuilder result =
+                new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText()) //
+                        .arguments(repo.get(ctx.mathExp())) //
+                        .style(PSymbol.DisplayStyle.OUTFIX) //
+                        .mathTypeValue(typeValues.get(ctx)) //
+                        .mathType(types.get(ctx));
+        repo.put(ctx, result.build());
+    }
+
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
@@ -107,6 +118,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathFunctionExp(
             @NotNull ResolveParser.MathFunctionExpContext ctx) {
+        List<PExp> s = Utils.collect(PExp.class, ctx.mathExp(), repo);
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))//
                 .quantification(quantifiedExps.get(ctx)) //

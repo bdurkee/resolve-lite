@@ -36,8 +36,7 @@ public class MathFunctionNamedQuery
             //Shouldn't be possible
             throw new RuntimeException(dse);
         }
-        return intermediateList.stream()
-                .map(Symbol::toMathSymbol)
+        return intermediateList.stream().map(Symbol::toMathSymbol)
                 .collect(Collectors.toList());
     }
 }

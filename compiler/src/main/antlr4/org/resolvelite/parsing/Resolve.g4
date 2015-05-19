@@ -329,8 +329,14 @@ mathTypeTheoremUniversalVars
 // mathematical definitions
 
 mathDefinitionDecl
-    :   'Definition' name=Identifier (definitionParameterList)? ':'
+    :   'Definition' name=infixOp (definitionParameterList)? ':'
         mathTypeExp ('is' mathAssertionExp)? ';'
+    ;
+
+infixOp
+    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
+    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
+    |   Identifier
     ;
 
 definitionParameterList

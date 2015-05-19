@@ -8,4 +8,6 @@ Precis Test_Theory;
     Forall n : N,
            n : Card;
 
+    Definition > (i : Z, j : Z) : B;
+
 end Test_Theory;

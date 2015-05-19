@@ -1,5 +1,6 @@
 package org.resolvelite.semantics.programtype;
 
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -10,15 +11,20 @@ import org.resolvelite.typereasoning.TypeGraph;
 public abstract class PTNamed extends PTType {
 
     private final String name;
-    protected final PExp initRequires, initEnsures, finalRequires,
-            finalEnsures;
+    protected final ResolveParser.RequiresClauseContext initRequires;
+    protected final ResolveParser.EnsuresClauseContext initEnsures;
+    protected final ResolveParser.RequiresClauseContext finalRequires;
+    protected final ResolveParser.EnsuresClauseContext finalEnsures;
     /**
      * Which module does this {@code PTType}s reference appear in?
      */
     private final String enclosingModuleID;
 
-    public PTNamed(TypeGraph g, String name, PExp initRequires,
-            PExp initEnsures, PExp finalRequires, PExp finalEnsures,
+    public PTNamed(TypeGraph g, String name,
+            ResolveParser.RequiresClauseContext initRequires,
+            ResolveParser.EnsuresClauseContext initEnsures,
+            ResolveParser.RequiresClauseContext finalRequires,
+            ResolveParser.EnsuresClauseContext finalEnsures,
             String enclosingModuleID) {
         super(g);
         this.name = name;
@@ -39,19 +45,19 @@ public abstract class PTNamed extends PTType {
 
     public abstract String getExemplarName();
 
-    public PExp getInitializationRequires() {
+    public ResolveParser.RequiresClauseContext getInitializationRequires() {
         return initRequires;
     }
 
-    public PExp getInitializationEnsures() {
+    public ResolveParser.EnsuresClauseContext getInitializationEnsures() {
         return initEnsures;
     }
 
-    public PExp getFinalizationRequires() {
+    public ResolveParser.RequiresClauseContext getFinalizationRequires() {
         return finalRequires;
     }
 
-    public PExp getFinalizationEnsures() {
+    public ResolveParser.EnsuresClauseContext getFinalizationEnsures() {
         return finalEnsures;
     }
 

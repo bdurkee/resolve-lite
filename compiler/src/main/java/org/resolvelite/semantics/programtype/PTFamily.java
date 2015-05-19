@@ -1,5 +1,6 @@
 package org.resolvelite.semantics.programtype;
 
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 
@@ -7,18 +8,21 @@ public class PTFamily extends PTNamed {
 
     private final MTType model;
     private final String name, exemplarName;
-    private final PExp constraint;
+    private final ResolveParser.ConstraintClauseContext constraint;
 
     public PTFamily(MTType model, String familyName, String exemplarName,
-            PExp constraint, PExp initRequires, PExp initEnsures,
-            PExp finalRequires, PExp finalEnsures, String enclosingModuleID) {
+            ResolveParser.ConstraintClauseContext constraint,
+            ResolveParser.RequiresClauseContext initRequires,
+            ResolveParser.EnsuresClauseContext initEnsures,
+            ResolveParser.RequiresClauseContext finalRequires,
+            ResolveParser.EnsuresClauseContext finalEnsures,
+            String enclosingModuleID) {
         super(model.getTypeGraph(), familyName, initRequires, initEnsures,
                 finalRequires, finalEnsures, enclosingModuleID);
         this.model = model;
         this.name = familyName;
         this.exemplarName = exemplarName;
         this.constraint = constraint;
-
     }
 
     public String getName() {
@@ -29,7 +33,7 @@ public class PTFamily extends PTNamed {
         return exemplarName;
     }
 
-    public PExp getConstraint() {
+    public ResolveParser.ConstraintClauseContext getConstraint() {
         return constraint;
     }
 
@@ -47,15 +51,16 @@ public class PTFamily extends PTNamed {
         if ( result ) {
             PTFamily oAsPTFamily = (PTFamily) o;
 
+            //Todo
             result =
                     (model.equals(oAsPTFamily.model))
                             && (name.equals(oAsPTFamily.name))
-                            && (exemplarName.equals(oAsPTFamily.exemplarName))
-                            && (constraint.equals(oAsPTFamily.constraint))
-                            && (initRequires.equals(oAsPTFamily.initRequires))
-                            && (initEnsures.equals(oAsPTFamily.initEnsures))
-                            && (finalRequires.equals(oAsPTFamily.finalRequires))
-                            && (finalEnsures.equals(oAsPTFamily.finalEnsures));
+                            && (exemplarName.equals(oAsPTFamily.exemplarName));
+            /* && (constraint.equals(oAsPTFamily.constraint))
+             && (initRequires.equals(oAsPTFamily.initRequires))
+             && (initEnsures.equals(oAsPTFamily.initEnsures))
+             && (finalRequires.equals(oAsPTFamily.finalRequires))
+             && (finalEnsures.equals(oAsPTFamily.finalEnsures));*/
         }
         return result;
     }

@@ -16,11 +16,13 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.*;
+import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefSymbolsAndScopes extends ResolveBaseListener {
 
@@ -38,9 +40,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
      * declaration portion of a QuantExp should have quantification
      * (universal or existential) applied, while those found in the body of the
      * QuantExp should have no quantification (unless there is an embedded
-     * QuantExp).
-     * In this case, QuantExp should not remove its layer, but rather change it
-     * to {@code Symbol.Quantification.none}.
+     * QuantExp). In this case, QuantExp should not remove its layer, but
+     * rather change it to {@code Symbol.Quantification.none}.
      * 
      * This stack is never empty, but rather the bottom layer is always
      * MathSymbolTableEntry.None.
@@ -73,6 +74,18 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.name, ctx.name.getText());
             }
+        }
+    }
+
+    @Override public void exitMathEntailsExp(
+            @NotNull ResolveParser.MathEntailsExpContext ctx) {
+        try {
+            symtab.getInnermostActiveScope().queryForOne(
+                    new MathSymbolQuery(null, ctx.variableName)).setMathType(
+                    g.N);
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            e.printStackTrace();
         }
     }
 
@@ -168,37 +181,38 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         //now annotate types for all subexpressions within the typeModelDecl
         //tree (e.g. contraints, init, final, etc) before leaving the scope.
-        annotateExpTypesFor(ctx, symtab.getInnermostActiveScope());
+        //annotateExpTypesFor(ctx, symtab.getInnermostActiveScope());
+        //We aren't doing this, it's a fucking pain ^^
         symtab.endScope();
         if ( ctx.mathTypeExp().getText().equals(ctx.name.getText()) ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
                     ctx.mathTypeExp().getStart(), ctx.mathTypeExp().getText());
         }
-        ParserRuleContext constraint =
+        ResolveParser.ConstraintClauseContext constraint =
                 ctx.constraintClause() != null ? ctx.constraintClause() : null;
-        ParserRuleContext initRequires =
+        ResolveParser.RequiresClauseContext initRequires =
                 ctx.typeModelInit() != null ? ctx.typeModelInit()
                         .requiresClause() : null;
-        ParserRuleContext initEnsures =
+        ResolveParser.EnsuresClauseContext initEnsures =
                 ctx.typeModelInit() != null ? ctx.typeModelInit()
                         .ensuresClause() : null;
-        ParserRuleContext finalRequires =
+        ResolveParser.RequiresClauseContext finalRequires =
                 ctx.typeModelFinal() != null ? ctx.typeModelFinal()
                         .requiresClause() : null;
-        ParserRuleContext finalEnsures =
+        ResolveParser.EnsuresClauseContext finalEnsures =
                 ctx.typeModelFinal() != null ? ctx.typeModelFinal()
                         .ensuresClause() : null;
         try {
-            symtab.getInnermostActiveScope().define(
-                    new ProgTypeModelSymbol(symtab.getTypeGraph(), ctx.name
-                            .getText(), modelType, new PTFamily(modelType,
-                            ctx.name.getText(), ctx.exemplar.getText(),
-                            normalizePExp(constraint),
-                            normalizePExp(initRequires),
-                            normalizePExp(initEnsures),
-                            normalizePExp(finalRequires),
-                            normalizePExp(finalEnsures), getRootModuleID()),
-                            exemplar, ctx, getRootModuleID()));
+
+            ProgTypeModelSymbol progType =
+                    new ProgTypeModelSymbol(symtab.getTypeGraph(),
+                            ctx.name.getText(), modelType, new PTFamily(
+                                    modelType, ctx.name.getText(),
+                                    ctx.exemplar.getText(), constraint,
+                                    initRequires, initEnsures, finalRequires,
+                                    finalEnsures, getRootModuleID()), exemplar,
+                            ctx, getRootModuleID());
+            symtab.getInnermostActiveScope().define(progType);
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -235,27 +249,24 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         PTType baseType =
                 ctx.record() != null ? getProgramType(ctx.record())
                         : getProgramType(ctx.type());
-        annotateExpTypesFor(ctx, symtab.getInnermostActiveScope());
-        annotatePExpsFor(ctx);
-        ParserRuleContext initRequires =
+
+        ResolveParser.RequiresClauseContext initRequires =
                 ctx.typeImplInit() != null ? ctx.typeImplInit()
                         .requiresClause() : null;
-        ParserRuleContext initEnsures =
+        ResolveParser.EnsuresClauseContext initEnsures =
                 ctx.typeImplInit() != null ? ctx.typeImplInit().ensuresClause()
                         : null;
-        ParserRuleContext finalRequires =
+        ResolveParser.RequiresClauseContext finalRequires =
                 ctx.typeImplFinal() != null ? ctx.typeImplFinal()
                         .requiresClause() : null;
-        ParserRuleContext finalEnsures =
+        ResolveParser.EnsuresClauseContext finalEnsures =
                 ctx.typeImplFinal() != null ? ctx.typeImplFinal()
                         .ensuresClause() : null;
 
         PTRepresentation reprType =
                 new PTRepresentation(g, baseType, ctx.name.getText(), typeDefn,
-                        normalizePExp(initRequires),
-                        normalizePExp(initEnsures),
-                        normalizePExp(finalRequires),
-                        normalizePExp(finalEnsures), getRootModuleID());
+                        initRequires, initEnsures, finalRequires, finalEnsures,
+                        getRootModuleID());
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgVariableSymbol(exemplarName, ctx, reprType,
@@ -294,8 +305,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.MathTypeTheoremDeclContext ctx) {
         annotateExpTypesFor(ctx, symtab.getInnermostActiveScope());
         annotatePExpsFor(ctx);
-        PExp bindingExp = normalizePExp(ctx.bindingExp);
-        PExp typeExp = normalizePExp(ctx.typeExp);
+        PExp bindingExp = normalizeClause(ctx.bindingExp);
+        PExp typeExp = normalizeClause(ctx.typeExp);
 
         try {
             g.addRelationship(bindingExp, typeExp.getMathTypeValue(),
@@ -324,8 +335,34 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitMathDefinitionDecl(
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
-        symtab.endScope();
+        List<MTType> paramTypes = symtab.getInnermostActiveScope()
+                .getSymbolsOfType(MathSymbol.class)
+                .stream().map(MathSymbol::getType)
+                .collect(Collectors.toList());
 
+        symtab.endScope();
+        annotateExpTypesFor(ctx.mathTypeExp(), symtab.getInnermostActiveScope());
+        MTType returnType = tree.mathTypeValues.get(ctx.mathTypeExp());
+        MTFunction.MTFunctionBuilder builder =
+                new MTFunction.MTFunctionBuilder(g, returnType)
+                        .paramTypes(paramTypes);
+
+        if (ctx.definitionParameterList() != null) {
+            for (ResolveParser.MathVariableDeclGroupContext grp :
+                    ctx.definitionParameterList().mathVariableDeclGroup()) {
+                builder.paramNames(grp.Identifier().stream()
+                        .map(ParseTree::getText).collect(Collectors.toList()));
+            }
+        }
+        try {
+            symtab.getInnermostActiveScope().define(new MathSymbol(g,
+                    ctx.name.getText(), builder.build(), null, ctx,
+                    getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name.getStart(), ctx.name.getText());
+        }
     }
 
     @Override public void enterOperationProcedureDecl(
@@ -529,13 +566,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         return new PTRecord(g, fields);
     }
 
-    protected PExp normalizePExp(ParserRuleContext ctx) {
-        if ( ctx == null ) {
-            return g.getTrueExp();
-        }
-        return symtab.mathPExps.get(ctx);
-    }
-
     /**
      * Annotates all expressions (and subexpressions) in parsetree {@code ctx}
      * with type info.
@@ -553,6 +583,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 new PExpBuildingListener<>(symtab.mathPExps,
                         symtab.quantifiedExps, tree);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
+    }
+
+    protected PExp normalizeClause(ParserRuleContext ctx) {
+        if ( ctx == null ) {
+            return g.getTrueExp();
+        }
+        return symtab.mathPExps.get(ctx);
     }
 
     protected final String getRootModuleID() {

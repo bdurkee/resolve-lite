@@ -20,8 +20,8 @@ import java.util.NoSuchElementException;
  * {@pre
  * SyntacticSubtypeChecker checker = new SyntacticSubtypeChecker(typeGraph); try
  * checker.visit(t1, t2);
- * //Stuff to do if t1 is a syntactic subtype of t2 * }
- * catch (IllegalArgumentException e) {
+ * //Stuff to do if t1 is a syntactic subtype of t2 * } catch
+ * (IllegalArgumentException e) {
  * TypeMismatchException mismatch = (TypeMismatchException) e.getCause();
  * //Stuff to do if t1 is NOT a syntactic subtype of t2
  * }}

@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.programtype;
 
 import org.antlr.v4.runtime.misc.Nullable;
+import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
@@ -25,8 +26,11 @@ public class PTRepresentation extends PTNamed {
     private final ProgTypeModelSymbol family;
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            @Nullable ProgTypeModelSymbol family, PExp initRequires,
-            PExp initEnsures, PExp finalRequires, PExp finalEnsures,
+            @Nullable ProgTypeModelSymbol family,
+            ResolveParser.RequiresClauseContext initRequires,
+            ResolveParser.EnsuresClauseContext initEnsures,
+            ResolveParser.RequiresClauseContext finalRequires,
+            ResolveParser.EnsuresClauseContext finalEnsures,
             String enclosingModuleID) {
         super(g, name, initRequires, initEnsures, finalRequires, finalEnsures,
                 enclosingModuleID);

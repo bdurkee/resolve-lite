@@ -41,7 +41,7 @@ public class FunctionAssignApplicationStrategy
             return block.snapshot();
         }
 
-        //apply explicit call rule to the exp-call-thing on the rhs.
+        //apply explicit call rule to the 'exp-call-like-thing' on the rhs.
         return new ExplicitCallApplicationStrategy<ParserRuleContext>()
                 .applyRule(statement.right, block);
     }

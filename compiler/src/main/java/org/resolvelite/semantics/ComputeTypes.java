@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
+import org.resolvelite.compiler.tree.ResolveToken;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
@@ -24,6 +25,7 @@ import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -210,18 +212,6 @@ public class ComputeTypes extends SetScopes {
         chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
-    @Override public void exitMathEntailsExp(
-            @NotNull ResolveParser.MathEntailsExpContext ctx) {
-        try {
-            currentScope.queryForOne(
-                    new MathSymbolQuery(null, ctx.variableName)).setMathType(
-                    g.N);
-        }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override public void exitEnsuresClause(
             @NotNull ResolveParser.EnsuresClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
@@ -260,6 +250,12 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+    }
+
+    @Override public void exitMathOutfixExp(
+            @NotNull ResolveParser.MathOutfixExpContext ctx) {
+        typeMathFunctionLikeThing(ctx, null, new ResolveToken(ctx.lop.getText()
+                + "..." + ctx.rop.getText()), ctx.mathExp());
     }
 
     @Override public void exitMathFunctionExp(
@@ -396,6 +392,12 @@ public class ComputeTypes extends SetScopes {
                 + " to " + intendedFunction.getName() + " : " + intendedEntryType);
 
         return intendedFunction;
+    }
+
+    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
+            @Nullable Token qualifier, @NotNull Token name,
+            ResolveParser.MathExpContext... args) {
+        typeMathFunctionLikeThing(ctx, qualifier, name, Arrays.asList(args));
     }
 
     private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
