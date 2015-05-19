@@ -12,6 +12,6 @@ Concept Bdd_Search_Store_Template<T>
 
         Oper Add (restores e : T; updates S : Store);
             requires ||S|| < Max_Capacity;
-            ensures Max_Capacity;
+            ensures S = @S union {e};
 
 end Bdd_Search_Store_Template;

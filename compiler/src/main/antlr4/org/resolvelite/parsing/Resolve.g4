@@ -33,6 +33,7 @@ grammar Resolve;
 module
     :   precisModule
     |   conceptModule
+    |   enhancementModule
     |   facilityModule
     |   conceptImplModule
     ;
@@ -71,6 +72,23 @@ conceptBlock
         | typeModelDecl
         | mathDefinitionDecl
         | constraintClause
+        )+
+    ;
+
+// enhancement module
+
+enhancementModule
+    :   'Enhancement' name=Identifier (specModuleParameterList)? ';'
+        (importList)?
+        (requiresClause)?
+        (enhancementBlock)?
+        'end' closename=Identifier ';'
+    ;
+
+enhancementBlock
+    :   ( operationDecl
+        | typeModelDecl
+        | mathDefinitionDecl
         )+
     ;
 
@@ -349,7 +367,7 @@ rememberClause
     ;
 
 requiresClause
-    :   'requires' mathAssertionExp (mathEntailsExp)? ';'
+    :   'requires' mathAssertionExp (mathEntailsAddendum)? ';'
     ;
 
 ensuresClause
@@ -374,6 +392,10 @@ decreasingClause
 
 whereClause
     :   'where' mathAssertionExp
+    ;
+
+mathEntailsAddendum
+    :   'which_entails' variableName=Identifier ':' mathTypeExp
     ;
 
 correspondenceClause
@@ -454,10 +476,6 @@ mathSetExp
 
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
-    ;
-
-mathEntailsExp
-    :   'which_entails' variableName=Identifier ':' mathTypeExp
     ;
 
 // program expressions

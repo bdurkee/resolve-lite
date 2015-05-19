@@ -269,6 +269,13 @@ public class ComputeTypes extends SetScopes {
         if (ctx.mathExp().isEmpty()) {
             tr.mathTypeValues.put(ctx, g.EMPTY_SET);
         }
+        else {
+            List<MTType> powersets = ctx.mathExp().stream()
+                    .map(e -> new MTPowersetApplication(g, tr.mathTypes.get(e)))
+                    .collect(Collectors.toList());
+            MTUnion u = new MTUnion(g, powersets);
+            tr.mathTypeValues.put(ctx, u);
+        }
         if (typeValueDepth > 0) {
 
             // construct a union chain and see if all the component types
@@ -423,7 +430,8 @@ public class ComputeTypes extends SetScopes {
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());
-        if ( typeValueDepth > 0 || name.getText().equals("Powerset") ) {
+        if ( typeValueDepth > 0 || name.getText().equals("Powerset") ||
+                name.getText().equals("union") ) {
             //  if ( typeValueDepth > 0 ) {
 
             //I had better identify a type
