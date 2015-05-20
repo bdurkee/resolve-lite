@@ -228,7 +228,12 @@ public enum ErrorKind {
             31,
             "malformed ensures clause on return-valued "
                     + "operation '<arg>'; found '<arg2>', but should be of the form '<arg>=[expr]'",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    VALUE_NOT_TUPLE(32, "value on seg <arg> is not a tuple",
+            ErrorSeverity.ERROR),
+
+    NO_SUCH_FACTOR(33, "no such factor <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

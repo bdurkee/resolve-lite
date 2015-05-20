@@ -12,6 +12,9 @@ public abstract class VCRuleBackedStat<T> extends OutputModelObject {
 
     public VCRuleBackedStat(T contents, VCAssertiveBlockBuilder block,
             RuleApplicationStrategy<T> apply) {
+        if ( block == null ) {
+            throw new IllegalArgumentException("assertive block==null");
+        }
         this.contents = contents;
         this.applicationStrategy = apply;
         this.enclosingBlock = block;

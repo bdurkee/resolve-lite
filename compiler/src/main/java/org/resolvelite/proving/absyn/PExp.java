@@ -106,7 +106,7 @@ public abstract class PExp {
 
     public abstract boolean containsName(String name);
 
-    public abstract List<PExp> getSubExpressions();
+    public abstract List<? extends PExp> getSubExpressions();
 
     public abstract boolean isObviouslyTrue();
 

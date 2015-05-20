@@ -4,8 +4,8 @@ import org.resolvelite.proving.Antecedent;
 import org.resolvelite.proving.Consequent;
 
 /**
- * Represents an immutable vc (<em>verification condition</em>), which takes
- * the form of a mathematical implication.
+ * Represents an immutable vc (verification condition), which takes the form
+ * of a mathematical implication.
  */
 public class VC {
 

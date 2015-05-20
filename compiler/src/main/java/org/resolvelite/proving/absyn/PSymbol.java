@@ -50,8 +50,12 @@ public class PSymbol extends PExp {
         this.dispStyle = builder.style;
     }
 
-    private static HashDuple calculateHashes(String left, String right,
-            Iterator<PExp> args) {
+    protected static HashDuple calculateHashes(List<? extends PExp> args) {
+        return calculateHashes("", "", args.iterator());
+    }
+
+    protected static HashDuple calculateHashes(String left, String right,
+            Iterator<? extends PExp> args) {
 
         int structureHash;
 
@@ -195,18 +199,12 @@ public class PSymbol extends PExp {
                 newArgs.add(mm);
             }
 
-            result =
-                    new PSymbolBuilder(name)
-                            //
-                            .mathType(getMathType())
-                            .mathTypeValue(getMathTypeValue())
-                            //
-                            .quantification(newQuantification)
-                            //
-                            .arguments(newArgs).style(dispStyle)
-                            //
-                            .incoming(incomingFlag).progType(getProgType())
-                            .progTypeValue(getProgTypeValue()).build();
+            result = new PSymbolBuilder(name) //
+                    .mathType(getMathType()).mathTypeValue(getMathTypeValue()) //
+                    .quantification(newQuantification) //
+                    .arguments(newArgs).style(dispStyle) //
+                    .incoming(incomingFlag).progType(getProgType()) //
+                    .progTypeValue(getProgTypeValue()).build();
         }
         return result;
     }
@@ -226,7 +224,7 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override public List<PExp> getSubExpressions() {
+    @Override public List<? extends PExp> getSubExpressions() {
         return arguments;
     }
 

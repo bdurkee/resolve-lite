@@ -40,9 +40,9 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
 
             walker.walk(defSymsAndScopes, unit.getRoot());
             walker.walk(computeTypes, unit.getRoot());
-            //walker.walk(pexpAnnotator, unit.getRoot());
+            walker.walk(pexpAnnotator, unit.getRoot());
             //walker.walk(sanityChecker, unit.getRoot());
-            //unit.mathPExps = compiler.symbolTable.mathPExps;
+            unit.mathPExps = compiler.symbolTable.mathPExps;
             // PrintTypes pt = new PrintTypes(unit);
             // walker.walk(pt, unit.getRoot());
         }

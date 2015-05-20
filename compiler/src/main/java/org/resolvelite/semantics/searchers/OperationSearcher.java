@@ -2,6 +2,7 @@ package org.resolvelite.semantics.searchers;
 
 import org.antlr.v4.runtime.Token;
 import org.resolvelite.semantics.DuplicateSymbolException;
+import org.resolvelite.semantics.UnexpectedSymbolException;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.symbol.OperationSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
@@ -28,17 +29,20 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
             throws DuplicateSymbolException {
 
         if ( entries.containsKey(queryName) ) {
-            OperationSymbol operation =
-                    entries.get(queryName).toOperationSymbol();
+            try {
+                OperationSymbol operation =
+                        entries.get(queryName).toOperationSymbol();
 
-            if ( argumentsMatch(operation.getParameters()) ) {
-                //We have a match at this point
-                if ( !matches.isEmpty() ) {
-                    throw new DuplicateSymbolException();
+                if ( argumentsMatch(operation.getParameters()) ) {
+                    //We have a match at this point
+                    if ( !matches.isEmpty() ) {
+                        throw new DuplicateSymbolException();
+                    }
+
+                    matches.add(operation);
                 }
-
-                matches.add(operation);
             }
+            catch (UnexpectedSymbolException use) {}
         }
         return false;
     }

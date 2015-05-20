@@ -430,8 +430,7 @@ public class TypeGraph {
             return e.get(0);
         }
         while (segsIter.hasNext()) {
-            PExp current = segsIter.next();
-            result = formConjunct(result, current);
+            result = formConjunct(result, segsIter.next());
         }
         return result;
     }
@@ -460,4 +459,5 @@ public class TypeGraph {
         return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
                 .style(DisplayStyle.INFIX).build();
     }
+
 }

@@ -1,16 +1,17 @@
 package org.resolvelite.misc;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
-import org.resolvelite.semantics.DuplicateSymbolException;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.semantics.*;
 import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
-import org.resolvelite.semantics.ScopeBuilder;
-import org.resolvelite.semantics.SymbolTable;
 import org.resolvelite.typereasoning.TypeGraph;
 
-public class Hardcoded {
+public class HardCoded {
 
     public static void addBuiltInSymbols(TypeGraph g, ResolveCompiler rc,
             ScopeBuilder b) {
@@ -21,6 +22,7 @@ public class Hardcoded {
             b.addBinding("Card", null, g.MTYPE, g.CARD);
 
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
+            b.addBinding("Conc", null, g.BOOLEAN, null);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
             b.addBinding("N", null, g.SSET, g.N);
@@ -55,5 +57,34 @@ public class Hardcoded {
             rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,
                     e.getExistingSymbol());
         }
+    }
+
+    //Todo: Should these *really* be in here?
+    public static String getMetaFieldName(ParserRuleContext t) {
+        String result;
+
+        if ( t instanceof ResolveParser.MathFunctionExpContext ) {
+            result = ((ResolveParser.MathFunctionExpContext) t).name.getText();
+        }
+        else if ( t instanceof ResolveParser.MathVariableExpContext ) {
+            result = ((ResolveParser.MathVariableExpContext) t).name.getText();
+        }
+        else {
+            throw new RuntimeException("not a variable exp or function exp: "
+                    + t.getText() + " (" + t.getClass() + ")");
+        }
+        return result;
+    }
+
+    public static MTType getMetaFieldType(TypeGraph g, String metaSegment) {
+        MTType result = null;
+
+        if ( metaSegment.equals("Is_Initial") ) {
+            result =
+                    new MTFunction.MTFunctionBuilder(g, g.BOOLEAN).paramTypes(
+                            g.ENTITY).build();
+        }
+
+        return result;
     }
 }

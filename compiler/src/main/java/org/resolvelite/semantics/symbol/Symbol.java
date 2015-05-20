@@ -75,4 +75,8 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
+    public ProcedureSymbol toProcedureSymbol() {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
 }

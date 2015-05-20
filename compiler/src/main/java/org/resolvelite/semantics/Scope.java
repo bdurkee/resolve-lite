@@ -31,6 +31,10 @@ public interface Scope {
 
     public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
 
+    public <T extends Symbol> T getSymbolOfType(Class<T> type)
+            throws NoSuchSymbolException,
+                DuplicateSymbolException;
+
     public List<? extends Symbol> getAllSymbols();
 
     public Symbol define(Symbol s) throws DuplicateSymbolException;

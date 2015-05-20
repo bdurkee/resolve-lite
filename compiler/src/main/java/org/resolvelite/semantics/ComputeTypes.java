@@ -11,7 +11,7 @@ import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ResolveToken;
-import org.resolvelite.parsing.ResolveBaseListener;
+import org.resolvelite.misc.HardCoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
@@ -24,10 +24,7 @@ import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ComputeTypes extends SetScopes {
@@ -295,6 +292,53 @@ public class ComputeTypes extends SetScopes {
             }
             tr.mathTypeValues.put(ctx, chainedTypes);
         }
+    }
+
+    /**
+     * We aren't really doing so much typing here per-se as we are checking to
+     * make sure each segment is in fact a cartesian.
+     */
+    @Override public void exitMathDotExp(
+            @NotNull ResolveParser.MathDotExpContext ctx) {
+        Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
+                ctx.mathFunctionApplicationExp().iterator();
+        ParserRuleContext nextSeg, lastSeg = null;
+        if ( ctx.getStart().getText().equals("Conc") )
+            nextSeg = segsIter.next();
+        nextSeg = segsIter.next();
+        MTType curType = tr.mathTypes.get(nextSeg);
+        MTCartesian curTypeCartesian;
+
+        while (segsIter.hasNext()) {
+            lastSeg = nextSeg;
+            nextSeg = segsIter.next();
+            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
+        }
+        tr.mathTypeValues.put(ctx, curType);
     }
 
     @Override public void exitMathVariableExp(

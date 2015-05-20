@@ -92,6 +92,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
         symtab.endScope();
     }
+
     //just add the named imports already found in ImportListener. Module compile
     //order needs the importlist way before now. So just use it.
     @Override public void enterEnhancementImplModule(
@@ -179,7 +180,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         //now annotate types for all subexpressions within the typeModelDecl
         //tree (e.g. contraints, init, final, etc) before leaving the scope.
         //annotateExpTypesFor(ctx, symtab.getInnermostActiveScope());
-        //We aren't doing this, it's a fucking pain ^^
+        //We aren't doing this.
         symtab.endScope();
         if ( ctx.mathTypeExp().getText().equals(ctx.name.getText()) ) {
             compiler.errorManager.semanticError(ErrorKind.INVALID_MATH_MODEL,
@@ -376,16 +377,52 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitConstraintClause(
             @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        if (!(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext)) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+        }
+    }
+
+    @Override public void exitRequiresClause(
+            @NotNull ResolveParser.RequiresClauseContext ctx) {
+        if (ctx.getParent().getParent() instanceof ResolveParser.ModuleContext) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+        }
+    }
+
+    private void insertGlobalAssertion(ParserRuleContext ctx,
+                           ResolveParser.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         try {
             symtab.getInnermostActiveScope().define(
-                    new GlobalMathAssertionSymbol(name, ctx.mathAssertionExp(),
-                            ctx, getRootModuleID()));
+                    new GlobalMathAssertionSymbol(name, assertion, ctx,
+                            getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
+    }
+
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        try {
+            if ( ctx.type() != null ) {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                getProgramType(ctx.type()), getRootModuleID()));
+            }
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        symtab.endScope();
+        insertFunction(ctx.name, ctx, null, null, ctx.type(), true, null);
     }
 
     @Override public void enterOperationProcedureDecl(
@@ -406,10 +443,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        annotateExpTypesFor(ctx, symtab.getInnermostActiveScope()); //annotate all exps before we leave
         symtab.endScope();
         insertFunction(ctx.name, ctx, ctx.requiresClause(),
-                ctx.ensuresClause(), ctx.type());
+                ctx.ensuresClause(), ctx.type(), false, null);
     }
 
     @Override public void enterOperationDecl(
@@ -433,7 +469,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.endScope();
         insertFunction(ctx.name, ctx, ctx.requiresClause(),
-                ctx.ensuresClause(), ctx.type());
+                ctx.ensuresClause(), ctx.type(), false, null);
     }
 
     @Override public void exitParameterDeclGroup(
@@ -529,15 +565,26 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private void insertFunction(@NotNull Token name, ParserRuleContext ctx,
             ResolveParser.RequiresClauseContext requires,
             ResolveParser.EnsuresClauseContext ensures,
-            @Nullable ResolveParser.TypeContext type) {
+            @Nullable ResolveParser.TypeContext type, boolean isProcedure,
+            OperationSymbol formalOp) {
         try {
             List<ProgParameterSymbol> params =
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
-            symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(symtab.getTypeGraph(), name.getText(),
-                            ctx, requires, ensures, getProgramType(type),
-                            getRootModuleID(), params, walkingModuleParameter));
+            Symbol result = null;
+            if ( isProcedure ) {
+                result =
+                        new ProcedureSymbol(name.getText(), ctx,
+                                getRootModuleID(), formalOp);
+            }
+            else {
+                result =
+                        new OperationSymbol(symtab.getTypeGraph(),
+                                name.getText(), ctx, requires, ensures,
+                                getProgramType(type), getRootModuleID(),
+                                params, walkingModuleParameter);
+            }
+            symtab.getInnermostActiveScope().define(result);
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,

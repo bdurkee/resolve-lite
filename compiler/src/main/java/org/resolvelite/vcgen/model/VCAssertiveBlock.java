@@ -46,6 +46,9 @@ public class VCAssertiveBlock extends AssertiveCode {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
+            if ( assume == null ) {
+                assume = g.getTrueExp();
+            }
             stats.add(new VCAssume(assume, this));
             return this;
         }
@@ -64,6 +67,9 @@ public class VCAssertiveBlock extends AssertiveCode {
         }
 
         public VCAssertiveBlockBuilder confirm(PExp confirm) {
+            if ( confirm == null ) {
+                confirm = g.getTrueExp();
+            }
             stats.add(new VCConfirm(confirm, this));
             return this;
         }

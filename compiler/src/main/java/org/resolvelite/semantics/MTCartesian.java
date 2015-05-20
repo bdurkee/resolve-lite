@@ -60,6 +60,24 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         this.elementTypes = new ArrayList<>(elementTypes);
     }
 
+    public MTType getFactor(String tag) {
+        MTType result;
+        if ( elements.get(0).tag != null && elements.get(0).tag.equals(tag) ) {
+            result = elements.get(0).element;
+        }
+        else if ( elements.get(1).tag != null
+                && elements.get(1).tag.equals(tag) ) {
+            result = elements.get(1).element;
+        }
+        else if ( elements.get(0).element instanceof MTCartesian ) {
+            result = ((MTCartesian) elements.get(0).element).getFactor(tag);
+        }
+        else {
+            throw new NoSuchElementException();
+        }
+        return result;
+    }
+
     public int size() {
         return size;
     }

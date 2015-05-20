@@ -118,6 +118,7 @@ conceptImplModule
     :   'Implementation' name=Identifier (implModuleParameterList)?
         'for' concept=Identifier ';'
         (importList)?
+        (requiresClause)?
         (implBlock)?
         'end' closename=Identifier ';'
     ;
@@ -126,6 +127,7 @@ enhancementImplModule
     :   'Implementation' name=Identifier (specModuleParameterList)?
         'for' enhancement=Identifier 'of' concept=Identifier ';'
         (importList)?
+        (requiresClause)?
         (implBlock)?
         'end' closename=Identifier ';'
     ;
@@ -372,6 +374,7 @@ definitionParameterList
     ;
 
 // mathematical clauses
+
 rememberClause
     :   'remember'
     ;
@@ -454,6 +457,7 @@ mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
     |   mathCrossTypeExp
+    |   mathDotExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
@@ -486,6 +490,10 @@ mathSetExp
 
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
+    ;
+
+mathDotExp
+    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
 // program expressions

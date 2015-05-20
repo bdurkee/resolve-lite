@@ -10,21 +10,14 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
-import org.resolvelite.semantics.ModuleScopeBuilder;
-import org.resolvelite.semantics.Scope;
-import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.semantics.*;
 import org.resolvelite.semantics.programtype.*;
+import org.resolvelite.semantics.query.OperationQuery;
 import org.resolvelite.semantics.query.SymbolTypeQuery;
-import org.resolvelite.semantics.symbol.ProgParameterSymbol;
+import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
-import org.resolvelite.semantics.symbol.ProgVariableSymbol;
-import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol;
-import org.resolvelite.semantics.symbol.Symbol;
-import org.resolvelite.vcgen.applicationstrategies.ExplicitCallApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.FunctionAssignApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.SwapApplicationStrategy;
+import org.resolvelite.vcgen.applicationstrategies.*;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -54,8 +47,6 @@ public class ModelBuilder extends ResolveBaseListener {
     private final VCOutputFile outputCollector = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
 
-    //Todo: Write an adaptor for this guy so we can reuse its logic in
-    //'function assign application'
     private final static RuleApplicationStrategy //
     <ResolveParser.CallStmtContext> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy<ResolveParser.CallStmtContext>();
@@ -67,6 +58,10 @@ public class ModelBuilder extends ResolveBaseListener {
     private final static RuleApplicationStrategy //
     <ResolveParser.AssignStmtContext> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
+
+    private final static RuleApplicationStrategy //
+    <ResolveParser.VariableDeclGroupContext> VAR_DECL_APPLICATION =
+            new VarDeclarationApplicationStrategy();
 
     public ModelBuilder(VCGenerator gen, SymbolTable symtab) {
         this.gen = gen;
@@ -86,15 +81,24 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
         moduleLevelRequires = null;
         moduleLevelConstraint = null;
+        moduleScope = null;
     }
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        moduleLevelRequires = normalizePExp(ctx.requiresClause());
-        moduleLevelConstraint = conjunctGlobalConstraints(ctx);
+        moduleLevelRequires = symtab.mathPExps.get(ctx.requiresClause());
+        moduleLevelConstraint = conjunctGlobalAssertions(ctx, isConstraint());
     }
 
-    private PExp conjunctGlobalConstraints(ParserRuleContext scopedCtx) {
+    @Override public void enterEnhancementImplModule(
+            @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
+        moduleLevelRequires = conjunctGlobalAssertions(ctx, isRequires());
+        moduleLevelConstraint = conjunctGlobalAssertions(ctx, isConstraint());
+
+    }
+
+    private PExp conjunctGlobalAssertions(ParserRuleContext scopedCtx,
+                                          Predicate<Symbol> clause) {
         List<GlobalMathAssertionSymbol> wrappedAssertions =
                 symtab.scopes.get(scopedCtx).query(
                         new SymbolTypeQuery<GlobalMathAssertionSymbol>(
@@ -102,7 +106,7 @@ public class ModelBuilder extends ResolveBaseListener {
         if (wrappedAssertions.isEmpty()) {
             return g.getTrueExp();
         }
-        return g.formConjuncts(wrappedAssertions.stream().filter(isConstraint())
+        return g.formConjuncts(wrappedAssertions.stream().filter(clause)
                 .map(e -> symtab.mathPExps.get(e.getAssertion()))
                 .collect(Collectors.toList()));
     }
@@ -126,9 +130,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, s, ctx, tr)
                         .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
                         .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
-                        .assume(moduleLevelRequires).assume(topAssume) //
-                        .assume(moduleLevelConstraint).remember() //
-                        .finalConfirm(bottomConfirm);
+                        .assume(moduleLevelRequires).assume(topAssume)
+                        .remember().finalConfirm(bottomConfirm);
     }
 
     @Override public void exitOperationProcedureDecl(
@@ -140,6 +143,50 @@ public class ModelBuilder extends ResolveBaseListener {
 
         outputCollector.chunks.add(curAssertiveBuilder.build());
         curAssertiveBuilder = null;
+    }
+
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        try {
+            List<PTType> argTypes =
+                    s.getSymbolsOfType(ProgParameterSymbol.class).stream()
+                            .map(ProgParameterSymbol::getDeclaredType)
+                            .collect(Collectors.toList());
+            OperationSymbol op =
+                    moduleScope.queryForOne(
+                            new OperationQuery(null, ctx.name, argTypes));
+
+            PExp topAssume = modifyRequiresByParams(ctx, op.getRequires());
+            PExp bottomConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
+
+            curAssertiveBuilder =
+                    new VCAssertiveBlockBuilder(g, s, ctx, tr)
+                        .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
+                        .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
+                        .assume(moduleLevelRequires).assume(topAssume) //
+                        .assume(moduleLevelConstraint).remember();
+        }
+        catch (DuplicateSymbolException|NoSuchSymbolException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        curAssertiveBuilder.stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+                .stats(Utils.collect(VCRuleBackedStat.class,
+                        ctx.variableDeclGroup(), stats));
+
+        outputCollector.chunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        stats.put(ctx, new VCCode<ResolveParser.VariableDeclGroupContext>(ctx,
+                VAR_DECL_APPLICATION, curAssertiveBuilder));
     }
 
     @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
@@ -166,7 +213,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.RequiresClauseContext requires) {
-        return normalizePExp(requires);
+        return normalizePExp(requires); //Todo.
     }
 
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
@@ -216,6 +263,10 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         return existingEnsures;
+    }
+
+    public static Predicate<Symbol> isRequires() {
+        return s -> s.getDefiningTree() instanceof ResolveParser.RequiresClauseContext;
     }
 
     public static Predicate<Symbol> isConstraint() {

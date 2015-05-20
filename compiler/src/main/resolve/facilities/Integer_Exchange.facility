@@ -31,7 +31,7 @@
 
 Facility Integer_Exchange;
 
-    Oper Exchange (updates I, J: Std_Integer_Fac::Integer);
+    Oper Exchange (updates I, J : Std_Integer_Fac :: Integer);
             ensures J = @I and I = @J;
         Procedure
             I :=: J;

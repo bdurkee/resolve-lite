@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
@@ -36,6 +37,11 @@ public class ProgTypeSymbol extends Symbol {
 
     @Override public String toString() {
         return getName();
+    }
+
+    public PSymbol asPSymbol() {
+        return new PSymbol.PSymbolBuilder(getName()).mathType(getModelType())
+                .build();
     }
 
     @Override public ProgTypeSymbol toProgTypeSymbol() {
