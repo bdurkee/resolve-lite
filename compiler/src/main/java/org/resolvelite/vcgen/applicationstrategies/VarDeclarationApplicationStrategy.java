@@ -39,8 +39,9 @@ public class VarDeclarationApplicationStrategy
                 block.assume(createInitializationPredicate(g, typeSym, term));
             }
             else {
-                throw new UnsupportedOperationException("normally typed var decls "
-                        + "not yet supported by vcgen");
+                throw new UnsupportedOperationException(
+                        "normally typed var decls "
+                                + "not yet supported by vcgen");
             }
         }
 
@@ -48,13 +49,13 @@ public class VarDeclarationApplicationStrategy
     }
 
     protected static PDot createInitializationPredicate(TypeGraph g,
-                                                        ProgTypeSymbol type,
-                                                        TerminalNode t) {
+            ProgTypeSymbol type, TerminalNode t) {
         PSymbol predicateArg =
                 new PSymbolBuilder(t.getText()).mathType(type.getModelType())
-                            .build();
-        PSymbol predicate = new PSymbolBuilder("Is_Initial").mathType(g.BOOLEAN)
-                .arguments(predicateArg).build();
+                        .build();
+        PSymbol predicate =
+                new PSymbolBuilder("Is_Initial").mathType(g.BOOLEAN)
+                        .arguments(predicateArg).build();
         return new PDot(g.BOOLEAN, null, type.asPSymbol(), predicate);
     }
 

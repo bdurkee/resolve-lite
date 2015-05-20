@@ -377,20 +377,20 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitConstraintClause(
             @NotNull ResolveParser.ConstraintClauseContext ctx) {
-        if (!(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext)) {
+        if ( !(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext) ) {
             insertGlobalAssertion(ctx, ctx.mathAssertionExp());
         }
     }
 
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
-        if (ctx.getParent().getParent() instanceof ResolveParser.ModuleContext) {
+        if ( ctx.getParent().getParent() instanceof ResolveParser.ModuleContext ) {
             insertGlobalAssertion(ctx, ctx.mathAssertionExp());
         }
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
-                           ResolveParser.MathAssertionExpContext assertion) {
+            ResolveParser.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         try {
             symtab.getInnermostActiveScope().define(

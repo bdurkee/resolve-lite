@@ -98,7 +98,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     private PExp conjunctGlobalAssertions(ParserRuleContext scopedCtx,
-                                          Predicate<Symbol> clause) {
+                                          Predicate<Symbol> clauseType) {
         List<GlobalMathAssertionSymbol> wrappedAssertions =
                 symtab.scopes.get(scopedCtx).query(
                         new SymbolTypeQuery<GlobalMathAssertionSymbol>(
@@ -106,15 +106,14 @@ public class ModelBuilder extends ResolveBaseListener {
         if (wrappedAssertions.isEmpty()) {
             return g.getTrueExp();
         }
-        return g.formConjuncts(wrappedAssertions.stream().filter(clause)
+        return g.formConjuncts(wrappedAssertions.stream().filter(clauseType)
                 .map(e -> symtab.mathPExps.get(e.getAssertion()))
                 .collect(Collectors.toList()));
     }
 
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-        //curAssertiveBuilder =
-        //        new VCAssertiveBlockBuilder(g, moduleScope, ctx, tr);
+
     }
 
     @Override public void exitFacilityDecl(
@@ -165,7 +164,8 @@ public class ModelBuilder extends ResolveBaseListener {
                         .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
                         .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
                         .assume(moduleLevelRequires).assume(topAssume) //
-                        .assume(moduleLevelConstraint).remember();
+                        .assume(moduleLevelConstraint) //
+                        .finalConfirm(bottomConfirm).remember();
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
             e.printStackTrace();
