@@ -29,8 +29,6 @@ public class HardCoded {
 
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
-            b.addBinding("Powerset", null, g.POWERSET);
-            b.addBinding("union", null, g.UNION);
             b.addBinding("min_int", null, g.Z, null);
             b.addBinding("max_int", null, g.Z, null);
 
@@ -48,10 +46,25 @@ public class HardCoded {
                     .paramTypes(g.CARD, g.CARD).build());
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("/=", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.ENTITY).build());
             b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+            b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+
+            //S E T   R E L A T E D
+            b.addBinding("Powerset", null, g.POWERSET);
+            b.addBinding("union", null, g.UNION);
+            //b.addBinding("intersect", null, g.INTERSECT);
+
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
                     .paramTypes(g.SSET).build());
+            b.addBinding("is_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.SSET).build());
+            b.addBinding("~", null,
+                    new MTFunctionBuilder(g, g.CARD).paramTypes(g.SSET, g.SSET)
+                            .build());
         }
         catch (DuplicateSymbolException e) {
             rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,
@@ -59,7 +72,7 @@ public class HardCoded {
         }
     }
 
-    //Todo: Should these *really* be in here?
+    //Todo: Should the following two methods *really* be in here?
     public static String getMetaFieldName(ParserRuleContext t) {
         String result;
 
@@ -84,7 +97,6 @@ public class HardCoded {
                     new MTFunction.MTFunctionBuilder(g, g.BOOLEAN).paramTypes(
                             g.ENTITY).build();
         }
-
         return result;
     }
 }

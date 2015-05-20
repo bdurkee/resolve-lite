@@ -37,8 +37,10 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -159,6 +161,10 @@ public class Utils {
         return name;
     }
 
+    public static <T> List<T> apply(Collection<T> l, Function<T, T> f) {
+        return l.stream().map(f).collect(Collectors.toList());
+    }
+    
     public static <T> String join(Collection<T> data, String separator) {
         return join(data.iterator(), separator, "", "");
     }

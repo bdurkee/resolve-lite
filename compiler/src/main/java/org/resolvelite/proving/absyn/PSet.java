@@ -10,14 +10,14 @@ public class PSet extends PExp {
 
     private final List<PExp> elements = new ArrayList<>();
 
-    //Todo: hash correctly.
     public PSet(MTType type, MTType typeValue, List<PExp> elements) {
-        super(0, 0, type, typeValue, null, null);
+        super(PSymbol.calculateHashes(elements), type, typeValue, null, null);
         this.elements.addAll(elements);
     }
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
-        return null;
+        return new PSet(getMathType(), getMathTypeValue(),
+                Utils.apply(elements, u -> u.substitute(substitutions)));
     }
 
     @Override public boolean containsName(String name) {
@@ -54,12 +54,11 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
-
-    }
+    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
 
     @Override public PExp withIncomingSignsErased() {
-        return null;
+        return new PSet(getMathType(), getMathTypeValue(),
+                Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
     @Override public PExp flipQuantifiers() {
@@ -71,15 +70,15 @@ public class PSet extends PExp {
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
-        return null;
+        return new HashSet<>();
     }
 
     @Override public List<PExp> getFunctionApplicationsNoCache() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override protected Set<String> getSymbolNamesNoCache() {
-        return null;
+        return new HashSet<>();
     }
 
     @Override public String toString() {

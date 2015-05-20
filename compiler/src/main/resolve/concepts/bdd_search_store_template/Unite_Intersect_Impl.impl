@@ -1,12 +1,12 @@
 Implementation Unite_Intersect_Impl for
     Unite_Intersect_Capability of Bdd_Search_Store_Template;
 
-    Procedure Unite_Intersect (updates U, V : Store);
-        --Var U_Ct, V_Ct : Std_Integer_Fac :: Integer;
-        Var Temp : T;
+    Proc Unite_Intersect (updates U, V : Store);
+        Var U_Ct, V_Ct : Std_Integer_Fac :: Integer;
+        Var Temp : Store;
 
-        --U_Ct := Count(U);
-        --V_Ct := Count(V);
+        U_Ct := Count(U);
+        V_Ct := Count(V);
 
     end Unite_Intersect;
 end Unite_Intersect_Impl;

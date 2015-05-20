@@ -1,0 +1,7 @@
+Implementation Do_Nothing_Impl
+    for Do_Nothing_Capability of Bdd_Search_Store_Template;
+
+    Proc Do_Nothing (restores S : Store);
+        Var Temp : T; Add(Temp, S); Remove(Temp, S);
+    end Do_Nothing;
+end Do_Nothing_Impl;

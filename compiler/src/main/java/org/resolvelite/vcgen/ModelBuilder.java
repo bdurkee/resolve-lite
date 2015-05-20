@@ -61,7 +61,11 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private final static RuleApplicationStrategy //
     <ResolveParser.VariableDeclGroupContext> VAR_DECL_APPLICATION =
-            new VarDeclarationApplicationStrategy();
+            new VarDeclApplicationStrategy();
+
+    private final static RuleApplicationStrategy //
+    <ResolveParser.RecordVariableDeclGroupContext> RECORD_VAR_DECL_APPLICATION =
+            new RecordVarDeclApplicationStrategy();
 
     public ModelBuilder(VCGenerator gen, SymbolTable symtab) {
         this.gen = gen;
@@ -113,11 +117,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void enterFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
-
+        throw new UnsupportedOperationException("not yet supported by vcgen");
     }
 
     @Override public void exitFacilityDecl(
-            @NotNull ResolveParser.FacilityDeclContext ctx) {}
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        throw new UnsupportedOperationException("not yet supported by vcgen");
+    }
 
     @Override public void enterOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
@@ -187,6 +193,13 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
         stats.put(ctx, new VCCode<ResolveParser.VariableDeclGroupContext>(ctx,
                 VAR_DECL_APPLICATION, curAssertiveBuilder));
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        stats.put(ctx,
+                new VCCode<ResolveParser.RecordVariableDeclGroupContext>(ctx,
+                        RECORD_VAR_DECL_APPLICATION, curAssertiveBuilder));
     }
 
     @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {

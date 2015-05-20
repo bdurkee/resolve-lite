@@ -1,0 +1,4 @@
+Enhancement Do_Nothing_Capability for Bdd_Search_Store_Template;
+    Oper Do_Nothing (restores S : Store);
+        requires S /= {};
+end Do_Nothing_Capability;

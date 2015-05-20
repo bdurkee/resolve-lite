@@ -2,7 +2,7 @@ Concept Bdd_Search_Store_Template<T>
         (evaluates Max_Capacity : Std_Integer_Fac :: Integer);
             uses Test_Theory;
     requires Max_Capacity > 0 which_entails Max_Capacity : N;
-    Constraint true;
+
     Type Family Store is
                 modeled by Powerset(T);
         exemplar S;
@@ -13,6 +13,10 @@ Concept Bdd_Search_Store_Template<T>
         Oper Add (restores e : T; updates S : Store);
             requires ||S|| < Max_Capacity;
             ensures S = @S union {e};
+
+        Oper Remove (restores e : T; updates S : Store);
+            requires e is_in S;
+            ensures S = @S ~ {e};
 
         Oper Count (restores S : Store) :
                     Std_Integer_Fac :: Integer;

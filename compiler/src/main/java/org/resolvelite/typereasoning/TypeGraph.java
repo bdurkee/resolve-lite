@@ -420,10 +420,10 @@ public class TypeGraph {
     }
 
     public PExp formConjuncts(List<PExp> e) {
-        if ( e == null || e.isEmpty() ) {
-            throw new IllegalArgumentException("can't conjunct an empty or "
-                    + "null list");
+        if ( e == null ) {
+            throw new IllegalArgumentException("can't conjunct a null list");
         }
+        if ( e.isEmpty() ) return null;
         Iterator<PExp> segsIter = e.iterator();
         PExp result = segsIter.next();
         if ( e.size() == 1 ) {
