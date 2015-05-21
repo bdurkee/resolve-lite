@@ -36,7 +36,6 @@ public class ModelBuilder extends ResolveBaseListener {
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
     private final TypeGraph g;
-    private final VCGenerator gen;
 
     private final ParseTreeProperty<VCRuleBackedStat> stats =
             new ParseTreeProperty<>();
@@ -68,7 +67,6 @@ public class ModelBuilder extends ResolveBaseListener {
             new RecordVarDeclApplicationStrategy();
 
     public ModelBuilder(VCGenerator gen, SymbolTable symtab) {
-        this.gen = gen;
         this.symtab = symtab;
         this.tr = gen.getModule();
         this.g = symtab.getTypeGraph();
@@ -180,10 +178,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
-        curAssertiveBuilder.stats(
-                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+        curAssertiveBuilder
                 .stats(Utils.collect(VCRuleBackedStat.class,
-                        ctx.variableDeclGroup(), stats));
+                        ctx.variableDeclGroup(), stats))
+                .stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
 
         outputCollector.chunks.add(curAssertiveBuilder.build());
         curAssertiveBuilder = null;

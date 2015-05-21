@@ -7,6 +7,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -21,9 +22,14 @@ public class ScopeBuilder extends SyntacticScope {
     protected final List<ScopeBuilder> children = new ArrayList<>();
     private final TypeGraph typeGraph;
 
+    //Todo: We definitely want a linkedHashMap here to preserve the order
+    //in which entries were added to the table. Though it shouldn't necessarily
+    //matter. It just does currently because of the way we grab lists of
+    //formal parameters (from scope) for functions before we insert the
+    //completed sym into the table.
     ScopeBuilder(SymbolTable s, TypeGraph g, ParseTree definingTree,
             Scope parent, String moduleID) {
-        super(s, definingTree, parent, moduleID, new HashMap<>());
+        super(s, definingTree, parent, moduleID, new LinkedHashMap<>());
         this.typeGraph = g;
     }
 

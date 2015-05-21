@@ -70,6 +70,14 @@ public abstract class PExp {
         return typeValue;
     }
 
+    public PExp substitute(List<? extends PExp> currents, PExp repl) {
+        Map<PExp, PExp> substitutions = new HashMap<>();
+        for (PExp current : currents ) {
+            substitutions.put(current, repl);
+        }
+        return substitute(substitutions);
+    }
+
     public PExp substitute(List<? extends PExp> currents, PExp... repls) {
         return substitute(currents, Arrays.asList(repls));
     }

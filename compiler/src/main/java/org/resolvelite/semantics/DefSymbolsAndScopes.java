@@ -568,6 +568,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @Nullable ResolveParser.TypeContext type, boolean isProcedure,
             OperationSymbol formalOp) {
         try {
+            //TODO: This is dangerous if we aren't using a linked hashmap as our table.
+            //There is probably a way to fix this so that the implementation/insertion order
+            //for the table doesn't matter.
             List<ProgParameterSymbol> params =
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);

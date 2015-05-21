@@ -7,6 +7,7 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OperationSymbol extends Symbol {
 
@@ -32,6 +33,12 @@ public class OperationSymbol extends Symbol {
 
     public ResolveParser.RequiresClauseContext getRequires() {
         return requires;
+    }
+
+    //They need to share the same name, so this shouldn't be too bad.
+    public Optional<ProgParameterSymbol> mapActualToFormal(String actualName) {
+        return parameters.stream().filter(p -> p.getName().equals(actualName))
+                .findAny();
     }
 
     public ResolveParser.EnsuresClauseContext getEnsures() {

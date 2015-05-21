@@ -198,9 +198,12 @@ public class PSymbol extends PExp {
                 PExp mm = argument.substitute(substitutions);
                 newArgs.add(mm);
             }
+            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
+                new PSymbolBuilder(leftPrint, rightPrint) :
+                new PSymbolBuilder(name);
 
-            result = new PSymbolBuilder(name) //
-                    .mathType(getMathType()).mathTypeValue(getMathTypeValue()) //
+            result = temp.mathType(getMathType()) //
+                    .mathTypeValue(getMathTypeValue()) //
                     .quantification(newQuantification) //
                     .arguments(newArgs).style(dispStyle) //
                     .incoming(incomingFlag).progType(getProgType()) //
@@ -241,14 +244,19 @@ public class PSymbol extends PExp {
     @Override public PExp withIncomingSignsErased() {
         if ( arguments.isEmpty() ) {
             //literal is false by default, so no need to explicitly state it.
-            return new PSymbolBuilder(this.name).mathType(getMathType())
+            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
+                    new PSymbolBuilder(leftPrint, rightPrint) :
+                    new PSymbolBuilder(name);
+            return temp.mathType(getMathType())
                     .mathTypeValue(getMathTypeValue()).style(dispStyle)
                     .literal(literalFlag).progType(getProgType())
                     .progTypeValue(getProgTypeValue()).build();
         }
         else {
-            PSymbolBuilder result =
-                    new PSymbolBuilder(name).mathType(getMathType())
+            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
+                    new PSymbolBuilder(leftPrint, rightPrint) :
+                    new PSymbolBuilder(name);
+            PSymbolBuilder result = temp.mathType(getMathType())
                             .mathTypeValue(getMathTypeValue()).style(dispStyle)
                             .quantification(quantification)
                             .progType(getProgType())
@@ -317,7 +325,7 @@ public class PSymbol extends PExp {
     }
 
     @Override public List<PExp> getFunctionApplicationsNoCache() {
-        List<PExp> result = new LinkedList<PExp>();
+        List<PExp> result = new LinkedList<>();
         if ( this.arguments.size() > 0 ) {
             result.add(this);
         }
