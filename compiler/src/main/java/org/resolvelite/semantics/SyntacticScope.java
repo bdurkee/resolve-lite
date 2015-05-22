@@ -68,19 +68,6 @@ public abstract class SyntacticScope extends AbstractScope {
                 .collect(Collectors.toList());
     }
 
-    @Override public <T extends Symbol> T getSymbolOfType(Class<T> type)
-            throws DuplicateSymbolException,
-                NoSuchSymbolException {
-        List<T> intermediate = getSymbolsOfType(type);
-        if ( intermediate.size() > 1 ) {
-            throw new DuplicateSymbolException();
-        }
-        if ( intermediate.isEmpty() ) {
-            throw new NoSuchSymbolException();
-        }
-        return intermediate.get(0);
-    }
-
     @Override public List<? extends Symbol> getAllSymbols() {
         return new ArrayList<>(symbols.values());
     }

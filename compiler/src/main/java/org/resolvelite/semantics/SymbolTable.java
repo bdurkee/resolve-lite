@@ -8,6 +8,7 @@ import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.misc.HardCoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;

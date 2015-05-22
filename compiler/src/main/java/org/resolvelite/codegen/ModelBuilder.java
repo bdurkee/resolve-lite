@@ -41,14 +41,12 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
-import org.resolvelite.semantics.DuplicateSymbolException;
-import org.resolvelite.semantics.ModuleScopeBuilder;
-import org.resolvelite.semantics.NoSuchSymbolException;
-import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.semantics.*;
 import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTNamed;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.NameQuery;
+import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
 import org.resolvelite.codegen.model.Qualifier.FacilityQualifier;
@@ -224,13 +222,31 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         MemberClassDef representationClass =
                 new MemberClassDef(ctx.name.getText());
+        String exemplarName = "";
+        try {
+            //Maybe in the future we can assign program types to the ctxs
+            ProgReprTypeSymbol x = moduleScope.queryForOne(
+                    new UnqualifiedNameQuery(ctx.name.getText()))
+                    .toProgReprTypeSymbol();
+            exemplarName = ((PTNamed)x.toProgTypeSymbol()
+                    .getProgramType()).getExemplarName();
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            exemplarName = ctx.name.getText().substring(0, 1); //default.
+        }
         representationClass.isStatic = withinFacilityModule();
+        representationClass.referredToByExemplar = exemplarName;
         if ( ctx.record() != null ) {
             for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
                     .record().recordVariableDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.Identifier(), built));
             }
+        }
+        if (ctx.typeImplInit() != null) {
+            representationClass.initVars.addAll(Utils.collect(VariableDef.class,
+                    ctx.typeImplInit().variableDeclGroup(), built));
+            representationClass.initStats.addAll(Utils.collect(Stat.class,
+                    ctx.typeImplInit().stmt(), built));
         }
         built.put(ctx, representationClass);
     }

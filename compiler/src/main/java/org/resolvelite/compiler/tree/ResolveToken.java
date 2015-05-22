@@ -39,7 +39,7 @@ import org.resolvelite.parsing.ResolveLexer;
 /**
  * A special token that overrides the "equals" logic present in the default
  * implementation of {@link CommonToken}. Turns out this is functionally
- * equivalent to our now removed <tt>PosSymbol</tt> class.
+ * equivalent to the now deleted {@code PosSymbol} class.
  */
 public class ResolveToken extends CommonToken {
 

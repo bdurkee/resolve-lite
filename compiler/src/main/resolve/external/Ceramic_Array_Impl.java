@@ -47,7 +47,7 @@ public class Ceramic_Array_Impl extends ResolveBase
         }
     }
 
-    @Override public RType initArray() {
+    @Override public RType initCeramic_Array() {
         return new Array();
     }
 

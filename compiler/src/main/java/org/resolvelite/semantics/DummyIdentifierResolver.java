@@ -37,12 +37,6 @@ public class DummyIdentifierResolver extends AbstractScope {
         return new ArrayList<>();
     }
 
-    @Override public <T extends Symbol> T getSymbolOfType(Class<T> type)
-            throws NoSuchSymbolException,
-                DuplicateSymbolException {
-        throw new NoSuchSymbolException();
-    }
-
     @Override public List<? extends Symbol> getAllSymbols() {
         return new ArrayList<>();
     }

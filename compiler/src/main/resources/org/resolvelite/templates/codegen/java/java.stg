@@ -128,12 +128,12 @@ DecoratedFacilityInstantiation(init, args, child) ::= <%
 <else>new <init.specRealizName><endif>(<[args, child]; separator=",\n ">)
 %>
 
-MemberClassDef(clazz, fields) ::= <<
+MemberClassDef(clazz, fields, initVars, initStats) ::= <<
 <if(clazz.isStatic)>static <endif><\\>
 class <clazz.name> implements RType {
     <clazz.name>_Rep rep;
     <clazz.name>() {
-        rep = new <clazz.name>_Rep();
+        rep = new <clazz.name>_Rep(this);
     }
 
     @Override public Object getRep() {
@@ -154,9 +154,13 @@ class <clazz.name> implements RType {
 }
 <if(clazz.isStatic)>static <endif><\\>
 class <clazz.name>_Rep {
+    <clazz.name> <clazz.referredToByExemplar>;
     <fields: {f|RType <f.var.name>;}; separator="\n">
-    <clazz.name>_Rep() {
-        <fields: {f|<f.var.name> = <f.init>;}; separator="\n">
+    <clazz.name>_Rep(<clazz.name> e) {
+        this.<clazz.referredToByExemplar> = e;
+        <fields: {f|this.<f.var.name> = <f.init>;}; separator="\n">
+        <initVars; separator="\n">
+        <initStats; separator="\n">
     }
     @Override public String toString() {
         return <fields: {f|<f.var.name>.toString()}; separator="+">;

@@ -58,19 +58,19 @@ public class Boolean_Impl extends ResolveBase implements Boolean_Template{
         }
     }
 
-    public RType And(RType b1, RType b2) {
+    @Override public RType And(RType b1, RType b2) {
         return new Boolean(((Boolean)b1).rep.val && ((Boolean)b2).rep.val);
     }
 
-    public RType Or(RType b1, RType b2) {
+    @Override public RType Or(RType b1, RType b2) {
         return new Boolean(((Boolean)b1).rep.val || ((Boolean)b2).rep.val);
     }
 
-    public RType True() {
+    @Override public RType True() {
         return new Boolean(true);
     }
 
-    public RType False() {
+    @Override public RType False() {
         return new Boolean(false);
     }
 

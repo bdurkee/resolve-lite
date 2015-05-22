@@ -504,7 +504,7 @@ public class ResolveCompiler {
     }
 
     public void version() {
-        info("RESOLVE Compiler Version " + VERSION);
+        info("Resolve Compiler Version " + VERSION);
     }
 
     public void help() {
