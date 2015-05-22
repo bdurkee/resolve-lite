@@ -163,9 +163,9 @@ public enum ErrorKind {
             + " to a module, not a facility", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 21: type <em>name</em> is not known to ba type".
+     * Compiler error 21: <em>name</em> is not known to ba type".
      */
-    INVALID_MATH_TYPE(21, "type '<arg>' is not known to be a type",
+    INVALID_MATH_TYPE(21, "'<arg>' is not known to be a type",
             ErrorSeverity.ERROR),
 
     /**
@@ -217,7 +217,7 @@ public enum ErrorKind {
      */
     AMBIGIOUS_DOMAIN(29, "multiple domain matches; for example: "
             + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
-            + "qualifying", ErrorSeverity.ERROR),
+            + "qualifying", ErrorSeverity.WARNING),
 
     NO_SUCH_OPERATION(30, "no operation found corresponding to call "
             + "<arg> <if(arg2)>" + "with the following arguments: "

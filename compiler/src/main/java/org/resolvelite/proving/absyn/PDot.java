@@ -22,7 +22,7 @@ public class PDot extends PExp {
     }
 
     public PDot(List<PSymbol> segs, MTType type, MTType typeValue,
-                PTType progType, PTType progTypeValue) {
+            PTType progType, PTType progTypeValue) {
         super(PSymbol.calculateHashes(segs), type, typeValue, progType,
                 progTypeValue);
         this.segs.addAll(segs);

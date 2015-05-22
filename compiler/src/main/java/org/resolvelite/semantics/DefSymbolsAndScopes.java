@@ -267,7 +267,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             symtab.getInnermostActiveScope().define(
                     new ProgReprTypeSymbol(g, ctx.name.getText(), ctx,
                             getRootModuleID(), typeDefn, reprType, ctx
-                                    .conventionClause(), null));
+                                    .conventionClause(), ctx
+                                    .correspondenceClause()));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -369,18 +370,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name.getStart(), ctx.name.getText());
-        }
-    }
-
-    @Override public void exitMathEntailsAddendum(
-            @NotNull ResolveParser.MathEntailsAddendumContext ctx) {
-        try {
-            symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(null, ctx.variableName))
-                    .setMathType(g.N);
-        }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            e.printStackTrace();
         }
     }
 

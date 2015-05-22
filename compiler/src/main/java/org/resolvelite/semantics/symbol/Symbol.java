@@ -24,6 +24,9 @@ public abstract class Symbol {
         return name;
     }
 
+    //Todo: This should really be changed across the board to return
+    //"ParserRuleContext" instead, as that gives start and stop info easier
+    //(without needing casts)
     public ParseTree getDefiningTree() {
         return definingTree;
     }

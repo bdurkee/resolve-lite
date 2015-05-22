@@ -12,6 +12,7 @@ import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ResolveToken;
 import org.resolvelite.misc.HardCoded;
+import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
@@ -25,6 +26,8 @@ import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ComputeTypes extends SetScopes {
@@ -42,6 +45,7 @@ public class ComputeTypes extends SetScopes {
     private final AnnotatedTree tr;
     private final TypeGraph g;
     protected int typeValueDepth = 0;
+
     protected boolean walkingMathDot = false;
     protected MTType currentSeg = null;
 
@@ -154,27 +158,33 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
-        List<PTType> argTypes = ctx.progExp().stream().map(tr.progTypes::get)
+        typeOperationSym(ctx, ctx.qualifier, ctx.name.getText(), ctx.progExp());
+    }
+
+    @Override public void exitProgApplicationExp(
+            @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+        typeOperationSym(ctx, null, ctx.op.getText(), ctx.progExp());
+    }
+
+    protected void typeOperationSym(ParserRuleContext ctx,
+                                    Token qualifier, String name,
+                                    List<ResolveParser.ProgExpContext> args) {
+        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
+        String opAsName = Utils.getNameFromProgramOp(name);
         try {
-            OperationSymbol opSym =
-                    currentScope.queryForOne(
-                            new OperationQuery(ctx.qualifier, ctx.name,
-                                    argTypes));
+            OperationSymbol opSym = currentScope.queryForOne(
+                    new OperationQuery(qualifier, opAsName, argTypes));
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;
         }
-        catch (NoSuchSymbolException nsse) {
-            List<String> argStrList = ctx.progExp().stream()
+        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            List<String> argStrList = args.stream()
                     .map(ResolveParser.ProgExpContext::getText)
                     .collect(Collectors.toList());
             compiler.errorManager.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                    ctx.getStart(), ctx.name.getText(), argStrList, argTypes);
-        }
-        catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.name, ctx.name.getText());
+                    ctx.getStart(), name, argStrList, argTypes);
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
@@ -206,6 +216,16 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitConstraintClause(
             @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public void exitConventionClause(
+            @NotNull ResolveParser.ConventionClauseContext ctx) {
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public void exitCorrespondenceClause(
+            @NotNull ResolveParser.CorrespondenceClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
@@ -388,6 +408,31 @@ public class ComputeTypes extends SetScopes {
         tr.mathTypes.put(ctx, curType);
         //Todo
         //tr.mathTypeValues.put(ctx, curType);
+    }
+
+    //Todo: This could use a redo/further refinement at some point. Though for
+    //an initial pass it'll do.
+    @Override public void exitMathEntailsAddendum(
+            @NotNull ResolveParser.MathEntailsAddendumContext ctx) {
+        List<MathSymbol> allVisibleMathSyms = new ArrayList<>();
+
+        for (Symbol s : currentScope.getAllSymbols()) {
+            try {
+                allVisibleMathSyms.add(s.toMathSymbol());
+            } catch (UnexpectedSymbolException use) {}
+        }
+        List<String> renames = ctx.Identifier().stream()
+                .map(ParseTree::getText).collect(Collectors.toList());
+        for (ResolveParser.MathDotExpContext e : ctx.mathDotExp()) {
+            int last = e.mathFunctionApplicationExp().size() - 1;
+            renames.add(e.mathFunctionApplicationExp().get(last).getText());
+        }
+        MTType newType = tr.mathTypeValues.get(ctx.mathTypeExp());
+        for (MathSymbol retypeSym : allVisibleMathSyms) {
+            if (renames.contains(retypeSym.getName())) {
+                retypeSym.setMathType(newType);
+            }
+        }
     }
 
     @Override public void exitMathVariableExp(
@@ -590,9 +635,11 @@ public class ComputeTypes extends SetScopes {
                 if ( comparison.compare(e, eType, candidateType) ) {
                     if ( match != null ) {
                         compiler.errorManager.semanticError(
-                                ErrorKind.AMBIGIOUS_DOMAIN, null,
-                                match.getName(), match.getType(),
-                                candidate.getName(), candidate.getType());
+                                ErrorKind.AMBIGIOUS_DOMAIN,
+                                ((ParserRuleContext) candidate
+                                        .getDefiningTree()).getStart(), match
+                                        .getName(), match.getType(), candidate
+                                        .getName(), candidate.getType());
                     }
                     match = candidate;
                 }

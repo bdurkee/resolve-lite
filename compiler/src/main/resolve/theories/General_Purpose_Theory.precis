@@ -10,4 +10,6 @@ Precis General_Purpose_Theory;
 
     Definition > (i : Z, j : Z) : B;
 
+    Definition <= (i : Z, j : Z) : B;
+
 end General_Purpose_Theory;

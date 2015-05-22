@@ -156,8 +156,7 @@ public class Utils {
         else if ( op.equals(">=") )
             name = "Greater_Or_Equal";
         else
-            throw new IllegalArgumentException("no template operation "
-                    + "corresponding to operator: " + op);
+            name = op;
         return name;
     }
 

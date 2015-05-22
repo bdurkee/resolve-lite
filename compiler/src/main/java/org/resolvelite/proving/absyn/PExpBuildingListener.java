@@ -202,11 +202,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         segs.add((PSymbol) repo.get(ctx.getChild(0)));
         for (TerminalNode term : ctx.Identifier()) {
             segs.add(new PSymbol.PSymbolBuilder(term.getText())
-                    .mathType(types.get(term))
-                    .progType(progTypes.get(term)).build());
+                    .mathType(types.get(term)).progType(progTypes.get(term))
+                    .build());
         }
-        PDot result = new PDot(segs, types.get(ctx), typeValues.get(ctx),
-                progTypes.get(ctx), progTypeValues.get(ctx));
+        PDot result =
+                new PDot(segs, types.get(ctx), typeValues.get(ctx),
+                        progTypes.get(ctx), progTypeValues.get(ctx));
         repo.put(ctx, result);
     }
 

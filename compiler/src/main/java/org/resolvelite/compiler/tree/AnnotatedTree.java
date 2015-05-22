@@ -48,7 +48,7 @@ public class AnnotatedTree {
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
     //Yes, this also exists in SymbolTable.java, but we keep a pointer here for
-    //convenience too. We'll see...
+    //convenience too.
     public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
 
     private final String name, fileName;

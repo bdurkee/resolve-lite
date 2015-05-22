@@ -250,7 +250,7 @@ typeModelDecl
 typeRepresentationDecl
     :   'Type' name=Identifier '=' (record|type) ';'
         (conventionClause)?
-        //(correspondenceClause)?
+        (correspondenceClause)?
         (typeImplInit)?
     ;
 
@@ -260,8 +260,12 @@ typeModelInit
     :   'initialization' (ensuresClause)?
     ;
 
+//Yes, typeImpl initialization technically shouldn't require *another* ensures
+//clause, but it does in the case of those defined in a facility module.
+//So to save ourselves an extra redundant rule, we just allow it here.
 typeImplInit
-    :   'initialization' (ensuresClause)? (variableDeclGroup)* (stmt)*
+    :   'initialization' (ensuresClause)?
+        (variableDeclGroup)* (stmt)* 'end' ';'
     ;
 
 // functions
@@ -396,7 +400,8 @@ whereClause
     ;
 
 mathEntailsAddendum
-    :   'which_entails' variableName=Identifier ':' mathTypeExp
+    :   'which_entails' (mathDotExp|Identifier)
+        (',' (mathDotExp|Identifier))? ':' mathTypeExp
     ;
 
 correspondenceClause
@@ -404,7 +409,7 @@ correspondenceClause
     ;
 
 conventionClause
-    :   'convention' mathAssertionExp ';'
+    :   'convention' mathAssertionExp (mathEntailsAddendum)? ';'
     ;
 
 // mathematical expressions
