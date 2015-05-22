@@ -163,7 +163,8 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        typeOperationSym(ctx, null, ctx.op.getText(), ctx.progExp());
+        typeOperationSym(ctx, new ResolveToken("Std_Integer_Fac"),
+                ctx.op.getText(), ctx.progExp());
     }
 
     protected void typeOperationSym(ParserRuleContext ctx,

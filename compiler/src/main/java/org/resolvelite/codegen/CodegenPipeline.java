@@ -33,6 +33,7 @@ package org.resolvelite.codegen;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.misc.FileLocator;
+import org.resolvelite.parsing.ResolveParser;
 import org.stringtemplate.v4.ST;
 import org.resolvelite.compiler.AbstractCompilationPipeline;
 import org.resolvelite.compiler.ResolveCompiler;
@@ -44,6 +45,8 @@ import java.nio.file.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
@@ -55,8 +58,11 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     @Override public void process() {
         if ( compiler.genCode == null ) return;
         File outputDir = new File(compiler.outputDirectory);
+
         for (AnnotatedTree unit : compilationUnits) {
             try {
+                if ( unit.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleContext )
+                    continue;
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 compiler.info("generating code: " + unit.getName());
                 if ( compiler.genCode.equals("Java") ) {
@@ -88,4 +94,5 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             }
         }
     }
+
 }

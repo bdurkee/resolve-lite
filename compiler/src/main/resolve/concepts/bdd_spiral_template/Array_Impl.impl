@@ -20,4 +20,5 @@ Implementation Array_Impl for Bdd_Spiral_Template;
             Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;
+
 end Array_Impl;

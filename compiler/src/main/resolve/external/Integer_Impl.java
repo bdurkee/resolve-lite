@@ -66,32 +66,40 @@ public class Integer_Impl extends ResolveBase implements Integer_Template {
                 .rep.val != 0);
     }
 
-    public RType Are_Equal(RType i1, RType i2) {
+    @Override public void Increment(RType i) {
+        ((Integer)i).rep.val = ((Integer)i).rep.val + 1;
+    }
+
+    @Override public void Decrement(RType i) {
+        ((Integer)i).rep.val = ((Integer)i).rep.val - 1;
+    }
+
+    @Override public RType Are_Equal(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer)i1).rep.val ==
                 ((Integer)i2).rep.val);
     }
 
-    public RType Are_Not_Equal(RType i1, RType i2) {
+    @Override public RType Are_Not_Equal(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val !=
                 ((Integer) i2).rep.val);
     }
 
-    public RType Less_Or_Equal(RType i1, RType i2) {
+    @Override public RType Less_Or_Equal(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val <=
                 ((Integer) i2).rep.val);
     }
 
-    public RType Less(RType i1, RType i2) {
+    @Override public RType Less(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val <
                 ((Integer) i2).rep.val);
     }
 
-    public RType Greater(RType i1, RType i2) {
+    @Override public RType Greater(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val >
                 ((Integer) i2).rep.val);
     }
 
-    public RType Greater_Or_Equal(RType i1, RType i2) {
+    @Override public RType Greater_Or_Equal(RType i1, RType i2) {
         return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).rep.val >=
                 ((Integer) i2).rep.val);
     }
