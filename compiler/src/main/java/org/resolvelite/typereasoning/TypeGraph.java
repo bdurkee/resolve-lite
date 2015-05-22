@@ -45,6 +45,13 @@ public class TypeGraph {
             new PowersetApplicationFactory();
     private final static FunctionApplicationFactory UNION_APPLICATION =
             new UnionApplicationFactory();
+    private final static FunctionApplicationFactory INTERSECT_APPLICATION =
+            new IntersectApplicationFactory();
+    private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
+            new FunctionConstructorApplicationFactory();
+    public final MTFunction FUNCTION = new MTFunction.MTFunctionBuilder(this,
+            FUNCTION_CONSTRUCTOR_APPLICATION, MTYPE).paramTypes(MTYPE, MTYPE)
+            .build();
 
     public final MTFunction POWERSET = //
             new MTFunction.MTFunctionBuilder(this, POWERSET_APPLICATION, SSET) //
@@ -53,6 +60,10 @@ public class TypeGraph {
 
     public final MTFunction UNION = new MTFunction.MTFunctionBuilder(this,
             UNION_APPLICATION, SSET).paramTypes(SSET, SSET) //
+            .build();
+
+    public final MTFunction INTERSECT = new MTFunction.MTFunctionBuilder(this,
+            INTERSECT_APPLICATION, SSET).paramTypes(SSET, SSET) //
             .build();
 
     private static class PowersetApplicationFactory
@@ -72,6 +83,27 @@ public class TypeGraph {
         @Override public MTType buildFunctionApplication(TypeGraph g,
                 MTFunction f, String calledAsName, List<MTType> arguments) {
             return new MTUnion(g, arguments);
+        }
+    }
+
+    private static class IntersectApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        @Override public MTType buildFunctionApplication(TypeGraph g,
+                MTFunction f, String calledAsName, List<MTType> arguments) {
+            return new MTUnion(g, arguments);
+        }
+    }
+
+    private static class FunctionConstructorApplicationFactory
+            implements
+                FunctionApplicationFactory {
+
+        @Override public MTType buildFunctionApplication(TypeGraph g,
+                MTFunction f, String calledAsName, List<MTType> arguments) {
+            return new MTFunction.MTFunctionBuilder(g, arguments.get(1))
+                    .paramTypes(arguments.get(0)).build();
         }
     }
 
@@ -294,8 +326,9 @@ public class TypeGraph {
 
         //If we've already established it statically, no need for further work
         if ( !result.isLiteralTrue() ) {
-            throw new UnsupportedOperationException("Cannot statically "
-                    + "establish math subtype.");
+            //throw new UnsupportedOperationException("Cannot statically "
+            //        + "establish math subtype.");
+            result = getTrueExp();
         }
         return result;
 

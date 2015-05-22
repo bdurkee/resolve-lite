@@ -12,13 +12,9 @@ public class PTFamily extends PTNamed {
 
     public PTFamily(MTType model, String familyName, String exemplarName,
             ResolveParser.ConstraintClauseContext constraint,
-            ResolveParser.RequiresClauseContext initRequires,
             ResolveParser.EnsuresClauseContext initEnsures,
-            ResolveParser.RequiresClauseContext finalRequires,
-            ResolveParser.EnsuresClauseContext finalEnsures,
             String enclosingModuleID) {
-        super(model.getTypeGraph(), familyName, initRequires, initEnsures,
-                finalRequires, finalEnsures, enclosingModuleID);
+        super(model.getTypeGraph(), familyName, initEnsures, enclosingModuleID);
         this.model = model;
         this.name = familyName;
         this.exemplarName = exemplarName;

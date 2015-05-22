@@ -93,6 +93,17 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
     }
 
+    @Override public void enterConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tree.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        symtab.endScope();
+    }
+
     //just add the named imports already found in ImportListener. Module compile
     //order needs the importlist way before now. So just use it.
     @Override public void enterEnhancementImplModule(
@@ -188,17 +199,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         ResolveParser.ConstraintClauseContext constraint =
                 ctx.constraintClause() != null ? ctx.constraintClause() : null;
-        ResolveParser.RequiresClauseContext initRequires =
-                ctx.typeModelInit() != null ? ctx.typeModelInit()
-                        .requiresClause() : null;
         ResolveParser.EnsuresClauseContext initEnsures =
                 ctx.typeModelInit() != null ? ctx.typeModelInit()
-                        .ensuresClause() : null;
-        ResolveParser.RequiresClauseContext finalRequires =
-                ctx.typeModelFinal() != null ? ctx.typeModelFinal()
-                        .requiresClause() : null;
-        ResolveParser.EnsuresClauseContext finalEnsures =
-                ctx.typeModelFinal() != null ? ctx.typeModelFinal()
                         .ensuresClause() : null;
         try {
 
@@ -207,8 +209,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             ctx.name.getText(), modelType, new PTFamily(
                                     modelType, ctx.name.getText(),
                                     ctx.exemplar.getText(), constraint,
-                                    initRequires, initEnsures, finalRequires,
-                                    finalEnsures, getRootModuleID()), exemplar,
+                                    initEnsures, getRootModuleID()), exemplar,
                             ctx, getRootModuleID());
             symtab.getInnermostActiveScope().define(progType);
         }
@@ -248,23 +249,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 ctx.record() != null ? getProgramType(ctx.record())
                         : getProgramType(ctx.type());
 
-        ResolveParser.RequiresClauseContext initRequires =
-                ctx.typeImplInit() != null ? ctx.typeImplInit()
-                        .requiresClause() : null;
         ResolveParser.EnsuresClauseContext initEnsures =
                 ctx.typeImplInit() != null ? ctx.typeImplInit().ensuresClause()
                         : null;
-        ResolveParser.RequiresClauseContext finalRequires =
-                ctx.typeImplFinal() != null ? ctx.typeImplFinal()
-                        .requiresClause() : null;
-        ResolveParser.EnsuresClauseContext finalEnsures =
-                ctx.typeImplFinal() != null ? ctx.typeImplFinal()
-                        .ensuresClause() : null;
 
         PTRepresentation reprType =
                 new PTRepresentation(g, baseType, ctx.name.getText(), typeDefn,
-                        initRequires, initEnsures, finalRequires, finalEnsures,
-                        getRootModuleID());
+                        initEnsures, getRootModuleID());
         try {
             symtab.getInnermostActiveScope().define(
                     new ProgVariableSymbol(exemplarName, ctx, reprType,
@@ -333,29 +324,47 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitMathDefinitionDecl(
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
-        List<MTType> paramTypes = symtab.getInnermostActiveScope()
-                .getSymbolsOfType(MathSymbol.class)
-                .stream().map(MathSymbol::getType)
-                .collect(Collectors.toList());
-
         symtab.endScope();
+
         annotateExpTypesFor(ctx.mathTypeExp(), symtab.getInnermostActiveScope());
         MTType returnType = tree.mathTypeValues.get(ctx.mathTypeExp());
         MTFunction.MTFunctionBuilder builder =
-                new MTFunction.MTFunctionBuilder(g, returnType)
-                        .paramTypes(paramTypes);
+                new MTFunction.MTFunctionBuilder(g, returnType);
 
-        if (ctx.definitionParameterList() != null) {
-            for (ResolveParser.MathVariableDeclGroupContext grp :
-                    ctx.definitionParameterList().mathVariableDeclGroup()) {
-                builder.paramNames(grp.Identifier().stream()
-                        .map(ParseTree::getText).collect(Collectors.toList()));
+        if ( ctx.definitionParameterList() != null ) {
+            for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                    .definitionParameterList().mathVariableDeclGroup()) {
+                for (TerminalNode t : grp.Identifier()) {
+                    try {
+                        MTType type =
+                                symtab.scopes
+                                        .get(ctx)
+                                        .queryForOne(
+                                                new NameQuery(null,
+                                                        t.getText(), true))
+                                        .toMathSymbol().getType();
+                        builder.paramTypes(type);
+                        builder.paramNames(t.getText());
+                    }
+                    catch (UnexpectedSymbolException | NoSuchSymbolException e) {
+                        e.printStackTrace();
+                    }
+                    catch (DuplicateSymbolException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+            returnType = builder.build();
         }
+        MTType typeValue = null;
+        if ( ctx.mathAssertionExp() != null ) {
+            typeValue = tree.mathTypeValues.get(ctx.mathAssertionExp());
+        }
+
         try {
-            symtab.getInnermostActiveScope().define(new MathSymbol(g,
-                    ctx.name.getText(), builder.build(), null, ctx,
-                    getRootModuleID()));
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, ctx.name.getText(), returnType,
+                            typeValue, ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -602,7 +611,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected PTType getProgramType(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull Token typeName) {
-        return getProgramType(compiler, ctx,
+        return getProgramType(symtab.getInnermostActiveScope(), compiler, ctx,
                 qualifier != null ? qualifier.getText() : null,
                 typeName.getText());
     }
@@ -611,12 +620,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
      * Returns a {@link PTType} based on context {@code ctx}; {@link PTInvalid}
      * if the symbol retrieved was not typed properly.
      */
-    protected static PTType getProgramType(ResolveCompiler compiler,
+    protected static PTType getProgramType(Scope s, ResolveCompiler compiler,
             @NotNull ParserRuleContext ctx, @Nullable String qualifier,
             @NotNull String typeName) {
         try {
-            return compiler.symbolTable.getInnermostActiveScope()
-                    .queryForOne(new NameQuery(qualifier, typeName, true))
+            return s.queryForOne(new NameQuery(qualifier, typeName, true))
                     .toProgTypeSymbol().getProgramType();
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {

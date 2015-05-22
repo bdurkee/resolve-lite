@@ -12,12 +12,12 @@ import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.OperationQuery;
 import org.resolvelite.semantics.symbol.OperationSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
+import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.vcgen.model.AssertiveCode;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
@@ -55,6 +55,8 @@ public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
                 .getPExpFor(block.g, op.getEnsures());
         if (opEnsures.isLiteralTrue()) return block.snapshot();
 
+        List<PExp> con = block.finalConfirm.getContents().splitIntoConjuncts();
+
         PExp ensuresLeft = opEnsures.getArguments().get(0);
         PExp ensuresRight = opEnsures.getArguments().get(1);
 
@@ -70,9 +72,18 @@ public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
          * with the modified {@code f} (formally, {@code Q[v -> f[x -> u]]}).
          */
         ensuresRight = ensuresRight.substitute(formals, actuals);
+        Map<String, ProgParameterSymbol.ParameterMode> modes =
+                new LinkedHashMap<>();
+
+        //The collection of 'updates' actuals that should be replaced in the
+        //existing final confirm.
+        List<PExp> replacementActuals = op.getParameters().stream()
+                .filter(p -> p.getMode() == ParameterMode.UPDATES)
+                .map(ProgParameterSymbol::asPSymbol)
+                .collect(Collectors.toList());
 
         block.finalConfirm(block.finalConfirm.getContents()
-                .substitute(actuals, ensuresRight));
+                .substitute(replacementActuals, ensuresRight));
         return block.snapshot();
     }
 
@@ -88,8 +99,6 @@ public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
             throw new RuntimeException(e);
         }
     }
-
-
 
     @Override public String getDescription() {
         return "explicit (simple) call rule application";

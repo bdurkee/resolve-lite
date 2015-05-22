@@ -178,10 +178,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
-        curAssertiveBuilder
-                .stats(Utils.collect(VCRuleBackedStat.class,
-                        ctx.variableDeclGroup(), stats))
-                .stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        curAssertiveBuilder.stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.variableDeclGroup(),
+                        stats)).stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
 
         outputCollector.chunks.add(curAssertiveBuilder.build());
         curAssertiveBuilder = null;

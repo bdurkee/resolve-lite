@@ -198,9 +198,9 @@ public class PSymbol extends PExp {
                 PExp mm = argument.substitute(substitutions);
                 newArgs.add(mm);
             }
-            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
-                new PSymbolBuilder(leftPrint, rightPrint) :
-                new PSymbolBuilder(name);
+            PSymbolBuilder temp =
+                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
+                            leftPrint, rightPrint) : new PSymbolBuilder(name);
 
             result = temp.mathType(getMathType()) //
                     .mathTypeValue(getMathTypeValue()) //
@@ -244,19 +244,20 @@ public class PSymbol extends PExp {
     @Override public PExp withIncomingSignsErased() {
         if ( arguments.isEmpty() ) {
             //literal is false by default, so no need to explicitly state it.
-            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
-                    new PSymbolBuilder(leftPrint, rightPrint) :
-                    new PSymbolBuilder(name);
+            PSymbolBuilder temp =
+                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
+                            leftPrint, rightPrint) : new PSymbolBuilder(name);
             return temp.mathType(getMathType())
                     .mathTypeValue(getMathTypeValue()).style(dispStyle)
                     .literal(literalFlag).progType(getProgType())
                     .progTypeValue(getProgTypeValue()).build();
         }
         else {
-            PSymbolBuilder temp = (dispStyle == DisplayStyle.OUTFIX) ?
-                    new PSymbolBuilder(leftPrint, rightPrint) :
-                    new PSymbolBuilder(name);
-            PSymbolBuilder result = temp.mathType(getMathType())
+            PSymbolBuilder temp =
+                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
+                            leftPrint, rightPrint) : new PSymbolBuilder(name);
+            PSymbolBuilder result =
+                    temp.mathType(getMathType())
                             .mathTypeValue(getMathTypeValue()).style(dispStyle)
                             .quantification(quantification)
                             .progType(getProgType())

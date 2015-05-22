@@ -245,7 +245,6 @@ typeModelDecl
         'exemplar' exemplar=Identifier ';'
         (constraintClause)?
         (typeModelInit)?
-        (typeModelFinal)?
     ;
 
 typeRepresentationDecl
@@ -253,27 +252,16 @@ typeRepresentationDecl
         (conventionClause)?
         //(correspondenceClause)?
         (typeImplInit)?
-        (typeImplFinal)?
     ;
 
-// initialization, finalization rules
+// type initialization rules
 
 typeModelInit
-    :   'initialization' (requiresClause)? (ensuresClause)?
-    ;
-
-typeModelFinal
-    :   'finalization' (requiresClause)? (ensuresClause)?
+    :   'initialization' (ensuresClause)?
     ;
 
 typeImplInit
-    :   'initialization' (requiresClause)? (ensuresClause)?
-        (variableDeclGroup)* (stmt)*
-    ;
-
-typeImplFinal
-    :   'finalization' (requiresClause)? (ensuresClause)?
-        (variableDeclGroup)* (stmt)*
+    :   'initialization' (ensuresClause)? (variableDeclGroup)* (stmt)*
     ;
 
 // functions
@@ -388,7 +376,7 @@ ensuresClause
     ;
 
 constraintClause
-    :   ('constraint'|'Constraint') mathAssertionExp ';'
+    :   ('constraints'|'constraint') mathAssertionExp ';'
     ;
 
 changingClause

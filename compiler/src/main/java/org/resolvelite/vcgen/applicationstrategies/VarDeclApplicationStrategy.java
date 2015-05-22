@@ -49,14 +49,15 @@ public class VarDeclApplicationStrategy
                         new PSymbolBuilder(term.getText()).mathType(
                                 groupType.getModelType()).build();
                 PExp init =
-                        block.annotations.getPExpFor(g,
+                        block.annotations.getPExpFor(
+                                g,
                                 namedComponent.getInitializationEnsures()
-                                .mathAssertionExp())
-                                .substitute(exemplar, variable);
+                                        .mathAssertionExp()).substitute(
+                                exemplar, variable);
 
                 if ( finalConfirm.containsName(term.getText()) ) {
                     block.assume(init);
-                 }
+                }
             }
         }
         return block.snapshot();

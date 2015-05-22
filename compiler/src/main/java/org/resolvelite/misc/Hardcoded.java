@@ -22,7 +22,7 @@ public class HardCoded {
             b.addBinding("Card", null, g.MTYPE, g.CARD);
 
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
-            b.addBinding("Conc", null, g.BOOLEAN, null);
+            b.addBinding("conc", null, g.BOOLEAN, null);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
             b.addBinding("N", null, g.SSET, g.N);
@@ -31,6 +31,7 @@ public class HardCoded {
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("min_int", null, g.Z, null);
             b.addBinding("max_int", null, g.Z, null);
+            b.addBinding("->", null, g.FUNCTION);
 
             b.addBinding("+", null,
                     new MTFunctionBuilder(g, g.Z).paramTypes(g.Z, g.Z).build());
@@ -56,15 +57,16 @@ public class HardCoded {
             //S E T   R E L A T E D
             b.addBinding("Powerset", null, g.POWERSET);
             b.addBinding("union", null, g.UNION);
-            //b.addBinding("intersect", null, g.INTERSECT);
+            b.addBinding("intersect", null, g.INTERSECT);
 
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
                     .paramTypes(g.SSET).build());
+
+            //TODO TODO This should be (ENTITY * SSET)
             b.addBinding("is_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
-                    .paramTypes(g.ENTITY, g.SSET).build());
-            b.addBinding("~", null,
-                    new MTFunctionBuilder(g, g.CARD).paramTypes(g.SSET, g.SSET)
-                            .build());
+                    .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("~", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET, g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errorManager.semanticError(ErrorKind.DUP_SYMBOL, null,

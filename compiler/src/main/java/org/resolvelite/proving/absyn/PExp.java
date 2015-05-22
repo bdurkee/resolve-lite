@@ -72,7 +72,7 @@ public abstract class PExp {
 
     public PExp substitute(List<? extends PExp> currents, PExp repl) {
         Map<PExp, PExp> substitutions = new HashMap<>();
-        for (PExp current : currents ) {
+        for (PExp current : currents) {
             substitutions.put(current, repl);
         }
         return substitute(substitutions);

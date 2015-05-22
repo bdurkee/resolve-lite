@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
@@ -13,6 +14,7 @@ import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,6 +49,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitConstraintClause(
             @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitConventionClause(
+            @NotNull ResolveParser.ConventionClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
@@ -187,6 +194,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
                 .mathType(types.get(ctx));
         repo.put(ctx, result.build());
+    }
+
+    @Override public void exitProgMemberExp(
+            @NotNull ResolveParser.ProgMemberExpContext ctx) {
+        List<PSymbol> segs = new ArrayList<>();
+        segs.add((PSymbol) repo.get(ctx.getChild(0)));
+        for (TerminalNode term : ctx.Identifier()) {
+            segs.add(new PSymbol.PSymbolBuilder(term.getText())
+                    .mathType(types.get(term))
+                    .progType(progTypes.get(term)).build());
+        }
+        PDot result = new PDot(segs, types.get(ctx), typeValues.get(ctx),
+                progTypes.get(ctx), progTypeValues.get(ctx));
+        repo.put(ctx, result);
     }
 
     @Override public void exitProgIntegerExp(

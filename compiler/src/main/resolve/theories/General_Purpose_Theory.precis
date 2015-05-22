@@ -1,4 +1,4 @@
-Precis Test_Theory;
+Precis General_Purpose_Theory;
 
     Type Theorem N_Subset_of_Z:
     Forall n : N,
@@ -10,4 +10,4 @@ Precis Test_Theory;
 
     Definition > (i : Z, j : Z) : B;
 
-end Test_Theory;
+end General_Purpose_Theory;

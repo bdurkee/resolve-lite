@@ -3,6 +3,7 @@ package org.resolvelite.proving.absyn;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -13,11 +14,17 @@ public class PDot extends PExp {
     private final List<PSymbol> segs = new ArrayList<>();
 
     public PDot(MTType type, MTType typeValue, PSymbol... segs) {
-        this(Arrays.asList(segs), type, typeValue);
+        this(Arrays.asList(segs), type, typeValue, null, null);
     }
 
     public PDot(List<PSymbol> segs, MTType type, MTType typeValue) {
-        super(PSymbol.calculateHashes(segs), type, typeValue);
+        this(segs, type, typeValue, null, null);
+    }
+
+    public PDot(List<PSymbol> segs, MTType type, MTType typeValue,
+                PTType progType, PTType progTypeValue) {
+        super(PSymbol.calculateHashes(segs), type, typeValue, progType,
+                progTypeValue);
         this.segs.addAll(segs);
     }
 
@@ -25,7 +32,8 @@ public class PDot extends PExp {
         List<PSymbol> segz = segs.stream().map(s -> substitute(substitutions))
                 .map(s -> (PSymbol)s)
                 .collect(Collectors.toList());
-        return new PDot(segz, getMathType(), getMathTypeValue());
+        return new PDot(segz, getMathType(), getMathTypeValue(), getProgType(),
+                getProgTypeValue());
     }
 
     @Override public boolean containsName(String name) {
@@ -71,7 +79,8 @@ public class PDot extends PExp {
         List<PSymbol> newSegs = segs.stream()
                 .map(PSymbol::withIncomingSignsErased).map(s -> (PSymbol) s)
                 .collect(Collectors.toList());
-        return new PDot(newSegs, getMathType(), getMathTypeValue());
+        return new PDot(newSegs, getMathType(), getMathTypeValue(),
+                getProgType(), getProgTypeValue());
     }
 
     @Override public PExp flipQuantifiers() {

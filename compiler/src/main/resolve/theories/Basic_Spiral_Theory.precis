@@ -1,0 +1,21 @@
+Precis Basic_Spiral_Theory;
+    uses General_Purpose_Theory;
+    --Some placeholder definitions (excluding the important k-arity bit).
+
+    (*Definition Is_Spiral_Like(Sp_Loc(k : N) : SSet, Cen(k) : Sp_Loc(k),
+        SS(k), RS(k) : Sp_Loc(k) -> Sp_Loc(k)) : B is
+            Forall k : N,
+            pty1)*)
+
+    Definition Sp_Loc : SSet;
+
+    Definition Cen : Sp_Loc;
+
+    Definition SCD(p : Sp_Loc) : N;
+
+    Definition SS(p : Sp_Loc, step : Z) : Sp_Loc;
+
+    Definition Inward_Loc(b : Sp_Loc) : Powerset(Sp_Loc) is
+        { p : Sp_Loc | SCD(p) < SCD(b) };
+
+end Basic_Spiral_Theory;

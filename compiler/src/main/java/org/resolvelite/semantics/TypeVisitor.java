@@ -16,7 +16,7 @@ public abstract class TypeVisitor {
 
     public void beginMTFunctionApplication(MTFunctionApplication t) {}
 
-    //public void beginMTIntersect(MTIntersect t) {}
+    public void beginMTIntersect(MTIntersect t) {}
 
     public void beginMTPowersetApplication(MTPowersetApplication t) {}
 
@@ -44,7 +44,7 @@ public abstract class TypeVisitor {
 
     public void endMTFunctionApplication(MTFunctionApplication t) {}
 
-    //public void endMTIntersect(MTIntersect t) {}
+    public void endMTIntersect(MTIntersect t) {}
 
     public void endMTPowersetApplication(MTPowersetApplication t) {}
 

@@ -164,7 +164,7 @@ public class Utils {
     public static <T> List<T> apply(Collection<T> l, Function<T, T> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
-    
+
     public static <T> String join(Collection<T> data, String separator) {
         return join(data.iterator(), separator, "", "");
     }

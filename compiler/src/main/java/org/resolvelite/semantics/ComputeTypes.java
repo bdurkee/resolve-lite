@@ -42,6 +42,8 @@ public class ComputeTypes extends SetScopes {
     private final AnnotatedTree tr;
     private final TypeGraph g;
     protected int typeValueDepth = 0;
+    protected boolean walkingMathDot = false;
+    protected MTType currentSeg = null;
 
     ComputeTypes(ResolveCompiler rc, SymbolTable symtab,
             AnnotatedTree annotations) {
@@ -99,14 +101,17 @@ public class ComputeTypes extends SetScopes {
         for (TerminalNode term : ctx.Identifier()) {
             PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
             curFieldType = recordType.getFieldType(term.getText());
-
             if ( curFieldType == null ) {
                 compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
                         term.getSymbol(), term.getText());
                 curFieldType = PTInvalid.getInstance(g);
+                tr.progTypes.put(term, curFieldType);
+                tr.mathTypes.put(term, curFieldType.toMath());
                 break;
             }
             tr.progTypes.put(term, curFieldType);
+            tr.mathTypes.put(term, curFieldType.toMath());
+
             if ( curFieldType.isAggregateType() ) {
                 curAggregateType = (PTRepresentation) curFieldType;
             }
@@ -141,7 +146,7 @@ public class ComputeTypes extends SetScopes {
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         PTType progType =
-                DefSymbolsAndScopes.getProgramType(compiler, ctx,
+                DefSymbolsAndScopes.getProgramType(currentScope, compiler, ctx,
                         "Std_Integer_Fac", "Integer");
         tr.progTypes.put(ctx, progType);
         tr.mathTypes.put(ctx, g.Z);
@@ -260,6 +265,31 @@ public class ComputeTypes extends SetScopes {
         typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
     }
 
+    @Override public void enterMathCrossTypeExp(
+            @NotNull ResolveParser.MathCrossTypeExpContext ctx) {
+        typeValueDepth++;
+    }
+
+    /**
+     * Simply represents the value of a math type that looks like the
+     * following: {@code CART_PROD X1 : T1; X2 : T2; ... Xn : Tn; END;}
+     */
+    @Override public void exitMathCrossTypeExp(
+            @NotNull ResolveParser.MathCrossTypeExpContext ctx) {
+        List<MTCartesian.Element> fieldTypes = new ArrayList<>();
+
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            for (TerminalNode t : grp.Identifier()) {
+                fieldTypes.add(new MTCartesian.Element(t.getText(), grpType));
+            }
+        }
+        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypeValues.put(ctx, new MTCartesian(g, fieldTypes));
+        typeValueDepth--;
+    }
+
     @Override public void exitMathSetCollectionExp(
             @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
         tr.mathTypes.put(ctx, g.SSET);
@@ -294,16 +324,33 @@ public class ComputeTypes extends SetScopes {
         }
     }
 
+    @Override public void exitMathSetBuilderExp(
+            @NotNull ResolveParser.MathSetBuilderExpContext ctx) {
+        tr.mathTypes.put(ctx, g.SSET);
+        MTType singleParamType =
+                tr.mathTypes.get(ctx.mathVariableDecl().mathTypeExp());
+        MTType typeValue =
+                new MTFunction.MTFunctionBuilder(g, g.POWERSET).paramTypes(
+                        singleParamType).build();
+        tr.mathTypeValues.put(ctx, typeValue);
+    }
+
+    @Override public void enterMathDotExp(
+            @NotNull ResolveParser.MathDotExpContext ctx) {
+        walkingMathDot = true;
+    }
+
     /**
      * We aren't really doing so much typing here per-se as we are checking to
-     * make sure each segment is in fact a cartesian.
+     * ensure each segment is in fact a cartesian.
      */
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
+        walkingMathDot = false;
         Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
                 ctx.mathFunctionApplicationExp().iterator();
         ParserRuleContext nextSeg, lastSeg = null;
-        if ( ctx.getStart().getText().equals("Conc") )
+        if ( ctx.getStart().getText().equals("conc") )
             nextSeg = segsIter.next();
         nextSeg = segsIter.next();
         MTType curType = tr.mathTypes.get(nextSeg);
@@ -338,7 +385,9 @@ public class ComputeTypes extends SetScopes {
                 }
             }
         }
-        tr.mathTypeValues.put(ctx, curType);
+        tr.mathTypes.put(ctx, curType);
+        //Todo
+        //tr.mathTypeValues.put(ctx, curType);
     }
 
     @Override public void exitMathVariableExp(
@@ -348,7 +397,19 @@ public class ComputeTypes extends SetScopes {
 
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull String symbolName) {
-        MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
+        MathSymbol intendedEntry = null;
+        try {
+            intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
+        }
+        catch (NoSuchSymbolException e) {
+            if ( walkingMathDot && currentSeg != null
+                    && currentSeg instanceof MTCartesian ) {
+                tr.mathTypes.put(ctx, currentSeg);
+                return null; //just cut out.
+            }
+            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                    ctx.getStart(), symbolName);
+        }
         if ( intendedEntry == null ) {
             tr.mathTypes.put(ctx, g.INVALID);
         }
@@ -356,11 +417,12 @@ public class ComputeTypes extends SetScopes {
             tr.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
         }
+        if ( walkingMathDot ) currentSeg = tr.mathTypes.get(ctx);
         return intendedEntry;
     }
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
-            ParserRuleContext ctx) {
+            ParserRuleContext ctx) throws NoSuchSymbolException {
         try {
             return currentScope.queryForOne(
                     new MathSymbolQuery(qualifier, symbolName, ctx.getStart()))
@@ -368,11 +430,6 @@ public class ComputeTypes extends SetScopes {
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException();
-        }
-        catch (NoSuchSymbolException nsse) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                    ctx.getStart(), symbolName);
-            return null;
         }
     }
 

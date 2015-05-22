@@ -61,8 +61,7 @@ public abstract class MTType {
      * that quantified variables may have different names if they are otherwise
      * identical. So, {@pre code BigUnion t : MType}{t}} = BigUnion{r :
      * MType}{r}}.
-     * However, {@pre BigUnion t : MType}{t}} /= BigUnion{r :
-     * Power(MType)}{r}}.
+     * Whereas, {@pre BigUnion t : MType}{t}} /= BigUnion{r : Power(MType)}{r}}
      * 
      * @param o The object to compare with this {@code MTType}.
      * 
@@ -251,11 +250,9 @@ public abstract class MTType {
     public abstract int getHashCode();
 
     /**
-     * <p>
-     * Indicates that this type is known to contain only elements <em>that
-     * are themselves</em> types. Practically, this answers the question, "can
+     * Indicates that this type is known to contain only elements that
+     * are themselves types. Practically, this answers the question, "can
      * an instance of this type itself be used as a type?"
-     * </p>
      */
     public boolean isKnownToContainOnlyMTypes() {
         return false;

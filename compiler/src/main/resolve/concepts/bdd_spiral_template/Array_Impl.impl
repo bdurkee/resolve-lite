@@ -1,0 +1,20 @@
+Implementation Array_Impl for Bdd_Spiral_Template;
+
+    Facility Ceramic_Arr_Fac is Bdd_Ceramic_Array_Template
+        <Std_Integer_Fac :: Integer>(0, Max_Length - 1)
+            externally implemented by Ceramic_Array_Impl;
+
+    Type Spiral_Pos = Record
+            Labl : Ceramic_Arr_Fac :: Ceramic_Array;
+            Length, Curr_Place : Std_Integer_Fac :: Integer;
+        end;
+        convention
+
+    Proc Lengthen (alters e : T; updates P : Spiral_Pos);
+        --Duration_Is_Theta(0);
+        Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
+        P.Length := P.Length + 1;
+    end Lengthen;
+
+
+end Array_Impl;
