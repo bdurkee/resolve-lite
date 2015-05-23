@@ -415,10 +415,11 @@ public class ComputeTypes extends SetScopes {
     //an initial pass it'll do.
     @Override public void exitMathEntailsAddendum(
             @NotNull ResolveParser.MathEntailsAddendumContext ctx) {
-        List<Symbol> allVisibleSyms = currentScope.query(
+
+        List<Symbol> symbolsInThisScope = currentScope.query(
                 new SymbolTypeQuery<>(Symbol.class));
         List<MathSymbol> coerceableMathSyms = new ArrayList<>();
-        for (Symbol s : allVisibleSyms) {
+        for (Symbol s : symbolsInThisScope) {
             try {
                 coerceableMathSyms.add(s.toMathSymbol());
             } catch (UnexpectedSymbolException use) {}

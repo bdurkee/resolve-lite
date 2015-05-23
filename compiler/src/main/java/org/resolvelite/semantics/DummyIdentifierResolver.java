@@ -33,6 +33,10 @@ public class DummyIdentifierResolver extends AbstractScope {
         return false;
     }
 
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return new ArrayList<>();
+    }
+
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
         return s;
     }

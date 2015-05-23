@@ -61,6 +61,13 @@ public abstract class SyntacticScope extends AbstractScope {
         return results.get(0);
     }
 
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return symbols.values().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .collect(Collectors.toList());
+    }
+
     @Override public String toString() {
         String s = "";
         if ( definingTree != null )

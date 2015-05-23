@@ -152,11 +152,10 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         try {
-            List<PTType> argTypes = s.query(new SymbolTypeQuery
-                    <ProgParameterSymbol>(ProgParameterSymbol.class)).stream()
-                    .map(ProgParameterSymbol::getDeclaredType)
-                    .collect(Collectors.toList());
-
+            List<PTType> argTypes =
+                    s.getSymbolsOfType(ProgParameterSymbol.class).stream()
+                            .map(ProgParameterSymbol::getDeclaredType)
+                            .collect(Collectors.toList());
             OperationSymbol op =
                     moduleScope.queryForOne(
                             new OperationQuery(null, ctx.name, argTypes));
