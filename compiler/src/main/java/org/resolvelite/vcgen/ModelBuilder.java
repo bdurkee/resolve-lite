@@ -132,7 +132,6 @@ public class ModelBuilder extends ResolveBaseListener {
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, s, ctx, tr)
                         .freeVars(getFreeVars(s))
-                        //
                         .assume(moduleLevelRequires).assume(topAssume)
                         .remember().finalConfirm(bottomConfirm);
     }
@@ -229,8 +228,8 @@ public class ModelBuilder extends ResolveBaseListener {
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.EnsuresClauseContext ensures) {
         List<ProgParameterSymbol> params =
-                symtab.scopes.get(functionCtx).query(
-                        new SymbolTypeQuery<>(ProgParameterSymbol.class));
+                symtab.scopes.get(functionCtx)
+                        .getSymbolsOfType(ProgParameterSymbol.class);
         PExp existingEnsures = normalizePExp(ensures);
         for (ProgParameterSymbol p : params) {
             PSymbolBuilder temp =
@@ -276,9 +275,9 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     public List<Symbol> getFreeVars(Scope s) {
-        return s.query(new SymbolTypeQuery<Symbol>(Symbol.class)).stream()
-                .filter(x -> x instanceof ProgParameterSymbol)
-                .filter(x -> x instanceof ProgVariableSymbol)
+        return s.getSymbolsOfType(Symbol.class).stream()
+                .filter(x -> x instanceof ProgParameterSymbol ||
+                        x instanceof ProgVariableSymbol)
                 .collect(Collectors.toList());
     }
 
