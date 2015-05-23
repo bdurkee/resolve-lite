@@ -65,6 +65,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
                 tr.imports.getImportsOfType(ImportType.NAMED));
+
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
@@ -96,8 +97,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tr.imports.getImportsOfType(ImportType.NAMED));
+        symtab.startModuleScope(ctx, ctx.name.getText())
+                .addImports(tr.imports.getImportsOfType(ImportType.NAMED))
+                .addRelatedModules(ctx.concept.getText());
     }
 
     @Override public void exitConceptImplModule(
@@ -109,8 +111,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     //order needs the importlist way before now. So just use it.
     @Override public void enterEnhancementImplModule(
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tr.imports.getImportsOfType(ImportType.NAMED));
+        symtab.startModuleScope(ctx, ctx.name.getText())
+                .addImports(tr.imports.getImportsOfType(ImportType.NAMED))
+                .addRelatedModules(ctx.enhancement.getText());
     }
 
     @Override public void exitEnhancementImplModule(
@@ -281,17 +284,29 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (DuplicateSymbolException e) {}
         symtab.endScope();
         try {
-            symtab.getInnermostActiveScope().define(
+            ProgReprTypeSymbol repr =
                     new ProgReprTypeSymbol(g, ctx.name.getText(), ctx,
-                            getRootModuleID(), typeDefn, reprType, ctx
-                                    .conventionClause(), ctx
-                                    .correspondenceClause()));
+                            getRootModuleID(), typeDefn, reprType,
+                            ctx.conventionClause(), ctx.correspondenceClause());
+
+            symtab.getInnermostActiveScope().define(repr);
+            symtab.ctxToSyms.put(ctx, repr); //Todo: Consistently fill this
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
     }
+
+    /*@Override public void enterTypeImplInit(
+            @NotNull ResolveParser.TypeImplInitContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitTypeImplInit(
+            @NotNull ResolveParser.TypeImplInitContext ctx) {
+        symtab.endScope();
+    }*/
 
     @Override public void enterMathTypeTheoremDecl(
             @NotNull ResolveParser.MathTypeTheoremDeclContext ctx) {

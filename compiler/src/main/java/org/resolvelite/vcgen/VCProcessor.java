@@ -41,7 +41,7 @@ public class VCProcessor implements Iterable<VC> {
     private void addVCsInContext(final AssertiveCode batch,
             final int sectionNumber) {
 
-        /*List<InfixExp> vCs = batch.getFinalConfirm().getAssertion().split();
+        /*List<InfixExp> vCs = batch.getFinalConfirm().getEnclosedExp().split();
         int vcIndex = 1;
 
         for (InfixExp vC : vCs) {

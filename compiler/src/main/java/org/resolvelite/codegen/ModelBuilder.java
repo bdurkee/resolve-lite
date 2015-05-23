@@ -536,7 +536,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            if (isJavaLocallyAccessibleSymbol(symQualifier)) {
+            if ( isJavaLocallyAccessibleSymbol(symQualifier) ) {
                 return new NormalQualifier("this");
             }
             return new NormalQualifier(symQualifier);

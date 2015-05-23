@@ -9,6 +9,7 @@ import org.resolvelite.misc.HardCoded;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
+import org.resolvelite.semantics.symbol.Symbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -135,12 +136,16 @@ public class SymbolTable {
     }
 
     private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
-    public final ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
+    public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
+
+    public final ParseTreeProperty<PExp> mathPExps = //
+            new ParseTreeProperty<>();
+    public final ParseTreeProperty<Symbol> ctxToSyms =
+            new ParseTreeProperty<>();
     public final ParseTreeProperty<Quantification> quantifiedExps =
             new ParseTreeProperty<>();
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
-    public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
 
     private ModuleScopeBuilder curModuleScope = null;
     private final TypeGraph typeGraph;

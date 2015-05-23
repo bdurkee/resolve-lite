@@ -1,10 +1,8 @@
 package org.resolvelite.vcgen;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.resolvelite.codegen.ModelConverter;
 import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.codegen.AbstractCodeGenerator;
 import org.resolvelite.compiler.ResolveCompiler;
@@ -21,14 +19,15 @@ public class VCGenerator extends AbstractCodeGenerator {
     }
 
     private OutputModelObject buildVCOutputModel() {
-        ModelBuilder o = new ModelBuilder(this, compiler.symbolTable);
-        ParseTree root = module.getRoot();
-        ParseTreeWalker.DEFAULT.walk(o, root);
-        return o.getOutputFile();
+        /* ModelBuilderProto1 o = new ModelBuilderProto1(this, compiler.symbolTable);
+         ParseTree root = module.getRoot();
+         ParseTreeWalker.DEFAULT.walk(o, root);
+         return o.getOutputFile();*/
+        return null;
     }
 
     @Nullable public ST generateAssertions() {
-        return walk(buildVCOutputModel());
+        return null;//walk(buildVCOutputModel());
     }
 
     @Nullable public ST generateXMLAssertions() {

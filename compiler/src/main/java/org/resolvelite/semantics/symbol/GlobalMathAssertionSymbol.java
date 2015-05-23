@@ -17,6 +17,10 @@ import java.util.Map;
  * query and get all relevant entries -- from which we can do further processing
  * (or even write a query that does such processing for us)..
  */
+
+//Todo: Maybe these should actually be added in a phase following compute types
+//so we can just put the already typed PExps in here AND have hte ability to
+//instantiate generics
 public class GlobalMathAssertionSymbol extends Symbol {
 
     private ResolveParser.MathAssertionExpContext assertion;
@@ -33,8 +37,8 @@ public class GlobalMathAssertionSymbol extends Symbol {
         this.assertion = assertion;
     }
 
-    public ResolveParser.MathAssertionExpContext getAssertion() {
-        return assertion;
+    public ResolveParser.MathExpContext getEnclosedExp() {
+        return assertion.mathExp();
     }
 
     @Override public String getSymbolDescription() {
