@@ -4,8 +4,11 @@ import org.antlr.v4.runtime.misc.Nullable;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.Map;
 
 /**
  * A {@code PTRepresentation} wraps an existing {@link PTType PTType} with
@@ -58,20 +61,19 @@ public class PTRepresentation extends PTNamed {
         return baseType.isAggregateType();
     }
 
-    /*@Override public PTType instantiatseGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility) {
-
-        throw new UnsupportedOperationException(this.getClass() + " cannot "
-                + "be instantiated.");
-    }*/
-
     @Override public boolean acceptableFor(PTType t) {
         boolean result = super.acceptableFor(t);
         if ( !result && family != null ) {
             result = family.getProgramType().acceptableFor(t);
         }
         return result;
+    }
+
+    @Override public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        throw new UnsupportedOperationException(this.getClass() + " cannot "
+                + "be instantiated.");
     }
 
     @Override public String toString() {

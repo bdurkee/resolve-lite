@@ -1,6 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.Map;
 
@@ -23,16 +24,14 @@ public class ProcedureSymbol extends Symbol {
         return "a procedure";
     }
 
-    /*@Override
-    public ProcedureEntry instantiateGenerics(
+    @Override public ProcedureSymbol instantiateGenerics(
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility) {
+            FacilitySymbol instantiatingFacility) {
 
-        return new ProcedureEntry(getName(), getDefiningElement(),
-                getSourceModuleIdentifier(), myCorrespondingOperation
-                .instantiateGenerics(genericInstantiations,
-                        instantiatingFacility));
-    }*/
+        return new ProcedureSymbol(getName(), getDefiningTree(), getModuleID(),
+                correspondingOperation.instantiateGenerics(
+                        genericInstantiations, instantiatingFacility));
+    }
 
     @Override public ProcedureSymbol toProcedureSymbol() {
         return this;

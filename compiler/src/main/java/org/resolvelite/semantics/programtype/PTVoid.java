@@ -1,8 +1,10 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class PTVoid extends PTType {
@@ -34,5 +36,11 @@ public class PTVoid extends PTType {
     @Override public boolean equals(Object o) {
         //We override this simply to show that we've given it some thought
         return super.equals(o);
+    }
+
+    @Override public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        return this;
     }
 }

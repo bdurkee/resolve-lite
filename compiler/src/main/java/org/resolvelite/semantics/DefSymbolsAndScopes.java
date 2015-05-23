@@ -142,13 +142,29 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
+        int i = 0;
         try {
+            List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
+            for (ResolveParser.TypeContext generic : ctx.type()) {
+                suppliedGenericSyms.add(symtab
+                        .getInnermostActiveScope()
+                        .queryForOne(
+                                new NameQuery(generic.qualifier, generic.name,
+                                        true)).toProgTypeSymbol());
+                i++;
+            }
             symtab.getInnermostActiveScope().define(
-                    new FacilitySymbol(ctx, getRootModuleID(), tr, symtab));
+                    new FacilitySymbol(ctx, getRootModuleID(),
+                            suppliedGenericSyms, symtab));
         }
-        catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+        catch (DuplicateSymbolException | NoSuchSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
                     ctx.name.getText());
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a program type", ctx.type(i).getText(),
+                    use.getActualSymbolDescription());
         }
     }
 
@@ -571,8 +587,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             //There is probably a way to fix this so that the implementation/insertion order
             //for the table doesn't matter.
             List<ProgParameterSymbol> params =
-                    symtab.scopes.get(ctx).query(
-                            new SymbolTypeQuery<>(ProgParameterSymbol.class));
+                    symtab.scopes.get(ctx)
+                            .getSymbolsOfType(ProgParameterSymbol.class);
             Symbol result = null;
             if ( isProcedure ) {
                 result =
@@ -581,10 +597,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             }
             else {
                 result =
-                        new OperationSymbol(symtab.getTypeGraph(),
-                                name.getText(), ctx, requires, ensures,
-                                getProgramType(type), getRootModuleID(),
-                                params, walkingModuleParameter);
+                        new OperationSymbol(name.getText(), ctx, requires,
+                                ensures, getProgramType(type),
+                                getRootModuleID(), params,
+                                walkingModuleParameter);
             }
             symtab.getInnermostActiveScope().define(result);
         }

@@ -79,7 +79,7 @@ public enum ErrorKind {
      * Compiler error 8: expecting <em>entrytype</em>: found
      * <em>foundentrytype</em>.
      */
-    UNEXPECTED_SYMBOL(8, "expecting <arg> on '<arg2>', found <arg3>",
+    UNEXPECTED_SYMBOL(8, "expecting <arg> on '<arg2>', found <arg3> instead",
             ErrorSeverity.ERROR),
 
     /**

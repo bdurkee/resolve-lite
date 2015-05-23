@@ -7,9 +7,8 @@ import org.resolvelite.semantics.searchers.TableSearcher;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.Symbol;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An {@code InstantiatedScope} decorates an existing {@link Scope Scope} such
@@ -18,32 +17,56 @@ import java.util.Set;
  * instantiations and an instantiating facility.
  */
 public class InstantiatedScope extends AbstractScope {
+
+    private final Scope myBaseScope;
+    private final FacilitySymbol myInstantiatingFacility;
+    private final Map<String, PTType> myAdditionalGenericInstantiations =
+            new HashMap<>();
+
+    public InstantiatedScope(Scope baseScope,
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        myBaseScope = baseScope;
+        myAdditionalGenericInstantiations.putAll(genericInstantiations);
+        myInstantiatingFacility = instantiatingFacility;
+    }
+
     @Override public <E extends Symbol> List<E> query(
             MultimatchSymbolQuery<E> query) {
-        return null;
+        return myBaseScope.query(query);
     }
 
     @Override public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
             throws NoSuchSymbolException,
                 DuplicateSymbolException {
-        return null;
+        return myBaseScope.queryForOne(query);
     }
 
     @Override public <E extends Symbol> boolean
             addMatches(TableSearcher<E> searcher, List<E> matches,
                     Set<Scope> searchedScopes,
                     Map<String, PTType> genericInstantiations,
-                    FacilitySymbol instantiatingFacility,
+                    FacilitySymbol facilityInstantiation,
                     TableSearcher.SearchContext l)
                     throws DuplicateSymbolException {
-        return false;
+
+        if ( facilityInstantiation != null ) {
+            //It's unclear how this could happen or what it would mean, so we
+            //fail fast.  If an example triggers this, we need to think
+            //carefully about what it would mean.
+            throw new RuntimeException("Duplicate instantiation???");
+        }
+
+        return myBaseScope.addMatches(searcher, matches, searchedScopes,
+                myAdditionalGenericInstantiations, myInstantiatingFacility, l);
     }
 
     @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
-        return null;
+        return myBaseScope.getSymbolsOfType(type);
     }
 
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
-        return null;
+        return myBaseScope.define(s);
     }
+
 }

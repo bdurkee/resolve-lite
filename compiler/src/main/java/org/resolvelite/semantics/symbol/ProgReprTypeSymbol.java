@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Map;
+
 public class ProgReprTypeSymbol extends Symbol {
 
     //Note: This is null in the case where we represent a standalone
@@ -45,6 +47,16 @@ public class ProgReprTypeSymbol extends Symbol {
 
     @Override public String toString() {
         return getName();
+    }
+
+    @Override public Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        //Representation is an internal implementation detail of a realization
+        //and cannot be accessed through a facility instantiation
+        throw new UnsupportedOperationException("Cannot instantiate "
+                + this.getClass());
     }
 
 }

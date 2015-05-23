@@ -1,7 +1,10 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.Map;
 
 public abstract class PTType {
 
@@ -26,9 +29,9 @@ public abstract class PTType {
         return false;
     }
 
-    // public abstract PTType instantiateGenerics(
-    //         Map<String, PTType> genericInstantiations,
-    //         FacilityEntry instantiatingFacility);
+    public abstract PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility);
 
     /**
      * Returns {@code true} <strong>iff</strong> an value of this type

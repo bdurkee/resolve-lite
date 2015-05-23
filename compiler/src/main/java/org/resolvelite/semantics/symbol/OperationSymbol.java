@@ -5,9 +5,9 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class OperationSymbol extends Symbol {
 
@@ -18,7 +18,7 @@ public class OperationSymbol extends Symbol {
     private final ResolveParser.RequiresClauseContext requires;
     private final ResolveParser.EnsuresClauseContext ensures;
 
-    public OperationSymbol(TypeGraph g, String name, ParseTree definingTree,
+    public OperationSymbol(String name, ParseTree definingTree,
             ResolveParser.RequiresClauseContext requires,
             ResolveParser.EnsuresClauseContext ensures, PTType type,
             String moduleID, List<ProgParameterSymbol> params,
@@ -33,12 +33,6 @@ public class OperationSymbol extends Symbol {
 
     public ResolveParser.RequiresClauseContext getRequires() {
         return requires;
-    }
-
-    //They need to share the same name, so this shouldn't be too bad.
-    public Optional<ProgParameterSymbol> mapActualToFormal(String actualName) {
-        return parameters.stream().filter(p -> p.getName().equals(actualName))
-                .findAny();
     }
 
     public ResolveParser.EnsuresClauseContext getEnsures() {
@@ -69,4 +63,41 @@ public class OperationSymbol extends Symbol {
         return getName() + ":" + parameters;
     }
 
+    @Override public OperationSymbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        InstantiationFunction f =
+                new InstantiationFunction(genericInstantiations,
+                        instantiatingFacility);
+        List<ProgParameterSymbol> newParams = parameters.stream()
+                .map(f::apply).collect(Collectors.toList());
+        return new OperationSymbol(
+                getName(),
+                getDefiningTree(),
+                requires, ensures,
+                returnType.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility), getModuleID(), newParams,
+                moduleParameter);
+    }
+
+    private static class InstantiationFunction
+            implements
+                Function<ProgParameterSymbol, ProgParameterSymbol> {
+
+        private final Map<String, PTType> genericInstantiations;
+        private final FacilitySymbol instantiatingFacility;
+
+        public InstantiationFunction(Map<String, PTType> instantiations,
+                FacilitySymbol instantiatingFacility) {
+            this.genericInstantiations =
+                    new HashMap<String, PTType>(instantiations);
+            this.instantiatingFacility = instantiatingFacility;
+        }
+
+        @Override public ProgParameterSymbol apply(ProgParameterSymbol input) {
+            return (ProgParameterSymbol) input.instantiateGenerics(
+                    genericInstantiations, instantiatingFacility);
+        }
+    }
 }

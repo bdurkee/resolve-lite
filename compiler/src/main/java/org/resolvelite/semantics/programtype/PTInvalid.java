@@ -1,8 +1,10 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class PTInvalid extends PTType {
@@ -29,6 +31,12 @@ public class PTInvalid extends PTType {
 
     @Override public String toString() {
         return "Invalid";
+    }
+
+    @Override public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        return this;
     }
 
 }

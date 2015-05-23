@@ -5,6 +5,8 @@ import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTInvalid;
 import org.resolvelite.semantics.programtype.PTType;
 
+import java.util.Map;
+
 public class ProgVariableSymbol extends Symbol {
 
     private final PTType type;
@@ -34,4 +36,25 @@ public class ProgVariableSymbol extends Symbol {
     @Override public MathSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
+
+    @Override public Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        Symbol result;
+        PTType instantiatedType =
+                type.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility);
+
+        if ( instantiatedType != type ) {
+            result =
+                    new ProgVariableSymbol(getName(), getDefiningTree(),
+                            instantiatedType, getModuleID());
+        }
+        else {
+            result = this;
+        }
+        return result;
+    }
+
 }

@@ -2,7 +2,12 @@ package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.Symbol;
+
+import java.util.Map;
 
 public class PTFamily extends PTNamed {
 
@@ -39,6 +44,32 @@ public class PTFamily extends PTNamed {
 
     @Override public String toString() {
         return name;
+    }
+
+    @Override public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        Map<String, MTType> stringToMathType =
+                Symbol.buildMathTypeGenerics(genericInstantiations);
+
+        @SuppressWarnings("unchecked") Map<MTType, MTType> mathTypeToMathType =
+                (Map<MTType, MTType>) (Map<?, MTType>) MTNamed.toMTNamedMap(
+                        getTypeGraph(), stringToMathType);
+
+        //Todo: Not currently substituting generics into math expressions..
+        /*MTType newModel =
+                myModel.getCopyWithVariablesSubstituted(stringToMathType);
+
+        PExp newConstraint =
+                myConstraint.withTypesSubstituted(mathTypeToMathType);
+
+        PExp newInitializationEnsures =
+                myInitializationEnsures
+                        .withTypesSubstituted(mathTypeToMathType);*/
+
+        return new PTFamily(model, name, exemplarName, constraint, initEnsures,
+                getEnclosingModuleID());
     }
 
     @Override public boolean equals(Object o) {

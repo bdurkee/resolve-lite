@@ -170,6 +170,7 @@ public class ComputeTypes extends SetScopes {
     protected void typeOperationSym(ParserRuleContext ctx,
                                     Token qualifier, Token name,
                                     List<ResolveParser.ProgExpContext> args) {
+
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
         Token opAsName = Utils.getNameFromProgramOp(name.getText());

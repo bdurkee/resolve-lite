@@ -127,6 +127,16 @@ public class ProgParameterSymbol extends Symbol {
         return "a parameter";
     }
 
+    @Override public Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        return new ProgParameterSymbol(typeGraph, getName(), mode,
+                declaredType.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility), getDefiningTree(),
+                getModuleID());
+    }
+
     @Override public String toString() {
         return "<" + mode.toString().toLowerCase() + ">" + getName();
     }

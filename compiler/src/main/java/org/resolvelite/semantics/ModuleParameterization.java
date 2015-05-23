@@ -7,6 +7,7 @@ import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.GenericSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
+import org.resolvelite.semantics.symbol.ProgTypeSymbol;
 
 import java.util.*;
 
@@ -17,20 +18,16 @@ public class ModuleParameterization {
 
     private final List<ResolveParser.ModuleArgumentContext> arguments =
             new ArrayList<>();
-    private final List<ResolveParser.TypeContext> suppliedGenerics =
-            new ArrayList<>();
+    private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     private final FacilitySymbol instantiatingFacility;
-    private final AnnotatedTree annotations;
 
     public ModuleParameterization(String moduleID,
-            List<ResolveParser.TypeContext> actualTypes,
+            List<ProgTypeSymbol> actualGenerics,
             ResolveParser.ModuleArgumentListContext actualArgs,
-            FacilitySymbol instantiatingFacility, AnnotatedTree annotations,
-            SymbolTable scopeRepo) {
+            FacilitySymbol instantiatingFacility, SymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
-        this.suppliedGenerics.addAll(actualTypes);
-        this.annotations = annotations;
+        this.actualGenerics.addAll(actualGenerics);
 
         if ( actualArgs != null ) {
             arguments.addAll(actualArgs.moduleArgument());
@@ -49,11 +46,9 @@ public class ModuleParameterization {
 
                 genericInstantiations =
                         getGenericInstantiations(originalScope, arguments);
-                int i;
-                i = 0;
-                /*  result =
-                          new InstantiatedScope(originalScope,
-                                  genericInstantiations, instantiatingFacility);*/
+                result =
+                        new InstantiatedScope(originalScope,
+                                genericInstantiations, instantiatingFacility);
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -68,18 +63,18 @@ public class ModuleParameterization {
             List<ResolveParser.ModuleArgumentContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
-        Iterator<GenericSymbol> formalGenerics =
-                moduleScope.getSymbolsOfType(GenericSymbol.class).iterator();
-        Iterator<ResolveParser.TypeContext> actualGenerics =
-                suppliedGenerics.iterator();
+        List<GenericSymbol> formalGenerics =
+                moduleScope.getSymbolsOfType(GenericSymbol.class);
 
-        if ( suppliedGenerics.size() != suppliedGenerics.size() ) {
+        if ( formalGenerics.size() != actualGenerics.size() ) {
             throw new RuntimeException("generic list sizes do not match");
         }
-
-        while (formalGenerics.hasNext()) {
-            result.put(formalGenerics.next().getName(),
-                    annotations.progTypeValues.get(actualGenerics.next()));
+        Iterator<ProgTypeSymbol> suppliedGenericIter =
+                actualGenerics.iterator();
+        Iterator<GenericSymbol> formalGenericIter = formalGenerics.iterator();
+        while (formalGenericIter.hasNext()) {
+            result.put(formalGenericIter.next().getName(), suppliedGenericIter
+                    .next().getProgramType());
         }
         return result;
     }

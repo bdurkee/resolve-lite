@@ -3,6 +3,9 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.programtype.PTType;
+
+import java.util.Map;
 
 /**
  * Currently there's no easy way to obtain global (module level) specifications.
@@ -36,5 +39,11 @@ public class GlobalMathAssertionSymbol extends Symbol {
 
     @Override public String getSymbolDescription() {
         return "a module level specification";
+    }
+
+    @Override public Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        return this;
     }
 }

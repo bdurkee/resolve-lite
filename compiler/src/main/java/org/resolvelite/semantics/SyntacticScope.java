@@ -87,11 +87,13 @@ public abstract class SyntacticScope extends AbstractScope {
             searchedScopes.add(this);
 
             Map<String, Symbol> symbolTableView = symbols;
-            /*if (instantiatingFacility != null) {
+            if ( instantiatingFacility != null ) {
+
                 symbolTableView =
-                        new InstantiatedSymbolTable(myBindings,
-                                genericInstantiations, instantiatingFacility);
-            }*/
+                        updateSymbols(symbols, genericInstantiations,
+                                instantiatingFacility);
+
+            }
             finished = searcher.addMatches(symbolTableView, matches, l);
 
             if ( !finished ) {
@@ -101,5 +103,17 @@ public abstract class SyntacticScope extends AbstractScope {
             }
         }
         return finished;
+    }
+
+    private Map<String, Symbol> updateSymbols(
+            Map<String, Symbol> currentBindings,
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+        Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
+        for (Symbol s : currentBindings.values()) {
+            instantiatedBindings.put(s.getName(), s.instantiateGenerics(
+                    genericInstantiations, instantiatingFacility));
+        }
+        return instantiatedBindings;
     }
 }

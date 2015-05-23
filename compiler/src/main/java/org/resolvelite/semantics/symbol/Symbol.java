@@ -1,8 +1,11 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.UnexpectedSymbolException;
+import org.resolvelite.semantics.programtype.PTType;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Symbol {
@@ -80,6 +83,24 @@ public abstract class Symbol {
 
     public ProcedureSymbol toProcedureSymbol() {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
+    public abstract Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility);
+
+    public static Map<String, MTType> buildMathTypeGenerics(
+            Map<String, PTType> genericInstantiations) {
+
+        Map<String, MTType> genericMathematicalInstantiations =
+                new HashMap<String, MTType>();
+
+        for (Map.Entry<String, PTType> instantiation : genericInstantiations
+                .entrySet()) {
+            genericMathematicalInstantiations.put(instantiation.getKey(),
+                    instantiation.getValue().toMath());
+        }
+        return genericMathematicalInstantiations;
     }
 
 }

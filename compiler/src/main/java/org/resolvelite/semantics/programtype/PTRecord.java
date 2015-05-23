@@ -3,6 +3,7 @@ package org.resolvelite.semantics.programtype;
 import org.resolvelite.semantics.MTCartesian;
 import org.resolvelite.semantics.MTCartesian.Element;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.HashMap;
@@ -41,5 +42,20 @@ public class PTRecord extends PTType {
 
     @Override public String toString() {
         return "record " + fields;
+    }
+
+    @Override public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        Map<String, PTType> newFields = new HashMap<>();
+        for (Map.Entry<String, PTType> type : fields.entrySet()) {
+            newFields.put(
+                    type.getKey(),
+                    type.getValue().instantiateGenerics(genericInstantiations,
+                            instantiatingFacility));
+        }
+
+        return new PTRecord(getTypeGraph(), newFields);
     }
 }

@@ -1,7 +1,10 @@
 package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.Map;
 
 /**
  * The program-type corresponding to TypeGraph.ELEMENT, i.e., the type of
@@ -17,9 +20,9 @@ public class PTElement extends PTType {
         return getTypeGraph().ELEMENT;
     }
 
-    /*@Override public PTType instantiateGenerics(
+    @Override public PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility) {
+            FacilitySymbol instantiatingFacility) {
         return this;
-    }*/
+    }
 }

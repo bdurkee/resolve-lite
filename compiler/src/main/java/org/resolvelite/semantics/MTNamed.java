@@ -3,7 +3,9 @@ package org.resolvelite.semantics;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a type that is simply a named reference to some bound variable.
@@ -54,6 +56,17 @@ public class MTNamed extends MTType {
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTNamed(this);
         v.endMTType(this);
+    }
+
+    public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source,
+            Map<String, MTType> original) {
+        Map<MTNamed, MTType> result = new HashMap<>();
+
+        for (Map.Entry<String, MTType> e : original.entrySet()) {
+            result.put(new MTNamed(source, e.getKey()), e.getValue());
+        }
+
+        return result;
     }
 
 }

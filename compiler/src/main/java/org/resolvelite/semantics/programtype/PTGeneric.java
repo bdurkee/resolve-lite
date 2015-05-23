@@ -2,7 +2,10 @@ package org.resolvelite.semantics.programtype;
 
 import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.typereasoning.TypeGraph;
+
+import java.util.Map;
 
 public class PTGeneric extends PTType {
 
@@ -21,19 +24,15 @@ public class PTGeneric extends PTType {
         return new MTNamed(getTypeGraph(), name);
     }
 
-    /*@Override
-    public PTType instantiateGenerics(
+    @Override public PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility) {
-
+            FacilitySymbol instantiatingFacility) {
         PTType result = this;
-
-        if (genericInstantiations.containsKey(myName)) {
-            result = genericInstantiations.get(myName);
+        if ( genericInstantiations.containsKey(name) ) {
+            result = genericInstantiations.get(name);
         }
-
         return result;
-    }*/
+    }
 
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PTGeneric);

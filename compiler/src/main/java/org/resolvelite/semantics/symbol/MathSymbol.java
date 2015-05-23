@@ -3,6 +3,7 @@ package org.resolvelite.semantics.symbol;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.*;
+import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.GenericQuery;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -16,6 +17,9 @@ public class MathSymbol extends Symbol {
 
     private MTType type, typeValue;
     private final Quantification quantification;
+
+    private final Map<String, MTType> myGenericsInDefiningContext =
+            new HashMap<>();
 
     public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
             MTType typeValue, ParseTree definingTree, String moduleID) {
@@ -138,5 +142,43 @@ public class MathSymbol extends Symbol {
     @Override public String toString() {
         return getModuleID() + "::" + getName() + "\t\t" + quantification
                 + "\t\tof type: " + type + "\t\t defines type: " + typeValue;
+    }
+
+    @Override public Symbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        //Any type that appears in our list of schematic types shadows any
+        //possible reference to a generic type
+        genericInstantiations =
+                new HashMap<String, PTType>(genericInstantiations);
+        /*    for (String schematicType : mySchematicTypes.keySet()) {
+                genericInstantiations.remove(schematicType);
+            }*/
+
+        Map<String, MTType> genericMathematicalInstantiations =
+                Symbol.buildMathTypeGenerics(genericInstantiations);
+
+        VariableReplacingVisitor typeSubstitutor =
+                new VariableReplacingVisitor(genericMathematicalInstantiations);
+        type.accept(typeSubstitutor);
+
+        MTType instantiatedTypeValue = null;
+        if ( typeValue != null ) {
+            VariableReplacingVisitor typeValueSubstitutor =
+                    new VariableReplacingVisitor(
+                            genericMathematicalInstantiations);
+            typeValue.accept(typeValueSubstitutor);
+            instantiatedTypeValue = typeValueSubstitutor.getFinalExpression();
+        }
+
+        Map<String, MTType> newGenericsInDefiningContext =
+                new HashMap<String, MTType>(myGenericsInDefiningContext);
+        newGenericsInDefiningContext.keySet().removeAll(
+                genericInstantiations.keySet());
+
+        return new MathSymbol(type.getTypeGraph(), getName(),
+                getQuantification(), typeSubstitutor.getFinalExpression(),
+                instantiatedTypeValue, getDefiningTree(), getModuleID());
     }
 }

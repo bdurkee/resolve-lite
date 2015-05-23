@@ -5,25 +5,27 @@ import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.ModuleParameterization;
 import org.resolvelite.semantics.SpecImplementationPairing;
 import org.resolvelite.semantics.SymbolTable;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FacilitySymbol extends Symbol {
 
     private final SpecImplementationPairing type;
     private final SymbolTable scopeRepo;
-    private final AnnotatedTree annotations;
+    private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
 
     public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
-            String moduleID, AnnotatedTree annotations, SymbolTable scopeRepo) {
+            String moduleID, List<ProgTypeSymbol> actualGenerics,
+            SymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleID);
         this.scopeRepo = scopeRepo;
-        this.annotations = annotations;
+        this.actualGenerics.addAll(actualGenerics);
         ModuleParameterization spec =
                 new ModuleParameterization(facility.spec.getText(),
-                        facility.type(), facility.specArgs, this, annotations,
-                        scopeRepo);
+                        actualGenerics, facility.specArgs, this, scopeRepo);
 
         ModuleParameterization impl = null;
 
@@ -33,8 +35,7 @@ public class FacilitySymbol extends Symbol {
                             .moduleArgument() : new ArrayList<>();
             impl =
                     new ModuleParameterization(facility.impl.getText(),
-                            facility.type(), facility.implArgs, this,
-                            annotations, scopeRepo);
+                            actualGenerics, facility.implArgs, this, scopeRepo);
         }
         this.type = new SpecImplementationPairing(spec, impl);
 
@@ -83,6 +84,17 @@ public class FacilitySymbol extends Symbol {
     }
 
     @Override public FacilitySymbol toFacilitySymbol() {
+        return this;
+    }
+
+    @Override public FacilitySymbol instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilitySymbol instantiatingFacility) {
+
+        //TODO : This is probably wrong.  One of the parameters to a module
+        //       used in the facility could be a generic, in which case it
+        //       should be replaced with the corresponding concrete type--but
+        //       how?
         return this;
     }
 }
