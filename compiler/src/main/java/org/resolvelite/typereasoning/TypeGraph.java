@@ -50,7 +50,7 @@ public class TypeGraph {
     private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
             new FunctionConstructorApplicationFactory();
     public final MTFunction FUNCTION = new MTFunction.MTFunctionBuilder(this,
-            FUNCTION_CONSTRUCTOR_APPLICATION, MTYPE).paramTypes(MTYPE, MTYPE)
+            FUNCTION_CONSTRUCTOR_APPLICATION, SSET).paramTypes(SSET, SSET)
             .build();
 
     public final MTFunction POWERSET = //
