@@ -131,9 +131,9 @@ public class ModelBuilder extends ResolveBaseListener {
 
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, s, ctx, tr)
-                        .freeVars(getFreeVars(s))
-                        .assume(moduleLevelRequires).assume(topAssume)
-                        .remember().finalConfirm(bottomConfirm);
+                        .freeVars(getFreeVars(s)).assume(moduleLevelRequires)
+                        .assume(topAssume).remember()
+                        .finalConfirm(bottomConfirm);
     }
 
     @Override public void exitOperationProcedureDecl(
@@ -228,8 +228,8 @@ public class ModelBuilder extends ResolveBaseListener {
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.EnsuresClauseContext ensures) {
         List<ProgParameterSymbol> params =
-                symtab.scopes.get(functionCtx)
-                        .getSymbolsOfType(ProgParameterSymbol.class);
+                symtab.scopes.get(functionCtx).getSymbolsOfType(
+                        ProgParameterSymbol.class);
         PExp existingEnsures = normalizePExp(ensures);
         for (ProgParameterSymbol p : params) {
             PSymbolBuilder temp =

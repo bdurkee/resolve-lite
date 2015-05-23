@@ -12,7 +12,7 @@ Implementation Array_Impl for Bdd_Spiral_Template;
                         and P.Length <= Max_Length
                    which_entails P.Curr_Place, P.Length : N;
         initialization
-            P.Length := 1;
+            P.Length := 0;
             P.Curr_Place := 0;
         end;
 

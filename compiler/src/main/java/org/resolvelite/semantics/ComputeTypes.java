@@ -158,24 +158,26 @@ public class ComputeTypes extends SetScopes {
 
     @Override public void exitProgParamExp(
             @NotNull ResolveParser.ProgParamExpContext ctx) {
-        typeOperationSym(ctx, ctx.qualifier, ctx.name.getText(), ctx.progExp());
+        typeOperationSym(ctx, ctx.qualifier, ctx.name, ctx.progExp());
     }
 
     @Override public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        typeOperationSym(ctx, new ResolveToken("Std_Integer_Fac"),
-                ctx.op.getText(), ctx.progExp());
+        typeOperationSym(ctx, new ResolveToken("Std_Integer_Fac"), ctx.op,
+                ctx.progExp());
     }
 
     protected void typeOperationSym(ParserRuleContext ctx,
-                                    Token qualifier, String name,
+                                    Token qualifier, Token name,
                                     List<ResolveParser.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
-        String opAsName = Utils.getNameFromProgramOp(name);
+        Token opAsName = Utils.getNameFromProgramOp(name.getText());
         try {
             OperationSymbol opSym = currentScope.queryForOne(
-                    new OperationQuery(qualifier, opAsName, argTypes));
+                    new OperationQuery(qualifier, opAsName, argTypes,
+                            SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                            SymbolTable.ImportStrategy.IMPORT_NAMED));
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;

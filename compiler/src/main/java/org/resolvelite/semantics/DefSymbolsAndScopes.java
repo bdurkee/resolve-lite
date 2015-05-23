@@ -29,7 +29,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     protected ResolveCompiler compiler;
     protected SymbolTable symtab;
-    protected AnnotatedTree tree;
+    protected AnnotatedTree tr;
     protected TypeGraph g;
 
     /**
@@ -57,14 +57,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;
-        this.tree = annotatedTree;
+        this.tr = annotatedTree;
         this.g = symtab.getTypeGraph();
     }
 
     @Override public void enterConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
@@ -86,7 +86,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitEnhancementModule(
@@ -97,7 +97,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitConceptImplModule(
@@ -110,7 +110,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterEnhancementImplModule(
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitEnhancementImplModule(
@@ -121,7 +121,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitFacilityModule(
@@ -132,7 +132,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void enterPrecisModule(
             @NotNull ResolveParser.PrecisModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tree.imports.getImportsOfType(ImportType.NAMED));
+                tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitPrecisModule(
@@ -144,7 +144,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         try {
             symtab.getInnermostActiveScope().define(
-                    new FacilitySymbol(ctx, getRootModuleID(), symtab));
+                    new FacilitySymbol(ctx, getRootModuleID(), tr, symtab));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -179,7 +179,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             //here.
             annotateExpTypesFor(ctx.mathTypeExp(),
                     symtab.getInnermostActiveScope());
-            modelType = tree.mathTypeValues.get(ctx.mathTypeExp());
+            modelType = tr.mathTypeValues.get(ctx.mathTypeExp());
             exemplar =
                     symtab.getInnermostActiveScope()
                             .define(new MathSymbol(symtab.getTypeGraph(),
@@ -329,7 +329,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         symtab.endScope();
 
         annotateExpTypesFor(ctx.mathTypeExp(), symtab.getInnermostActiveScope());
-        MTType returnType = tree.mathTypeValues.get(ctx.mathTypeExp());
+        MTType returnType = tr.mathTypeValues.get(ctx.mathTypeExp());
         MTFunction.MTFunctionBuilder builder =
                 new MTFunction.MTFunctionBuilder(g, returnType);
 
@@ -360,7 +360,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         MTType typeValue = null;
         if ( ctx.mathAssertionExp() != null ) {
-            typeValue = tree.mathTypeValues.get(ctx.mathAssertionExp());
+            typeValue = tr.mathTypeValues.get(ctx.mathAssertionExp());
         }
 
         try {
@@ -530,7 +530,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             ResolveParser.MathTypeExpContext type, List<TerminalNode> terms) {
         annotateExpTypesFor(type, symtab.getInnermostActiveScope());
         for (TerminalNode t : terms) {
-            MTType mathTypeValue = tree.mathTypeValues.get(type);
+            MTType mathTypeValue = tr.mathTypeValues.get(type);
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, t.getText(), activeQuantifications
@@ -648,7 +648,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
      * @param ctx The subtree to annotate.
      */
     protected final void annotateExpTypesFor(@NotNull ParseTree ctx, Scope s) {
-        ComputeTypes annotator = new ComputeTypes(compiler, symtab, tree);
+        ComputeTypes annotator = new ComputeTypes(compiler, symtab, tr);
         annotator.setCurrentScope(s);
         ParseTreeWalker.DEFAULT.walk(annotator, ctx);
     }
@@ -656,7 +656,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected final void annotatePExpsFor(@NotNull ParseTree ctx) {
         PExpBuildingListener<PExp> builder =
                 new PExpBuildingListener<>(symtab.mathPExps,
-                        symtab.quantifiedExps, tree);
+                        symtab.quantifiedExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
     }
 

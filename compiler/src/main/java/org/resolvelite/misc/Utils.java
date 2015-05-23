@@ -36,6 +36,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.compiler.tree.ResolveToken;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 
@@ -133,7 +134,7 @@ public class Utils {
         }
     }
 
-    public static String getNameFromProgramOp(String op) {
+    public static ResolveToken getNameFromProgramOp(String op) {
         String name = null;
         if ( op.equals("+") )
             name = "Sum";
@@ -157,7 +158,7 @@ public class Utils {
             name = "Greater_Or_Equal";
         else
             name = op;
-        return name;
+        return new ResolveToken(name);
     }
 
     public static <T> List<T> apply(Collection<T> l, Function<T, T> f) {

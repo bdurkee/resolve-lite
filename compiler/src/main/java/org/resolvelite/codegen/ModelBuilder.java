@@ -343,11 +343,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        String name = Utils.getNameFromProgramOp(ctx.op.getText());
+        Token name = Utils.getNameFromProgramOp(ctx.op.getText());
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        built.put(ctx, new MethodCall(buildQualifier("Std_Integer_Fac", name),
-                name, args));
-
+        built.put(
+                ctx,
+                new MethodCall(
+                        buildQualifier("Std_Integer_Fac", name.getText()), name
+                                .getText(), args));
     }
 
     @Override public void exitProgNamedExp(

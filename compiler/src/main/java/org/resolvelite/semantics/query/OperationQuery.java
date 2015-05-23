@@ -20,6 +20,14 @@ import java.util.List;
 public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
 
     public OperationQuery(Token qualifier, Token name,
+            List<PTType> argumentTypes, FacilityStrategy facilityStrategy,
+            ImportStrategy importStrategy) {
+        super(new PossiblyQualifiedPath(qualifier, importStrategy,
+                facilityStrategy, false), new OperationSearcher(name,
+                argumentTypes));
+    }
+
+    public OperationQuery(Token qualifier, Token name,
             List<PTType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_IGNORE, false),
@@ -39,4 +47,5 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
                 FacilityStrategy.FACILITY_IGNORE, false),
                 new OperationSearcher(name, argumentTypes));
     }
+
 }
