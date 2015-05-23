@@ -91,15 +91,15 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
     /**
      * Applies the given type comparison function to each of the expressions
-     * in <code>parameters</code>, returning <code>true</code>
-     * <strong>iff</strong> the comparison returns true for each parameter.
+     * in {@code parameters}, returning {@code true} iff the comparison returns
+     * true for each parameter.
      * 
      * The comparison is guaranteed to be applied to the parameters in the
-     * order returned by <code>parameters</code>' iterator, and thus the
+     * order returned by {@code parameters} iterator, and thus the
      * comparison may accumulate data about, for example, parameterized types
-     * as it goes. However, if the comparison returns <code>false</code> for
+     * as it goes. However, if the comparison returns {@code false} for
      * any individual parameter, then further comparison behavior is undefined.
-     * That is, in this case this method will return <code>false</code> and the
+     * That is, in this case this method will return {@code false} and the
      * comparison may be applied to none, some, or all of the remaining
      * parameters.
      */
@@ -186,20 +186,19 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * 
      * So, for example, if this function type were
      * {@code (T : MType, S : Str(R : MType), t : T) -> (T * S)} and you
-     * were to provide the parameters {@code (Z, true, false, false}, false)},
+     * were to provide the parameters {@code (Z, true, false, false, false)},
      * this method would return the function type
      * {@code (T : MType, S : Str(R : MType), t : Z) -> (Z * S)}. Note that
      * the parameters in this example do not type against the given
      * function type, but that is irrelevant to this method. The unbound
      * type variable {@code T} would be matched to {@code Z} and
-     * replaced throughout, while the unbound type variable <code>R</code> would
+     * replaced throughout, while the unbound type variable {@code R} would
      * not be bound, since it is not at the top level. Note for simplicity of
      * implementation that the top-level type parameter itself remains unchanged
-     * (i.e., in theory you could later pass a <em>different</em> type to
-     * <code>T</code>, despite having already "decided" that <code>T</code> is
-     * <code>Z</code>. This shouldn't be a problem in the normal type checking
-     * algorithm, but being certain not to abuse this is the client's
-     * responsibility.
+     * (i.e., in theory you could later pass a different type to {@code T},
+     * despite having already "decided" that {@code T} is {@code Z}. This
+     * shouldn't be a problem in the normal type checking algorithm, but being
+     * certain not to abuse this is the client's responsibility.
      * 
      * If the parameters cannot be applied to this function type, either
      * because of an inappropriate number of parameters, or a parameter value
@@ -318,7 +317,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
             throw new IndexOutOfBoundsException();
         }
         return new MTFunctionBuilder(getTypeGraph(), newRange)
-                .domain(newDomain).elementsRestrict(restrictionFlag).build();
+                .paramTypes(newDomain).elementsRestrict(restrictionFlag)
+                .build();
     }
 
     @Override public String toString() {
@@ -352,11 +352,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
         public MTFunctionBuilder elementsRestrict(boolean e) {
             this.restricts = e;
-            return this;
-        }
-
-        public MTFunctionBuilder domain(MTType e) {
-            this.domain = e;
             return this;
         }
 

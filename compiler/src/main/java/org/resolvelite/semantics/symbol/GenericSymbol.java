@@ -18,8 +18,8 @@ public class GenericSymbol extends ProgTypeSymbol {
 
     public GenericSymbol(TypeGraph g, String name, ParseTree definingTree,
             String moduleID) {
-        super(g, name, new PTGeneric(g, name), new MTNamed(g, name), definingTree,
-                moduleID);
+        super(g, name, new PTGeneric(g, name), new MTNamed(g, name),
+                definingTree, moduleID);
 
         MTType typeValue =
                 new PTGeneric(getProgramType().getTypeGraph(), getName())

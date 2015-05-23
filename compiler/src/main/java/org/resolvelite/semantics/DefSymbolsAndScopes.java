@@ -587,8 +587,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             //There is probably a way to fix this so that the implementation/insertion order
             //for the table doesn't matter.
             List<ProgParameterSymbol> params =
-                    symtab.scopes.get(ctx)
-                            .getSymbolsOfType(ProgParameterSymbol.class);
+                    symtab.scopes.get(ctx).getSymbolsOfType(
+                            ProgParameterSymbol.class);
             Symbol result = null;
             if ( isProcedure ) {
                 result =

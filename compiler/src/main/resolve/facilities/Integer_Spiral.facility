@@ -1,0 +1,16 @@
+Facility Integer_Spiral;
+
+    Type Point = Record
+            x, y : Std_Integer_Fac :: Integer;
+        end;
+
+    Facility Sp_Fac is Bdd_Spiral_Template<Point>(3)
+        implemented by Array_Impl;
+
+    Oper Main();
+        Procedure
+            Var p : Point;
+            Var h : Sp_Fac :: Spiral_Pos;
+    end Main;
+
+end Integer_Spiral;

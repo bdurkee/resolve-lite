@@ -1,7 +1,8 @@
 Implementation Array_Impl for Bdd_Spiral_Template;
 
     Facility Ceramic_Arr_Fac is Bdd_Ceramic_Array_Template
-        <T>(0, Max_Length - 1) externally implemented by Ceramic_Array_Impl;
+                <T>(0, Max_Length - 1)
+        externally implemented by Ceramic_Array_Impl;
 
     Type Spiral_Pos = Record
             Labl : Ceramic_Arr_Fac :: Ceramic_Array;

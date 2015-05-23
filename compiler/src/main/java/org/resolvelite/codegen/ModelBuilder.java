@@ -42,9 +42,7 @@ import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.semantics.*;
-import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTNamed;
-import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.NameQuery;
 import org.resolvelite.semantics.query.SymbolTypeQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
@@ -111,13 +109,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected FunctionImpl buildFunctionImpl(String name,
             ResolveParser.TypeContext type,
-            List<ResolveParser.ParameterDeclGroupContext> formalGroupings,
+            List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
             List<ResolveParser.VariableDeclGroupContext> variableGroupings,
             List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
-        for (ResolveParser.ParameterDeclGroupContext grp : formalGroupings) {
+        for (ResolveParser.ParameterDeclGroupContext grp : paramGroupings) {
             f.params.addAll(Utils.collect(ParameterDef.class, grp.Identifier(),
                     built));
         }
@@ -225,7 +223,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 new MemberClassDef(ctx.name.getText());
         String exemplarName = "";
         try {
-            //Maybe in the future we can assign program types to the ctxs
+            //Maybe in the future we can assign program types to the ctxs?
             ProgReprTypeSymbol x =
                     moduleScope.queryForOne(
                             new UnqualifiedNameQuery(ctx.name.getText()))
@@ -235,7 +233,7 @@ public class ModelBuilder extends ResolveBaseListener {
                             .getExemplarName();
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            exemplarName = ctx.name.getText().substring(0, 1); //default.
+            exemplarName = ctx.name.getText().substring(0, 1); //default name
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
@@ -474,12 +472,26 @@ public class ModelBuilder extends ResolveBaseListener {
         return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
     }
 
-    protected boolean isLocallyAccessibleSymbol(Symbol s)
+    protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        ModuleScopeBuilder module = symtab.getModuleScope(s.getModuleID());
+        return isJavaLocallyAccessibleSymbol(s.getModuleID());
+    }
 
-        return (moduleScope.getModuleID().equals(s.getModuleID()) || gen
-                .getModule().getRoot().getChild(0) instanceof ResolveParser.ConceptModuleContext);
+    protected boolean isJavaLocallyAccessibleSymbol(String symbolModuleID) {
+        //was s defined in the module we're translating?
+        if ( moduleScope.getModuleID().equals(symbolModuleID) ) {
+            return true;
+        }
+        else { //was s defined in our parent concept?
+            ParseTree thisTree = moduleScope.getDefiningTree();
+            if ( moduleScope.getDefiningTree() instanceof ResolveParser.ConceptImplModuleContext ) {
+                ResolveParser.ConceptImplModuleContext asConceptImpl =
+                        (ResolveParser.ConceptImplModuleContext) thisTree;
+                return symbolModuleID.equals(asConceptImpl.concept.getText());
+            }
+            //Todo: enhancement case.
+        }
+        return false;
     }
 
     protected CallStat buildPrimitiveInfixStat(@NotNull String name,
@@ -492,18 +504,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected Qualifier buildQualifier(String symQualifier, String symName) {
         try {
-            //The user has chosen not to qualify their symbol, so at this point
-            //symName might refer to something local, or something accessible
-            //from an imported module...
-            //NOTE: In the language's present state, it CANNOT be referring to
-            //to something brought in via a facilitydecl--they would've had to
-            //explicitly qualify if this were the case.
             if ( symQualifier == null ) {
                 Symbol s =
                         moduleScope.queryForOne(new NameQuery(null, symName,
                                 true));
                 NormalQualifier q;
-                if ( isLocallyAccessibleSymbol(s) ) {
+                if ( isJavaLocallyAccessibleSymbol(s) ) {
                     //this.<symName>
                     if ( withinFacilityModule() ) {
                         q = new NormalQualifier(moduleScope.getModuleID());
@@ -518,22 +524,25 @@ public class ModelBuilder extends ResolveBaseListener {
                 }
                 return q;
             }
-            //We're here: so the call was qualified... is the qualifier
+            //We're here: so the call (or thing) was qualified... is the qualifier
             //referring to a facility? Let's check.
-            Symbol s =
-                    moduleScope.queryForOne(new NameQuery(null, symQualifier,
-                            true));
-            //Looks like it is!, let's see if what we found is actually a facility
-            if ( !(s instanceof FacilitySymbol) ) {
-                throw new RuntimeException("non-facility qualifier... "
-                        + "what's going on here?");
-            }
+            FacilitySymbol s =
+                    moduleScope.queryForOne(
+                            new NameQuery(null, symQualifier, true))
+                            .toFacilitySymbol();
+
             //Ok, so let's build a facility qualifier from the found 's'.
-            return new FacilityQualifier((FacilitySymbol) s);
+            return new FacilityQualifier(s);
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
+            if (isJavaLocallyAccessibleSymbol(symQualifier)) {
+                return new NormalQualifier("this");
+            }
             return new NormalQualifier(symQualifier);
+        }
+        catch (UnexpectedSymbolException use) {
+            throw new RuntimeException(); //should've been caught looong ago.
         }
     }
 
