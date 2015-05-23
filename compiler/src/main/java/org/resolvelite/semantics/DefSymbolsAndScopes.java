@@ -18,6 +18,7 @@ import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.MathSymbolQuery;
 import org.resolvelite.semantics.query.NameQuery;
+import org.resolvelite.semantics.query.SymbolTypeQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -570,8 +571,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             //There is probably a way to fix this so that the implementation/insertion order
             //for the table doesn't matter.
             List<ProgParameterSymbol> params =
-                    symtab.scopes.get(ctx).getSymbolsOfType(
-                            ProgParameterSymbol.class);
+                    symtab.scopes.get(ctx).query(
+                            new SymbolTypeQuery<>(ProgParameterSymbol.class));
             Symbol result = null;
             if ( isProcedure ) {
                 result =

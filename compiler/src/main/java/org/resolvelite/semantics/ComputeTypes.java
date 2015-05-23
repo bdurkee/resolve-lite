@@ -415,11 +415,12 @@ public class ComputeTypes extends SetScopes {
     //an initial pass it'll do.
     @Override public void exitMathEntailsAddendum(
             @NotNull ResolveParser.MathEntailsAddendumContext ctx) {
-        List<MathSymbol> allVisibleMathSyms = new ArrayList<>();
-
-        for (Symbol s : currentScope.getAllSymbols()) {
+        List<Symbol> allVisibleSyms = currentScope.query(
+                new SymbolTypeQuery<>(Symbol.class));
+        List<MathSymbol> coerceableMathSyms = new ArrayList<>();
+        for (Symbol s : allVisibleSyms) {
             try {
-                allVisibleMathSyms.add(s.toMathSymbol());
+                coerceableMathSyms.add(s.toMathSymbol());
             } catch (UnexpectedSymbolException use) {}
         }
         List<String> renames = ctx.Identifier().stream()
@@ -429,8 +430,9 @@ public class ComputeTypes extends SetScopes {
             renames.add(e.mathFunctionApplicationExp().get(last).getText());
         }
         MTType newType = tr.mathTypeValues.get(ctx.mathTypeExp());
-        for (MathSymbol retypeSym : allVisibleMathSyms) {
-            if (renames.contains(retypeSym.getName())) {
+        for (MathSymbol retypeSym : coerceableMathSyms) {
+            if (renames.contains(retypeSym.getName())
+                    && retypeSym.getModuleID().equals(tr.getName())) {
                 retypeSym.setMathType(newType);
             }
         }

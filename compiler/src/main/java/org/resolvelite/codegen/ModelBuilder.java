@@ -46,6 +46,7 @@ import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTNamed;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.NameQuery;
+import org.resolvelite.semantics.query.SymbolTypeQuery;
 import org.resolvelite.semantics.query.UnqualifiedNameQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.codegen.model.Qualifier.NormalQualifier;
@@ -225,12 +226,15 @@ public class ModelBuilder extends ResolveBaseListener {
         String exemplarName = "";
         try {
             //Maybe in the future we can assign program types to the ctxs
-            ProgReprTypeSymbol x = moduleScope.queryForOne(
-                    new UnqualifiedNameQuery(ctx.name.getText()))
-                    .toProgReprTypeSymbol();
-            exemplarName = ((PTNamed)x.toProgTypeSymbol()
-                    .getProgramType()).getExemplarName();
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            ProgReprTypeSymbol x =
+                    moduleScope.queryForOne(
+                            new UnqualifiedNameQuery(ctx.name.getText()))
+                            .toProgReprTypeSymbol();
+            exemplarName =
+                    ((PTNamed) x.toProgTypeSymbol().getProgramType())
+                            .getExemplarName();
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             exemplarName = ctx.name.getText().substring(0, 1); //default.
         }
         representationClass.isStatic = withinFacilityModule();
@@ -242,11 +246,12 @@ public class ModelBuilder extends ResolveBaseListener {
                         VariableDef.class, grp.Identifier(), built));
             }
         }
-        if (ctx.typeImplInit() != null) {
-            representationClass.initVars.addAll(Utils.collect(VariableDef.class,
-                    ctx.typeImplInit().variableDeclGroup(), built));
-            representationClass.initStats.addAll(Utils.collect(Stat.class,
-                    ctx.typeImplInit().stmt(), built));
+        if ( ctx.typeImplInit() != null ) {
+            representationClass.initVars.addAll(Utils.collect(
+                    VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
+                    built));
+            representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
+                    .typeImplInit().stmt(), built));
         }
         built.put(ctx, representationClass);
     }
@@ -399,10 +404,11 @@ public class ModelBuilder extends ResolveBaseListener {
             ModuleScopeBuilder conceptScope =
                     symtab.getModuleScope(ctx.concept.getText());
             impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(conceptScope
-                    .getAllSymbols());
+                    .query(new SymbolTypeQuery<>(Symbol.class)));
 
             for (OperationSymbol f : moduleScope
-                    .getSymbolsOfType(OperationSymbol.class)) {
+                    .query(new SymbolTypeQuery<OperationSymbol>(
+                            OperationSymbol.class))) {
                 if ( f.isModuleParameter() ) {
                     impl.addOperationParameterModelObjects((FunctionDef) built
                             .get(f.getDefiningTree()));
@@ -449,7 +455,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     .conceptBlock().operationDecl(), built));
         }
         spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope
-                .getAllSymbols());
+                .query(new SymbolTypeQuery<>(Symbol.class)));
 
         file.module = spec;
         built.put(ctx, file);

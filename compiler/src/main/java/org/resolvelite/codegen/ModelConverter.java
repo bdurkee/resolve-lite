@@ -48,9 +48,7 @@ import java.util.*;
  * We identify those nested objects by the list of arguments in the template
  * definition. For example, here is the definition of the parser template:
  * 
- * <pre>
- * Parser(parser, scopes, funcs) ::= <<...>>
- * </pre>
+ * {@pre Parser(parser, scopes, funcs) ::= <<...>>}
  * <p>
  * The first template argument is always the output model object from which this
  * walker will create the template. Any other arguments identify the field names

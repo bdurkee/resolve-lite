@@ -131,8 +131,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, s, ctx, tr)
-                        .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
-                        .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
+                        .freeVars(getFreeVars(s))
+                        //
                         .assume(moduleLevelRequires).assume(topAssume)
                         .remember().finalConfirm(bottomConfirm);
     }
@@ -152,10 +152,11 @@ public class ModelBuilder extends ResolveBaseListener {
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         try {
-            List<PTType> argTypes =
-                    s.getSymbolsOfType(ProgParameterSymbol.class).stream()
-                            .map(ProgParameterSymbol::getDeclaredType)
-                            .collect(Collectors.toList());
+            List<PTType> argTypes = s.query(new SymbolTypeQuery
+                    <ProgParameterSymbol>(ProgParameterSymbol.class)).stream()
+                    .map(ProgParameterSymbol::getDeclaredType)
+                    .collect(Collectors.toList());
+
             OperationSymbol op =
                     moduleScope.queryForOne(
                             new OperationQuery(null, ctx.name, argTypes));
@@ -165,11 +166,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
             curAssertiveBuilder =
                     new VCAssertiveBlockBuilder(g, s, ctx, tr)
-                        .freeVars(s.getSymbolsOfType(ProgParameterSymbol.class))
-                        .freeVars(s.getSymbolsOfType(ProgVariableSymbol.class))
-                        .assume(moduleLevelRequires).assume(topAssume) //
-                        .assume(moduleLevelConstraint) //
-                        .finalConfirm(bottomConfirm).remember();
+                            .freeVars(getFreeVars(s)) //
+                            .assume(moduleLevelRequires).assume(topAssume) //
+                            .assume(moduleLevelConstraint) //
+                            .finalConfirm(bottomConfirm).remember();
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
             e.printStackTrace();
@@ -230,8 +230,8 @@ public class ModelBuilder extends ResolveBaseListener {
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.EnsuresClauseContext ensures) {
         List<ProgParameterSymbol> params =
-                symtab.scopes.get(functionCtx).getSymbolsOfType(
-                        ProgParameterSymbol.class);
+                symtab.scopes.get(functionCtx).query(
+                        new SymbolTypeQuery<>(ProgParameterSymbol.class));
         PExp existingEnsures = normalizePExp(ensures);
         for (ProgParameterSymbol p : params) {
             PSymbolBuilder temp =
@@ -274,6 +274,13 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         return existingEnsures;
+    }
+
+    public List<Symbol> getFreeVars(Scope s) {
+        return s.query(new SymbolTypeQuery<Symbol>(Symbol.class)).stream()
+                .filter(x -> x instanceof ProgParameterSymbol)
+                .filter(x -> x instanceof ProgVariableSymbol)
+                .collect(Collectors.toList());
     }
 
     public static Predicate<Symbol> isRequires() {
