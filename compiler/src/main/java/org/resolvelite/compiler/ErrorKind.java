@@ -233,7 +233,10 @@ public enum ErrorKind {
     VALUE_NOT_TUPLE(32, "value on seg <arg> is not a tuple",
             ErrorSeverity.ERROR),
 
-    NO_SUCH_FACTOR(33, "no such factor <arg>", ErrorSeverity.ERROR);
+    NO_SUCH_FACTOR(33, "no such factor <arg>", ErrorSeverity.ERROR),
+
+    DANGLING_PROCEDURE(34, "procedure <arg> does not implement any known "
+            + "operation", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

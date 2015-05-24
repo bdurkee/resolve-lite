@@ -77,7 +77,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
-        f.hasReturn = ctx.type() != null;
+        f.hasReturn = ctx.operationReturnType() != null;
         f.isStatic = withinFacilityModule();
         for (ResolveParser.ParameterDeclGroupContext grp : ctx
                 .operationParameterList().parameterDeclGroup()) {
@@ -91,24 +91,26 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         FunctionImpl f =
-                buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
-                        .operationParameterList().parameterDeclGroup(),
-                        ctx.variableDeclGroup(), ctx.stmt());
+                buildFunctionImpl(ctx.name.getText(),
+                        ctx.operationReturnType(), ctx.operationParameterList()
+                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                        ctx.stmt());
         built.put(ctx, f);
     }
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         FunctionImpl f =
-                buildFunctionImpl(ctx.name.getText(), ctx.type(), ctx
-                        .operationParameterList().parameterDeclGroup(),
-                        ctx.variableDeclGroup(), ctx.stmt());
+                buildFunctionImpl(ctx.name.getText(),
+                        ctx.operationReturnType(), ctx.operationParameterList()
+                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                        ctx.stmt());
         f.implementsOper = true;
         built.put(ctx, f);
     }
 
     protected FunctionImpl buildFunctionImpl(String name,
-            ResolveParser.TypeContext type,
+            ResolveParser.OperationReturnTypeContext type,
             List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
             List<ResolveParser.VariableDeclGroupContext> variableGroupings,
             List<ResolveParser.StmtContext> stats) {

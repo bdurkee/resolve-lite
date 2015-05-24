@@ -228,8 +228,13 @@ whileStmt
 
 // type and record related rules
 
+
 type
     :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+operationReturnType
+    :   type
     ;
 
 record
@@ -281,12 +286,12 @@ typeImplInit
 
 operationDecl
     :   ('Operation'|'Oper') name=Identifier operationParameterList
-        (':' type)? ';' (requiresClause)? (ensuresClause)?
+        (':' operationReturnType)? ';' (requiresClause)? (ensuresClause)?
     ;
 
 operationProcedureDecl
     :   (recursive='Recursive')? ('Operation'|'Oper')
-        name=Identifier operationParameterList (':' type)? ';'
+        name=Identifier operationParameterList (':' operationReturnType)? ';'
         (requiresClause)?
         (ensuresClause)?
         'Procedure'
@@ -297,7 +302,7 @@ operationProcedureDecl
 
 procedureDecl
     :   (recursive='Recursive')? ('Procedure'|'Proc') name=Identifier
-        operationParameterList (':' type)? ';'
+        operationParameterList (':' operationReturnType)? ';'
         (variableDeclGroup)*
         (stmt)*
         'end' closename=Identifier ';'

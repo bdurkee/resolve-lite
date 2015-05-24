@@ -64,7 +64,8 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
 
     private MathSymbol exemplarSymbol = null;
     private ProgTypeModelSymbol curTypeDefnSymbol = null;
-
+    private OperationSymbol correspondingOperation = null;
+    private String curOperationName = null;
     private PTRepresentation reprType = null;
 
     protected int typeValueDepth = 0;
@@ -203,47 +204,75 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
     @Override public void enterOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
+        curOperationName = ctx.name.getText();
+    }
+
+    //effectively serves as the 'mid' method for all operation like things
+    @Override public void exitOperationReturnType(
+            @NotNull ResolveParser.OperationReturnTypeContext ctx) {
         try {
-            if ( ctx.type() != null ) {
-                symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, ctx.name.getText(), getProgramType(
-                                ctx.type()).toMath(), null, ctx,
-                                getRootModuleID()));
-            }
+            //Inside the operation's assertions, the name of the operation
+            //refers to its return value
+            symtab.getInnermostActiveScope().addBinding(curOperationName,
+                    ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
         }
-        catch (DuplicateSymbolException e) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
-                    ctx.name.getText());
+        catch (DuplicateSymbolException dse) {
+            //This shouldn't be possible--the operation declaration has a
+            //scope all its own and we're the first ones to get to
+            //introduce anything
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
         }
     }
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
         symtab.endScope();
-        insertFunction(ctx.name, ctx, ctx.requiresClause(),
-                ctx.ensuresClause(), ctx.type(), false, null);
+        insertFunction(ctx.name, ctx.operationReturnType(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
     }
 
     @Override public void enterProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
-        symtab.startScope(ctx);
         try {
-            if ( ctx.type() != null ) {
-                symtab.getInnermostActiveScope().define(
-                        new ProgVariableSymbol(ctx.name.getText(), ctx,
-                                getProgramType(ctx.type()), getRootModuleID()));
-            }
+            correspondingOperation =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toOperationSymbol();
         }
-        catch (DuplicateSymbolException e) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
-                    ctx.name.getText());
+        catch (NoSuchSymbolException nse) {
+            compiler.errorManager.semanticError(ErrorKind.DANGLING_PROCEDURE,
+                    ctx.getStart(), ctx.getText());
         }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        symtab.startScope(ctx);
     }
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         symtab.endScope();
-        insertFunction(ctx.name, ctx, null, null, ctx.type(), true, null);
+        ResolveParser.OperationReturnTypeContext returnTy =
+                ctx.operationReturnType();
+        PTType returnType;
+        if ( returnTy == null ) {
+            returnType = PTVoid.getInstance(g);
+        }
+        else {
+            returnType = tr.progTypeValues.get(returnTy.type());
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProcedureSymbol(ctx.name.getText(), ctx,
+                            getRootModuleID(), correspondingOperation));
+            correspondingOperation = null;
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
     }
 
     @Override public void enterTypeModelDecl(
@@ -301,20 +330,20 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
 
     @Override public void exitParameterDeclGroup(
             @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
-        PTType programType = getProgramType(ctx.type());
-        for (TerminalNode t : ctx.Identifier()) {
+        PTType groupType = tr.progTypeValues.get(ctx.type());
+        for (TerminalNode term : ctx.Identifier()) {
             try {
                 ProgParameterSymbol.ParameterMode mode =
                         ProgParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
                 symtab.getInnermostActiveScope().define(
-                        new ProgParameterSymbol(symtab.getTypeGraph(), t
-                                .getText(), mode, programType, ctx,
+                        new ProgParameterSymbol(symtab.getTypeGraph(), term
+                                .getText(), mode, groupType, ctx,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
-                        t.getSymbol(), t.getText());
+                        term.getSymbol(), term.getText());
             }
         }
     }
@@ -363,11 +392,11 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
 
     private void insertVariables(List<TerminalNode> terminalGroup,
             ResolveParser.TypeContext type) {
-        PTType programType = getProgramType(type);
+        PTType progType = tr.progTypeValues.get(type);
         for (TerminalNode t : terminalGroup) {
             try {
                 ProgVariableSymbol vs =
-                        new ProgVariableSymbol(t.getText(), t, programType,
+                        new ProgVariableSymbol(t.getText(), t, progType,
                                 getRootModuleID());
                 symtab.getInnermostActiveScope().define(vs);
             }
@@ -397,15 +426,15 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
     //again, think of this as a standin to "midTypeRepresentationDecl"
     @Override public void exitTypeRepresentationType(
             @NotNull ResolveParser.TypeRepresentationTypeContext ctx) {
-        PTType t =
-                ctx.type() != null ? getProgramType(ctx.type())
-                        : getProgramType(ctx.record());
+        ParseTree t = ctx.type() != null ? ctx.type() : ctx.record();
+
         ResolveParser.TypeRepresentationDeclContext typeRep =
                 ((ResolveParser.TypeRepresentationDeclContext) ctx.getParent());
 
         reprType =
-                new PTRepresentation(g, t, typeRep.name.getText(),
-                        curTypeDefnSymbol, getRootModuleID());
+                new PTRepresentation(g, tr.progTypeValues.get(t),
+                        typeRep.name.getText(), curTypeDefnSymbol,
+                        getRootModuleID());
 
         String exemplarName = "";
         if ( curTypeDefnSymbol != null ) {
@@ -607,12 +636,14 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
     @Override public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         try {
-            ProgTypeSymbol integerType = symtab.getInnermostActiveScope()
-                    .queryForOne(new NameQuery("Std_Integer_Fac",
-                            "Integer", false)).toProgTypeSymbol();
+            ProgTypeSymbol integerType =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery("Std_Integer_Fac", "Integer",
+                                            false)).toProgTypeSymbol();
             tr.progTypes.put(ctx, integerType.getProgramType());
         }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(),
                     ctx.getStart(), "Integer");
             tr.progTypes.put(ctx, PTInvalid.getInstance(g));
@@ -657,52 +688,45 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
     }
 
-    private void insertFunction(@NotNull Token name, ParserRuleContext ctx,
+    private void insertFunction(Token name,
+            ResolveParser.OperationReturnTypeContext type,
             ResolveParser.RequiresClauseContext requires,
-            ResolveParser.EnsuresClauseContext ensures,
-            @Nullable ResolveParser.TypeContext type, boolean isProcedure,
-            OperationSymbol formalOp) {
+            ResolveParser.EnsuresClauseContext ensures, ParserRuleContext ctx) {
         try {
-            //TODO: This is dangerous if we aren't using a linked hashmap as our table.
-            //There is probably a way to fix this so that the implementation/insertion order
-            //for the table doesn't matter.
             List<ProgParameterSymbol> params =
                     symtab.scopes.get(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
-            Symbol result = null;
-            PTType returnType = tr.progTypeValues.get(type);
-            if ( isProcedure ) {
-                result =
-                        new ProcedureSymbol(name.getText(), ctx,
-                                getRootModuleID(), formalOp);
+            PTType returnType;
+            if ( type == null ) {
+                returnType = PTVoid.getInstance(g);
             }
             else {
-                result =
-                        new OperationSymbol(name.getText(), ctx, requires,
-                                ensures, returnType, getRootModuleID(), params,
-                                walkingModuleParameter);
+                returnType = tr.progTypeValues.get(type.type());
             }
-            symtab.getInnermostActiveScope().define(result);
+            symtab.getInnermostActiveScope().define(
+                    new OperationSymbol(name.getText(), ctx, requires, ensures,
+                            returnType, getRootModuleID(), params,
+                            walkingModuleParameter));
         }
         catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
-                    name.getText());
+            // duplicateSymbol(name.getName(), name.getLocation());
         }
     }
 
     @Override public void exitType(@NotNull ResolveParser.TypeContext ctx) {
         try {
             ProgTypeSymbol type =
-                    symtab.getInnermostActiveScope().queryForOne(
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(
                                     new NameQuery(ctx.qualifier, ctx.name, true))
                             .toProgTypeSymbol();
             tr.progTypeValues.put(ctx, type.getProgramType());
             tr.mathTypes.put(ctx, g.MTYPE);
             tr.mathTypeValues.put(ctx, type.getModelType());
         }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
-            compiler.errorManager.semanticError(e.getErrorKind(), ctx.getStart(),
-                    ctx.name.getText());
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(),
+                    ctx.getStart(), ctx.name.getText());
             tr.progTypes.put(ctx, PTInvalid.getInstance(g));
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
         }
