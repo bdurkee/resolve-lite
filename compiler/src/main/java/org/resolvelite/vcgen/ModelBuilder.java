@@ -258,8 +258,8 @@ public class ModelBuilder extends ResolveBaseListener {
                     PExp exemplar =
                             new PSymbolBuilder(t.getExemplarName()).mathType(
                                     t.toMath()).build();
-                    init = symtab.mathPExps.get(((PTNamed) p.getDeclaredType()) //
-                            .getInitializationEnsures()) //
+                    init = ((PTNamed) p.getDeclaredType()) //
+                            .getInitializationEnsures() //
                             .substitute(exemplar, paramExp);
                 }
                 else { //we're dealing with a generic

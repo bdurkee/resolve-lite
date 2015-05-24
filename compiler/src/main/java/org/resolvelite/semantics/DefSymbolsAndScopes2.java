@@ -13,6 +13,7 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.compiler.tree.ResolveToken;
+import org.resolvelite.misc.HardCoded;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
@@ -68,6 +69,8 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
 
     protected int typeValueDepth = 0;
     protected boolean walkingMathDot = false;
+    private boolean walkingModuleParameter = false;
+
     protected MTType currentSeg = null;
 
     public DefSymbolsAndScopes2(@NotNull ResolveCompiler rc,
@@ -114,6 +117,17 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         symtab.endScope();
     }
 
+    @Override public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tr.imports.getImportsOfType(ImportType.NAMED));
+    }
+
+    @Override public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        symtab.endScope();
+    }
+
     @Override public void enterEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
         symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
@@ -146,6 +160,90 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
     @Override public void exitPrecisModule(
             @NotNull ResolveParser.PrecisModuleContext ctx) {
         symtab.endScope();
+    }
+
+    @Override public void enterModuleParameterDecl(
+            @NotNull ResolveParser.ModuleParameterDeclContext ctx) {
+        walkingModuleParameter = true;
+    }
+
+    @Override public void exitModuleParameterDecl(
+            @NotNull ResolveParser.ModuleParameterDeclContext ctx) {
+        walkingModuleParameter = false;
+    }
+
+    @Override public void exitFacilityDecl(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+        int i = 0;
+        try {
+            List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
+            for (ResolveParser.TypeContext generic : ctx.type()) {
+                suppliedGenericSyms.add(symtab
+                        .getInnermostActiveScope()
+                        .queryForOne(
+                                new NameQuery(generic.qualifier, generic.name,
+                                        true)).toProgTypeSymbol());
+                i++;
+            }
+            symtab.getInnermostActiveScope().define(
+                    new FacilitySymbol(ctx, getRootModuleID(),
+                            suppliedGenericSyms, symtab));
+        }
+        catch (DuplicateSymbolException | NoSuchSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a program type", ctx.type(i).getText(),
+                    use.getActualSymbolDescription());
+        }
+    }
+
+    @Override public void enterOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        symtab.startScope(ctx);
+        try {
+            if (ctx.type() != null ) {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, ctx.name.getText(), getProgramType(
+                                ctx.type()).toMath(), null, ctx,
+                                getRootModuleID()));
+            }
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
+    @Override public void exitOperationDecl(
+            @NotNull ResolveParser.OperationDeclContext ctx) {
+        symtab.endScope();
+        insertFunction(ctx.name, ctx, ctx.requiresClause(),
+                ctx.ensuresClause(), ctx.type(), false, null);
+    }
+
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        try {
+            if ( ctx.type() != null ) {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                getProgramType(ctx.type()), getRootModuleID()));
+            }
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        symtab.endScope();
+        insertFunction(ctx.name, ctx, null, null, ctx.type(), true, null);
     }
 
     @Override public void enterTypeModelDecl(
@@ -201,6 +299,85 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         }
     }
 
+    @Override public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        PTType programType = getProgramType(ctx.type());
+        for (TerminalNode t : ctx.Identifier()) {
+            try {
+                ProgParameterSymbol.ParameterMode mode =
+                        ProgParameterSymbol.getModeMapping().get(
+                                ctx.parameterMode().getText());
+                symtab.getInnermostActiveScope().define(
+                        new ProgParameterSymbol(symtab.getTypeGraph(), t
+                                .getText(), mode, programType, ctx,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        insertVariables(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitMathVariableDeclGroup(
+            @NotNull ResolveParser.MathVariableDeclGroupContext ctx) {
+        insertMathVariables(ctx, ctx.mathTypeExp(), ctx.Identifier());
+    }
+
+    @Override public void exitMathVariableDecl(
+            @NotNull ResolveParser.MathVariableDeclContext ctx) {
+        insertMathVariables(ctx, ctx.mathTypeExp(), ctx.Identifier());
+    }
+
+    private void insertMathVariables(ParserRuleContext ctx,
+            ResolveParser.MathTypeExpContext type, TerminalNode... terms) {
+        insertMathVariables(ctx, type, Arrays.asList(terms));
+    }
+
+    private void insertMathVariables(ParserRuleContext ctx,
+            ResolveParser.MathTypeExpContext type, List<TerminalNode> terms) {
+        for (TerminalNode t : terms) {
+            MTType mathTypeValue = tr.mathTypeValues.get(type);
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, t.getText(), activeQuantifications
+                                .peek(), mathTypeValue, null, ctx,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException e) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
+    private void insertVariables(List<TerminalNode> terminalGroup,
+            ResolveParser.TypeContext type) {
+        PTType programType = getProgramType(type);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), t, programType,
+                                getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
     @Override public void enterTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         symtab.startScope(ctx);
@@ -212,21 +389,23 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
                                             false)).toProgTypeModelSymbol();
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errorManager.semanticError(e.getErrorKind(), ctx.name,
-                    ctx.name.getText());
+            //this is actually ok for now. Facility type reprs won't have a
+            //model.
         }
     }
 
     //again, think of this as a standin to "midTypeRepresentationDecl"
     @Override public void exitTypeRepresentationType(
             @NotNull ResolveParser.TypeRepresentationTypeContext ctx) {
-        PTType t = ctx.type() != null ? tr.progTypeValues.get(ctx.type()) :
-                tr.progTypeValues.get(ctx.record());
+        PTType t =
+                ctx.type() != null ? tr.progTypeValues.get(ctx.type())
+                        : tr.progTypeValues.get(ctx.record());
         ResolveParser.TypeRepresentationDeclContext typeRep =
-                ((ResolveParser.TypeRepresentationDeclContext)ctx.getParent());
+                ((ResolveParser.TypeRepresentationDeclContext) ctx.getParent());
 
-        reprType = new PTRepresentation(g, t, typeRep.name.getText(),
-                curTypeDefnSymbol, getRootModuleID());
+        reprType =
+                new PTRepresentation(g, t, typeRep.name.getText(),
+                        curTypeDefnSymbol, getRootModuleID());
 
         String exemplarName = "";
         if ( curTypeDefnSymbol != null ) {
@@ -470,6 +649,39 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
     }
 
+    private void insertFunction(@NotNull Token name, ParserRuleContext ctx,
+            ResolveParser.RequiresClauseContext requires,
+            ResolveParser.EnsuresClauseContext ensures,
+            @Nullable ResolveParser.TypeContext type, boolean isProcedure,
+            OperationSymbol formalOp) {
+        try {
+            //TODO: This is dangerous if we aren't using a linked hashmap as our table.
+            //There is probably a way to fix this so that the implementation/insertion order
+            //for the table doesn't matter.
+            List<ProgParameterSymbol> params =
+                    symtab.scopes.get(ctx).getSymbolsOfType(
+                            ProgParameterSymbol.class);
+            Symbol result = null;
+            if ( isProcedure ) {
+                result =
+                        new ProcedureSymbol(name.getText(), ctx,
+                                getRootModuleID(), formalOp);
+            }
+            else {
+                result =
+                        new OperationSymbol(name.getText(), ctx, requires,
+                                ensures, getProgramType(type),
+                                getRootModuleID(), params,
+                                walkingModuleParameter);
+            }
+            symtab.getInnermostActiveScope().define(result);
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
+        }
+    }
+
     //-----------------------------------------------
     // M A T H    E X P    T Y P I N G
     //-----------------------------------------------
@@ -585,6 +797,57 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         typeValueDepth--;
     }
 
+    @Override public void enterMathDotExp(
+            @NotNull ResolveParser.MathDotExpContext ctx) {
+        walkingMathDot = true;
+    }
+
+    @Override public void exitMathDotExp(
+            @NotNull ResolveParser.MathDotExpContext ctx) {
+        walkingMathDot = false;
+        Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
+                ctx.mathFunctionApplicationExp().iterator();
+        ParserRuleContext nextSeg, lastSeg = null;
+        if ( ctx.getStart().getText().equals("conc") )
+            nextSeg = segsIter.next();
+        nextSeg = segsIter.next();
+        MTType curType = tr.mathTypes.get(nextSeg);
+        MTCartesian curTypeCartesian;
+
+        while (segsIter.hasNext()) {
+            lastSeg = nextSeg;
+            nextSeg = segsIter.next();
+            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errorManager.semanticError(
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
+        }
+        tr.mathTypes.put(ctx, curType);
+        //Todo
+        //tr.mathTypeValues.put(ctx, curType);
+    }
+
     @Override public void exitMathSetCollectionExp(
             @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
         tr.mathTypes.put(ctx, g.SSET);
@@ -654,11 +917,6 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
                 retypeSym.setMathType(newType);
             }
         }
-    }
-
-    @Override public void enterMathDotExp(
-            @NotNull ResolveParser.MathDotExpContext ctx) {
-        walkingMathDot = true;
     }
 
     @Override public void exitMathVariableExp(
@@ -935,6 +1193,49 @@ public class DefSymbolsAndScopes2 extends ResolveBaseListener {
         @Override public String description() {
             return "inexact";
         }
+    }
+
+    protected PTType getProgramType(@Nullable ResolveParser.TypeContext type) {
+        return type == null ? PTVoid.getInstance(g) : getProgramType(type,
+                type.qualifier, type.name);
+    }
+
+    protected PTType getProgramType(@NotNull ParserRuleContext ctx,
+            @Nullable Token qualifier, @NotNull Token typeName) {
+        return getProgramType(symtab.getInnermostActiveScope(), compiler, ctx,
+                qualifier != null ? qualifier.getText() : null,
+                typeName.getText());
+    }
+
+    protected static PTType getProgramType(Scope s, ResolveCompiler compiler,
+            @NotNull ParserRuleContext ctx, @Nullable String qualifier,
+            @NotNull String typeName) {
+        try {
+            return s.queryForOne(new NameQuery(qualifier, typeName, true))
+                    .toProgTypeSymbol().getProgramType();
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(),
+                    ctx.getStart(), typeName);
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a prog type symbol", typeName,
+                    use.getActualSymbolDescription());
+        }
+        return PTInvalid.getInstance(compiler.symbolTable.getTypeGraph());
+    }
+
+    protected PTType getProgramType(@NotNull ResolveParser.RecordContext ctx) {
+        Map<String, PTType> fields = new LinkedHashMap<>();
+        for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
+                .recordVariableDeclGroup()) {
+            PTType grpType = getProgramType(fieldGrp.type());
+            for (TerminalNode t : fieldGrp.Identifier()) {
+                fields.put(t.getText(), grpType);
+            }
+        }
+        return new PTRecord(g, fields);
     }
 
     protected final void chainMathTypes(ParseTree current, ParseTree child) {

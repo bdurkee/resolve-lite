@@ -48,9 +48,8 @@ public class RecordVarDeclApplicationStrategy
                         new PDot(typeSym.getModelType(), null, exemplar,
                                 variable);
                 PExp init =
-                        block.annotations.getPExpFor(g,
-                                namedComponent.getInitializationEnsures())
-                                .substitute(exemplar, dot);
+                        namedComponent.getInitializationEnsures().substitute(
+                                exemplar, dot);
 
                 if ( finalConfirm.containsName(term.getText()) ) {
                     block.assume(init);

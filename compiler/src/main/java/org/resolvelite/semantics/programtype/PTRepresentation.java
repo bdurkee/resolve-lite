@@ -29,8 +29,7 @@ public class PTRepresentation extends PTNamed {
     private final ProgTypeModelSymbol family;
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            @Nullable ProgTypeModelSymbol family,
-            String enclosingModuleID) {
+            @Nullable ProgTypeModelSymbol family, String enclosingModuleID) {
         super(g, name, g.getTrueExp(), enclosingModuleID);
         this.name = name;
         this.baseType = baseType;

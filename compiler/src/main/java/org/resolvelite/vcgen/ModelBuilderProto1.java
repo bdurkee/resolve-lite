@@ -58,8 +58,7 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
         List<PExp> assumptions = getGlobalAssertionsOfType(requires());
         PExp convention = tr.getPExpFor(g, ctx.conventionClause());
         PExp typeInitEnsures =
-                tr.getPExpFor(g, s.getRepresentationType()
-                        .getInitializationEnsures());
+                s.getRepresentationType().getInitializationEnsures();
         int i = 0;
         i = 0;
     }
@@ -92,5 +91,4 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
         }
         return result;
     }
-
 }

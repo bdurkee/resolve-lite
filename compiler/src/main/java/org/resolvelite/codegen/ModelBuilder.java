@@ -237,9 +237,10 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
-        if ( ctx.record() != null ) {
+        if ( ctx.typeRepresentationType().record() != null ) {
             for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
-                    .record().recordVariableDeclGroup()) {
+                    .typeRepresentationType().record()
+                    .recordVariableDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.Identifier(), built));
             }

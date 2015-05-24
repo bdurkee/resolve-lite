@@ -49,10 +49,7 @@ public class VarDeclApplicationStrategy
                         new PSymbolBuilder(term.getText()).mathType(
                                 groupType.getModelType()).build();
                 PExp init =
-                        block.annotations.getPExpFor(
-                                g,
-                                namedComponent.getInitializationEnsures()
-                                        .mathAssertionExp()).substitute(
+                        namedComponent.getInitializationEnsures().substitute(
                                 exemplar, variable);
 
                 if ( finalConfirm.containsName(term.getText()) ) {
