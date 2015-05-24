@@ -241,17 +241,26 @@ recordVariableDeclGroup
     ;
 
 typeModelDecl
-    :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeExp ';'
+    :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeModelExp ';'
         'exemplar' exemplar=Identifier ';'
         (constraintClause)?
         (typeModelInit)?
     ;
 
+mathTypeModelExp
+    :   mathTypeExp
+    ;
+
 typeRepresentationDecl
-    :   'Type' name=Identifier '=' (record|type) ';'
+    :   'Type' name=Identifier '=' typeRepresentationType ';'
         (conventionClause)?
         (correspondenceClause)?
         (typeImplInit)?
+    ;
+
+typeRepresentationType
+    :   record
+    |   type
     ;
 
 // type initialization rules

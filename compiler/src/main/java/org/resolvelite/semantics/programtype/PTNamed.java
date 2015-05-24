@@ -11,15 +11,14 @@ import org.resolvelite.typereasoning.TypeGraph;
 public abstract class PTNamed extends PTType {
 
     private final String name;
-    protected final ResolveParser.EnsuresClauseContext initEnsures;
+    protected final PExp initEnsures;
 
     /**
      * Which module does this {@code PTType}s reference appear in?
      */
     private final String enclosingModuleID;
 
-    public PTNamed(TypeGraph g, String name,
-            ResolveParser.EnsuresClauseContext initEnsures,
+    public PTNamed(TypeGraph g, String name, PExp initEnsures,
             String enclosingModuleID) {
         super(g);
         this.name = name;
@@ -37,7 +36,7 @@ public abstract class PTNamed extends PTType {
 
     public abstract String getExemplarName();
 
-    public ResolveParser.EnsuresClauseContext getInitializationEnsures() {
+    public PExp getInitializationEnsures() {
         return initEnsures;
     }
 

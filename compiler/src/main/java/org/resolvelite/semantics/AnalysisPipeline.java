@@ -28,18 +28,18 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             System.out.println("----------------------\nModule: "
                     + unit.getName() + "\n----------------------");
             ParseTreeWalker walker = new ParseTreeWalker();
-            DefSymbolsAndScopes defSymsAndScopes =
-                    new DefSymbolsAndScopes(compiler, compiler.symbolTable,
+            DefSymbolsAndScopes2 defSymsAndScopes =
+                    new DefSymbolsAndScopes2(compiler, compiler.symbolTable,
                             unit);
-            ComputeTypes computeTypes =
-                    new ComputeTypes(compiler, compiler.symbolTable, unit);
+            //ComputeTypes computeTypes =
+            //        new ComputeTypes(compiler, compiler.symbolTable, unit);
             PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             compiler.symbolTable.quantifiedExps, unit);
             SanityChecker sanityChecker = new SanityChecker(compiler, unit);
 
             walker.walk(defSymsAndScopes, unit.getRoot());
-            walker.walk(computeTypes, unit.getRoot());
+            //walker.walk(computeTypes, unit.getRoot());
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;

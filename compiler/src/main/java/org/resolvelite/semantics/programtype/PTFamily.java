@@ -1,11 +1,17 @@
 package org.resolvelite.semantics.programtype;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.Symbol;
+import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Map;
 
@@ -13,12 +19,10 @@ public class PTFamily extends PTNamed {
 
     private final MTType model;
     private final String name, exemplarName;
-    private final ResolveParser.ConstraintClauseContext constraint;
+    private final PExp constraint;
 
     public PTFamily(MTType model, String familyName, String exemplarName,
-            ResolveParser.ConstraintClauseContext constraint,
-            ResolveParser.EnsuresClauseContext initEnsures,
-            String enclosingModuleID) {
+            PExp constraint, PExp initEnsures, String enclosingModuleID) {
         super(model.getTypeGraph(), familyName, initEnsures, enclosingModuleID);
         this.model = model;
         this.name = familyName;
@@ -34,7 +38,7 @@ public class PTFamily extends PTNamed {
         return exemplarName;
     }
 
-    public ResolveParser.ConstraintClauseContext getConstraint() {
+    public PExp getConstraint() {
         return constraint;
     }
 

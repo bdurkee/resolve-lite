@@ -30,9 +30,8 @@ public class PTRepresentation extends PTNamed {
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
             @Nullable ProgTypeModelSymbol family,
-            ResolveParser.EnsuresClauseContext initEnsures,
             String enclosingModuleID) {
-        super(g, name, initEnsures, enclosingModuleID);
+        super(g, name, g.getTrueExp(), enclosingModuleID);
         this.name = name;
         this.baseType = baseType;
         this.family = family;
