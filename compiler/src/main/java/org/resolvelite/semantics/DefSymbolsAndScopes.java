@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.compiler.tree.ImportCollection;
 import org.resolvelite.compiler.tree.ImportCollection.ImportType;
 import org.resolvelite.compiler.tree.ResolveToken;
 import org.resolvelite.misc.HardCoded;
@@ -23,6 +22,7 @@ import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
+import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol.AssertionContext;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -75,7 +75,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected MTType currentSeg = null;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
-                               @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
+            @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;
@@ -462,7 +462,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             getRootModuleID(), curTypeDefnSymbol, reprType,
                             ctx.conventionClause(), ctx.correspondenceClause());
             symtab.getInnermostActiveScope().define(repr);
-        } catch (DuplicateSymbolException e) {
+        }
+        catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.name.getText());
         }
@@ -610,16 +611,17 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         tr.progTypes.put(ctx, curFieldType);
         tr.mathTypes.put(ctx, curFieldType.toMath());
+        int i;
+        i = 0;
     }
 
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         try {
             ProgVariableSymbol variable =
-                    symtab.getInnermostActiveScope()
-                            .queryForOne(
-                                    new ProgVariableQuery(ctx.qualifier,
-                                            ctx.name, false));
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new ProgVariableQuery(ctx.qualifier, ctx.name,
+                                    false));
             tr.progTypes.put(ctx, variable.getProgramType());
             exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return;
@@ -722,8 +724,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
                             .queryForOne(
-                                    new NameQuery(ctx.qualifier, ctx.name,
-                                            true))
+                                    new NameQuery(ctx.qualifier, ctx.name, true))
                             .toProgTypeSymbol();
             tr.progTypeValues.put(ctx, type.getProgramType());
             tr.mathTypes.put(ctx, g.MTYPE);
@@ -794,6 +795,20 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
+        if ( !(ctx.getParent().getParent() instanceof ResolveParser.ModuleContext) ) {
+            return;
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GlobalMathAssertionSymbol(ctx.getText()
+                            + ctx.getStart().getStartIndex(), getPExpFor(ctx
+                            .mathAssertionExp().mathExp()), ctx,
+                            AssertionContext.REQUIRES, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            throw new RuntimeException("");
+            //somehow our global req names match?
+        }
     }
 
     @Override public void exitEnsuresClause(
@@ -964,6 +979,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         tr.mathTypeValues.put(ctx, typeValue);
     }
 
+    //Todo: This should be re-done eventually once we have more use cases,
+    //but it should work alright for now.
     @Override public void exitMathEntailsAddendum(
             @NotNull ResolveParser.MathEntailsAddendumContext ctx) {
 

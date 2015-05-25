@@ -109,7 +109,7 @@ public class ModelBuilder extends ResolveBaseListener {
             return g.getTrueExp();
         }
         return g.formConjuncts(wrappedAssertions.stream().filter(clauseType)
-                .map(e -> symtab.mathPExps.get(e.getEnclosedExp()))
+                .map(GlobalMathAssertionSymbol::getEnclosedExp)
                 .collect(Collectors.toList()));
     }
 

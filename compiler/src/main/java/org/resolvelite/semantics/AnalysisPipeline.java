@@ -31,8 +31,9 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             SanityChecker sanityChecker = new SanityChecker(compiler, unit);
 
             walker.walk(defSymsAndScopes, unit.getRoot());
-            walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
+            if ( compiler.errorManager.getErrorCount() > 0 ) return;
+            walker.walk(pexpAnnotator, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;
             // PrintTypes pt = new PrintTypes(unit);
             // walker.walk(pt, unit.getRoot());

@@ -86,7 +86,7 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
                             .collect(Collectors.toList());
 
             result.addAll(intermediates.stream()
-                    .map(m -> tr.getPExpFor(g, m.getEnclosedExp()))
+                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
                     .collect(Collectors.toList()));
         }
         return result;

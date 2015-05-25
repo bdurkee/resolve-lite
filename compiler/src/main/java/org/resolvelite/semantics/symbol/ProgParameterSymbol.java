@@ -120,12 +120,11 @@ public class ProgParameterSymbol extends Symbol {
         return this;
     }
 
-    @Override public ProgTypeSymbol toProgTypeSymbol( ) {
+    @Override public ProgTypeSymbol toProgTypeSymbol() {
 
         return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
-                            typeGraph, getName()),
-                            new MTNamed(typeGraph, getName()),
-                            getDefiningTree(), getModuleID());
+                typeGraph, getName()), new MTNamed(typeGraph, getName()),
+                getDefiningTree(), getModuleID());
     }
 
     public PSymbol asPSymbol() {
