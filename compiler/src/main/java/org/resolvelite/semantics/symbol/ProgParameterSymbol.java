@@ -2,7 +2,9 @@ package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.resolvelite.proving.absyn.PSymbol;
+import org.resolvelite.semantics.MTNamed;
 import org.resolvelite.semantics.Quantification;
+import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -116,6 +118,14 @@ public class ProgParameterSymbol extends Symbol {
 
     @Override public ProgParameterSymbol toProgParameterSymbol() {
         return this;
+    }
+
+    @Override public ProgTypeSymbol toProgTypeSymbol( ) {
+
+        return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
+                            typeGraph, getName()),
+                            new MTNamed(typeGraph, getName()),
+                            getDefiningTree(), getModuleID());
     }
 
     public PSymbol asPSymbol() {

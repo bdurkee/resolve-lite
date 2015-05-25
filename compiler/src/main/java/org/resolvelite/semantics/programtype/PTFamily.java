@@ -81,17 +81,13 @@ public class PTFamily extends PTNamed {
 
         if ( result ) {
             PTFamily oAsPTFamily = (PTFamily) o;
-
             //Todo
             result =
                     (model.equals(oAsPTFamily.model))
                             && (name.equals(oAsPTFamily.name))
                             && (exemplarName.equals(oAsPTFamily.exemplarName));
             /* && (constraint.equals(oAsPTFamily.constraint))
-             && (initRequires.equals(oAsPTFamily.initRequires))
-             && (initEnsures.equals(oAsPTFamily.initEnsures))
-             && (finalRequires.equals(oAsPTFamily.finalRequires))
-             && (finalEnsures.equals(oAsPTFamily.finalEnsures));*/
+             && (initEnsures.equals(oAsPTFamily.initEnsures))*/
         }
         return result;
     }

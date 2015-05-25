@@ -6,19 +6,18 @@ Implementation Array_Impl for Bdd_Spiral_Template;
 
     Type Spiral_Pos = Record
             Labl : Ceramic_Arr_Fac :: Ceramic_Array;
-            Length, Curr_Place : Std_Integer_Fac :: Integer;
+            Length, Curr_Place, Temp : Std_Integer_Fac :: Integer;
         end;
         convention 0 <= P.Curr_Place and P.Curr_Place <= P.Length
                         and P.Length <= Max_Length
                    which_entails P.Curr_Place, P.Length : N;
-        initialization
-            P.Length := 0;
-            P.Curr_Place := 0;
-        end;
+      --  initialization
+      --      P.Length := 0;
+      --      P.Curr_Place := 0;
+      --  end;
 
-        Proc Lengthen (alters e : T; updates P : Spiral_Pos);
-            Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
-            P.Length := P.Length + 1;
+        Proc Lengthen (alters e : T; updates X : Spiral_Pos);
+            X.Temp := X.Length + 1;
         end Lengthen;
 
 end Array_Impl;

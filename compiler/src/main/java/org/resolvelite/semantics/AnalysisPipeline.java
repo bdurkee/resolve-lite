@@ -1,18 +1,12 @@
 package org.resolvelite.semantics;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.AbstractCompilationPipeline;
-import org.resolvelite.compiler.ErrorKind;
 import org.resolvelite.compiler.ResolveCompiler;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
-import org.resolvelite.semantics.symbol.Symbol;
 
 import java.util.List;
 
@@ -28,18 +22,15 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             System.out.println("----------------------\nModule: "
                     + unit.getName() + "\n----------------------");
             ParseTreeWalker walker = new ParseTreeWalker();
-            DefSymbolsAndScopes2 defSymsAndScopes =
-                    new DefSymbolsAndScopes2(compiler, compiler.symbolTable,
+            DefSymbolsAndScopes defSymsAndScopes =
+                    new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);
-            //ComputeTypes computeTypes =
-            //        new ComputeTypes(compiler, compiler.symbolTable, unit);
             PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             compiler.symbolTable.quantifiedExps, unit);
             SanityChecker sanityChecker = new SanityChecker(compiler, unit);
 
             walker.walk(defSymsAndScopes, unit.getRoot());
-            //walker.walk(computeTypes, unit.getRoot());
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;
