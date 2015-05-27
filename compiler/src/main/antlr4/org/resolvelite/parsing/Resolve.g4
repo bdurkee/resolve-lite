@@ -495,6 +495,18 @@ mathSetExp
     |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
     ;
 
+mathLambdaExp
+    :   'lambda' '(' definitionParameterList ')' '.' '(' mathExp ')'
+    ;
+
+mathAlternativeExp
+    :   '{''{' (mathAlternativeItemExp)+ '}' '}'
+    ;
+
+mathAlternativeItemExp
+    :   mathExp ('if' test=mathExp ';' |'otherwise' ';')
+    ;
+
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
     ;

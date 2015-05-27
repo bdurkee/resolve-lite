@@ -19,10 +19,11 @@ public class VCGenerator extends AbstractCodeGenerator {
     }
 
     private OutputModelObject buildVCOutputModel() {
-         ModelBuilderProto1 o = new ModelBuilderProto1(this, compiler.symbolTable);
-         ParseTree root = module.getRoot();
-         ParseTreeWalker.DEFAULT.walk(o, root);
-         return o.getOutputFile();
+        ModelBuilderProto1 o =
+                new ModelBuilderProto1(this, compiler.symbolTable);
+        ParseTree root = module.getRoot();
+        ParseTreeWalker.DEFAULT.walk(o, root);
+        return o.getOutputFile();
     }
 
     @Nullable public ST generateAssertions() {

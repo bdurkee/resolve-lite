@@ -5,8 +5,7 @@ import org.resolvelite.vcgen.application.ConfirmApplicationStrategy;
 
 public class VCConfirm extends VCRuleBackedStat {
 
-    public VCConfirm(VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                     PExp... e) {
+    public VCConfirm(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
         super(null, block, new ConfirmApplicationStrategy(), e);
     }
 

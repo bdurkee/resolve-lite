@@ -24,10 +24,9 @@ public abstract class AssertiveBlock extends OutputModelObject {
             new ArrayList<>();
 
     public AssertiveBlock(TypeGraph g, ParserRuleContext definingTree,
-                          VCConfirm finalConfirm, AnnotatedTree annotations,
-                          List<VCRuleBackedStat> stats, Collection<PSymbol> freeVars,
-                          List<RuleApplicationStep> applicationSteps,
-                          String blockDescription) {
+            VCConfirm finalConfirm, AnnotatedTree annotations,
+            List<VCRuleBackedStat> stats, Collection<PSymbol> freeVars,
+            List<RuleApplicationStep> applicationSteps, String blockDescription) {
         this.g = g;
         this.definingTree = definingTree;
         this.annotations = annotations;

@@ -8,7 +8,7 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public class AssumeApplicationStrategy implements RuleApplicationStrategy {
+public class AssumeApplicationStrategy implements StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
@@ -16,7 +16,7 @@ public class AssumeApplicationStrategy implements RuleApplicationStrategy {
     }
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              List<PExp> statComponents) {
+            List<PExp> statComponents) {
         PExp curFinalConfirm = block.finalConfirm.getConfirmExp();
         PExp statement = statComponents.get(0);
 

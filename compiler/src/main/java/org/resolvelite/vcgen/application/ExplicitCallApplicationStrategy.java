@@ -17,10 +17,12 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ExplicitCallApplicationStrategy implements RuleApplicationStrategy {
+public class ExplicitCallApplicationStrategy
+        implements
+            StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp ... e) {
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
         return applyRule(block, Arrays.asList(e));
     }
 

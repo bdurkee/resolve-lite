@@ -38,8 +38,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final String description;
 
         public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
-                                       String description,
-                ParserRuleContext ctx, AnnotatedTree annotations) {
+                String description, ParserRuleContext ctx,
+                AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
             this.annotations = annotations;
@@ -111,7 +111,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        public VCAssertiveBlockBuilder stats(VCRuleBackedStat ... e) {
+        public VCAssertiveBlockBuilder stats(VCRuleBackedStat... e) {
             stats(Arrays.asList(e));
             return this;
         }

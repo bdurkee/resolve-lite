@@ -22,6 +22,7 @@ import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
+import org.resolvelite.semantics.MTFunction.MTFunctionBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -896,6 +897,57 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         typeValueDepth--;
     }
 
+    @Override public void enterMathLambdaExp(
+            @NotNull ResolveParser.MathLambdaExpContext ctx) {
+        symtab.startScope(ctx);
+        compiler.info("lambda exp: " + ctx.getText());
+    }
+
+    @Override public void exitMathLambdaExp(
+            @NotNull ResolveParser.MathLambdaExpContext ctx) {
+        symtab.endScope();
+
+        List<MTType> parameterTypes = new LinkedList<>();
+        for (ResolveParser.MathVariableDeclGroupContext grp :
+                ctx.definitionParameterList().mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            parameterTypes.addAll(grp.Identifier().stream()
+                    .map(term -> grpType).collect(Collectors.toList()));
+        }
+        tr.mathTypes.put(ctx, new MTFunctionBuilder(g, tr.mathTypeValues //
+                .get(ctx.mathExp())) //
+                .paramTypes(parameterTypes).build()); //
+    }
+
+    @Override public void exitMathAlternativeItemExp(
+            @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
+         if ( ctx.test != null) {
+             expectType(ctx.test, g.BOOLEAN);
+         }
+
+         e.setMathType(e.getAssignment().getMathType());
+         e.setMathTypeValue(e.getAssignment().getMathTypeValue());
+     }
+
+    @Override public void exitMathAlternativeItemExp(
+            @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
+
+        MTType establishedType = null;
+        MTType establishedTypeValue = null;
+        for (AltItemExp alt : e.getAlternatives()) {
+            if ( establishedType == null ) {
+                establishedType = alt.getAssignment().getMathType();
+                establishedTypeValue = alt.getAssignment().getMathTypeValue();
+            }
+            else {
+                expectType(alt, establishedType);
+            }
+        }
+
+        e.setMathType(establishedType);
+        e.setMathTypeValue(establishedTypeValue);
+    }
+
     @Override public void enterMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
         walkingMathDot = true;
@@ -1310,6 +1362,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                         symtab.quantifiedExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
+    }
+
+    public void expectType(ParserRuleContext ctx, MTType expectedType) {
+        if (!g.isKnownToBeIn(tr.mathTypes.get(ctx), expectedType)) {
+            compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_TYPE,
+                    ctx.getStart(), expectedType, tr.mathTypes.get(ctx));
+        }
     }
 
     protected final String getRootModuleID() {

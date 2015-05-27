@@ -6,12 +6,12 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
 import java.util.List;
 
-public interface RuleApplicationStrategy {
+public interface StatRuleApplicationStrategy {
 
     public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                    List<PExp> statComponents);
+            List<PExp> statComponents);
 
-    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, PExp ... e);
+    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, PExp... e);
 
     public String getDescription();
 

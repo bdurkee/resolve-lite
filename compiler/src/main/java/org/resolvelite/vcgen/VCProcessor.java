@@ -27,7 +27,8 @@ public class VCProcessor implements Iterable<VC> {
     }
 
     /**
-     * Each {@link org.resolvelite.vcgen.model.AssertiveBlock} contains a set of vcs that refer to
+     * Each {@link org.resolvelite.vcgen.model.AssertiveBlock} contains a set of
+     * vcs that refer to
      * the same set of free variables. This method adds each vc to the final
      * list.
      * 

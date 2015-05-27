@@ -31,20 +31,20 @@ public class PDot extends PExp {
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
 
-        if (result == null) {
+        if ( result == null ) {
             List<PSymbol> newSegments = new ArrayList<>();
 
             for (PSymbol p : segs) {
                 PExp x1 = p.substitute(substitutions);
 
-                if (x1 instanceof PDot) { //flatten the dot exp
+                if ( x1 instanceof PDot ) { //flatten the dot exp
                     PDot x1AsPDot = (PDot) x1;
                     for (PSymbol s : x1AsPDot.getSegments()) {
                         newSegments.add(s);
                     }
                 }
                 else {
-                    newSegments.add((PSymbol)x1);
+                    newSegments.add((PSymbol) x1);
                 }
             }
             return new PDot(newSegments, getMathType(), getMathTypeValue(),
@@ -126,12 +126,12 @@ public class PDot extends PExp {
 
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PDot);
-        if (result) {
-            List<PSymbol> oSegs = ((PDot)o).getSegments();
-            if (oSegs.size() != this.getSegments().size()) {
+        if ( result ) {
+            List<PSymbol> oSegs = ((PDot) o).getSegments();
+            if ( oSegs.size() != this.getSegments().size() ) {
                 result = false;
             }
-            Iterator<PSymbol> oSegsIter = ((PDot)o).getSegments().iterator();
+            Iterator<PSymbol> oSegsIter = ((PDot) o).getSegments().iterator();
             Iterator<PSymbol> thisSegsIter = this.getSegments().iterator();
 
             while (result && oSegsIter.hasNext() && thisSegsIter.hasNext()) {

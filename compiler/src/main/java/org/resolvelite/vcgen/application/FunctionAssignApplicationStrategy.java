@@ -12,10 +12,10 @@ import java.util.List;
 
 public class FunctionAssignApplicationStrategy
         implements
-            RuleApplicationStrategy {
+            StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              List<PExp> statComponents) {
+            List<PExp> statComponents) {
         AnnotatedTree annotations = block.annotations;
         PExp leftReplacee = statComponents.get(0);
         PExp rightReplacer = statComponents.get(1);
@@ -28,12 +28,12 @@ public class FunctionAssignApplicationStrategy
         }
 
         //apply explicit call rule to the 'exp-call-like-thing' on the rhs.
-        return ModelBuilderProto1.EXPLICIT_CALL_APPLICATION
-                .applyRule(block, statComponents.get(1));
+        return ModelBuilderProto1.EXPLICIT_CALL_APPLICATION.applyRule(block,
+                statComponents.get(1));
     }
 
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp ... e) {
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
         return applyRule(block, Arrays.asList(e));
     }
 

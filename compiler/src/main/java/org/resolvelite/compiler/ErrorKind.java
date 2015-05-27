@@ -236,7 +236,9 @@ public enum ErrorKind {
     NO_SUCH_FACTOR(33, "no such factor <arg>", ErrorSeverity.ERROR),
 
     DANGLING_PROCEDURE(34, "procedure <arg> does not implement any known "
-            + "operation", ErrorSeverity.ERROR);
+            + "operation", ErrorSeverity.ERROR),
+
+    UNEXPECTED_TYPE(35, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

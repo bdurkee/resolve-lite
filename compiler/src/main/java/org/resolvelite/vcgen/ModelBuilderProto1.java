@@ -13,7 +13,7 @@ import org.resolvelite.semantics.*;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.vcgen.application.ExplicitCallApplicationStrategy;
 import org.resolvelite.vcgen.application.FunctionAssignApplicationStrategy;
-import org.resolvelite.vcgen.application.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.StatRuleApplicationStrategy;
 import org.resolvelite.vcgen.application.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -42,11 +42,11 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     private ModuleScopeBuilder moduleScope = null;
     private ResolveParser.TypeRepresentationDeclContext curTypeRepr = null;
 
-    public static final RuleApplicationStrategy EXPLICIT_CALL_APPLICATION =
+    public static final StatRuleApplicationStrategy EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
-    private final static RuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
+    private final static StatRuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
-    private final static RuleApplicationStrategy SWAP_APPLICATION =
+    private final static StatRuleApplicationStrategy SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
     public ModelBuilderProto1(VCGenerator gen, SymbolTable symtab) {
@@ -67,20 +67,20 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     @Override public void enterTypeImplInit(
             @NotNull ResolveParser.TypeImplInitContext ctx) {
         Scope s = symtab.scopes.get(ctx);
-        ProgReprTypeSymbol repr = symtab.ctxToSyms.get(ctx)
-                .toProgReprTypeSymbol();
+        ProgReprTypeSymbol repr =
+                symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
 
         PExp convention = repr.getConvention();
         PExp correspondence = repr.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
-        curAssertiveBuilder = new VCAssertiveBlockBuilder(g,
-                symtab.scopes.get(ctx), "T_Init_Hypo="+repr.getName(), ctx, tr);
+        curAssertiveBuilder =
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                        "T_Init_Hypo=" + repr.getName(), ctx, tr);
     }
 
     @Override public void exitTypeImplInit(
             @NotNull ResolveParser.TypeImplInitContext ctx) {
-        ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx)
-                .toProgReprTypeSymbol();
+        ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = s.getConvention();
         PExp correspondence = s.getCorrespondence();
@@ -89,8 +89,9 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
                     s.getDefinition().getProgramType()
                             .getInitializationEnsures();
         }
-        PExp newInitEnsures = typeInitEnsures.substitute(s.exemplarAsPSymbol(),
-                s.getConceptualExemplarAsPDot());
+        PExp newInitEnsures =
+                typeInitEnsures.substitute(s.exemplarAsPSymbol(),
+                        s.getConceptualExemplarAsPDot());
         newInitEnsures =
                 withCorrespondencePartsSubstituted(newInitEnsures,
                         correspondence);
@@ -103,20 +104,23 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
-        curAssertiveBuilder = new VCAssertiveBlockBuilder(g,
-                symtab.scopes.get(ctx),
-                "Well_Def_Corr_Hyp="+ctx.name.getText(), ctx, tr)
-                    .assume(getGlobalAssertionsOfType(requires()))
-                    .assume(s.getConvention());
+        curAssertiveBuilder =
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
+                        .assume(getGlobalAssertionsOfType(requires())).assume(
+                                s.getConvention());
 
         PExp constraint = g.getTrueExp();
         PExp correspondence = s.getCorrespondence();
-        if (s.getDefinition() != null) {
+        if ( s.getDefinition() != null ) {
             constraint = s.getDefinition().getProgramType().getConstraint();
         }
-        PExp newConstraint = constraint.substitute(s.exemplarAsPSymbol(),
-                s.getConceptualExemplarAsPDot());
-        newConstraint = withCorrespondencePartsSubstituted(newConstraint, correspondence);
+        PExp newConstraint =
+                constraint.substitute(s.exemplarAsPSymbol(),
+                        s.getConceptualExemplarAsPDot());
+        newConstraint =
+                withCorrespondencePartsSubstituted(newConstraint,
+                        correspondence);
         curAssertiveBuilder.finalConfirm(newConstraint);
         outputFile.chunks.add(curAssertiveBuilder.build());
     }
@@ -127,23 +131,29 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
 
     @Override public void exitCallStmt(
             @NotNull ResolveParser.CallStmtContext ctx) {
-        stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
-                EXPLICIT_CALL_APPLICATION,
-                tr.mathPExps.get(ctx.progParamExp())));
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
+                                .progParamExp()));
+        stats.put(ctx, s);
     }
 
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
-        stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
-                SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
-                tr.mathPExps.get(ctx.right)));
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                        SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
+                        tr.mathPExps.get(ctx.right));
+        stats.put(ctx, s);
     }
 
     @Override public void exitAssignStmt(
             @NotNull ResolveParser.AssignStmtContext ctx) {
-        stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
-                FUNCTION_ASSIGN_APPLICATION, tr.mathPExps.get(ctx.left),
-                tr.mathPExps.get(ctx.right)));
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                        FUNCTION_ASSIGN_APPLICATION,
+                        tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
+        stats.put(ctx, s);
     }
 
     public static Predicate<Symbol> constraint() {
@@ -157,17 +167,18 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     }
 
     public PExp withCorrespondencePartsSubstituted(PExp start,
-                                                   PExp correspondence) {
+            PExp correspondence) {
         for (PExp e : correspondence.splitIntoConjuncts()) {
-            if (!e.isEquality()) {
+            if ( !e.isEquality() ) {
                 //Todo: This should be added to ErrorKind and checked somewhere better.
-                throw new IllegalStateException("malformed correspondence, " +
-                        "should be of the form " +
-                        "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
+                throw new IllegalStateException(
+                        "malformed correspondence, "
+                                + "should be of the form "
+                                + "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
             }
             PSymbol eAsPSym = (PSymbol) e;
-            PDot elhs =  (PDot) eAsPSym.getArguments().get(0);
-            PSymbol erhs =  (PSymbol) eAsPSym.getArguments().get(1);
+            PDot elhs = (PDot) eAsPSym.getArguments().get(0);
+            PSymbol erhs = (PSymbol) eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }
         return start;

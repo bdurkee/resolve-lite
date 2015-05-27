@@ -5,7 +5,7 @@ import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.vcgen.application.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.StatRuleApplicationStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,12 +15,12 @@ public class VCRuleBackedStat extends OutputModelObject {
 
     protected final ParserRuleContext definingCtx;
     protected final List<PExp> statComponents = new ArrayList<>();
-    protected final RuleApplicationStrategy applicationStrategy;
+    protected final StatRuleApplicationStrategy applicationStrategy;
     protected final VCAssertiveBlockBuilder enclosingBlock;
 
     public VCRuleBackedStat(ParserRuleContext ctx,
-                            VCAssertiveBlockBuilder block,
-                         RuleApplicationStrategy apply, PExp... e) {
+            VCAssertiveBlockBuilder block, StatRuleApplicationStrategy apply,
+            PExp... e) {
         this.statComponents.addAll(Arrays.asList(e));
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
@@ -28,7 +28,7 @@ public class VCRuleBackedStat extends OutputModelObject {
     }
 
     public String getText() {
-        if (definingCtx != null) return Utils.getRawText(definingCtx);
+        if ( definingCtx != null ) return Utils.getRawText(definingCtx);
         return "";
     }
 

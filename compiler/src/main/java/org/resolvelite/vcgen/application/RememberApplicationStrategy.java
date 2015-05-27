@@ -7,7 +7,7 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import java.util.Arrays;
 import java.util.List;
 
-public class RememberApplicationStrategy implements RuleApplicationStrategy {
+public class RememberApplicationStrategy implements StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block,
@@ -17,8 +17,7 @@ public class RememberApplicationStrategy implements RuleApplicationStrategy {
     }
 
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block,
-            PExp ... e) {
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
         return applyRule(block, Arrays.asList(e));
     }
 

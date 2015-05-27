@@ -1,7 +1,6 @@
 package org.resolvelite.vcgen.application;
 
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
@@ -9,7 +8,7 @@ import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public class SwapApplicationStrategy implements RuleApplicationStrategy {
+public class SwapApplicationStrategy implements StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block,
