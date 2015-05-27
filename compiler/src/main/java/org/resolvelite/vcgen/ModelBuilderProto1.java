@@ -40,8 +40,8 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     private VCAssertiveBlockBuilder curAssertiveBuilder = null;
     private final VCOutputFile outputFile = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
-
     private ResolveParser.TypeRepresentationDeclContext curTypeRepr = null;
+
     public static final RuleApplicationStrategy EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
     private final static RuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
@@ -123,6 +123,13 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
 
     @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitCallStmt(
+            @NotNull ResolveParser.CallStmtContext ctx) {
+        stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                EXPLICIT_CALL_APPLICATION,
+                tr.mathPExps.get(ctx.progParamExp())));
     }
 
     @Override public void exitSwapStmt(
