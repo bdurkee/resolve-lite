@@ -10,22 +10,24 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
 
-public abstract class AssertiveCode extends OutputModelObject {
+public abstract class AssertiveBlock extends OutputModelObject {
 
     private final Set<PSymbol> freeVars = new LinkedHashSet<>();
     private final AnnotatedTree annotations;
     private final ParserRuleContext definingTree;
     private final TypeGraph g;
+    private final String blockDescription;
 
-    @ModelElement public final VCConfirm finalConfirm;
+    @ModelElement public final VCRuleBackedStat finalConfirm;
     @ModelElement public final List<VCRuleBackedStat> stats = new ArrayList<>();
     @ModelElement public final List<RuleApplicationStep> applicationSteps =
             new ArrayList<>();
 
-    public AssertiveCode(TypeGraph g, ParserRuleContext definingTree,
-            VCConfirm finalConfirm, AnnotatedTree annotations,
-            List<VCRuleBackedStat> stats, Collection<PSymbol> freeVars,
-            List<RuleApplicationStep> applicationSteps) {
+    public AssertiveBlock(TypeGraph g, ParserRuleContext definingTree,
+                          VCConfirm finalConfirm, AnnotatedTree annotations,
+                          List<VCRuleBackedStat> stats, Collection<PSymbol> freeVars,
+                          List<RuleApplicationStep> applicationSteps,
+                          String blockDescription) {
         this.g = g;
         this.definingTree = definingTree;
         this.annotations = annotations;
@@ -33,6 +35,11 @@ public abstract class AssertiveCode extends OutputModelObject {
         this.stats.addAll(stats);
         this.freeVars.addAll(freeVars);
         this.applicationSteps.addAll(applicationSteps);
+        this.blockDescription = blockDescription;
+    }
+
+    public String getDescription() {
+        return blockDescription;
     }
 
     public TypeGraph getTypeGraph() {
@@ -51,7 +58,7 @@ public abstract class AssertiveCode extends OutputModelObject {
         return Utils.getRawText(definingTree);
     }
 
-    public VCConfirm getFinalConfirm() {
+    public VCRuleBackedStat getFinalConfirm() {
         return finalConfirm;
     }
 

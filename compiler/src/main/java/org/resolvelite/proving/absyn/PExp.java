@@ -120,6 +120,10 @@ public abstract class PExp {
 
     public abstract boolean isLiteralTrue();
 
+    public boolean isEquality() {
+        return false;
+    }
+
     public abstract boolean isLiteralFalse();
 
     public abstract boolean isVariable();

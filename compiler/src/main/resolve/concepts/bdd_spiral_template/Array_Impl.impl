@@ -1,4 +1,5 @@
 Implementation Array_Impl for Bdd_Spiral_Template;
+        uses Basic_Spiral_Theory;
 
     Facility Ceramic_Arr_Fac is Bdd_Ceramic_Array_Template
                 <T>(0, Max_Length - 1)
@@ -10,11 +11,29 @@ Implementation Array_Impl for Bdd_Spiral_Template;
         end;
         convention 0 <= P.Curr_Place and P.Curr_Place <= P.Length
                         and P.Length <= Max_Length
-                   which_entails P.Curr_Place, P.Length : N;
+                    which_entails P.Curr_Place, P.Length : N;
+        correspondence conc.P.Trmnl_Loc = SS(Cen, P.Length) and
+                       conc.P.Curr_Loc = SS(Cen, P.Curr_Place);
         initialization
             P.Length := 0;
             P.Curr_Place := 0;
         end;
+
+        (*
+            assume Max_Length > 0 and
+                P.Length := 0;
+                P.Curr_Place := 0;
+            confirm 0 <= P.Curr_Place and P.Curr_Place <= P.Length
+                                            and P.Length <= Max_Length and
+                                 conc.P.Trmnl_Loc = Cen;
+            ----------->
+            assume Max_Length > 0 and
+                P.Length := 0;
+                P.Curr_Place := 0;
+            confirm 0 <= P.Curr_Place and P.Curr_Place <= P.Length
+                                            and P.Length <= Max_Length and
+                                 conc.P.Trmnl_Loc = Cen;
+        *)
 
         Proc Lengthen (alters e : T; updates P : Spiral_Pos);
             Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);

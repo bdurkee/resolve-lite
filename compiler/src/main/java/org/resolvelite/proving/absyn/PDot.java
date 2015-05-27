@@ -29,15 +29,36 @@ public class PDot extends PExp {
     }
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
-        List<PSymbol> segz = segs.stream().map(s -> substitute(substitutions))
-                .map(s -> (PSymbol)s)
-                .collect(Collectors.toList());
-        return new PDot(segz, getMathType(), getMathTypeValue(), getProgType(),
-                getProgTypeValue());
+        PExp result = substitutions.get(this);
+
+        if (result == null) {
+            List<PSymbol> newSegments = new ArrayList<>();
+
+            for (PSymbol p : segs) {
+                PExp x1 = p.substitute(substitutions);
+
+                if (x1 instanceof PDot) { //flatten the dot exp
+                    PDot x1AsPDot = (PDot) x1;
+                    for (PSymbol s : x1AsPDot.getSegments()) {
+                        newSegments.add(s);
+                    }
+                }
+                else {
+                    newSegments.add((PSymbol)x1);
+                }
+            }
+            return new PDot(newSegments, getMathType(), getMathTypeValue(),
+                    getProgType(), getProgTypeValue());
+        }
+        return result;
+    }
+
+    public List<PSymbol> getSegments() {
+        return segs;
     }
 
     @Override public boolean containsName(String name) {
-        for (PSymbol s : segs) {
+        for (PExp s : segs) {
             if ( s.containsName(name) ) return true;
         }
         return false;
@@ -77,7 +98,7 @@ public class PDot extends PExp {
 
     @Override public PExp withIncomingSignsErased() {
         List<PSymbol> newSegs = segs.stream()
-                .map(PSymbol::withIncomingSignsErased).map(s -> (PSymbol) s)
+                .map(PExp::withIncomingSignsErased).map(s -> (PSymbol) s)
                 .collect(Collectors.toList());
         return new PDot(newSegs, getMathType(), getMathTypeValue(),
                 getProgType(), getProgTypeValue());
@@ -101,6 +122,23 @@ public class PDot extends PExp {
 
     @Override protected Set<String> getSymbolNamesNoCache() {
         return new HashSet<>();
+    }
+
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof PDot);
+        if (result) {
+            List<PSymbol> oSegs = ((PDot)o).getSegments();
+            if (oSegs.size() != this.getSegments().size()) {
+                result = false;
+            }
+            Iterator<PSymbol> oSegsIter = ((PDot)o).getSegments().iterator();
+            Iterator<PSymbol> thisSegsIter = this.getSegments().iterator();
+
+            while (result && oSegsIter.hasNext() && thisSegsIter.hasNext()) {
+                result = oSegsIter.next().equals(thisSegsIter.next());
+            }
+        }
+        return result;
     }
 
     @Override public String toString() {

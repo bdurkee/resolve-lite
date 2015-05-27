@@ -10,11 +10,11 @@ import java.util.List;
 public class VCOutputFile extends OutputModelObject {
 
     /**
-     * All completed {@link AssertiveCode} objects; where each
+     * All completed {@link AssertiveBlock} objects; where each
      * represents a vc or group of vcs that must be satisfied to verify a parsed
      * program.
      */
-    @ModelElement public List<AssertiveCode> chunks = new ArrayList<>();
+    @ModelElement public List<AssertiveBlock> chunks = new ArrayList<>();
 
     /**
      * The final list of immutable vcs.

@@ -38,6 +38,8 @@ public class TypeGraph {
     public final MTProper Z = new MTProper(this, SSET, false, "Z");
     public final MTProper N = new MTProper(this, SSET, false, "N");
 
+    public final MTProper BASE_POINT = new MTProper(this, SSET, false,
+            "Base_Point");
     public final MTProper EMPTY_SET = new MTProper(this, SSET, false,
             "Empty_Set");
 
@@ -493,4 +495,7 @@ public class TypeGraph {
                 .style(DisplayStyle.INFIX).build();
     }
 
+    public final PSymbol formConcMetaSegment() {
+        return new PSymbolBuilder("conc").mathType(MTYPE).build();
+    }
 }

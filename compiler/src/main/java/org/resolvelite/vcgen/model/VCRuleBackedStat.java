@@ -1,31 +1,43 @@
 package org.resolvelite.vcgen.model;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.codegen.model.OutputModelObject;
+import org.resolvelite.misc.Utils;
+import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
-public abstract class VCRuleBackedStat<T> extends OutputModelObject {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-    protected final T contents;
-    protected final RuleApplicationStrategy<T> applicationStrategy;
+public class VCRuleBackedStat extends OutputModelObject {
+
+    protected final ParserRuleContext definingCtx;
+    protected final List<PExp> statComponents = new ArrayList<>();
+    protected final RuleApplicationStrategy applicationStrategy;
     protected final VCAssertiveBlockBuilder enclosingBlock;
 
-    public VCRuleBackedStat(T contents, VCAssertiveBlockBuilder block,
-            RuleApplicationStrategy<T> apply) {
-        if ( block == null ) {
-            throw new IllegalArgumentException("assertive block==null");
-        }
-        this.contents = contents;
+    public VCRuleBackedStat(ParserRuleContext ctx,
+                            VCAssertiveBlockBuilder block,
+                         RuleApplicationStrategy apply, PExp... e) {
+        this.statComponents.addAll(Arrays.asList(e));
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
+        this.definingCtx = ctx;
     }
 
-    public AssertiveCode reduce() {
-        return applicationStrategy.applyRule(contents, enclosingBlock);
+    public String getText() {
+        if (definingCtx != null) return Utils.getRawText(definingCtx);
+        return "";
     }
 
-    public T getContents() {
-        return contents;
+    public List<PExp> getStatComponents() {
+        return statComponents;
+    }
+
+    public AssertiveBlock reduce() {
+        return applicationStrategy.applyRule(enclosingBlock, statComponents);
     }
 
     public String getApplicationDescription() {
@@ -35,6 +47,4 @@ public abstract class VCRuleBackedStat<T> extends OutputModelObject {
     public VCAssertiveBlockBuilder getEnclosingBlock() {
         return enclosingBlock;
     }
-
-    public abstract String getText();
 }

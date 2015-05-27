@@ -1,23 +1,17 @@
 package org.resolvelite.vcgen.model;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.applicationstrategies.AssumeApplicationStrategy;
-import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
-public class VCAssume extends VCRuleBackedStat<PExp> {
+public class VCAssume extends VCRuleBackedStat {
 
-    public VCAssume(PExp contents, RuleApplicationStrategy<PExp> apply,
-            VCAssertiveBlock.VCAssertiveBlockBuilder enclosingBlock) {
-        super(contents, enclosingBlock, apply);
+    public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
+        super(null, block, new AssumeApplicationStrategy(), e);
     }
 
-    public VCAssume(PExp contents, VCAssertiveBlockBuilder enclosingBlock) {
-        this(contents, new AssumeApplicationStrategy(), enclosingBlock);
+    public PExp getAssumeExp() {
+        return statComponents.get(0);
     }
-
-    @Override public String getText() {
-        return getContents().toString();
-    }
-
 }

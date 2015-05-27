@@ -2,15 +2,25 @@ package org.resolvelite.vcgen.applicationstrategies;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.AssertiveBlock;
+import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.vcgen.model.VCConfirm;
 
-public class AssumeApplicationStrategy implements RuleApplicationStrategy<PExp> {
+import java.util.Arrays;
+import java.util.List;
 
-    @Override public AssertiveCode applyRule(@NotNull PExp statement,
-            VCAssertiveBlockBuilder block) {
-        PExp curFinalConfirm = block.finalConfirm.getContents();
+public class AssumeApplicationStrategy implements RuleApplicationStrategy {
+
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
+        return applyRule(block, Arrays.asList(e));
+    }
+
+    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
+                                              List<PExp> statComponents) {
+        PExp curFinalConfirm = block.finalConfirm.getConfirmExp();
+        PExp statement = statComponents.get(0);
+
         if ( curFinalConfirm.isLiteralTrue() ) {
             block.finalConfirm(statement);
         }

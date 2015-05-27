@@ -13,27 +13,23 @@ import org.resolvelite.semantics.query.OperationQuery;
 import org.resolvelite.semantics.symbol.OperationSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
-import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
-        implements
-            RuleApplicationStrategy<E> {
+public class ExplicitCallApplicationStrategy implements RuleApplicationStrategy {
 
-    @Override public AssertiveCode applyRule(
-            E call, VCAssertiveBlock.VCAssertiveBlockBuilder block) {
-        PSymbol asPSym;
-        if (call.getClass().equals(ResolveParser.CallStmtContext.class)) {
-            asPSym = (PSymbol)block.annotations.getPExpFor(block.g,
-                    (ParserRuleContext)call.getChild(0));
-        }
-        else {
-            asPSym = (PSymbol)block.annotations.getPExpFor(block.g, call);
-        }
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp ... e) {
+        return applyRule(block, Arrays.asList(e));
+    }
+
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block,
+            List<PExp> statComponents) {
+        PSymbol asPSym = (PSymbol) statComponents.get(0);
         AnnotatedTree annotations = block.annotations;
 
         OperationSymbol op = getOperation(block.scope, asPSym);
@@ -55,7 +51,7 @@ public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
                 .getPExpFor(block.g, op.getEnsures());
         if (opEnsures.isLiteralTrue()) return block.snapshot();
 
-        List<PExp> con = block.finalConfirm.getContents().splitIntoConjuncts();
+        List<PExp> con = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
 
         PExp ensuresLeft = opEnsures.getArguments().get(0);
         PExp ensuresRight = opEnsures.getArguments().get(1);
@@ -82,7 +78,7 @@ public class ExplicitCallApplicationStrategy<E extends ParserRuleContext>
                 .map(ProgParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
 
-        block.finalConfirm(block.finalConfirm.getContents()
+        block.finalConfirm(block.finalConfirm.getConfirmExp()
                 .substitute(replacementActuals, ensuresRight));
         return block.snapshot();
     }

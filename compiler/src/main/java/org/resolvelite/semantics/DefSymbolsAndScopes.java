@@ -22,7 +22,6 @@ import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
 import org.resolvelite.semantics.symbol.*;
-import org.resolvelite.semantics.symbol.GlobalMathAssertionSymbol.AssertionContext;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -456,12 +455,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitTypeRepresentationDecl(
             @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
         symtab.endScope();
+        PExp convention = getPExpFor(ctx.conventionClause());
+        PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
             ProgReprTypeSymbol repr =
                     new ProgReprTypeSymbol(g, ctx.name.getText(), ctx,
                             getRootModuleID(), curTypeDefnSymbol, reprType,
-                            ctx.conventionClause(), ctx.correspondenceClause());
+                            convention, correspondence);
             symtab.getInnermostActiveScope().define(repr);
+            symtab.ctxToSyms.put(ctx, repr);
+            symtab.ctxToSyms.put(ctx.typeImplInit(), repr); //give the initialization subtree a clue too.
         }
         catch (DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -469,6 +472,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         curTypeDefnSymbol = null;
         reprType = null;
+    }
+
+    @Override public void enterTypeImplInit(
+            @NotNull ResolveParser.TypeImplInitContext ctx) {
+        symtab.startScope(ctx);
+    }
+
+    @Override public void exitTypeImplInit(
+            @NotNull ResolveParser.TypeImplInitContext ctx) {
+        symtab.endScope();
     }
 
     @Override public void enterMathTypeTheoremDecl(
@@ -803,7 +816,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     new GlobalMathAssertionSymbol(ctx.getText()
                             + ctx.getStart().getStartIndex(), getPExpFor(ctx
                             .mathAssertionExp().mathExp()), ctx,
-                            AssertionContext.REQUIRES, getRootModuleID()));
+                            getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             throw new RuntimeException("");
@@ -909,7 +922,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 curType = curTypeCartesian.getFactor(segmentName);
             }
             catch (ClassCastException cce) {
-                curType = HardCoded.getMetaFieldType(g, segmentName);
+                //curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
                             ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
@@ -919,7 +932,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 }
             }
             catch (NoSuchElementException nsee) {
-                curType = HardCoded.getMetaFieldType(g, segmentName);
+                // curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
                             ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),

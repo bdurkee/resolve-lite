@@ -21,13 +21,8 @@ public class VCGenPipeline extends AbstractCompilationPipeline {
             if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
                 compiler.info("generating vcs for: " + unit.getName());
                 VCGenerator gen = new VCGenerator(compiler, unit);
-
-                ModelBuilderProto1 x =
-                        new ModelBuilderProto1(gen, compiler.symbolTable);
-                ParseTreeWalker.DEFAULT.walk(x, unit.getRoot());
-                //VCGenerator gen = new VCGenerator(compiler, unit);
-                //ST x = gen.generateAssertions();
-                //System.out.println(x.render());
+                ST x = gen.generateAssertions();
+                System.out.println(x.render());
             }
         }
     }

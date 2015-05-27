@@ -4,31 +4,40 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.ModelBuilderProto1;
+import org.resolvelite.vcgen.model.AssertiveBlock;
+import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class FunctionAssignApplicationStrategy
         implements
-            RuleApplicationStrategy<ResolveParser.AssignStmtContext> {
+            RuleApplicationStrategy {
 
-    @Override public AssertiveCode applyRule(
-            ResolveParser.AssignStmtContext statement,
-            VCAssertiveBlockBuilder block) {
-
+    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
+                                              List<PExp> statComponents) {
         AnnotatedTree annotations = block.annotations;
-        PExp leftReplacee = annotations.mathPExps.get(statement.left);
-        PExp rightReplacer = annotations.mathPExps.get(statement.right);
+        PExp leftReplacee = statComponents.get(0);
+        PExp rightReplacer = statComponents.get(1);
 
         if ( rightReplacer.isLiteral() ) {
-            PExp workingConfirm = block.finalConfirm.getContents();
+            PExp workingConfirm = block.finalConfirm.getConfirmExp();
             block.finalConfirm(workingConfirm.substitute(leftReplacee,
                     rightReplacer));
             return block.snapshot();
         }
 
         //apply explicit call rule to the 'exp-call-like-thing' on the rhs.
-        return new ExplicitCallApplicationStrategy<ParserRuleContext>()
-                .applyRule(statement.right, block);
+        return ModelBuilderProto1.EXPLICIT_CALL_APPLICATION
+                .applyRule(block, statComponents.get(1));
+    }
+
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp ... e) {
+        return applyRule(block, Arrays.asList(e));
     }
 
     @Override public String getDescription() {

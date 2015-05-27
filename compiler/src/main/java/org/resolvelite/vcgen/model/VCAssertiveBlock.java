@@ -13,12 +13,12 @@ import org.resolvelite.typereasoning.TypeGraph;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class VCAssertiveBlock extends AssertiveCode {
+public class VCAssertiveBlock extends AssertiveBlock {
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
         super(builder.g, builder.definingTree, builder.finalConfirm,
                 builder.annotations, builder.stats, builder.freeVars,
-                builder.applicationSteps);
+                builder.applicationSteps, builder.description);
     }
 
     public static class VCAssertiveBlockBuilder
@@ -35,26 +35,36 @@ public class VCAssertiveBlock extends AssertiveCode {
         public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
+        public final String description;
 
         public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
+                                       String description,
                 ParserRuleContext ctx, AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
             this.annotations = annotations;
-            this.finalConfirm = new VCConfirm(g.getTrueExp(), this);
+            this.finalConfirm = new VCConfirm(this, g.getTrueExp());
             this.scope = contextScope;
+            this.description = description;
+        }
+
+        public VCAssertiveBlockBuilder assume(List<PExp> assumes) {
+            for (PExp e : assumes) {
+                assume(e);
+            }
+            return this;
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
             if ( assume == null ) {
                 assume = g.getTrueExp();
             }
-            stats.add(new VCAssume(assume, this));
+            stats.add(new VCAssume(this, assume));
             return this;
         }
 
         public VCAssertiveBlockBuilder remember() {
-            VCRemember remember = new VCRemember(null, this);
+            VCRemember remember = new VCRemember(this, g.getTrueExp());
             //Todo: not too sure if it's important where remember falls in
             //the stat sequence..
             if ( stats.size() > 1 ) {
@@ -70,7 +80,7 @@ public class VCAssertiveBlock extends AssertiveCode {
             if ( confirm == null ) {
                 confirm = g.getTrueExp();
             }
-            stats.add(new VCConfirm(confirm, this));
+            stats.add(new VCConfirm(this, confirm));
             return this;
         }
 
@@ -78,7 +88,7 @@ public class VCAssertiveBlock extends AssertiveCode {
             if ( confirm == null ) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
-            this.finalConfirm = new VCConfirm(confirm, this);
+            this.finalConfirm = new VCConfirm(this, confirm);
             return this;
         }
 
@@ -96,8 +106,13 @@ public class VCAssertiveBlock extends AssertiveCode {
                 if ( stat == null ) {
                     throw new IllegalArgumentException("null rule app stat");
                 }
+                stats.add(stat);
             }
-            this.stats.addAll(e);
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder stats(VCRuleBackedStat ... e) {
+            stats(Arrays.asList(e));
             return this;
         }
 

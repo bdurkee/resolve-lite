@@ -5,10 +5,10 @@ import org.resolvelite.codegen.model.OutputModelObject;
 
 public class RuleApplicationStep extends OutputModelObject {
 
-    public @ModelElement AssertiveCode step;
+    public @ModelElement AssertiveBlock step;
     public String description;
 
-    public RuleApplicationStep(AssertiveCode step, String description) {
+    public RuleApplicationStep(AssertiveBlock step, String description) {
         this.step = step;
         this.description = description;
     }

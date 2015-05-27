@@ -1,7 +1,6 @@
 package org.resolvelite.vcgen;
 
-import org.resolvelite.misc.Utils;
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.AssertiveBlock;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,19 +15,19 @@ public class VCProcessor implements Iterable<VC> {
      */
     private final List<VC> finalVCs = new ArrayList<>();
 
-    public VCProcessor(Collection<AssertiveCode> source) {
+    public VCProcessor(Collection<AssertiveBlock> source) {
         int sectionNumber = 0;
 
         //VCs come in batches that all refer to the same cluster of variables.
         //Cycle through each batch.
-        for (AssertiveCode batch : source) {
+        for (AssertiveBlock batch : source) {
             addVCsInContext(batch, sectionNumber);
             sectionNumber++;
         }
     }
 
     /**
-     * Each {@link AssertiveCode} contains a set of vcs that refer to
+     * Each {@link org.resolvelite.vcgen.model.AssertiveBlock} contains a set of vcs that refer to
      * the same set of free variables. This method adds each vc to the final
      * list.
      * 
@@ -38,7 +37,7 @@ public class VCProcessor implements Iterable<VC> {
      *        embed the name of each VC from the Verifier with its
      *        name for greater robustness.)
      */
-    private void addVCsInContext(final AssertiveCode batch,
+    private void addVCsInContext(final AssertiveBlock batch,
             final int sectionNumber) {
 
         /*List<InfixExp> vCs = batch.getFinalConfirm().getEnclosedExp().split();

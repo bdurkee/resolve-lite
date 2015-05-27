@@ -477,7 +477,7 @@ mathLiteralExp
 
 mathFunctionApplicationExp
     :   ('@')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   ('@')? name=Identifier    #mathVariableExp
+    |   ('@')? (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
     ;
 
 mathCrossTypeExp

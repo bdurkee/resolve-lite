@@ -22,7 +22,8 @@ public class HardCoded {
             b.addBinding("Card", null, g.MTYPE, g.CARD);
 
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
-            b.addBinding("conc", null, g.BOOLEAN, null);
+            b.addBinding("Base_Point", null, g.BASE_POINT);
+            b.addBinding("conc", null, g.MTYPE, null);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
             b.addBinding("N", null, g.SSET, g.N);
@@ -53,6 +54,9 @@ public class HardCoded {
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
             b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+            b.addBinding("Is_Initial", null,
+                    new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
+                            .build());
 
             //S E T   R E L A T E D
             b.addBinding("Powerset", null, g.POWERSET);
@@ -98,6 +102,9 @@ public class HardCoded {
             result =
                     new MTFunction.MTFunctionBuilder(g, g.BOOLEAN).paramTypes(
                             g.ENTITY).build();
+        }
+        else if ( metaSegment.equals("Base_Point") ) {
+            result = new MTFunction.MTFunctionBuilder(g, g.ENTITY).build();
         }
         return result;
     }

@@ -140,6 +140,10 @@ public class PSymbol extends PExp {
         return incomingFlag;
     }
 
+    @Override public boolean isEquality() {
+        return arguments.size() == 2 && name.equals("=");
+    }
+
     @Override public boolean isFunction() {
         return arguments.size() > 0;
     }

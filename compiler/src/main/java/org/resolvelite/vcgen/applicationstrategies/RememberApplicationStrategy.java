@@ -1,17 +1,25 @@
 package org.resolvelite.vcgen.applicationstrategies;
 
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
 
-public class RememberApplicationStrategy
-        implements
-            RuleApplicationStrategy<Void> {
+import java.util.Arrays;
+import java.util.List;
 
-    @Override public AssertiveCode applyRule(Void statement,
-            VCAssertiveBlock.VCAssertiveBlockBuilder block) {
-        PExp confirm = block.finalConfirm.getContents();
+public class RememberApplicationStrategy implements RuleApplicationStrategy {
+
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block,
+            List<PExp> statComponents) {
+        PExp confirm = block.finalConfirm.getConfirmExp();
         return block.finalConfirm(confirm.withIncomingSignsErased()).snapshot();
+    }
+
+    @Override public AssertiveBlock applyRule(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block,
+            PExp ... e) {
+        return applyRule(block, Arrays.asList(e));
     }
 
     @Override public String getDescription() {

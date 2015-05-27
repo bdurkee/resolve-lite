@@ -1,19 +1,21 @@
 package org.resolvelite.vcgen.model;
 
-import org.resolvelite.misc.Utils;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.applicationstrategies.RememberApplicationStrategy;
-import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
 
-public class VCRemember extends VCRuleBackedStat<Void> {
+import java.util.Collections;
+import java.util.List;
 
-    public VCRemember(Void contents, VCAssertiveBlockBuilder block) {
-        super(contents, block, new RememberApplicationStrategy());
+public class VCRemember extends VCRuleBackedStat {
+
+    public VCRemember(VCAssertiveBlock.VCAssertiveBlockBuilder block,
+                      PExp... e) {
+        super(null, block, new RememberApplicationStrategy(), e);
     }
 
-    public String getText() {
-        return "";
+    public List<PExp> getRememberVars() {
+        return statComponents;
     }
-
 }

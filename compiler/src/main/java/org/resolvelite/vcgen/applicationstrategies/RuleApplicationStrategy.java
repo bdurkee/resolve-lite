@@ -1,11 +1,17 @@
 package org.resolvelite.vcgen.applicationstrategies;
 
-import org.resolvelite.vcgen.model.AssertiveCode;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
-public interface RuleApplicationStrategy<T> {
+import java.util.List;
 
-    public AssertiveCode applyRule(T statement, VCAssertiveBlockBuilder block);
+public interface RuleApplicationStrategy {
+
+    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
+                                    List<PExp> statComponents);
+
+    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, PExp ... e);
 
     public String getDescription();
 

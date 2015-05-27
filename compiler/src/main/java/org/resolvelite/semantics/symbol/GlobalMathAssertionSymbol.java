@@ -23,22 +23,12 @@ import java.util.Map;
 //instantiate generics
 public class GlobalMathAssertionSymbol extends Symbol {
 
-    public static enum AssertionContext {
-        REQUIRES, CONSTRAINT
-    }
-
     private PExp assertion;
-    private final AssertionContext context;
 
     public GlobalMathAssertionSymbol(String name, PExp assertion,
-            ParseTree definingTree, AssertionContext c, String moduleID) {
+            ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.assertion = assertion;
-        this.context = c;
-    }
-
-    public AssertionContext getContext() {
-        return context;
     }
 
     public PExp getEnclosedExp() {
