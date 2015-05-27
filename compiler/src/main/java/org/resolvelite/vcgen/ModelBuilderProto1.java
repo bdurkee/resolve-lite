@@ -14,6 +14,7 @@ import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.vcgen.application.ExplicitCallApplicationStrategy;
 import org.resolvelite.vcgen.application.FunctionAssignApplicationStrategy;
 import org.resolvelite.vcgen.application.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.SwapApplicationStrategy;
 import org.resolvelite.vcgen.model.*;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -45,9 +46,8 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
             new ExplicitCallApplicationStrategy();
     private final static RuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
-
-    private final static RuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
-            new SwapA();
+    private final static RuleApplicationStrategy SWAP_APPLICATION =
+            new SwapApplicationStrategy();
 
     public ModelBuilderProto1(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
@@ -125,7 +125,15 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
-    @Override public void exitAssignStmt(@NotNull ResolveParser.AssignStmtContext ctx) {
+    @Override public void exitSwapStmt(
+            @NotNull ResolveParser.SwapStmtContext ctx) {
+        stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
+                tr.mathPExps.get(ctx.right)));
+    }
+
+    @Override public void exitAssignStmt(
+            @NotNull ResolveParser.AssignStmtContext ctx) {
         stats.put(ctx, new VCRuleBackedStat(ctx, curAssertiveBuilder,
                 FUNCTION_ASSIGN_APPLICATION, tr.mathPExps.get(ctx.left),
                 tr.mathPExps.get(ctx.right)));
