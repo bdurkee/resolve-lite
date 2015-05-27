@@ -1,15 +1,12 @@
-package org.resolvelite.vcgen.applicationstrategies;
+package org.resolvelite.vcgen.application;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.ModelBuilderProto1;
 import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

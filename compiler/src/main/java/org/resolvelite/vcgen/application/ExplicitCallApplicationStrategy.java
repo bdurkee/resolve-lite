@@ -1,8 +1,6 @@
-package org.resolvelite.vcgen.applicationstrategies;
+package org.resolvelite.vcgen.application;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.DuplicateSymbolException;

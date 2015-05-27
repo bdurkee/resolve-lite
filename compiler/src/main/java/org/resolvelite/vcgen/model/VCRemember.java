@@ -1,11 +1,8 @@
 package org.resolvelite.vcgen.model;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.applicationstrategies.RememberApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.RememberApplicationStrategy;
 
-import java.util.Collections;
 import java.util.List;
 
 public class VCRemember extends VCRuleBackedStat {

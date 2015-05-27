@@ -1,9 +1,7 @@
 package org.resolvelite.vcgen.model;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.applicationstrategies.ConfirmApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.ConfirmApplicationStrategy;
 
 public class VCConfirm extends VCRuleBackedStat {
 

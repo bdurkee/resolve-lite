@@ -5,7 +5,7 @@ import org.resolvelite.codegen.model.OutputModelObject;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.RuleApplicationStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;

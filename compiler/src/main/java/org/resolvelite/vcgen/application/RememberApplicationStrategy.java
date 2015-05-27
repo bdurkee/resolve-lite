@@ -1,4 +1,4 @@
-package org.resolvelite.vcgen.applicationstrategies;
+package org.resolvelite.vcgen.application;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.model.AssertiveBlock;

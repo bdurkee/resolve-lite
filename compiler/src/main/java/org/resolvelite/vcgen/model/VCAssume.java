@@ -1,9 +1,7 @@
 package org.resolvelite.vcgen.model;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.applicationstrategies.AssumeApplicationStrategy;
-import org.resolvelite.vcgen.applicationstrategies.RuleApplicationStrategy;
+import org.resolvelite.vcgen.application.AssumeApplicationStrategy;
 
 public class VCAssume extends VCRuleBackedStat {
 

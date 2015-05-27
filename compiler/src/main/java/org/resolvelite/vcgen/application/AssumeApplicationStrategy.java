@@ -1,4 +1,4 @@
-package org.resolvelite.vcgen.applicationstrategies;
+package org.resolvelite.vcgen.application;
 
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.vcgen.model.AssertiveBlock;
@@ -8,7 +8,7 @@ import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public class ConfirmApplicationStrategy implements RuleApplicationStrategy {
+public class AssumeApplicationStrategy implements RuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
@@ -17,12 +17,19 @@ public class ConfirmApplicationStrategy implements RuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                               List<PExp> statComponents) {
-        block.finalConfirm(block.g.formConjunct(statComponents.get(0),
-                block.finalConfirm.getConfirmExp()));
+        PExp curFinalConfirm = block.finalConfirm.getConfirmExp();
+        PExp statement = statComponents.get(0);
+
+        if ( curFinalConfirm.isLiteralTrue() ) {
+            block.finalConfirm(statement);
+        }
+        else if ( !statement.equals(block.g.getTrueExp()) ) {
+            block.finalConfirm(block.g.formImplies(statement, curFinalConfirm));
+        }
         return block.snapshot();
     }
 
     @Override public String getDescription() {
-        return "confirm rule application";
+        return "assume rule application";
     }
 }
