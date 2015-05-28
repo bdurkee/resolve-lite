@@ -15,6 +15,20 @@ public class PSet extends PExp {
         this.elements.addAll(elements);
     }
 
+    @Override public void accept(PExpVisitor v) {
+        v.beginPExp(this);
+        v.beginPSet(this);
+
+        v.beginChildren(this);
+        for (PExp e : elements) {
+            e.accept(v);
+        }
+        v.endChildren(this);
+
+        v.endPSet(this);
+        v.endPExp(this);
+    }
+
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         return new PSet(getMathType(), getMathTypeValue(),
                 Utils.apply(elements, u -> u.substitute(substitutions)));

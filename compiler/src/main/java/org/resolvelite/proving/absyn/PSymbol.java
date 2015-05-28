@@ -245,6 +245,24 @@ public class PSymbol extends PExp {
         }
     }
 
+    @Override public void accept(PExpVisitor v) {
+        v.beginPExp(this);
+        v.beginPSymbol(this);
+        v.beginChildren(this);
+
+        boolean first = true;
+        for (PExp arg : arguments) {
+            if ( !first ) {
+                v.fencepostPSymbol(this);
+            }
+            first = false;
+            arg.accept(v);
+        }
+        v.endChildren(this);
+        v.endPSymbol(this);
+        v.endPExp(this);
+    }
+
     @Override public PExp withIncomingSignsErased() {
         if ( arguments.isEmpty() ) {
             //literal is false by default, so no need to explicitly state it.

@@ -18,6 +18,7 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
+import org.resolvelite.proving.absyn.PLambda;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
@@ -1339,8 +1340,26 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
                 MTType expectedType) {
-            return g.isKnownToBeIn(foundValue, expectedType);
+            boolean result = g.isKnownToBeIn(foundValue, expectedType);
+
+            if (!result && foundValue instanceof PLambda
+                    && expectedType instanceof MTFunction) {
+                PLambda foundValueAsLambda = (PLambda) foundValue;
+                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
+
+                result =
+                        g.isSubtype(foundValueAsLambda.getMathType()
+                                .getDomain(), expectedTypeAsFunction
+                                .getDomain())
+                                && g.isKnownToBeIn(foundValueAsLambda
+                                .getBody(), expectedTypeAsFunction
+                                .getRange());
+            }
+
+            return result;
         }
+
+
 
         @Override public String description() {
             return "inexact";

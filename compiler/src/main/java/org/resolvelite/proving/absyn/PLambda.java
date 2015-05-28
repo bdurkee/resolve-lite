@@ -43,10 +43,9 @@ public class PLambda extends PExp {
         v.endPExp(this);
     }
 
-    @Override
-    public PExp substitute(Map<PExp, PExp> substitutions) {
+    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp retval;
-        if (substitutions.containsKey(this)) {
+        if ( substitutions.containsKey(this) ) {
             retval = substitutions.get(this);
         }
         else {
@@ -72,6 +71,10 @@ public class PLambda extends PExp {
         return body.isObviouslyTrue();
     }
 
+    public PExp getBody() {
+        return body;
+    }
+
     @Override public boolean isLiteralTrue() {
         return body.isObviouslyTrue();
     }
@@ -80,18 +83,15 @@ public class PLambda extends PExp {
         return body.isLiteralFalse();
     }
 
-    @Override
-    public boolean isVariable() {
+    @Override public boolean isVariable() {
         return false;
     }
 
-    @Override
-    public boolean isLiteral() {
+    @Override public boolean isLiteral() {
         return false;
     }
 
-    @Override
-    public boolean isFunction() {
+    @Override public boolean isFunction() {
         return false;
     }
 
@@ -99,34 +99,35 @@ public class PLambda extends PExp {
         accumulator.add(this);
     }
 
-    @Override
-    public PExp withIncomingSignsErased() {
+    @Override public PExp withIncomingSignsErased() {
+        return new PLambda(parameters, body.withIncomingSignsErased());
+    }
+
+    @Override public PExp flipQuantifiers() {
+        return this;
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return null;
     }
 
-    @Override
-    public PExp flipQuantifiers() {
-        return null;
+    @Override public Set<String> getSymbolNamesNoCache() {
+        Set<String> bodyNames = new HashSet<>(body.getSymbolNames());
+        bodyNames.add("lambda");
+        return bodyNames;
     }
 
-    @Override
-    public Set<PSymbol> getIncomingVariablesNoCache() {
-        return null;
+    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+        return body.getQuantifiedVariables();
     }
 
-    @Override
-    public Set<PSymbol> getQuantifiedVariablesNoCache() {
-        return null;
-    }
+    @Override public List<PExp> getFunctionApplicationsNoCache() {
+        List<PExp> bodyFunctions =
+                new LinkedList<>(body.getFunctionApplications());
 
-    @Override
-    public List<PExp> getFunctionApplicationsNoCache() {
-        return null;
-    }
-
-    @Override
-    protected Set<String> getSymbolNamesNoCache() {
-        return null;
+        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(
+                getMathType()).build());
+        return bodyFunctions;
     }
 
     public static class Parameter {
@@ -134,10 +135,10 @@ public class PLambda extends PExp {
         public final MTType type;
 
         public Parameter(String name, MTType type) {
-            if (name == null) {
+            if ( name == null ) {
                 throw new IllegalArgumentException("name==null");
             }
-            if (type == null) {
+            if ( type == null ) {
                 throw new IllegalArgumentException("type==null");
             }
             this.name = name;

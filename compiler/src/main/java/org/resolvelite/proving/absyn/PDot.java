@@ -28,6 +28,20 @@ public class PDot extends PExp {
         this.segs.addAll(segs);
     }
 
+    @Override public void accept(PExpVisitor v) {
+        v.beginPExp(this);
+        v.beginPDot(this);
+
+        v.beginChildren(this);
+        for (PSymbol segment : segs) {
+            segment.accept(v);
+        }
+        v.endChildren(this);
+
+        v.endPDot(this);
+        v.endPExp(this);
+    }
+
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
 

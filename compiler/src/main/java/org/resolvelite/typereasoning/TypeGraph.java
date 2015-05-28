@@ -118,7 +118,8 @@ public class TypeGraph {
 
         result =
                 (value != MTYPE) && (value != ENTITY)
-                        && isSubtype(value.getType(), expected);
+                        && isSubtype(value.getType(), expected)
+                || value.equals(expected);
         return result;
     }
 

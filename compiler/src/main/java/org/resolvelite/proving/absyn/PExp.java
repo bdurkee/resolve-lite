@@ -40,8 +40,7 @@ public abstract class PExp {
                 progTypeValue);
     }
 
-    public PExp(int structureHash, int valueHash, MTType type,
-                MTType typeValue) {
+    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
         this(structureHash, valueHash, type, typeValue, null, null);
     }
 
@@ -113,6 +112,14 @@ public abstract class PExp {
          PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
 
          this.accept(finalVisitor);*/
+    }
+
+    public boolean typeMatches(MTType other) {
+        return other.isSubtypeOf(getMathType());
+    }
+
+    public boolean typeMatches(PExp other) {
+        return typeMatches(other.getMathType());
     }
 
     public abstract void accept(PExpVisitor v);
