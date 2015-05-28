@@ -92,8 +92,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
-                        new GenericSymbol(g, new PTElement(g),
-                                generic.getText(), generic, getRootModuleID()));
+                        new GenericSymbol(g, new PTElement(g), generic
+                                .getText(), generic, getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -626,8 +626,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         }
         tr.progTypes.put(ctx, curFieldType);
         tr.mathTypes.put(ctx, curFieldType.toMath());
-        int i;
-        i = 0;
     }
 
     @Override public void exitProgNamedExp(
@@ -916,7 +914,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     .map(term -> grpType).collect(Collectors.toList()));
         }
 
-        MTFunction result = new MTFunctionBuilder(g, tr.mathTypeValues //
+        MTFunction result = new MTFunctionBuilder(g, tr.mathTypes //
                 .get(ctx.mathAlternativeExp())) //
                 .paramTypes(parameterTypes).build();
         tr.mathTypes.put(ctx, result); //
@@ -930,8 +928,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         for (ResolveParser.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
             if ( establishedType == null ) {
-                establishedType = tr.mathTypes.get(alt.assignment);
-                establishedTypeValue = tr.mathTypeValues.get(alt.assignment);
+                establishedType = tr.mathTypes.get(alt.result);
+                establishedTypeValue = tr.mathTypeValues.get(alt.result);
             }
             else {
                 expectType(alt, establishedType);
@@ -943,11 +941,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitMathAlternativeItemExp(
             @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
-        if ( ctx.conditional != null ) {
-            expectType(ctx.conditional, g.BOOLEAN);
+        if ( ctx.condition != null ) {
+            expectType(ctx.condition, g.BOOLEAN);
         }
-        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.assignment));
-        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.assignment));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
+        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
     }
 
     @Override public void enterMathDotExp(
@@ -1155,7 +1153,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             List<ResolveParser.MathExpContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
-        List<MTType> foundArgTypes = Utils.collect(MTType.class, args, tr.mathTypes);
+        List<MTType> foundArgTypes =
+                Utils.collect(MTType.class, args, tr.mathTypes);
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
@@ -1346,19 +1345,19 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 MTType expectedType) {
             boolean result = g.isKnownToBeIn(foundValue, expectedType);
 
-           /* if ( !result && foundValue instanceof PLambda
-                    && expectedType instanceof MTFunction ) {
-                PLambda foundValueAsLambda = (PLambda) foundValue;
-                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
-                MTFunction foundTypeAsFunction =
-                        (MTFunction) foundValue.getMathType();
-                result =
-                        g.isSubtype(foundTypeAsFunction.getDomain(),
-                                expectedTypeAsFunction.getDomain())
-                                && g.isKnownToBeIn(
-                                        foundValueAsLambda.getBody(),
-                                        expectedTypeAsFunction.getRange());
-            }*/
+            /* if ( !result && foundValue instanceof PLambda
+                     && expectedType instanceof MTFunction ) {
+                 PLambda foundValueAsLambda = (PLambda) foundValue;
+                 MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
+                 MTFunction foundTypeAsFunction =
+                         (MTFunction) foundValue.getMathType();
+                 result =
+                         g.isSubtype(foundTypeAsFunction.getDomain(),
+                                 expectedTypeAsFunction.getDomain())
+                                 && g.isKnownToBeIn(
+                                         foundValueAsLambda.getBody(),
+                                         expectedTypeAsFunction.getRange());
+             }*/
 
             return result;
         }

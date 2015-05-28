@@ -18,14 +18,13 @@ public class GenericSymbol extends Symbol {
     private final TypeGraph g;
     private final PTType type;
 
-    public GenericSymbol(TypeGraph g, PTType type, String name, ParseTree definingTree,
-            String moduleID) {
+    public GenericSymbol(TypeGraph g, PTType type, String name,
+            ParseTree definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.g = g;
         this.type = type;
 
-        MTType typeValue =
-                new PTGeneric(g, getName()).toMath();
+        MTType typeValue = new PTGeneric(g, getName()).toMath();
         mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
                         typeValue, definingTree, moduleID);
@@ -46,17 +45,16 @@ public class GenericSymbol extends Symbol {
     //Todo: As long is this guy is a subclass, this should no
     //longer be necessary
     @Override public ProgTypeSymbol toProgTypeSymbol() {
-           return new ProgTypeSymbol(g, getName(), new PTGeneric(g, getName()),
-                   new MTNamed(g, getName()), getDefiningTree(), getModuleID());
+        return new ProgTypeSymbol(g, getName(), new PTGeneric(g, getName()),
+                new MTNamed(g, getName()), getDefiningTree(), getModuleID());
     }
 
     @Override public GenericSymbol instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility) {
 
-        return new GenericSymbol(g,
-                type.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), name,
+        return new GenericSymbol(g, type.instantiateGenerics(
+                genericInstantiations, instantiatingFacility), name,
                 getDefiningTree(), getModuleID());
     }
 }

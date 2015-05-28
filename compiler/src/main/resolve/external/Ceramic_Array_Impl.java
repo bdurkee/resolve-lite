@@ -1,16 +1,22 @@
+/**
+ * Generated from Insertion_Sorting_Impl.impl by RESOLVE version 2.22.15a.
+ * This file should not be modified.
+ */
 import org.resolvelite.runtime.*;
 import java.lang.reflect.*;
 
-public class Ceramic_Array_Impl extends ResolveBase
-        implements
-            Bdd_Ceramic_Array_Template {
-    RType type;
-    int lowerBound, upperBound;
-
-    class Array extends ResolveBase implements RType {
-        Array_Rep rep;
-        Array() {
-            rep = new Array_Rep();
+public class Insertion_Sorting_Impl implements Prioritizer_Template {
+    RType T;
+    RType Max_Capacity;
+    RType Is_Lss_Eq;
+    public RType Is_Lss_Eq(RType x, RType y) {
+        return ((OperationParameter)Is_Lss_Eq).op(x, y);
+    }
+    Bdd_Ceramic_Array_Template Ceramic_Arr_Fac;
+    class Keeper implements RType {
+        Keeper_Rep rep;
+        Keeper() {
+            rep = new Keeper_Rep();
         }
 
         @Override public Object getRep() {
@@ -18,73 +24,55 @@ public class Ceramic_Array_Impl extends ResolveBase
         }
 
         @Override public void setRep(Object o) {
-            rep = (Array_Rep)o;
+            rep = (Keeper_Rep)o;
+        }
+
+        @Override public RType initialValue() {
+            return new Keeper();
         }
 
         @Override public String toString() {
             return rep.toString();
         }
-
-        @Override public RType initialValue() {
-            return new Array();
-        }
     }
-    class Array_Rep {
-        RType[] content;
-        Array_Rep() {
-            content = new RType[upperBound - lowerBound + 1];
-            for(int i = 0; i < content.length; i++) {
-                content[i] = type.initialValue();
-            }
+    class Keeper_Rep {
+        RType Seq;
+        RType Accepting_Flag;
+        Keeper_Rep() {
+            Seq = ((Bdd_Ceramic_Array_Template)Ceramic_Arr_Fac).initCeramic_Array();
+            Accepting_Flag = ((Boolean_Template)Standard_Booleans.INSTANCE).initBoolean();
         }
         @Override public String toString() {
-            StringBuilder sb = new StringBuilder();
-            for (RType aContent : content) {
-                sb.append(aContent.toString());
-                sb.append("\n");
-            }
-            return sb.toString();
+            return Seq.toString()+Accepting_Flag.toString();
         }
     }
-
-    @Override public RType initCeramic_Array() {
-        return new Array();
+    public RType initKeeper() {
+        return new Keeper();
     }
 
-    public Ceramic_Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
-        this.type = type;
-        this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).rep.val;
-        this.upperBound = ((Integer_Impl.Integer)Upper_Bound).rep.val;
+    public RType getKeeper() {
+        return initKeeper();
     }
-
-    @Override public void Swap_Element(RType A, RType e, RType i) {
-        int adj = ((Integer_Impl.Integer)i).rep.val - lowerBound;
-        RType[] temp1 = ((Array_Rep)A.getRep()).content;
-        swap(e, temp1[adj]);
+    public Insertion_Sorting_Impl(RType T, RType Max_Capacity, RType Is_Lss_Eq) {
+        this.T = T;
+        this.Max_Capacity = Max_Capacity;
+        this.Is_Lss_Eq = Is_Lss_Eq;
+        this.Ceramic_Arr_Fac = new Ceramic_Array_Impl(this.getT(),
+                ((Integer_Template)Standard_Integers.INSTANCE).initInteger(1),
+                this.getMax_Capacity());
     }
-
-    @Override public void Swap_Two_Elements(RType A, RType i, RType j) {
-        int adjI = ((Integer_Impl.Integer)i).rep.val - lowerBound;
-        int adjJ = ((Integer_Impl.Integer)j).rep.val - lowerBound;
-        RType[] temp1 = ((Array_Rep)A.getRep()).content;
-        swap(temp1[adjI], temp1[adjJ]);
-    }
-
-    @Override public void Assign_Element(RType A, RType e, RType i) {
-        int adjI = ((Integer_Impl.Integer)i).rep.val - lowerBound;
-        RType[] temp1 = ((Array_Rep)A.getRep()).content;
-        assign(temp1[adjI], e);
-    }
-
-    @Override public RType getUpper_Bound() {
-        return Standard_Integers.INSTANCE.initInteger(upperBound);
-    }
-
-    @Override public RType getLower_Bound() {
-        return Standard_Integers.INSTANCE.initInteger(lowerBound);
+    @Override public void Add(RType e, RType K) {
     }
 
     @Override public RType getT() {
-        return type;
+        return T;
+    }
+
+    public RType initT() {
+        return T;
+    }
+
+    @Override public RType getMax_Capacity() {
+        return Max_Capacity;
     }
 }

@@ -9,6 +9,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// Todo: We probably don't even really need this class. Just use PSymbol; that
+// is, no need for segments. Yes I realize the VC generator currently 'uses'
+// them
+// but it doesn't have to.
 public class PDot extends PExp {
 
     private final List<PSymbol> segs = new ArrayList<>();

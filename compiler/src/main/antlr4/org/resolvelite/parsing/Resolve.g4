@@ -505,7 +505,7 @@ mathAlternativeExp
     ;
 
 mathAlternativeItemExp
-    :   assignment=mathExp ('if' conditional=mathExp ';' | 'otherwise' ';')
+    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
 mathTupleExp

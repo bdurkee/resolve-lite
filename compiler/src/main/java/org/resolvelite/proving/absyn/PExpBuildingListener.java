@@ -128,6 +128,42 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitMathLambdaExp(
+            @NotNull ResolveParser.MathLambdaExpContext ctx) {
+        List<PLambda.Parameter> parameters = new ArrayList<>();
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .definitionParameterList().mathVariableDeclGroup()) {
+            for (TerminalNode term : grp.Identifier()) {
+                parameters.add(new PLambda.Parameter(term.getText(), types
+                        .get(grp.mathTypeExp())));
+            }
+        }
+        repo.put(ctx,
+                new PLambda(parameters, repo.get(ctx.mathAlternativeExp())));
+    }
+
+    @Override public void exitMathAlternativeExp(
+            @NotNull ResolveParser.MathAlternativeExpContext ctx) {
+        List<PExp> conditions = new ArrayList<>();
+        List<PExp> results = new ArrayList<>();
+        PExp otherwiseResult = null;
+
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
+            if ( alt.condition != null ) {
+                conditions.add(repo.get(alt.condition));
+                results.add(repo.get(alt.result));
+            }
+            else {
+                otherwiseResult = repo.get(alt.result);
+            }
+        }
+        PAlternatives result =
+                new PAlternatives(conditions, results, otherwiseResult,
+                        types.get(ctx), typeValues.get(ctx));
+        repo.put(ctx, result);
+    }
+
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
         List<PSymbol> segs =
