@@ -10,8 +10,8 @@ import java.util.Map;
 
 public abstract class Symbol {
 
-    private final String name, moduleID;
-    private final ParseTree definingTree;
+    protected final String name, moduleID;
+    protected final ParseTree definingTree;
 
     public Symbol(String name, ParseTree definingTree, String moduleID) {
         this.name = name;

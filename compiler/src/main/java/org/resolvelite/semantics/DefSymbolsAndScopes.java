@@ -92,8 +92,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         for (ResolveParser.GenericTypeContext generic : ctx.genericType()) {
             try {
                 symtab.getInnermostActiveScope().define(
-                        new GenericSymbol(g, generic.getText(), generic,
-                                getRootModuleID()));
+                        new GenericSymbol(g, new PTElement(g),
+                                generic.getText(), generic, getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
                 compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
@@ -915,9 +915,11 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             parameterTypes.addAll(grp.Identifier().stream()
                     .map(term -> grpType).collect(Collectors.toList()));
         }
-        tr.mathTypes.put(ctx, new MTFunctionBuilder(g, tr.mathTypeValues //
+
+        MTFunction result = new MTFunctionBuilder(g, tr.mathTypeValues //
                 .get(ctx.mathAlternativeExp())) //
-                .paramTypes(parameterTypes).build()); //
+                .paramTypes(parameterTypes).build();
+        tr.mathTypes.put(ctx, result); //
     }
 
     @Override public void exitMathAlternativeExp(
@@ -1151,7 +1153,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull Token name,
             List<ResolveParser.MathExpContext> args) {
+        String foundExp = ctx.getText();
         MTFunction foundExpType;
+        List<MTType> foundArgTypes = Utils.collect(MTType.class, args, tr.mathTypes);
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
@@ -1342,24 +1346,22 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 MTType expectedType) {
             boolean result = g.isKnownToBeIn(foundValue, expectedType);
 
-            if (!result && foundValue instanceof PLambda
-                    && expectedType instanceof MTFunction) {
+           /* if ( !result && foundValue instanceof PLambda
+                    && expectedType instanceof MTFunction ) {
                 PLambda foundValueAsLambda = (PLambda) foundValue;
                 MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
-
+                MTFunction foundTypeAsFunction =
+                        (MTFunction) foundValue.getMathType();
                 result =
-                        g.isSubtype(foundValueAsLambda.getMathType()
-                                .getDomain(), expectedTypeAsFunction
-                                .getDomain())
-                                && g.isKnownToBeIn(foundValueAsLambda
-                                .getBody(), expectedTypeAsFunction
-                                .getRange());
-            }
+                        g.isSubtype(foundTypeAsFunction.getDomain(),
+                                expectedTypeAsFunction.getDomain())
+                                && g.isKnownToBeIn(
+                                        foundValueAsLambda.getBody(),
+                                        expectedTypeAsFunction.getRange());
+            }*/
 
             return result;
         }
-
-
 
         @Override public String description() {
             return "inexact";

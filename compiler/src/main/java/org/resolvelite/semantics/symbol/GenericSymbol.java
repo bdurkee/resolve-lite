@@ -12,18 +12,20 @@ import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.Map;
 
-public class GenericSymbol extends ProgTypeSymbol {
+public class GenericSymbol extends Symbol {
 
     private final MathSymbol mathSymbolAlterEgo;
+    private final TypeGraph g;
+    private final PTType type;
 
-    public GenericSymbol(TypeGraph g, String name, ParseTree definingTree,
+    public GenericSymbol(TypeGraph g, PTType type, String name, ParseTree definingTree,
             String moduleID) {
-        super(g, name, new PTGeneric(g, name), new MTNamed(g, name),
-                definingTree, moduleID);
+        super(name, definingTree, moduleID);
+        this.g = g;
+        this.type = type;
 
         MTType typeValue =
-                new PTGeneric(getProgramType().getTypeGraph(), getName())
-                        .toMath();
+                new PTGeneric(g, getName()).toMath();
         mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
                         typeValue, definingTree, moduleID);
@@ -43,25 +45,18 @@ public class GenericSymbol extends ProgTypeSymbol {
 
     //Todo: As long is this guy is a subclass, this should no
     //longer be necessary
-    /*   @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @Override public ProgTypeSymbol toProgTypeSymbol() {
            return new ProgTypeSymbol(g, getName(), new PTGeneric(g, getName()),
                    new MTNamed(g, getName()), getDefiningTree(), getModuleID());
-       }*/
+    }
 
-    @Override public ProgTypeSymbol instantiateGenerics(
+    @Override public GenericSymbol instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility) {
 
-        Map<String, MTType> genericMathematicalInstantiations =
-                Symbol.buildMathTypeGenerics(genericInstantiations);
-
-        VariableReplacingVisitor typeSubstitutor =
-                new VariableReplacingVisitor(genericMathematicalInstantiations);
-        modelType.accept(typeSubstitutor);
-
-        return new ProgTypeSymbol(modelType.getTypeGraph(),
-                genericInstantiations.get(getName()).toString(),
-                getProgramType(), typeSubstitutor.getFinalExpression(),
+        return new GenericSymbol(g,
+                type.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility), name,
                 getDefiningTree(), getModuleID());
     }
 }
