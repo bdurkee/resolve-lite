@@ -14,9 +14,9 @@ public abstract class PExpVisitor {
 
     public void beginPostfixPSymbol(PSymbol p) {}
 
-    //public void beginPAlternatives(PAlternatives p) {}
+    public void beginPAlternatives(PAlternatives p) {}
 
-    //public void beginPLambda(PLambda p) {}
+    public void beginPLambda(PLambda p) {}
 
     public void beginChildren(PExp p) {}
 
@@ -30,7 +30,7 @@ public abstract class PExpVisitor {
 
     public void fencepostPostfixPSymbol(PSymbol p) {}
 
-    //public void fencepostPAlternatives(PAlternatives p) {}
+    public void fencepostPAlternatives(PAlternatives p) {}
 
     public void endChildren(PExp p) {}
 
@@ -46,7 +46,7 @@ public abstract class PExpVisitor {
 
     public void endPostfixPSymbol(PSymbol p) {}
 
-    //public void endPAlternatives(PAlternatives p) {}
+    public void endPAlternatives(PAlternatives p) {}
 
-    //public void endPLambda(PLambda p) {}
+    public void endPLambda(PLambda p) {}
 }

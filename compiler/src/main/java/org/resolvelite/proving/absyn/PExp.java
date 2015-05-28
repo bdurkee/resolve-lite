@@ -41,6 +41,11 @@ public abstract class PExp {
     }
 
     public PExp(int structureHash, int valueHash, MTType type,
+                MTType typeValue) {
+        this(structureHash, valueHash, type, typeValue, null, null);
+    }
+
+    public PExp(int structureHash, int valueHash, MTType type,
             MTType typeValue, PTType progType, PTType progTypeValue) {
         this.type = type;
         this.typeValue = typeValue;
@@ -109,6 +114,8 @@ public abstract class PExp {
 
          this.accept(finalVisitor);*/
     }
+
+    public abstract void accept(PExpVisitor v);
 
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 

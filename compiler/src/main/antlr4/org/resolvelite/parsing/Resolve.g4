@@ -467,6 +467,7 @@ mathPrimaryExp
     |   mathDotExp
     |   mathOutfixExp
     |   mathSetExp
+    |   mathLambdaExp
     |   mathTupleExp
     ;
 
@@ -496,15 +497,15 @@ mathSetExp
     ;
 
 mathLambdaExp
-    :   'lambda' '(' definitionParameterList ')' '.' '(' mathExp ')'
+    :   'lambda' definitionParameterList '.' mathAlternativeExp
     ;
 
 mathAlternativeExp
-    :   '{''{' (mathAlternativeItemExp)+ '}' '}'
+    :   '{' '{' (mathAlternativeItemExp)+ '}' '}'
     ;
 
 mathAlternativeItemExp
-    :   mathExp ('if' test=mathExp ';' |'otherwise' ';')
+    :   assignment=mathExp ('if' conditional=mathExp ';' | 'otherwise' ';')
     ;
 
 mathTupleExp

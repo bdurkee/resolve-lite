@@ -729,7 +729,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             walkingModuleParameter));
         }
         catch (DuplicateSymbolException dse) {
-            // duplicateSymbol(name.getName(), name.getLocation());
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
         }
     }
 
@@ -906,7 +907,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitMathLambdaExp(
             @NotNull ResolveParser.MathLambdaExpContext ctx) {
         symtab.endScope();
-
         List<MTType> parameterTypes = new LinkedList<>();
         for (ResolveParser.MathVariableDeclGroupContext grp :
                 ctx.definitionParameterList().mathVariableDeclGroup()) {
@@ -915,37 +915,36 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     .map(term -> grpType).collect(Collectors.toList()));
         }
         tr.mathTypes.put(ctx, new MTFunctionBuilder(g, tr.mathTypeValues //
-                .get(ctx.mathExp())) //
+                .get(ctx.mathAlternativeExp())) //
                 .paramTypes(parameterTypes).build()); //
     }
 
-    @Override public void exitMathAlternativeItemExp(
-            @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
-         if ( ctx.test != null) {
-             expectType(ctx.test, g.BOOLEAN);
-         }
-
-         e.setMathType(e.getAssignment().getMathType());
-         e.setMathTypeValue(e.getAssignment().getMathTypeValue());
-     }
-
-    @Override public void exitMathAlternativeItemExp(
-            @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
+    @Override public void exitMathAlternativeExp(
+            @NotNull ResolveParser.MathAlternativeExpContext ctx) {
 
         MTType establishedType = null;
         MTType establishedTypeValue = null;
-        for (AltItemExp alt : e.getAlternatives()) {
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
             if ( establishedType == null ) {
-                establishedType = alt.getAssignment().getMathType();
-                establishedTypeValue = alt.getAssignment().getMathTypeValue();
+                establishedType = tr.mathTypes.get(alt.assignment);
+                establishedTypeValue = tr.mathTypeValues.get(alt.assignment);
             }
             else {
                 expectType(alt, establishedType);
             }
         }
+        tr.mathTypes.put(ctx, establishedType);
+        tr.mathTypeValues.put(ctx, establishedTypeValue);
+    }
 
-        e.setMathType(establishedType);
-        e.setMathTypeValue(establishedTypeValue);
+    @Override public void exitMathAlternativeItemExp(
+            @NotNull ResolveParser.MathAlternativeItemExpContext ctx) {
+        if ( ctx.conditional != null ) {
+            expectType(ctx.conditional, g.BOOLEAN);
+        }
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.assignment));
+        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.assignment));
     }
 
     @Override public void enterMathDotExp(
@@ -1365,7 +1364,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     }
 
     public void expectType(ParserRuleContext ctx, MTType expectedType) {
-        if (!g.isKnownToBeIn(tr.mathTypes.get(ctx), expectedType)) {
+        if ( !g.isKnownToBeIn(tr.mathTypes.get(ctx), expectedType) ) {
             compiler.errorManager.semanticError(ErrorKind.UNEXPECTED_TYPE,
                     ctx.getStart(), expectedType, tr.mathTypes.get(ctx));
         }

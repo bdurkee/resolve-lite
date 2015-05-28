@@ -1,17 +1,19 @@
 Concept Bdd_Ceramic_Array_Template<T>
-        (evaluates Upper_Bound, Lower_Bound: Std_Integer_Fac::Integer);
+        (evaluates Lower_Bound, Upper_Bound : Std_Integer_Fac::Integer);
+            uses General_Purpose_Theory;
+    requires Lower_Bound <= Upper_Bound;
 
     Type Family Ceramic_Array is modeled by Z -> T;
         exemplar A;
         constraint true;
 
-    Oper Swap_Element (updates A: Ceramic_Array; updates e: T;
-            evaluates i: Std_Integer_Fac::Integer);
+        Oper Swap_Element (updates A : Ceramic_Array; updates e : T;
+                evaluates i : Std_Integer_Fac :: Integer);
+            requires Lower_Bound <= i  and i <= Upper_Bound;
+            ensures e = @A(i) and A = lambda (j : Z).
+                                {{@e if j = i; @A(j) otherwise;}};
 
-    Oper Swap_Two_Elements (updates A: Ceramic_Array;
-            evaluates i, j: Std_Integer_Fac::Integer);
-
-    Oper Assign_Element (updates A: Ceramic_Array;
-            evaluates e: T; evaluates i: Std_Integer_Fac::Integer);
+        Oper Swap_Two_Elements (updates A : Ceramic_Array;
+                evaluates i, j : Std_Integer_Fac :: Integer);
 
 end Bdd_Ceramic_Array_Template;
