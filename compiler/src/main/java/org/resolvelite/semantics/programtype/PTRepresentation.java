@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.misc.Nullable;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.semantics.MTType;
+import org.resolvelite.semantics.NoSuchSymbolException;
+import org.resolvelite.semantics.NoneProvidedException;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -40,7 +42,10 @@ public class PTRepresentation extends PTNamed {
         return baseType;
     }
 
-    public ProgTypeModelSymbol getFamily() {
+    public ProgTypeModelSymbol getFamily() throws NoneProvidedException {
+        if (family == null) {
+            throw new NoneProvidedException();
+        }
         return family;
     }
 

@@ -13,9 +13,7 @@ import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.*;
-import org.resolvelite.semantics.programtype.PTGeneric;
-import org.resolvelite.semantics.programtype.PTNamed;
-import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.OperationQuery;
 import org.resolvelite.semantics.symbol.*;
 import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
@@ -44,7 +42,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
             new ParseTreeProperty<>();
     private final Deque<VCAssertiveBlock> assertiveBlockStack =
             new LinkedList<>();
-    private PExp moduleLevelRequires, moduleLevelConstraint = null;
     private VCAssertiveBlockBuilder curAssertiveBuilder = null;
     private final VCOutputFile outputFile = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
@@ -83,7 +80,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "T_Init_Hypo=" + repr.getName(), ctx, tr)
-                        .assume(getGlobalAssertionsOfType(requires()));
+                        .assume(getModuleLevelAssertionsOfType(requires()));
     }
 
     @Override public void exitTypeImplInit(
@@ -107,6 +104,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx.stmt(), stats));
         curAssertiveBuilder.confirm(convention).finalConfirm(newInitEnsures);
         outputFile.chunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
     }
 
     @Override public void exitTypeRepresentationDecl(
@@ -115,7 +113,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
-                        .assume(getGlobalAssertionsOfType(requires())).assume(
+                        .assume(getModuleLevelAssertionsOfType(requires())).assume(
                                 s.getConvention());
 
         PExp constraint = g.getTrueExp();
@@ -131,6 +129,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         correspondence);
         curAssertiveBuilder.finalConfirm(newConstraint);
         outputFile.chunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
     }
 
     @Override public void enterProcedureDecl(
@@ -144,16 +143,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
             OperationSymbol op = s.queryForOne(
                     new OperationQuery(null, ctx.name, argTypes));
 
-            PExp topAssume = modifyRequiresByParams(ctx, op.getRequires());
-            PExp bottomConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
+            PExp localRequires = modifyRequiresByParams(ctx, op.getRequires());
+            PExp localConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
 
             curAssertiveBuilder =
                     new VCAssertiveBlockBuilder(g, s,
                             "Proc_Decl_Rule="+ctx.name.getText() , ctx, tr)
                             .freeVars(getFreeVars(s)) //
-                            .assume(moduleLevelRequires).assume(topAssume) //
-                            .assume(moduleLevelConstraint) //
-                            .finalConfirm(bottomConfirm).remember();
+                            .assume(localRequires) //
+                            .assume(getModuleLevelAssertionsOfType(requires()))
+                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .finalConfirm(localConfirm).remember();
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
             e.printStackTrace();
@@ -162,8 +162,36 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        curAssertiveBuilder.stats(Utils.collect(VCRuleBackedStat.class,
+                ctx.stmt(), stats));
+        outputFile.chunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
+    }
+
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        PExp localRequires = modifyRequiresByParams(ctx, ctx.requiresClause());
+        PExp localConfirm = modifyEnsuresByParams(ctx, ctx.ensuresClause());
+        List<ResolveParser.ParameterDeclGroupContext> paramGroupings =
+                ctx.operationParameterList().parameterDeclGroup();
+        curAssertiveBuilder =
+                new VCAssertiveBlockBuilder(g, s, "Proc_Decl_Rule="
+                        + ctx.name.getText(), ctx, tr).freeVars(getFreeVars(s))
+                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(localRequires)
+                        .assume(getFormalParamConstraints(paramGroupings))
+                        .remember().finalConfirm(localConfirm);
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         curAssertiveBuilder.stats(
-                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+                .stats(Utils.collect(VCRuleBackedStat.class,
+                        ctx.variableDeclGroup(), stats));
+
         outputFile.chunks.add(curAssertiveBuilder.build());
         curAssertiveBuilder = null;
     }
@@ -270,36 +298,39 @@ public class ModelBuilderProto extends ResolveBaseListener {
     /**
      * Modifies the current, working assertive block by adding initializion
      * information for declared variables to our set of assumptions.
-     *
+     * 
      * @param vars A list of {@link TerminalNode}s representing the names of
-     *             the declared variables.
+     *        the declared variables.
      * @param type The syntax node containing the 'programmatic type' of all
-     *             variables contained in {@code vars}.
+     *        variables contained in {@code vars}.
      * @throws java.lang.IllegalStateException if the working assertive block
-     *              is {@code null}.
+     *         is {@code null}.
      */
     public void modifyAssertiveBlockByVariableDecls(
             @NotNull List<TerminalNode> vars,
             @NotNull ResolveParser.TypeContext type) {
-        if (curAssertiveBuilder == null) {
+        if ( curAssertiveBuilder == null ) {
             throw new IllegalStateException("no open assertive builder");
         }
         PTType groupType = tr.progTypeValues.get(type);
         PExp finalConfirm = curAssertiveBuilder.finalConfirm.getConfirmExp();
         for (TerminalNode t : vars) {
-            if ( groupType instanceof PTGeneric) {
-                curAssertiveBuilder.assume(
-                        g.formInitializationPredicate(groupType, t.getText()));
+            if ( groupType instanceof PTGeneric ) {
+                curAssertiveBuilder.assume(g.formInitializationPredicate(
+                        groupType, t.getText()));
             }
             else {
                 PTNamed namedComponent = (PTNamed) groupType;
-                PExp exemplar = new PSymbol.PSymbolBuilder(
-                        namedComponent.getExemplarName())
-                        .mathType(groupType.toMath()).build();
-                PExp variable = new PSymbol.PSymbolBuilder(t.getText())
-                                .mathType(groupType.toMath()).build();
-                PExp init = namedComponent.getInitializationEnsures()
-                        .substitute(exemplar, variable);
+                PExp exemplar =
+                        new PSymbol.PSymbolBuilder(
+                                namedComponent.getExemplarName()).mathType(
+                                groupType.toMath()).build();
+                PExp variable =
+                        new PSymbol.PSymbolBuilder(t.getText()).mathType(
+                                groupType.toMath()).build();
+                PExp init =
+                        namedComponent.getInitializationEnsures().substitute(
+                                exemplar, variable);
                 if ( finalConfirm.containsName(t.getText()) ) {
                     curAssertiveBuilder.assume(init);
                 }
@@ -342,7 +373,35 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return start;
     }
 
-    private List<PExp> getGlobalAssertionsOfType(
+    private List<PExp> getFormalParamConstraints(
+            List<ResolveParser.ParameterDeclGroupContext> paramGrouping) {
+        List<PExp> result = new ArrayList<>();
+        for (ResolveParser.ParameterDeclGroupContext grp : paramGrouping) {
+            //We actually don't give a shit about the individual terms. We
+            //just care about the type of each term-grouping.
+            PTType groupType = tr.progTypeValues.get(grp.type());
+            result.add(getTypeLevelConstraint(groupType));
+        }
+        return result;
+    }
+
+    private PExp getTypeLevelConstraint(PTType t) {
+        PExp result = g.getTrueExp();
+        if (t instanceof PTFamily) {
+            result = ((PTFamily) t).getConstraint();
+        }
+        else if (t instanceof PTRepresentation) {
+            try {
+                result = ((PTRepresentation) t).getFamily()
+                        .getProgramType().getInitializationEnsures();
+            } catch (NoneProvidedException e) {
+                //No fam? How sad. But we'll manage; we'll just be true then
+            }
+        }
+        return result;
+    }
+
+    private List<PExp> getModuleLevelAssertionsOfType(
             Predicate<Symbol> assertionType) {
         List<PExp> result = new ArrayList<>();
         for (String relatedScope : moduleScope.getRelatedModules()) {

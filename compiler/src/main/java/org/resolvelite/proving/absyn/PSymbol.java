@@ -90,9 +90,9 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * This class represents function <em>applications</em>. The type of a
+     * This class represents function applications. The type of a
      * function application is the type of the range of the function. Often we'd
-     * like to think about the type of the <em>function itself</em>, not the
+     * like to think about the type of the function itself, not the
      * type of the result of its application. Unfortunately our AST does not
      * consider that the 'function' part of a FunctionExp (as distinct from its
      * parameters) might be a first-class citizen with a type of its own. This
@@ -102,7 +102,7 @@ public class PSymbol extends PExp {
      * available information. For nodes without a true, first-class function to
      * consult (which, at the moment, is all of them), this means that for the
      * formal parameter types, we'll guess the types of the actual parameters,
-     * and for the return type we'll guess <strong>Empty_Set</strong> (since we
+     * and for the return type we'll guess Empty_Set (since we
      * have no information about how the return value is used.) This guarantees
      * that the type we return will be a subset of the actual type of the
      * function the RESOLVE programmer intends (assuming she has called it
@@ -417,7 +417,7 @@ public class PSymbol extends PExp {
         else {
             result.append(name);
         }
-        if (this.isFunction() && this.dispStyle != DisplayStyle.OUTFIX) {
+        if ( this.isFunction() && this.dispStyle != DisplayStyle.OUTFIX ) {
             return "(" + result.toString() + ")";
         }
         return result.toString();

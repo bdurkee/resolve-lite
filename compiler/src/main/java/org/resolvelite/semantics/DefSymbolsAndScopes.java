@@ -69,6 +69,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private PTRepresentation reprType = null;
 
     protected int typeValueDepth = 0;
+    private int globalSpecCount = 0;
     private boolean walkingModuleParameter = false;
     private ModuleScopeBuilder curModuleScope = null;
 
@@ -233,6 +234,19 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitOperationDecl(
             @NotNull ResolveParser.OperationDeclContext ctx) {
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.operationReturnType(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+    }
+
+    @Override public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        curOperationName = ctx.name.getText();
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         symtab.endScope();
         insertFunction(ctx.name, ctx.operationReturnType(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
@@ -796,11 +810,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         tr.mathTypeValues.put(ctx, typeValue);
     }
 
-    @Override public void exitConstraintClause(
-            @NotNull ResolveParser.ConstraintClauseContext ctx) {
-        chainMathTypes(ctx, ctx.mathAssertionExp());
-    }
-
     @Override public void exitConventionClause(
             @NotNull ResolveParser.ConventionClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
@@ -811,22 +820,34 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         chainMathTypes(ctx, ctx.mathAssertionExp());
     }
 
+    @Override public void exitConstraintClause(
+            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        if ( !(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext) ) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+        }
+    }
+
     @Override public void exitRequiresClause(
             @NotNull ResolveParser.RequiresClauseContext ctx) {
         chainMathTypes(ctx, ctx.mathAssertionExp());
-        if ( !(ctx.getParent().getParent() instanceof ResolveParser.ModuleContext) ) {
-            return;
+        if ( !(ctx.getParent() instanceof ResolveParser.TypeModelDeclContext) ) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
         }
+    }
+
+    private void insertGlobalAssertion(ParserRuleContext ctx,
+            ResolveParser.MathAssertionExpContext assertion) {
+        String name = ctx.getText() + "_" + globalSpecCount++;
+        PExp assertionAsPExp = getPExpFor(assertion);
         try {
             symtab.getInnermostActiveScope().define(
-                    new GlobalMathAssertionSymbol(ctx.getText()
-                            + ctx.getStart().getStartIndex(), getPExpFor(ctx
-                            .mathAssertionExp().mathExp()), ctx,
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, ctx,
                             getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
-            throw new RuntimeException("");
-            //somehow our global req names match?
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
         }
     }
 
@@ -982,7 +1003,15 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     ((PTRepresentation) firstSym.toProgVariableSymbol()
                             .getProgramType());
 
-            curType = repr.getFamily().getModelType();
+            try {
+                curType = repr.getFamily().getModelType();
+            } catch (NoneProvidedException e) {
+                //if a model was not provided to us, then we're a locally defined
+                //type representation and should not be referring to conceptual
+                //variables (because there are none in this case).
+                //Todo: error better and more informative.
+                e.printStackTrace();
+            }
         }
         MTCartesian curTypeCartesian;
         while (segsIter.hasNext()) {

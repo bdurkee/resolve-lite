@@ -499,13 +499,12 @@ public class TypeGraph {
                 .style(DisplayStyle.INFIX).build();
     }
 
-    public final PSymbol formInitializationPredicate(
-                                        PTType argType, String argName) {
+    public final PSymbol formInitializationPredicate(PTType argType,
+            String argName) {
         PSymbol predicateArg =
-                new PSymbolBuilder(argName).mathType(argType.toMath())
-                        .build();
+                new PSymbolBuilder(argName).mathType(argType.toMath()).build();
 
-        return new PSymbolBuilder(argType.toString() + ".Is_Initial").mathType(BOOLEAN)
-                        .arguments(predicateArg).build();
+        return new PSymbolBuilder(argType.toString() + ".Is_Initial")
+                .mathType(BOOLEAN).arguments(predicateArg).build();
     }
 }
