@@ -1146,8 +1146,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             tr.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
         }
-        if ( walkingMathDot && !symbolName.equalsIgnoreCase("conc") && !(intendedEntry.getType() instanceof MTCartesian)) {
-            System.err.println("Setting currentSeg to: "
+        if ( walkingMathDot && !symbolName.equalsIgnoreCase("conc") &&
+                !(currentSeg instanceof MTCartesian)) {
+            System.out.println("SETTING CURRENTSEG TO: "
                     + tr.mathTypes.get(ctx));
             currentSeg = tr.mathTypes.get(ctx);
         }
@@ -1182,7 +1183,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
                 MTType x = ((MTCartesian)currentSeg)
                         .getFactor(name.getText());
-                System.err.println("Setting currentSeg to: " + x);
+                System.out.println("SETTING CURRENTSEG TO: "
+                        + x);
                 tr.mathTypes.put(ctx, ((MTFunction) x).getRange());
             }
             return;
