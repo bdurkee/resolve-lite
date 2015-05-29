@@ -1,0 +1,12 @@
+Concept Test_Cart;
+
+    Type Family Something is modeled by Cart_Prod
+            Lab : Z -> Z;
+            x, y : Z;
+        end;
+        exemplar P;
+
+     Oper Foo (preserves P : Something);
+        requires P.Lab(1);
+
+end Test_Cart;

@@ -961,7 +961,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
         walkingMathDot = false;
-        Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
+        ParserRuleContext last = ctx.mathFunctionApplicationExp()
+                        .get(ctx.mathFunctionApplicationExp().size() - 1);
+        tr.mathTypes.put(ctx, tr.mathTypes.get(last));
+   /*     Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
                 ctx.mathFunctionApplicationExp().iterator();
         ParserRuleContext nextSeg, lastSeg = null;
         if ( ctx.getStart().getText().equals("conc") ) {
@@ -999,10 +1002,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     break;
                 }
             }
-        }
-        tr.mathTypes.put(ctx, curType);
-        //Todo
-        //tr.mathTypeValues.put(ctx, curType);
+        }*/
+
     }
 
     @Override public void exitMathSetCollectionExp(
@@ -1131,7 +1132,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (NoSuchSymbolException e) {
             if ( walkingMathDot && currentSeg != null
                     && currentSeg instanceof MTCartesian ) {
-                tr.mathTypes.put(ctx, currentSeg);
+                MTType t = ((MTCartesian) currentSeg).getFactor(symbolName);
+                tr.mathTypes.put(ctx, t);
                 return null; //just cut out.
             }
             compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
@@ -1144,7 +1146,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             tr.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
         }
-        if ( walkingMathDot && !(currentSeg instanceof MTCartesian)) {
+        if ( walkingMathDot && !symbolName.equalsIgnoreCase("conc") && !(intendedEntry.getType() instanceof MTCartesian)) {
+            System.err.println("Setting currentSeg to: "
+                    + tr.mathTypes.get(ctx));
             currentSeg = tr.mathTypes.get(ctx);
         }
         return intendedEntry;
@@ -1175,8 +1179,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             //Todo: Typechecking args for dot expressions ending in a function
             //application.
             if (currentSeg instanceof MTCartesian) {
+
                 MTType x = ((MTCartesian)currentSeg)
                         .getFactor(name.getText());
+                System.err.println("Setting currentSeg to: " + x);
                 tr.mathTypes.put(ctx, ((MTFunction) x).getRange());
             }
             return;
