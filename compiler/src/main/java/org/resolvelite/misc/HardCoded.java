@@ -18,12 +18,10 @@ public class HardCoded {
         try {
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
-            b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
             b.addBinding("Card", null, g.MTYPE, g.CARD);
 
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
             b.addBinding("Base_Point", null, g.BASE_POINT);
-            b.addBinding("conc", null, g.MTYPE, null);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("Z", null, g.SSET, g.Z);
             b.addBinding("N", null, g.SSET, g.N);
@@ -54,14 +52,15 @@ public class HardCoded {
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
             b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
-            b.addBinding("Is_Initial", null,
+           /* b.addBinding("Is_Initial", null,
                     new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
-                            .build());
+                            .build());*/
 
             //S E T   R E L A T E D
             b.addBinding("Powerset", null, g.POWERSET);
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
+            b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
 
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
                     .paramTypes(g.SSET).build());

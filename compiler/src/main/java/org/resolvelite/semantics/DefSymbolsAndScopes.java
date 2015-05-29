@@ -71,12 +71,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private PTRepresentation reprType = null;
 
     protected int typeValueDepth = 0;
-
     protected boolean walkingMathDot = false;
     private boolean walkingModuleParameter = false;
-    protected MTType currentSeg = null;
-
-    protected MTCartesian currentSegCartesian = null;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -956,6 +952,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         TerminalNode nextSeg, lastSeg = null;
         if ( ctx.getStart().getText().equals("conc") ) {
             nextSeg = segsIter.next();
+            tr.mathTypes.put(nextSeg, g.BOOLEAN);
         }
         nextSeg = segsIter.next();
         //first get the zeroth seg
@@ -963,8 +960,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 ctx.Identifier().get(0).getText(), ctx);
         if (first == null) {
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+            return;
         }
         MTType curType = first.getType();
+        tr.mathTypes.put(nextSeg, curType);
         MTCartesian curTypeCartesian;
 
         while (segsIter.hasNext()) {
@@ -977,7 +976,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 tr.mathTypes.put(nextSeg, curType);
             }
             catch (ClassCastException cce) {
-                //curType = HardCoded.getMetaFieldType(g, segmentName);
+                curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
                             ErrorKind.VALUE_NOT_TUPLE, nextSeg.getSymbol(),
@@ -987,7 +986,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 }
             }
             catch (NoSuchElementException nsee) {
-                // curType = HardCoded.getMetaFieldType(g, segmentName);
+                curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
                             ErrorKind.NO_SUCH_FACTOR, nextSeg.getSymbol(),

@@ -165,10 +165,23 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        /*List<PSymbol> segs =
-                Utils.collect(PSymbol.class, ctx.mathFunctionApplicationExp(),
-                        repo);
-        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));*/
+        System.out.println("building PDot for: " + ctx.getText());
+        List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
+                .collect(Collectors.toList());
+
+        List<PSymbol> segs = ctx.Identifier().stream()
+                .map(t -> new PSymbolBuilder(t.getText())
+                        .mathType(types.get(t)).build())
+                .collect(Collectors.toList());
+        PSymbolBuilder semanticLast = new PSymbolBuilder(ctx.semantic.getText())
+                .mathType(types.get(ctx));
+
+        if (!ctx.mathExp().isEmpty()) {
+            semanticLast.arguments(Utils.collect(PExp.class,
+                    ctx.mathExp(), repo));
+        }
+        segs.add(semanticLast.build());
+        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));
     }
 
     @Override public void exitMathFunctionExp(
