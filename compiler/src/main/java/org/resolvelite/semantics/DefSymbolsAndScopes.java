@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
@@ -19,7 +18,6 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
-import org.resolvelite.proving.absyn.PLambda;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
@@ -73,6 +71,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     protected int typeValueDepth = 0;
     protected boolean walkingMathDot = false;
     private boolean walkingModuleParameter = false;
+    private ModuleScopeBuilder curModuleScope = null;
 
     public DefSymbolsAndScopes(@NotNull ResolveCompiler rc,
             @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -108,9 +107,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText())
-                .addImports(tr.imports.getImportsOfType(ImportType.NAMED))
-                .addRelatedModules(ctx.concept.getText());
+        curModuleScope =
+                symtab.startModuleScope(ctx, ctx.name.getText())
+                        .addImports(
+                                tr.imports.getImportsOfType(ImportType.NAMED))
+                        .addParentSpecificationRelationship(
+                                ctx.concept.getText());
     }
 
     @Override public void exitConceptImplModule(
@@ -120,8 +122,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tr.imports.getImportsOfType(ImportType.NAMED));
+        curModuleScope =
+                symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                        tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitFacilityModule(
@@ -131,8 +134,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
-                tr.imports.getImportsOfType(ImportType.NAMED));
+        curModuleScope =
+                symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                        tr.imports.getImportsOfType(ImportType.NAMED));
     }
 
     @Override public void exitEnhancementModule(
@@ -142,9 +146,12 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void enterEnhancementImplModule(
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText())
-                .addImports(tr.imports.getImportsOfType(ImportType.NAMED))
-                .addRelatedModules(ctx.enhancement.getText());
+        curModuleScope =
+                symtab.startModuleScope(ctx, ctx.name.getText())
+                        .addImports(
+                                tr.imports.getImportsOfType(ImportType.NAMED))
+                        .addParentSpecificationRelationship(
+                                ctx.enhancement.getText());
     }
 
     @Override public void exitEnhancementImplModule(
@@ -948,24 +955,34 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
+        System.out.println("typing dot exp ctx=" + ctx.getText());
+
         Iterator<TerminalNode> segsIter = ctx.Identifier().iterator();
         TerminalNode nextSeg, lastSeg = null;
-        if ( ctx.getStart().getText().equals("conc") ) {
+        if ( ctx.getStart().getText().equalsIgnoreCase("conc") ) {
             nextSeg = segsIter.next();
-            tr.mathTypes.put(nextSeg, g.BOOLEAN);
         }
         nextSeg = segsIter.next();
-        //first get the zeroth seg
-        MathSymbol first = getIntendedEntry(null,
-                ctx.Identifier().get(0).getText(), ctx);
-        if (first == null) {
+        Symbol firstSym = null;
+        try {
+            //query for first.
+            firstSym = symtab.getInnermostActiveScope()
+                    .queryForOne(new UnqualifiedNameQuery(nextSeg.getText()));
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+            tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
             return;
         }
-        MTType curType = first.getType();
-        tr.mathTypes.put(nextSeg, curType);
-        MTCartesian curTypeCartesian;
+        MTType curType = firstSym.toMathSymbol().getType();
+        if ( ctx.getStart().getText().equalsIgnoreCase("conc") ) {
+            PTRepresentation repr = ((PTRepresentation)firstSym
+                    .toProgVariableSymbol().getProgramType());
 
+            curType = repr.getFamily().getModelType();
+        }
+        MTCartesian curTypeCartesian;
         while (segsIter.hasNext()) {
             lastSeg = nextSeg;
             nextSeg = segsIter.next();
@@ -973,7 +990,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);
-                tr.mathTypes.put(nextSeg, curType);
+                tr.mathTypes.put(nextSeg, g.MTYPE);
             }
             catch (ClassCastException cce) {
                 curType = HardCoded.getMetaFieldType(g, segmentName);
@@ -995,6 +1012,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     break;
                 }
             }
+        }
+        //type all segs for kicks
+        for (TerminalNode t : ctx.Identifier()) {
+            tr.mathTypes.put(t, g.MTYPE);
         }
         tr.mathTypes.put(ctx, curType);
     }
@@ -1078,12 +1099,16 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
             ParserRuleContext ctx) {
+        return getIntendedEntry(symtab.getInnermostActiveScope(), qualifier,
+                symbolName, ctx);
+    }
+
+    private MathSymbol getIntendedEntry(Scope s, Token qualifier,
+            String symbolName, ParserRuleContext ctx) {
         try {
-            return symtab
-                    .getInnermostActiveScope()
-                    .queryForOne(
-                            new MathSymbolQuery(qualifier, symbolName, ctx
-                                    .getStart())).toMathSymbol();
+            return s.queryForOne(
+                    new MathSymbolQuery(qualifier, symbolName, ctx.getStart()))
+                    .toMathSymbol();
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(),

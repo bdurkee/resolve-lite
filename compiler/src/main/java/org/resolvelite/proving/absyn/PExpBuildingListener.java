@@ -165,7 +165,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        System.out.println("building PDot for: " + ctx.getText());
         List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
                 .collect(Collectors.toList());
 

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Builds assertive code and applies proof rules to the code within.
  */
-public class ModelBuilderProto1 extends ResolveBaseListener {
+public class ModelBuilderProto extends ResolveBaseListener {
 
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
@@ -49,7 +49,7 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
     private final static StatRuleApplicationStrategy SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
-    public ModelBuilderProto1(VCGenerator gen, SymbolTable symtab) {
+    public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
         this.g = symtab.getTypeGraph();
@@ -186,18 +186,15 @@ public class ModelBuilderProto1 extends ResolveBaseListener {
 
     private List<PExp> getGlobalAssertionsOfType(
             Predicate<Symbol> assertionType) {
-        List<PExp> result = new ArrayList<>();
-        for (String relatedScope : moduleScope.getRelatedModules()) {
-            List<GlobalMathAssertionSymbol> intermediates =
-                    symtab.moduleScopes.get(relatedScope)
-                            .getSymbolsOfType(GlobalMathAssertionSymbol.class)
-                            .stream().filter(assertionType)
-                            .collect(Collectors.toList());
 
-            result.addAll(intermediates.stream()
-                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
-                    .collect(Collectors.toList()));
-        }
-        return result;
+        List<GlobalMathAssertionSymbol> intermediates =
+                symtab.moduleScopes.get(moduleScope.getSpecificationModule())
+                        .getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                        .stream().filter(assertionType)
+                        .collect(Collectors.toList());
+
+        return intermediates.stream()
+                .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                .collect(Collectors.toList());
     }
 }
