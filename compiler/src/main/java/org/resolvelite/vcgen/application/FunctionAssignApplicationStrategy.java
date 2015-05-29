@@ -2,7 +2,7 @@ package org.resolvelite.vcgen.application;
 
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.vcgen.ModelBuilderProto1;
+import org.resolvelite.vcgen.ModelBuilderProto;
 import org.resolvelite.vcgen.model.AssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock;
 import org.resolvelite.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -28,7 +28,7 @@ public class FunctionAssignApplicationStrategy
         }
 
         //apply explicit call rule to the 'exp-call-like-thing' on the rhs.
-        return ModelBuilderProto1.EXPLICIT_CALL_APPLICATION.applyRule(block,
+        return ModelBuilderProto.EXPLICIT_CALL_APPLICATION.applyRule(block,
                 statComponents.get(1));
     }
 

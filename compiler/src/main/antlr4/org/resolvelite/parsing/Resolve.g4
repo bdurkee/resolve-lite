@@ -514,7 +514,8 @@ mathTupleExp
     ;
 
 mathDotExp
-    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
+    :   ('@')? ( Identifier '.')+
+        semantic=Identifier ('(' mathExp (',' mathExp)* ')')?
     ;
 
 // program expressions

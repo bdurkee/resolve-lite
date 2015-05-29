@@ -13,16 +13,15 @@ public class ModuleScopeBuilder extends ScopeBuilder {
      * Related modules are those that have an immediate relationship with this
      * one. For instance, if I represent a concept implementation, a related
      * module is my corresponding concept. If I represent a facility, theory,
-     * or any other specification for that matter -- I should have no related
-     * modules. Note too that all modules are related to themselves, so this
+     * or any other specification for that matter -- I should have no spec
+     * module. Note too that all modules are related to themselves, so this
      * will always contain at least one element.
      */
-    private final Set<String> relatedModules = new HashSet<>();
+    private String specificationModule;
 
     ModuleScopeBuilder(TypeGraph g, String name, ParseTree definingTree,
             Scope parent, SymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, name);
-        this.relatedModules.add(name);
     }
 
     public String getModuleID() {
@@ -36,8 +35,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return this;
     }
 
-    public ModuleScopeBuilder addRelatedModules(String... e) {
-        relatedModules.addAll(Arrays.asList(e));
+    public ModuleScopeBuilder addParentSpecificationRelationship(String e) {
+        this.specificationModule = e;
         return this;
     }
 
@@ -49,8 +48,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return i.equals(getModuleID()) || importedModules.contains(i);
     }
 
-    public Set<String> getRelatedModules() {
-        return relatedModules;
+    public String getSpecificationModule() {
+        return specificationModule;
     }
 
     public List<String> getImports() {
