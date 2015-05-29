@@ -110,9 +110,7 @@ public class PDot extends PExp {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
-
-    }
+    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
 
     @Override public PExp withIncomingSignsErased() {
         List<PSymbol> newSegs = segs.stream()

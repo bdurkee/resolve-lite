@@ -119,8 +119,7 @@ public <if(func.isStatic)>static <endif><\\>
 
 FacilityDef(facility, root) ::= <<
 public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
-<if(toStdFacilityName.(facility.name))>INSTANCE<else><facility.name><endif> =
-    <root>;
+<if(toStdFacilityName.(facility.name))>INSTANCE<else><facility.name><endif> = <root>;
 >>
 
 DecoratedFacilityInstantiation(init, args, child) ::= <%

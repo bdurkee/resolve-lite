@@ -17,11 +17,12 @@ public class ModuleScopeBuilder extends ScopeBuilder {
      * module. Note too that all modules are related to themselves, so this
      * will always contain at least one element.
      */
-    private String specificationModule;
+    private Set<String> relatedModules = new HashSet<>();
 
     ModuleScopeBuilder(TypeGraph g, String name, ParseTree definingTree,
             Scope parent, SymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, name);
+        this.relatedModules.add(name);
     }
 
     public String getModuleID() {
@@ -36,7 +37,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     public ModuleScopeBuilder addParentSpecificationRelationship(String e) {
-        this.specificationModule = e;
+        this.relatedModules.add(e);
         return this;
     }
 
@@ -48,8 +49,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return i.equals(getModuleID()) || importedModules.contains(i);
     }
 
-    public String getSpecificationModule() {
-        return specificationModule;
+    public Set<String> getRelatedModules() {
+        return relatedModules;
     }
 
     public List<String> getImports() {

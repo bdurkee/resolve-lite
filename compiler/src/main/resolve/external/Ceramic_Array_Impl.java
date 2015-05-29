@@ -1,3 +1,6 @@
+import org.resolvelite.runtime.*;
+import java.lang.reflect.*;
+
 public class Ceramic_Array_Impl extends ResolveBase
         implements
         Bdd_Ceramic_Array_Template {

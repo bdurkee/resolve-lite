@@ -165,7 +165,22 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
+        //leave the conc out of our psymbol dot exps
+        //(for the sake of later substitutions)
+        String name = Utils.join(ctx.Identifier().stream()
+                .filter(i -> !i.getText().equalsIgnoreCase("conc"))
+                .map(ParseTree::getText).collect(Collectors.toList()), ".");
+
+        List<PExp> args = ctx.mathExp().stream().map(repo::get)
+                .collect(Collectors.toList());
+
+        PSymbolBuilder result = new PSymbolBuilder(name)
+                .incoming(ctx.getStart().getText().equals("@"))
+                .arguments(args).mathType(types.get(ctx));
+
+        repo.put(ctx, result.build());
+    //PDOT WAY
+ /*       List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
                 .collect(Collectors.toList());
 
         List<PSymbol> segs = ctx.Identifier().stream()
@@ -180,7 +195,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     ctx.mathExp(), repo));
         }
         segs.add(semanticLast.build());
-        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));
+        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));*/
     }
 
     @Override public void exitMathFunctionExp(
@@ -250,7 +265,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgMemberExp(
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
-        List<PSymbol> segs = new ArrayList<>();
+        PSymbol first = (PSymbol) repo.get(ctx.getChild(0));
+        if (!first.getArguments().isEmpty()) {
+            throw new UnsupportedOperationException("member exps with "
+                    + "arguments in the first segment are not yet supported.");
+        }
+        String name = Utils.join(ctx.Identifier().stream()
+                .map(ParseTree::getText).collect(Collectors.toList()), ".");
+        PSymbolBuilder result = new PSymbolBuilder(first.getName() + "." + name)
+                .incoming(first.isIncoming()).mathType(types.get(ctx));
+
+        repo.put(ctx, result.build());
+
+        //PDOT WAY
+        /*List<PSymbol> segs = new ArrayList<>();
         segs.add((PSymbol) repo.get(ctx.getChild(0)));
         for (TerminalNode term : ctx.Identifier()) {
             segs.add(new PSymbol.PSymbolBuilder(term.getText())
@@ -260,7 +288,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PDot result =
                 new PDot(segs, types.get(ctx), typeValues.get(ctx),
                         progTypes.get(ctx), progTypeValues.get(ctx));
-        repo.put(ctx, result);
+        repo.put(ctx, result);*/
     }
 
     @Override public void exitProgIntegerExp(

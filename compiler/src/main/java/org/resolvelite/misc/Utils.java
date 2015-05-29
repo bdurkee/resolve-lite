@@ -161,6 +161,10 @@ public class Utils {
         return new ResolveToken(name);
     }
 
+    /*public static <T, R> List<R> apply(Collection<T> l, Function<T, R> f) {
+        return l.stream().map(f).collect(Collectors.toList());
+    }*/
+    //Todo: This should change to this: ^^
     public static <T> List<T> apply(Collection<T> l, Function<T, T> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }

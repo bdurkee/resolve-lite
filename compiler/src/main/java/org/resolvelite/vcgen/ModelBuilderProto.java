@@ -75,7 +75,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp typeInitEnsures = g.getTrueExp();
         curAssertiveBuilder =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
-                        "T_Init_Hypo=" + repr.getName(), ctx, tr);
+                        "T_Init_Hypo=" + repr.getName(), ctx, tr)
+                        .assume(getGlobalAssertionsOfType(requires()));
     }
 
     @Override public void exitTypeImplInit(
@@ -177,7 +178,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 + "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
             }
             PSymbol eAsPSym = (PSymbol) e;
-            PDot elhs = (PDot) eAsPSym.getArguments().get(0);
+            PSymbol elhs = (PSymbol) eAsPSym.getArguments().get(0);
             PSymbol erhs = (PSymbol) eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }
@@ -186,15 +187,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private List<PExp> getGlobalAssertionsOfType(
             Predicate<Symbol> assertionType) {
+        List<PExp> result = new ArrayList<>();
+        for (String relatedScope : moduleScope.getRelatedModules()) {
+            List<GlobalMathAssertionSymbol> intermediates =
+                    symtab.moduleScopes.get(relatedScope)
+                            .getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                            .stream().filter(assertionType)
+                            .collect(Collectors.toList());
 
-        List<GlobalMathAssertionSymbol> intermediates =
-                symtab.moduleScopes.get(moduleScope.getSpecificationModule())
-                        .getSymbolsOfType(GlobalMathAssertionSymbol.class)
-                        .stream().filter(assertionType)
-                        .collect(Collectors.toList());
-
-        return intermediates.stream()
-                .map(GlobalMathAssertionSymbol::getEnclosedExp)
-                .collect(Collectors.toList());
+            result.addAll(intermediates.stream()
+                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                    .collect(Collectors.toList()));
+        }
+        return result;
     }
 }

@@ -69,7 +69,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private PTRepresentation reprType = null;
 
     protected int typeValueDepth = 0;
-    protected boolean walkingMathDot = false;
     private boolean walkingModuleParameter = false;
     private ModuleScopeBuilder curModuleScope = null;
 
@@ -967,19 +966,21 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         Symbol firstSym = null;
         try {
             //query for first.
-            firstSym = symtab.getInnermostActiveScope()
-                    .queryForOne(new UnqualifiedNameQuery(nextSeg.getText()));
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            firstSym =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new UnqualifiedNameQuery(nextSeg.getText()));
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-            tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
             return;
         }
         MTType curType = firstSym.toMathSymbol().getType();
         if ( ctx.getStart().getText().equalsIgnoreCase("conc") ) {
-            PTRepresentation repr = ((PTRepresentation)firstSym
-                    .toProgVariableSymbol().getProgramType());
+            PTRepresentation repr =
+                    ((PTRepresentation) firstSym.toProgVariableSymbol()
+                            .getProgramType());
 
             curType = repr.getFamily().getModelType();
         }
@@ -991,7 +992,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);
-                tr.mathTypes.put(nextSeg, g.MTYPE);
             }
             catch (ClassCastException cce) {
                 curType = HardCoded.getMetaFieldType(g, segmentName);
@@ -1014,10 +1014,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 }
             }
         }
-        //type all segs for kicks
-        for (TerminalNode t : ctx.Identifier()) {
-            tr.mathTypes.put(t, g.MTYPE);
-        }
+        //Todo: Typecheck args on dotexps ending in a function application
         tr.mathTypes.put(ctx, curType);
     }
 
@@ -1098,12 +1095,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         exitMathSymbolExp(ctx, null, ctx.name.getText());
     }
 
-    private MathSymbol getIntendedEntry(Token qualifier,
-            String symbolName, ParserRuleContext ctx) {
+    private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
+            ParserRuleContext ctx) {
         try {
-            return symtab.getInnermostActiveScope().queryForOne(
-                    new MathSymbolQuery(qualifier, symbolName, ctx.getStart()))
-                    .toMathSymbol();
+            return symtab
+                    .getInnermostActiveScope()
+                    .queryForOne(
+                            new MathSymbolQuery(qualifier, symbolName, ctx
+                                    .getStart())).toMathSymbol();
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(e.getErrorKind(),
@@ -1169,7 +1168,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
                 + foundExpType.toString());
-        
+
         MathSymbol intendedEntry =
                 getIntendedFunction(ctx, qualifier, name, args);
 
