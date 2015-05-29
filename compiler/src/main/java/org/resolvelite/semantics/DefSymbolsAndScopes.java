@@ -958,7 +958,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             nextSeg = segsIter.next();
         }
         nextSeg = segsIter.next();
-        MTType curType = tr.mathTypes.get(nextSeg);
+        //first get the zeroth seg
+        MathSymbol first = getIntendedEntry(null,
+                ctx.Identifier().get(0).getText(), ctx);
+        if (first == null) {
+            tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+        }
+        MTType curType = first.getType();
         MTCartesian curTypeCartesian;
 
         while (segsIter.hasNext()) {
@@ -968,6 +974,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);
+                tr.mathTypes.put(nextSeg, curType);
             }
             catch (ClassCastException cce) {
                 //curType = HardCoded.getMetaFieldType(g, segmentName);
