@@ -165,10 +165,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        List<PSymbol> segs =
+        /*List<PSymbol> segs =
                 Utils.collect(PSymbol.class, ctx.mathFunctionApplicationExp(),
                         repo);
-        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));
+        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));*/
     }
 
     @Override public void exitMathFunctionExp(

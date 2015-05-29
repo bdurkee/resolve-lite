@@ -932,7 +932,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 establishedTypeValue = tr.mathTypeValues.get(alt.result);
             }
             else {
-                if (alt.condition != null) {
+                if ( alt.condition != null ) {
                     expectType(alt, establishedType);
                 }
             }
@@ -950,20 +950,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
     }
 
-    @Override public void enterMathDotExp(
-            @NotNull ResolveParser.MathDotExpContext ctx) {
-        walkingMathDot = true;
-    }
-
-    //Todo: The way this is written now (grammatically) it makes sense to spread
-    //the logic out over the course of the traversal. That is, in the appropriate
-    //methods, keep track of the current cartesian and type terms that way.
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        walkingMathDot = false;
-        Iterator<ResolveParser.MathFunctionApplicationExpContext> segsIter =
-                ctx.mathFunctionApplicationExp().iterator();
-        ParserRuleContext nextSeg, lastSeg = null;
+        Iterator<TerminalNode> segsIter = ctx.Identifier().iterator();
+        TerminalNode nextSeg, lastSeg = null;
         if ( ctx.getStart().getText().equals("conc") ) {
             nextSeg = segsIter.next();
         }
@@ -974,7 +964,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         while (segsIter.hasNext()) {
             lastSeg = nextSeg;
             nextSeg = segsIter.next();
-            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            String segmentName = nextSeg.getSymbol().getText();
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);
@@ -983,7 +973,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 //curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
-                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getSymbol(),
                             segmentName);
                     curType = g.INVALID;
                     break;
@@ -993,7 +983,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 // curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errorManager.semanticError(
-                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getSymbol(),
                             segmentName);
                     curType = g.INVALID;
                     break;
@@ -1001,8 +991,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             }
         }
         tr.mathTypes.put(ctx, curType);
-        //Todo
-        //tr.mathTypeValues.put(ctx, curType);
     }
 
     @Override public void exitMathSetCollectionExp(
@@ -1066,8 +1054,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         List<String> renames = ctx.Identifier().stream()
                 .map(ParseTree::getText).collect(Collectors.toList());
         for (ResolveParser.MathDotExpContext e : ctx.mathDotExp()) {
-            int last = e.mathFunctionApplicationExp().size() - 1;
-            renames.add(e.mathFunctionApplicationExp().get(last).getText());
+            renames.add(e.semantic.getText());
         }
         MTType newType = tr.mathTypeValues.get(ctx.mathTypeExp());
         for (MathSymbol retypeSym : coerceableMathSyms) {
@@ -1084,7 +1071,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     }
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
-            ParserRuleContext ctx) throws NoSuchSymbolException {
+            ParserRuleContext ctx) {
         try {
             return symtab
                     .getInnermostActiveScope()
@@ -1092,8 +1079,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                             new MathSymbolQuery(qualifier, symbolName, ctx
                                     .getStart())).toMathSymbol();
         }
-        catch (DuplicateSymbolException dse) {
-            compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errorManager.semanticError(e.getErrorKind(),
                     ctx.getStart(), symbolName);
         }
         return null;
@@ -1124,28 +1111,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
             @Nullable Token qualifier, @NotNull String symbolName) {
-        MathSymbol intendedEntry = null;
-        try {
-            intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
-        }
-        catch (NoSuchSymbolException e) {
-            if ( walkingMathDot && currentSeg != null
-                    && currentSeg instanceof MTCartesian ) {
-                tr.mathTypes.put(ctx, currentSeg);
-                return null; //just cut out.
-            }
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                    ctx.getStart(), symbolName);
-        }
+        MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
+
         if ( intendedEntry == null ) {
             tr.mathTypes.put(ctx, g.INVALID);
         }
         else {
             tr.mathTypes.put(ctx, intendedEntry.getType());
             setSymbolTypeValue(ctx, symbolName, intendedEntry);
-        }
-        if ( walkingMathDot && !(currentSeg instanceof MTCartesian)) {
-            currentSeg = tr.mathTypes.get(ctx);
         }
         return intendedEntry;
     }
@@ -1170,17 +1143,6 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
                 + foundExpType.toString());
-
-        if (walkingMathDot && currentSeg != null) {
-            //Todo: Typechecking args for dot expressions ending in a function
-            //application.
-            if (currentSeg instanceof MTCartesian) {
-                MTType x = ((MTCartesian)currentSeg)
-                        .getFactor(name.getText());
-                tr.mathTypes.put(ctx, ((MTFunction) x).getRange());
-            }
-            return;
-        }
 
         MathSymbol intendedEntry =
                 getIntendedFunction(ctx, qualifier, name, args);
