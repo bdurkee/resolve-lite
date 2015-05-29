@@ -19,7 +19,6 @@ Concept Bdd_Spiral_Template<T>
             ensures P.Trmnl_Loc = SS(@P.Trmnl_Loc, 0) and
                 P.Curr_Loc = @P.Curr_Loc and
                         P.Lab = lambda (q : Sp_Loc).(
-                            {{@e if q = @P.Trmnl_Loc;
-                            @P.Lab(q) otherwise; }});
+                {{@e if q = @P.Trmnl_Loc; @P.Lab(q) otherwise; }});
 
 end Bdd_Spiral_Template;

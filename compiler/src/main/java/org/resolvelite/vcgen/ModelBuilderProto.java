@@ -1,16 +1,23 @@
 package org.resolvelite.vcgen;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PDot;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.*;
+import org.resolvelite.semantics.programtype.PTNamed;
+import org.resolvelite.semantics.programtype.PTType;
+import org.resolvelite.semantics.query.OperationQuery;
 import org.resolvelite.semantics.symbol.*;
+import org.resolvelite.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.resolvelite.vcgen.application.ExplicitCallApplicationStrategy;
 import org.resolvelite.vcgen.application.FunctionAssignApplicationStrategy;
 import org.resolvelite.vcgen.application.StatRuleApplicationStrategy;
@@ -55,9 +62,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         this.g = symtab.getTypeGraph();
     }
 
-    @Override public void enterConceptImplModule(
-            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
-        moduleScope = symtab.moduleScopes.get(ctx.name.getText());
+    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+        moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
+
     }
 
     public VCOutputFile getOutputFile() {
@@ -126,6 +133,48 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.chunks.add(curAssertiveBuilder.build());
     }
 
+    @Override public void enterProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        try {
+            List<PTType> argTypes =
+                    s.getSymbolsOfType(ProgParameterSymbol.class).stream()
+                            .map(ProgParameterSymbol::getDeclaredType)
+                            .collect(Collectors.toList());
+            OperationSymbol op = s.queryForOne(
+                    new OperationQuery(null, ctx.name, argTypes));
+
+            PExp topAssume = modifyRequiresByParams(ctx, op.getRequires());
+            PExp bottomConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
+
+            curAssertiveBuilder =
+                    new VCAssertiveBlockBuilder(g, s,
+                            "Proc_Decl_Rule="+ctx.name.getText() , ctx, tr)
+                            .freeVars(getFreeVars(s)) //
+                            .assume(moduleLevelRequires).assume(topAssume) //
+                            .assume(moduleLevelConstraint) //
+                            .finalConfirm(bottomConfirm).remember();
+        }
+        catch (DuplicateSymbolException|NoSuchSymbolException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override public void exitProcedureDecl(
+            @NotNull ResolveParser.ProcedureDeclContext ctx) {
+        curAssertiveBuilder.stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.variableDeclGroup(),
+                        stats)).stats(
+                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+
+        outputFile.chunks.add(curAssertiveBuilder.build());
+        curAssertiveBuilder = null;
+    }
+
+    //-----------------------------------------------
+    // S T A T S
+    //-----------------------------------------------
+
     @Override public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
@@ -155,6 +204,67 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
+    }
+
+    private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,
+            @Nullable ResolveParser.RequiresClauseContext requires) {
+        return tr.getPExpFor(g, requires);
+    }
+
+    private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
+            @Nullable ResolveParser.EnsuresClauseContext ensures) {
+        List<ProgParameterSymbol> params =
+                symtab.scopes.get(functionCtx).getSymbolsOfType(
+                        ProgParameterSymbol.class);
+        PExp existingEnsures = tr.getPExpFor(g, ensures);
+        for (ProgParameterSymbol p : params) {
+            PSymbol.PSymbolBuilder temp =
+                    new PSymbol.PSymbolBuilder(p.getName()).mathType(p
+                            .getDeclaredType().toMath());
+
+            PExp incParamExp = temp.incoming(true).build();
+            PExp paramExp = temp.incoming(false).build();
+
+            if ( p.getMode() == ParameterMode.PRESERVES
+                    || p.getMode() == ParameterMode.RESTORES ) {
+                PExp equalsExp =
+                        new PSymbol.PSymbolBuilder("=")
+                                .arguments(paramExp, incParamExp)
+                                .style(DisplayStyle.INFIX).mathType(g.BOOLEAN)
+                                .build();
+
+                existingEnsures =
+                        !existingEnsures.isLiteral() ? g.formConjunct(
+                                existingEnsures, equalsExp) : equalsExp;
+            }
+            else if ( p.getMode() == ParameterMode.CLEARS ) {
+                PExp init = null;
+                if ( p.getDeclaredType() instanceof PTNamed ) {
+                    PTNamed t = (PTNamed) p.getDeclaredType();
+                    PExp exemplar =
+                            new PSymbol.PSymbolBuilder(t.getExemplarName())
+                                    .mathType(t.toMath()).build();
+                    init = ((PTNamed) p.getDeclaredType()) //
+                            .getInitializationEnsures() //
+                            .substitute(exemplar, paramExp);
+                }
+                else { //we're dealing with a generic
+                    throw new UnsupportedOperationException(
+                            "generics not yet handled");
+                }
+                existingEnsures =
+                        !existingEnsures.isLiteral() ? g.formConjunct(
+                                existingEnsures, init) : init;
+            }
+        }
+        return existingEnsures;
+    }
+
+    public List<Symbol> getFreeVars(Scope s) {
+        return s.getSymbolsOfType(Symbol.class).stream()
+                .filter(x -> x instanceof ProgParameterSymbol ||
+                        x instanceof ProgVariableSymbol)
+                .collect(Collectors.toList());
     }
 
     public static Predicate<Symbol> constraint() {

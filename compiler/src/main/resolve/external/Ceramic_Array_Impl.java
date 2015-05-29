@@ -7,9 +7,9 @@ public class Ceramic_Array_Impl extends ResolveBase
     RType type;
     int lowerBound, upperBound;
 
-    class Array extends ResolveBase implements RType {
+    class Ceramic_Array extends ResolveBase implements RType {
         Array_Rep rep;
-        Array() {
+        Ceramic_Array() {
             rep = new Array_Rep();
         }
 
@@ -26,7 +26,7 @@ public class Ceramic_Array_Impl extends ResolveBase
         }
 
         @Override public RType initialValue() {
-            return new Array();
+            return new Ceramic_Array();
         }
     }
     class Array_Rep {
@@ -48,7 +48,7 @@ public class Ceramic_Array_Impl extends ResolveBase
     }
 
     @Override public RType initCeramic_Array() {
-        return new Array();
+        return new Ceramic_Array();
     }
 
     public Ceramic_Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {

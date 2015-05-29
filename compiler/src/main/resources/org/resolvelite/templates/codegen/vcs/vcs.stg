@@ -38,12 +38,12 @@ VCOutputFile(vcs, chunks) ::= <<
 
 RuleApplicationStep(app, step) ::= <<
 <app.description>
+free vars: {<step.assertCode.freeVars: {f|<f.name> : <f.mathType>}; separator=", ">}
 <step>
 --------------------
 >>
 
 VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<
-free vars: {<assertCode.freeVars: {f|<f.name> : <f.mathType>}; separator=", ">}
 <first(stats)>
     <rest(stats); separator="\n">
 <finalConfirm>
@@ -57,4 +57,4 @@ VCConfirm(confirm) ::= "confirm <confirm.confirmExp>;"
 
 VCRuleBackedStat(code) ::= "<code.text>"
 
-fileExtension() ::= ".asrt_dan"
+fileExtension() ::= ".asrt"
