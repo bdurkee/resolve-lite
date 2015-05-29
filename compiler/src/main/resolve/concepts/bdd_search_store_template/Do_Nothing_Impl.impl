@@ -3,7 +3,9 @@ Implementation Do_Nothing_Impl
 
     Proc Do_Nothing (restores S : Store);
         --duration Is_Big_Theta(0);
-
+        Var Temp : T;
+        Add (Temp, S);
+        Remove (Temp, S);
     end Do_Nothing;
 end Do_Nothing_Impl;
 
@@ -22,13 +24,13 @@ C / assume S /= {};
         Var Temp : T;
         Add(Temp, S);
     confirm e is_in S[e -> Temp, S -> S] and
-            S = @S[S -> S = @S ~ {e}[e -> Temp, @S -> S]]
-                   Temp -> S = @S ~ {e}[e -> Temp, @S -> S]
+            S = @S[S -> @S ~ {e}[e -> Temp, @S -> S]]
+                   Temp -> @S ~ {e}[e -> Temp, @S -> S]
 ------------------- SIMPL
 C / assume S /= {};
         Var Temp : T;
         Add(Temp, S);
-    confirm Temp is_in S and (S = S ~ {Temp}) = @S
+    confirm Temp is_in S and (S ~ {Temp}) = @S
 -------------------
 2. apply explicit call rule (Add)
 

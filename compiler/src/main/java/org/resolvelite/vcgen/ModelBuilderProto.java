@@ -4,15 +4,16 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
-import org.resolvelite.proving.absyn.PDot;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.*;
+import org.resolvelite.semantics.programtype.PTGeneric;
 import org.resolvelite.semantics.programtype.PTNamed;
 import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.semantics.query.OperationQuery;
@@ -62,13 +63,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         this.g = symtab.getTypeGraph();
     }
 
-    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
-        moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
-
-    }
-
     public VCOutputFile getOutputFile() {
         return outputFile;
+    }
+
+    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+        moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
     @Override public void enterTypeImplInit(
@@ -99,7 +99,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         PExp newInitEnsures =
                 typeInitEnsures.substitute(s.exemplarAsPSymbol(),
-                        s.getConceptualExemplarAsPDot());
+                        s.conceptualExemplarAsPSymbol());
         newInitEnsures =
                 withCorrespondencePartsSubstituted(newInitEnsures,
                         correspondence);
@@ -125,7 +125,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         PExp newConstraint =
                 constraint.substitute(s.exemplarAsPSymbol(),
-                        s.getConceptualExemplarAsPDot());
+                        s.conceptualExemplarAsPSymbol());
         newConstraint =
                 withCorrespondencePartsSubstituted(newConstraint,
                         correspondence);
@@ -163,12 +163,19 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         curAssertiveBuilder.stats(
-                Utils.collect(VCRuleBackedStat.class, ctx.variableDeclGroup(),
-                        stats)).stats(
                 Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
-
         outputFile.chunks.add(curAssertiveBuilder.build());
         curAssertiveBuilder = null;
+    }
+
+    @Override public void exitVariableDeclGroup(
+            @NotNull ResolveParser.VariableDeclGroupContext ctx) {
+        modifyAssertiveBlockByVariableDecls(ctx.Identifier(), ctx.type());
+    }
+
+    @Override public void exitRecordVariableDeclGroup(
+            @NotNull ResolveParser.RecordVariableDeclGroupContext ctx) {
+        modifyAssertiveBlockByVariableDecls(ctx.Identifier(), ctx.type());
     }
 
     //-----------------------------------------------
@@ -258,6 +265,46 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
         return existingEnsures;
+    }
+
+    /**
+     * Modifies the current, working assertive block by adding initializion
+     * information for declared variables to our set of assumptions.
+     *
+     * @param vars A list of {@link TerminalNode}s representing the names of
+     *             the declared variables.
+     * @param type The syntax node containing the 'programmatic type' of all
+     *             variables contained in {@code vars}.
+     * @throws java.lang.IllegalStateException if the working assertive block
+     *              is {@code null}.
+     */
+    public void modifyAssertiveBlockByVariableDecls(
+            @NotNull List<TerminalNode> vars,
+            @NotNull ResolveParser.TypeContext type) {
+        if (curAssertiveBuilder == null) {
+            throw new IllegalStateException("no open assertive builder");
+        }
+        PTType groupType = tr.progTypeValues.get(type);
+        PExp finalConfirm = curAssertiveBuilder.finalConfirm.getConfirmExp();
+        for (TerminalNode t : vars) {
+            if ( groupType instanceof PTGeneric) {
+                curAssertiveBuilder.assume(
+                        g.formInitializationPredicate(groupType, t.getText()));
+            }
+            else {
+                PTNamed namedComponent = (PTNamed) groupType;
+                PExp exemplar = new PSymbol.PSymbolBuilder(
+                        namedComponent.getExemplarName())
+                        .mathType(groupType.toMath()).build();
+                PExp variable = new PSymbol.PSymbolBuilder(t.getText())
+                                .mathType(groupType.toMath()).build();
+                PExp init = namedComponent.getInitializationEnsures()
+                        .substitute(exemplar, variable);
+                if ( finalConfirm.containsName(t.getText()) ) {
+                    curAssertiveBuilder.assume(init);
+                }
+            }
+        }
     }
 
     public List<Symbol> getFreeVars(Scope s) {

@@ -417,6 +417,9 @@ public class PSymbol extends PExp {
         else {
             result.append(name);
         }
+        if (this.isFunction() && this.dispStyle != DisplayStyle.OUTFIX) {
+            return "(" + result.toString() + ")";
+        }
         return result.toString();
     }
 

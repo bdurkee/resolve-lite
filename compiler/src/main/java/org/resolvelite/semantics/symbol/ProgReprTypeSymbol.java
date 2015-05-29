@@ -33,14 +33,14 @@ public class ProgReprTypeSymbol extends Symbol {
 
     public PSymbol exemplarAsPSymbol() {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
-                .mathType(definition.getModelType()).progType(representation)
+                .mathType(representation.toMath()).progType(representation)
                 .build();
     }
 
-    public PDot getConceptualExemplarAsPDot() {
-        return new PDot(exemplarAsPSymbol().getMathType(), exemplarAsPSymbol()
-                .getMathTypeValue(), typeGraph.formConcMetaSegment(),
-                exemplarAsPSymbol());
+    public PSymbol conceptualExemplarAsPSymbol() {
+        return new PSymbol.PSymbolBuilder("conc."
+                + representation.getExemplarName()).mathType(
+                definition.getModelType()).build();
     }
 
     public PTRepresentation getRepresentationType() {

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 // is, no need for segments. Yes I realize the VC generator currently 'uses'
 // them
 // but it doesn't have to.
+@Deprecated
 public class PDot extends PExp {
 
     private final List<PSymbol> segs = new ArrayList<>();

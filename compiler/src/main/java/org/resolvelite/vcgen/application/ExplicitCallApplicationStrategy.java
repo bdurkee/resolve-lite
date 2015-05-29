@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class ExplicitCallApplicationStrategy
         implements
-            StatRuleApplicationStrategy {
+        StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {

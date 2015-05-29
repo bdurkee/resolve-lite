@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FunctionAssignApplicationStrategy
         implements
-            StatRuleApplicationStrategy {
+        StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
             List<PExp> statComponents) {

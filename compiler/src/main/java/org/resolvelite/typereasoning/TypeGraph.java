@@ -5,6 +5,9 @@ import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.*;
+import org.resolvelite.semantics.programtype.PTGeneric;
+import org.resolvelite.semantics.programtype.PTNamed;
+import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.*;
 
@@ -496,7 +499,13 @@ public class TypeGraph {
                 .style(DisplayStyle.INFIX).build();
     }
 
-    public final PSymbol formConcMetaSegment() {
-        return new PSymbolBuilder("conc").mathType(MTYPE).build();
+    public final PSymbol formInitializationPredicate(
+                                        PTType argType, String argName) {
+        PSymbol predicateArg =
+                new PSymbolBuilder(argName).mathType(argType.toMath())
+                        .build();
+
+        return new PSymbolBuilder(argType.toString() + ".Is_Initial").mathType(BOOLEAN)
+                        .arguments(predicateArg).build();
     }
 }
