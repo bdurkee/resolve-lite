@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.resolvelite.compiler.ErrorKind;
@@ -70,6 +71,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
     private PTRepresentation reprType = null;
 
     protected int typeValueDepth = 0;
+
     protected boolean walkingMathDot = false;
     private boolean walkingModuleParameter = false;
 
@@ -913,11 +915,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             parameterTypes.addAll(grp.Identifier().stream()
                     .map(term -> grpType).collect(Collectors.toList()));
         }
-
-        MTFunction result = new MTFunctionBuilder(g, tr.mathTypes //
-                .get(ctx.mathAlternativeExp())) //
-                .paramTypes(parameterTypes).build();
-        tr.mathTypes.put(ctx, result); //
+        tr.mathTypes.put(ctx, new MTFunctionBuilder(g, tr.mathTypes
+                .get(ctx.mathExp())).paramTypes(parameterTypes).build());
     }
 
     @Override public void exitMathAlternativeExp(
@@ -1207,6 +1206,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         PSymbol e = (PSymbol)getPExpFor(ctx);
         MTFunction eType = (MTFunction)e.getMathType();
         String operatorStr = name.getText();
+
 
         List<MathSymbol> sameNameFunctions =
                 symtab.getInnermostActiveScope() //

@@ -10,10 +10,14 @@ Concept Bdd_Ceramic_Array_Template<T>
         Oper Swap_Element (updates A : Ceramic_Array; updates e : T;
                 evaluates i : Std_Integer_Fac :: Integer);
             requires Lower_Bound <= i  and i <= Upper_Bound;
-            ensures e = @A(i) and A = lambda (j : Z).
-                                {{@e if j = i; @A(j) otherwise;}};
+            ensures e = @A(i) and A = lambda (j : Z).(
+                                {{@e if j = i; @A(j) otherwise;}});
 
         Oper Swap_Two_Elements (updates A : Ceramic_Array;
                 evaluates i, j : Std_Integer_Fac :: Integer);
+            requires Lower_Bound <= i and i <= Upper_Bound and
+                    Lower_Bound <= j  and j <= Upper_Bound;
+            ensures A = lambda (k : Z).(
+                {{@A(j) if k = i; @A(i) if k = j; @A(k) otherwise;}});
 
 end Bdd_Ceramic_Array_Template;

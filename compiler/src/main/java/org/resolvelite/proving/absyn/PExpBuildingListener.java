@@ -138,8 +138,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .get(grp.mathTypeExp())));
             }
         }
-        repo.put(ctx,
-                new PLambda(parameters, repo.get(ctx.mathAlternativeExp())));
+        repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 
     @Override public void exitMathAlternativeExp(

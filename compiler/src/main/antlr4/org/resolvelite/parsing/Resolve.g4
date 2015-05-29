@@ -467,8 +467,9 @@ mathPrimaryExp
     |   mathDotExp
     |   mathOutfixExp
     |   mathSetExp
-    |   mathLambdaExp
     |   mathTupleExp
+    |   mathAlternativeExp
+    |   mathLambdaExp
     ;
 
 mathLiteralExp
@@ -497,11 +498,11 @@ mathSetExp
     ;
 
 mathLambdaExp
-    :   'lambda' definitionParameterList '.' mathAlternativeExp
+    :   'lambda' definitionParameterList '.' '(' mathExp ')'
     ;
 
 mathAlternativeExp
-    :   '{' '{' (mathAlternativeItemExp)+ '}' '}'
+    :   '{{' (mathAlternativeItemExp)+ '}}'
     ;
 
 mathAlternativeItemExp
