@@ -8,7 +8,7 @@ Facility Integer_Do_Nothing;
 end Integer_Do_Nothing;
 
 (*
-1. apply procedure decl rule
+1. procedure decl rule
 
 C / assume ((min_int <= i) and (i <= max_int));
         remember;
@@ -16,7 +16,7 @@ C / assume ((min_int <= i) and (i <= max_int));
         Decrement(I);
     confirm I = @I;
 
-2. apply simple call rule (Decrement)
+2. simple call rule (Decrement)
 
 C / assume ((min_int <= i) and (i <= max_int));
         remember;
@@ -27,7 +27,7 @@ C / assume ((min_int <= i) and (i <= max_int));
     confirm min_int <= I - 1 and
             I - 1 = @I
 
-3. apply simple call rule (Increment)
+3. simple call rule (Increment)
 
 C / assume ((min_int <= i) and (i <= max_int));
        remember;

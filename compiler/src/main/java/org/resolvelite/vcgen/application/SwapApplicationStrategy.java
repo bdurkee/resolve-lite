@@ -34,6 +34,6 @@ public class SwapApplicationStrategy implements StatRuleApplicationStrategy {
     }
 
     @Override public String getDescription() {
-        return null;
+        return "swap rule application";
     }
 }
