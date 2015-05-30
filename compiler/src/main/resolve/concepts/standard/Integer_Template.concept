@@ -4,6 +4,7 @@ Concept Integer_Template;
 
     Type Family Integer is modeled by Z;
         exemplar i;
+        constraint min_int <= i and i <= max_int;
         initialization ensures i = 0;
 
     Oper Increment (updates i: Integer);

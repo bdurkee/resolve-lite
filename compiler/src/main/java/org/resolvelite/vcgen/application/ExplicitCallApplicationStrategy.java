@@ -73,11 +73,18 @@ public class ExplicitCallApplicationStrategy
 
         //The collection of 'updates' actuals that should be replaced in the
         //existing final confirm.
-        List<PExp> replacementActuals = op.getParameters().stream()
-                .filter(p -> p.getMode() == ParameterMode.UPDATES)
-                .map(ProgParameterSymbol::asPSymbol)
-                .collect(Collectors.toList());
+        Iterator<ProgParameterSymbol> formalParamIter =
+                op.getParameters().iterator();
+        Iterator<PExp> actualParamIter = actuals.iterator();
+        List<PExp> replacementActuals = new ArrayList<>();
 
+        while (formalParamIter.hasNext()) {
+            ProgParameterSymbol formal = formalParamIter.next();
+            PExp actual = actualParamIter.next();
+            if (formal.getMode() == ParameterMode.UPDATES) {
+                replacementActuals.add(actual);
+            }
+        }
         block.finalConfirm(block.finalConfirm.getConfirmExp()
                 .substitute(replacementActuals, ensuresRight));
         return block.snapshot();
