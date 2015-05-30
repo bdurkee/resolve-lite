@@ -1,0 +1,31 @@
+Concept Bdd_Stack_Template<T>
+        (evaluates Max_Depth : Std_Integer_Fac :: Integer);
+            uses General_Purpose_Theory, String_Theory;
+    requires 1 <= Max_Depth which_entails Max_Depth : N;
+
+    Type Family Stack is
+                modeled by Str(T);
+        exemplar S;
+        constraint |S| <= Max_Depth;
+        initialization
+                ensures S = Empty_String;
+
+        Oper Push (alters e : T; updates S : Stack);
+            requires 1 + |S| <= Max_Depth;
+            ensures  S = <@e> o @S;
+
+        Oper Pop (replaces e : T; updates S : Stack);
+            requires 1 <= |S|;
+            ensures @S = <e> o S;
+
+        Oper Depth (restores S : Stack) :
+                        Std_Integer_Fac :: Integer;
+            ensures Depth = (|S|);
+
+        Oper Rem_Capacity (restores S : Stack) :
+                        Std_Integer_Fac :: Integer;
+            ensures Rem_Capacity = (Max_Depth - |S|);
+
+        Oper Clear (clears S : Stack);
+
+end Bdd_Stack_Template;

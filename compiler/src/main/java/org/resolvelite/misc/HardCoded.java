@@ -16,6 +16,24 @@ public class HardCoded {
     public static void addBuiltInSymbols(TypeGraph g, ResolveCompiler rc,
             ScopeBuilder b) {
         try {
+
+            //temporary builtin string types
+            b.addBinding("Empty_String", null, g.SSTR, null);
+
+            b.addBinding("SStr", null, g.SSTR);
+            b.addBinding("Str", null, new MTFunctionBuilder(g, g.MTYPE)
+                    .paramTypes(g.MTYPE).build());
+            b.addBinding("|...|", null, new MTFunctionBuilder(g, g.N)
+                    .paramTypes(g.SSTR).build());
+            b.addBinding("<...>", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.SSTR).build());
+            b.addBinding("o", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.SSTR, g.SSTR).build());
+            b.addBinding("Reverse", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.SSTR).build());
+            b.addBinding("Iterated_Concatenation", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.MTYPE, g.MTYPE, g.MTYPE).build());
+
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
             b.addBinding("Card", null, g.MTYPE, g.CARD);

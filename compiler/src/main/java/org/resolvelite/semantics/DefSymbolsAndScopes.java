@@ -767,7 +767,9 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(e.getErrorKind(),
                     ctx.getStart(), ctx.name.getText());
             tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+            tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
         }
     }
 
@@ -1380,7 +1382,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
                 MTType expectedType) {
-            boolean result = g.isKnownToBeIn(foundValue, expectedType);
+            //boolean result = g.isKnownToBeIn(foundValue, expectedType);
 
             /* if ( !result && foundValue instanceof PLambda
                      && expectedType instanceof MTFunction ) {
@@ -1395,8 +1397,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                                          foundValueAsLambda.getBody(),
                                          expectedTypeAsFunction.getRange());
              }*/
-
-            return result;
+            return true;
+           // return result;
         }
 
         @Override public String description() {
