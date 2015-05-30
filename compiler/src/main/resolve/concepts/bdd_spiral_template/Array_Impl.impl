@@ -20,9 +20,50 @@ Implementation Array_Impl for Bdd_Spiral_Template;
         end;
 
         Proc Lengthen (alters e : T; updates P : Spiral_Pos);
-            --duration Big_Theta(0);
+            --duration Is_Big_Theta(0);
             Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;
+
+(*
+--------------------------
+L E N G T H E N:
+--------------------------
+1. Apply procedure decl rule
+C / ASSUME  0 <= P.Curr_Place <= P.Length <= Max_Length and
+            SCD(P.Trmnl_Loc) < Max_Length;
+    REMEMBER;
+        Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
+        P.Length := P.Length + 1;
+    CONFIRM P.Trmnl_Loc = SS(@P.Trmnl_Loc, 0) and
+            P.Curr_Loc = @P.Curr_Loc and
+            P.Lab = lambda (q : Sp_Loc).(
+                {{@e if q = @P.Trmnl_Loc; @P.Lab(q) otherwise; }}) and
+            0 <= P.Curr_Place <= P.Length <= Max_Length
+
+2. apply call simple call rule (Sum)
+C / ASSUME  0 <= P.Curr_Place <= P.Length <= Max_Length and
+            SCD(P.Trmnl_Loc) < Max_Length;
+    REMEMBER;
+        Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
+        P.Length := P.Length + 1;
+    CONFIRM
+            min_int <= i + j <= max_int [i -> P.Length, j -> 1] and
+            P.Trmnl_Loc = SS(@P.Trmnl_Loc, 0) and
+            P.Curr_Loc = @P.Curr_Loc and
+            P.Lab = lambda (q : Sp_Loc).(
+                {{@e if q = @P.Trmnl_Loc; @P.Lab(q) otherwise; }}) and
+            0 <= P.Curr_Place <= P.Length <= Max_Length
+            [P.Length -> Sum = ( i + j )[i -> P.Length, j -> 1]]
+------------------------------>
+    CONFIRM
+            min_int <= P.Length + 1 <= max_int and
+            conc.P.Trmnl_Loc = SS(@conc.P.Trmnl_Loc, 0) and
+            conc.P.Curr_Loc = @conc.P.Curr_Loc and
+            conc.P.Lab = lambda (q : Sp_Loc).(
+                {{@e if q = @P.Trmnl_Loc; @P.Lab(q) otherwise; }}) and
+            0 <= P.Curr_Place <= P.Length <= Max_Length
+            [P.Length -> Sum = ( i + j )[i -> P.Length, j -> 1]]
+*)
 
 end Array_Impl;

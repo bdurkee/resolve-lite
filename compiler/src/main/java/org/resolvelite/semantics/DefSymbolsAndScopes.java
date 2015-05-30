@@ -1005,7 +1005,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
             try {
                 curType = repr.getFamily().getModelType();
-            } catch (NoneProvidedException e) {
+            }
+            catch (NoneProvidedException e) {
                 //if a model was not provided to us, then we're a locally defined
                 //type representation and should not be referring to conceptual
                 //variables (because there are none in this case).

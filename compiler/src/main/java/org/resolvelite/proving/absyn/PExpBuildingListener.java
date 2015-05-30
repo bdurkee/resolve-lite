@@ -244,6 +244,22 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitProgApplicationExp(
+            @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+        PSymbolBuilder result =
+                new PSymbolBuilder(Utils.getNameFromProgramOp(ctx.op.getText())
+                        .getText())
+                        //
+                        .arguments(
+                                Utils.collect(PExp.class, ctx.progExp(), repo))
+                        //
+                        .qualifier("Std_Integer_Fac")
+                        .progType(progTypes.get(ctx)) //
+                        .mathTypeValue(typeValues.get(ctx)) //
+                        .mathType(types.get(ctx));
+        repo.put(ctx, result.build());
+    }
+
     @Override public void exitProgPrimaryExp(
             @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progPrimary()));
@@ -273,8 +289,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         String name = Utils.join(ctx.Identifier().stream()
                 .map(ParseTree::getText).collect(Collectors.toList()), ".");
         PSymbolBuilder result = new PSymbolBuilder(first.getName() + "." + name)
-                .incoming(first.isIncoming()).mathType(types.get(ctx));
-
+                .incoming(first.isIncoming()).mathType(types.get(ctx))
+                .progType(progTypes.get(ctx))
+                .progTypeValue(progTypeValues.get(ctx));
         repo.put(ctx, result.build());
 
         //PDOT WAY

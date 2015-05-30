@@ -43,7 +43,7 @@ public class PTRepresentation extends PTNamed {
     }
 
     public ProgTypeModelSymbol getFamily() throws NoneProvidedException {
-        if (family == null) {
+        if ( family == null ) {
             throw new NoneProvidedException();
         }
         return family;

@@ -16,7 +16,8 @@ Concept Integer_Template;
         ensures	i = @i - 1;
 
     Operation Sum (evaluates i, j: Integer): Integer;
-        --ensures temp + i;
+        requires min_int <= i + j and i + j <= max_int;
+        ensures	Sum = ( i + j );
 
     Operation Difference (evaluates i, j: Integer): Integer;
 

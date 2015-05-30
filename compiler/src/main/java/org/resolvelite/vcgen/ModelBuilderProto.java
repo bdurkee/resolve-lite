@@ -38,21 +38,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final SymbolTable symtab;
     private final TypeGraph g;
 
-    private final ParseTreeProperty<VCRuleBackedStat> stats =
-            new ParseTreeProperty<>();
-    private final Deque<VCAssertiveBlock> assertiveBlockStack =
-            new LinkedList<>();
-    private VCAssertiveBlockBuilder curAssertiveBuilder = null;
-    private final VCOutputFile outputFile = new VCOutputFile();
-    private ModuleScopeBuilder moduleScope = null;
-    private ResolveParser.TypeRepresentationDeclContext curTypeRepr = null;
-
     public static final StatRuleApplicationStrategy EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
     private final static StatRuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
     private final static StatRuleApplicationStrategy SWAP_APPLICATION =
             new SwapApplicationStrategy();
+
+    private final ParseTreeProperty<VCRuleBackedStat> stats =
+            new ParseTreeProperty<>();
+    private final VCOutputFile outputFile = new VCOutputFile();
+    private ModuleScopeBuilder moduleScope = null;
+    private ResolveParser.TypeRepresentationDeclContext curTypeRepr = null;
+
+    private final Deque<VCAssertiveBlockBuilder> assertiveBlocks =
+            new LinkedList<>();
 
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
@@ -68,23 +68,55 @@ public class ModelBuilderProto extends ResolveBaseListener {
         moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
+    @Override public void enterTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
+
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
+                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(s.getConvention());
+        assertiveBlocks.push(block);
+    }
+
+    @Override public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
+        PExp constraint = g.getTrueExp();
+        PExp correspondence = s.getCorrespondence();
+        if ( s.getDefinition() != null ) {
+            constraint = s.getDefinition().getProgramType().getConstraint();
+        }
+        PExp newConstraint =
+                constraint.substitute(s.exemplarAsPSymbol(),
+                        s.conceptualExemplarAsPSymbol());
+        newConstraint =
+                withCorrespondencePartsSubstituted(newConstraint,
+                        correspondence);
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.finalConfirm(newConstraint);
+        outputFile.chunks.add(block.build());
+    }
+
     @Override public void enterTypeImplInit(
             @NotNull ResolveParser.TypeImplInitContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         ProgReprTypeSymbol repr =
                 symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
-
         PExp convention = repr.getConvention();
         PExp correspondence = repr.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
-        curAssertiveBuilder =
+        VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "T_Init_Hypo=" + repr.getName(), ctx, tr)
                         .assume(getModuleLevelAssertionsOfType(requires()));
+        assertiveBlocks.push(block);
     }
 
     @Override public void exitTypeImplInit(
             @NotNull ResolveParser.TypeImplInitContext ctx) {
+        //Todo: You still need to populate this map consistently
         ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = s.getConvention();
@@ -100,38 +132,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
         newInitEnsures =
                 withCorrespondencePartsSubstituted(newInitEnsures,
                         correspondence);
-        curAssertiveBuilder.stats(Utils.collect(VCRuleBackedStat.class,
-                ctx.stmt(), stats));
-        curAssertiveBuilder.confirm(convention).finalConfirm(newInitEnsures);
-        outputFile.chunks.add(curAssertiveBuilder.build());
-        curAssertiveBuilder = null;
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        block.confirm(convention).finalConfirm(newInitEnsures);
+        outputFile.chunks.add(block.build());
     }
 
-    @Override public void exitTypeRepresentationDecl(
-            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
-        ProgReprTypeSymbol s = symtab.ctxToSyms.get(ctx).toProgReprTypeSymbol();
-        curAssertiveBuilder =
-                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
-                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
-                        .assume(getModuleLevelAssertionsOfType(requires())).assume(
-                                s.getConvention());
-
-        PExp constraint = g.getTrueExp();
-        PExp correspondence = s.getCorrespondence();
-        if ( s.getDefinition() != null ) {
-            constraint = s.getDefinition().getProgramType().getConstraint();
-        }
-        PExp newConstraint =
-                constraint.substitute(s.exemplarAsPSymbol(),
-                        s.conceptualExemplarAsPSymbol());
-        newConstraint =
-                withCorrespondencePartsSubstituted(newConstraint,
-                        correspondence);
-        curAssertiveBuilder.finalConfirm(newConstraint);
-        outputFile.chunks.add(curAssertiveBuilder.build());
-        curAssertiveBuilder = null;
-    }
-
+    //Todo: We need Correct_Op_Hypo to be applied to every procedure before we
+    //get here. Have a map that the the representation fills with the correct
+    //assertive code outlines
     @Override public void enterProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
@@ -146,7 +155,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp localRequires = modifyRequiresByParams(ctx, op.getRequires());
             PExp localConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
 
-            curAssertiveBuilder =
+            VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Proc_Decl_Rule="+ctx.name.getText() , ctx, tr)
                             .freeVars(getFreeVars(s)) //
@@ -154,6 +163,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
                             .finalConfirm(localConfirm).remember();
+            assertiveBlocks.push(block);
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
             e.printStackTrace();
@@ -162,10 +172,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
-        curAssertiveBuilder.stats(Utils.collect(VCRuleBackedStat.class,
-                ctx.stmt(), stats));
-        outputFile.chunks.add(curAssertiveBuilder.build());
-        curAssertiveBuilder = null;
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        outputFile.chunks.add(block.build());
     }
 
     @Override public void enterOperationProcedureDecl(
@@ -175,7 +184,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp localConfirm = modifyEnsuresByParams(ctx, ctx.ensuresClause());
         List<ResolveParser.ParameterDeclGroupContext> paramGroupings =
                 ctx.operationParameterList().parameterDeclGroup();
-        curAssertiveBuilder =
+        VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s, "Proc_Decl_Rule="
                         + ctx.name.getText(), ctx, tr).freeVars(getFreeVars(s))
                         .assume(getModuleLevelAssertionsOfType(requires()))
@@ -183,17 +192,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(localRequires)
                         .assume(getFormalParamConstraints(paramGroupings))
                         .remember().finalConfirm(localConfirm);
+        assertiveBlocks.push(block);
     }
 
     @Override public void exitOperationProcedureDecl(
             @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
-        curAssertiveBuilder.stats(
-                Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .stats(Utils.collect(VCRuleBackedStat.class,
                         ctx.variableDeclGroup(), stats));
-
-        outputFile.chunks.add(curAssertiveBuilder.build());
-        curAssertiveBuilder = null;
+        outputFile.chunks.add(block.build());
     }
 
     @Override public void exitVariableDeclGroup(
@@ -217,7 +225,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void exitCallStmt(
             @NotNull ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
                                 .progParamExp()));
         stats.put(ctx, s);
@@ -226,7 +234,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void exitSwapStmt(
             @NotNull ResolveParser.SwapStmtContext ctx) {
         VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
@@ -235,7 +243,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void exitAssignStmt(
             @NotNull ResolveParser.AssignStmtContext ctx) {
         VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, curAssertiveBuilder,
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
@@ -309,15 +317,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
     public void modifyAssertiveBlockByVariableDecls(
             @NotNull List<TerminalNode> vars,
             @NotNull ResolveParser.TypeContext type) {
-        if ( curAssertiveBuilder == null ) {
-            throw new IllegalStateException("no open assertive builder");
+        if ( assertiveBlocks.isEmpty() ) {
+            throw new IllegalStateException("no active assertive builders");
         }
         PTType groupType = tr.progTypeValues.get(type);
-        PExp finalConfirm = curAssertiveBuilder.finalConfirm.getConfirmExp();
+        PExp finalConfirm = assertiveBlocks.peek().finalConfirm.getConfirmExp();
         for (TerminalNode t : vars) {
             if ( groupType instanceof PTGeneric ) {
-                curAssertiveBuilder.assume(g.formInitializationPredicate(
-                        groupType, t.getText()));
+                assertiveBlocks.peek().assume(
+                        g.formInitializationPredicate(groupType, t.getText()));
             }
             else {
                 PTNamed namedComponent = (PTNamed) groupType;
@@ -332,7 +340,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         namedComponent.getInitializationEnsures().substitute(
                                 exemplar, variable);
                 if ( finalConfirm.containsName(t.getText()) ) {
-                    curAssertiveBuilder.assume(init);
+                    assertiveBlocks.peek().assume(init);
                 }
             }
         }
@@ -387,14 +395,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private PExp getTypeLevelConstraint(PTType t) {
         PExp result = g.getTrueExp();
-        if (t instanceof PTFamily) {
+        if ( t instanceof PTFamily ) {
             result = ((PTFamily) t).getConstraint();
         }
-        else if (t instanceof PTRepresentation) {
+        else if ( t instanceof PTRepresentation ) {
             try {
-                result = ((PTRepresentation) t).getFamily()
-                        .getProgramType().getInitializationEnsures();
-            } catch (NoneProvidedException e) {
+                result =
+                        ((PTRepresentation) t).getFamily().getProgramType()
+                                .getInitializationEnsures();
+            }
+            catch (NoneProvidedException e) {
                 //No fam? How sad. But we'll manage; we'll just be true then
             }
         }
