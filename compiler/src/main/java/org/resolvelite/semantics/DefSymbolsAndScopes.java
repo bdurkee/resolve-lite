@@ -214,14 +214,25 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         curOperationName = ctx.name.getText();
     }
 
-    //effectively serves as the 'mid' method for all operation like things
+    //effectively serves as the 'mid' method for all 'operation like things'
     @Override public void exitOperationReturnType(
             @NotNull ResolveParser.OperationReturnTypeContext ctx) {
         try {
-            //Inside the operation's assertions, the name of the operation
-            //refers to its return value
-            symtab.getInnermostActiveScope().addBinding(curOperationName,
-                    ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+            //If our parent is an operation decl, then we're in a mathematical
+            //context and should add a mathematical binding
+            if (ctx.getParent() instanceof ResolveParser.OperationDeclContext) {
+                symtab.getInnermostActiveScope().addBinding(curOperationName,
+                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+            }
+            else {
+                //otherwise we're in some implementation context and should a
+                //variable reference to the operation to scope
+                //(to allow for return refs etc)
+                PTType type = tr.progTypeValues.get(ctx.type());
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(curOperationName,
+                                ctx.getParent(), type, getRootModuleID()));
+            }
         }
         catch (DuplicateSymbolException dse) {
             //This shouldn't be possible--the operation declaration has a
@@ -268,6 +279,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
+        curOperationName = ctx.name.getText();
         symtab.startScope(ctx);
     }
 
@@ -1398,7 +1410,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                                          expectedTypeAsFunction.getRange());
              }*/
             return true;
-           // return result;
+            // return result;
         }
 
         @Override public String description() {

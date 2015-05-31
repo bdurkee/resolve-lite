@@ -179,23 +179,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .arguments(args).mathType(types.get(ctx));
 
         repo.put(ctx, result.build());
-    //PDOT WAY
- /*       List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
-                .collect(Collectors.toList());
-
-        List<PSymbol> segs = ctx.Identifier().stream()
-                .map(t -> new PSymbolBuilder(t.getText())
-                        .mathType(types.get(t)).build())
-                .collect(Collectors.toList());
-        PSymbolBuilder semanticLast = new PSymbolBuilder(ctx.semantic.getText())
-                .mathType(types.get(ctx));
-
-        if (!ctx.mathExp().isEmpty()) {
-            semanticLast.arguments(Utils.collect(PExp.class,
-                    ctx.mathExp(), repo));
-        }
-        segs.add(semanticLast.build());
-        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));*/
     }
 
     @Override public void exitMathFunctionExp(
@@ -293,19 +276,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .progType(progTypes.get(ctx))
                 .progTypeValue(progTypeValues.get(ctx));
         repo.put(ctx, result.build());
-
-        //PDOT WAY
-        /*List<PSymbol> segs = new ArrayList<>();
-        segs.add((PSymbol) repo.get(ctx.getChild(0)));
-        for (TerminalNode term : ctx.Identifier()) {
-            segs.add(new PSymbol.PSymbolBuilder(term.getText())
-                    .mathType(types.get(term)).progType(progTypes.get(term))
-                    .build());
-        }
-        PDot result =
-                new PDot(segs, types.get(ctx), typeValues.get(ctx),
-                        progTypes.get(ctx), progTypeValues.get(ctx));
-        repo.put(ctx, result);*/
     }
 
     @Override public void exitProgIntegerExp(

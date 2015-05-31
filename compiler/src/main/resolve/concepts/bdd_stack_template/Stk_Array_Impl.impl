@@ -18,4 +18,23 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
             Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
         end Push;
 
+        Proc Pop (replaces e : T; updates S : Stack);
+            Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
+            S.Top := S.Top - 1;
+        end Pop;
+
+        Proc Depth (restores S : Stack) :
+                        Std_Integer_Fac :: Integer;
+            Depth := S.Top;
+        end Depth;
+
+        Proc Rem_Capacity (restores S : Stack) :
+                        Std_Integer_Fac :: Integer;
+            Rem_Capacity := Max_Depth - S.Top;
+        end Rem_Capacity;
+
+        Proc Clear (clears S : Stack);
+            S.Top := 0;
+        end Clear;
+
 end Stk_Array_Impl;

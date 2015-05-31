@@ -31,8 +31,8 @@ public class HardCoded {
                     .paramTypes(g.SSTR, g.SSTR).build());
             b.addBinding("Reverse", null, new MTFunctionBuilder(g, g.SSTR)
                     .paramTypes(g.SSTR).build());
-            b.addBinding("Iterated_Concatenation", null, new MTFunctionBuilder(g, g.SSTR)
-                    .paramTypes(g.MTYPE, g.MTYPE, g.MTYPE).build());
+            b.addBinding("Iterated_Concatenation", null, new MTFunctionBuilder(
+                    g, g.SSTR).paramTypes(g.Z, g.SSTR, g.SSTR).build());
 
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
