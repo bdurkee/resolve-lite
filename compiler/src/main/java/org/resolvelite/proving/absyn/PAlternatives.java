@@ -71,19 +71,15 @@ public class PAlternatives extends PExp {
 
     private static int calculateStructureHash(List<PExp> conditions,
             List<PExp> results, PExp otherwiseClauseResult) {
-
         int hash = 0;
-
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = conditions.iterator();
-
         while (conditionIter.hasNext()) {
             hash *= 31;
             hash += conditionIter.next().structureHash;
             hash *= 34;
             hash += resultIter.next().structureHash;
         }
-
         return hash;
     }
 
@@ -125,7 +121,14 @@ public class PAlternatives extends PExp {
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
-        return null;
+        Set<PSymbol> result = new HashSet<>();
+
+        for (Alternative a : alternatives) {
+            result.addAll(a.condition.getIncomingVariables());
+            result.addAll(a.result.getIncomingVariables());
+        }
+        result.addAll(otherwiseClauseResult.getIncomingVariables());
+        return result;
     }
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
@@ -174,7 +177,7 @@ public class PAlternatives extends PExp {
     }
 
     @Override public List<PExp> getFunctionApplicationsNoCache() {
-        List<PExp> result = new LinkedList<PExp>();
+        List<PExp> result = new LinkedList<>();
 
         for (Alternative a : alternatives) {
             result.addAll(a.condition.getFunctionApplications());

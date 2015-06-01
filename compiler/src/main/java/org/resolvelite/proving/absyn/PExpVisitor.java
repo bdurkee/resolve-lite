@@ -10,6 +10,8 @@ public abstract class PExpVisitor {
 
     public void beginPSet(PSet p) {}
 
+    public void beginPSegments(PSegments p) {}
+
     public void beginPLambda(PLambda p) {}
 
     public void beginChildren(PExp p) {}
@@ -27,6 +29,8 @@ public abstract class PExpVisitor {
     public void endPAlternatives(PAlternatives p) {}
 
     public void endPLambda(PLambda p) {}
+
+    public void endPSegments(PSegments p) {}
 
     public void endPSet(PSet p) {}
 

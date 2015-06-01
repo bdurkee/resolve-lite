@@ -220,7 +220,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         try {
             //If our parent is an operation decl, then we're in a mathematical
             //context and should add a mathematical binding
-            if (ctx.getParent() instanceof ResolveParser.OperationDeclContext) {
+            if ( ctx.getParent() instanceof ResolveParser.OperationDeclContext ) {
                 symtab.getInnermostActiveScope().addBinding(curOperationName,
                         ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
             }
@@ -230,8 +230,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 //(to allow for return refs etc)
                 PTType type = tr.progTypeValues.get(ctx.type());
                 symtab.getInnermostActiveScope().define(
-                        new ProgVariableSymbol(curOperationName,
-                                ctx.getParent(), type, getRootModuleID()));
+                        new ProgVariableSymbol(curOperationName, ctx
+                                .getParent(), type, getRootModuleID()));
             }
         }
         catch (DuplicateSymbolException dse) {
@@ -462,7 +462,8 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
         ResolveParser.TypeRepresentationDeclContext typeRep =
                 ((ResolveParser.TypeRepresentationDeclContext) ctx.getParent());
-
+        //we can't do the following here. We haven't visited them and assigned
+        //the exps types yet.
         reprType =
                 new PTRepresentation(g, tr.progTypeValues.get(t),
                         typeRep.name.getText(), curTypeDefnSymbol,
@@ -495,6 +496,10 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     new ProgReprTypeSymbol(g, ctx.name.getText(), ctx,
                             getRootModuleID(), curTypeDefnSymbol, reprType,
                             convention, correspondence);
+            //not ideal, but it'll do for now it's convenient to have access to
+            //the repr symbol from the actual type (just like we already do for
+            //the model sym)
+            repr.getRepresentationType().setReprTypeSymbol(repr);
             symtab.getInnermostActiveScope().define(repr);
             symtab.ctxToSyms.put(ctx, repr);
             symtab.ctxToSyms.put(ctx.typeImplInit(), repr); //give the initialization subtree a clue too.
@@ -989,13 +994,13 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-
         System.out.println("typing dot exp ctx=" + ctx.getText());
 
         Iterator<TerminalNode> segsIter = ctx.Identifier().iterator();
         TerminalNode nextSeg, lastSeg = null;
         if ( ctx.getStart().getText().equalsIgnoreCase("conc") ) {
             nextSeg = segsIter.next();
+            tr.mathTypes.put(ctx, g.BOOLEAN);
         }
         nextSeg = segsIter.next();
         Symbol firstSym = null;
@@ -1008,10 +1013,15 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errorManager.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
+            //mark the whole thing invalid (segs included.
+            for (TerminalNode t : ctx.Identifier()) {
+                tr.mathTypes.put(t, MTInvalid.getInstance(g));
+            }
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
             return;
         }
         MTType curType = firstSym.toMathSymbol().getType();
+        tr.mathTypes.put(nextSeg, curType);
         if ( ctx.getStart().getText().equalsIgnoreCase("conc") ) {
             PTRepresentation repr =
                     ((PTRepresentation) firstSym.toProgVariableSymbol()
@@ -1024,7 +1034,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                 //if a model was not provided to us, then we're a locally defined
                 //type representation and should not be referring to conceptual
                 //variables (because there are none in this case).
-                //Todo: error better and more informative.
+                //Todo: give a better, more official error for this.
                 e.printStackTrace();
             }
         }
@@ -1056,6 +1066,14 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
                     curType = g.INVALID;
                     break;
                 }
+            }
+            tr.mathTypes.put(nextSeg, curType);
+        }
+        //sanity check all segs to make sure they have a type, if one segment
+        //doesn't, then give it invalid.
+        for (TerminalNode t : ctx.Identifier()) {
+            if (tr.mathTypes.get(t) == null) {
+                tr.mathTypes.put(t, g.INVALID);
             }
         }
         //Todo: Typecheck args on dotexps ending in a function application

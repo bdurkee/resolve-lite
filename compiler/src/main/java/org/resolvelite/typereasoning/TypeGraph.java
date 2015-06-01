@@ -500,6 +500,10 @@ public class TypeGraph {
                 .style(DisplayStyle.INFIX).build();
     }
 
+    public final PSymbol formConcExp() {
+        return new PSymbol.PSymbolBuilder("conc").mathType(BOOLEAN).build();
+    }
+
     public final PSymbol formInitializationPredicate(PTType argType,
             String argName) {
         PSymbol predicateArg =

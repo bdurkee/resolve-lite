@@ -132,6 +132,7 @@ enhancementImplModule
         'end' closename=Identifier ';'
     ;
 
+//Todo: Apparently impls can have constraints too.
 implBlock
     :   ( typeRepresentationDecl
         | operationProcedureDecl
