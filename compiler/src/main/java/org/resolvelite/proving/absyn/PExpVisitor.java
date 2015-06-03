@@ -10,7 +10,7 @@ public abstract class PExpVisitor {
 
     public void beginPSet(PSet p) {}
 
-    public void beginPDot(PDot p) {}
+    public void beginPSegments(PSegments p) {}
 
     public void beginPLambda(PLambda p) {}
 
@@ -30,7 +30,7 @@ public abstract class PExpVisitor {
 
     public void endPLambda(PLambda p) {}
 
-    public void endPDot(PDot p) {}
+    public void endPSegments(PSegments p) {}
 
     public void endPSet(PSet p) {}
 

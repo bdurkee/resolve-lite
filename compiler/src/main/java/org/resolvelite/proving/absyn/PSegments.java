@@ -1,41 +1,32 @@
 package org.resolvelite.proving.absyn;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.resolvelite.misc.Utils;
-import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-// Todo: We probably don't even really need this class. Just use PSymbol; that
-// is, no need for segments. Yes I realize the VC generator currently 'uses'
-// them
-// but it doesn't have to.
-@Deprecated
-public class PDot extends PExp {
+public class PSegments extends PExp {
 
     private final List<PSymbol> segs = new ArrayList<>();
 
-    public PDot(MTType type, MTType typeValue, PSymbol... segs) {
-        this(Arrays.asList(segs), type, typeValue, null, null);
+    public PSegments(PSymbol... segs) {
+        this(Arrays.asList(segs));
     }
 
-    public PDot(List<PSymbol> segs, MTType type, MTType typeValue) {
-        this(segs, type, typeValue, null, null);
+    public PSegments(List<PSymbol> segs) {
+        this(segs, segs.get(segs.size() - 1));
     }
 
-    public PDot(List<PSymbol> segs, MTType type, MTType typeValue,
-            PTType progType, PTType progTypeValue) {
-        super(PSymbol.calculateHashes(segs), type, typeValue, progType,
-                progTypeValue);
+    public PSegments(List<PSymbol> segs, PSymbol lastSegment) {
+        super(PSymbol.calculateHashes(segs), lastSegment.getMathType(),
+                lastSegment.getMathTypeValue(), lastSegment.getProgType(),
+                lastSegment.getProgTypeValue());
         this.segs.addAll(segs);
     }
 
     @Override public void accept(PExpVisitor v) {
         v.beginPExp(this);
-        v.beginPDot(this);
+        v.beginPSegments(this);
 
         v.beginChildren(this);
         for (PSymbol segment : segs) {
@@ -43,7 +34,7 @@ public class PDot extends PExp {
         }
         v.endChildren(this);
 
-        v.endPDot(this);
+        v.endPSegments(this);
         v.endPExp(this);
     }
 
@@ -56,8 +47,8 @@ public class PDot extends PExp {
             for (PSymbol p : segs) {
                 PExp x1 = p.substitute(substitutions);
 
-                if ( x1 instanceof PDot ) { //flatten the dot exp
-                    PDot x1AsPDot = (PDot) x1;
+                if ( x1 instanceof PSegments ) { //flatten the dot exp
+                    PSegments x1AsPDot = (PSegments) x1;
                     for (PSymbol s : x1AsPDot.getSegments()) {
                         newSegments.add(s);
                     }
@@ -66,8 +57,7 @@ public class PDot extends PExp {
                     newSegments.add((PSymbol) x1);
                 }
             }
-            return new PDot(newSegments, getMathType(), getMathTypeValue(),
-                    getProgType(), getProgTypeValue());
+            return new PSegments(newSegments);
         }
         return result;
     }
@@ -117,8 +107,7 @@ public class PDot extends PExp {
         List<PSymbol> newSegs = segs.stream()
                 .map(PExp::withIncomingSignsErased).map(s -> (PSymbol) s)
                 .collect(Collectors.toList());
-        return new PDot(newSegs, getMathType(), getMathTypeValue(),
-                getProgType(), getProgTypeValue());
+        return new PSegments(newSegs);
     }
 
     @Override public PExp flipQuantifiers() {
@@ -142,13 +131,14 @@ public class PDot extends PExp {
     }
 
     @Override public boolean equals(Object o) {
-        boolean result = (o instanceof PDot);
+        boolean result = (o instanceof PSegments);
         if ( result ) {
-            List<PSymbol> oSegs = ((PDot) o).getSegments();
+            List<PSymbol> oSegs = ((PSegments) o).getSegments();
             if ( oSegs.size() != this.getSegments().size() ) {
                 result = false;
             }
-            Iterator<PSymbol> oSegsIter = ((PDot) o).getSegments().iterator();
+            Iterator<PSymbol> oSegsIter =
+                    ((PSegments) o).getSegments().iterator();
             Iterator<PSymbol> thisSegsIter = this.getSegments().iterator();
 
             while (result && oSegsIter.hasNext() && thisSegsIter.hasNext()) {

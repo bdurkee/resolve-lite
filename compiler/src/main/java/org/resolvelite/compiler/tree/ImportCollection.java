@@ -50,8 +50,9 @@ import java.util.*;
  * <tt>imports</tt> list in a module's preamble.</li>
  * </ul>
  */
-//Todo: This shit has gotten way too confusing. Delete this, simplify it, whatever it takes.
-//and make it so the importListener doesn't crash -- it's run before we do our filtering step for
+//Todo: This shit has gotten way too complicated for what it's actually doing.
+//Delete this, simplify it, whatever it takes. and make it so the
+//importListener doesn't crash -- it's run before we do our filtering step for
 //modules with gross syntactic errors.
 public class ImportCollection {
 

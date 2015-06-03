@@ -1,7 +1,7 @@
 package org.resolvelite.semantics.symbol;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.proving.absyn.PDot;
+import org.resolvelite.proving.absyn.PSegments;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.PTRepresentation;
@@ -37,10 +37,8 @@ public class ProgReprTypeSymbol extends Symbol {
                 .build();
     }
 
-    public PSymbol conceptualExemplarAsPSymbol() {
-        return new PSymbol.PSymbolBuilder("conc."
-                + representation.getExemplarName()).mathType(
-                definition.getModelType()).build();
+    public PSegments conceptualExemplarAsPSymbol() {
+        return new PSegments(typeGraph.formConcExp(), exemplarAsPSymbol());
     }
 
     public PTRepresentation getRepresentationType() {

@@ -1,5 +1,6 @@
 package org.resolvelite.proving.absyn;
 
+import org.resolvelite.misc.Utils;
 import org.resolvelite.semantics.MTFunction;
 import org.resolvelite.semantics.MTType;
 
@@ -108,7 +109,7 @@ public class PLambda extends PExp {
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
-        return null;
+        return body.getIncomingVariablesNoCache();
     }
 
     @Override public Set<String> getSymbolNamesNoCache() {
@@ -148,5 +149,10 @@ public class PLambda extends PExp {
         @Override public String toString() {
             return name + ":" + type;
         }
+    }
+
+    @Override public String toString() {
+        return "lambda" + Utils.join(parameters, ".", "(", ")") + ".(" + body
+                + ")";
     }
 }

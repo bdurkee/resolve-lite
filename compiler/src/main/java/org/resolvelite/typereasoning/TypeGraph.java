@@ -33,6 +33,7 @@ public class TypeGraph {
     public final MTProper ENTITY = new MTProper(this, "Entity");
 
     public final MTProper MTYPE = new MTProper(this, null, true, "MType");
+    public final MTProper SSTR = new MTProper(this, MTYPE, false, "SStr");
     public final MTProper SSET = new MTProper(this, MTYPE, true, "SSet");
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
     public final MTProper CARD = new MTProper(this, MTYPE, false, "Card");
@@ -497,6 +498,10 @@ public class TypeGraph {
     public final PSymbol formImplies(PExp p, PExp q) {
         return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
                 .style(DisplayStyle.INFIX).build();
+    }
+
+    public final PSymbol formConcExp() {
+        return new PSymbol.PSymbolBuilder("conc").mathType(BOOLEAN).build();
     }
 
     public final PSymbol formInitializationPredicate(PTType argType,

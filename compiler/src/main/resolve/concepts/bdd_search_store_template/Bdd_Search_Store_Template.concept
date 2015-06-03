@@ -2,6 +2,7 @@ Concept Bdd_Search_Store_Template<T>
         (evaluates Max_Capacity : Std_Integer_Fac :: Integer);
             uses General_Purpose_Theory;
     requires Max_Capacity > 0 which_entails Max_Capacity : N;
+
     Type Family Store is
                 modeled by Powerset(T);
         exemplar S;

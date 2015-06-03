@@ -9,6 +9,7 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PSegments;
 import org.resolvelite.proving.absyn.PSymbol.DisplayStyle;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PSymbol;
@@ -75,6 +76,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
+                        .freeVars(getFreeVars(symtab.scopes.get(ctx)))
+                        //
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(s.getConvention());
         assertiveBlocks.push(block);
@@ -138,12 +141,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.chunks.add(block.build());
     }
 
-    //Todo: We need Correct_Op_Hypo to be applied to every procedure before we
-    //get here. Have a map that the the representation fills with the correct
-    //assertive code outlines
     @Override public void enterProcedureDecl(
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
+        //If a formal parameter 'p' comes in as a PTRepresentation, THEN we
+        //need to replace all instances of 'p' with 'conc.p' in the precondition
+        //AND postcondition, then once again substitute conc.p for the
+        //full correspondence expression.
         try {
             List<PTType> argTypes =
                     s.getSymbolsOfType(ProgParameterSymbol.class).stream()
@@ -153,7 +157,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     new OperationQuery(null, ctx.name, argTypes));
 
             PExp localRequires = modifyRequiresByParams(ctx, op.getRequires());
-            PExp localConfirm = modifyEnsuresByParams(ctx, op.getEnsures());
+            PExp localEnsures = modifyEnsuresByParams(ctx, op.getEnsures());
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
@@ -162,7 +166,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .assume(localRequires) //
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
-                            .finalConfirm(localConfirm).remember();
+                            .finalConfirm(localEnsures).remember();
             assertiveBlocks.push(block);
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
@@ -251,7 +255,54 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private PExp modifyRequiresByParams(@NotNull ParserRuleContext functionCtx,
             @Nullable ResolveParser.RequiresClauseContext requires) {
-        return tr.getPExpFor(g, requires);
+        List<ProgParameterSymbol> params =
+                symtab.scopes.get(functionCtx).getSymbolsOfType(
+                        ProgParameterSymbol.class);
+        List<PExp> additionalConjuncts = new ArrayList<>();
+        PExp resultingRequires = tr.getPExpFor(g, requires);
+
+        for (ProgParameterSymbol p : params) {
+            PTType t = p.getDeclaredType();
+            PExp param = p.asPSymbol();
+            PExp exemplar = null;
+            PExp init = g.getTrueExp();
+            if ( t instanceof PTNamed ) { //covers the PTFamily case (it's a subclass of PTNamed)
+                exemplar =
+                        new PSymbol.PSymbolBuilder(
+                                ((PTNamed) t).getExemplarName()).mathType(
+                                t.toMath()).build();
+                init = ((PTNamed) t).getInitializationEnsures();
+                init = init.substitute(exemplar, param);
+                additionalConjuncts.add(init);
+                //existingRequires = g.formConjunct(existingRequires, init);
+            }
+            //but if we're a representation we need to add conventions for that
+            if ( t instanceof PTRepresentation ) {
+                //not that exemplar should have already been set in the if above
+                //PTRepresentation is also a subclass.
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) t).getReprTypeSymbol();
+                PExp convention = repr.getConvention();
+                PExp corrFnExp = repr.getCorrespondence();
+                convention = convention.substitute(exemplar, param);
+                additionalConjuncts.add(convention);
+
+                //existingRequires = g.formConjunct(existingRequires, convention);
+                //now substitute whereever param occurs in the requires clause
+                //with the correspondence function
+                resultingRequires =
+                        resultingRequires.substitute(exemplar,
+                                repr.conceptualExemplarAsPSymbol());
+                resultingRequires =
+                        withCorrespondencePartsSubstituted(resultingRequires,
+                                corrFnExp);
+            }
+            else { //generic.
+
+            }
+        }
+        additionalConjuncts.add(resultingRequires);
+        return g.formConjuncts(additionalConjuncts);
     }
 
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,
@@ -328,6 +379,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         g.formInitializationPredicate(groupType, t.getText()));
             }
             else {
+                //else we use the 'initialization ensures' portion
+                //of the PTNamed type we've just found (with the exemplar
+                //substituted for the actual variable declared)
                 PTNamed namedComponent = (PTNamed) groupType;
                 PExp exemplar =
                         new PSymbol.PSymbolBuilder(
@@ -374,7 +428,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 + "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
             }
             PSymbol eAsPSym = (PSymbol) e;
-            PSymbol elhs = (PSymbol) eAsPSym.getArguments().get(0);
+            PSegments elhs = (PSegments) eAsPSym.getArguments().get(0);
             PSymbol erhs = (PSymbol) eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }

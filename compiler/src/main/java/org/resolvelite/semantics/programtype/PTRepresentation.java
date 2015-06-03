@@ -7,6 +7,7 @@ import org.resolvelite.semantics.MTType;
 import org.resolvelite.semantics.NoSuchSymbolException;
 import org.resolvelite.semantics.NoneProvidedException;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
+import org.resolvelite.semantics.symbol.ProgReprTypeSymbol;
 import org.resolvelite.semantics.symbol.ProgTypeModelSymbol;
 import org.resolvelite.typereasoning.TypeGraph;
 
@@ -29,6 +30,7 @@ public class PTRepresentation extends PTNamed {
      * would appear in the context of a facility module.
      */
     private final ProgTypeModelSymbol family;
+    private ProgReprTypeSymbol repr;
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
             @Nullable ProgTypeModelSymbol family, String enclosingModuleID) {
@@ -36,6 +38,14 @@ public class PTRepresentation extends PTNamed {
         this.name = name;
         this.baseType = baseType;
         this.family = family;
+    }
+
+    public void setReprTypeSymbol(ProgReprTypeSymbol t) {
+        this.repr = t;
+    }
+
+    public ProgReprTypeSymbol getReprTypeSymbol() {
+        return repr;
     }
 
     public PTType getBaseType() {

@@ -15,8 +15,6 @@ import org.resolvelite.semantics.Quantification;
 import org.resolvelite.semantics.programtype.PTType;
 
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -134,7 +132,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .definitionParameterList().mathVariableDeclGroup()) {
             for (TerminalNode term : grp.Identifier()) {
-                parameters.add(new PLambda.Parameter(term.getText(), types
+                parameters.add(new PLambda.Parameter(term.getText(), typeValues
                         .get(grp.mathTypeExp())));
             }
         }
@@ -165,37 +163,23 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathDotExp(
             @NotNull ResolveParser.MathDotExpContext ctx) {
-        //leave the conc out of our psymbol dot exps
-        //(for the sake of later substitutions)
-        String name = Utils.join(ctx.Identifier().stream()
-                .filter(i -> !i.getText().equalsIgnoreCase("conc"))
-                .map(ParseTree::getText).collect(Collectors.toList()), ".");
-
-        List<PExp> args = ctx.mathExp().stream().map(repo::get)
-                .collect(Collectors.toList());
-
-        PSymbolBuilder result = new PSymbolBuilder(name)
-                .incoming(ctx.getStart().getText().equals("@"))
-                .arguments(args).mathType(types.get(ctx));
-
-        repo.put(ctx, result.build());
-    //PDOT WAY
- /*       List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
+        //Todo: Type the individual segs of a dot exp.
+        List<MTType> segTypes = ctx.Identifier().stream().map(types::get)
                 .collect(Collectors.toList());
 
         List<PSymbol> segs = ctx.Identifier().stream()
+                .limit(ctx.Identifier().size() - 1) //skips last
                 .map(t -> new PSymbolBuilder(t.getText())
                         .mathType(types.get(t)).build())
                 .collect(Collectors.toList());
         PSymbolBuilder semanticLast = new PSymbolBuilder(ctx.semantic.getText())
                 .mathType(types.get(ctx));
-
         if (!ctx.mathExp().isEmpty()) {
             semanticLast.arguments(Utils.collect(PExp.class,
                     ctx.mathExp(), repo));
         }
         segs.add(semanticLast.build());
-        repo.put(ctx, new PDot(segs, types.get(ctx), typeValues.get(ctx)));*/
+        repo.put(ctx, new PSegments(segs));
     }
 
     @Override public void exitMathFunctionExp(
@@ -249,10 +233,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result =
                 new PSymbolBuilder(Utils.getNameFromProgramOp(ctx.op.getText())
                         .getText())
-                        //
                         .arguments(
                                 Utils.collect(PExp.class, ctx.progExp(), repo))
-                        //
                         .qualifier("Std_Integer_Fac")
                         .progType(progTypes.get(ctx)) //
                         .mathTypeValue(typeValues.get(ctx)) //
@@ -281,31 +263,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgMemberExp(
             @NotNull ResolveParser.ProgMemberExpContext ctx) {
-        PSymbol first = (PSymbol) repo.get(ctx.getChild(0));
-        if (!first.getArguments().isEmpty()) {
-            throw new UnsupportedOperationException("member exps with "
-                    + "arguments in the first segment are not yet supported.");
-        }
-        String name = Utils.join(ctx.Identifier().stream()
-                .map(ParseTree::getText).collect(Collectors.toList()), ".");
-        PSymbolBuilder result = new PSymbolBuilder(first.getName() + "." + name)
-                .incoming(first.isIncoming()).mathType(types.get(ctx))
-                .progType(progTypes.get(ctx))
-                .progTypeValue(progTypeValues.get(ctx));
-        repo.put(ctx, result.build());
-
-        //PDOT WAY
-        /*List<PSymbol> segs = new ArrayList<>();
+        List<PSymbol> segs = new ArrayList<>();
         segs.add((PSymbol) repo.get(ctx.getChild(0)));
         for (TerminalNode term : ctx.Identifier()) {
             segs.add(new PSymbol.PSymbolBuilder(term.getText())
                     .mathType(types.get(term)).progType(progTypes.get(term))
                     .build());
         }
-        PDot result =
-                new PDot(segs, types.get(ctx), typeValues.get(ctx),
-                        progTypes.get(ctx), progTypeValues.get(ctx));
-        repo.put(ctx, result);*/
+        repo.put(ctx, new PSegments(segs));
     }
 
     @Override public void exitProgIntegerExp(
