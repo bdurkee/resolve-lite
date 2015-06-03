@@ -17,7 +17,7 @@ Facility Test;
                 Var x: Student_Info;
                 Var y: Std_Boolean_Fac::Boolean;
                 Var b: Blah;
-                y := x.enrolled;
+                y := x.enrolled.something;
                 Foo := 3;
         end Foo;
 

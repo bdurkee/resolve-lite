@@ -47,7 +47,7 @@ public class PSegments extends PExp {
             for (PSymbol p : segs) {
                 PExp x1 = p.substitute(substitutions);
 
-                if ( x1 instanceof PSegments) { //flatten the dot exp
+                if ( x1 instanceof PSegments ) { //flatten the dot exp
                     PSegments x1AsPDot = (PSegments) x1;
                     for (PSymbol s : x1AsPDot.getSegments()) {
                         newSegments.add(s);
@@ -137,7 +137,8 @@ public class PSegments extends PExp {
             if ( oSegs.size() != this.getSegments().size() ) {
                 result = false;
             }
-            Iterator<PSymbol> oSegsIter = ((PSegments) o).getSegments().iterator();
+            Iterator<PSymbol> oSegsIter =
+                    ((PSegments) o).getSegments().iterator();
             Iterator<PSymbol> thisSegsIter = this.getSegments().iterator();
 
             while (result && oSegsIter.hasNext() && thisSegsIter.hasNext()) {

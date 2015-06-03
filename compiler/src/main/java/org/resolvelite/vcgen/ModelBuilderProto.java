@@ -76,7 +76,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
-                        .freeVars(getFreeVars(symtab.scopes.get(ctx))) //
+                        .freeVars(getFreeVars(symtab.scopes.get(ctx)))
+                        //
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(s.getConvention());
         assertiveBlocks.push(block);
@@ -257,42 +258,51 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> params =
                 symtab.scopes.get(functionCtx).getSymbolsOfType(
                         ProgParameterSymbol.class);
-        PExp existingRequires = tr.getPExpFor(g, requires);
+        List<PExp> additionalConjuncts = new ArrayList<>();
+        PExp resultingRequires = tr.getPExpFor(g, requires);
+
         for (ProgParameterSymbol p : params) {
             PTType t = p.getDeclaredType();
             PExp param = p.asPSymbol();
             PExp exemplar = null;
             PExp init = g.getTrueExp();
-            if (t instanceof PTNamed) { //covers the PTFamily case (it's a subclass of PTNamed)
-                exemplar = new PSymbol.PSymbolBuilder(((PTNamed) t)
-                        .getExemplarName())
-                        .mathType(t.toMath()).build();
+            if ( t instanceof PTNamed ) { //covers the PTFamily case (it's a subclass of PTNamed)
+                exemplar =
+                        new PSymbol.PSymbolBuilder(
+                                ((PTNamed) t).getExemplarName()).mathType(
+                                t.toMath()).build();
                 init = ((PTNamed) t).getInitializationEnsures();
                 init = init.substitute(exemplar, param);
-                existingRequires = g.formConjunct(existingRequires, init);
+                additionalConjuncts.add(init);
+                //existingRequires = g.formConjunct(existingRequires, init);
             }
             //but if we're a representation we need to add conventions for that
-            if (t instanceof PTRepresentation) {
+            if ( t instanceof PTRepresentation ) {
                 //not that exemplar should have already been set in the if above
                 //PTRepresentation is also a subclass.
-                ProgReprTypeSymbol repr = ((PTRepresentation) t)
-                        .getReprTypeSymbol();
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) t).getReprTypeSymbol();
                 PExp convention = repr.getConvention();
                 PExp corrFnExp = repr.getCorrespondence();
                 convention = convention.substitute(exemplar, param);
-                existingRequires = g.formConjunct(existingRequires, convention);
+                additionalConjuncts.add(convention);
+
+                //existingRequires = g.formConjunct(existingRequires, convention);
                 //now substitute whereever param occurs in the requires clause
                 //with the correspondence function
-                existingRequires = existingRequires.substitute(
-                        exemplar, repr.conceptualExemplarAsPSymbol());
-                existingRequires = withCorrespondencePartsSubstituted(
-                        existingRequires, corrFnExp);
+                resultingRequires =
+                        resultingRequires.substitute(exemplar,
+                                repr.conceptualExemplarAsPSymbol());
+                resultingRequires =
+                        withCorrespondencePartsSubstituted(resultingRequires,
+                                corrFnExp);
             }
-            else {  //generic.
+            else { //generic.
 
             }
         }
-        return existingRequires;
+        additionalConjuncts.add(resultingRequires);
+        return g.formConjuncts(additionalConjuncts);
     }
 
     private PExp modifyEnsuresByParams(@NotNull ParserRuleContext functionCtx,

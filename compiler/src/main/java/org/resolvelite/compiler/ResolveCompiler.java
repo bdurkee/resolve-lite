@@ -365,7 +365,6 @@ public class ResolveCompiler {
 
     private File findResolveFile(String baseName, List<String> extensions)
             throws IOException {
-
         FileLocator l = new FileLocator(baseName, extensions);
         Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();

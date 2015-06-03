@@ -480,6 +480,8 @@ mathLiteralExp
 
 mathFunctionApplicationExp
     :   ('@')? name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
+    |   ('@')? name=Identifier '(' mathExp (',' mathExp)* ')'
+        '(' mathExp (',' mathExp)* ')'                         #mathFunctionExp2
     |   ('@')? (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
     ;
 

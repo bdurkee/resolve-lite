@@ -168,7 +168,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .collect(Collectors.toList());
 
         List<PSymbol> segs = ctx.Identifier().stream()
-                .limit(ctx.Identifier().size() - 1)
+                .limit(ctx.Identifier().size() - 1) //skips last
                 .map(t -> new PSymbolBuilder(t.getText())
                         .mathType(types.get(t)).build())
                 .collect(Collectors.toList());
@@ -233,7 +233,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result =
                 new PSymbolBuilder(Utils.getNameFromProgramOp(ctx.op.getText())
                         .getText())
-                        .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+                        .arguments(
+                                Utils.collect(PExp.class, ctx.progExp(), repo))
                         .qualifier("Std_Integer_Fac")
                         .progType(progTypes.get(ctx)) //
                         .mathTypeValue(typeValues.get(ctx)) //

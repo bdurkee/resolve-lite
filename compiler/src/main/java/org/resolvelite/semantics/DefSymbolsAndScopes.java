@@ -18,6 +18,7 @@ import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
+import org.resolvelite.proving.absyn.PLambda;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.programtype.*;
 import org.resolvelite.semantics.query.*;
@@ -1072,7 +1073,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
         //sanity check all segs to make sure they have a type, if one segment
         //doesn't, then give it invalid.
         for (TerminalNode t : ctx.Identifier()) {
-            if (tr.mathTypes.get(t) == null) {
+            if ( tr.mathTypes.get(t) == null ) {
                 tr.mathTypes.put(t, g.INVALID);
             }
         }
@@ -1412,21 +1413,21 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
                 MTType expectedType) {
-            //boolean result = g.isKnownToBeIn(foundValue, expectedType);
+            boolean result = g.isKnownToBeIn(foundValue, expectedType);
 
-            /* if ( !result && foundValue instanceof PLambda
-                     && expectedType instanceof MTFunction ) {
-                 PLambda foundValueAsLambda = (PLambda) foundValue;
-                 MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
-                 MTFunction foundTypeAsFunction =
-                         (MTFunction) foundValue.getMathType();
-                 result =
-                         g.isSubtype(foundTypeAsFunction.getDomain(),
-                                 expectedTypeAsFunction.getDomain())
-                                 && g.isKnownToBeIn(
-                                         foundValueAsLambda.getBody(),
-                                         expectedTypeAsFunction.getRange());
-             }*/
+            if ( !result && foundValue instanceof PLambda
+                    && expectedType instanceof MTFunction ) {
+                PLambda foundValueAsLambda = (PLambda) foundValue;
+                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
+                MTFunction foundTypeAsFunction =
+                        (MTFunction) foundValue.getMathType();
+                result =
+                        g.isSubtype(foundTypeAsFunction.getDomain(),
+                                expectedTypeAsFunction.getDomain())
+                                && g.isKnownToBeIn(
+                                        foundValueAsLambda.getBody(),
+                                        expectedTypeAsFunction.getRange());
+            }
             return true;
             // return result;
         }
