@@ -1,3 +1,0 @@
-Concept Generic_Test<T, U, V>(evaluates Max_Depth: T; evaluates p: U);
-    Oper Test(): U;
-end Generic_Test;

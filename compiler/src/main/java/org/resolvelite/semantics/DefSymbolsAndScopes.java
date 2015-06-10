@@ -1447,8 +1447,7 @@ public class DefSymbolsAndScopes extends ResolveBaseListener {
             return g.getTrueExp();
         }
         PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<>(symtab.mathPExps,
-                        symtab.quantifiedExps, tr);
+                new PExpBuildingListener<>(symtab.mathPExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

@@ -136,6 +136,10 @@ public class PSymbol extends PExp {
         return arguments;
     }
 
+    public Quantification getQuantification() {
+        return quantification;
+    }
+
     public boolean isIncoming() {
         return incomingFlag;
     }

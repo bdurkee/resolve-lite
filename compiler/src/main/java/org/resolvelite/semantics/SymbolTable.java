@@ -142,8 +142,6 @@ public class SymbolTable {
             new ParseTreeProperty<>();
     public final ParseTreeProperty<Symbol> ctxToSyms =
             new ParseTreeProperty<>();
-    public final ParseTreeProperty<Quantification> quantifiedExps =
-            new ParseTreeProperty<>();
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
 
