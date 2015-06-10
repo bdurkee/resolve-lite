@@ -66,11 +66,10 @@ public class ResolveCompiler {
     } // NONE implies boolean
 
     public static final List<String> NATIVE_EXT = Collections
-            .unmodifiableList(Arrays.asList("concept", "precis", "facility",
-                    "impl", "enhancement"));
+            .unmodifiableList(Collections.singletonList("resolve"));
 
     public static final List<String> NON_NATIVE_EXT = Collections
-            .unmodifiableList(Arrays.asList("java"));
+            .unmodifiableList(Collections.singletonList("java"));
 
     public static class Option {
         String fieldName;

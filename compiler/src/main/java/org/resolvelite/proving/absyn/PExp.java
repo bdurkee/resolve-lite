@@ -7,20 +7,17 @@ import org.resolvelite.semantics.programtype.PTType;
 import java.util.*;
 
 public abstract class PExp {
-
     public final int structureHash;
     public final int valueHash;
     private final MTType type, typeValue;
 
     /**
-     * Since the removal of the PExp hierarchy, the role of PExp has expanded
-     * somewhat and because we now build PExps for the vcgen that are from
-     * stricly programmatic things, it also seems fitting to add (optional)
-     * pttype info to this hierachy.
+     * Since the removal of the PExp hierarchy, the role of this hierarchy has
+     * expanded considerably.
      * 
      * In other words, if this mathematical PExp was born out of a programmatic
-     * expression, program type info should be present, if not, then these
-     * should/will be null.
+     * expression (needed in vcgen), program type info should be present, if
+     * not, then these should/will be null.
      */
     private final PTType progType, progTypeValue;
 

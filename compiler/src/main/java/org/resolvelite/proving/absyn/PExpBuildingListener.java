@@ -100,7 +100,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     //rewriteprover.Utilities.java
     @Override public void enterMathQuantifiedExp(
             @NotNull ResolveParser.MathQuantifiedExpContext ctx) {
+        for (TerminalNode term : ctx.mathVariableDeclGroup().Identifier()) {
+            String quantifier = ctx.q.getText();
+            quantifiedVars.put(term.getText(),
+                    quantifier.equals("Forall") ? Quantification.UNIVERSAL
+                            : Quantification.EXISTENTIAL);
+        }
+    }
 
+    @Override public void exitMathQuantifiedExp(
+            @NotNull ResolveParser.MathQuantifiedExpContext ctx) {
+        for (TerminalNode term : ctx.mathVariableDeclGroup().Identifier()) {
+            quantifiedVars.remove(term.getText());
+        }
     }
 
     @Override public void exitMathInfixExp(
