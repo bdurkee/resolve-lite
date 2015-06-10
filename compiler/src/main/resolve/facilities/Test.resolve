@@ -3,13 +3,6 @@ Facility Test;
     Type Blah = Record
             v, b: Std_Boolean_Fac::Boolean;
         end;
-        initialization ensures v = true and b = true;
-
-    Type Student_Info = Record
-            enrolled: Std_Boolean_Fac::Boolean;
-            gpa: Std_Integer_Fac::Integer;
-            something: Blah;
-        end;
 
     Oper Foo(evaluates g: Std_Boolean_Fac::Boolean;
              evaluates h: Student_Info): Std_Integer_Fac::Integer;

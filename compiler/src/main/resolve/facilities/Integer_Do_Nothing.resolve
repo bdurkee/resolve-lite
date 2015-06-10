@@ -7,7 +7,7 @@ Facility Integer_Do_Nothing;
     end Do_Nothing;
 end Integer_Do_Nothing;
 
-(*
+(**
 1. procedure decl rule
 
 C / assume ((min_int <= i) and (i <= max_int));

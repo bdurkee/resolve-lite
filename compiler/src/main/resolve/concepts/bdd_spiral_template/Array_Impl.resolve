@@ -19,13 +19,15 @@ Implementation Array_Impl for Bdd_Spiral_Template;
             P.Curr_Place := 0;
         end;
 
-      (*  Proc Lengthen (alters e : T; updates P : Spiral_Pos);
+      (**  Proc Lengthen (alters e : T; updates P : Spiral_Pos);
             --duration Is_Big_Theta(0);
             Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;*)
 
-(*
+end Array_Impl;
+
+(**
 --------------------------
 L E N G T H E N:
 --------------------------
@@ -65,5 +67,3 @@ C / ASSUME  0 <= P.Curr_Place <= P.Length <= Max_Length and
             0 <= P.Curr_Place <= P.Length <= Max_Length
             [P.Length -> Sum = ( i + j )[i -> P.Length, j -> 1]]
 *)
-
-end Array_Impl;

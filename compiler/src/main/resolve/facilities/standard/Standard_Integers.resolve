@@ -1,4 +1,4 @@
-(*
+(**
  * [The "BSD license"]
  * Copyright (c) 2015 Clemson University
  * All rights reserved.
@@ -28,13 +28,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *)
-
-Facility Integer_Exchange;
-
-    Oper Exchange (updates I, J : Std_Integer_Fac :: Integer);
-            ensures J = @I and I = @J;
-        Procedure
-            I :=: J;
-    end Exchange;
-
-end Integer_Exchange;
+Facility Standard_Integers;
+    Facility Std_Integer_Fac is Integer_Template
+        externally implemented by Integer_Impl;
+end Standard_Integers;
