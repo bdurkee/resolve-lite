@@ -74,7 +74,10 @@ public class AnnotatedTree {
         }
     }
 
-    public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
+    //Todo: delete me after my usages have been removed in vcgen.
+    //Use a specialized method in vcgen.ModelBuilderProto (normalize) that does
+    //this
+    @Deprecated public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
         PExp result = mathPExps.get(ctx);
         return result != null ? result : g.getTrueExp();
     }

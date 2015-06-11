@@ -9,6 +9,7 @@ import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveBaseListener;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.semantics.MTInvalid;
 import org.resolvelite.semantics.MTType;
 import org.resolvelite.proving.absyn.PSymbol.PSymbolBuilder;
 import org.resolvelite.semantics.Quantification;
@@ -113,11 +114,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (TerminalNode term : ctx.mathVariableDeclGroup().Identifier()) {
             quantifiedVars.remove(term.getText());
         }
-        repo.put(ctx, repo.get(ctx.mathQuantifiedExpBody()));
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
+        System.out.println("HERE: " + ctx.getText());
         PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo)) //
                 .style(PSymbol.DisplayStyle.INFIX) //
@@ -138,6 +140,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
+        System.out.println("quant map: " + quantifiedVars.toString());
+
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
                 .quantification(quantifiedVars.get(ctx.name.getText())) //
@@ -291,7 +295,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
-                        //
                         .mathTypeValue(typeValues.get(ctx))
                         .progType(progTypes.get(ctx)) //
                         .mathType(types.get(ctx)).literal(true);

@@ -439,11 +439,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathQuantifiedExpBody
-    ;
-
-mathQuantifiedExpBody
-    :   mathAssertionExp
+    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp

@@ -317,7 +317,6 @@ public class PSymbol extends PExp {
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new HashSet<>();
-
         if ( quantification != Quantification.NONE ) {
             if ( arguments.size() == 0 ) {
                 result.add(this);
@@ -327,11 +326,8 @@ public class PSymbol extends PExp {
                         .quantification(quantification).build());
             }
         }
-        Iterator<PExp> argumentIter = arguments.iterator();
-        Set<PSymbol> argumentVariables;
-        while (argumentIter.hasNext()) {
-            argumentVariables = argumentIter.next().getQuantifiedVariables();
-            result.addAll(argumentVariables);
+        for (PExp argument : arguments) {
+            result.addAll(argument.getQuantifiedVariables());
         }
         return result;
     }
@@ -494,6 +490,9 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder quantification(Quantification q) {
+            if ( q == null ) {
+                q = Quantification.NONE;
+            }
             this.quantification = q;
             return this;
         }
@@ -519,10 +518,16 @@ public class PSymbol extends PExp {
         }
 
         @Override public PSymbol build() {
-            if ( this.mathType == null ) {
+            //Todo: This should REALLY be checked immediately after
+            //DefSymbolsAndScopes. To allow us some more flexibility in creating
+            //test exps, I'm turning this annoying (but still useful) check
+            //off for the moment.
+            /*if ( this.mathType == null ) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
-            }
+            }*/
+            System.out.println("building PSymbol name=" + name
+                    + ",quantification=" + quantification);
             return new PSymbol(this);
         }
     }

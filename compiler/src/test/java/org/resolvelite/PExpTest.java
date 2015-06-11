@@ -2,12 +2,15 @@ package org.resolvelite;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 import org.resolvelite.compiler.tree.AnnotatedTree;
 import org.resolvelite.compiler.tree.ResolveTokenFactory;
-import org.resolvelite.misc.Utils;
 import org.resolvelite.parsing.ResolveLexer;
 import org.resolvelite.parsing.ResolveParser;
+import org.resolvelite.proving.absyn.PExp;
+import org.resolvelite.proving.absyn.PExpBuildingListener;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
@@ -22,7 +25,8 @@ public class PExpTest extends BaseTest {
     /**
      * For methods where an instance of {@link PSymbol.PSymbolBuilder} is used
      * to construct testable {@link PSymbol}s, math types will also be checked.
-     * However, for methods where {@link #parseMathExp} is used, we don't care
+     * However, for methods where {@link #parseMathAssertionExp} is used, we
+     * don't care
      * about types so much as we do about expr structure and (correct)
      * quantifier distribution--so those are the things we're primarily checking
      * whenever that method is employed. In other words, if you want to test
@@ -41,13 +45,18 @@ public class PExpTest extends BaseTest {
     }
 
     @Test public void testQuantifierDistribution() throws Exception {
-        ParseTree x = parseMathExp("1 + 1");
-        System.out.println("SDSDS: " + x.getText());
-        int i;
-        i = 0;
+        ParseTree t = parseMathAssertionExp("Forall x : Z, x = y");
+        AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
+        PExpBuildingListener<PExp> l =
+                new PExpBuildingListener<>(new ParseTreeProperty<>(), dummy);
+        ParseTreeWalker.DEFAULT.walk(l, t);
+        PExp result = l.getBuiltPExp(t);
+
+        assertEquals(result.getQuantifiedVariables().size(), 1);
+        assertEquals(result.isLiteral(), false);
     }
 
-    private ParseTree parseMathExp(String input) {
+    private ParseTree parseMathAssertionExp(String input) {
         ParseTree result = null;
         try {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
@@ -57,7 +66,7 @@ public class PExpTest extends BaseTest {
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
             parser.setTokenFactory(factory);
-            result = parser.mathExp();
+            result = parser.mathAssertionExp();
         }
         catch (IOException e) {
             throw new RuntimeException(e);
