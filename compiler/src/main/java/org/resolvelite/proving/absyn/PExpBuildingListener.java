@@ -119,7 +119,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixExp(
             @NotNull ResolveParser.MathInfixExpContext ctx) {
-        System.out.println("HERE: " + ctx.getText());
         PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo)) //
                 .style(PSymbol.DisplayStyle.INFIX) //
@@ -140,8 +139,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        System.out.println("quant map: " + quantifiedVars.toString());
-
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
                 .quantification(quantifiedVars.get(ctx.name.getText())) //

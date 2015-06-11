@@ -526,8 +526,8 @@ public class PSymbol extends PExp {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
             }*/
-            System.out.println("building PSymbol name=" + name
-                    + ",quantification=" + quantification);
+            // System.out.println("building PSymbol name=" + name
+            //         + ",quantification=" + quantification);
             return new PSymbol(this);
         }
     }
