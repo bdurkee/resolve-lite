@@ -113,6 +113,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (TerminalNode term : ctx.mathVariableDeclGroup().Identifier()) {
             quantifiedVars.remove(term.getText());
         }
+        repo.put(ctx, repo.get(ctx.mathQuantifiedExpBody()));
     }
 
     @Override public void exitMathInfixExp(

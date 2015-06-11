@@ -14,6 +14,7 @@ import org.resolvelite.parsing.ResolveLexer;
 import org.resolvelite.parsing.ResolveParser;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +31,17 @@ public abstract class BaseTest {
     public static final String pathSep = System.getProperty("path.separator");
 
     /**
+     * The base test directory is the directory where generated files get placed
+     * during unit test execution.
+     * <p>
+     * The default value for this property is the {@code java.io.tmpdir} system
+     * property.
+     * </p>
+     */
+    public static final String BASE_TEST_DIR = System
+            .getProperty("java.io.tmpdir");
+
+    /**
      * Build up the full classpath we need, including the surefire path (if
      * present)
      */
@@ -40,7 +52,7 @@ public abstract class BaseTest {
     @org.junit.Rule public final TestRule testWatcher = new TestWatcher() {
 
         @Override protected void succeeded(Description description) {
-            // remove tmpdir if no error.
+            //remove tmpdir if no error.
             eraseTempDir();
         }
     };
@@ -73,69 +85,4 @@ public abstract class BaseTest {
         return compiler;
     }
 
-    public ParseTree execParser(String startRuleName, String input,
-            String parserName, String lexerName) throws Exception {
-        Pair<Parser, Lexer> pl =
-                getParserAndLexer(input, parserName, lexerName);
-        Parser parser = pl.a;
-        return execStartRule(startRuleName, parser);
-    }
-
-    public ParseTree execStartRule(String startRuleName, Parser parser)
-            throws IllegalAccessException,
-                InvocationTargetException,
-                NoSuchMethodException {
-        Method startRule = null;
-        Object[] args = null;
-        try {
-            startRule = parser.getClass().getMethod(startRuleName);
-        }
-        catch (NoSuchMethodException nsme) {
-            // try with int _p arg for recursive func
-            startRule = parser.getClass().getMethod(startRuleName, int.class);
-            args = new Integer[] { 0 };
-        }
-        ParseTree result = (ParseTree) startRule.invoke(parser, args);
-        //		System.out.println("parse tree = "+result.toStringTree(parser));
-        return result;
-    }
-
-    public Pair<Parser, Lexer> getParserAndLexer(String input,
-            String parserName, String lexerName) throws Exception {
-        final Class<? extends Lexer> lexerClass =
-                loadLexerClassFromTempDir(lexerName);
-        final Class<? extends Parser> parserClass =
-                loadParserClassFromTempDir(parserName);
-
-        ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
-
-        Class<? extends Lexer> c = lexerClass.asSubclass(Lexer.class);
-        Constructor<? extends Lexer> ctor = c.getConstructor(CharStream.class);
-        Lexer lexer = ctor.newInstance(in);
-
-        Class<? extends Parser> pc = parserClass.asSubclass(Parser.class);
-        Constructor<? extends Parser> pctor =
-                pc.getConstructor(TokenStream.class);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        Parser parser = pctor.newInstance(tokens);
-        return new Pair<Parser, Lexer>(parser, lexer);
-    }
-
-    public Class<?> loadClassFromTempDir(String name) throws Exception {
-        ClassLoader loader =
-                new URLClassLoader(
-                        new URL[] { new File(tmpdir).toURI().toURL() },
-                        ClassLoader.getSystemClassLoader());
-        return loader.loadClass(name);
-    }
-
-    public Class<? extends Lexer> loadLexerClassFromTempDir(String name)
-            throws Exception {
-        return loadClassFromTempDir(name).asSubclass(Lexer.class);
-    }
-
-    public Class<? extends Parser> loadParserClassFromTempDir(String name)
-            throws Exception {
-        return loadClassFromTempDir(name).asSubclass(Parser.class);
-    }
 }
