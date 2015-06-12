@@ -526,14 +526,10 @@ public class PSymbol extends PExp {
         }
 
         @Override public PSymbol build() {
-            //Todo: This should REALLY be checked immediately after
-            //DefSymbolsAndScopes. To allow us some more flexibility in creating
-            //test exps, I'm turning this annoying (but still useful) check
-            //off for the moment.
-            /*if ( this.mathType == null ) {
+            if ( this.mathType == null ) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
-            }*/
+            }
             // System.out.println("building PSymbol name=" + name
             //         + ",quantification=" + quantification);
             return new PSymbol(this);

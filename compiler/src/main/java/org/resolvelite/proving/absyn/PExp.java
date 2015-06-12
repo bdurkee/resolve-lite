@@ -15,8 +15,8 @@ public abstract class PExp {
      * Since the removal of the PExp hierarchy, the role of this hierarchy has
      * expanded considerably.
      * <p>
-     * In other words, if this mathematical {@code PExp} was born out of a
-     * programmatic expression (needed for vcgen), program type info should be
+     * In other words, if this {@code PExp} was born out of a
+     * programmatic expression (a la vcgen), program type info should be
      * present, if not, then these should/will be {@code null}.</p>
      */
     private final PTType progType, progTypeValue;
