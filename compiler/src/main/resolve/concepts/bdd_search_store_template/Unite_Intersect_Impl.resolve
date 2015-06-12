@@ -11,8 +11,7 @@ Implementation Unite_Intersect_Impl for
 
 end Unite_Intersect_Impl;
 
-(*
-
+(**
     assume Max_Capacity > 0;
         remember;
         Var U_Ct, V_Ct : Std_Integer_Fac :: Integer;

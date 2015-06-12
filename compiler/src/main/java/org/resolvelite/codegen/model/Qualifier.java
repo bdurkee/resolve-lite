@@ -3,7 +3,6 @@ package org.resolvelite.codegen.model;
 import org.resolvelite.semantics.symbol.FacilitySymbol;
 
 public abstract class Qualifier extends OutputModelObject {
-
     //Todo: Pull this out and make it extend a generic, abstract "Qualifier"
     public static class FacilityQualifier extends Qualifier {
         public String facilitySpecName, facilityName;

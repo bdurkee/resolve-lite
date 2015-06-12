@@ -1,7 +1,7 @@
 package org.resolvelite.vcgen;
 
-import org.resolvelite.proving.Antecedent;
-import org.resolvelite.proving.Consequent;
+// import org.resolvelite.proving.Antecedent;
+// import org.resolvelite.proving.Consequent;
 
 /**
  * Represents an immutable vc (verification condition), which takes the form

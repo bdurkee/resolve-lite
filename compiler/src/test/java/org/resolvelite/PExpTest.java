@@ -67,7 +67,7 @@ public class PExpTest {
         assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification());
     }
 
-    @Test public void testPExpEquality() {
+    @Test public void testEquals() {
         PExp first = parseMathAssertionExp("f(x,y,z+2)");
         PExp second = parseMathAssertionExp("f(x,y,z+2)");
         assertEquals(first, second);
@@ -107,23 +107,55 @@ public class PExpTest {
         second = parseMathAssertionExp("conc");
 
         first = parseMathAssertionExp("foo");
-        second = parseMathAssertionExp("foo");
-        assertEquals(first, second);
-
         second = parseMathAssertionExp("bar::foo");
         assertNotEquals(first, second);
     }
 
-    @Test public void testObviousPExpTruth() {
+    @Test public void testIsObviouslyTrue() {
         PExp result = parseMathAssertionExp("f(x,y) = f(x,y)");
         assertEquals(true, result.isObviouslyTrue());
         result = parseMathAssertionExp("f(x,y) = f(y,x)");
         assertEquals(false, result.isObviouslyTrue());
 
+        result = parseMathAssertionExp("25 = 25");
+        assertEquals(true, result.isObviouslyTrue());
+
+        result = parseMathAssertionExp("true = false");
+        assertEquals(false, result.isObviouslyTrue());
     }
 
     @Test public void testContainsName() {
-        //PExp result =
+        PExp result = parseMathAssertionExp("f");
+        assertEquals(true, result.containsName("f"));
+
+        result = parseMathAssertionExp("f(h(g(x)))");
+        assertEquals(true, result.containsName("x"));
+        assertEquals(true, result.containsName("h"));
+        assertEquals(false, result.containsName("a"));
+        assertEquals(true, result.containsName("f"));
+        assertEquals(true, result.containsName("g"));
+        assertEquals(false, result.containsName("z"));
+    }
+
+    @Test public void testVariable() {
+        PExp result = parseMathAssertionExp("a");
+        assertEquals(true, result.isVariable());
+        result = parseMathAssertionExp("a(x)");
+        assertEquals(false, result.isVariable());
+        result = parseMathAssertionExp("a(x,y)");
+        assertEquals(false, result.isVariable());
+    }
+
+    @Test public void testLiteralFalse() {
+        PExp result = parseMathAssertionExp("false");
+        assertEquals(true, result.isLiteralFalse());
+    }
+
+    @Test public void testSplitIntoConjuncts() {
+        PExp result =
+                parseMathAssertionExp("x = 3 and y = 2 and "
+                        + "P.Lab = lambda(q : Z).(true)");
+
     }
 
     protected static ParseTree getTree(String input) {

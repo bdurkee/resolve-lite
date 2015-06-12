@@ -1,7 +1,6 @@
 package org.resolvelite.codegen.model;
 
 public class TypeInit extends Expr {
-
     @ModelElement public Qualifier q;
     public String typeName, initialValue;
 

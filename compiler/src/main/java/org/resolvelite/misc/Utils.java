@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 /**
  * A collection of general purposes classes, interfaces, and methods.
  * 
- * @author dtwelch <dtw.welch@gmail.com>
+ * @author daniel <dtw.welch@gmail.com>
  */
 public class Utils {
 
@@ -72,7 +72,7 @@ public class Utils {
      * of concrete syntax {@code nodes}, and mapping from rule contexts to
      * some number of elements descending from {@code E}.
      * 
-     * @param expectedType The class of expected type
+     * @param expectedType The class type to inhabit the returned container
      * @param nodes A list of concrete syntax nodes, as obtained through
      *        a visitor, listener, etc.
      * @param annotations A map from rule context to the primary supertype

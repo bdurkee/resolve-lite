@@ -243,7 +243,7 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
         v.beginChildren(this);
@@ -372,7 +372,7 @@ public class PSymbol extends PExp {
      * and all function and variable names.
      *
      * @param o The expression to compare this one to.
-     * @return True <strong>iff</strong> this expression and the provided
+     * @return {@code true} <strong>iff</strong> {@code this} and the provided
      *         expression are equivalent with respect to structure and all
      *         function and variable names.
      */
@@ -382,6 +382,7 @@ public class PSymbol extends PExp {
             PSymbol oAsPSymbol = (PSymbol) o;
 
             //Apparently factoring in quantification makes this too strict?
+            //but what about literal flags? incoming flags?
             result =
                     (oAsPSymbol.valueHash == valueHash)
                             && name.equals(oAsPSymbol.name)

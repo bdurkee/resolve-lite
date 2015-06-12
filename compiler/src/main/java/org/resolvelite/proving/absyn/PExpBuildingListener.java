@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Transforms concrete parse tree math exprs to an equivalent abstract-syntax
- * form, represented by an {@link PExp}.
+ * Converts parse tree math exps to an equivalent abstract-syntax form,
+ * represented by the {@link PExp} hierarchy.
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
@@ -32,14 +32,21 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final ParseTreeProperty<PExp> repo;
 
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
+    private final MTType dummyType;
 
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
             AnnotatedTree annotations) {
+        this(repo, annotations, null);
+    }
+
+    public PExpBuildingListener(ParseTreeProperty<PExp> repo,
+                            AnnotatedTree annotations, MTInvalid dummyType) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
         this.progTypeValues = annotations.progTypeValues;
         this.repo = repo;
+        this.dummyType = dummyType;
     }
 
     @SuppressWarnings("unchecked") @Nullable public T getBuiltPExp(ParseTree t) {
@@ -237,7 +244,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))//
                 .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
-                .mathTypeValue(typeValues.get(ctx)).mathType(types.get(ctx));
+                .mathTypeValue(getMathTypeValue(ctx)).mathType(types.get(ctx));
         repo.put(ctx, result.build());
     }
 
@@ -250,7 +257,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                                 Utils.collect(PExp.class, ctx.progExp(), repo))
                         .qualifier("Std_Integer_Fac")
                         .progType(progTypes.get(ctx)) //
-                        .mathTypeValue(typeValues.get(ctx)) //
+                        .mathTypeValue(getMathTypeValue(ctx)) //
                         .mathType(types.get(ctx));
         repo.put(ctx, result.build());
     }
@@ -268,7 +275,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitProgNamedExp(
             @NotNull ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
-                .mathTypeValue(typeValues.get(ctx)) //
+                .mathTypeValue(getMathTypeValue(ctx)) //
                 .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
                 .mathType(types.get(ctx));
         repo.put(ctx, result.build());
@@ -290,9 +297,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
-                        .mathTypeValue(typeValues.get(ctx))
+                        .mathTypeValue(getMathTypeValue(ctx))
                         .progType(progTypes.get(ctx)).mathType(types.get(ctx))
                         .literal(true);
         repo.put(ctx, result.build());
+    }
+
+    private MTType getMathType(ParseTree t) {
+        return types.get(t) == null ? dummyType : types.get(t);
+    }
+
+    private MTType getMathTypeValue(ParseTree t) {
+        return typeValues.get(t) == null ? dummyType : typeValues.get(t);
     }
 }

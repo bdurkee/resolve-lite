@@ -4,7 +4,8 @@ Facility Integer_Spiral;
     Type Point = Record
             x, y : Std_Integer_Fac :: Integer;
         end;
-        convention x <= 5 and y <= 5;
+        convention 0 <= x <= 50 and 0 <= y <= 50
+            which_entails x, y : N;
 
     Facility Sp_Fac is Bdd_Spiral_Template<Point>(3)
         implemented by Array_Impl;

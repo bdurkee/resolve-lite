@@ -24,7 +24,7 @@ public class PSegments extends PExp {
         this.segs.addAll(segs);
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSegments(this);
 

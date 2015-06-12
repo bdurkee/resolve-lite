@@ -77,7 +77,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
-                        //
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(s.getConvention());
         assertiveBlocks.push(block);

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CallStat extends Stat {
-
     @ModelElement public List<Expr> args = new ArrayList<>();
     @ModelElement public Qualifier q;
     public String name;

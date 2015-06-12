@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberClassDef extends OutputModelObject {
-
     public boolean isStatic = false;
     public String name, referredToByExemplar;
 

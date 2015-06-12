@@ -32,7 +32,7 @@ public class PLambda extends PExp {
         return hash;
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPLambda(this);
 
@@ -132,6 +132,7 @@ public class PLambda extends PExp {
         public final MTType type;
 
         public Parameter(String name, MTType type) {
+            //Todo: Again, I think this should probably be checked before now
             if ( name == null ) {
                 throw new IllegalArgumentException("name==null");
             }

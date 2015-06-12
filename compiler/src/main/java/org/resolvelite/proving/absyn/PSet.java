@@ -15,7 +15,7 @@ public class PSet extends PExp {
         this.elements.addAll(elements);
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSet(this);
 

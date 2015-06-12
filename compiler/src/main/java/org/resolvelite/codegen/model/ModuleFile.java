@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Set;
 
 public class ModuleFile extends OutputModelObject {
-
     public String RESOLVEVersion;
     public String resolveFileName;
     @ModelElement public Module module;

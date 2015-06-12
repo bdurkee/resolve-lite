@@ -12,7 +12,6 @@ import java.util.List;
  * that we wish to pass into another module (via a facility, etc).
  */
 public class AnonOpParameterClassInstance extends Expr {
-
     public String name;
     public boolean hasReturn = false;
     public List<ProgParameterSymbol> params = new ArrayList<>();
