@@ -71,7 +71,6 @@ public class PExpTest {
 
     @Test public void testEquals() {
         TypeGraph g = new TypeGraph();
-
         PExp first = parseMathAssertionExp(g, "f(x,y,z+2)");
         PExp second = parseMathAssertionExp(g, "f(x,y,z+2)");
         assertEquals(first, second);
@@ -109,7 +108,6 @@ public class PExpTest {
         second = parseMathAssertionExp(g, "conc.S");
         assertNotEquals(first, second);
         second = parseMathAssertionExp(g, "conc");
-
         first = parseMathAssertionExp(g, "foo");
         second = parseMathAssertionExp(g, "bar::foo");
         assertNotEquals(first, second);
@@ -127,13 +125,15 @@ public class PExpTest {
 
         result = parseMathAssertionExp(g, "true = false");
         assertEquals(false, result.isObviouslyTrue());
+
+        result = parseMathAssertionExp(g, "true = true");
+        assertEquals(true, result.isObviouslyTrue());
     }
 
     @Test public void testContainsName() {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "f");
         assertEquals(true, result.containsName("f"));
-
         result = parseMathAssertionExp(g, "f(h(g(x)))");
         assertEquals(true, result.containsName("x"));
         assertEquals(true, result.containsName("h"));
@@ -143,9 +143,8 @@ public class PExpTest {
         assertEquals(false, result.containsName("z"));
     }
 
-    @Test public void testVariable() {
+    @Test public void testIsVariable() {
         TypeGraph g = new TypeGraph();
-
         PExp result = parseMathAssertionExp(g, "a");
         assertEquals(true, result.isVariable());
         result = parseMathAssertionExp(g, "a(x)");
@@ -154,9 +153,8 @@ public class PExpTest {
         assertEquals(false, result.isVariable());
     }
 
-    @Test public void testLiteralFalse() {
+    @Test public void testIsLiteralFalse() {
         TypeGraph g = new TypeGraph();
-
         PExp result = parseMathAssertionExp(g, "false");
         assertEquals(true, result.isLiteralFalse());
     }
@@ -179,8 +177,113 @@ public class PExpTest {
         assertEquals(1, result.splitIntoConjuncts().size());
     }
 
+    @Test public void testWithQuantifiersFlipped1() {
+        TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+
+        //now flip the quantifiers
+        result = result.withQuantifiersFlipped();
+        exps = result.getSubExpressions().iterator();
+
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+    }
+
+    //nothing flipped.
+    @Test public void testWithQuantifiersFlipped2() {
+        TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "Forall x, y, z : Z, a = c");
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        result = result.withQuantifiersFlipped();
+        exps = result.getSubExpressions().iterator();
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+    }
+
+    //alternating flips
+    @Test public void testWithQuantifiersFlipped3() {
+        TypeGraph g = new TypeGraph();
+        PExp result =
+                parseMathAssertionExp(
+                        g,
+                        "Forall x, y, z : Z,"
+                                + "Exists u, v, w : N, Forall f : Entity * Entity -> B,"
+                                + "g(u, a(f(y)), z, w, f(u))");
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        exps = result.getSubExpressions().iterator();
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //u
+
+        //a(f(y))
+        PSymbol aApp = (PSymbol) exps.next();
+        PSymbol aAppArg = ((PSymbol) aApp.getArguments().get(0));
+
+        assertEquals(NONE, (aApp).getQuantification());
+        assertEquals(FORALL, aAppArg.getQuantification());
+        assertEquals(FORALL,
+                ((PSymbol) aAppArg.getArguments().get(0)).getQuantification());
+
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //z
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //w
+
+        //f(u)
+        PSymbol fApp = (PSymbol) exps.next();
+        assertEquals(FORALL, fApp.getQuantification());
+        assertEquals(EXISTS,
+                ((PSymbol) fApp.getArguments().get(0)).getQuantification());
+
+        //Now flip em
+        result = result.withQuantifiersFlipped();
+        exps = result.getSubExpressions().iterator();
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //u
+
+        //a(f(y))
+        aApp = (PSymbol) exps.next();
+        aAppArg = ((PSymbol) aApp.getArguments().get(0));
+
+        assertEquals(NONE, (aApp).getQuantification());
+        assertEquals(EXISTS, aAppArg.getQuantification());
+        assertEquals(EXISTS,
+                ((PSymbol) aAppArg.getArguments().get(0)).getQuantification());
+
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //z
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //w
+
+        //f(u)
+        fApp = (PSymbol) exps.next();
+        assertEquals(EXISTS, fApp.getQuantification());
+        assertEquals(FORALL,
+                ((PSymbol) fApp.getArguments().get(0)).getQuantification());
+    }
+
+    @Test public void testWithQuantifiersFlipped4() {
+        TypeGraph g = new TypeGraph();
+        PExp result =
+                parseMathAssertionExp(g,
+                        "Forall x, y : Z, x > 0 and (Exists x: N, x is_in S)");
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        exps = result.getSubExpressions().iterator();
+
+    }
+
+    @Test public void testWithIncomingSignsRemoved() {}
+
+    @Test public void testGetIncomingVariables() {}
+
+    @Test public void testGetQuantifiedVariables() {}
+
+    @Test public void testGetFunctionApplications() {}
+
+    @Test public void testGetSymbolNames() {}
+
+    @Test public void testSubstitute() {}
+
     protected static ParseTree getTree(String input) {
-        ParseTree result = null;
         try {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
             ResolveLexer lexer = new ResolveLexer(in);
@@ -195,12 +298,11 @@ public class PExpTest {
                         + " for PExp test contains syntax error");
             }
             parser.setTokenFactory(factory);
-            result = parser.mathAssertionExp();
+            return parser.mathAssertionExp();
         }
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return result;
     }
 
     /**

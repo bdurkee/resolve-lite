@@ -4,22 +4,22 @@ public enum Quantification {
 
     NONE {
 
-        protected Quantification flipped() {
+        public Quantification flipped() {
             return NONE;
         }
     },
     UNIVERSAL {
 
-        protected Quantification flipped() {
+        public Quantification flipped() {
             return EXISTENTIAL;
         }
     },
     EXISTENTIAL {
 
-        protected Quantification flipped() {
+        public Quantification flipped() {
             return UNIVERSAL;
         }
     };
 
-    protected abstract Quantification flipped();
+    public abstract Quantification flipped();
 }

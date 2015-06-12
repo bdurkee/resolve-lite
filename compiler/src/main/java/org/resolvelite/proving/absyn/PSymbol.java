@@ -12,6 +12,7 @@ import org.resolvelite.semantics.programtype.PTType;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +38,6 @@ public class PSymbol extends PExp {
         super(calculateHashes(builder.lprint, builder.rprint,
                 builder.arguments.iterator()), builder.mathType,
                 builder.mathTypeValue, builder.progType, builder.progTypeValue);
-
         this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -56,9 +56,7 @@ public class PSymbol extends PExp {
 
     protected static HashDuple calculateHashes(String left, String right,
             Iterator<? extends PExp> args) {
-
         int structureHash;
-
         int leftHashCode = left.hashCode();
         int valueHash = leftHashCode;
 
@@ -262,35 +260,29 @@ public class PSymbol extends PExp {
     }
 
     @Override public PExp withIncomingSignsErased() {
-        if ( arguments.isEmpty() ) {
-            //literal is false by default, so no need to explicitly state it.
-            PSymbolBuilder temp =
-                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
-                            leftPrint, rightPrint) : new PSymbolBuilder(name);
-            return temp.mathType(getMathType())
-                    .mathTypeValue(getMathTypeValue()).style(dispStyle)
-                    .literal(literalFlag).progType(getProgType())
-                    .progTypeValue(getProgTypeValue()).build();
+        PSymbolBuilder temp =
+                (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
+                        leftPrint, rightPrint) : new PSymbolBuilder(name);
+        PSymbolBuilder result =
+                temp.mathType(getMathType()).mathTypeValue(getMathTypeValue())
+                        .style(dispStyle).quantification(quantification)
+                        .progType(getProgType())
+                        .progTypeValue(getProgTypeValue());
+        for (PExp arg : arguments) {
+            result.arguments(arg.withIncomingSignsErased());
         }
-        else {
-            PSymbolBuilder temp =
-                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
-                            leftPrint, rightPrint) : new PSymbolBuilder(name);
-            PSymbolBuilder result =
-                    temp.mathType(getMathType())
-                            .mathTypeValue(getMathTypeValue()).style(dispStyle)
-                            .quantification(quantification)
-                            .progType(getProgType())
-                            .progTypeValue(getProgTypeValue());
-            for (PExp arg : arguments) {
-                result.arguments(arg.withIncomingSignsErased());
-            }
-            return result.build();
-        }
+        return result.build();
     }
 
     @Override public PExp withQuantifiersFlipped() {
-        return this;
+        List<PExp> flippedArgs = arguments.stream()
+                .map(PExp::withQuantifiersFlipped).collect(Collectors.toList());
+
+        return new PSymbolBuilder(name).literal(literalFlag)
+                .incoming(incomingFlag).style(dispStyle).arguments(flippedArgs)
+                .mathType(getMathType()).mathTypeValue(getMathTypeValue())
+                .progType(getProgType()).progTypeValue(getProgTypeValue())
+                .quantification(this.quantification.flipped()).build();
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
@@ -300,11 +292,8 @@ public class PSymbol extends PExp {
                 result.add(this);
             }
         }
-        Iterator<PExp> argumentIter = arguments.iterator();
-        Set<PSymbol> argumentVariables;
-        while (argumentIter.hasNext()) {
-            argumentVariables = argumentIter.next().getIncomingVariables();
-            result.addAll(argumentVariables);
+        for (PExp argument : arguments) {
+            result.addAll(argument.getIncomingVariables());
         }
         return result;
     }
@@ -328,15 +317,11 @@ public class PSymbol extends PExp {
 
     @Override protected Set<String> getSymbolNamesNoCache() {
         Set<String> result = new HashSet<>();
-
         if ( quantification == Quantification.NONE ) {
             result.add(getCanonicalName());
         }
-        Iterator<PExp> argumentIter = arguments.iterator();
-        Set<String> argumentSymbols;
-        while (argumentIter.hasNext()) {
-            argumentSymbols = argumentIter.next().getSymbolNames();
-            result.addAll(argumentSymbols);
+        for (PExp argument : arguments) {
+            result.addAll(argument.getSymbolNames());
         }
         return result;
     }
@@ -346,11 +331,8 @@ public class PSymbol extends PExp {
         if ( this.arguments.size() > 0 ) {
             result.add(this);
         }
-        Iterator<PExp> argumentIter = arguments.iterator();
-        List<PExp> argumentFunctions;
-        while (argumentIter.hasNext()) {
-            argumentFunctions = argumentIter.next().getFunctionApplications();
-            result.addAll(argumentFunctions);
+        for (PExp argument : arguments) {
+            result.addAll(argument.getFunctionApplications());
         }
         return result;
     }
@@ -358,7 +340,7 @@ public class PSymbol extends PExp {
     private String getCanonicalName() {
         String result;
         if ( dispStyle.equals(DisplayStyle.OUTFIX) ) {
-            result = leftPrint + "_" + rightPrint;
+            result = leftPrint + "..." + rightPrint;
         }
         else {
             result = name;
@@ -515,14 +497,34 @@ public class PSymbol extends PExp {
             return this;
         }
 
+        public PSymbolBuilder argument(PExp e) {
+            sanityCheckAddition(e);
+            arguments.add(e);
+            return this;
+        }
+
         public PSymbolBuilder arguments(PExp... e) {
             arguments(Arrays.asList(e));
             return this;
         }
 
         public PSymbolBuilder arguments(Collection<PExp> args) {
+            sanityCheckAdditions(args);
             arguments.addAll(args);
             return this;
+        }
+
+        private void sanityCheckAdditions(Collection<PExp> exps) {
+            for (PExp e : exps) {
+                sanityCheckAddition(e);
+            }
+        }
+
+        private void sanityCheckAddition(PExp o) {
+            if ( o == null ) {
+                throw new IllegalArgumentException("trying to add null element"
+                        + " to PSymbol: " + name);
+            }
         }
 
         @Override public PSymbol build() {
