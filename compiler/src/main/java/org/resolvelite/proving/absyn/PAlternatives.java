@@ -103,10 +103,6 @@ public class PAlternatives extends PExp {
         return result && otherwiseClauseResult.isObviouslyTrue();
     }
 
-    @Override public boolean isLiteralTrue() {
-        return false;
-    }
-
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
         accumulator.add(this);
     }
@@ -115,7 +111,7 @@ public class PAlternatives extends PExp {
         return null;
     }
 
-    @Override public PExp flipQuantifiers() {
+    @Override public PExp withQuantifiersFlipped() {
         throw new UnsupportedOperationException("This method has not yet "
                 + "been implemented.");
     }

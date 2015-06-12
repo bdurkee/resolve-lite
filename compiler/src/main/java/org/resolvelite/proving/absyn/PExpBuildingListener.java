@@ -96,9 +96,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
-    //Todo: We should eliminate where clauses somewhere around here too.
-    //For example, see comment on applyQuantification(..) in
-    //rewriteprover.Utilities.java
     @Override public void enterMathQuantifiedExp(
             @NotNull ResolveParser.MathQuantifiedExpContext ctx) {
         for (TerminalNode term : ctx.mathVariableDeclGroup().Identifier()) {
@@ -140,6 +137,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
+                .qualifier(ctx.qualifier) //
                 .incoming(ctx.getParent().getStart().toString().equals("@")) //
                 .quantification(quantifiedVars.get(ctx.name.getText())) //
                 .mathTypeValue(typeValues.get(ctx)).mathType(types.get(ctx));
@@ -293,8 +291,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
                         .mathTypeValue(typeValues.get(ctx))
-                        .progType(progTypes.get(ctx)) //
-                        .mathType(types.get(ctx)).literal(true);
+                        .progType(progTypes.get(ctx)).mathType(types.get(ctx))
+                        .literal(true);
         repo.put(ctx, result.build());
     }
 }

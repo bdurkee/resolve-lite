@@ -152,12 +152,6 @@ public class PSymbol extends PExp {
         return arguments.size() > 0;
     }
 
-    //Todo: This should really check to make sure this.mathType == BOOLEAN.
-    //But to do that we need a reference to the typegraph in this hierarchy..
-    @Override public boolean isLiteralTrue() {
-        return (arguments.size() == 0 && name.equalsIgnoreCase("true"));
-    }
-
     @Override public boolean isLiteralFalse() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("false"));
     }
@@ -295,7 +289,7 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override public PExp flipQuantifiers() {
+    @Override public PExp withQuantifiersFlipped() {
         return this;
     }
 
@@ -372,15 +366,28 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    /**
+     * Returns {@code true} <strong>iff</code> this {@code PSymbol} and the
+     * provided expression, {@code e}, are equivalent with respect to structure
+     * and all function and variable names.
+     *
+     * @param o The expression to compare this one to.
+     * @return True <strong>iff</strong> this expression and the provided
+     *         expression are equivalent with respect to structure and all
+     *         function and variable names.
+     */
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
         if ( result ) {
             PSymbol oAsPSymbol = (PSymbol) o;
+
+            //Apparently factoring in quantification makes this too strict?
             result =
                     (oAsPSymbol.valueHash == valueHash)
                             && name.equals(oAsPSymbol.name)
                             && literalFlag == oAsPSymbol.literalFlag
-                            && incomingFlag == oAsPSymbol.incomingFlag;
+                            && incomingFlag == oAsPSymbol.incomingFlag
+                            && Objects.equals(qualifier, oAsPSymbol.qualifier);
 
             if ( result ) {
                 Iterator<PExp> localArgs = arguments.iterator();

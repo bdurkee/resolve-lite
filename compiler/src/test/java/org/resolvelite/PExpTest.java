@@ -18,16 +18,21 @@ import org.resolvelite.typereasoning.TypeGraph;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class PExpTest {
 
+    protected static final Quantification FORALL = Quantification.UNIVERSAL;
+    protected static final Quantification EXISTS = Quantification.EXISTENTIAL;
+    protected static final Quantification NONE = Quantification.NONE;
+
     /**
      * For methods where an instance of {@link PSymbol.PSymbolBuilder} is used
      * to construct testable {@link PSymbol}s, math types will also be tested.
      */
-    @Test public void testLiterals() throws Exception {
+    @Test public void testLiterals() {
         TypeGraph g = new TypeGraph();
         PSymbol result =
                 new PSymbol.PSymbolBuilder("0").mathType(g.Z).literal(true)
@@ -38,27 +43,87 @@ public class PExpTest {
         assertEquals(Quantification.NONE, result.getQuantification());
     }
 
-    @Test public void testQuantifierDistribution() throws Exception {
+    @Test public void testQuantifierDistribution() {
         PExp result = parseMathAssertionExp("Forall x : Z, x = y");
-        Iterator<? extends PExp> subexps =
-                result.getSubExpressions().iterator();
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         assertEquals(1, result.getQuantifiedVariables().size());
         assertEquals(false, result.isLiteral());
         assertEquals(2, result.getSubExpressions().size());
-        assertEquals(Quantification.NONE,
-                ((PSymbol) result).getQuantification());
-        assertEquals(Quantification.UNIVERSAL,
-                ((PSymbol) subexps.next()).getQuantification());
-        assertEquals(Quantification.NONE,
-                ((PSymbol) subexps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) result).getQuantification());
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
     }
 
-    @Test public void testNestedQuantifierDistribution() throws Exception {
+    @Test public void testNestedQuantifierDistribution() {
         PExp result =
                 parseMathAssertionExp("Forall x, y : Z, Exists v : Z, "
-                        + "Forall f : Entity * Entity -> B, f(x, y)");
+                        + "Forall f : Entity * Entity -> B, f(x, v)");
         assertEquals(2, result.getSubExpressions().size());
         assertEquals(3, result.getQuantifiedVariables().size());
+        assertEquals(FORALL, ((PSymbol) result).getQuantification());
+
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification());
+    }
+
+    @Test public void testPExpEquality() {
+        PExp first = parseMathAssertionExp("f(x,y,z+2)");
+        PExp second = parseMathAssertionExp("f(x,y,z+2)");
+        assertEquals(first, second);
+        second = parseMathAssertionExp("f(x,y,z+1)");
+        assertNotEquals(first, second);
+        second = parseMathAssertionExp("f(x,@y,z+2)");
+        assertNotEquals(first, second);
+
+        first = parseMathAssertionExp("(x + y)");
+        second = parseMathAssertionExp("((x + y))");
+        assertEquals(first, second);
+
+        second = parseMathAssertionExp("(((y) + x))");
+        assertNotEquals(first, second);
+
+        first = parseMathAssertionExp("@x + @y");
+        second = parseMathAssertionExp("@x + @y");
+        assertEquals(first, second);
+        second = parseMathAssertionExp("x + y");
+        assertNotEquals(first, second);
+
+        first = parseMathAssertionExp("f(f(y)) + g(h + f(x))");
+        second = parseMathAssertionExp("(f(f(y)) + g(h + f(x)))");
+        assertEquals(first, second);
+
+        first = parseMathAssertionExp("conc.G.S");
+        second = parseMathAssertionExp("conc.P.S");
+        assertNotEquals(first, second);
+        second = parseMathAssertionExp("conc.G.S");
+        assertEquals(first, second);
+        second = parseMathAssertionExp("@conc.P.S");
+        assertNotEquals(first, second);
+        second = parseMathAssertionExp("conc.S.P");
+        assertNotEquals(first, second);
+        second = parseMathAssertionExp("conc.S");
+        assertNotEquals(first, second);
+        second = parseMathAssertionExp("conc");
+
+        first = parseMathAssertionExp("foo");
+        second = parseMathAssertionExp("foo");
+        assertEquals(first, second);
+
+        second = parseMathAssertionExp("bar::foo");
+        assertNotEquals(first, second);
+    }
+
+    @Test public void testObviousPExpTruth() {
+        PExp result = parseMathAssertionExp("f(x,y) = f(x,y)");
+        assertEquals(true, result.isObviouslyTrue());
+        result = parseMathAssertionExp("f(x,y) = f(y,x)");
+        assertEquals(false, result.isObviouslyTrue());
+
+    }
+
+    @Test public void testContainsName() {
+        //PExp result =
     }
 
     protected static ParseTree getTree(String input) {
@@ -70,6 +135,8 @@ public class PExpTest {
             lexer.setTokenFactory(factory);
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
+
+            //Todo: For some reason this isn't working atm..
             if ( parser.getNumberOfSyntaxErrors() > 0 ) {
                 throw new IllegalArgumentException("input string for PExp"
                         + " test contains syntax error");
@@ -91,9 +158,8 @@ public class PExpTest {
      * where this function is used, know that we don't care about types so much
      * as we do about correct exp structure and quantifier distribution.</p>
      * <p>
-     * In other words, if you want to test something math type related, just
-     * use the builder, otherwise parse the actual expression using
-     * this method.</p>
+     * In other words, if you want to test something math type related, just use
+     * the builder, otherwise parse the actual expression using this method.</p>
      * @param input
      * @return
      */

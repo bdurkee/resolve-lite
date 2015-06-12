@@ -131,7 +131,7 @@ public class TypeGraph {
         boolean result;
         try {
             PExp conditions = getValidTypeConditions(value, expected);
-            result = conditions.isLiteralTrue();
+            result = conditions.isObviouslyTrue();
         }
         catch (TypeMismatchException e) {
             result = false;
@@ -202,7 +202,7 @@ public class TypeGraph {
                                     expectedEntry, pathStrategy);
 
                     foundPath = foundPath | !newCondition.isLiteralFalse();
-                    foundTrivialPath = newCondition.isLiteralTrue();
+                    foundTrivialPath = newCondition.isObviouslyTrue();
                     result = formDisjunct(newCondition, result);
                 }
                 catch (TypeMismatchException e) {}
@@ -332,7 +332,7 @@ public class TypeGraph {
         }*/
 
         //If we've already established it statically, no need for further work
-        if ( !result.isLiteralTrue() ) {
+        if ( !result.isObviouslyTrue() ) {
             //throw new UnsupportedOperationException("Cannot statically "
             //        + "establish math subtype.");
             result = getTrueExp();

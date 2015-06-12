@@ -17,9 +17,8 @@ public abstract class PExp {
      * expanded considerably.
      * <p>
      * In other words, if this mathematical {@code PExp} was born out of a
-     * programmatic expression (needed in vcgen), program type info should be
-     * present, if not, then these should/will be {@code null}.
-     * </p>
+     * programmatic expression (needed for vcgen), program type info should be
+     * present, if not, then these should/will be {@code null}.</p>
      */
     private final PTType progType, progTypeValue;
 
@@ -131,8 +130,6 @@ public abstract class PExp {
 
     public abstract boolean isObviouslyTrue();
 
-    public abstract boolean isLiteralTrue();
-
     public boolean isEquality() {
         return false;
     }
@@ -162,7 +159,7 @@ public abstract class PExp {
      */
     public abstract PExp withIncomingSignsErased();
 
-    public abstract PExp flipQuantifiers();
+    public abstract PExp withQuantifiersFlipped();
 
     public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {

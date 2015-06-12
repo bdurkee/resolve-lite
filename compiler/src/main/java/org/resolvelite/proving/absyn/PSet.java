@@ -48,10 +48,6 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override public boolean isLiteralTrue() {
-        return false;
-    }
-
     @Override public boolean isLiteralFalse() {
         return false;
     }
@@ -75,7 +71,7 @@ public class PSet extends PExp {
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
-    @Override public PExp flipQuantifiers() {
+    @Override public PExp withQuantifiersFlipped() {
         return null;
     }
 

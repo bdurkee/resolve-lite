@@ -81,10 +81,6 @@ public class PSegments extends PExp {
         return false;
     }
 
-    @Override public boolean isLiteralTrue() {
-        return false;
-    }
-
     @Override public boolean isLiteralFalse() {
         return false;
     }
@@ -110,7 +106,7 @@ public class PSegments extends PExp {
         return new PSegments(newSegs);
     }
 
-    @Override public PExp flipQuantifiers() {
+    @Override public PExp withQuantifiersFlipped() {
         return this;
     }
 

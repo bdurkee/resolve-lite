@@ -20,7 +20,7 @@ public class AssumeApplicationStrategy implements StatRuleApplicationStrategy {
         PExp curFinalConfirm = block.finalConfirm.getConfirmExp();
         PExp statement = statComponents.get(0);
 
-        if ( curFinalConfirm.isLiteralTrue() ) {
+        if ( curFinalConfirm.isObviouslyTrue() ) {
             block.finalConfirm(statement);
         }
         else if ( !statement.equals(block.g.getTrueExp()) ) {

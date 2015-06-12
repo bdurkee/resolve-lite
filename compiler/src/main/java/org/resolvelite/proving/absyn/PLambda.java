@@ -76,10 +76,6 @@ public class PLambda extends PExp {
         return body;
     }
 
-    @Override public boolean isLiteralTrue() {
-        return body.isObviouslyTrue();
-    }
-
     @Override public boolean isLiteralFalse() {
         return body.isLiteralFalse();
     }
@@ -104,7 +100,7 @@ public class PLambda extends PExp {
         return new PLambda(parameters, body.withIncomingSignsErased());
     }
 
-    @Override public PExp flipQuantifiers() {
+    @Override public PExp withQuantifiersFlipped() {
         return this;
     }
 

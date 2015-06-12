@@ -56,7 +56,7 @@ public class TypeNode {
                         pathStrategy.getValidTypeConditionsAlong(relationship,
                                 value, bindings);
 
-                foundTrivialPath = (relationshipConditions.isLiteralTrue());
+                foundTrivialPath = (relationshipConditions.isObviouslyTrue());
 
                 finalConditions =
                         typeGraph.formDisjunct(relationshipConditions,

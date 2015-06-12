@@ -49,7 +49,7 @@ public class ExplicitCallApplicationStrategy
 
         PSymbol opEnsures = (PSymbol)annotations
                 .getPExpFor(block.g, op.getEnsures());
-        if (opEnsures.isLiteralTrue()) return block.snapshot();
+        if (opEnsures.isObviouslyTrue()) return block.snapshot();
 
         List<PExp> con = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
 
