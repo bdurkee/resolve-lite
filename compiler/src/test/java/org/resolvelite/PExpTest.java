@@ -11,14 +11,15 @@ import org.resolvelite.parsing.ResolveLexer;
 import org.resolvelite.parsing.ResolveParser;
 import org.resolvelite.proving.absyn.PExp;
 import org.resolvelite.proving.absyn.PExpBuildingListener;
+import org.resolvelite.proving.absyn.PSegments;
 import org.resolvelite.proving.absyn.PSymbol;
 import org.resolvelite.semantics.Quantification;
 import org.resolvelite.typereasoning.TypeGraph;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -265,17 +266,69 @@ public class PExpTest {
         TypeGraph g = new TypeGraph();
         PExp result =
                 parseMathAssertionExp(g,
-                        "Forall x, y : Z, x > 0 and (Exists x: N, x is_in S)");
+                        "Forall x, y : Z, x and (Exists x : N, x is_in S)");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         exps = result.getSubExpressions().iterator();
+        assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //x
+        PSymbol app = (PSymbol) exps.next();
+        assertEquals(NONE, app.getQuantification()); //x is_in S
+        assertEquals(EXISTS,
+                ((PSymbol) app.getArguments().get(0)).getQuantification()); //x
+        assertEquals(NONE,
+                ((PSymbol) app.getArguments().get(1)).getQuantification()); //S
 
+        result = result.withQuantifiersFlipped();
+        exps = result.getSubExpressions().iterator();
+        assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //x
+        app = (PSymbol) exps.next();
+        assertEquals(NONE, app.getQuantification()); //x is_in S
+        assertEquals(FORALL,
+                ((PSymbol) app.getArguments().get(0)).getQuantification()); //x
+        assertEquals(NONE,
+                ((PSymbol) app.getArguments().get(1)).getQuantification()); //S
     }
 
-    @Test public void testWithIncomingSignsRemoved() {}
+    @Test public void testWithIncomingSignsRemoved() {
+        TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "F(@I, J, I, @S.Top)");
+        assertEquals(false, ((PSymbol) result).isIncoming());
+        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        assertEquals(true, ((PSymbol) exps.next()).isIncoming());
+        assertEquals(false, ((PSymbol) exps.next()).isIncoming());
+        assertEquals(false, ((PSymbol) exps.next()).isIncoming());
+        assertEquals(true, ((PSegments) exps.next()).isIncoming());
+    }
 
-    @Test public void testGetIncomingVariables() {}
+    @Test public void testGetIncomingVariables() {
+        TypeGraph g = new TypeGraph();
+        PExp result =
+                parseMathAssertionExp(
+                        g,
+                        "Forall x, y, z : Z, Exists u, v, w : N,"
+                                + "g(@u) + (h(@z, @w, f(@u)))");
+        Set<String> incomingNames = result.getIncomingVariables().stream()
+                .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
+        assertEquals(3, incomingNames.size());
+        Set<String> expectedNames = Arrays.asList("u", "z", "w").stream()
+                .collect(Collectors.toSet());
+        assertEquals(true, incomingNames.containsAll(expectedNames));
+    }
 
-    @Test public void testGetQuantifiedVariables() {}
+    @Test public void testGetQuantifiedVariables() {
+        TypeGraph g = new TypeGraph();
+        PExp result =
+                parseMathAssertionExp(
+                        g,
+                        "Forall x, y, z : Z, Exists u, v : N," +
+                                "Forall f, h : Z * Z -> B, "
+                                + "g(@u) + (h(@z, @w, f(@u)))");
+        Set<String> quantifiedNames = result.getQuantifiedVariables().stream()
+                .map(e -> ((PSymbol)e).getName()).collect(Collectors.toSet());
+        Set<String> expectedNames = Arrays.asList("u", "z", "f", "h").stream()
+                .collect(Collectors.toSet());
+        assertEquals(4, quantifiedNames.size());
+        assertEquals(true, quantifiedNames.containsAll(expectedNames));
+    }
 
     @Test public void testGetFunctionApplications() {}
 
@@ -317,7 +370,7 @@ public class PExpTest {
      * construct smaller exps manually using {@link PSymbol.PSymbolBuilder},
      * otherwise parse the actual expression using this method.</p>
      *
-     * @param input The string to parse.
+     * @param input The input to parse.
      * @return The dummy-typed {@link PExp} representation.
      */
     protected static PExp parseMathAssertionExp(TypeGraph g, String input) {

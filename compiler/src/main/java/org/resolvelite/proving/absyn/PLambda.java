@@ -149,7 +149,7 @@ public class PLambda extends PExp {
     }
 
     @Override public String toString() {
-        return "lambda" + "(" + Utils.join(parameters, ".")
-                + ").(" + body + ")";
+        return "lambda" + "(" + Utils.join(parameters, ".") + ").(" + body
+                + ")";
     }
 }

@@ -8,20 +8,26 @@ import java.util.stream.Collectors;
 public class PSegments extends PExp {
 
     private final List<PSymbol> segs = new ArrayList<>();
+    private final boolean incoming;
 
     public PSegments(PSymbol... segs) {
         this(Arrays.asList(segs));
     }
 
     public PSegments(List<PSymbol> segs) {
-        this(segs, segs.get(segs.size() - 1));
+        this(segs, segs.get(segs.size() - 1), false);
     }
 
-    public PSegments(List<PSymbol> segs, PSymbol lastSegment) {
+    public PSegments(List<PSymbol> segs, boolean incoming) {
+        this(segs, segs.get(segs.size() - 1), incoming);
+    }
+
+    public PSegments(List<PSymbol> segs, PSymbol lastSegment, boolean incoming) {
         super(PSymbol.calculateHashes(segs), lastSegment.getMathType(),
                 lastSegment.getMathTypeValue(), lastSegment.getProgType(),
                 lastSegment.getProgTypeValue());
         this.segs.addAll(segs);
+        this.incoming = incoming;
     }
 
     @Override public void accept(PExpListener v) {
@@ -91,6 +97,11 @@ public class PSegments extends PExp {
 
     @Override public boolean isLiteral() {
         return false;
+    }
+
+    //Todo: Move this upto PExp.
+    public boolean isIncoming() {
+        return incoming;
     }
 
     @Override public boolean isFunction() {

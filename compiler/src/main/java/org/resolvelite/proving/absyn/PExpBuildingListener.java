@@ -125,12 +125,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathInfixExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.op.getText())
-                        //
                         .arguments(
                                 Utils.collect(PExp.class, ctx.mathExp(), repo))
-                        //
                         .style(PSymbol.DisplayStyle.INFIX)
-                        //
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
         repo.put(ctx, result.build());
@@ -151,15 +148,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
-                        //
                         .qualifier(ctx.qualifier)
-                        //
                         .incoming(
                                 ctx.getParent().getStart().toString()
                                         .equals("@"))
-                        //
                         .quantification(quantifiedVars.get(ctx.name.getText()))
-                        //
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
         repo.put(ctx, result.build());
@@ -218,7 +211,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     ctx.mathExp(), repo));
         }
         segs.add(semanticLast.build());
-        repo.put(ctx, new PSegments(segs));
+        repo.put(ctx, new PSegments(segs, ctx.getStart() //
+                .getText().equals("@")));
     }
 
     @Override public void exitMathFunctionExp(
@@ -226,12 +220,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         List<PExp> s = Utils.collect(PExp.class, ctx.mathExp(), repo);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
-                        //
                         .arguments(
                                 Utils.collect(PExp.class, ctx.mathExp(), repo))
-                        //
                         .quantification(quantifiedVars.get(ctx.name.getText()))
-                        //
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
         repo.put(ctx, result.build());

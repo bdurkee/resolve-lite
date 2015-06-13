@@ -1,4 +1,4 @@
-Implementation Array_Impl for Bdd_Spiral_Template;
+Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         uses Basic_Spiral_Theory;
 
     Facility Ceramic_Arr_Fac is Bdd_Ceramic_Array_Template
@@ -25,7 +25,7 @@ Implementation Array_Impl for Bdd_Spiral_Template;
             P.Length := P.Length + 1;
         end Lengthen;*)
 
-end Array_Impl;
+end Sp_Array_Impl;
 
 (**
 --------------------------

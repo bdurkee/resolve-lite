@@ -2,7 +2,7 @@ Precis Basic_Spiral_Theory;
     uses General_Purpose_Theory;
     --Some placeholder definitions (excluding the important k-arity bit).
 
-    (*Definition Is_Spiral_Like(Sp_Loc(k : N) : SSet, Cen(k) : Sp_Loc(k),
+    (**Definition Is_Spiral_Like(Sp_Loc(k : N) : SSet, Cen(k) : Sp_Loc(k),
         SS(k), RS(k) : Sp_Loc(k) -> Sp_Loc(k)) : B is
             Forall k : N,
             pty1)*)
