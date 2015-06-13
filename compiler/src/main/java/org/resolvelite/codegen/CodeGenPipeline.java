@@ -78,7 +78,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     Files.walkFileTree(
                             new File(compiler.libDirectory).toPath(), l);
                     File srcFile = l.getFile();
-                    Path srcPath = l.getFile().toPath();
+                    Path srcPath = srcFile.toPath();
                     Path destPath =
                             new File(outputDir.getName() + "/"
                                     + srcFile.getName()).toPath();
@@ -90,7 +90,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 return; //if the templates were unable to be loaded, etc.
             }
             catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
+                throw new RuntimeException(ioe.getCause().getMessage());
             }
         }
     }

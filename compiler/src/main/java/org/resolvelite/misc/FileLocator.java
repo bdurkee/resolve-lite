@@ -45,10 +45,10 @@ import java.util.List;
  */
 public class FileLocator extends SimpleFileVisitor<Path> {
 
-    private final PathMatcher myMatcher;
-    private String myPattern = null;
+    private final PathMatcher matcher;
+    private String pattern = null;
 
-    private List<File> myMatches = new ArrayList<>();
+    private List<File> matches = new ArrayList<>();
 
     /**
      * Constructs a new {@code FileLocator} that will match based on the
@@ -59,14 +59,14 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *        pattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
-        myPattern = pattern;
-        myMatcher =
+        this.pattern = pattern;
+        this.matcher =
                 FileSystems.getDefault().getPathMatcher(
                         "glob:" + pattern + parseExtensions(extensions));
     }
 
     public FileLocator(String extension) {
-        myMatcher =
+        matcher =
                 FileSystems.getDefault().getPathMatcher(
                         "glob:*.{" + extension + "}");
     }
@@ -74,8 +74,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     @Override public FileVisitResult visitFile(Path file,
             BasicFileAttributes attr) {
         Path name = file.getFileName();
-        if ( name != null && myMatcher.matches(name) ) {
-            myMatches.add(file.toFile());
+        if ( name != null && matcher.matches(name) ) {
+            matches.add(file.toFile());
         }
         return FileVisitResult.CONTINUE;
     }
@@ -89,15 +89,15 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * @return The matching file.
      */
     public File getFile() throws IOException {
-        if ( myMatches.size() == 0 ) {
-            throw new NoSuchFileException("file matching name '" + myPattern
+        if ( matches.size() == 0 ) {
+            throw new NoSuchFileException("file matching name '" + pattern
                     + "' could not be found");
         }
-        return myMatches.get(0);
+        return matches.get(0);
     }
 
     public List<File> getFiles() {
-        return myMatches;
+        return matches;
     }
 
     private String parseExtensions(List<String> extensions) {
