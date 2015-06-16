@@ -36,8 +36,12 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.resolvelite.compiler.tree.ResolveToken;
-import org.resolvelite.parsing.ResolveParser;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.CommonToken;
+
+import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.ResolveLexer;
 
 import java.util.*;
 import java.util.function.Function;
@@ -108,12 +112,12 @@ public class Utils {
         }
 
         if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
-            return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
+            return ((ResolveParser.PrecisModuleContext) ctx).name.;
         }
-        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
+     /*    else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
             return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
+       else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
             return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
         }
         else if ( ctx instanceof ResolveParser.ConceptImplModuleContext ) {
@@ -127,13 +131,13 @@ public class Utils {
         else if ( ctx instanceof ResolveParser.EnhancementImplModuleContext ) {
             return ((ResolveParser.EnhancementImplModuleContext) ctx).name
                     .getText();
-        }
+        }*/
         else {
             throw new IllegalArgumentException("unrecognized module");
         }
     }
 
-    public static ResolveToken getNameFromProgramOp(String op) {
+    public static Token getNameFromProgramOp(String op) {
         String name = null;
         if ( op.equals("+") )
             name = "Sum";
@@ -157,7 +161,7 @@ public class Utils {
             name = "Greater_Or_Equal";
         else
             name = op;
-        return new ResolveToken(name);
+        return new CommonToken(ResolveLexer.Identifier, name);
     }
 
     /*public static <T, R> List<R> apply(Collection<T> l, Function<T, R> f) {

@@ -30,8 +30,8 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.compiler.tree.AnnotatedTree;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.resolvelite.compiler.tree.AnnotatedTree;
 
 import java.util.List;
 

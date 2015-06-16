@@ -32,15 +32,14 @@ package edu.clemson.resolve.compiler;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.resolvelite.codegen.CodeGenPipeline;
-import org.resolvelite.compiler.tree.ImportCollection;
-import org.resolvelite.compiler.tree.AnnotatedTree;
-import org.resolvelite.compiler.tree.ResolveTokenFactory;
+
+import edu.clemson.resolve.compiler.tree.ImportCollection;
+import edu.clemson.resolve.compiler.tree.AnnotatedTree;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
-import org.resolvelite.parsing.ResolveLexer;
-import org.resolvelite.parsing.ResolveParser;
+import edu.clemson.resolve.parser.ResolveLexer;
+import edu.clemson.resolve.parser.ResolveParser;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -147,6 +146,10 @@ public class ResolveCompiler {
             resolve.exit(1);
         }
         resolve.exit(0);
+    }
+
+    public void processCommandLineTargets() {
+
     }
 
     public void log(@Nullable String component, String msg) {

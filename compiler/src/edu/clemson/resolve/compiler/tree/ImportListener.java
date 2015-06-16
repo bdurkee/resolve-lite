@@ -33,9 +33,9 @@ package edu.clemson.resolve.compiler.tree;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.compiler.tree.ImportCollection.ImportType;
-import org.resolvelite.parsing.ResolveBaseListener;
-import org.resolvelite.parsing.ResolveParser;
+import edu.clemson.resolve.compiler.tree.ImportCollection.ImportType;
+import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
 
 import java.util.*;
 
@@ -96,7 +96,7 @@ public class ImportListener extends ResolveBaseListener {
         }
     }
 
-    @Override public void enterConceptImplModule(
+ /*   @Override public void enterConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.concept.getText());
     }
@@ -110,19 +110,19 @@ public class ImportListener extends ResolveBaseListener {
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.enhancement.getText(),
                 ctx.concept.getText());
-    }
+    }*/
 
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.Identifier());
     }
 
-    @Override public void exitFacilityDecl(
+    /*@Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
         ImportType type =
                 (ctx.externally != null) ? ImportType.EXTERNAL
                         : ImportType.IMPLICIT;
         importCollection.imports(type, ctx.impl.getText());
-    }
+    }*/
 }

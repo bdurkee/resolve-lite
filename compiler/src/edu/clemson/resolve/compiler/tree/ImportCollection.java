@@ -31,7 +31,7 @@
 package edu.clemson.resolve.compiler.tree;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.resolvelite.parsing.ResolveParser;
+import edu.clemson.resolve.parser.ResolveParser;
 
 import java.util.*;
 

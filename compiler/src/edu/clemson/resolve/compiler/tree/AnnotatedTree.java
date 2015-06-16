@@ -35,10 +35,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.semantics.MTType;
-import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
 
 public class AnnotatedTree {
 
@@ -84,6 +80,10 @@ public class AnnotatedTree {
 
     @NotNull public ParseTree getRoot() {
         return root;
+    }
+
+    @Override public int hashCode() {
+        return name.hashCode();
     }
 
     @Override public boolean equals(Object o) {
