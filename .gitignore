@@ -1,3 +1,20 @@
 .idea/
 *.iml
 target/
+build/
+dist/
+lib/
+
+# Generated files
+/out/
+/doc/
+/gen/
+/gen3/
+/gen4/
+/tool/playground/
+tmp/
+
+# Configurable build files
+bilder.py
+bilder.pyc
+bild.log
