@@ -18,51 +18,60 @@ if not os.path.exists("bilder.py"):
 # assumes bilder.py is in current directory
 from bilder import *
 
-VERSION = "0.0.1"
-
 def parser():
-    antlr4(srcdir="compiler/src/edu/clemson/resolve/parser", trgdir="gen",
-           package="edu.clemson.resolve.parser",
+    antlr4(srcdir="src/edu/clemson/resolve/parser", trgdir="gen",
+           package="edu.clemson.resolve",
            version="4.5",
-           args=["-visitor"])
+           args=["-visitor", "-listener"])
 
 def compile():
     require(parser)
-    #require(regen_tests)
-    cp = uniformpath("out") + os.pathsep + \
-            os.path.join(JARCACHE, "antlr-4.5-complete.jar") + os.pathsep
-    srcpath = ["gen", "compiler/src"]
-    args = ["-Xlint", "-Xlint:-serial", "-g", "-sourcepath", string.join(srcpath, os.pathsep)]
-    for sp in srcpath:
-        javac(sp, "out", version="1.8", cp=cp, args=args)
-
-    junit_jar, hamcrest_jar = load_junitjars()
-    cp += os.pathsep + uniformpath("out") \
-         + os.pathsep + junit_jar \
-         + os.pathsep + hamcrest_jar
-    javac("./compiler/src", "out", version="1.8", cp=cp, args=args)
+    javac("src", "out", javacVersion="1.8", cp="src:gen:out:resources:"+JARCACHE+"/antlr-4.5-complete.jar")
 
 def mkjar():
     require(compile)
     mkdir("dist")
-    jarfile = "dist/resolve"+VERSION+".jar"
+    jarfile = "dist/jtran.jar"
     manifest = \
-        "Main-Class: edu.clemson.resolve.compiler.ResolveCompiler\n" + \
-        "Implementation-Title: Resolve lite compiler\n" + \
-        "Implementation-Vendor-Id: edu.clemson\n" + \
-        "Built-By: %s\n" + \
-        "Build-Jdk: 1.8\n" + \
-        "Created-By: http://www.bildtool.org\n" + \
+        "Main-Class: edu.clemson.resolve.compiler.ResolveCompiler\n" +\
+        "Implementation-Title: RESOLVE compiler\n" +\
+        "Implementation-Vendor-Id: edu.clemson\n" +\
+        "Built-By: %s\n" +\
+        "Build-Jdk: 1.8\n" +\
+        "Created-By: http://www.bildtool.org\n" +\
         "\n"
     manifest = manifest % os.getlogin()
     download("http://www.antlr.org/download/antlr-4.5-complete.jar", JARCACHE)
     unjar(os.path.join(JARCACHE, "antlr-4.5-complete.jar"), trgdir="out")
-    copytree(src="compiler/resources", trg="out")  # messages, Java code gen, etc...
+    copyfile("resources/edu/clemson/resolve/templates/Java.stg", "out/edu/clemson/resolve/templates/Java.stg")
     jar(jarfile, srcdir="out", manifest=manifest)
     print_and_log("Generated " + jarfile)
 
 def test(jfile):
     log("TEST "+jfile)
+    print("TEST "+jfile)
+    dir = os.path.dirname(jfile)
+    base = os.path.basename(jfile)
+    base = os.path.splitext(base)[0]
+    cfile = base+".c"
+    expected_cfile = dir+"/"+cfile
+    expected_output = dir+"/"+base+".txt"
+    java(classname="cs652.j.JTran", cp="out:resources:"+JARCACHE+"/antlr-4.5-complete.jar",
+         progargs=["-o", "/tmp/"+cfile, jfile])
+    executable = "/tmp/" + base
+    CC = ["gcc", "-o", executable, "/tmp/"+cfile]
+    exec_and_log(CC)
+    log(executable+" &> /tmp/"+base+".txt")
+    os.system(executable+" &> /tmp/"+base+".txt")
+    # normalize the file
+    indent_args = ["-bap", "-bad", "-br", "-nce", "-ncs", "-nprs", "-npcs", "-sai", "-saw",
+                   "-di1", "-brs", "-blf", "--indent-level4", "-nut", "-sob", "-l200"]
+    exec_and_log(["gindent"]+indent_args+["/tmp/"+cfile])
+    # compare with expected c file but first format the expected file as well
+    exec_and_log(["gindent"]+indent_args+[expected_cfile, "-o", "/tmp/expected_"+base+".c"])
+    exec_and_log(["diff", "/tmp/expected_"+base+".c", "/tmp/"+cfile])
+    # compare with expected output
+    exec_and_log(["diff", expected_output, "/tmp/"+base+".txt"])
 
 def tests():
     require(compile)
@@ -70,6 +79,13 @@ def tests():
         test(file)
 
 def clean():
+    os.remove("bild.log")
+    rmdir("out")
+    rmdir("gen")
+
+def clean_full():
+    rmdir("dist")
+    os.remove("bild.log")
     rmdir("out")
     rmdir("gen")
 
