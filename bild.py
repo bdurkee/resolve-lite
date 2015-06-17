@@ -45,7 +45,7 @@ def mkjar():
     unjar(os.path.join(JARCACHE, "antlr-4.5-complete.jar"), trgdir="out")
     download("http://central.maven.org/maven2/org/jgrapht/jgrapht-core/0.9.0/jgrapht-core-0.9.0.jar", JARCACHE)
     unjar(os.path.join(JARCACHE, "jgrapht-core-0.9.0.jar"), trgdir="out")
-    copyfile("resources/edu/clemson/resolve/templates/Java.stg", "out/edu/clemson/resolve/templates/Java.stg")
+    copytree(src="resources", trg="out")  # messages, Java code gen, etc...
     jar(jarfile, srcdir="out", manifest=manifest)
     print_and_log("Generated " + jarfile)
 

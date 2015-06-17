@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class ErrorManager extends BaseErrorListener {
     public static final String FORMATS_DIR =
-            "edu/resolve/templates/messages/";
+            "edu/clemson/resolve/templates/messages/";
 
     private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve"
             + STGroup.GROUP_FILE_EXTENSION);

@@ -36,7 +36,14 @@ module
 
 precisModule
     :   'Precis' name=ID ';'
+        (importList)?
         'end' closename=ID ';'
+    ;
+
+// uses, imports
+
+importList
+    :   'uses' ID (',' ID)* ';'
     ;
 
 // whitespace, identifier rules, and comments

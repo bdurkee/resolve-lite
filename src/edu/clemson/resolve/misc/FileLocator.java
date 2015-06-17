@@ -68,7 +68,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     public FileLocator(String extension) {
         matcher =
                 FileSystems.getDefault().getPathMatcher(
-                        "glob:*.{" + extension + "}");
+                        "glob:*{" + extension + "}");
     }
 
     @Override public FileVisitResult visitFile(Path file,
@@ -101,6 +101,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     private String parseExtensions(List<String> extensions) {
-        return "*.{" + Utils.join(extensions, ",") + "}";
+        return "*{" + Utils.join(extensions, ",") + "}";
     }
 }

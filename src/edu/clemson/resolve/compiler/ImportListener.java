@@ -79,14 +79,14 @@ public class ImportListener extends ResolveBaseListener {
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.enhancement.getText(),
                 ctx.concept.getText());
-    }
+    }*/
 
     @Override public void exitImportList(
             @NotNull ResolveParser.ImportListContext ctx) {
-        importCollection.imports(ImportType.NAMED, ctx.Identifier());
+        importCollection.imports(ImportType.NAMED, ctx.ID());
     }
 
-    @Override public void exitFacilityDecl(
+   /* @Override public void exitFacilityDecl(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
         importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
         ImportCollection.ImportType type =

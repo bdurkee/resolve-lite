@@ -56,10 +56,13 @@ public class ResolveCompiler {
 
     public static String VERSION = "0.0.1";
 
-    public static final List<String> NATIVE_EXT = Collections
-            .unmodifiableList(Collections.singletonList("resolve"));
-    public static final List<String> NON_NATIVE_EXT = Collections
-            .unmodifiableList(Collections.singletonList("java"));
+    public static final String FILE_EXTENSION = ".resolve";
+
+    public static final List<String> NATIVE_EXTENSION = Collections
+            .unmodifiableList(Collections.singletonList(FILE_EXTENSION));
+
+    public static final List<String> NON_NATIVE_EXTENSION = Collections
+            .unmodifiableList(Collections.singletonList(".java"));
 
     public static enum OptionArgType { NONE, STRING } // NONE implies boolean
 
@@ -122,8 +125,8 @@ public class ResolveCompiler {
         while (args != null && i < args.length) {
             String arg = args[i];
             i++;
-            if ( arg.charAt(0) != '-' ) { // file name
-                if ( !targetFiles.contains(arg) ) {
+            if (arg.charAt(0) != '-') { // file name
+                if (!targetFiles.contains(arg)) {
                     targetFiles.add(arg);
                     String f = Utils.groomFileName(arg);
                     targetNames.add(f.substring(0, f.indexOf(".")));
@@ -132,10 +135,10 @@ public class ResolveCompiler {
             }
             boolean found = false;
             for (Option o : optionDefs) {
-                if ( arg.equals(o.name) ) {
+                if (arg.equals(o.name)) {
                     found = true;
                     String argValue = null;
-                    if ( o.argType == OptionArgType.STRING ) {
+                    if (o.argType == OptionArgType.STRING) {
                         argValue = args[i];
                         i++;
                     }
@@ -143,58 +146,56 @@ public class ResolveCompiler {
                     Class<? extends ResolveCompiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
-                        if ( argValue == null ) {
-                            if ( arg.startsWith("-no-") )
+                        if (argValue == null) {
+                            if (arg.startsWith("-no-"))
                                 f.setBoolean(this, false);
                             else
                                 f.setBoolean(this, true);
-                        }
-                        else
+                        } else
                             f.set(this, argValue);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         errMgr.toolError(ErrorKind.INTERNAL_ERROR,
                                 "can't access field " + o.fieldName);
                     }
                 }
             }
-            if ( !found ) {
+            if (!found) {
                 errMgr.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
             }
-            if ( outputDirectory != null ) {
-                if ( outputDirectory.endsWith("/")
-                        || outputDirectory.endsWith("\\") ) {
-                    outputDirectory =
-                            outputDirectory.substring(0,
-                                    outputDirectory.length() - 1);
-                }
-                File outDir = new File(outputDirectory);
-                haveOutputDir = true;
-                if ( outDir.exists() && !outDir.isDirectory() ) {
-                    errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
-                            outputDirectory);
-                    libDirectory = ".";
-                }
+        }
+        if ( outputDirectory != null ) {
+            if ( outputDirectory.endsWith("/")
+                    || outputDirectory.endsWith("\\") ) {
+                outputDirectory =
+                        outputDirectory.substring(0,
+                                outputDirectory.length() - 1);
             }
-            else {
-                outputDirectory = ".";
-            }
-            if ( libDirectory != null ) {
-                if ( libDirectory.endsWith("/") || libDirectory.endsWith("\\") ) {
-                    libDirectory =
-                            libDirectory
-                                    .substring(0, libDirectory.length() - 1);
-                }
-                File outDir = new File(libDirectory);
-                if ( !outDir.exists() ) {
-                    errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
-                            libDirectory);
-                    libDirectory = ".";
-                }
-            }
-            else {
+            File outDir = new File(outputDirectory);
+            haveOutputDir = true;
+            if ( outDir.exists() && !outDir.isDirectory() ) {
+                errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
+                        outputDirectory);
                 libDirectory = ".";
             }
+        }
+        else {
+            outputDirectory = ".";
+        }
+        if ( libDirectory != null ) {
+            if ( libDirectory.endsWith("/") || libDirectory.endsWith("\\") ) {
+                libDirectory =
+                        libDirectory
+                                .substring(0, libDirectory.length() - 1);
+            }
+            File outDir = new File(libDirectory);
+            if ( !outDir.exists() ) {
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
+                        libDirectory);
+                libDirectory = ".";
+            }
+        }
+        else {
+            libDirectory = ".";
         }
     }
 
@@ -275,7 +276,7 @@ public class ResolveCompiler {
                 .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
             AnnotatedTree module = roots.get(importRequest);
             try {
-                File file = findResolveFile(importRequest, NATIVE_EXT);
+                File file = findResolveFile(importRequest, NATIVE_EXTENSION);
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
                     roots.put(module.getName(), module);
