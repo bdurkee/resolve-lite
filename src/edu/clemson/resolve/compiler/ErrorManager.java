@@ -177,7 +177,7 @@ public class ErrorManager extends BaseErrorListener {
                 if ( errorTypes.contains(kind) ) {
                     break;
                 }
-                // fall thru
+            // fall thru
             case WARNING:
                 warningCount++;
                 compiler.warning(msg);
@@ -186,7 +186,7 @@ public class ErrorManager extends BaseErrorListener {
                 if ( errorTypes.contains(kind) ) {
                     break;
                 }
-                // fall thru
+            // fall thru
             case ERROR:
                 errorCount++;
                 compiler.error(msg);

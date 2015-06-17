@@ -30,15 +30,27 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.ResolveLexer;
+import edu.clemson.resolve.ResolveParser;
+import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.semantics.AnalysisPipeline;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 
 public class ResolveCompiler {
 
@@ -184,6 +196,183 @@ public class ResolveCompiler {
                 libDirectory = ".";
             }
         }
+    }
+
+    public static void main(String[] args) {
+        ResolveCompiler resolve = new ResolveCompiler(args);
+        if ( args.length == 0 ) {
+            resolve.help();
+            resolve.exit(0);
+        }
+        resolve.version();
+        try {
+            resolve.processCommandLineTargets();
+        }
+        finally {
+            if ( resolve.log ) {
+                try {
+                    String logname = resolve.logMgr.save();
+                    System.out.println("wrote " + logname);
+                }
+                catch (IOException ioe) {
+                    resolve.errMgr.toolError(ErrorKind.INTERNAL_ERROR, ioe);
+                }
+            }
+        }
+        if ( resolve.errMgr.getErrorCount() > 0 ) {
+            resolve.exit(1);
+        }
+        resolve.exit(0);
+    }
+
+    public void processCommandLineTargets() {
+        List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
+        int initialErrCt = errMgr.getErrorCount();
+        AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
+        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        //VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
+
+        analysisPipe.process();
+        if ( errMgr.getErrorCount() > initialErrCt ) {
+            return;
+        }
+        //codegenPipe.process();
+        //vcsPipe.process();
+    }
+
+    public List<AnnotatedTree> sortTargetModulesByUsesReferences() {
+        Map<String, AnnotatedTree> roots = new HashMap<>();
+        for (String fileName : targetFiles) {
+            AnnotatedTree t = parseModule(fileName);
+            if ( t == null || t.hasErrors ) {
+                continue;
+            }
+            roots.put(t.getName(), t);
+        }
+        DefaultDirectedGraph<String, DefaultEdge> g =
+                new DefaultDirectedGraph<>(DefaultEdge.class);
+        for (AnnotatedTree t : Collections.unmodifiableCollection(roots
+                .values())) {
+            g.addVertex(t.getName());
+            findDependencies(g, t, roots);
+        }
+        List<AnnotatedTree> finalOrdering = new ArrayList<>();
+        for (String s : getCompileOrder(g)) {
+            AnnotatedTree m = roots.get(s);
+            if ( m.hasErrors ) {
+                finalOrdering.clear();
+                break;
+            }
+            finalOrdering.add(m);
+        }
+        return finalOrdering;
+    }
+
+    private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
+                                  AnnotatedTree root,
+                                  Map<String, AnnotatedTree> roots) {
+        for (String importRequest : root.imports
+                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
+            AnnotatedTree module = roots.get(importRequest);
+            try {
+                File file = findResolveFile(importRequest, NATIVE_EXT);
+                if ( module == null ) {
+                    module = parseModule(file.getAbsolutePath());
+                    roots.put(module.getName(), module);
+                }
+            }
+            catch (IOException ioe) {
+                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, null,
+                        root.getName(), importRequest);
+                //mark the current root as erroneous
+                root.hasErrors = true;
+                continue;
+            }
+
+            if ( root.imports.inCategory(ImportCollection.ImportType.NAMED,
+                    module.getName()) ) {
+                /*
+                 * if (!module.appropriateForImport()) {
+                 * errorManager.toolError(ErrorKind.INVALID_IMPORT,
+                 * "MODULE TYPE GOES HERE", root.getName().getText(),
+                 * "IMPORTED MODULE TYPE GOES HERE", module.getName()
+                 * .getText());
+                 * }
+                 */
+            }
+            if ( pathExists(g, module.getName(), root.getName()) ) {
+                //Todo.
+                throw new IllegalStateException("circular dependency detected");
+            }
+            Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
+            findDependencies(g, module, roots);
+        }
+    }
+
+    protected List<String> getCompileOrder(
+            DefaultDirectedGraph<String, DefaultEdge> g) {
+        List<String> result = new ArrayList<>();
+
+        EdgeReversedGraph<String, DefaultEdge> reversed =
+                new EdgeReversedGraph<>(g);
+
+        TopologicalOrderIterator<String, DefaultEdge> dependencies =
+                new TopologicalOrderIterator<>(reversed);
+        while (dependencies.hasNext()) {
+            result.add(dependencies.next());
+        }
+        return result;
+    }
+
+    protected boolean pathExists(DefaultDirectedGraph<String, DefaultEdge> g,
+                                 String src, String dest) {
+        //If src doesn't exist in g, then there is obviously no path from
+        //src -> ... -> dest
+        if ( !g.containsVertex(src) ) {
+            return false;
+        }
+        GraphIterator<String, DefaultEdge> iterator =
+                new DepthFirstIterator<>(g, src);
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            //we've reached dest from src -- a path exists.
+            if ( next.equals(dest) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private File findResolveFile(String baseName, List<String> extensions)
+            throws IOException {
+        FileLocator l = new FileLocator(baseName, extensions);
+        Files.walkFileTree(new File(libDirectory).toPath(), l);
+        return l.getFile();
+    }
+
+    private AnnotatedTree parseModule(String fileName) {
+        try {
+            File file = new File(fileName);
+            if ( !file.isAbsolute() ) {
+                file = new File(libDirectory, fileName);
+            }
+            ANTLRInputStream input =
+                    new ANTLRFileStream(file.getAbsolutePath());
+            ResolveLexer lexer = new ResolveLexer(input);
+
+            TokenStream tokens = new CommonTokenStream(lexer);
+            ResolveParser parser = new ResolveParser(tokens);
+            parser.removeErrorListeners();
+            parser.addErrorListener(errMgr);
+            ParserRuleContext start = parser.module();
+            return new AnnotatedTree(start, Utils.getModuleName(start),
+                    parser.getSourceName(),
+                    parser.getNumberOfSyntaxErrors() > 0);
+        }
+        catch (IOException ioe) {
+            errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
+        }
+        return null;
     }
 
     public void log(@Nullable String component, String msg) {

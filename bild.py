@@ -5,10 +5,6 @@ import urllib
 import os
 import glob
 
-# ASSUMES YOU HAVE GNU indent installed. ($ brew install gnu-indent on mac os x)
-# Executable is gindent
-# http://www.gnu.org/software/indent/manual/
-
 if not os.path.exists("bilder.py"):
     print "bootstrapping; downloading bilder.py"
     urllib.urlretrieve(
@@ -18,6 +14,8 @@ if not os.path.exists("bilder.py"):
 # assumes bilder.py is in current directory
 from bilder import *
 
+VERSION = "0.0.1"
+
 def parser():
     antlr4(srcdir="src/edu/clemson/resolve/parser", trgdir="gen",
            package="edu.clemson.resolve",
@@ -26,12 +24,14 @@ def parser():
 
 def compile():
     require(parser)
-    javac("src", "out", javacVersion="1.8", cp="src:gen:out:resources:"+JARCACHE+"/antlr-4.5-complete.jar")
+    javac("src", "out", javacVersion="1.8", cp="src:gen:out:resources:"
+                           +JARCACHE+"/antlr-4.5-complete.jar:"
+                           +JARCACHE+"/jgrapht-core-0.9.0.jar")
 
 def mkjar():
     require(compile)
     mkdir("dist")
-    jarfile = "dist/jtran.jar"
+    jarfile = "dist/resolve_"+VERSION+".jar"
     manifest = \
         "Main-Class: edu.clemson.resolve.compiler.ResolveCompiler\n" +\
         "Implementation-Title: RESOLVE compiler\n" +\
@@ -43,6 +43,8 @@ def mkjar():
     manifest = manifest % os.getlogin()
     download("http://www.antlr.org/download/antlr-4.5-complete.jar", JARCACHE)
     unjar(os.path.join(JARCACHE, "antlr-4.5-complete.jar"), trgdir="out")
+    download("http://central.maven.org/maven2/org/jgrapht/jgrapht-core/0.9.0/jgrapht-core-0.9.0.jar", JARCACHE)
+    unjar(os.path.join(JARCACHE, "jgrapht-core-0.9.0.jar"), trgdir="out")
     copyfile("resources/edu/clemson/resolve/templates/Java.stg", "out/edu/clemson/resolve/templates/Java.stg")
     jar(jarfile, srcdir="out", manifest=manifest)
     print_and_log("Generated " + jarfile)

@@ -30,6 +30,7 @@
  */
 package edu.clemson.resolve.misc;
 
+import edu.clemson.resolve.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -81,7 +82,7 @@ public class Utils {
         return builder.toString();
     }
 
-    /*public static String getModuleName(@NotNull ParseTree ctx) {
+    public static String getModuleName(@NotNull ParseTree ctx) {
         if ( ctx instanceof ResolveParser.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
@@ -89,13 +90,13 @@ public class Utils {
         if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
             return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
-            return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
-        }
+        //else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
+        //    return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
+        //}
         else {
             throw new IllegalArgumentException("unrecognized module");
         }
-    }*/
+    }
 
     public static String getRawText(ParserRuleContext ctx) {
         Interval interval =
