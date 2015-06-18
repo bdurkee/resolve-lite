@@ -36,6 +36,7 @@ def compile():
     javac("test", "out/test", version="1.8", cp=cp)
 
 def mkjar():
+    rmdir("out")
     require(compile)
     mkdir("dist")
     jarfile = "dist/resolve_"+VERSION+".jar"
@@ -57,18 +58,19 @@ def mkjar():
     print_and_log("Generated " + jarfile)
 
 def tests():
-    require(compile)
+    require(mkjar)
     print_and_log("Testing ...")
     args = ["-nowarn", "-Xlint", "-Xlint:-serial", "-g"]
-    try:
-        test(args)
-        print "tests complete"
-    except Exception as e:
-        print "tests failed: ", e
+    #try:
+    test(args)
+    print "tests complete"
+    #except Exception as e:
+        #print "GETS HERE!!!!"
+       # print "tests failed: "
 
 def test(args):
     junit_jar, hamcrest_jar = load_junitjars()
-    junit("out/test", cp='/Users/daniel/resolve-lite/out/test:'+uniformpath("dist/resolve_"+VERSION+".jar"), verbose=False, args=[])
+    junit("out/test", cp='/Users/daniel/resolve-lite/out/test:'+uniformpath("dist/resolve_"+VERSION+".jar"), verbose=False)
 
 def clean():
     os.remove("bild.log")
