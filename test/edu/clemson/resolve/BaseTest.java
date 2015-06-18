@@ -1,7 +1,8 @@
 package edu.clemson.resolve;
 
 import edu.clemson.resolve.compiler.DefaultCompilerListener;
-import edu.clemson.resolve.compiler.ResolveCompiler;
+import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.compiler.RESOLVEMessage;
 import org.antlr.v4.runtime.misc.Utils;
 import org.junit.Before;
 import org.junit.rules.TestRule;
@@ -11,7 +12,6 @@ import org.junit.runner.Description;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -62,12 +62,12 @@ public abstract class BaseTest {
         }
     }
 
-    protected ResolveCompiler newCompiler(String[] args) {
-        return new ResolveCompiler(args);
+    protected RESOLVECompiler newCompiler(String[] args) {
+        return new RESOLVECompiler(args);
     }
 
-    protected ResolveCompiler newCompiler() {
-        return new ResolveCompiler(new String[] {"-o", tmpdir});
+    protected RESOLVECompiler newCompiler() {
+        return new RESOLVECompiler(new String[] {"-o", tmpdir});
     }
 
     protected ErrorCollector resolve(String moduleFileName,
@@ -84,13 +84,37 @@ public abstract class BaseTest {
         options.add(new File(tmpdir, moduleFileName).toString());
         final String[] optionsA = new String[options.size()];
         options.toArray(optionsA);
-        ResolveCompiler resolve = new ResolveCompiler(optionsA);
+        RESOLVECompiler resolve = new RESOLVECompiler(optionsA);
         ErrorCollector equeue = new ErrorCollector(resolve);
         resolve.addListener(equeue);
         if (defaultListener) {
             resolve.addListener(new DefaultCompilerListener(resolve));
         }
         resolve.processCommandLineTargets();
+
+        if ( !defaultListener && !equeue.errors.isEmpty() ) {
+            System.err.println("resolve reports errors from "+options);
+            for (int i = 0; i < equeue.errors.size(); i++) {
+                RESOLVEMessage msg = equeue.errors.get(i);
+                System.err.println(msg);
+            }
+            System.out.println("!!!\nmodule:");
+            try {
+                System.out.println(new String(Utils.readFile(tmpdir+"/"+moduleFileName)));
+            }
+            catch (IOException ioe) {
+                System.err.println(ioe.toString());
+            }
+            System.out.println("###");
+        }
+        if ( !defaultListener && !equeue.warnings.isEmpty() ) {
+            System.err.println("resolve reports warnings from "+options);
+            for (int i = 0; i < equeue.warnings.size(); i++) {
+                RESOLVEMessage msg = equeue.warnings.get(i);
+                System.err.println(msg);
+            }
+        }
+        return equeue;
     }
 
     public void testErrors(String[] pairs) {
@@ -108,7 +132,7 @@ public abstract class BaseTest {
      * the logic works well enough for testing purposes.
      */
     public String getFilenameFromFirstLineOfModule(String firstLine) {
-        String fileName = "A" + ResolveCompiler.FILE_EXTENSION;
+        String fileName = "A" + RESOLVECompiler.FILE_EXTENSION;
         int mIndex = -1;
         int semi = firstLine.lastIndexOf(';');
         if ( firstLine.lastIndexOf("Precis")!=-1 ) {
@@ -119,10 +143,10 @@ public abstract class BaseTest {
         }
         if ( mIndex>=0 && semi>=0 ) {
             int space = firstLine.indexOf(' ', mIndex);
-            fileName = firstLine.substring(space+1, semi)+ResolveCompiler.FILE_EXTENSION;
+            fileName = firstLine.substring(space+1, semi)+ RESOLVECompiler.FILE_EXTENSION;
         }
-        if ( fileName.length()==ResolveCompiler.FILE_EXTENSION.length() ) {
-            fileName = "A" + ResolveCompiler.FILE_EXTENSION;
+        if ( fileName.length()== RESOLVECompiler.FILE_EXTENSION.length() ) {
+            fileName = "A" + RESOLVECompiler.FILE_EXTENSION;
         }
         return fileName;
     }

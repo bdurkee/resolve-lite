@@ -33,7 +33,7 @@ package edu.clemson.resolve.compiler;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 
-public class LanguageSemanticsMessage extends ResolveMessage {
+public class LanguageSemanticsMessage extends RESOLVEMessage {
 
     public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken,
                                     Object... args) {

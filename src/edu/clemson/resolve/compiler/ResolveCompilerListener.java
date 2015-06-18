@@ -30,13 +30,11 @@
  */
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.compiler.ResolveMessage;
-
-public interface ResolveCompilerListener {
+public interface RESOLVECompilerListener {
 
     public void info(String msg);
 
-    public void error(ResolveMessage msg);
+    public void error(RESOLVEMessage msg);
 
-    public void warning(ResolveMessage msg);
+    public void warning(RESOLVEMessage msg);
 }

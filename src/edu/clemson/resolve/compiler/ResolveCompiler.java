@@ -53,7 +53,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ResolveCompiler {
+public  class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
@@ -66,7 +66,6 @@ public class ResolveCompiler {
             .unmodifiableList(Collections.singletonList(".java"));
 
     public static enum OptionArgType { NONE, STRING } // NONE implies boolean
-
     public static class Option {
         String fieldName;
         String name;
@@ -94,7 +93,7 @@ public class ResolveCompiler {
         new Option("log",               "-Xlog", "dump lots of logging info to resolve-timestamp.log")
     };
 
-    List<ResolveCompilerListener> listeners = new CopyOnWriteArrayList<>();
+    List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Track separately so if someone adds a listener, it's the only one
@@ -120,7 +119,7 @@ public class ResolveCompiler {
     public final ErrorManager errMgr;
     public LogManager logMgr = new LogManager();
 
-    public ResolveCompiler(String[] args) {
+    public RESOLVECompiler(String[] args) {
         this.errMgr = new ErrorManager(this);
         this.args = args;
         handleArgs();
@@ -149,7 +148,7 @@ public class ResolveCompiler {
                         i++;
                     }
                     // use reflection to set field
-                    Class<? extends ResolveCompiler> c = this.getClass();
+                    Class<? extends RESOLVECompiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
                         if (argValue == null) {
@@ -206,7 +205,7 @@ public class ResolveCompiler {
     }
 
     public static void main(String[] args) {
-        ResolveCompiler resolve = new ResolveCompiler(args);
+        RESOLVECompiler resolve = new RESOLVECompiler(args);
         if ( args.length == 0 ) {
             resolve.help();
             resolve.exit(0);
@@ -338,8 +337,7 @@ public class ResolveCompiler {
         if ( !g.containsVertex(src) ) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator =
-                new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
@@ -390,11 +388,11 @@ public class ResolveCompiler {
         log(null, msg);
     }
 
-    public void addListener(ResolveCompilerListener cl) {
+    public void addListener(RESOLVECompilerListener cl) {
         if ( cl!=null ) listeners.add(cl);
     }
 
-    public void removeListener(ResolveCompilerListener tl) {
+    public void removeListener(RESOLVECompilerListener tl) {
         listeners.remove(tl);
     }
 
@@ -402,7 +400,7 @@ public class ResolveCompiler {
         listeners.clear();
     }
 
-    public List<ResolveCompilerListener> getListeners() {
+    public List<RESOLVECompilerListener> getListeners() {
         return listeners;
     }
 
@@ -424,11 +422,11 @@ public class ResolveCompiler {
         defaultListener.info(msg);
     }
 
-    public void error(ResolveMessage msg) {
+    public void error(RESOLVEMessage msg) {
         defaultListener.error(msg);
     }
 
-    public void warning(ResolveMessage msg) {
+    public void warning(RESOLVEMessage msg) {
         defaultListener.warning(msg);
     }
 

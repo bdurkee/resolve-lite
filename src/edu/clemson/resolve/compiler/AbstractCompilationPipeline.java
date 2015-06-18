@@ -7,9 +7,9 @@ import java.util.List;
 public abstract class AbstractCompilationPipeline {
 
     protected final List<AnnotatedTree> compilationUnits;
-    protected final ResolveCompiler compiler;
+    protected final RESOLVECompiler compiler;
 
-    public AbstractCompilationPipeline(@NotNull ResolveCompiler rc,
+    public AbstractCompilationPipeline(@NotNull RESOLVECompiler rc,
                                @NotNull List<AnnotatedTree> compilationUnits) {
         this.compilationUnits = compilationUnits;
         this.compiler = rc;

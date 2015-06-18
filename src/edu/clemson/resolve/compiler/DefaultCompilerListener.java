@@ -32,15 +32,15 @@ package edu.clemson.resolve.compiler;
 
 import org.stringtemplate.v4.ST;
 
-public class DefaultCompilerListener implements ResolveCompilerListener {
+public class DefaultCompilerListener implements RESOLVECompilerListener {
 
-    private final ResolveCompiler compiler;
+    private final RESOLVECompiler compiler;
 
-    public DefaultCompilerListener(ResolveCompiler c) {
+    public DefaultCompilerListener(RESOLVECompiler c) {
         this.compiler = c;
     }
 
-    @Override public void error(ResolveMessage msg) {
+    @Override public void error(RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
         if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
@@ -56,7 +56,7 @@ public class DefaultCompilerListener implements ResolveCompilerListener {
         System.out.println(msg);
     }
 
-    @Override public void warning(ResolveMessage msg) {
+    @Override public void warning(RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
         if ( compiler.errMgr.formatWantsSingleLineMessage() ) {

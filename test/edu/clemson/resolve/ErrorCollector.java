@@ -1,25 +1,25 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.ResolveCompiler;
-import edu.clemson.resolve.compiler.ResolveCompilerListener;
-import edu.clemson.resolve.compiler.ResolveMessage;
+import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.compiler.RESOLVECompilerListener;
+import edu.clemson.resolve.compiler.RESOLVEMessage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ErrorCollector implements ResolveCompilerListener {
+public class ErrorCollector implements RESOLVECompilerListener {
 
-    public final ResolveCompiler compiler;
+    public final RESOLVECompiler compiler;
     public final List<String> infos = new ArrayList<>();
-    public final List<ResolveMessage> errors = new ArrayList<>();
-    public final List<ResolveMessage> warnings = new ArrayList<>();
-    public final List<ResolveMessage> all = new ArrayList<>();
+    public final List<RESOLVEMessage> errors = new ArrayList<>();
+    public final List<RESOLVEMessage> warnings = new ArrayList<>();
+    public final List<RESOLVEMessage> all = new ArrayList<>();
 
     public ErrorCollector() {
         this(null);
     }
 
-    public ErrorCollector(ResolveCompiler rc) {
+    public ErrorCollector(RESOLVECompiler rc) {
         this.compiler = rc;
     }
 
@@ -27,12 +27,12 @@ public class ErrorCollector implements ResolveCompilerListener {
         infos.add(msg);
     }
 
-    @Override public void error(ResolveMessage msg) {
+    @Override public void error(RESOLVEMessage msg) {
         errors.add(msg);
         all.add(msg);
     }
 
-    @Override public void warning(ResolveMessage msg) {
+    @Override public void warning(RESOLVEMessage msg) {
         warnings.add(msg);
         all.add(msg);
     }

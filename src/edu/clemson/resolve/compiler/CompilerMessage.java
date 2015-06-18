@@ -39,7 +39,7 @@ package edu.clemson.resolve.compiler;
  * Allow a generic {@code Object} to be passed in and the string template can
  * deal with just printing it or pulling some property out of it.</p>
  */
-public class CompilerMessage extends ResolveMessage {
+public class CompilerMessage extends RESOLVEMessage {
 
     public CompilerMessage(ErrorKind errorType) {
         super(errorType);

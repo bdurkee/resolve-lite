@@ -20,12 +20,12 @@ public class ErrorManager extends BaseErrorListener {
     private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve"
             + STGroup.GROUP_FILE_EXTENSION);
 
-    private final ResolveCompiler compiler;
+    private final RESOLVECompiler compiler;
     private int errorCount, warningCount;
 
     public Set<ErrorKind> errorTypes = EnumSet.noneOf(ErrorKind.class);
 
-    public ErrorManager(ResolveCompiler c) {
+    public ErrorManager(RESOLVECompiler c) {
         this.compiler = c;
     }
 
@@ -42,7 +42,7 @@ public class ErrorManager extends BaseErrorListener {
         errorCount = 0;
     }
 
-    public ST getMessageTemplate(ResolveMessage msg) {
+    public ST getMessageTemplate(RESOLVEMessage msg) {
         ST messageST = msg.getMessageTemplate(compiler.longMessages);
         ST locationST = getLocationFormat();
         ST reportST = getReportFormat(msg.getErrorType().severity);
@@ -93,7 +93,7 @@ public class ErrorManager extends BaseErrorListener {
     @Override public void syntaxError(Recognizer<?, ?> recognizer,
                                       Object offendingSymbol, int line, int charPositionInLine,
                                       String msg, RecognitionException e) {
-        ResolveMessage m =
+        RESOLVEMessage m =
                 new LanguageSyntaxMessage(ErrorKind.SYNTAX_ERROR,
                         (Token) offendingSymbol, e, msg);
         emit(ErrorKind.SYNTAX_ERROR, m);
@@ -110,7 +110,7 @@ public class ErrorManager extends BaseErrorListener {
 
     public void semanticError(ErrorKind etype, Token offendingSymbol,
                               Object... args) {
-        ResolveMessage msg =
+        RESOLVEMessage msg =
                 new LanguageSemanticsMessage(etype, offendingSymbol, args);
         emit(etype, msg);
     }
@@ -171,7 +171,7 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     @SuppressWarnings("fallthrough") public void emit(ErrorKind kind,
-                                                      ResolveMessage msg) {
+                                                      RESOLVEMessage msg) {
         switch (kind.severity) {
             case WARNING_ONE_OFF:
                 if ( errorTypes.contains(kind) ) {

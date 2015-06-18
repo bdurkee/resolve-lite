@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ResolveCompiler;
+import edu.clemson.resolve.compiler.RESOLVECompiler;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class AnalysisPipeline extends AbstractCompilationPipeline {
 
-    public AnalysisPipeline(@NotNull ResolveCompiler rc,
+    public AnalysisPipeline(@NotNull RESOLVECompiler rc,
                         @NotNull List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }

@@ -7,7 +7,7 @@ import org.stringtemplate.v4.ST;
 
 import java.util.Arrays;
 
-public class ResolveMessage {
+public class RESOLVEMessage {
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 
@@ -21,16 +21,16 @@ public class ResolveMessage {
     public int charPosition = -1;
     public Token offendingToken;
 
-    public ResolveMessage(@NotNull ErrorKind errorKind) {
+    public RESOLVEMessage(@NotNull ErrorKind errorKind) {
         this(errorKind, (Throwable) null, null);
     }
 
-    public ResolveMessage(@NotNull ErrorKind errorType, Token offendingToken,
+    public RESOLVEMessage(@NotNull ErrorKind errorType, Token offendingToken,
                           Object... args) {
         this(errorType, null, offendingToken, args);
     }
 
-    public ResolveMessage(@NotNull ErrorKind errorType, @Nullable Throwable e,
+    public RESOLVEMessage(@NotNull ErrorKind errorType, @Nullable Throwable e,
                           Token offendingToken, Object... args) {
         this.errorType = errorType;
         this.e = e;

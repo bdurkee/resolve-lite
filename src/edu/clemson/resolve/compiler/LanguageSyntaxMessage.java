@@ -33,7 +33,7 @@ package edu.clemson.resolve.compiler;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 
-public class LanguageSyntaxMessage extends ResolveMessage {
+public class LanguageSyntaxMessage extends RESOLVEMessage {
 
     public LanguageSyntaxMessage(ErrorKind etype, Token offendingToken,
                          RecognitionException antlrException, Object... args) {
