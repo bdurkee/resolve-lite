@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ResolveCompiler {
 
@@ -93,8 +94,13 @@ public class ResolveCompiler {
         new Option("log",               "-Xlog", "dump lots of logging info to resolve-timestamp.log")
     };
 
-    public final DefaultCompilerListener defaultListener =
-            new DefaultCompilerListener(this);
+    List<ResolveCompilerListener> listeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Track separately so if someone adds a listener, it's the only one
+     * instead of it and the default stderr listener.
+     */
+    DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     //public final SymbolTable symbolTable = new SymbolTable(this);
 
     public final String[] args;
@@ -382,6 +388,22 @@ public class ResolveCompiler {
 
     public void log(String msg) {
         log(null, msg);
+    }
+
+    public void addListener(ResolveCompilerListener cl) {
+        if ( cl!=null ) listeners.add(cl);
+    }
+
+    public void removeListener(ResolveCompilerListener tl) {
+        listeners.remove(tl);
+    }
+
+    public void removeListeners() {
+        listeners.clear();
+    }
+
+    public List<ResolveCompilerListener> getListeners() {
+        return listeners;
     }
 
     public void version() {

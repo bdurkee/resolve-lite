@@ -1,5 +1,6 @@
 package edu.clemson.resolve;
 
+import edu.clemson.resolve.compiler.DefaultCompilerListener;
 import edu.clemson.resolve.compiler.ResolveCompiler;
 import org.antlr.v4.runtime.misc.Utils;
 import org.junit.Before;
@@ -9,6 +10,9 @@ import org.junit.runner.Description;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class BaseTest {
@@ -59,13 +63,34 @@ public abstract class BaseTest {
     }
 
     protected ResolveCompiler newCompiler(String[] args) {
-        ResolveCompiler compiler = new ResolveCompiler(args);
-        return compiler;
+        return new ResolveCompiler(args);
     }
 
     protected ResolveCompiler newCompiler() {
-        ResolveCompiler compiler = new ResolveCompiler(new String[] {"-o", tmpdir});
-        return compiler;
+        return new ResolveCompiler(new String[] {"-o", tmpdir});
+    }
+
+    protected ErrorCollector resolve(String moduleFileName,
+                                     boolean defaultListener) {
+        final List<String> options = new ArrayList<>();
+        if ( !options.contains("-o") ) {
+            options.add("-o");
+            options.add(tmpdir);
+        }
+        if ( !options.contains("-lib") ) {
+            options.add("-lib");
+            options.add(tmpdir);
+        }
+        options.add(new File(tmpdir, moduleFileName).toString());
+        final String[] optionsA = new String[options.size()];
+        options.toArray(optionsA);
+        ResolveCompiler resolve = new ResolveCompiler(optionsA);
+        ErrorCollector equeue = new ErrorCollector(resolve);
+        resolve.addListener(equeue);
+        if (defaultListener) {
+            resolve.addListener(new DefaultCompilerListener(resolve));
+        }
+        resolve.processCommandLineTargets();
     }
 
     public void testErrors(String[] pairs) {
@@ -79,8 +104,8 @@ public abstract class BaseTest {
     }
 
     /**
-     * Far from a foolproof means of getting a module's filename, but the logic
-     * well enough for finding names for our test cases.
+     * Seems far from a foolproof means of getting a module's name, but
+     * the logic works well enough for testing purposes.
      */
     public String getFilenameFromFirstLineOfModule(String firstLine) {
         String fileName = "A" + ResolveCompiler.FILE_EXTENSION;
@@ -103,10 +128,10 @@ public abstract class BaseTest {
     }
 
     protected ErrorCollector resolve(String moduleFileName, String moduleStr,
-                         boolean defaultListener, String... extraOptions) {
+                         boolean defaultListener) {
         mkdir(tmpdir);
-        writeFile(tmpdir, grammarFileName, grammarStr);
-        return antlr(grammarFileName, defaultListener, extraOptions);
+        writeFile(tmpdir, moduleFileName, moduleStr);
+        return resolve(moduleFileName, defaultListener);
     }
 
     public static void writeFile(String dir, String fileName, String content) {
