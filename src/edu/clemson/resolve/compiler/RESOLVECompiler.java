@@ -84,13 +84,13 @@ public  class RESOLVECompiler {
     }
 
     public static Option[] optionDefs = {
-        new Option("longMessages",      "-longMessages", "show exception details on errors"),
-        new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
-        new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-        new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
-        new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
-        new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
-        new Option("log",               "-Xlog", "dump lots of logging info to resolve-timestamp.log")
+            new Option("longMessages",      "-longMessages", "show exception details on errors"),
+            new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
+            new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
+            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
+            new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
+            new Option("log",               "-Xlog", "dump lots of logging info to resolve-timestamp.log")
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();

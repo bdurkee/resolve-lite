@@ -36,8 +36,8 @@ package edu.clemson.resolve.compiler;
  * might arise from user sourcecode, which may be rather complex.
  * <p>
  * Sometimes you need to pass in a filename or something to say it is "bad".
- * Allow a generic {@code Object} to be passed in and the string template can
- * deal with just printing it or pulling some property out of it.</p>
+ * Allow a generic {@code Object} to be passed in and the template in the view
+ * can deal with just printing it or pulling some property out of it.</p>
  */
 public class CompilerMessage extends RESOLVEMessage {
 
