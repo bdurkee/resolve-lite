@@ -1,0 +1,3 @@
+Precis Boo;
+    uses Bar;
+end Boo;
