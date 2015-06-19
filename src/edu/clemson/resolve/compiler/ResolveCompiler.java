@@ -30,8 +30,8 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.Resolve;
 import edu.clemson.resolve.ResolveLexer;
-import edu.clemson.resolve.ResolveParser;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
@@ -366,7 +366,7 @@ public  class RESOLVECompiler {
             ResolveLexer lexer = new ResolveLexer(input);
 
             TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
+            Resolve parser = new Resolve(tokens);
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.module();

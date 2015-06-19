@@ -60,15 +60,13 @@ def mkjar():
 def tests():
     require(mkjar)
     print_and_log("Testing ...")
-    args = ["-nowarn", "-Xlint", "-Xlint:-serial", "-g"]
-    #try:
-    test(args)
-    print "tests complete"
-    #except Exception as e:
-        #print "GETS HERE!!!!"
-       # print "tests failed: "
+    try:
+        test()
+        print "tests complete"
+    except Exception as e:
+        print "tests failed: "+e
 
-def test(args):
+def test():
     junit_jar, hamcrest_jar = load_junitjars()
     junit("out/test", cp='/Users/daniel/resolve-lite/out/test:'+uniformpath("dist/resolve_"+VERSION+".jar"), verbose=False)
 

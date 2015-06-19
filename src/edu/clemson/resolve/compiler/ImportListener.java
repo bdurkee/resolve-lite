@@ -1,7 +1,7 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.Resolve;
 import edu.clemson.resolve.ResolveBaseListener;
-import edu.clemson.resolve.ResolveParser;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -51,9 +51,9 @@ public class ImportListener extends ResolveBaseListener {
         NON_STD_MODULES.put(moduleName, defaultImports);
     }
 
-    @Override public void enterModule(@NotNull ResolveParser.ModuleContext ctx) {
+    @Override public void enterModule(@NotNull Resolve.ModuleContext ctx) {
         ParseTree moduleChild = ctx.getChild(0);
-        if ( !(moduleChild instanceof ResolveParser.PrecisModuleContext) ) {
+        if ( !(moduleChild instanceof Resolve.PrecisModuleContext) ) {
             LinkedHashSet<String> stdImports =
                     NON_STD_MODULES.get(Utils.getModuleName(moduleChild));
             if ( stdImports != null ) { // if this is a standard module
@@ -81,8 +81,8 @@ public class ImportListener extends ResolveBaseListener {
                 ctx.concept.getText());
     }*/
 
-    @Override public void exitImportList(
-            @NotNull ResolveParser.ImportListContext ctx) {
+    @Override public void exitUsesList(
+            @NotNull Resolve.UsesListContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.ID());
     }
 

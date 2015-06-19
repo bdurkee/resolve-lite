@@ -30,7 +30,7 @@
  */
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.ResolveParser;
+import edu.clemson.resolve.Resolve;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -83,16 +83,16 @@ public class Utils {
     }
 
     public static String getModuleName(@NotNull ParseTree ctx) {
-        if ( ctx instanceof ResolveParser.ModuleContext ) {
+        if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
 
-        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
-            return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
+        if ( ctx instanceof Resolve.PrecisModuleContext ) {
+            return ((Resolve.PrecisModuleContext) ctx).name.getText();
         }
-        //else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
-        //    return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
-        //}
+        else if ( ctx instanceof Resolve.ConceptModuleContext ) {
+            return ((Resolve.ConceptModuleContext) ctx).name.getText();
+        }
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

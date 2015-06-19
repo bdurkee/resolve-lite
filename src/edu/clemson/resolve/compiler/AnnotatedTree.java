@@ -21,14 +21,14 @@ public class AnnotatedTree {
         this.fileName = fileName;
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
-        if ( !hasErrors ) {
+      /*  if ( !hasErrors ) {
             ImportListener l = new ImportListener();
             ParseTreeWalker.DEFAULT.walk(l, root);
             this.imports = l.getImports();
         }
         else {
             this.imports = new ImportCollection();
-        }
+        }*/
     }
 
     @NotNull public String getName() {

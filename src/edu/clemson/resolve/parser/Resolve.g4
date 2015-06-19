@@ -28,29 +28,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-grammar Resolve;
+parser grammar Resolve;
+
+options {
+	tokenVocab=ResolveLexer;
+}
 
 module
     :   precisModule
+    |   conceptModule
+    ;
+
+usesList
+    :   USES ID (COMMA ID)* SEMI
+    ;
+
+conceptModule
+    :   CONCEPT name=ID SEMI
+        (usesList)?
+        END closename=ID SEMI EOF
     ;
 
 precisModule
-    :   'Precis' name=ID ';'
-        (importList)?
-        'end' closename=ID ';'
+    :   PRECIS name=ID SEMI
+        (usesList)?
+        END closename=ID SEMI EOF
     ;
-
-// uses, imports
-
-importList
-    :   'uses' ID (',' ID)* ';'
-    ;
-
-// whitespace, identifier rules, and comments
-
-ID  :	[a-zA-Z_] [a-zA-Z_0-9]*
-    ;
-
-COMMENT : '(*' .*? '*)' -> channel(HIDDEN) ;
-LINE_COMMENT : '--' ~'\n'* '\n' -> channel(HIDDEN) ;
-WS : [ \t\n\r]+ -> channel(HIDDEN) ;
