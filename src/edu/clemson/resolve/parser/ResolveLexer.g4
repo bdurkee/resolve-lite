@@ -30,13 +30,13 @@
  */
 lexer grammar ResolveLexer;
 
-PRECIS      :   'Precis'                        ;
+PRECIS      :   'Precis'						;
 CONCEPT	    :	'Concept'						;
-END         :   'end'                           ;
-USES		:	'uses'							;
+END         :   'end'							;
+USES        :   'uses'							;
 
-SEMI        :   ';'                             ;
-COMMA		:	','								;
+SEMI        :   ';'								;
+COMMA       :	','								;
 
 ID			:	NameStartChar NameChar*         ;
 WS          :	[ \t\r\n\f]+ -> channel(HIDDEN)	;
@@ -47,7 +47,7 @@ DOC_COMMENT
 
 BLOCK_COMMENT
 	:	'(*' .*? ('*)' | EOF)  -> channel(HIDDEN)
-    ;
+	;
 
 LINE_COMMENT
 	:	'--' ~[\r\n]*  -> channel(HIDDEN)

@@ -3,6 +3,8 @@ package edu.clemson.resolve;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.compiler.RESOLVECompilerListener;
 import edu.clemson.resolve.compiler.RESOLVEMessage;
+import edu.clemson.resolve.misc.Utils;
+import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,5 +37,28 @@ public class ErrorCollector implements RESOLVECompilerListener {
     @Override public void warning(RESOLVEMessage msg) {
         warnings.add(msg);
         all.add(msg);
+    }
+
+    @Override public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean rendered) {
+        if (!rendered) {
+            return Utils.join(all, "\n");
+        }
+
+        if (compiler == null) {
+            throw new IllegalStateException(String.format("no %s instance is available.",
+                    RESOLVECompiler.class.getName()));
+        }
+
+        StringBuilder buf = new StringBuilder();
+        for (RESOLVEMessage m : all) {
+            ST st = compiler.errMgr.getMessageTemplate(m);
+            buf.append(st.render());
+            buf.append("\n");
+        }
+        return buf.toString();
     }
 }

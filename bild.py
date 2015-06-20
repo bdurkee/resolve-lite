@@ -39,7 +39,7 @@ def mkjar():
     rmdir("out")
     require(compile)
     mkdir("dist")
-    jarfile = "dist/resolve_"+VERSION+".jar"
+    jarfile = "dist/resolve-"+VERSION+".jar"
     manifest = \
         "Main-Class: edu.clemson.resolve.compiler.ResolveCompiler\n" +\
         "Implementation-Title: RESOLVE compiler\n" +\
@@ -57,18 +57,33 @@ def mkjar():
     jar(jarfile, srcdir="out", manifest=manifest)
     print_and_log("Generated " + jarfile)
 
+#Todo
+def mkdoc():
+    require(mksrc)
+
+#Todo
+def mksrc():
+    srcpath = "src/edu"
+    srcfiles = allfiles(srcpath, "*.java")
+    jarfile = "dist/resolve-" + VERSION + "-complete.jar"
+    if not isstale(src=newest(srcfiles), trg=jarfile):
+        return
+    zip(jarfile, srcpath)
+    print_and_log("Generated " + jarfile)
+
 def tests():
     require(mkjar)
     print_and_log("Testing ...")
+    args = ["-nowarn", "-Xlint", "-Xlint:-serial", "-g"]
     try:
-        test()
+        test(args)
         print "tests complete"
     except Exception as e:
         print "tests failed: "+e
 
-def test():
+def test(args):
     junit_jar, hamcrest_jar = load_junitjars()
-    junit("out/test", cp='/Users/daniel/resolve-lite/out/test:'+uniformpath("dist/resolve_"+VERSION+".jar"), verbose=False)
+    junit("out/test", cp='/Users/daniel/resolve-lite/out/test:'+uniformpath("dist/resolve-"+VERSION+".jar"), verbose=False)
 
 def clean():
     os.remove("bild.log")

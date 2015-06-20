@@ -337,7 +337,8 @@ public  class RESOLVECompiler {
         if ( !g.containsVertex(src) ) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator =
+                new DepthFirstIterator<>(g, src);
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
@@ -419,15 +420,28 @@ public  class RESOLVECompiler {
     }
 
     public void info(String msg) {
-        defaultListener.info(msg);
+        if ( listeners.isEmpty() ) {
+            defaultListener.info(msg);
+            return;
+        }
+        for (RESOLVECompilerListener l : listeners) l.info(msg);
     }
 
     public void error(RESOLVEMessage msg) {
-        defaultListener.error(msg);
+        if ( listeners.isEmpty() ) {
+            defaultListener.error(msg);
+            return;
+        }
+        for (RESOLVECompilerListener l : listeners) l.error(msg);
     }
 
     public void warning(RESOLVEMessage msg) {
-        defaultListener.warning(msg);
+        if ( listeners.isEmpty() ) {
+            defaultListener.warning(msg);
+        }
+        else {
+            for (RESOLVECompilerListener l : listeners) l.warning(msg);
+        }
     }
 
     public void exit(int e) {

@@ -52,7 +52,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     /**
      * Constructs a new {@code FileLocator} that will match based on the
-     * {@code pattern, extensions} pair provided.
+     * {@code (pattern, extensions)} pair provided.
      *
      * @param pattern An extensionless pattern.
      * @param extensions An list of valid extensions to choose from after a

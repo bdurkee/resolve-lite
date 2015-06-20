@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static org.junit.Assert.assertEquals;
+
 public abstract class BaseTest {
     private static final Logger LOGGER = Logger.getLogger(BaseTest.class.getName());
 
@@ -70,6 +72,35 @@ public abstract class BaseTest {
         return new RESOLVECompiler(new String[] {"-o", tmpdir});
     }
 
+    public void testErrors(String[] pairs, String moduleName) {
+        for (int i = 0; i < pairs.length; i+=2) {
+            String input = pairs[i];
+            String expected = pairs[i + 1];
+
+            String[] lines = input.split("\n");
+
+            String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
+            ErrorCollector errors = resolve(fileName, input, false);
+
+            String actual = errors.toString(true);
+            actual = actual.replace(tmpdir + File.separator, "");
+            System.err.println(actual);
+            String msg = input;
+            msg = msg.replace("\n","\\n");
+            msg = msg.replace("\r","\\r");
+            msg = msg.replace("\t","\\t");
+
+            assertEquals("error in: "+msg, expected, actual);
+        }
+    }
+
+    protected ErrorCollector resolve(String moduleFileName, String moduleStr,
+                         boolean defaultListener) {
+        mkdir(tmpdir);
+        writeFile(tmpdir, moduleFileName, moduleStr);
+        return resolve(moduleFileName, defaultListener);
+    }
+
     protected ErrorCollector resolve(String moduleFileName,
                                      boolean defaultListener) {
         final List<String> options = new ArrayList<>();
@@ -115,47 +146,6 @@ public abstract class BaseTest {
             }
         }
         return equeue;
-    }
-
-    public void testErrors(String[] pairs) {
-        for (int i = 0; i < pairs.length; i+=2) {
-            String input = pairs[i];
-            String expected = pairs[i + 1];
-
-            String[] lines = input.split("\n");
-            String fileName = getFilenameFromFirstLineOfModule(lines[0]);
-        }
-    }
-
-    /**
-     * Seems far from a foolproof means of getting a module's name, but
-     * the logic works well enough for testing purposes.
-     */
-    public String getFilenameFromFirstLineOfModule(String firstLine) {
-        String fileName = "A" + RESOLVECompiler.FILE_EXTENSION;
-        int mIndex = -1;
-        int semi = firstLine.lastIndexOf(';');
-        if ( firstLine.lastIndexOf("Precis")!=-1 ) {
-            mIndex = firstLine.lastIndexOf("Precis");
-        }
-        else if ( firstLine.lastIndexOf("Concept")!=-1 ) {
-            mIndex = firstLine.lastIndexOf("Concept");
-        }
-        if ( mIndex>=0 && semi>=0 ) {
-            int space = firstLine.indexOf(' ', mIndex);
-            fileName = firstLine.substring(space+1, semi)+ RESOLVECompiler.FILE_EXTENSION;
-        }
-        if ( fileName.length()== RESOLVECompiler.FILE_EXTENSION.length() ) {
-            fileName = "A" + RESOLVECompiler.FILE_EXTENSION;
-        }
-        return fileName;
-    }
-
-    protected ErrorCollector resolve(String moduleFileName, String moduleStr,
-                         boolean defaultListener) {
-        mkdir(tmpdir);
-        writeFile(tmpdir, moduleFileName, moduleStr);
-        return resolve(moduleFileName, defaultListener);
     }
 
     public static void writeFile(String dir, String fileName, String content) {

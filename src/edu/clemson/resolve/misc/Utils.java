@@ -42,6 +42,11 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Some general shortcut/utility methods.
+ *
+ * @author daniel <dtw.welch@gmail.com>
+ */
 public class Utils {
 
     public static <T, R> List<R> apply(Collection<T> l, Function<T, R> f) {
@@ -86,7 +91,6 @@ public class Utils {
         if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
-
         if ( ctx instanceof Resolve.PrecisModuleContext ) {
             return ((Resolve.PrecisModuleContext) ctx).name.getText();
         }
@@ -113,7 +117,7 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     * {@code ../Foo/facilities/T.concept} grooms to {@code T.concept}.
+     * {@code ../Foo/facilities/T.resolve} grooms to {@code T.resolve}.
      *
      * @param name A file name with zero or more '/' delimited directories.
      * @return just the file name.

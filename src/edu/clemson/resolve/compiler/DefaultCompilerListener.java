@@ -32,6 +32,14 @@ package edu.clemson.resolve.compiler;
 
 import org.stringtemplate.v4.ST;
 
+/**
+ * A basic, default implementation of a listener for the compiler that reports
+ * warnings, errors, and other miscellaneous info.
+ * <p>
+ * Note that this implementation simply outputs the information
+ * received directly to {@code stdout} (or {@code stderr}); it doesn't try to
+ * save or otherwise preserve any of the information forwarded.</p>
+ */
 public class DefaultCompilerListener implements RESOLVECompilerListener {
 
     private final RESOLVECompiler compiler;
