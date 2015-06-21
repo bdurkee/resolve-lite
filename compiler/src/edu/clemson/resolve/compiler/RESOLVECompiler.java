@@ -30,11 +30,11 @@
  */
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.Resolve;
-import edu.clemson.resolve.ResolveLexer;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.semantics.AnalysisPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
@@ -87,10 +87,10 @@ public  class RESOLVECompiler {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of edu.clemson.resolve source files"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
-            new Option("log",               "-Xlog", "dump lots of logging info to resolve-timestamp.log")
+            new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();

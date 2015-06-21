@@ -102,7 +102,7 @@ public class LogManager {
         String dir = ".";
         String defaultFilename =
                 dir
-                        + "/resolve-"
+                        + "/edu.clemson.resolve-"
                         + new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss")
                         .format(new Date()) + ".log";
         save(defaultFilename);

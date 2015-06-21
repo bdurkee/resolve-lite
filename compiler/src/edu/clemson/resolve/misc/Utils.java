@@ -30,7 +30,7 @@
  */
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.Resolve;
+import edu.clemson.resolve.parser.Resolve;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -117,7 +117,7 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     * {@code ../Foo/facilities/T.resolve} grooms to {@code T.resolve}.
+     * {@code ../Foo/facilities/T.edu.clemson.resolve} grooms to {@code T.edu.clemson.resolve}.
      *
      * @param name A file name with zero or more '/' delimited directories.
      * @return just the file name.

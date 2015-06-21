@@ -124,7 +124,7 @@ public abstract class BaseTest {
         resolve.processCommandLineTargets();
 
         if ( !defaultListener && !equeue.errors.isEmpty() ) {
-            System.err.println("resolve reports errors from "+options);
+            System.err.println("edu.clemson.resolve reports errors from "+options);
             for (int i = 0; i < equeue.errors.size(); i++) {
                 RESOLVEMessage msg = equeue.errors.get(i);
                 System.err.println(msg);
@@ -139,7 +139,7 @@ public abstract class BaseTest {
             System.out.println("###");
         }
         if ( !defaultListener && !equeue.warnings.isEmpty() ) {
-            System.err.println("resolve reports warnings from "+options);
+            System.err.println("edu.clemson.resolve reports warnings from "+options);
             for (int i = 0; i < equeue.warnings.size(); i++) {
                 RESOLVEMessage msg = equeue.warnings.get(i);
                 System.err.println(msg);

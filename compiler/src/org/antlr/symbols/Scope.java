@@ -6,7 +6,7 @@ import java.util.Set;
 public interface Scope {
     String getScopeName();
 
-    /** Where to look next for symbols if just one parent; superclass or enclosing scope. */
+    /** Where to look next for org.antlr.symbols if just one parent; superclass or enclosing scope. */
     Scope getParentScope();
 
 	/** Multiple superclass or interfaces and the like... */
@@ -35,7 +35,7 @@ public interface Scope {
 	List<? extends Symbol> getAllSymbols();
 	Set<String> getSymbolNames();
 
-	/** Number of symbols in this specific scope */
+	/** Number of org.antlr.symbols in this specific scope */
 	int getNumberOfSymbols();
 
     /** Define a symbol in the current scope, throw IllegalArgumentException

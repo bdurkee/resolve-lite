@@ -54,11 +54,11 @@ public class ErrorCollector implements RESOLVECompilerListener {
         }
 
         StringBuilder buf = new StringBuilder();
+        List<String> result = new ArrayList<>();
         for (RESOLVEMessage m : all) {
             ST st = compiler.errMgr.getMessageTemplate(m);
-            buf.append(st.render());
-            buf.append("\n");
+            result.add(st.render());
         }
-        return buf.toString();
+        return Utils.join(result, "\n");
     }
 }

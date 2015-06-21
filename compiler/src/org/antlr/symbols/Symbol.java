@@ -9,7 +9,7 @@ public interface Symbol {
 	void setInsertionOrderNumber(int i);
 	String getFullyQualifiedName(String scopePathSeparator);
 
-	// to satisfy adding symbols to sets, hashtables
+	// to satisfy adding org.antlr.symbols to sets, hashtables
 	int hashCode();
 	boolean equals(Object o);
 }

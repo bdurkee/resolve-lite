@@ -3,7 +3,6 @@ package edu.clemson.resolve.compiler;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ImportCollection {
 

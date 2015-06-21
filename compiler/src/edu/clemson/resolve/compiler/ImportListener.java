@@ -1,8 +1,8 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.Resolve;
-import edu.clemson.resolve.ResolveBaseListener;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 
