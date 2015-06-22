@@ -119,9 +119,9 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     *      {@code ../Foo/facilities/T.resolve}
+     *      {@code ../Foo/facilities/Basic_Natural_Number_Theory.resolve}
      * grooms to
-     *      {@code T.resolve}.
+     *      {@code Basic_Natural_Number_Theory.resolve}.
      *
      * @param name a file name with zero or more '/' delimited directories
      * @return just the file name

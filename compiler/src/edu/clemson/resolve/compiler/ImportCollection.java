@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
  * If the same reference appears in two separate categories
  * (where one is of type {@code named}), we always default to named--since it's
  * the 'stronger' category (and should have the same affect anyways). However
- * if the overlap involves an {@code external} reference,
- * and it appears in another category, then that's an error -- our language can't
- * load external files atm and the only place they should appear is in the
- * context of a facility declaration.</p>
+ * if the overlap involves an {@code external} reference, then that's an error;
+ * our language can't load external files atm and the only place they should
+ * appear is in the context of a facility declaration.</p>
  */
 public class ImportCollection {
 

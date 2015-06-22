@@ -39,6 +39,7 @@ END         :   'end'							;
 FOR 		:	'for'							;
 EXISTS		:	'Exists'						;
 FORALL		:	'Forall'						;
+IMPLICIT	:	'Implicit'						;
 INDUCTIVE	:	'Inductive'						;
 IS			:	'is'							;
 OF			:	'of'							;

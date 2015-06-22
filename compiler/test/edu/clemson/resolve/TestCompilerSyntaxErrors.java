@@ -15,7 +15,7 @@ public class TestCompilerSyntaxErrors extends BaseTest {
                 "Precis T\n" +
                     "uses x,y,z;\n" +
                 "end T;",
-                "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:2:0: syntax error: missing ';' at 'uses'",
+                "error(" + ErrorKind.SYNTAX_ERROR.code + "): Basic_Natural_Number_Theory.resolve:2:0: syntax error: missing ';' at 'uses'",
         };
         super.testErrors(pair, "T");
     }
@@ -25,8 +25,8 @@ public class TestCompilerSyntaxErrors extends BaseTest {
                 "Precis T\n" +
                         "uses x,y,z\n" +
                         "end T;",
-                "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:2:0: syntax error: missing ';' at 'uses'\n"+
-                "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:3:0: syntax error: extraneous input 'end' expecting {',', ';'}",
+                "error(" + ErrorKind.SYNTAX_ERROR.code + "): Basic_Natural_Number_Theory.resolve:2:0: syntax error: missing ';' at 'uses'\n"+
+                "error(" + ErrorKind.SYNTAX_ERROR.code + "): Basic_Natural_Number_Theory.resolve:3:0: syntax error: extraneous input 'end' expecting {',', ';'}",
         };
         super.testErrors(pair, "T");
     }

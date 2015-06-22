@@ -64,7 +64,7 @@ precisBlock
     ;
 
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
-//for cases in which this signature introduces an inductive defn
+//for instances in which this signature introduces an inductive defn
 mathDefinitionSig
     :   name=mathSymbol (LPAREN
             mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
@@ -78,7 +78,8 @@ mathCategoricalDefinitionDecl
     ;
 
 mathDefinitionDecl
-    :   DEFINITION mathDefinitionSig SEMI
+    :   (IMPLICIT)? DEFINITION mathDefinitionSig
+        (IS mathAssertionExp)? SEMI
     ;
 
 mathInductiveDefinitionDecl

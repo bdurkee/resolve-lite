@@ -5,4 +5,6 @@ Precis Basic_Natural_Number_Theory;
 
     Definition 1 : N;
 
+    Definition N2 : Powerset(N) is {n : N | n >= 2};
+
 end Basic_Natural_Number_Theory;
