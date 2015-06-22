@@ -52,5 +52,104 @@ conceptModule
 precisModule
     :   PRECIS name=ID SEMI
         (usesList)?
+        (precisBlock)?
         END closename=ID SEMI EOF
+    ;
+
+precisBlock
+    :   (mathDefinitionDecl)+
+    ;
+
+mathDefinitionDecl
+    :   DEFINITION name=ID LPAREN
+        (mathVariableDeclGroup (COMMA mathVariableDeclGroup)*)? RPAREN COLON
+        mathTypeExp SEMI
+    ;
+
+mathVariableDeclGroup
+    :   ID (COMMA ID)* COLON mathTypeExp
+    ;
+
+mathVariableDecl
+    :   ID COLON mathTypeExp
+    ;
+
+// mathematical expressions
+
+mathTypeExp
+    :   mathExp
+    ;
+
+mathAssertionExp
+    :   mathExp
+    |   mathQuantifiedExp
+    ;
+
+mathQuantifiedExp
+    :   q=(FORALL|EXISTS) mathVariableDeclGroup COMMA mathAssertionExp
+    ;
+
+mathExp
+    :   mathPrimaryExp                                  #mathPrimeExp
+    |   op=(PLUS|MINUS|NOT) mathExp                     #mathUnaryExp
+    |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
+    |   mathExp op=(PLUS|MINUS) mathExp                 #mathInfixExp
+    |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
+    |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
+    |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
+    |   mathExp op=IMPLIES mathExp                      #mathInfixExp
+    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
+    |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    ;
+
+mathPrimaryExp
+    :   mathLiteralExp
+    |   mathFunctionApplicationExp
+    |   mathSegmentsExp
+    |   mathOutfixExp
+    |   mathSetExp
+    |   mathTupleExp
+ //   |   mathAlternativeExp
+ //   |   mathLambdaExp
+    ;
+
+mathLiteralExp
+    :   BOOL        #mathBooleanExp
+    |   INT         #mathIntegerExp
+    ;
+
+mathFunctionApplicationExp
+    :   (AT)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
+    |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
+    ;
+
+mathOutfixExp
+    :   lop=LT mathExp rop=GT
+    |   lop=BAR mathExp rop=BAR
+    |   lop=DBL_BAR mathExp rop=DBL_BAR
+    ;
+
+mathSetExp
+    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE  #mathSetBuilderExp//Todo
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE         #mathSetCollectionExp
+    ;
+
+/*mathLambdaExp
+    :   'lambda' definitionParameterList '.' '(' mathExp ')'
+    ;
+
+mathAlternativeExp
+    :   '{{' (mathAlternativeItemExp)+ '}}'
+    ;
+
+mathAlternativeItemExp
+    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
+    ;*/
+
+mathTupleExp
+    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
+    ;
+
+mathSegmentsExp
+    :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
     ;

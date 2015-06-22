@@ -30,14 +30,53 @@
  */
 lexer grammar ResolveLexer;
 
-PRECIS      :   'Precis'						;
+// keywords
+
 CONCEPT	    :	'Concept'						;
+DEFINITION	:	'Definition'					;
 END         :   'end'							;
+EXISTS		:	'Exists'						;
+FORALL		:	'Forall'						;
+PRECIS      :   'Precis'						;
 USES        :   'uses'							;
 
-SEMI        :   ';'								;
-COMMA       :	','								;
+// punctuation
 
+COLON		:	':'								;
+COLONCOLON	:	'::'							;
+COMMA       :	','								;
+DOT			:	'.'								;
+RBRACE		:	'}'								;
+LPAREN		:	'('								;
+RPAREN		:	')'								;
+SEMI        :   ';'								;
+LBRACE		:	'{'								;
+
+// operators
+
+DIVIDE		:	'/'								;
+PLUS		:	'+'								;
+MINUS		:	'-'								;
+MULT		:	'*'								;
+TILDE		:	'~'								;
+NOT			:	'not'							;
+AND			:	'and'							;
+OR 			:	'or'							;
+IMPLIES		:	'implies'						;
+RANGE		:	'..'							;
+RARROW		:	'->'							;
+LT 			:	'<'								;
+GT			:	'>'								;
+LTE			:	'<='							;
+GTE			:	'>='							;
+EQUALS		:	'='								;
+NEQUALS		:	'/='							;
+AT			:	'@'								;
+BAR			:	'|'								;
+DBL_BAR		:	'||'							;
+
+INT			:	('0'|[1-9]+ [0-9]*)				;
+BOOL		:	('B'|'true'|'false')			;
 ID			:	NameStartChar NameChar*         ;
 WS          :	[ \t\r\n\f]+ -> channel(HIDDEN)	;
 

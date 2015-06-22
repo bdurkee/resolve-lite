@@ -142,8 +142,8 @@ public class Utils {
     }
 
     /**
-     * Strips the file extension off of filename {@code name}. If the dot is
-     * not present, returns {@code name} unmodified; assumes one dot.
+     * Strips the extension off of filename {@code name}. If the dot is
+     * not present, returns {@code name} unmodified; we assume one dot.
      *
      * @param name the filename
      * @return extensionless name
