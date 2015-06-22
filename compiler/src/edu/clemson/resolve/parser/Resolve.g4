@@ -57,13 +57,39 @@ precisModule
     ;
 
 precisBlock
-    :   (mathDefinitionDecl)+
+    :   ( mathDefinitionDecl
+        | mathCategoricalDefinitionDecl
+        | mathInductiveDefinitionDecl
+        )+
+    ;
+
+//The '(COMMA ID)?' is reserved for the variable we're inducting over
+//for cases in which this signature introduces an inductive defn
+mathDefinitionSig
+    :   name=mathSymbol (LPAREN
+            mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
+            (COMMA inductionVar=ID)? RPAREN)? COLON mathTypeExp
+    ;
+
+mathCategoricalDefinitionDecl
+    :   CATEGORICAL DEFINITION FOR
+        mathDefinitionSig (COMMA mathDefinitionSig)+
+        IS mathAssertionExp SEMI
     ;
 
 mathDefinitionDecl
-    :   DEFINITION name=ID (LPAREN
-        mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN)? COLON
-        mathTypeExp SEMI
+    :   DEFINITION mathDefinitionSig SEMI
+    ;
+
+mathInductiveDefinitionDecl
+    :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig (IS
+        BASE_CASE mathAssertionExp SEMI
+        INDUCT_CASE mathAssertionExp)? SEMI
+    ;
+
+mathSymbol
+    :   (PLUS|MINUS|DIVIDE|MULT|BOOL|INT)
+    |   ID
     ;
 
 mathVariableDeclGroup
@@ -99,6 +125,7 @@ mathExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
+    |   mathExp op=COLON mathExp                        #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
 

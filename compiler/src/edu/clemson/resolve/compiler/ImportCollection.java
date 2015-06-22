@@ -3,7 +3,25 @@ package edu.clemson.resolve.compiler;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ * Maintains disjoint sets of module uses references. References currently come
+ * in three flavors:
+ * <ul>
+ * <li>{@code named}: Explicitly named imports (e.g. uses x,y).</li>
+ * <li>{@code implicit}: Those that come via facility declarations.</li>
+ * <li>{@code external}: Those preceded by the {@code external} keyword.</li>
+ * </ul>
+ * <p>
+ * If the same reference appears in two separate categories
+ * (where one is of type {@code named}), we always default to named--since it's
+ * the 'stronger' category (and should have the same affect anyways). However
+ * if the overlap involves an {@code external} reference,
+ * and it appears in another category, then that's an error -- our language can't
+ * load external files atm and the only place they should appear is in the
+ * context of a facility declaration.</p>
+ */
 public class ImportCollection {
 
     public static enum ImportType { NAMED, IMPLICIT, EXTERNAL }
@@ -12,6 +30,7 @@ public class ImportCollection {
             new HashMap<>();
 
     public ImportCollection() {
+        //Initialize all categories to the empty set.
         for (int i = 0; i < ImportType.values().length; i++) {
             ImportType curType = ImportType.values()[i];
             if ( imports.get(curType) == null ) {
@@ -23,17 +42,14 @@ public class ImportCollection {
     /**
      * Retrieves a set of all imports except those of {@code type}.
      *
-     * @param type Any types we would like to filter/exclude.
-     * @return A set of imports filtered by <code>type</code>.
+     * @param type {@code ImportType}s to filter by.
+     * @return a set of filtered import .
      */
     public Set<String> getImportsExcluding(ImportType... type) {
         Set<String> result = new HashSet<>();
         List<ImportType> typesToExclude = Arrays.asList(type);
-
         for (ImportType s : imports.keySet()) {
-            if ( !typesToExclude.contains(s) ) {
-                result.addAll(imports.get(s));
-            }
+            if ( !typesToExclude.contains(s) ) result.addAll(imports.get(s));
         }
         return result;
     }
@@ -51,10 +67,8 @@ public class ImportCollection {
     }
 
     public void imports(ImportType type, List<TerminalNode> terminals) {
-        List<String> convertedTerms = new ArrayList<>();
-        for (TerminalNode t : terminals) {
-            convertedTerms.add(t.getSymbol().getText());
-        }
+        List<String> convertedTerms = terminals.stream()
+                .map(t -> t.getSymbol().getText()).collect(Collectors.toList());
         addTokenSet(type, convertedTerms);
     }
 
@@ -69,23 +83,20 @@ public class ImportCollection {
         }
         //Todo: Do a little normalization here on additions. For instance,
         //if something already exists in the map as an implicit import,
-        //but is later added as an explicit import too, then it the import
-        //should appear twice in two different categories (especially if
+        //but is later added as an explicit import too, then the import
+        //will appear twice in two different categories (especially if
         // it's already listed as an implicit import). So in other words,
-        //cull duplicate references in multiple categories...
+        //we need cull duplicate references in multiple categories...
         tokSet.addAll(newToks);
     }
 
     /**
-     * Returns <code>true</code> <strong>iff</strong> the set of
-     * <code>type</code> imports contains <code>t</code>; <code>false</code>
-     * otherwise.
+     * Returns {@code true} iff the set of imports of {@code type} contains
+     * {@code t}; {@code false} otherwise.
      *
-     * @param type A {@link ImportType}.
-     * @param t A name token.
-     *
-     * @return <code>true</code> if <code>t</code> is in the set of
-     *         <code>type</code>, <code>false</code> otherwise.
+     * @param type an import type
+     * @param t a name token
+     * @return is {@code t} in category {@code type}?
      */
     public boolean inCategory(ImportType type, String t) {
         return imports.get(type).contains(t);

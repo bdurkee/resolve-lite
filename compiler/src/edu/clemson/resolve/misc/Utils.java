@@ -117,13 +117,6 @@ public class Utils {
         return ctx.start.getInputStream().getText(interval);
     }
 
-    public static String tab(int n) {
-        StringBuilder buf = new StringBuilder();
-        for (int i = 1; i <= n; i++)
-            buf.append("    ");
-        return buf.toString();
-    }
-
     /**
      * Strips leading directories off a file's name; for example:
      *      {@code ../Foo/facilities/T.resolve}
@@ -141,13 +134,6 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
-    /**
-     * Strips the extension off of filename {@code name}. If the dot is
-     * not present, returns {@code name} unmodified; we assume one dot.
-     *
-     * @param name the filename
-     * @return extensionless name
-     */
     public static String stripFileExtension(String name) {
         if ( name == null ) return null;
         int lastDot = name.lastIndexOf('.');

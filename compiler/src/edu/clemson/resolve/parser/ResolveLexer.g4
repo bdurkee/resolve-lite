@@ -32,11 +32,17 @@ lexer grammar ResolveLexer;
 
 // keywords
 
+CATEGORICAL	:	'Categorical'					;
 CONCEPT	    :	'Concept'						;
 DEFINITION	:	'Definition'					;
 END         :   'end'							;
+FOR 		:	'for'							;
 EXISTS		:	'Exists'						;
 FORALL		:	'Forall'						;
+INDUCTIVE	:	'Inductive'						;
+IS			:	'is'							;
+OF			:	'of'							;
+ON 			:	'on'							;
 PRECIS      :   'Precis'						;
 USES        :   'uses'							;
 
@@ -51,6 +57,8 @@ LPAREN		:	'('								;
 RPAREN		:	')'								;
 SEMI        :   ';'								;
 LBRACE		:	'{'								;
+BASE_CASE	:	'(i.)'							;
+INDUCT_CASE :	'(ii.)'							;
 
 // operators
 
