@@ -133,8 +133,12 @@ public  class RESOLVECompiler {
             if (arg.charAt(0) != '-') { // file name
                 if (!targetFiles.contains(arg)) {
                     targetFiles.add(arg);
-                    String f = Utils.groomFileName(arg);
-                    targetNames.add(f.substring(0, f.indexOf(".")));
+                    String name = Utils.groomFileName(arg);
+                    int dotIdx = name.indexOf(".");
+                    if (dotIdx != -1) {
+                        name = name.substring(0, dotIdx);
+                    }
+                    targetNames.add(name);
                 }
                 continue;
             }
