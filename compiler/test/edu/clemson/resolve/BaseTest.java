@@ -100,27 +100,6 @@ public abstract class BaseTest {
         }
     }
 
-    public void testInfos(String[] pairs, String moduleName, String ... compilerOptions) {
-        for (int i = 0; i < pairs.length; i+=2) {
-            String input = pairs[i];
-            String expected = pairs[i + 1];
-
-            String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
-            ErrorCollector errors = resolve(fileName, input, false,
-                    compilerOptions);
-
-            String actual = errors.toInfoString();
-            actual = actual.replace(tmpdir + File.separator, "");
-            System.err.println(actual);
-            String msg = input;
-            msg = msg.replace("\n","\\n");
-            msg = msg.replace("\r","\\r");
-            msg = msg.replace("\t","\\t");
-
-            assertEquals("info output in: "+msg, expected, actual);
-        }
-    }
-
     protected ErrorCollector resolve(String moduleFileName, String moduleStr,
                                      boolean defaultListener, String ... extraOptions) {
         mkdir(tmpdir);
@@ -174,6 +153,31 @@ public abstract class BaseTest {
             }
         }
         return equeue;
+    }
+
+    /**
+     * Loads a collection of module strings into {@code tmpdir} and returns
+     * the filename of the root -- which is, conventionally, the first module
+     * in {@code modules}.
+     *
+     * @param modules A list of strings describing modules.
+     * @param names The names of the modules (in the same order they appear
+     *              in the {@code modules}.
+     * @return The file name of the first module in {@code modules}.
+     */
+    protected String writeModules(String[] modules, String... names) {
+        if (modules.length != names.length) {
+            throw new IllegalArgumentException(
+                    "modules.length != names.length!");
+        }
+        mkdir(tmpdir);
+        for (int i = 0; i < modules.length; i++) {
+            String inputModule = modules[i];
+            String fileName = names[i]+RESOLVECompiler.FILE_EXTENSION;
+            //write all of our test modules to tmpdir
+            writeFile(tmpdir, fileName, inputModule);
+        }
+        return names[0]+RESOLVECompiler.FILE_EXTENSION;
     }
 
     public static void writeFile(String dir, String fileName, String content) {
