@@ -5,7 +5,7 @@ import org.junit.Test;
 
 public class TestCompilerSyntaxErrors extends BaseTest {
 
-    @Test public void testMissingModuleSemi() throws Exception {
+    @Test public void testMissingSemi() throws Exception {
         String[] pair = new String[] {
                 "Precis T\n" +
                     "uses x,y,z;\n" +

@@ -21,7 +21,7 @@ public class ImportListener extends ResolveBaseListener {
     @NotNull public ImportCollection getImports() {
         return importCollection;
     }
-    public static final Map<String, LinkedHashSet<String>> NON_STD_MODULES =
+    public static final Map<String, LinkedHashSet<String>> STD_MODULES =
             new HashMap<>();
 
     public static final List<String> DEFAULT_IMPORTS = Collections
@@ -37,25 +37,25 @@ public class ImportListener extends ResolveBaseListener {
     }
 
     protected static void registerStandardModule(String moduleName) {
-        NON_STD_MODULES.put(moduleName, new LinkedHashSet<>());
+        STD_MODULES.put(moduleName, new LinkedHashSet<>());
     }
 
     protected static void registerStandardModule(String moduleName,
                                          String... defaultImports) {
-        NON_STD_MODULES.put(moduleName,
+        STD_MODULES.put(moduleName,
                 new LinkedHashSet<>(Arrays.asList(defaultImports)));
     }
 
     protected static void registerStandardModule(String moduleName,
                                         LinkedHashSet<String> defaultImports) {
-        NON_STD_MODULES.put(moduleName, defaultImports);
+        STD_MODULES.put(moduleName, defaultImports);
     }
 
     @Override public void enterModule(@NotNull Resolve.ModuleContext ctx) {
         ParseTree moduleChild = ctx.getChild(0);
         if ( !(moduleChild instanceof Resolve.PrecisModuleContext) ) {
             LinkedHashSet<String> stdImports =
-                    NON_STD_MODULES.get(Utils.getModuleName(moduleChild));
+                    STD_MODULES.get(Utils.getModuleName(moduleChild));
             if ( stdImports != null ) { // if this is a standard module
                 importCollection.addTokenSet(ImportType.NAMED, stdImports);
             }

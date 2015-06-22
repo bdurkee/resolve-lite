@@ -31,6 +31,8 @@
 package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveLexer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -43,7 +45,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Some general shortcut/utility methods.
+ * Some generally useful methods and interfaces.
  *
  * @author daniel <dtw.welch@gmail.com>
  */
@@ -91,17 +93,24 @@ public class Utils {
         if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
-        if ( ctx instanceof Resolve.PrecisModuleContext ) {
-            return ((Resolve.PrecisModuleContext) ctx).name.getText();
-        }
-        else if ( ctx instanceof Resolve.ConceptModuleContext ) {
-            return ((Resolve.ConceptModuleContext) ctx).name.getText();
-        }
-        else {
-            throw new IllegalArgumentException("unrecognized module");
+        int moduleType = ((ParserRuleContext)ctx).getStart().getType();
+        switch(moduleType) {
+            case ResolveLexer.PRECIS:
+                return ((Resolve.PrecisModuleContext) ctx).name.getText();
+            case ResolveLexer.CONCEPT:
+                return ((Resolve.ConceptModuleContext) ctx).name.getText();
+            default:
+                throw new IllegalArgumentException("unrecognized module type");
         }
     }
 
+    /**
+     * Returns the text encapsulated by a {@link ParserRuleContext} exactly
+     * as it appears within whatever sourcecode the user typed in.
+     *
+     * @param ctx the rule context
+     * @return the raw sourcecode represented within {@code ctx}
+     */
     public static String getRawText(ParserRuleContext ctx) {
         Interval interval =
                 new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
@@ -117,10 +126,12 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     * {@code ../Foo/facilities/T.edu.clemson.resolve} grooms to {@code T.edu.clemson.resolve}.
+     *      {@code ../Foo/facilities/T.resolve}
+     * grooms to
+     *      {@code T.resolve}.
      *
-     * @param name A file name with zero or more '/' delimited directories.
-     * @return just the file name.
+     * @param name a file name with zero or more '/' delimited directories
+     * @return just the file name
      */
     public static String groomFileName(String name) {
         int start = name.lastIndexOf("/");
@@ -130,6 +141,13 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
+    /**
+     * Strips the file extension off of filename {@code name}. If the dot is
+     * not present, returns {@code name} unmodified; assumes one dot.
+     *
+     * @param name the filename
+     * @return extensionless name
+     */
     public static String stripFileExtension(String name) {
         if ( name == null ) return null;
         int lastDot = name.lastIndexOf('.');

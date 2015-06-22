@@ -14,6 +14,5 @@ public abstract class AbstractCompilationPipeline {
         this.compilationUnits = compilationUnits;
         this.compiler = rc;
     }
-
     public abstract void process();
 }

@@ -156,16 +156,15 @@ public abstract class BaseTest {
     }
 
     /**
-     * Loads a collection of module strings into {@code tmpdir} and returns
-     * the filename of the root -- which is, conventionally, the first module
-     * in {@code modules}.
+     * Loads a collection of module strings into {@code tmpdir}.
      *
-     * @param modules A list of strings describing modules.
-     * @param names The names of the modules (in the same order they appear
-     *              in the {@code modules}.
-     * @return The file name of the first module in {@code modules}.
+     * @throws IllegalArgumentException if the lengths of {@code modules} and
+     *          {@code names} differ.
+     * @param modules a list of strings describing modules.
+     * @param names names of the modules (in the same order they appear
+     *              in the {@code modules}).
      */
-    protected String writeModules(String[] modules, String... names) {
+    protected void writeModules(String[] modules, String... names) {
         if (modules.length != names.length) {
             throw new IllegalArgumentException(
                     "modules.length != names.length!");
@@ -177,7 +176,6 @@ public abstract class BaseTest {
             //write all of our test modules to tmpdir
             writeFile(tmpdir, fileName, inputModule);
         }
-        return names[0]+RESOLVECompiler.FILE_EXTENSION;
     }
 
     public static void writeFile(String dir, String fileName, String content) {
