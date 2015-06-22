@@ -61,8 +61,8 @@ precisBlock
     ;
 
 mathDefinitionDecl
-    :   DEFINITION name=ID LPAREN
-        (mathVariableDeclGroup (COMMA mathVariableDeclGroup)*)? RPAREN COLON
+    :   DEFINITION name=ID (LPAREN
+        mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN)? COLON
         mathTypeExp SEMI
     ;
 

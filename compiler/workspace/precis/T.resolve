@@ -1,3 +1,4 @@
 Precis T;
-
+    uses U;
+    Definition Foo : Sp_Loc(k)(z);
 end T;

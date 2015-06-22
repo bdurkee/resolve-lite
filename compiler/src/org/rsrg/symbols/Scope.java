@@ -1,4 +1,4 @@
-package org.antlr.symbols;
+package org.rsrg.symbols;
 
 import java.util.List;
 import java.util.Set;

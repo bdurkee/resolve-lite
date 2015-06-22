@@ -16,9 +16,13 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
     }
 
     @Override public void process() {
+        if (compiler.errMgr.getErrorCount() > 0) return;
         for (AnnotatedTree unit : compilationUnits) {
             compiler.info("populating: " + unit.getName());
             ParseTreeWalker walker = new ParseTreeWalker();
+            DefSymbolsAndScopes defSymbolsAndScopes =
+                    new DefSymbolsAndScopes();
+            walker.walk(defSymbolsAndScopes, unit.getRoot());
          /*   DefSymbolsAndScopes defSymsAndScopes =
                     new DefSymbolsAndScopes(compiler, compiler.symbolTable,
                             unit);

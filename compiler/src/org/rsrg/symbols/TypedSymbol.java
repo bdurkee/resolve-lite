@@ -1,4 +1,4 @@
-package org.antlr.symbols;
+package org.rsrg.symbols;
 
 public interface TypedSymbol {
 	Type getType();

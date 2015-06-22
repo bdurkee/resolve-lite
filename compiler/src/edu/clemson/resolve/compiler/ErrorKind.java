@@ -50,7 +50,16 @@ public enum ErrorKind {
      * import <em>module2type</em> module '<em>module2</em>'.
      */
     MISSING_IMPORT_FILE(8, "module <arg> was unable to find the file "
-            + "corresponding to import reference: '<arg2>'",
+            + "corresponding to import reference '<arg2>'",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 9: circular dependency: <em>moduleName1</em> depends on
+     * <em>moduleName2</em>, but <em>moduleName2</em> also depends on
+     * <em>moduleName1</em>.
+     */
+    CIRCULAR_DEPENDENCY(9, "circular dependency: <arg> depends on <arg2>, but "
+            + "<arg2> also depends on <arg>",
             ErrorSeverity.ERROR);
 
     public final int code;

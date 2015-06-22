@@ -298,17 +298,18 @@ public  class RESOLVECompiler {
             if ( root.imports.inCategory(ImportCollection.ImportType.NAMED,
                     module.getName()) ) {
                 /*
-                 * if (!module.appropriateForImport()) {
-                 * errorManager.toolError(ErrorKind.INVALID_IMPORT,
-                 * "MODULE TYPE GOES HERE", root.getName().getText(),
-                 * "IMPORTED MODULE TYPE GOES HERE", module.getName()
-                 * .getText());
-                 * }
+                   if (!module.appropriateForImport()) {
+                    errorManager.toolError(ErrorKind.INVALID_IMPORT,
+                    "MODULE TYPE GOES HERE", root.getName().getText(),
+                    "IMPORTED MODULE TYPE GOES HERE", module.getName()
+                        .getText());
+                    }
                  */
             }
             if ( pathExists(g, module.getName(), root.getName()) ) {
-                //Todo.
-                throw new IllegalStateException("circular dependency detected");
+                errMgr.toolError(ErrorKind.CIRCULAR_DEPENDENCY,
+                        module.getName(), root.getName());
+                break;
             }
             Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
             findDependencies(g, module, roots);

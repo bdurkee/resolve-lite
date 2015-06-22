@@ -1,4 +1,4 @@
-package org.antlr.symbols;
+package org.rsrg.symbols;
 
 /** A generic programming language symbol */
 public interface Symbol {

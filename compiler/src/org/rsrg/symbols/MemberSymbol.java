@@ -1,4 +1,4 @@
-package org.antlr.symbols;
+package org.rsrg.symbols;
 
 /** A symbol within an aggregate like a class or struct. Each
  *  symbol in an aggregate knows its slot number so we can order

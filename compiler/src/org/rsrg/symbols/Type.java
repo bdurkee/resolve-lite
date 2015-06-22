@@ -1,4 +1,4 @@
-package org.antlr.symbols;
+package org.rsrg.symbols;
 
 /** This is mostly just a tag that indicates the implementing object
  *  is a kind of type. Every type knows its name. In languages like C
