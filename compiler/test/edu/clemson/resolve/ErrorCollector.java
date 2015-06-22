@@ -43,6 +43,10 @@ public class ErrorCollector implements RESOLVECompilerListener {
         return toString(false);
     }
 
+    public String toInfoString() {
+        return Utils.join(infos, "\n");
+    }
+
     public String toString(boolean rendered) {
         if (!rendered) {
             return Utils.join(all, "\n");

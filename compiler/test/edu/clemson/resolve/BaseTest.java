@@ -12,7 +12,9 @@ import org.junit.runner.Description;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -73,14 +75,18 @@ public abstract class BaseTest {
     }
 
     public void testErrors(String[] pairs, String moduleName) {
+        testErrors(pairs, moduleName, new String[]{});
+    }
+
+    public void testErrors(String[] pairs, String moduleName,
+                           String ... compilerOptions) {
         for (int i = 0; i < pairs.length; i+=2) {
             String input = pairs[i];
             String expected = pairs[i + 1];
 
-            String[] lines = input.split("\n");
-
             String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
-            ErrorCollector errors = resolve(fileName, input, false);
+            ErrorCollector errors = resolve(fileName, input, false,
+                    compilerOptions);
 
             String actual = errors.toString(true);
             actual = actual.replace(tmpdir + File.separator, "");
@@ -94,16 +100,38 @@ public abstract class BaseTest {
         }
     }
 
+    public void testInfos(String[] pairs, String moduleName, String ... compilerOptions) {
+        for (int i = 0; i < pairs.length; i+=2) {
+            String input = pairs[i];
+            String expected = pairs[i + 1];
+
+            String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
+            ErrorCollector errors = resolve(fileName, input, false,
+                    compilerOptions);
+
+            String actual = errors.toInfoString();
+            actual = actual.replace(tmpdir + File.separator, "");
+            System.err.println(actual);
+            String msg = input;
+            msg = msg.replace("\n","\\n");
+            msg = msg.replace("\r","\\r");
+            msg = msg.replace("\t","\\t");
+
+            assertEquals("info output in: "+msg, expected, actual);
+        }
+    }
+
     protected ErrorCollector resolve(String moduleFileName, String moduleStr,
-                         boolean defaultListener) {
+                                     boolean defaultListener, String ... extraOptions) {
         mkdir(tmpdir);
         writeFile(tmpdir, moduleFileName, moduleStr);
-        return resolve(moduleFileName, defaultListener);
+        return resolve(moduleFileName, defaultListener, extraOptions);
     }
 
     protected ErrorCollector resolve(String moduleFileName,
-                                     boolean defaultListener) {
+                                     boolean defaultListener, String ... extraOptions) {
         final List<String> options = new ArrayList<>();
+        Collections.addAll(options, extraOptions);
         if ( !options.contains("-o") ) {
             options.add("-o");
             options.add(tmpdir);
@@ -124,7 +152,7 @@ public abstract class BaseTest {
         resolve.processCommandLineTargets();
 
         if ( !defaultListener && !equeue.errors.isEmpty() ) {
-            System.err.println("edu.clemson.resolve reports errors from "+options);
+            System.err.println("resolve reports errors from "+options);
             for (int i = 0; i < equeue.errors.size(); i++) {
                 RESOLVEMessage msg = equeue.errors.get(i);
                 System.err.println(msg);
@@ -139,7 +167,7 @@ public abstract class BaseTest {
             System.out.println("###");
         }
         if ( !defaultListener && !equeue.warnings.isEmpty() ) {
-            System.err.println("edu.clemson.resolve reports warnings from "+options);
+            System.err.println("resolve reports warnings from "+options);
             for (int i = 0; i < equeue.warnings.size(); i++) {
                 RESOLVEMessage msg = equeue.warnings.get(i);
                 System.err.println(msg);
