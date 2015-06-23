@@ -1,12 +1,12 @@
 package org.rsrg.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.proving.absyn.PExp;
-import org.resolvelite.proving.absyn.PSegments;
-import org.resolvelite.proving.absyn.PSymbol;
-import org.resolvelite.semantics.programtype.PTRepresentation;
-import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class ProgReprTypeSymbol extends Symbol {
     protected final PTRepresentation representation;
 
     public ProgReprTypeSymbol(TypeGraph g, String name,
-            ParseTree definingElement, String moduleID,
+            ParserRuleContext definingElement, String moduleID,
             ProgTypeModelSymbol definition, PTRepresentation representation,
             PExp convention, PExp correspondence) {
         super(name, definingElement, moduleID);
@@ -33,13 +33,12 @@ public class ProgReprTypeSymbol extends Symbol {
 
     public PSymbol exemplarAsPSymbol() {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
-                .mathType(representation.toMath()).progType(representation)
-                .build();
+                .mathType(representation.toMath()).build();
     }
 
-    public PSegments conceptualExemplarAsPSymbol() {
-        return new PSegments(typeGraph.formConcExp(), exemplarAsPSymbol());
-    }
+    //public PSegments conceptualExemplarAsPSymbol() {
+   //     return new PSegments(typeGraph.formConcExp(), exemplarAsPSymbol());
+   // }
 
     public PTRepresentation getRepresentationType() {
         return representation;

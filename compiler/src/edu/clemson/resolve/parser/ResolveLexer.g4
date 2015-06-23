@@ -32,13 +32,17 @@ lexer grammar ResolveLexer;
 
 // keywords
 
+BY			:	'by'							;
 CATEGORICAL	:	'Categorical'					;
 CONCEPT	    :	'Concept'						;
 DEFINITION	:	'Definition'					;
 END         :   'end'							;
-FOR 		:	'for'							;
 EXISTS		:	'Exists'						;
+EXTERNALLY	:	'externally'					;
+FACILITY	:	'Facility'						;
+FOR 		:	'for'							;
 FORALL		:	'Forall'						;
+IMPLEMENTED	:	'implemented'					;
 IMPLICIT	:	'Implicit'						;
 INDUCTIVE	:	'Inductive'						;
 IS			:	'is'							;

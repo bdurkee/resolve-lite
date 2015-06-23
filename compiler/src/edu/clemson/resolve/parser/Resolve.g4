@@ -101,6 +101,11 @@ mathVariableDecl
     :   ID COLON mathTypeExp
     ;
 
+facilityDecl
+    :   FACILITY name=ID IS concept=ID
+        (externally=EXTERNALLY)? IMPLEMENTED BY impl=ID SEMI
+    ;
+
 // mathematical expressions
 
 mathTypeExp

@@ -1,7 +1,8 @@
 package org.rsrg.semantics.symbol;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
@@ -9,7 +10,7 @@ public class ProcedureSymbol extends Symbol {
 
     private final OperationSymbol correspondingOperation;
 
-    public ProcedureSymbol(String name, ParseTree definingTree,
+    public ProcedureSymbol(String name, ParserRuleContext definingTree,
             String moduleID, OperationSymbol correspondingOperation) {
         super(name, definingTree, moduleID);
 

@@ -1,12 +1,13 @@
 package org.rsrg.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.resolvelite.proving.absyn.PSymbol;
-import org.resolvelite.semantics.MTNamed;
-import org.resolvelite.semantics.Quantification;
-import org.resolvelite.semantics.programtype.PTGeneric;
-import org.resolvelite.semantics.programtype.PTType;
-import org.resolvelite.typereasoning.TypeGraph;
+import org.rsrg.semantics.MTNamed;
+import org.rsrg.semantics.Quantification;
+import org.rsrg.semantics.programtype.PTGeneric;
+import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class ProgParameterSymbol extends Symbol {
     private final ProgVariableSymbol progVariableAlterEgo;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
-            PTType type, ParseTree definingTree, String moduleID) {
+            PTType type, ParserRuleContext definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
         this.mode = mode;
@@ -128,7 +129,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     public PSymbol asPSymbol() {
-        return new PSymbol.PSymbolBuilder(getName()).progType(declaredType)
+        return new PSymbol.PSymbolBuilder(getName())
                 .mathType(declaredType.toMath()).build();
     }
 
