@@ -104,6 +104,10 @@ public class Utils {
         }
     }
 
+    public interface Builder<T> {
+        T build();
+    }
+
     /**
      * Returns the text encapsulated by a {@link ParserRuleContext} exactly
      * as it appears within whatever sourcecode the user typed in.

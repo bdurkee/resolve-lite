@@ -35,7 +35,7 @@ import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.semantics.AnalysisPipeline;
+import edu.clemson.resolve.analysis.AnalysisPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
@@ -45,6 +45,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.rsrg.semantics.SymbolTable;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +101,7 @@ public  class RESOLVECompiler {
      * instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
-    //public final SymbolTable symbolTable = new SymbolTable(this);
+    public final SymbolTable symbolTable = new SymbolTable(this);
 
     public final String[] args;
     protected boolean haveOutputDir = false;

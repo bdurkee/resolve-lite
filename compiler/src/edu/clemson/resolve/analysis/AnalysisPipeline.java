@@ -1,4 +1,4 @@
-package edu.clemson.resolve.semantics;
+package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedTree;

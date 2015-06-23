@@ -5,43 +5,43 @@ import org.antlr.v4.tool.ErrorSeverity;
 public enum ErrorKind {
 
     /**
-     * Compiler error 1: cannot write file <em>filename</em>: <em>reason</em>.
+     * Compiler Error 1: cannot write file <em>filename</em>: <em>reason</em>.
      */
     CANNOT_WRITE_FILE(1, "cannot write file <arg>: <arg2>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 2: cannot find or open file: <em>filename</em>.
+     * Compiler Error 2: cannot find or open file: <em>filename</em>.
      */
     CANNOT_OPEN_FILE(2, "cannot find or open file: <arg>"
             + "<if(exception&&verbose)>; reason: <exception><endif>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 3: invalid command-line argument: <em>argument</em>.
+     * Compiler Error 3: invalid command-line argument: <em>argument</em>.
      */
     INVALID_CMDLINE_ARG(3, "invalid command line argument: <arg>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 4: directory not found: <em>directory</em>
+     * Compiler Error 4: directory not found: <em>directory</em>
      */
     DIR_NOT_FOUND(4, "directory not found: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 5: output directory is a file: <em>filename</em>
+     * Compiler Error 5: output directory is a file: <em>filename</em>
      */
     OUTPUT_DIR_IS_FILE(5, "output directory is a file: <arg>",
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 6: internal error: <em>message</em>.
+     * Compiler Error 6: internal error: <em>message</em>.
      */
     INTERNAL_ERROR(6, "internal error: <arg> <arg2><if(exception&&verbose)>: "
                            + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
                    ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 7: syntax error: <em>errormsg</em>.
+     * Compiler Error 7: syntax error: <em>errormsg</em>.
      */
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
@@ -60,7 +60,36 @@ public enum ErrorKind {
      */
     CIRCULAR_DEPENDENCY(9, "circular dependency: <arg> depends on <arg2>, but "
             + "<arg2> also depends on <arg>",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 10: no such symbol: <em>name</em> in <em>moduleName</em>.
+     */
+    NO_SUCH_SYMBOL(10, "no such symbol: <arg> <if(arg2)>in <arg2><endif>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 11: no such module: <em>moduleName</em>.
+     */
+    NO_SUCH_MODULE(11, "no such module: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 12: duplicate symbol: <em>name</em>.
+     */
+    DUP_SYMBOL(12, "duplicate symbol: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 13: expecting <em>entrytype</em>: found
+     * <em>foundentrytype</em>.
+     */
+    UNEXPECTED_SYMBOL(13, "expecting <arg> on '<arg2>', found <arg3> instead",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 14: <em>typename</em> is not known to be a type".
+     */
+    INVALID_MATH_TYPE(14, "'<arg>' is not known to be a type",
+                      ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

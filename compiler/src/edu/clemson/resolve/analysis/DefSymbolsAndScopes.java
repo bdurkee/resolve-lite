@@ -1,4 +1,4 @@
-package edu.clemson.resolve.semantics;
+package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
