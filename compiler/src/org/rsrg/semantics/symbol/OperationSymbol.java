@@ -1,5 +1,6 @@
 package org.rsrg.semantics.symbol;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import edu.clemson.resolve.parser.Resolve;
 import org.rsrg.semantics.programtype.PTType;
@@ -20,7 +21,7 @@ public class OperationSymbol extends Symbol {
     //private final Resolve.RequiresClauseContext requires;
     //private final Resolve.EnsuresClauseContext ensures;
 
-    public OperationSymbol(String name, ParseTree definingTree,
+    public OperationSymbol(String name, ParserRuleContext definingTree,
            // ResolveParser.RequiresClauseContext requires,
            // ResolveParser.EnsuresClauseContext ensures,
             PTType type,

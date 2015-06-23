@@ -63,6 +63,10 @@ public class InstantiatedScope extends AbstractScope {
                 myAdditionalGenericInstantiations, myInstantiatingFacility, l);
     }
 
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return myBaseScope.getSymbolsOfType(type);
+    }
+
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
         return myBaseScope.define(s);
     }

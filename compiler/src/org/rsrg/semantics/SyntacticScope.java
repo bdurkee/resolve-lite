@@ -7,12 +7,10 @@ import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
 import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class SyntacticScope extends AbstractScope {
@@ -100,6 +98,13 @@ public abstract class SyntacticScope extends AbstractScope {
             }
         }
         return finished;
+    }
+
+    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+        return symbols.values().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .collect(Collectors.toList());
     }
 
     private Map<String, Symbol> updateSymbols(

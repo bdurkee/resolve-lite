@@ -2,7 +2,7 @@ Precis Basic_Spiral_Theory;
     uses Basic_Natural_Number_Theory;
 
     Definition Is_k_Spiral_Like(
-        loc : N2 -> SSet,
+        sp_loc : N2 -> SSet,
         cen : (k : N2) * N -> Sp_Loc(k),
         ss : (k : N2) * N -> Sp_Loc(k),
         rs : (k : N2) * N -> Sp_Loc(k)) : B;

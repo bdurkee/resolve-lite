@@ -6,6 +6,7 @@ import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
 import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -30,4 +31,6 @@ public interface Scope {
                              SearchContext l) throws DuplicateSymbolException;
 
     public Symbol define(Symbol s) throws DuplicateSymbolException;
+
+    public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
 }

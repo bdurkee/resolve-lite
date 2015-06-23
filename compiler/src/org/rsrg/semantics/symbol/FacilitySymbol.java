@@ -29,7 +29,7 @@ public class FacilitySymbol extends Symbol {
         ModuleParameterization impl = null;
 
         if ( facility.impl != null ) {
-            List<ResolveParser.ModuleArgumentContext> actualArgs =
+            List<Resolve.ModuleArgumentContext> actualArgs =
                     facility.implArgs != null ? facility.implArgs
                             .moduleArgument() : new ArrayList<>();
             impl =

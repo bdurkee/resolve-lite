@@ -64,7 +64,7 @@ precisBlock
     ;
 
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
-//for instances in which this signature introduces an inductive defn
+//for instances in which the sig is used in the context of an inductive defn
 mathDefinitionSig
     :   name=mathSymbol (LPAREN
             mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
@@ -102,8 +102,19 @@ mathVariableDecl
     ;
 
 facilityDecl
-    :   FACILITY name=ID IS concept=ID
-        (externally=EXTERNALLY)? IMPLEMENTED BY impl=ID SEMI
+    :   FACILITY name=ID IS spec=ID
+        (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? IMPLEMENTED
+        BY impl=ID (implArgs=moduleArgumentList)? SEMI
+    ;
+
+moduleArgumentList
+    :   LPAREN moduleArgument (COMMA moduleArgument)* RPAREN
+    ;
+
+//Todo: Placeholder. I don't want to add the whole prog exp tree right now.
+//I want to focus on the math.
+moduleArgument
+    :   ID
     ;
 
 // mathematical expressions
