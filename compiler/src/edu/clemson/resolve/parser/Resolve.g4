@@ -64,7 +64,7 @@ precisBlock
     ;
 
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
-//for instances in which the sig is used in the context of an inductive defn
+//in the context of an inductive defn
 mathDefinitionSig
     :   name=mathSymbol (LPAREN
             mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
