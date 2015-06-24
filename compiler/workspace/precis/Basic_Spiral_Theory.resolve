@@ -1,7 +1,8 @@
 Precis Basic_Spiral_Theory;
-    uses Basic_Natural_Number_Theory;
+    --uses Basic_Natural_Number_Theory;
 
-    Definition Is_k_Spiral_Like(
+    Definition Foo : B;
+  (*  Definition Is_k_Spiral_Like(
         sp_loc : N2 -> SSet,
         cen : (k : N2) * N -> Sp_Loc(k),
         ss : (k : N2) * N -> Sp_Loc(k),
@@ -13,6 +14,6 @@ Precis Basic_Spiral_Theory;
         Cen : (k : N2) * Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
     
     Implicit Definition SCD(p : Sp_Loc(k : N2)) : N is
-        Forall p : Sp_Loc(k), SS(k, SCD(p))(Cen(k)) = p;
+        Forall p : Sp_Loc(k), SS(k, SCD(p))(Cen(k)) = p;*)
 
 end Basic_Spiral_Theory;

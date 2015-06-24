@@ -1,3 +1,33 @@
+/*
+ * [The "BSD license"]
+ * Copyright (c) 2015 Clemson University
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. The name of the author may not be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
@@ -11,6 +41,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.MathSymbolQuery;
@@ -48,7 +79,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
-                               @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
+                   @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;
@@ -140,7 +171,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
             //if the definition has parameters then it's type should be an
-            //MTFunction a * b ... -> ...
+            //MTFunction (e.g. something like a * b ... -> ...)
             defnType = builder.build();
         }
         tr.mathTypes.put(ctx, defnType);
@@ -188,14 +219,41 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathAssertionExp(
+            @NotNull Resolve.MathAssertionExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
+        return null;
+    }
+
+    @Override public Void visitMathPrimeExp(
+            @NotNull Resolve.MathPrimeExpContext ctx) {
+        this.visit(ctx.mathPrimaryExp());
+        chainMathTypes(ctx, ctx.mathPrimaryExp());
+        return null;
+    }
+
+    @Override public Void visitMathPrimaryExp(
+            @NotNull Resolve.MathPrimaryExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
+        return null;
+    }
+
     @Override public Void visitMathBooleanExp(
             @NotNull Resolve.MathBooleanExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
     }
 
+    @Override public Void visitMathVariableExp(
+            @NotNull Resolve.MathVariableExpContext ctx) {
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        return null;
+    }
+
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
-                                         @Nullable Token qualifier, @NotNull String symbolName) {
+                     @Nullable Token qualifier, @NotNull String symbolName) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
 
         if ( intendedEntry == null ) {
@@ -215,7 +273,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     .queryForOne(new MathSymbolQuery(qualifier,
                             symbolName, ctx.getStart())).toMathSymbol();
         }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+        catch (NoSuchSymbolException|DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
                     symbolName);
         }
@@ -245,7 +303,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    protected final String getRootModuleID() {
+    private void chainMathTypes(ParseTree current, ParseTree child) {
+        tr.mathTypes.put(current, tr.mathTypes.get(child));
+        tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
+    }
+
+    private final String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
     }
 }

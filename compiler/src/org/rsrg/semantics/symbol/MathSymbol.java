@@ -1,20 +1,24 @@
 package org.rsrg.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.typereasoning.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.GenericQuery;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
 
     private MTType type, typeValue;
     private final Quantification quantification;
 
-    private final Map<String, MTType> myGenericsInDefiningContext =
+    private final Map<String, MTType> genericsInDefiningContext =
             new HashMap<>();
 
     public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
@@ -69,6 +73,78 @@ public class MathSymbol extends Symbol {
         return "a math symbol";
     }
 
+    public MathSymbol deschematize(List<PExp> arguments,
+        Scope callingContext)
+            throws NoSolutionException {
+        if (!(type instanceof MTFunction)) throw NoSolutionException.INSTANCE;
+
+        List<MTType> formalParameterTypes =
+                getParameterTypes(((MTFunction) type));
+
+        List<MTType> actualArgumentTypes = arguments.stream()
+                .map(PExp::getMathType)
+                .collect(Collectors.toList());
+
+        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
+            throw NoSolutionException.INSTANCE;
+        }
+
+        List<ProgTypeSymbol> callingContextProgramGenerics =
+                callingContext.query(GenericQuery.INSTANCE);
+        Map<String, MTType> callingContextMathGenerics = new HashMap<>();
+        Map<String, MTType> bindingsSoFar = new HashMap<>();
+
+        MathSymbol mathGeneric;
+        for (ProgTypeSymbol e : callingContextProgramGenerics) {
+            //This is guaranteed not to fail--all program types can be coerced
+            //to math types, so the passed location is irrelevant
+            mathGeneric = e.toMathSymbol();
+            callingContextMathGenerics.put(mathGeneric.getName(),
+                    mathGeneric.type);
+        }
+
+
+        MTType newTypeValue = null;
+        MTType newType =
+                ((MTFunction) type
+                        .getCopyWithVariablesSubstituted(bindingsSoFar))
+                        .deschematize(arguments);
+
+        return new MathSymbol(type.getTypeGraph(), getName(),
+                getQuantification(), newType, newTypeValue, getDefiningTree(),
+                getModuleID());
+    }
+
+    private static List<MTType> getParameterTypes(MTFunction source) {
+        return expandAsNeeded(source.getDomain());
+    }
+
+    private static List<MTType> expandAsNeeded(MTType t) {
+        List<MTType> result = new ArrayList<>();
+        if ( t instanceof MTCartesian ) {
+            MTCartesian domainAsMTCartesian = (MTCartesian) t;
+
+            for (int i = 0; i < domainAsMTCartesian.size(); i++) {
+                result.add(domainAsMTCartesian.getFactor(i));
+            }
+        }
+        else {
+            if ( !t.equals(t.getTypeGraph().VOID) ) {
+                result.add(t);
+            }
+        }
+        return result;
+    }
+
+    @Override public MathSymbol toMathSymbol() {
+        return this;
+    }
+
+    @Override public String toString() {
+        return getModuleID() + "::" + getName() + "\t\t" + quantification
+                + "\t\tof type: " + type + "\t\t defines type: " + typeValue;
+    }
+
     @Override public Symbol instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility) {
@@ -98,7 +174,7 @@ public class MathSymbol extends Symbol {
         }
 
         Map<String, MTType> newGenericsInDefiningContext =
-                new HashMap<String, MTType>(myGenericsInDefiningContext);
+                new HashMap<String, MTType>(genericsInDefiningContext);
         newGenericsInDefiningContext.keySet().removeAll(
                 genericInstantiations.keySet());
 
@@ -106,5 +182,4 @@ public class MathSymbol extends Symbol {
                 getQuantification(), typeSubstitutor.getFinalExpression(),
                 instantiatedTypeValue, getDefiningTree(), getModuleID());
     }
-
 }

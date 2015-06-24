@@ -24,10 +24,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                     new PopulatingVisitor(compiler, compiler.symbolTable,
                             unit);
             defSymsAndScopes.visit(unit.getRoot());
-         /*   DefSymbolsAndScopes defSymsAndScopes =
-                    new DefSymbolsAndScopes(compiler, compiler.symbolTable,
-                            unit);
-            PExpBuildingListener<PExp> pexpAnnotator =
+         /* PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             unit);
             SanityChecker sanityChecker = new SanityChecker(compiler, unit);
