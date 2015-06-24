@@ -60,7 +60,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected int typeValueDepth = 0;
 
     /**
-     * Any quantification-introducing syntactic node (like, e.g., an
+     * Any quantification-introducing syntactic ctx (like, e.g., an
      * {@link edu.clemson.resolve.parser.Resolve.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
@@ -94,6 +94,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires return, even if its Void
+    }
+
+    @Override public Void visitMathCategoricalDefinitionDecl(
+            @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
+        for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
+            this.visit(sig);
+            MTType defnType = tr.mathTypes.get(sig);
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, sig.name.getText(),
+                        tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
+            } catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        sig.name.getStart(), sig.name.getText());
+            }
+        }
+        //visit the rhs of our categorical defn
+        //this.visit(ctx.mathAssertionExp());   //Todo: Once we have func apps
+        return null;
     }
 
     /**
@@ -255,7 +274,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private MathSymbol exitMathSymbolExp(@NotNull ParserRuleContext ctx,
                      @Nullable Token qualifier, @NotNull String symbolName) {
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
-
         if ( intendedEntry == null ) {
             tr.mathTypes.put(ctx, g.INVALID);
         }
