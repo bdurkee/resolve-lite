@@ -142,7 +142,7 @@ mathExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
-    |   mathExp op=COLON mathExp                        #mathTypeAssertionExp
+    |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
 

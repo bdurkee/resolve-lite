@@ -46,11 +46,11 @@ public enum ErrorKind {
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 8: <em>module1type</em> module '<em>module1</em>' cannot
-     * import <em>module2type</em> module '<em>module2</em>'.
+     * Compiler Error 8: module <em>name</em> was unable to find the file
+     * corresponding to uses reference '<em>usesref</em>'.
      */
     MISSING_IMPORT_FILE(8, "module <arg> was unable to find the file "
-            + "corresponding to import reference '<arg2>'",
+            + "corresponding to uses reference '<arg2>'",
             ErrorSeverity.ERROR),
 
     /**

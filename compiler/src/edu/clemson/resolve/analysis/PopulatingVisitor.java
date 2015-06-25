@@ -46,9 +46,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -60,7 +63,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected int typeValueDepth = 0;
 
     /**
-     * Any quantification-introducing syntactic ctx (like, e.g., an
+     * Any quantification-introducing syntactic context (e.g., an
      * {@link edu.clemson.resolve.parser.Resolve.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
@@ -78,6 +81,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
+    /**
+     * This simply enables an error check--as a definition uses named types,
+     * we keep track of them, and when an implicit type is introduced, we make
+     * sure that it hasn't been "used" yet, thus leading to a confusing scenario
+     * where some instances of the name should refer to a type already in scope
+     * as the definition is declared and other instance refer to the implicit
+     * type parameter.
+     */
+    private Set<String> definitionNamedTypes = new HashSet<String>();
+
+    /**
+     * While we walk the children of a direct definition, this will be set
+     * with a pointer to the definition declaration we are walking, otherwise
+     * it will be {@code null}.
+     * <p>
+     * Note that definitions cannot be nested, so there's
+     * no need for a stack.</p>
+     */
+    private Resolve.MathDefinitionDeclContext currentDirectDefinition;
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
@@ -93,19 +116,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 tr.imports.getImportsOfType(ImportCollection.ImportType.NAMED));
         super.visitChildren(ctx);
         symtab.endScope();
-        return null; //java requires return, even if its Void
+        return null; //java requires a return, even if its 'Void'
     }
 
     @Override public Void visitMathCategoricalDefinitionDecl(
             @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
         for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
             this.visit(sig);
-            MTType defnType = tr.mathTypes.get(sig);
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, sig.name.getText(),
                         tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
-            } catch (DuplicateSymbolException e) {
+            }
+            catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         sig.name.getStart(), sig.name.getText());
             }
@@ -122,6 +145,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     @Override public Void visitMathDefinitionDecl(
             @NotNull Resolve.MathDefinitionDeclContext ctx) {
+        currentDirectDefinition = ctx;
         if (ctx.mathDefinitionSig().inductionVar != null) {
             System.err.println("illegal usage of induction variable in standard"
                     + " definition.");
@@ -148,6 +172,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     sig.name.getStart(), sig.name.getText());
         }
+        currentDirectDefinition = null;
         return null;
     }
 
@@ -202,6 +227,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         for (TerminalNode t : ctx.ID()) {
             this.visit(ctx.mathTypeExp());
             MTType mathTypeValue = tr.mathTypeValues.get(ctx.mathTypeExp());
+            if (currentDirectDefinition != null
+                    && mathTypeValue.isKnownToContainOnlyMTypes()
+                    && definitionNamedTypes.contains(t.getText())) {
+                System.err.println("introduction of type "
+                        + "parameter must precede any use of that variable "
+                        + "name" + t.getSymbol().getLine() + ", "
+                        + t.getSymbol().getCharPositionInLine());
+            }
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, t.getText(), activeQuantifications
@@ -238,6 +271,56 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathTypeAssertionExp(
+            @NotNull Resolve.MathTypeAssertionExpContext ctx) {
+        if (typeValueDepth == 0) {
+            this.visit(ctx.mathTypeExp());
+        }
+        this.visit(ctx.mathTypeExp());
+        if ( typeValueDepth > 0 ) {
+            try {
+                //Todo: Check to ensure mathExp is in fact a variableExp
+                MTType assertedType = tr.mathTypes.get(ctx.mathTypeExp());
+                symtab.getInnermostActiveScope().addBinding(
+                        ctx.mathExp().getText(), Quantification.UNIVERSAL,
+                        ctx.mathExp(), tr.mathTypes.get(ctx.mathTypeExp()));
+
+                tr.mathTypes.put(ctx, assertedType);
+                tr.mathTypeValues.put(ctx,
+                        new MTNamed(g, ctx.mathExp().getText()));
+                if ( definitionNamedTypes.contains(ctx.mathExp().getText()) ) {
+                    //Regardless of where in the expression it appears, an
+                    //implicit type parameter exists at the top level of a
+                    //definition, and thus a definition that contains, e.g.,
+                    //an implicit type parameter T cannot make reference
+                    //to some existing type with that name (except via full
+                    //qualification), thus the introduction of an implicit
+                    //type parameter must precede any use of that
+                    //parameter's name, even if the name exists in-scope
+                    //before the parameter is declared
+                    System.err.println("introduction of type "
+                            + "parameter must precede any use of that variable "
+                            + "name" + ctx.mathExp().getStart().getLine() + ", "
+                            + ctx.mathExp().getStart().getCharPositionInLine());
+                }
+
+                //Note that a redudantly named type parameter would be
+                //caught when we add a symbol to the symbol table, so no
+                //need to check here
+               // myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
+               //         node.getAssertedTy().getMathType());
+
+                compiler.info("Added schematic variable: "
+                        + ctx.mathExp().getText());
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.mathExp().getStart(), ctx.mathExp().getText());
+            }
+        }
+        return null;
+    }
+
     @Override public Void visitMathAssertionExp(
             @NotNull Resolve.MathAssertionExpContext ctx) {
         this.visit(ctx.getChild(0));
@@ -267,7 +350,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        MathSymbol sym = exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        if (typeValueDepth > 0 && ctx.qualifier == null) {
+            try {
+                sym.getTypeValue();
+                definitionNamedTypes.add(sym.getName());
+            }
+            catch (SymbolNotOfKindTypeException snokte) {
+                //No problem, just don't need to add it
+            }
+        }
         return null;
     }
 
@@ -326,7 +418,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
     }
 
-    private final String getRootModuleID() {
+    private String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
     }
 }
