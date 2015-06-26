@@ -38,6 +38,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.typereasoning.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -45,8 +46,10 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -55,6 +58,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
+
+    private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
+            new ExactDomainMatch();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
+            new ExactParameterMatch();
+
+    private final TypeComparison<PSymbol, MTFunction> INEXACT_DOMAIN_MATCH =
+            new InexactDomainMatch();
+    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
+            new InexactParameterMatch();
 
     protected RESOLVECompiler compiler;
     protected SymbolTable symtab;
@@ -249,19 +262,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
- /*   @Override public Void exitMathInfixExp(
+    @Override public Void visitMathInfixExp(
             @NotNull Resolve.MathInfixExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+        return null;
     }
 
-    @Override public void exitMathOutfixExp(
+    /*@Override public void exitMathOutfixExp(
             @NotNull ResolveParser.MathOutfixExpContext ctx) {
+                    ctx.mathExp().forEach(this::visit);
         typeMathFunctionLikeThing(ctx, null, new ResolveToken(ctx.lop.getText()
                 + "..." + ctx.rop.getText()), ctx.mathExp());
     }*/
 
     @Override public Void visitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
         typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
         return null;
     }
@@ -461,7 +478,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 .map(MathSymbol::getType).collect(Collectors.toList());
 
         if (sameNameFunctions.isEmpty()) {
-            compiler.errorManager.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
         }
         MathSymbol intendedFunction = null;
@@ -488,18 +505,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private MathSymbol getExactDomainTypeMatch(PSymbol e,
-                                               List<MathSymbol> candidates) throws NoSolutionException {
+                   List<MathSymbol> candidates) throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
     }
 
     private MathSymbol getInexactDomainTypeMatch(PSymbol e,
-                                                 List<MathSymbol> candidates) throws NoSolutionException {
+                     List<MathSymbol> candidates) throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
     private MathSymbol getDomainTypeMatch(PSymbol e,
-                                          List<MathSymbol> candidates,
-                                          TypeComparison<PSymbol, MTFunction> comparison)
+                              List<MathSymbol> candidates,
+                              TypeComparison<PSymbol, MTFunction> comparison)
             throws NoSolutionException {
         MTFunction eType = e.getConservativePreApplicationType(g);
         MathSymbol match = null;
@@ -556,7 +573,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             implements
             TypeComparison<PSymbol, MTFunction> {
         @Override public boolean compare(PSymbol foundValue,
-                                         MTFunction foundType, MTFunction expectedType) {
+                             MTFunction foundType, MTFunction expectedType) {
             return foundType.parameterTypesMatch(expectedType,
                     EXACT_PARAMETER_MATCH);
         }
@@ -571,7 +588,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             TypeComparison<PSymbol, MTFunction> {
 
         @Override public boolean compare(PSymbol foundValue,
-                                         MTFunction foundType, MTFunction expectedType) {
+                             MTFunction foundType, MTFunction expectedType) {
             return expectedType.parametersMatch(foundValue.getArguments(),
                     INEXACT_PARAMETER_MATCH);
         }
@@ -607,6 +624,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return "inexact";
         }
     }
+
+    protected final PExp getPExpFor(@Nullable ParseTree ctx) {
+        if ( ctx == null ) {
+            return g.getTrueExp();
+        }
+        PExpBuildingListener<PExp> builder =
+                new PExpBuildingListener<>(symtab.mathPExps, tr);
+        ParseTreeWalker.DEFAULT.walk(builder, ctx);
+        return builder.getBuiltPExp(ctx);
+    }
+
 
     private void chainMathTypes(ParseTree current, ParseTree child) {
         tr.mathTypes.put(current, tr.mathTypes.get(child));

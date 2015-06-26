@@ -24,6 +24,7 @@ public class HardCoded {
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
             b.addBinding("->", null, g.FUNCTION);
+            b.addBinding("*", null, g.CROSS);
 
             b.addBinding("or", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());

@@ -50,9 +50,15 @@ public class TypeGraph {
             new IntersectApplicationFactory();
     private final static FunctionApplicationFactory FUNCTION_CONSTRUCTOR_APPLICATION =
             new FunctionConstructorApplicationFactory();
+    private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
+            new CartesianProductApplicationFactory();
     public final MTFunction FUNCTION = new MTFunction.MTFunctionBuilder(this,
             FUNCTION_CONSTRUCTOR_APPLICATION, SSET).paramTypes(SSET, SSET)
             .build();
+    public final MTFunction CROSS =
+            new MTFunction.MTFunctionBuilder(this,
+                    CARTESIAN_PRODUCT_APPLICATION, MTYPE)
+                    .paramTypes(MTYPE, MTYPE).build();
 
     public final MTFunction POWERSET = //
             new MTFunction.MTFunctionBuilder(this, POWERSET_APPLICATION, SSET) //
@@ -105,6 +111,19 @@ public class TypeGraph {
                 MTFunction f, String calledAsName, List<MTType> arguments) {
             return new MTFunction.MTFunctionBuilder(g, arguments.get(1))
                     .paramTypes(arguments.get(0)).build();
+        }
+    }
+
+    private static class CartesianProductApplicationFactory
+            implements
+            FunctionApplicationFactory {
+
+        @Override
+        public MTType buildFunctionApplication(TypeGraph g, MTFunction f,
+                               String calledAsName, List<MTType> arguments) {
+            return new MTCartesian(g,
+                    new MTCartesian.Element(arguments.get(0)),
+                    new MTCartesian.Element(arguments.get(1)));
         }
     }
 

@@ -1,9 +1,11 @@
 Precis Basic_Natural_Number_Theory;
 
-    Categorical Definition for
+    Definition N : SSet;
+    Definition 0 : N;
+(*    Categorical Definition for
         N : SSet,
         0 : N is
-            (Is_Monogeneric_for(N, 0, suc));
+            (Is_Monogeneric_for(N, 0, suc)); *)
 
    -- Definition 1 : N;
    -- Definition N2 : Powerset(N) is {n : N | n >= 2};

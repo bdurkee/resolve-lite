@@ -1,17 +1,12 @@
 Precis Basic_Spiral_Theory;
-    --uses Basic_Natural_Number_Theory;
+    uses Basic_Natural_Number_Theory;
 
-    --Definition N2 : Powerset(N) is {n : N | n >= 2};
+    Definition N2 : Powerset(N);
 
-    Definition Is_k_Spiral_Like(cen : (k : Cls)) : B;
-
-    (*Definition Is_k_Spiral_Like(
-        sp_loc : N2 -> SSet,
-        cen : (k : N2) * N -> sp_loc(k),
-        ss : (k : N2) * N -> sp_loc(k),
-        rs : (k : N2) * N -> sp_loc(k)) : B;
+    Definition Is_k_Spiral_Like(
+        sp_loc : Entity * Entity -> B) : B;
       
-    Categorical Definition for Sp_Loc : N2 -> SSet, 
+   (* Categorical Definition for Sp_Loc : N2 -> SSet,
         SS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
         RS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
         Cen : (k : N2) * Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
