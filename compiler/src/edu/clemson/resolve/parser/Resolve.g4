@@ -158,8 +158,8 @@ mathPrimaryExp
     ;
 
 mathLiteralExp
-    :   BOOL        #mathBooleanExp
-    |   INT         #mathIntegerExp
+    :   (qualifier=ID COLONCOLON)? bool=BOOL        #mathBooleanExp
+    |   (qualifier=ID COLONCOLON)? num=INT         #mathIntegerExp
     ;
 
 mathFunctionApplicationExp

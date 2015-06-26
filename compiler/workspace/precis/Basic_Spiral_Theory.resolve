@@ -12,9 +12,9 @@ Precis Basic_Spiral_Theory;
     Categorical Definition for Sp_Loc : N2 -> SSet,
         SS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
         RS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
-        Cen : (k : N2) * Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
+        Cen : (k : N2) -> Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
     
    Implicit Definition SCD(p : Sp_Loc(k : N2)) : N is
-        Forall u : Sp_Loc(k), SS(k)(SCD(p), ;
+        Forall u : Sp_Loc(k), SS(k)(SCD(u), Cen(k));
 
 end Basic_Spiral_Theory;

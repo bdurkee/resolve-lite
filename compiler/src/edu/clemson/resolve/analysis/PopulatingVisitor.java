@@ -37,10 +37,12 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -182,8 +184,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * because certain information (rightfully) isn't present: defn body, etc.
      * <p>
      * Note also that here we also add a binding for the name of this
-     * definition to the active scope (primarily for inductive and implicit
-     * definitions).</p>
+     * sig to the active scope (so inductive and implicit definitions may
+     * reference themselves).</p>
      */
     @Override public Void visitMathDefinitionSig(
             @NotNull Resolve.MathDefinitionSigContext ctx) {
@@ -216,6 +218,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //if the definition has parameters then it's type should be an
             //MTFunction (e.g. something like a * b ... -> ...)
             defnType = builder.build();
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, ctx.name.getText(),
+                            defnType, null, ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name.getStart(), ctx.name.getText());
         }
         tr.mathTypes.put(ctx, defnType);
         return null;
@@ -266,27 +277,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.MathNestedExpContext ctx) {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
-        return null;
-    }
-
-    @Override public Void visitMathInfixExp(
-            @NotNull Resolve.MathInfixExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
-        return null;
-    }
-
-    /*@Override public void exitMathOutfixExp(
-            @NotNull ResolveParser.MathOutfixExpContext ctx) {
-                    ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, new ResolveToken(ctx.lop.getText()
-                + "..." + ctx.rop.getText()), ctx.mathExp());
-    }*/
-
-    @Override public Void visitMathFunctionExp(
-            @NotNull Resolve.MathFunctionExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
         return null;
     }
 
@@ -347,9 +337,36 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathInfixExp(
+            @NotNull Resolve.MathInfixExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+        return null;
+    }
+
+    /*@Override public void exitMathOutfixExp(
+            @NotNull ResolveParser.MathOutfixExpContext ctx) {
+                    ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, null, new ResolveToken(ctx.lop.getText()
+                + "..." + ctx.rop.getText()), ctx.mathExp());
+    }*/
+
+    @Override public Void visitMathFunctionExp(
+            @NotNull Resolve.MathFunctionExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
+        return null;
+    }
+
     @Override public Void visitMathBooleanExp(
             @NotNull Resolve.MathBooleanExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
+        return null;
+    }
+
+    @Override public Void visitMathIntegerExp(
+            @NotNull Resolve.MathIntegerExpContext ctx) {
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
     }
 
@@ -373,7 +390,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private MathSymbol getIntendedEntry(Token qualifier, String symbolName,
-                                        ParserRuleContext ctx) {
+                                    ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
                     .queryForOne(new MathSymbolQuery(qualifier,
@@ -387,7 +404,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
-                                    @NotNull MathSymbol intendedEntry) {
+                                @NotNull MathSymbol intendedEntry) {
         try {
             if ( intendedEntry.getQuantification() == Quantification.NONE ) {
                 tr.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
