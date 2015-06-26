@@ -116,7 +116,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathCategoricalDefinitionDecl(
             @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
         for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
+            symtab.startScope(sig);
             this.visit(sig);
+            symtab.endScope();
+
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, sig.name.getText(),
@@ -177,6 +180,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * know that in the defn top level nodes, we must remember to start scope,
      * visit the signature, and end scope. We don't do this in the signature
      * because certain information (rightfully) isn't present: defn body, etc.
+     * <p>
+     * Note also that here we also add a binding for the name of this
+     * definition to the active scope (primarily for inductive and implicit
+     * definitions).</p>
      */
     @Override public Void visitMathDefinitionSig(
             @NotNull Resolve.MathDefinitionSigContext ctx) {
@@ -194,7 +201,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTFunction.MTFunctionBuilder builder =
                 new MTFunction.MTFunctionBuilder(g, defnType);
 
-        //if there are params, then our type needs to be an MTFunction.
+        //if there ARE params, then our type needs to be an MTFunction.
         //this if check needs to be here or else, even if there were no params,
         //our type would end up MTFunction: Void -> T (which we don't want)
         if ( !ctx.mathVariableDeclGroup().isEmpty() ) {

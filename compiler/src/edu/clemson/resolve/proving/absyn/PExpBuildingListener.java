@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Converts parse tree math exps to an equivalent abstract-syntax form,
+ * Converts parse tree math exprs to an equivalent abstract-syntax form,
  * represented by the {@link PExp} hierarchy.
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {

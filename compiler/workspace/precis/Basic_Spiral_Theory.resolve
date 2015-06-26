@@ -14,6 +14,7 @@ Precis Basic_Spiral_Theory;
         RS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
         Cen : (k : N2) * Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
     
-    Implicit Definition SCD(p : Sp_Loc(k : N2)) : N;
+   Implicit Definition SCD(p : Sp_Loc(k : N2)) : N is
+        Forall u : Sp_Loc(k), SS(k)(SCD(p), ;
 
 end Basic_Spiral_Theory;
