@@ -86,10 +86,35 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 14: <em>typename</em> is not known to be a type".
+     * Compiler Error 14: <em>typename</em> is not known to be a type.
      */
     INVALID_MATH_TYPE(14, "'<arg>' is not known to be a type",
-                      ErrorSeverity.ERROR);
+                      ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 15: no such function: <em>name</em>.
+     */
+    NO_SUCH_MATH_FUNCTION(15, "no such function: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 16: no function applicable for domain <em>domain</em>;
+     * candidates: <em>candidatename</em> : <em>candidatetype</em>.
+     */
+    NO_MATH_FUNC_FOR_DOMAIN(
+            16,
+            "no function applicable for domain <arg>;"
+                    + "\ncandidates: "
+                    + "<arg2, arg3 : {name,domain|('<name.name>' : <domain>)};separator={,\n}>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 17: multiple domain matches: <em>match1name</em> :
+     * <em>match1type</em> and <em>match2name</em> : <em>match2type</em>;
+     * consider explicitly qualifying.
+     */
+    AMBIGIOUS_DOMAIN(17, "multiple domain matches; for example: "
+            + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
+            + "qualifying", ErrorSeverity.WARNING);
 
     public final int code;
     public final String message;
