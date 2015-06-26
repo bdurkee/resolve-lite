@@ -128,7 +128,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
         //visit the rhs of our categorical defn
-        //this.visit(ctx.mathAssertionExp());   //Todo: Once we have func apps
+        this.visit(ctx.mathAssertionExp());
         return null;
     }
 
@@ -286,7 +286,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathTypeAssertionExp(
             @NotNull Resolve.MathTypeAssertionExpContext ctx) {
         if (typeValueDepth == 0) {
-            this.visit(ctx.mathTypeExp());
+            this.visit(ctx.mathExp());
         }
         this.visit(ctx.mathTypeExp());
         if ( typeValueDepth > 0 ) {
@@ -301,11 +301,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 tr.mathTypeValues.put(ctx,
                         new MTNamed(g, ctx.mathExp().getText()));
 
-                //Note that a redudantly named type parameter would be
-                //caught when we add a symbol to the symbol table, so no
-                //need to check here
-               // myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
-               //         node.getAssertedTy().getMathType());
+                //Don't forget to set the type for the var on the lhs of ':'!
+                //Todo: Don't know a better way of getting the bottommost rulectx.
+                //maybe write a utils method for that? Or read more about the api.
+                ParseTree x =
+                        ctx.mathExp().getChild(0).getChild(0);
+                tr.mathTypes.put(x, tr.mathTypes.get(ctx.mathTypeExp()));
 
                 compiler.info("Added schematic variable: "
                         + ctx.mathExp().getText());

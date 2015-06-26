@@ -255,11 +255,11 @@ public class MTFunction extends MTAbstract<MTFunction> {
                         .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
 
         if ( formalParameterType.isKnownToContainOnlyMTypes() ) {
-            MTType actualParameterMathTypeValue =
-                    actualParameter.getMathTypeValue();
+            //MTType actualParameterMathTypeValue =
+            //        actualParameter.getMathTypeValue();
             //S --> Power(T) --> 'T' isknowntobein SSet
             //S union S -->
-            if ( actualParameterMathTypeValue == null
+           /* if ( actualParameterMathTypeValue == null
                     || !getTypeGraph().isKnownToBeIn(
                             actualParameterMathTypeValue, formalParameterType) ) {
                 if ( actualParameterMathTypeValue != null ) {
@@ -277,7 +277,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 throw NoSolutionException.INSTANCE;
             }
             accumulatedConcreteValues.put(formalParameterName,
-                    actualParameter.getMathTypeValue());
+                    actualParameter.getMathTypeValue());*/
         }
     }
 

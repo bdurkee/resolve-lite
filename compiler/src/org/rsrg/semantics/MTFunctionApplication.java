@@ -100,9 +100,9 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
             sb.append(" ");
             sb.append(arguments.get(1).toString());
         }
-        else if ( arguments.size() == 1 && name.contains("_") ) {
+        else if ( arguments.size() == 1 && name.contains("...") ) {
             // ^^^ super hacky way to detect outfix
-            sb.append(name.replace("_", arguments.get(0).toString()));
+            sb.append(name.replace("...", arguments.get(0).toString()));
         }
         else {
             sb.append(name);
