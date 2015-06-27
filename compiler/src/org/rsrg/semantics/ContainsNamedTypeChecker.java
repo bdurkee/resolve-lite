@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public class ContainsNamedTypeChecker extends BoundVariableVisitor {
 
-    private final Set<String> names = new HashSet<String>();
+    private final Set<String> names = new HashSet<>();
     private boolean result = false;
 
     /**
@@ -20,7 +20,7 @@ public class ContainsNamedTypeChecker extends BoundVariableVisitor {
      * @param names 
      */
     public ContainsNamedTypeChecker(Set<String> names) {
-        names.addAll(names);
+        this.names.addAll(names);
     }
 
     /**

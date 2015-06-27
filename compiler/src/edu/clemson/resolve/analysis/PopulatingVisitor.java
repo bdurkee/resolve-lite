@@ -153,7 +153,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
         currentInductionVar = ctx.mathVariableDecl();
 
+        activeQuantifications.push(Quantification.UNIVERSAL);
+        walkingDefParams = true;
         this.visit(ctx.mathVariableDecl());
+        walkingDefParams = false;
+        activeQuantifications.pop();
+
         this.visit(sig);
         this.visit(baseCase);
         this.visit(indHypo);
@@ -172,6 +177,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     sig.name.getStart(), sig.name.getText());
         }
         currentInductionVar = null;
+        definitionSchematicTypes.clear();
         return null;
     }
 
@@ -268,7 +274,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
             if (ctx.inductionVar != null) {
-                System.out.println("doing induct var");
                 if (currentInductionVar == null) {
                     throw new RuntimeException("induction variable missing!?");
                 }
@@ -276,19 +281,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
                 builder.paramTypes(inductionVarType)
                         .paramNames(currentInductionVar.ID().getText());
-                //now add the induction variable to scope like everything else
-                try {
-                    symtab.getInnermostActiveScope().define(
-                            new MathSymbol(g, currentInductionVar.ID().getText(),
-                                    definitionSchematicTypes,
-                                    inductionVarType, null, ctx,
-                                    getRootModuleID()));
-                }
-                catch (DuplicateSymbolException e) {
-                    compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                            currentInductionVar.getStart(),
-                            currentInductionVar.ID().getText());
-                }
+                //The induction var itself should've already been visited in
+                //visitMathInductiveDefnDecl
             }
             //if the definition has parameters then it's type should be an
             //MTFunction (e.g. something like a * b ... -> ...)
@@ -309,23 +303,43 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathVariableDecl(
+            @NotNull Resolve.MathVariableDeclContext ctx) {
+        insertMathVariables(ctx, ctx.mathTypeExp(), ctx.ID());
+        return null;
+    }
+
     @Override public Void visitMathVariableDeclGroup(
             @NotNull Resolve.MathVariableDeclGroupContext ctx) {
-        for (TerminalNode t : ctx.ID()) {
-            this.visit(ctx.mathTypeExp());
-            MTType mathTypeValue = tr.mathTypeValues.get(ctx.mathTypeExp());
+        insertMathVariables(ctx, ctx.ID(), ctx.mathTypeExp());
+        return null;
+    }
+
+    private void insertMathVariables(ParserRuleContext ctx,
+             Resolve.MathTypeExpContext type, TerminalNode ... terms) {
+        insertMathVariables(ctx, Arrays.asList(terms), type);
+    }
+
+    private void insertMathVariables(ParserRuleContext ctx,
+            List<TerminalNode> terms, Resolve.MathTypeExpContext type) {
+        for (TerminalNode term : terms) {
+            this.visit(type);
+            MTType mathTypeValue = tr.mathTypeValues.get(type);
+            if ( walkingDefParams
+                    && mathTypeValue.isKnownToContainOnlyMTypes() ) {
+                definitionSchematicTypes.put(term.getText(), mathTypeValue);
+            }
             try {
                 symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, t.getText(), activeQuantifications
+                        new MathSymbol(g, term.getText(), activeQuantifications
                                 .peek(), mathTypeValue, null, ctx,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                        t.getSymbol(), t.getText());
+                        term.getSymbol(), term.getText());
             }
         }
-        return null;
     }
 
     //---------------------------------------------------
@@ -628,12 +642,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTFunction candidateType;
         for (MathSymbol candidate : candidates) {
             try {
+                String originalCandidateType = candidate.getType().toString();
                 candidate =
                         candidate.deschematize(e.getArguments(),
                                 definitionSchematicTypes,
                                 symtab.getInnermostActiveScope());
                 candidateType = (MTFunction) candidate.getType();
-                compiler.info(candidate.getType() + " deschematizes to "
+                compiler.info(originalCandidateType + " deschematizes to "
                         + candidateType);
 
                 if ( comparison.compare(e, eType, candidateType) ) {
