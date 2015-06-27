@@ -1,13 +1,18 @@
 Precis Basic_Natural_Number_Theory;
+    uses Monogenerator_Theory;
 
-    Definition N : SSet;
-    Definition 0 : N;
-(*    Categorical Definition for
-        N : SSet,
-        0 : N is
-            (Is_Monogeneric_for(N, 0, suc)); *)
+    Categorical Definition for N : SSet, 0 : N, suc : N -> N is
+        Monogeneric_for(N, 0, suc);
 
+    Inductive Definition on n : N of +(m : N, n) : N is
+    (i.)  m + 0 = m;
+    (ii.) m + suc(n) = suc(m + n);
+
+    Theorem N6: Forall m, n : N, suc(m) + n = suc(m + n);
    -- Definition 1 : N;
-   -- Definition N2 : Powerset(N) is {n : N | n >= 2};
+
+   Inductive Definition on n : N of *(m : N, n) : N is
+       (i.)  m * 0 = 0;
+       (ii.) m * suc(n) = m * n + m;
 
 end Basic_Natural_Number_Theory;

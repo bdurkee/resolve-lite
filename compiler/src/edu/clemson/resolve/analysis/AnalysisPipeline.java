@@ -20,6 +20,8 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
         for (AnnotatedTree unit : compilationUnits) {
             compiler.info("populating: " + unit.getName());
             ParseTreeWalker walker = new ParseTreeWalker();
+            System.out.println("----------------------\nModule: "
+                    + unit.getName() + "\n----------------------");
             PopulatingVisitor defSymsAndScopes =
                     new PopulatingVisitor(compiler, compiler.symbolTable,
                             unit);

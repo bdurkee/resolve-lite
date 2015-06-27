@@ -37,12 +37,10 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
-import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.typereasoning.TypeGraph;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -54,7 +52,6 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
-import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,6 +67,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             new InexactDomainMatch();
     private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
             new InexactParameterMatch();
+
+    private boolean walkingDefParams = false;
+
+    /**
+     * Keeps track of an inductive defn's (top level declared) induction
+     * variable for access later in the (lower level) signature. This is
+     * {@code null} we're not visiting the children of an inductive defn.
+     */
+    private Resolve.MathVariableDeclContext currentInductionVar = null;
+
+    private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
     protected RESOLVECompiler compiler;
     protected SymbolTable symtab;
@@ -137,6 +145,44 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathInductiveDefinitionDecl(
+            @NotNull Resolve.MathInductiveDefinitionDeclContext ctx) {
+        symtab.startScope(ctx);
+        Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
+        ParserRuleContext baseCase = ctx.mathAssertionExp(0);
+        ParserRuleContext indHypo = ctx.mathAssertionExp(1);
+        currentInductionVar = ctx.mathVariableDecl();
+
+        this.visit(ctx.mathVariableDecl());
+        this.visit(sig);
+        this.visit(baseCase);
+        this.visit(indHypo);
+
+        MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
+        checkMathTypes(baseCase, tr.mathTypes.get(baseCase), g.BOOLEAN);
+        checkMathTypes(indHypo, tr.mathTypes.get(indHypo), g.BOOLEAN);
+        symtab.endScope();
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, sig.name.getText(),
+                            defnType, null, ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    sig.name.getStart(), sig.name.getText());
+        }
+        currentInductionVar = null;
+        return null;
+    }
+
+    private void checkMathTypes(ParserRuleContext ctx,
+                                MTType found, MTType expected) {
+        if (!found.equals(expected)) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
+                    ctx.getStart(), expected, found);
+        }
+    }
+
     /**
      * Note: Shouldn't be calling this.visit(sigature.xxxx) anywhere at this
      * level. Those visits should all be taken care of in the visitor method
@@ -164,12 +210,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, sig.name.getText(),
-                            defnType, defnTypeValue, ctx, getRootModuleID()));
+                            definitionSchematicTypes, defnType, defnTypeValue,
+                            ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     sig.name.getStart(), sig.name.getText());
         }
+        definitionSchematicTypes.clear();
         return null;
     }
 
@@ -177,11 +225,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * Since 'MathDefinitionSig' appears all over the place within our three
      * styles of definitions (categorical, standard, and inductive), we simply
      * use this signature visitor method to visit and type all relevant
-     * children. Then, the top level definition nodes can simply grab the type
+     * children. This way the top level definition nodes can simply grab the type
      * of the signature and build/populate the appropriate object. However,
      * know that in the defn top level nodes, we must remember to start scope,
      * visit the signature, and end scope. We don't do this in the signature
-     * because certain information (rightfully) isn't present: defn body, etc.
+     * because certain information (i.e. body) is rightfully not present.
      * <p>
      * Note also that here we also add a binding for the name of this
      * sig to the active scope (so inductive and implicit definitions may
@@ -191,7 +239,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.MathDefinitionSigContext ctx) {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
+        walkingDefParams = true;
         ctx.mathVariableDeclGroup().forEach(this::visit);
+        walkingDefParams = false;
         activeQuantifications.pop();
 
         //next, visit the definitions 'return type' to give it a type
@@ -211,14 +261,41 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.mathVariableDeclGroup()) {
                 MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
                 for (TerminalNode t : grp.ID()) {
+                    System.out.println("t: " + t.getText() + ": " + grpType);
+
                     builder.paramTypes(grpType);
                     builder.paramNames(t.getText());
+                }
+            }
+            if (ctx.inductionVar != null) {
+                System.out.println("doing induct var");
+                if (currentInductionVar == null) {
+                    throw new RuntimeException("induction variable missing!?");
+                }
+                MTType inductionVarType =
+                        tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
+                builder.paramTypes(inductionVarType)
+                        .paramNames(currentInductionVar.ID().getText());
+                //now add the induction variable to scope like everything else
+                try {
+                    symtab.getInnermostActiveScope().define(
+                            new MathSymbol(g, currentInductionVar.ID().getText(),
+                                    definitionSchematicTypes,
+                                    inductionVarType, null, ctx,
+                                    getRootModuleID()));
+                }
+                catch (DuplicateSymbolException e) {
+                    compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                            currentInductionVar.getStart(),
+                            currentInductionVar.ID().getText());
                 }
             }
             //if the definition has parameters then it's type should be an
             //MTFunction (e.g. something like a * b ... -> ...)
             defnType = builder.build();
         }
+        System.out.println("result: " + defnType);
+
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, ctx.name.getText(),
@@ -305,6 +382,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ctx.mathExp().getChild(0).getChild(0);
                 tr.mathTypes.put(x, tr.mathTypes.get(ctx.mathTypeExp()));
 
+                definitionSchematicTypes.put(ctx.mathExp().getText(),
+                        tr.mathTypes.get(ctx.mathTypeExp()));
                 compiler.info("Added schematic variable: "
                         + ctx.mathExp().getText());
             }
@@ -551,6 +630,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             try {
                 candidate =
                         candidate.deschematize(e.getArguments(),
+                                definitionSchematicTypes,
                                 symtab.getInnermostActiveScope());
                 candidateType = (MTFunction) candidate.getType();
                 compiler.info(candidate.getType() + " deschematizes to "
@@ -559,11 +639,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 if ( comparison.compare(e, eType, candidateType) ) {
                     if ( match != null ) {
                         compiler.errMgr.semanticError(
-                                ErrorKind.AMBIGIOUS_DOMAIN,
-                                ((ParserRuleContext) candidate
-                                        .getDefiningTree()).getStart(), match
+                                ErrorKind.AMBIGIOUS_DOMAIN,null, match
                                         .getName(), match.getType(), candidate
                                         .getName(), candidate.getType());
+                        return match;
                     }
                     match = candidate;
                 }

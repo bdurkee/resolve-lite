@@ -114,7 +114,13 @@ public enum ErrorKind {
      */
     AMBIGIOUS_DOMAIN(17, "multiple domain matches; for example: "
             + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
-            + "qualifying", ErrorSeverity.WARNING);
+            + "qualifying", ErrorSeverity.WARNING),
+
+    /**
+     * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
+     */
+    UNEXPECTED_TYPE(18, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR);
+
 
     public final int code;
     public final String message;

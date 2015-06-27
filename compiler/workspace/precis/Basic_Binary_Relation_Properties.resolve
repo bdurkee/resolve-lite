@@ -1,0 +1,15 @@
+Precis Basic_Binary_Relation_Properties;
+
+    Definition Is_Reflexive(p : (D : SSet) * D -> B) : B is
+        Forall x : D, p(x, x);
+
+    Definition Is_Transitive(p : (D : SSet) * D -> B) : B is
+        Forall x, y, z : D, p(x, y) and p(y, z) implies p(x, z);
+
+    Definition Is_Symmetric(p : (D : SSet) * D -> B) : B is
+        Forall x, y : D, p(x, y) implies p(y, x);
+
+    Definition Is_Antisymmetric(p : (D : SSet) * D -> B) : B is
+        Forall x, y : D, p(x, y) and p(y, x) implies x = y;
+
+end Basic_Binary_Relation_Properties;

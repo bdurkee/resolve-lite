@@ -35,6 +35,7 @@ lexer grammar ResolveLexer;
 BY			:	'by'							;
 CATEGORICAL	:	'Categorical'					;
 CONCEPT	    :	'Concept'						;
+COROLLARY	:	'Corollary'						;
 DEFINITION	:	'Definition'					;
 END         :   'end'							;
 EXISTS		:	'Exists'						;
@@ -49,6 +50,7 @@ IS			:	'is'							;
 OF			:	'of'							;
 ON 			:	'on'							;
 PRECIS      :   'Precis'						;
+THEOREM		:	'Theorem'						;
 USES        :   'uses'							;
 
 // punctuation

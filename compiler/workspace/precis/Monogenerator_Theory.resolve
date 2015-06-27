@@ -1,0 +1,6 @@
+Precis Monogenerator_Theory;
+    uses Basic_Binary_Relation_Properties;
+
+    Definition Monogeneric_for(D : SSet, b : D, g : D -> D) : B;
+
+end Monogenerator_Theory;

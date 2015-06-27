@@ -60,7 +60,12 @@ precisBlock
     :   ( mathDefinitionDecl
         | mathCategoricalDefinitionDecl
         | mathInductiveDefinitionDecl
+        | mathTheoremDecl
         )+
+    ;
+
+mathTheoremDecl
+    :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
     ;
 
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
@@ -83,9 +88,9 @@ mathDefinitionDecl
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig (IS
+    :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig IS
         BASE_CASE mathAssertionExp SEMI
-        INDUCT_CASE mathAssertionExp)? SEMI
+        INDUCT_CASE mathAssertionExp SEMI
     ;
 
 mathSymbol

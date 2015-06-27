@@ -14,7 +14,6 @@ import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

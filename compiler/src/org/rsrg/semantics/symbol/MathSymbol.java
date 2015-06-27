@@ -7,10 +7,7 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.GenericQuery;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
@@ -21,14 +18,28 @@ public class MathSymbol extends Symbol {
     private final Map<String, MTType> genericsInDefiningContext =
             new HashMap<>();
 
-    public MathSymbol(TypeGraph g, String name, Quantification q, MTType type,
+    /**
+     * Math symbols that represent definitions can take parameters, which may
+     * contain implicit type parameters that cause the definition's true type
+     * to change based on the type of arguments that end up actually passed.
+     * These parameters are represented in this map, with the key giving the
+     * name of the type parameter (which will then behave as a normal, bound,
+     * named type within the definition's type) and the value giving the type
+     * bounds of the parameter.
+     */
+    private final Map<String, MTType> schematicTypes = new HashMap<>();
+
+    public MathSymbol(TypeGraph g, String name, Quantification q,
+                      Map<String, MTType> schematicTypes, MTType type,
                       MTType typeValue, ParserRuleContext definingTree,
                       String moduleID) {
         super(name, definingTree, moduleID);
 
         this.type = type;
         this.quantification = q;
-
+        if (schematicTypes != null) {
+            this.schematicTypes.putAll(schematicTypes);
+        }
         if ( typeValue != null ) {
             this.typeValue = typeValue;
         }
@@ -44,8 +55,23 @@ public class MathSymbol extends Symbol {
 
     public MathSymbol(TypeGraph g, String name, MTType type, MTType typeValue,
                       ParserRuleContext definingTree, String moduleID) {
-        this(g, name, Quantification.NONE, type, typeValue, definingTree,
-                moduleID);
+        this(g, name, Quantification.NONE, new HashMap<String, MTType>(),
+                type, typeValue, definingTree, moduleID);
+    }
+
+    public MathSymbol(TypeGraph g, String name, Quantification q,
+                      MTType type, MTType typeValue,
+                      ParserRuleContext definingTree, String moduleID) {
+        this(g, name, q, new HashMap<String, MTType>(),
+                type, typeValue, definingTree, moduleID);
+    }
+
+    public MathSymbol(TypeGraph g, String name,
+                      Map<String, MTType> schematicTypes,
+                      MTType type, MTType typeValue,
+                      ParserRuleContext definingTree, String moduleID) {
+        this(g, name, Quantification.NONE, schematicTypes, type, typeValue,
+                definingTree, moduleID);
     }
 
     public MTType getType() {
@@ -74,6 +100,7 @@ public class MathSymbol extends Symbol {
     }
 
     public MathSymbol deschematize(List<PExp> arguments,
+        Map<String, MTType> definitionSchematicTypes,
         Scope callingContext)
             throws NoSolutionException {
         if (!(type instanceof MTFunction)) throw NoSolutionException.INSTANCE;
@@ -91,8 +118,8 @@ public class MathSymbol extends Symbol {
 
         List<ProgTypeSymbol> callingContextProgramGenerics =
                 callingContext.query(GenericQuery.INSTANCE);
-        Map<String, MTType> callingContextMathGenerics = new HashMap<>();
-        Map<String, MTType> bindingsSoFar = new HashMap<>();
+        Map<String, MTType> callingContextMathGenerics =
+                new HashMap<>(definitionSchematicTypes);
 
         MathSymbol mathGeneric;
         for (ProgTypeSymbol e : callingContextProgramGenerics) {
@@ -103,7 +130,38 @@ public class MathSymbol extends Symbol {
                     mathGeneric.type);
         }
 
+        Iterator<MTType> argumentTypeIter = actualArgumentTypes.iterator();
+        Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
+        Map<String, MTType> iterationBindings;
+        MTType argumentType;
+        try {
+            for (MTType formalParameterType : formalParameterTypes) {
+                formalParameterType =
+                        formalParameterType
+                                .getCopyWithVariablesSubstituted(bindingsSoFar);
 
+                //We know arguments and formalParameterTypes are the same
+                //length, see above
+                argumentType = argumentTypeIter.next();
+
+                if (containsSchematicType(formalParameterType)) {
+                    //try{
+                    iterationBindings =
+                            argumentType.bindTo(formalParameterType,
+                                    callingContextMathGenerics,
+                                    schematicTypes);
+
+                    bindingsSoFar.putAll(iterationBindings);
+                    /*}
+                    catch (NoSuchElementException nsee) {
+                        int i = 0;
+                    }*/
+                }
+            }
+        }
+        catch (BindingException be) {
+            throw NoSolutionException.INSTANCE;
+        }
         MTType newTypeValue = null;
         MTType newType =
                 ((MTFunction) type
@@ -134,6 +192,14 @@ public class MathSymbol extends Symbol {
             }
         }
         return result;
+    }
+
+    private boolean containsSchematicType(MTType t) {
+        ContainsNamedTypeChecker checker =
+                new ContainsNamedTypeChecker(schematicTypes.keySet());
+        t.accept(checker);
+
+        return checker.getResult();
     }
 
     @Override public MathSymbol toMathSymbol() {

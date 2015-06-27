@@ -40,10 +40,13 @@ public class MTFunction extends MTAbstract<MTFunction> {
             this.singleParameterName = null;
         }
         this.range = builder.range;
+        List<String> paramNames = builder.paramNames;
+        List<MTType> paramTypes = builder.paramTypes;
+        if (paramTypes.size() != paramNames.size()) {
+            paramNames = buildNullNameListOfEqualLength(paramTypes);
+        }
         this.domain =
-                buildParameterType(getTypeGraph(),
-                        buildNullNameListOfEqualLength(builder.paramTypes),
-                        builder.paramTypes);
+                buildParameterType(getTypeGraph(), paramNames, paramTypes);
 
         this.components.add(domain);
         this.components.add(range);
