@@ -52,8 +52,13 @@ conceptModule
 precisModule
     :   PRECIS name=ID SEMI
         (usesList)?
+        (dependentTermOptions)?
         (precisBlock)?
         END closename=ID SEMI EOF
+    ;
+
+dependentTermOptions
+    :   AT DEPENDENT LBRACE ID (COMMA ID)* RBRACE
     ;
 
 precisBlock

@@ -37,6 +37,7 @@ CATEGORICAL	:	'Categorical'					;
 CONCEPT	    :	'Concept'						;
 COROLLARY	:	'Corollary'						;
 DEFINITION	:	'Definition'					;
+DEPENDENT	:	'DependentTerms'				;
 END         :   'end'							;
 EXISTS		:	'Exists'						;
 EXTERNALLY	:	'externally'					;

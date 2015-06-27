@@ -120,48 +120,8 @@ public class MathSymbol extends Symbol {
                 callingContext.query(GenericQuery.INSTANCE);
         Map<String, MTType> callingContextMathGenerics =
                 new HashMap<>(definitionSchematicTypes);
-
-        MathSymbol mathGeneric;
-        for (ProgTypeSymbol e : callingContextProgramGenerics) {
-            //This is guaranteed not to fail--all program types can be coerced
-            //to math types, so the passed location is irrelevant
-            mathGeneric = e.toMathSymbol();
-            callingContextMathGenerics.put(mathGeneric.getName(),
-                    mathGeneric.type);
-        }
-
-        Iterator<MTType> argumentTypeIter = actualArgumentTypes.iterator();
         Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
-        Map<String, MTType> iterationBindings;
-        MTType argumentType;
-        try {
-            for (MTType formalParameterType : formalParameterTypes) {
-                formalParameterType =
-                        formalParameterType
-                                .getCopyWithVariablesSubstituted(bindingsSoFar);
 
-                //We know arguments and formalParameterTypes are the same
-                //length, see above
-                argumentType = argumentTypeIter.next();
-
-                if (containsSchematicType(formalParameterType)) {
-                    //try{
-                    iterationBindings =
-                            argumentType.bindTo(formalParameterType,
-                                    callingContextMathGenerics,
-                                    schematicTypes);
-
-                    bindingsSoFar.putAll(iterationBindings);
-                    /*}
-                    catch (NoSuchElementException nsee) {
-                        int i = 0;
-                    }*/
-                }
-            }
-        }
-        catch (BindingException be) {
-            throw NoSolutionException.INSTANCE;
-        }
         MTType newTypeValue = null;
         MTType newType =
                 ((MTFunction) type

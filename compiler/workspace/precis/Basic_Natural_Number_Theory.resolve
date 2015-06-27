@@ -16,8 +16,8 @@ Precis Basic_Natural_Number_Theory;
     Definition 2 : N is suc(1);
 
    Inductive Definition on n : N of *(m : N, n) : N is
-       (i.)  m * 0 = 0;
-       (ii.) m * suc(n) = m * n + m;
+   (i.)  m * 0 = 0;
+   (ii.) m * suc(n) = m * n + m;
 
     Implicit Definition .-.(m, n : N) : N;
         Corollary C2: Forall m, n : N, m .-. n = 0 implies m <= n and

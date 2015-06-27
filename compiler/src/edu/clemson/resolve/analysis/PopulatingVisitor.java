@@ -108,6 +108,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
+    private Set<String> dependentTerms = new HashSet<>();
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
@@ -124,6 +126,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
+    }
+
+    @Override public Void visitDependentTermOptions(
+            @NotNull Resolve.DependentTermOptionsContext ctx) {
+        dependentTerms.addAll(ctx.ID().stream().map(TerminalNode::getText)
+                .collect(Collectors.toList()));
+        return null;
     }
 
     @Override public Void visitMathTheoremDecl(
@@ -615,7 +624,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTType argTypeValue;
             for (ParserRuleContext arg : args) {
                 argTypeValue = tr.mathTypeValues.get(arg);
-                if ( argTypeValue == null ) {
+                if (dependentTerms.contains(arg.getText())) {
+                    argTypeValue = new MTNamed(g, arg.getText());
+                }
+                else if ( argTypeValue == null ) {
                     compiler.errMgr.semanticError(
                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                             arg.getText());
