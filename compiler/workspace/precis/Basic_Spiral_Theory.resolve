@@ -5,9 +5,9 @@ Precis Basic_Spiral_Theory;
 
     Definition Is_k_Spiral_Like(
         sp_loc : N2 -> SSet,
-        cen : (k : N2) * N -> sp_loc(k),
-        ss : (k : N2) * N -> sp_loc(k),
-        rs : (k : N2) * N -> sp_loc(k)) : B;
+        cen : (k : N2) -> sp_loc(k),
+        ss : (k : N2) * N * sp_loc(k) -> sp_loc(k),
+        rs : (k : N2) * N * sp_loc(k) -> sp_loc(k)) : B;
 
     Categorical Definition for Sp_Loc : N2 -> SSet,
         SS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),

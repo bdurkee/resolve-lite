@@ -394,7 +394,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //maybe write a utils method for that? Or read more about the api.
                 ParseTree x =
                         ctx.mathExp().getChild(0).getChild(0);
-                tr.mathTypes.put(x, tr.mathTypes.get(ctx.mathTypeExp()));
+                tr.mathTypes.put(x, assertedType);
 
                 definitionSchematicTypes.put(ctx.mathExp().getText(),
                         tr.mathTypes.get(ctx.mathTypeExp()));
