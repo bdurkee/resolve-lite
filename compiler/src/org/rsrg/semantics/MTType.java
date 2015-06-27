@@ -78,7 +78,7 @@ public abstract class MTType {
 
             if ( !result ) {
                 try {
-                    //All 'equals' logic should be put into AlphaEquivalencyChecker! 
+                    //All 'equals' logic should be put into AlphaEquivalencyChecker!
                     //Don't override equals!
                     AlphaEquivalencyChecker alphaEq =
                             myTypeGraph.threadResources.alphaChecker;
@@ -89,7 +89,7 @@ public abstract class MTType {
                 catch (ClassCastException cce) {
                     result = false;
                 }
-                //We only cache our answer at the first level to avoid an 
+                //We only cache our answer at the first level to avoid an
                 //infinite equals loop
                 if ( (myEqualsDepth == 1) && result ) {
                     myKnownAlphaEquivalencies.add(o);

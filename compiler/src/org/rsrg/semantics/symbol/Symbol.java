@@ -87,6 +87,10 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
+    public TheoremSymbol toTheoremSymbol() {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
     public abstract Symbol instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility);

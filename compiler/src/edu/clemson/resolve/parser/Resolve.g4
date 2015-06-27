@@ -94,7 +94,7 @@ mathInductiveDefinitionDecl
     ;
 
 mathSymbol
-    :   (PLUS|MINUS|DIVIDE|MULT|BOOL|INT)
+    :   (PLUS|MINUS|CUTMINUS|DIVIDE|MULT|BOOL|INT|LTE|LT|GT|GTE)
     |   ID
     ;
 
@@ -141,7 +141,7 @@ mathExp
     :   mathPrimaryExp                                  #mathPrimeExp
     |   op=(PLUS|MINUS|NOT) mathExp                     #mathUnaryExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
-    |   mathExp op=(PLUS|MINUS) mathExp                 #mathInfixExp
+    |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
     |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp

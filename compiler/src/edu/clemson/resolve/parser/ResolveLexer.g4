@@ -72,6 +72,7 @@ INDUCT_CASE :	'(ii.)'							;
 DIVIDE		:	'/'								;
 PLUS		:	'+'								;
 MINUS		:	'-'								;
+CUTMINUS	:	'.-.'							;
 MULT		:	'*'								;
 TILDE		:	'~'								;
 NOT			:	'not'							;

@@ -9,10 +9,19 @@ Precis Basic_Natural_Number_Theory;
     (ii.) m + suc(n) = suc(m + n);
 
     Theorem N6: Forall m, n : N, suc(m) + n = suc(m + n);
-   -- Definition 1 : N;
+
+    Definition <=(m : N, n : N) : B is Exists i : N, m + i = n;
+
+    Definition 1 : N is suc(0);
+    Definition 2 : N is suc(1);
 
    Inductive Definition on n : N of *(m : N, n) : N is
        (i.)  m * 0 = 0;
        (ii.) m * suc(n) = m * n + m;
+
+    Implicit Definition .-.(m, n : N) : N;
+        Corollary C2: Forall m, n : N, m .-. n = 0 implies m <= n and
+            m <= n implies m .-. n;
+        Corollary C3: Forall m, n : N, (m + n) .-. n = m;
 
 end Basic_Natural_Number_Theory;

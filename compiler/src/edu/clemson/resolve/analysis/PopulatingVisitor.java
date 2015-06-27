@@ -37,6 +37,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -52,6 +53,8 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.Symbol;
+import org.rsrg.semantics.symbol.TheoremSymbol;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -123,6 +126,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null; //java requires a return, even if its 'Void'
     }
 
+    @Override public Void visitMathTheoremDecl(
+            @NotNull Resolve.MathTheoremDeclContext ctx) {
+        symtab.startScope(ctx);
+        this.visit(ctx.mathAssertionExp());
+        symtab.endScope();
+
+        checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
+        try {
+            PExp assertion = getPExpFor(ctx.mathAssertionExp());
+            symtab.getInnermostActiveScope().define(
+                    new TheoremSymbol(g, ctx.name.getText(), assertion,
+                            ctx, getRootModuleID()));
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+        compiler.info("New theorem: " + ctx.name.getText());
+        return null;
+    }
+
     @Override public Void visitMathCategoricalDefinitionDecl(
             @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
         for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
@@ -164,8 +187,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(indHypo);
 
         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-        checkMathTypes(baseCase, tr.mathTypes.get(baseCase), g.BOOLEAN);
-        checkMathTypes(indHypo, tr.mathTypes.get(indHypo), g.BOOLEAN);
+        checkMathTypes(baseCase, g.BOOLEAN);
+        checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
@@ -181,11 +204,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    private void checkMathTypes(ParserRuleContext ctx,
-                                MTType found, MTType expected) {
-        if (!found.equals(expected)) {
+    private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
+        MTType foundType = tr.mathTypes.get(ctx);
+        if (!foundType.equals(expected)) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                    ctx.getStart(), expected, found);
+                    ctx.getStart(), expected, foundType);
         }
     }
 
@@ -427,6 +450,36 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.MathPrimaryExpContext ctx) {
         this.visit(ctx.getChild(0));
         chainMathTypes(ctx, ctx.getChild(0));
+        return null;
+    }
+
+    @Override public Void visitMathQuantifiedExp(
+            @NotNull Resolve.MathQuantifiedExpContext ctx) {
+        compiler.info("entering mathQuantifiedExp...");
+        symtab.startScope(ctx);
+        Quantification quantification;
+
+        switch (ctx.q.getType()) {
+            case ResolveLexer.FORALL:
+                quantification = Quantification.UNIVERSAL;
+                break;
+            case ResolveLexer.EXISTS:
+                quantification = Quantification.EXISTENTIAL;
+                break;
+            default:
+                throw new RuntimeException("unrecognized quantification type: "
+                        + ctx.q.getText());
+        }
+        activeQuantifications.push(quantification);
+        this.visit(ctx.mathVariableDeclGroup());
+        activeQuantifications.pop();
+
+        activeQuantifications.push(Quantification.NONE);
+        this.visit(ctx.mathAssertionExp());
+        activeQuantifications.pop();
+        compiler.info("exiting mathQuantifiedExp.");
+        symtab.endScope();
+        tr.mathTypes.put(ctx, g.BOOLEAN);
         return null;
     }
 
