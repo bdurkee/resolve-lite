@@ -527,7 +527,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        MathSymbol sym = exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
         return null;
     }
 

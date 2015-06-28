@@ -17,7 +17,14 @@ Precis Basic_Spiral_Theory;
     
    Implicit Definition SCD(p : Sp_Loc(k : N2)) : N is
         Forall u : Sp_Loc(k), SS(k)(SCD(u), Cen(k)) = u;
+
         Corollary C1: Forall k : N2, Forall p : Sp_Loc(k),
             SS(k)(0, p) = SS(k)(SCD(p) + 1, Cen(k));
+
+        Corollary C2: Forall k : N2, Forall n : N,
+            SCD(SS(k)(n, Cen(k))) = n;
+
+        Corollary C3: Forall k : N2, Forall n : N,
+            SCD(RS(k)(0, SS(k)(n, Cen(k)))) = k * n + 1;
 
 end Basic_Spiral_Theory;
