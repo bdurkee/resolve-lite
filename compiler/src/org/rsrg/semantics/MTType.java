@@ -46,57 +46,18 @@ public abstract class MTType {
                     target.withComponentReplaced(entry.getKey(),
                             entry.getValue());
         }
-
         return target;
     }
 
-    /**
-     * Returns true iff {@code o} is an {@code MTType} that is alpha-equivalent
-     * to this type. I.e., it must be exactly the same with the sole exception
-     * that quantified variables may have different names if they are otherwise
-     * identical. So, {@pre code BigUnion t : MType}{t}} = BigUnion{r :
-     * MType}{r}}.
-     * Whereas, {@pre BigUnion t : MType}{t}} /= BigUnion{r : Power(MType)}{r}}
-     * 
-     * @param o The object to compare with this {@code MTType}.
-     * 
-     * @return true iff this {@code MTType} is alpha equivalent to {@code o}.
-     */
     @Override public final boolean equals(Object o) {
-        myEqualsDepth++;
         boolean result;
 
         if ( this == o ) {
             result = true;
         }
         else {
-            //We only check our cache if we're at the first level of equals
-            //comparison to avoid an infinite recursive loop
-            result =
-                    (myEqualsDepth == 1)
-                            && myKnownAlphaEquivalencies.contains(o);
-
-            if ( !result ) {
-                try {
-                    //All 'equals' logic should be put into AlphaEquivalencyChecker!
-                    //Don't override equals!
-                    AlphaEquivalencyChecker alphaEq =
-                            myTypeGraph.threadResources.alphaChecker;
-                    alphaEq.reset();
-                    alphaEq.visit(this, (MTType) o);
-                    result = alphaEq.getResult();
-                }
-                catch (ClassCastException cce) {
-                    result = false;
-                }
-                //We only cache our answer at the first level to avoid an
-                //infinite equals loop
-                if ( (myEqualsDepth == 1) && result ) {
-                    myKnownAlphaEquivalencies.add(o);
-                }
-            }
+            result = o.toString().equals(this.toString());
         }
-        myEqualsDepth--;
         return result;
     }
 

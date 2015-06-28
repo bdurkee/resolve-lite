@@ -154,14 +154,6 @@ public class MathSymbol extends Symbol {
         return result;
     }
 
-    private boolean containsSchematicType(MTType t) {
-        ContainsNamedTypeChecker checker =
-                new ContainsNamedTypeChecker(schematicTypes.keySet());
-        t.accept(checker);
-
-        return checker.getResult();
-    }
-
     @Override public MathSymbol toMathSymbol() {
         return this;
     }
