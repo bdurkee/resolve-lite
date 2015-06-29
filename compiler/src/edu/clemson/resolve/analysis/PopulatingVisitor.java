@@ -728,7 +728,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errMgr.semanticError(
-                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getSymbol(),
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
                             segmentName);
                     curType = g.INVALID;
                     break;
@@ -738,7 +738,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 curType = HardCoded.getMetaFieldType(g, segmentName);
                 if ( curType == null ) {
                     compiler.errMgr.semanticError(
-                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getSymbol(),
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
                             segmentName);
                     curType = g.INVALID;
                     break;

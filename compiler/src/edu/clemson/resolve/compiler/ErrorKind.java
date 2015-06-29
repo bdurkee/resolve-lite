@@ -131,7 +131,7 @@ public enum ErrorKind {
      * Compiler Error 20: no such factor <em>name</em>.
      */
     NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR);
-    
+
     public final int code;
     public final String message;
 
