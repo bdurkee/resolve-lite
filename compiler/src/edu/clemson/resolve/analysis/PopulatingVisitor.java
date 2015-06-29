@@ -667,14 +667,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             MTUnion chainedTypes = new MTUnion(g, elementTypes);
 
-            if (!chainedTypes.isKnownToContainOnlyMTypes() ||
+            /*if (!chainedTypes.isKnownToContainOnlyMTypes() ||
                     ctx.mathExp().isEmpty()) {
                 compiler.errMgr
                         .semanticError(ErrorKind.INVALID_MATH_TYPE,
                                 ctx.getStart(), ctx.getText());
                 tr.mathTypeValues.put(ctx, g.INVALID);
                 return null;
-            }
+            }*/
             tr.mathTypeValues.put(ctx, chainedTypes);
         }
         return null;
@@ -825,7 +825,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         return null;
     }
 

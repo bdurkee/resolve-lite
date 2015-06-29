@@ -204,7 +204,9 @@ mathInductiveDefinitionDecl
     ;
 
 mathSymbol
-    :   (PLUS|MINUS|CUTMINUS|DIVIDE|MULT|BOOL|INT|LTE|LT|GT|GTE)
+    :   (PLUS|MINUS|CUTMINUS|DIVIDE|CAT|MULT|BOOL|INT|LTE|LT|GT|GTE)
+    |   BAR TRIPLEDOT BAR
+    |   LT TRIPLEDOT GT
     |   ID
     ;
 
@@ -276,6 +278,8 @@ mathExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
     |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
+    |   mathExp op=(CAT|UNION|INTERSECT) mathExp        #mathInfixExp
+    |   mathExp op=(IS_IN|IS_NOT_IN) mathExp            #mathInfixExp
     |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp

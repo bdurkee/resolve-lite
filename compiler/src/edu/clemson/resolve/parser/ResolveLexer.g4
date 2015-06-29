@@ -53,6 +53,7 @@ IMPLEMENTED	:	'implemented'					;
 IMPLICIT	:	'Implicit'						;
 INIT		:	'initialization'				;
 INDUCTIVE	:	'Inductive'						;
+INTERSECT	:	'intersect'						;
 IS			:	'is'							;
 IF			:	'if'							;
 LAMBDA		:	'lambda'						;
@@ -67,6 +68,7 @@ ENSURES		:	'ensures'						;
 THEOREM		:	'Theorem'						;
 TYPE		:	'Type'							;
 USES        :   'uses'							;
+UNION		:	'union'							;
 
 // parameter modes
 
@@ -80,6 +82,7 @@ REPLACES	:	('replaces'|'rpl')					;
 
 // punctuation
 
+CAT 		:	'o'								;
 COLON		:	':'								;
 COLONCOLON	:	'::'							;
 COMMA       :	','								;
@@ -105,7 +108,10 @@ TILDE		:	'~'								;
 AND			:	'and'							;
 OR 			:	'or'							;
 IMPLIES		:	'implies'						;
+IS_IN		:	'is_in'							;
+IS_NOT_IN	:	'is_not_in'						;
 RANGE		:	'..'							;
+TRIPLEDOT	:	'...'							;
 RARROW		:	'->'							;
 LT 			:	'<'								;
 GT			:	'>'								;

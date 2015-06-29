@@ -25,4 +25,6 @@ Precis Basic_Integer_Theory;
     Definition <(m, n : Z) : B;
     Definition >(m, n : Z) : B;
 
+    Definition 1 : Z;
+    Definition 2 : Z;
 end Basic_Integer_Theory;

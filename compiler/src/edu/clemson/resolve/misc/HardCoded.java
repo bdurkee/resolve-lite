@@ -16,6 +16,7 @@ public class HardCoded {
     public static void addBuiltInSymbols(TypeGraph g, RESOLVECompiler rc,
             ScopeBuilder b) {
         try {
+            b.addBinding("El", null, g.MTYPE, g.ELEMENT);
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
@@ -34,6 +35,8 @@ public class HardCoded {
                     .paramTypes(g.BOOLEAN).build());
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("/=", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.ENTITY).build());
             b.addBinding("implies", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
 
@@ -48,6 +51,12 @@ public class HardCoded {
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
                     .paramTypes(g.SSET).build());
+            b.addBinding("is_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.SSET).build());
+            b.addBinding("is_not_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.SSET).build());
+            b.addBinding("~", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET, g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errMgr.semanticError(ErrorKind.DUP_SYMBOL, null,
