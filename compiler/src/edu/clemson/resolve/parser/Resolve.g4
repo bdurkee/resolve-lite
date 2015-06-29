@@ -49,6 +49,7 @@ usesList
 conceptModule
     :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
         (specModuleParameterList)? SEMI
+        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (conceptBlock)?
@@ -79,8 +80,8 @@ facilityBlock
 
 precisModule
     :   PRECIS name=ID SEMI
-        (usesList)?
         (dependentTermOptions)?
+        (usesList)?
         (precisBlock)?
         END closename=ID SEMI EOF
     ;
@@ -291,6 +292,7 @@ mathExp
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
+    |   mathCrossTypeExp
     |   mathSegmentsExp
     |   mathOutfixExp
     |   mathSetExp
@@ -307,6 +309,10 @@ mathLiteralExp
 mathFunctionApplicationExp
     :   (AT)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
+    ;
+
+mathCrossTypeExp
+    :   CART_PROD (mathVariableDeclGroup SEMI)+ END
     ;
 
 mathOutfixExp

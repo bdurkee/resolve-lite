@@ -8,6 +8,8 @@ Precis String_Theory;
 	    ext : SStr * El -> SStr is
 	    Is_String_Former(SStr, Empty_String, ext);
 
+	Definition Str : Cls -> Cls;
+
 	Implicit Definition Indcd_Fn(T, U : Cls, b : T -> U,
 		s : T * U * SStr * El -> U, p : T * SStr * El -> T) : T * SStr -> U;
 	Definition x : El;

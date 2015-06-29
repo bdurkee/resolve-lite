@@ -34,6 +34,7 @@ lexer grammar ResolveLexer;
 
 BY			:	'by'							;
 CATEGORICAL	:	'Categorical'					;
+CART_PROD	:	'Cart_Prod'						;
 CONCEPT	    :	'Concept'						;
 CONSTRAINT	:	('constraint'|'constraints')	;
 CONVENTION	:	'convention'					;

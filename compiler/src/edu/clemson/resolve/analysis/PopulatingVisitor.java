@@ -77,11 +77,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /**
      * Keeps track of an inductive defn's (top level declared) induction
      * variable for access later in the (lower level) signature. This is
-     * {@code null} we're not visiting the children of an inductive defn.
+     * {@code null} if we're not visiting the children of an inductive defn.
      */
     private Resolve.MathVariableDeclContext currentInductionVar = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
+
+    private ProgTypeModelSymbol currentTypeModelSym = null;
 
     protected RESOLVECompiler compiler;
     protected SymbolTable symtab;
@@ -333,6 +335,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         compiler.info("new theorem: " + ctx.name.getText());
         return null;
     }
+
 
     @Override public Void visitMathCategoricalDefinitionDecl(
             @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
@@ -599,6 +602,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathCrossTypeExp(
+            @NotNull Resolve.MathCrossTypeExpContext ctx) {
+        typeValueDepth++;
+        ctx.mathVariableDeclGroup().forEach(this::visit);
+
+        List<MTCartesian.Element> fieldTypes = new ArrayList<>();
+        for (Resolve.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                fieldTypes.add(new MTCartesian.Element(t.getText(), grpType));
+            }
+        }
+        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypeValues.put(ctx, new MTCartesian(g, fieldTypes));
+        typeValueDepth--;
+        return null;
+    }
+
     @Override public Void visitMathNestedExp(
             @NotNull Resolve.MathNestedExpContext ctx) {
         this.visit(ctx.mathAssertionExp());
@@ -677,6 +699,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }*/
             tr.mathTypeValues.put(ctx, chainedTypes);
         }
+        return null;
+    }
+
+    @Override public Void visitMathSegmentsExp(
+            @NotNull Resolve.MathSegmentsExpContext ctx) {
+        Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =
+                ctx.mathFunctionApplicationExp().iterator();
+        Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
+        nextSeg = segsIter.next();
+        this.visit(nextSeg);
+        if (nextSeg.getText().equals("conc")) nextSeg = segsIter.next();
+        
+        MTCartesian curTypeCartesian;
+        while (segsIter.hasNext()) {
+
+        }
+
         return null;
     }
 
@@ -871,9 +910,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         catch (SymbolNotOfKindTypeException snokte) {
             if ( typeValueDepth > 0 ) {
                 //I had better identify a type
-                compiler.errMgr
-                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
-                                ctx.getStart(), symbolName);
+                if (!dependentTerms.contains(symbolName)) {
+                    compiler.errMgr
+                            .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                    ctx.getStart(), symbolName);
+                }
                 tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
