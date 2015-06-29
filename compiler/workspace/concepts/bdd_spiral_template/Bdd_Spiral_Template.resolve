@@ -8,6 +8,6 @@ Concept Bdd_Spiral_Template<T>
             Curr_Loc, Trmnl_Loc : Sp_Loc(k);
         end;
         exemplar P;
-        SCD(k)(P.Trmnl_Loc) <= Max_Length and
+        constraints SCD(k)(P.Trmnl_Loc) = true;
 
 end Bdd_Spiral_Template;
