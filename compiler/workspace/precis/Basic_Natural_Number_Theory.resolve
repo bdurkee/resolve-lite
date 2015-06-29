@@ -19,6 +19,9 @@ Precis Basic_Natural_Number_Theory;
     (i.)  m * 0 = 0;
     (ii.) m * suc(n) = m * n + m;
 
+    (** Cut off minus; normal subtraction for values that would not exceed 0
+     *  but 0 otherwise.
+     *)
     Implicit Definition .-.(m, n : N) : N;
         Corollary C2: Forall m, n : N, m .-. n = 0 implies m <= n and
             m <= n implies m .-. n;

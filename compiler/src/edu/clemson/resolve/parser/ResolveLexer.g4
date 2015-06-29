@@ -53,9 +53,12 @@ IMPLICIT	:	'Implicit'						;
 INIT		:	'initialization'				;
 INDUCTIVE	:	'Inductive'						;
 IS			:	'is'							;
+IF			:	'if'							;
+LAMBDA		:	'lambda'						;
 MODELED		:	'modeled'						;
 OF			:	'of'							;
 ON 			:	'on'							;
+OTHERWISE	:	'otherwise'						;
 PRECIS      :   'Precis'						;
 REQUIRES	:	'requires'						;
 ENSURES		:	'ensures'						;
@@ -78,6 +81,8 @@ REPLACES	:	('replaces'|'rpl')					;
 COLON		:	':'								;
 COLONCOLON	:	'::'							;
 COMMA       :	','								;
+DBL_LBRACE	:	'{{'							;
+DBL_RBRACE	:	'}}'							;
 DOT			:	'.'								;
 RBRACE		:	'}'								;
 LPAREN		:	'('								;
@@ -95,7 +100,6 @@ MINUS		:	'-'								;
 CUTMINUS	:	'.-.'							;
 MULT		:	'*'								;
 TILDE		:	'~'								;
-NOT			:	'not'							;
 AND			:	'and'							;
 OR 			:	'or'							;
 IMPLIES		:	'implies'						;
@@ -117,7 +121,7 @@ ID			:	NameStartChar NameChar*         ;
 WS          :	[ \t\r\n\f]+ -> channel(HIDDEN)	;
 
 DOC_COMMENT
-	:	'(**' .*? ('*)' | EOF)
+	:	'(**' .*? ('*)' | EOF) -> channel(HIDDEN)
 	;
 
 BLOCK_COMMENT

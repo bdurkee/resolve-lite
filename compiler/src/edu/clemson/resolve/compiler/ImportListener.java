@@ -86,12 +86,12 @@ public class ImportListener extends ResolveBaseListener {
         importCollection.imports(ImportType.NAMED, ctx.ID());
     }
 
-   /* @Override public void exitFacilityDecl(
-            @NotNull ResolveParser.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(
+            @NotNull Resolve.FacilityDeclContext ctx) {
         importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
         ImportCollection.ImportType type =
                 (ctx.externally != null) ? ImportType.EXTERNAL
                         : ImportType.IMPLICIT;
         importCollection.imports(type, ctx.impl.getText());
-    }*/
+    }
 }

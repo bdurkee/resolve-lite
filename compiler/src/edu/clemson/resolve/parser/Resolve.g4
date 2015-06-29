@@ -37,6 +37,7 @@ options {
 module
     :   precisModule
     |   conceptModule
+    |   facilityModule
     ;
 
 usesList
@@ -255,7 +256,6 @@ mathQuantifiedExp
 
 mathExp
     :   mathPrimaryExp                                  #mathPrimeExp
-    |   op=(PLUS|MINUS|NOT) mathExp                     #mathUnaryExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
     |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
@@ -274,8 +274,8 @@ mathPrimaryExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
- //   |   mathAlternativeExp
- //   |   mathLambdaExp
+    |   mathAlternativeExp
+    |   mathLambdaExp
     ;
 
 mathLiteralExp
@@ -299,17 +299,18 @@ mathSetExp
     |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE         #mathSetCollectionExp
     ;
 
-/*mathLambdaExp
-    :   'lambda' definitionParameterList '.' '(' mathExp ')'
+mathLambdaExp
+    :   LAMBDA LPAREN mathVariableDeclGroup
+        (COMMA mathVariableDeclGroup)* RPAREN DOT LPAREN mathExp RPAREN
     ;
 
 mathAlternativeExp
-    :   '{{' (mathAlternativeItemExp)+ '}}'
+    :   DBL_LBRACE (mathAlternativeItemExp)+ DBL_RBRACE
     ;
 
 mathAlternativeItemExp
-    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
-    ;*/
+    :   result=mathExp (IF condition=mathExp SEMI | OTHERWISE SEMI)
+    ;
 
 mathTupleExp
     :   LPAREN mathExp (COMMA mathExp)+ RPAREN

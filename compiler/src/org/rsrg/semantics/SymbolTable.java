@@ -176,7 +176,7 @@ public class SymbolTable {
         if ( ctx instanceof Resolve.ModuleContext ) {
             moduleTree = ctx.getChild(0);
         }
-        if ( !(ctx.getParent() instanceof Resolve.ModuleContext) ) {
+        else if ( !(ctx.getParent() instanceof Resolve.ModuleContext) ) {
             throw new IllegalArgumentException("the rule context "
                     + "isn't for a module");
         }
