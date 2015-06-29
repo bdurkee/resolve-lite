@@ -52,30 +52,30 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
- /*   @Override public void exitCorrespondenceClause(
-            @NotNull Resolve.CorrespondenceClauseContext ctx) {
-        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-    }
+    //@Override public void exitCorrespondenceClause(
+    //        @NotNull Resolve.CorrespondenceClauseContext ctx) {
+    //    repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    //}
 
     @Override public void exitConstraintClause(
-            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+            @NotNull Resolve.ConstraintClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitConventionClause(
-            @NotNull ResolveParser.ConventionClauseContext ctx) {
+            @NotNull Resolve.ConventionClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitRequiresClause(
-            @NotNull ResolveParser.RequiresClauseContext ctx) {
+            @NotNull Resolve.RequiresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitEnsuresClause(
-            @NotNull ResolveParser.EnsuresClauseContext ctx) {
+            @NotNull Resolve.EnsuresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-    }*/
+    }
 
     @Override public void exitMathTypeAssertionExp(
             @NotNull Resolve.MathTypeAssertionExpContext ctx) {

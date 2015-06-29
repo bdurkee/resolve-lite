@@ -513,6 +513,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    @Override public Void visitRequiresClause(
+            @NotNull Resolve.RequiresClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitEnsuresClause(
+            @NotNull Resolve.EnsuresClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitConstraintClause(
+            @NotNull Resolve.ConstraintClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
     //---------------------------------------------------
     //  M A T H   E X P   V I S I T O R   M E T H O D S
     //---------------------------------------------------

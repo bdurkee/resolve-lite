@@ -46,7 +46,8 @@ public class HardCoded {
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
-
+            b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errMgr.semanticError(ErrorKind.DUP_SYMBOL, null,
