@@ -34,6 +34,7 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.ImportCollection;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
@@ -709,13 +710,42 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
         nextSeg = segsIter.next();
         this.visit(nextSeg);
-        if (nextSeg.getText().equals("conc")) nextSeg = segsIter.next();
-        
+        if (nextSeg.getText().equals("conc")) {
+            nextSeg = segsIter.next();
+            this.visit(nextSeg);
+        }
+        MTType curType = tr.mathTypes.get(nextSeg);
         MTCartesian curTypeCartesian;
         while (segsIter.hasNext()) {
-
+            lastSeg = nextSeg;
+            nextSeg = segsIter.next();
+            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getSymbol(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getSymbol(),
+                            segmentName);
+                    curType = g.INVALID;
+                    break;
+                }
+            }
         }
-
+        tr.mathTypes.put(nextSeg, curType);
         return null;
     }
 

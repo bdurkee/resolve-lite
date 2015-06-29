@@ -119,9 +119,19 @@ public enum ErrorKind {
     /**
      * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
      */
-    UNEXPECTED_TYPE(18, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR);
+    UNEXPECTED_TYPE(18, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR),
 
+    /**
+     * Compiler Error 19: value on seg <em>name</em> is not a tuple.
+     */
+    VALUE_NOT_TUPLE(19, "value on seg <arg> is not a tuple",
+            ErrorSeverity.ERROR),
 
+    /**
+     * Compiler Error 20: no such factor <em>name</em>.
+     */
+    NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR);
+    
     public final int code;
     public final String message;
 
