@@ -43,11 +43,37 @@ usesList
     :   USES ID (COMMA ID)* SEMI
     ;
 
+// concept modules
+
 conceptModule
-    :   CONCEPT name=ID SEMI
+    :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
+        (specModuleParameterList)? SEMI
         (usesList)?
+        (requiresClause)?
+        (conceptBlock)?
         END closename=ID SEMI EOF
     ;
+
+conceptBlock
+    :   ( typeModelDecl
+        )+
+    ;
+
+// facility modules
+
+facilityModule
+    :   FACILITY name=ID SEMI
+        (usesList)?
+        (facilityBlock)?
+        END closename=ID SEMI EOF
+    ;
+
+facilityBlock
+    :   ( facilityDecl
+        )+
+    ;
+
+// precis modules
 
 precisModule
     :   PRECIS name=ID SEMI
@@ -69,6 +95,67 @@ precisBlock
         )+
     ;
 
+// parameter and parameter-list related rules
+
+specModuleParameterList
+    :   LPAREN specModuleParameterDecl (SEMI specModuleParameterDecl)* RPAREN
+    ;
+
+moduleParameterDecl
+    :   parameterDeclGroup
+    ;
+
+specModuleParameterDecl
+    :   parameterDeclGroup
+    |   mathDefinitionDecl
+    ;
+
+genericType
+    :   ID
+    ;
+
+parameterDeclGroup
+    :   parameterMode ID (COMMA ID)* COLON type
+    ;
+
+parameterMode
+    :   ( ALTERS
+        | UPDATES
+        | CLEARS
+        | RESTORES
+        | PRESERVES
+        | REPLACES
+        | EVALUATES )
+    ;
+
+// type and record related rules
+
+type
+    :   (qualifier=ID COLONCOLON)? name=ID
+    ;
+
+typeModelDecl
+    :   TYPE FAMILY name=ID IS MODELED BY mathTypeExp SEMI
+        EXEMPLAR exemplar=ID SEMI
+        (constraintClause)?
+        (typeModelInit)?
+    ;
+
+// type initialization rules
+
+typeModelInit
+    :   INIT (ensuresClause)?
+    ;
+
+//Yes, typeImpl initialization technically shouldn't require *another* ensures
+//clause, but it does in the case of those defined in a facility module.
+//So to save ourselves an extra redundant rule, we just allow it here.
+typeImplInit
+    :   INIT (ensuresClause)?
+        //(variableDeclGroup)* (stmt)*
+        END SEMI
+    ;
+
 mathTheoremDecl
     :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
     ;
@@ -77,8 +164,13 @@ mathTheoremDecl
 //in the context of an inductive defn
 mathDefinitionSig
     :   name=mathSymbol (LPAREN
-            mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
-            (COMMA inductionVar=ID)? RPAREN)? COLON mathTypeExp
+            mathDefinitionParameter (COMMA mathDefinitionParameter)* RPAREN)?
+            COLON mathTypeExp
+    ;
+
+mathDefinitionParameter
+    :   mathVariableDeclGroup
+    |   ID
     ;
 
 mathCategoricalDefinitionDecl
@@ -112,7 +204,7 @@ mathVariableDecl
     ;
 
 facilityDecl
-    :   FACILITY name=ID IS spec=ID
+    :   FACILITY name=ID IS spec=ID (LT type (COMMA type)* GT)?
         (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? IMPLEMENTED
         BY impl=ID (implArgs=moduleArgumentList)? SEMI
     ;
@@ -125,6 +217,25 @@ moduleArgumentList
 //I want to focus on the math.
 moduleArgument
     :   ID
+    ;
+
+
+// mathematical clauses
+
+requiresClause
+    :   REQUIRES mathAssertionExp SEMI
+    ;
+
+ensuresClause
+    :   ENSURES mathAssertionExp SEMI
+    ;
+
+constraintClause
+    :   CONSTRAINT mathAssertionExp SEMI
+    ;
+
+conventionClause
+    :   CONVENTION  mathAssertionExp SEMI
     ;
 
 // mathematical expressions

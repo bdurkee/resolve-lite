@@ -1,0 +1,14 @@
+Precis Basic_Integer_Theory;
+    uses Monogenerator_Theory, Basic_Natural_Number_Theory;
+
+    Categorical Definition for Z : SSet, 0 : Z, NB : Z -> Z is
+    	Is_Monogeneric_for(Z, 0, NB);
+
+    Inductive Definition on n : Z of Is_Neg(n) : B is
+	(i.) Is_Neg(0) = false;
+	(ii.) Is_Neg(NB(n));
+
+	Inductive Definition on n : Z of suc(n) : Z is
+    (i.) suc(0) = NB(NB(0));
+    (ii.) suc(NB(n)) = true;
+end Basic_Integer_Theory;

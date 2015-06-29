@@ -50,11 +50,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
-import org.rsrg.semantics.symbol.MathSymbol;
-import org.rsrg.semantics.symbol.Symbol;
-import org.rsrg.semantics.symbol.TheoremSymbol;
+import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -135,12 +134,77 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitConceptModule(
+            @NotNull Resolve.ConceptModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tr.imports.getImportsOfType(ImportCollection.ImportType.NAMED));
+        super.visitChildren(ctx);
+        symtab.endScope();
+        return null;
+    }
+
+    @Override public Void visitFacilityModule(
+            @NotNull Resolve.FacilityModuleContext ctx) {
+        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+                tr.imports.getImportsOfType(ImportCollection.ImportType.NAMED));
+        super.visitChildren(ctx);
+        symtab.endScope();
+        return null;
+    }
+
+    @Override public Void visitTypeModelDecl(
+            @NotNull Resolve.TypeModelDeclContext ctx) {
+        symtab.startScope(ctx);
+        this.visit(ctx.mathTypeExp());
+        MathSymbol exemplarSymbol = null;
+        try {
+            exemplarSymbol =
+                    symtab.getInnermostActiveScope().addBinding(
+                            ctx.exemplar.getText(), ctx,
+                            tr.mathTypeValues.get(ctx.mathTypeExp()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        if (ctx.constraintClause() != null) {
+            this.visit(ctx.constraintClause());
+        }
+        if (ctx.typeModelInit() != null) {
+            this.visit(ctx.typeModelInit());
+        }
+        symtab.endScope();
+        try {
+            PExp constraint =
+                    getPExpFor(ctx.constraintClause() != null ? ctx
+                            .constraintClause() : null);
+            PExp initEnsures =
+                    getPExpFor(ctx.typeModelInit() != null ? ctx
+                            .typeModelInit().ensuresClause() : null);
+            MTType modelType = tr.mathTypeValues.get(ctx.mathTypeExp());
+
+            ProgTypeSymbol progType =
+                    new ProgTypeModelSymbol(symtab.getTypeGraph(),
+                            ctx.name.getText(), modelType,
+                                new PTFamily(modelType, ctx.name.getText(),
+                                    ctx.exemplar.getText(), constraint,
+                                    initEnsures, getRootModuleID()),
+                            exemplarSymbol, ctx, getRootModuleID());
+            symtab.getInnermostActiveScope().define(progType);
+            exemplarSymbol = null;
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+        return null;
+    }
+
     @Override public Void visitMathTheoremDecl(
             @NotNull Resolve.MathTheoremDeclContext ctx) {
         symtab.startScope(ctx);
         this.visit(ctx.mathAssertionExp());
         symtab.endScope();
-
         checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
         try {
             PExp assertion = getPExpFor(ctx.mathAssertionExp());
@@ -151,7 +215,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
         }
-        compiler.info("New theorem: " + ctx.name.getText());
+        compiler.info("new theorem: " + ctx.name.getText());
         return null;
     }
 
@@ -228,10 +292,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     @Override public Void visitMathDefinitionDecl(
             @NotNull Resolve.MathDefinitionDeclContext ctx) {
-        if (ctx.mathDefinitionSig().inductionVar != null) {
-            System.err.println("illegal usage of induction variable in standard"
-                    + " definition.");
-        }
         Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         symtab.startScope(ctx);
         this.visit(sig);
@@ -278,7 +338,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
         walkingDefParams = true;
-        ctx.mathVariableDeclGroup().forEach(this::visit);
+        ctx.mathDefinitionParameter().forEach(this::visit);
         walkingDefParams = false;
         activeQuantifications.pop();
 
@@ -294,34 +354,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //if there ARE params, then our type needs to be an MTFunction.
         //this if check needs to be here or else, even if there were no params,
         //our type would end up MTFunction: Void -> T (which we don't want)
-        if ( !ctx.mathVariableDeclGroup().isEmpty() ) {
-            for (Resolve.MathVariableDeclGroupContext grp :
-                    ctx.mathVariableDeclGroup()) {
-                MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
-                for (TerminalNode t : grp.ID()) {
-                    System.out.println("t: " + t.getText() + ": " + grpType);
-
-                    builder.paramTypes(grpType);
-                    builder.paramNames(t.getText());
+        if ( !ctx.mathDefinitionParameter().isEmpty() ) {
+            for (Resolve.MathDefinitionParameterContext p :
+                    ctx.mathDefinitionParameter()) {
+                if (p.mathVariableDeclGroup() != null) {
+                    MTType grpType = tr.mathTypeValues.get(
+                            p.mathVariableDeclGroup().mathTypeExp());
+                    for (TerminalNode t : p.mathVariableDeclGroup().ID()) {
+                        builder.paramTypes(grpType);
+                        builder.paramNames(t.getText());
+                    }
                 }
+                if (p.ID() != null) {
+                        if (currentInductionVar == null) {
+                            throw new RuntimeException("induction variable missing!?");
+                        }
+                        MTType inductionVarType =
+                                tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
+                        builder.paramTypes(inductionVarType)
+                                .paramNames(currentInductionVar.ID().getText());
+                    //The induction var itself should've already been visited in
+                    //visitMathInductiveDefnDecl
+                    }
+                //if the definition has parameters then it's type should be an
+                //MTFunction (e.g. something like a * b ... -> ...)
+                defnType = builder.build();
             }
-            if (ctx.inductionVar != null) {
-                if (currentInductionVar == null) {
-                    throw new RuntimeException("induction variable missing!?");
-                }
-                MTType inductionVarType =
-                        tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
-                builder.paramTypes(inductionVarType)
-                        .paramNames(currentInductionVar.ID().getText());
-                //The induction var itself should've already been visited in
-                //visitMathInductiveDefnDecl
-            }
-            //if the definition has parameters then it's type should be an
-            //MTFunction (e.g. something like a * b ... -> ...)
-            defnType = builder.build();
         }
-        System.out.println("result: " + defnType);
-
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, ctx.name.getText(),
@@ -332,6 +391,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getStart(), ctx.name.getText());
         }
         tr.mathTypes.put(ctx, defnType);
+        return null;
+    }
+
+    @Override public Void visitMathDefinitionParameter(
+            @NotNull Resolve.MathDefinitionParameterContext ctx) {
+        visitChildren(ctx);
         return null;
     }
 

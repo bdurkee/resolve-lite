@@ -35,24 +35,43 @@ lexer grammar ResolveLexer;
 BY			:	'by'							;
 CATEGORICAL	:	'Categorical'					;
 CONCEPT	    :	'Concept'						;
+CONSTRAINT	:	('constraint'|'constraints')	;
+CONVENTION	:	'convention'					;
 COROLLARY	:	'Corollary'						;
 DEFINITION	:	'Definition'					;
 DEPENDENT	:	'DependentTerms'				;
 END         :   'end'							;
 EXISTS		:	'Exists'						;
 EXTERNALLY	:	'externally'					;
+EXEMPLAR	:	'exemplar'						;
 FACILITY	:	'Facility'						;
+FAMILY		:	'Family'						;
 FOR 		:	'for'							;
 FORALL		:	'Forall'						;
 IMPLEMENTED	:	'implemented'					;
 IMPLICIT	:	'Implicit'						;
+INIT		:	'initialization'				;
 INDUCTIVE	:	'Inductive'						;
 IS			:	'is'							;
+MODELED		:	'modeled'						;
 OF			:	'of'							;
 ON 			:	'on'							;
 PRECIS      :   'Precis'						;
+REQUIRES	:	'requires'						;
+ENSURES		:	'ensures'						;
 THEOREM		:	'Theorem'						;
+TYPE		:	'Type'							;
 USES        :   'uses'							;
+
+// parameter modes
+
+ALTERS		:	('alters'|'alt')					;
+UPDATES		:	('updates'|'upd')					;
+EVALUATES	:	('evaluates'|'eval')				;
+CLEARS		:	('clears'|'clr')					;
+RESTORES	:	('restores'|'rest')					;
+PRESERVES	:	('preserves'|'pres')				;
+REPLACES	:	('replaces'|'rpl')					;
 
 // punctuation
 

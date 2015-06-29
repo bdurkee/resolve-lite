@@ -2,7 +2,7 @@ Precis Basic_Spiral_Theory;
     uses Basic_Natural_Number_Theory;
     @DependentTerms{k}
 
-    Definition N2 : Powerset(N);
+    Definition N2 : Powerset(N); --is {n : N | n >= 2};
 
     Definition Is_k_Spiral_Like(
         sp_loc : N2 -> SSet,
