@@ -51,10 +51,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTElement;
-import org.rsrg.semantics.programtype.PTFamily;
-import org.rsrg.semantics.programtype.PTInvalid;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
@@ -167,12 +164,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-        if (ctx.constraintClause() != null) {
-            this.visit(ctx.constraintClause());
-        }
-        if (ctx.typeModelInit() != null) {
-            this.visit(ctx.typeModelInit());
-        }
+        if (ctx.constraintClause() != null) this.visit(ctx.constraintClause());
+        if (ctx.typeModelInit() != null) this.visit(ctx.typeModelInit());
         symtab.endScope();
         try {
             PExp constraint =
@@ -197,6 +190,56 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getText());
         }
         return null;
+    }
+
+    @Override public Void visitOperationDecl(
+            @NotNull Resolve.OperationDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
+                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+            } catch (DuplicateSymbolException e) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
+    private void insertFunction(Token name, Resolve.TypeContext type,
+            Resolve.RequiresClauseContext requires,
+            Resolve.EnsuresClauseContext ensures, ParserRuleContext ctx) {
+        try {
+            List<ProgParameterSymbol> params =
+                    symtab.scopes.get(ctx).getSymbolsOfType(
+                            ProgParameterSymbol.class);
+            PTType returnType;
+            if ( type == null ) {
+                returnType = PTVoid.getInstance(g);
+            }
+            else {
+                returnType = tr.progTypeValues.get(type);
+            }
+            symtab.getInnermostActiveScope().define(
+                    new OperationSymbol(name.getText(), ctx, requires, ensures,
+                            returnType, getRootModuleID(), params,
+                            false));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
+        }
     }
 
     @Override public Void visitParameterDeclGroup(
@@ -597,6 +640,42 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.mathExp().getStart(), ctx.mathExp().getText());
             }
+        }
+        return null;
+    }
+
+    @Override public Void visitMathSetCollectionExp(
+            @NotNull Resolve.MathSetCollectionExpContext ctx) {
+        tr.mathTypes.put(ctx, g.SSET);
+        ctx.mathExp().forEach(this::visit);
+        if (ctx.mathExp().isEmpty()) {
+            tr.mathTypeValues.put(ctx, g.EMPTY_SET);
+        }
+        else {
+            List<MTType> powersets = ctx.mathExp().stream()
+                    .map(e -> new MTPowersetApplication(g, tr.mathTypes.get(e)))
+                    .collect(Collectors.toList());
+            MTUnion u = new MTUnion(g, powersets);
+            tr.mathTypeValues.put(ctx, u);
+        }
+        if (typeValueDepth > 0) {
+
+            // construct a union chain and see if all the component types
+            // are known to contain only sets.
+            List<MTType> elementTypes = ctx.mathExp().stream()
+                    .map(tr.mathTypes::get).collect(Collectors.toList());
+
+            MTUnion chainedTypes = new MTUnion(g, elementTypes);
+
+            if (!chainedTypes.isKnownToContainOnlyMTypes() ||
+                    ctx.mathExp().isEmpty()) {
+                compiler.errMgr
+                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                ctx.getStart(), ctx.getText());
+                tr.mathTypeValues.put(ctx, g.INVALID);
+                return null;
+            }
+            tr.mathTypeValues.put(ctx, chainedTypes);
         }
         return null;
     }

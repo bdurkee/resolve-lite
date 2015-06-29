@@ -20,4 +20,9 @@ Precis Basic_Integer_Theory;
     (i.)  m + 0 = m;
     (ii.) m + NB(n) = true;
 
+    Definition <=(m, n : Z) : B;
+    Definition >=(m, n : Z) : B;
+    Definition <(m, n : Z) : B;
+    Definition >(m, n : Z) : B;
+
 end Basic_Integer_Theory;

@@ -8,7 +8,7 @@ public abstract class PExpListener {
 
   //  public void beginPAlternatives(PAlternatives p) {}
 
-  //  public void beginPSet(PSet p) {}
+    public void beginPSet(PSet p) {}
 
     public void beginPSegments(PSegments p) {}
 
@@ -32,6 +32,6 @@ public abstract class PExpListener {
 
     public void endPSegments(PSegments p) {}
 
- //   public void endPSet(PSet p) {}
+    public void endPSet(PSet p) {}
 
 }

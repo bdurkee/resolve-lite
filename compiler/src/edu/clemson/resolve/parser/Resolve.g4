@@ -57,6 +57,7 @@ conceptModule
 
 conceptBlock
     :   ( typeModelDecl
+        | operationDecl
         )+
     ;
 
@@ -97,6 +98,10 @@ precisBlock
     ;
 
 // parameter and parameter-list related rules
+
+operationParameterList
+    :   LPAREN (parameterDeclGroup (SEMI parameterDeclGroup)*)?  RPAREN
+    ;
 
 specModuleParameterList
     :   LPAREN specModuleParameterDecl (SEMI specModuleParameterDecl)* RPAREN
@@ -155,6 +160,13 @@ typeImplInit
     :   INIT (ensuresClause)?
         //(variableDeclGroup)* (stmt)*
         END SEMI
+    ;
+
+// functions
+
+operationDecl
+    :   OPERATION name=ID operationParameterList (COLON type)? SEMI
+        (requiresClause)? (ensuresClause)?
     ;
 
 mathTheoremDecl
@@ -220,11 +232,10 @@ moduleArgument
     :   ID
     ;
 
-
 // mathematical clauses
 
 requiresClause
-    :   REQUIRES mathAssertionExp SEMI
+    :   REQUIRES mathAssertionExp (entailsClause)? SEMI
     ;
 
 ensuresClause
@@ -236,7 +247,13 @@ constraintClause
     ;
 
 conventionClause
-    :   CONVENTION  mathAssertionExp SEMI
+    :   CONVENTION mathAssertionExp SEMI
+    ;
+
+//within the compiler we'll restrict this guy to be a
+//mathTypeAssertionExp
+entailsClause
+    :   ENTAILS mathExp (COMMA mathExp)* COLON mathTypeExp
     ;
 
 // mathematical expressions

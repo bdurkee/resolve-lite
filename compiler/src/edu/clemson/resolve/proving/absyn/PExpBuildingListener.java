@@ -220,13 +220,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-  /*  @Override public void exitMathSetCollectionExp(
-            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+    @Override public void exitMathSetCollectionExp(
+            @NotNull Resolve.MathSetCollectionExpContext ctx) {
         List<PExp> elements = ctx.mathExp().stream()
                 .map(repo::get)
                 .collect(Collectors.toList());
         repo.put(ctx, new PSet(getMathType(ctx), getMathTypeValue(ctx), elements));
-    }*/
+    }
 
     @Override public void exitMathBooleanExp(
             @NotNull Resolve.MathBooleanExpContext ctx) {
