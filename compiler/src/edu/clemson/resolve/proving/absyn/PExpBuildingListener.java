@@ -159,16 +159,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
-        System.out.println("HERERERERER: " + ctx.getText());
         repo.put(ctx, result.build());
     }
 
-   /* @Override public void exitMathLambdaExp(
+    @Override public void exitMathLambdaExp(
             @NotNull Resolve.MathLambdaExpContext ctx) {
         List<PLambda.Parameter> parameters = new ArrayList<>();
-        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
-                .definitionParameterList().mathVariableDeclGroup()) {
-            for (TerminalNode term : grp.Identifier()) {
+        for (Resolve.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            for (TerminalNode term : grp.ID()) {
                 parameters.add(new PLambda.Parameter(term.getText(),
                         getMathTypeValue(grp.mathTypeExp())));
             }
@@ -177,12 +176,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathAlternativeExp(
-            @NotNull ResolveParser.MathAlternativeExpContext ctx) {
+            @NotNull Resolve.MathAlternativeExpContext ctx) {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
         PExp otherwiseResult = null;
 
-        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+        for (Resolve.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
             if ( alt.condition != null ) {
                 conditions.add(repo.get(alt.condition));
@@ -196,7 +195,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 new PAlternatives(conditions, results, otherwiseResult,
                         getMathType(ctx), getMathTypeValue(ctx));
         repo.put(ctx, result);
-    }*/
+    }
 
     @Override public void exitMathSegmentsExp(
             @NotNull Resolve.MathSegmentsExpContext ctx) {
