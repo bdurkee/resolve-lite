@@ -130,7 +130,14 @@ public enum ErrorKind {
     /**
      * Compiler Error 20: no such factor <em>name</em>.
      */
-    NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR);
+    NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 34: procedure <em>name</em> does not implement any known
+     * operation.
+     */
+    DANGLING_PROCEDURE(34, "procedure <arg> does not implement any known "
+            + "operation", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

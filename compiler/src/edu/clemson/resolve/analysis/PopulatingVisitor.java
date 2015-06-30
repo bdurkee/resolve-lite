@@ -194,6 +194,54 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProcedureDecl(
+            @NotNull Resolve.ProcedureDeclContext ctx) {
+        OperationSymbol correspondingOp = null;
+        try {
+            correspondingOp =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toOperationSymbol();
+        } catch (NoSuchSymbolException nse) {
+            compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
+                    ctx.getStart(), ctx.getText());
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+
+        symtab.startScope(ctx);
+        this.visit(ctx.operationParameterList());
+        PTType returnType = null;
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            returnType = tr.progTypeValues.get(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                returnType, getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                        ctx.name.getText());
+            }
+        }
+        else {
+            returnType = PTVoid.getInstance(g);
+        }
+
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProcedureSymbol(ctx.name.getText(), ctx,
+                            getRootModuleID(), correspondingOp));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        return null;
+    }
+
     @Override public Void visitOperationDecl(
             @NotNull Resolve.OperationDeclContext ctx) {
         symtab.startScope(ctx);
@@ -359,7 +407,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         symtab.endScope();
         PExp convention = getPExpFor(ctx.conventionClause());
-        //PExp correspondence = getPExpFor(ctx.correspondenceClause());
+        PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
             symtab.getInnermostActiveScope().define(new ProgReprTypeSymbol(g,
                             ctx.name.getText(), ctx, getRootModuleID(),

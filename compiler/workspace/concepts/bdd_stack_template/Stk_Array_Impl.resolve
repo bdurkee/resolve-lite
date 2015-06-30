@@ -14,5 +14,7 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
             conc.S = Reverse(Iterated_Concatenation(1, S.Top,
                         lambda(i : Z).(<S.Contents(i)>)));
 
-        
+    Proc Push (alters e : T; updates S : Stack);
+    end Push;
+
 end Std_Array_Impl;

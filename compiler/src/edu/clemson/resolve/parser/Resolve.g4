@@ -73,7 +73,7 @@ conceptImplModule
 implBlock
     :   ( typeRepresentationDecl
         //| operationProcedureDecl
-       // | procedureDecl
+        | procedureDecl
         | facilityDecl
         )+
     ;
@@ -211,6 +211,14 @@ typeImplInit
 operationDecl
     :   OPERATION name=ID operationParameterList (COLON type)? SEMI
         (requiresClause)? (ensuresClause)?
+    ;
+
+procedureDecl
+    :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
+        (COLON type)? SEMI
+        //(variableDeclGroup)*
+        //(stmt)*
+        END closename=ID SEMI
     ;
 
 mathTheoremDecl
