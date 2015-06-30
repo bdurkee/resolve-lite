@@ -275,7 +275,7 @@ moduleArgumentList
 //Todo: Placeholder. I don't want to add the whole prog exp tree right now.
 //I want to focus on the math.
 moduleArgument
-    :   ID
+    :   progExp
     ;
 
 // mathematical clauses
@@ -388,4 +388,40 @@ mathTupleExp
 
 mathSegmentsExp
     :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
+    ;
+
+// program expressions
+
+progExp
+    :   op=MINUS progExp                        #progApplicationExp
+    |   progExp op=(MULT|DIVIDE) progExp        #progApplicationExp
+    |   progExp op=(PLUS|MINUS) progExp         #progApplicationExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp      #progApplicationExp
+    |   progExp op=(EQUALS|NEQUALS) progExp     #progApplicationExp
+    |   LPAREN progExp RPAREN                   #progNestedExp
+    |   progPrimary                             #progPrimaryExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progNamedExp
+    |   progParamExp
+    |   progMemberExp
+    ;
+
+progMemberExp
+    :   (progParamExp|progNamedExp) (DOT ID)+
+    ;
+
+progParamExp
+    :   (qualifier=ID COLONCOLON)? name=ID
+        LPAREN (progExp (COMMA progExp)*)? RPAREN
+    ;
+
+progNamedExp
+    :   (qualifier=ID COLONCOLON)? name=ID
+    ;
+
+progLiteralExp
+    :   INT      #progIntegerExp
     ;
