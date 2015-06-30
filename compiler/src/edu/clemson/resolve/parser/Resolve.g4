@@ -71,10 +71,10 @@ conceptImplModule
 
 //Todo: Apparently impls can have constraints too.
 implBlock
-    :   ( //typeRepresentationDecl
+    :   ( typeRepresentationDecl
         //| operationProcedureDecl
        // | procedureDecl
-        facilityDecl
+        | facilityDecl
         )+
     ;
 
@@ -187,7 +187,7 @@ typeModelDecl
 typeRepresentationDecl
     :   TYPE name=ID EQUALS (type|record) SEMI
         (conventionClause)?
-        //(correspondenceClause)?
+        (correspondenceClause)?
         (typeImplInit)?
     ;
 
@@ -294,6 +294,10 @@ constraintClause
 
 conventionClause
     :   CONVENTION mathAssertionExp SEMI
+    ;
+
+correspondenceClause
+    :   CORRESPONDENCE mathAssertionExp SEMI
     ;
 
 //within the compiler we'll restrict this guy to be a

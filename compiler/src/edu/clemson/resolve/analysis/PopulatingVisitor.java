@@ -324,8 +324,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ParseTree reprTypeNode = ctx.type() != null ? ctx.type() : ctx.record();
         this.visit(reprTypeNode);
 
-        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
-        if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         try {
             typeDefnSym = symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(null, ctx.name.getText(),
@@ -344,9 +342,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 new PTRepresentation(g, tr.progTypeValues.get(reprTypeNode),
                         ctx.name.getText(), typeDefnSym, getRootModuleID());
         try {
+            String exemplarName = typeDefnSym != null ?
+                    typeDefnSym.getExemplar().getName() : ctx.name.getText()
+                    .substring(0, 1).toUpperCase();
             symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
-                            ctx.name.getText(), ctx, reprType,
-                            getRootModuleID()));
+                    exemplarName, ctx, reprType, getRootModuleID()));
         }
         catch (DuplicateSymbolException dse) {
             //This shouldn't be possible--the type declaration has a
@@ -354,6 +354,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //introduce anything
             throw new RuntimeException(dse);
         }
+        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
+        if (ctx.correspondenceClause() != null) this.visit(ctx.correspondenceClause());
+        if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         symtab.endScope();
         PExp convention = getPExpFor(ctx.conventionClause());
         //PExp correspondence = getPExpFor(ctx.correspondenceClause());
@@ -649,6 +652,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitCorrespondenceClause(
+            @NotNull Resolve.CorrespondenceClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
     //---------------------------------------------------
     //  M A T H   E X P   V I S I T O R   M E T H O D S
     //---------------------------------------------------
@@ -780,6 +790,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(nextSeg);
         if (nextSeg.getText().equals("conc")) {
             nextSeg = segsIter.next();
+            this.visit(nextSeg);
         }
 
         MTType curType = tr.mathTypes.get(nextSeg);

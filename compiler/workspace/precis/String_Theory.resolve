@@ -39,4 +39,10 @@ Precis String_Theory;
 	Corollary RevC3: Forall alpha : SStr, Reverse(Reverse(alpha)) = alpha;
 
 	--Implicit Definition >...<(p :
+
+	(** Big Pi (Iterated Concatenation) Parameter of F is implicitly (m,m + n]
+	 *  theorems assume it is defined this way: F(m + 1) o ... o F(m + n)
+	 *)
+	 Definition Iterated_Concatenation(m : N, n : N, F : N -> SStr) : SStr;
+
 end String_Theory;

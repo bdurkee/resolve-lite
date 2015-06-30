@@ -1,8 +1,18 @@
 Implementation Stk_Array_Impl for Bdd_Stack_Template;
+        uses Basic_Integer_Theory;
 
     Facility Ceramic_Arr_Fac is
             Bdd_Ceramic_Array_Template<T>(1, Max_Depth)
         externally implemented by Ceramic_Array_Impl;
 
+    Type Stack = Record
+            Contents : Ceramic_Arr_Fac :: Ceramic_Array;
+            Top : Std_Integer_Fac :: Integer;
+        end;
+        convention 0 <= S.Top and S.Top <= Max_Depth;
+        correspondence
+            conc.S = Reverse(Iterated_Concatenation(1, S.Top,
+                        lambda(i : Z).(<S.Contents(i)>)));
 
+        
 end Std_Array_Impl;

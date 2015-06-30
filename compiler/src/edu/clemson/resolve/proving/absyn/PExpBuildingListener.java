@@ -52,10 +52,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
-    //@Override public void exitCorrespondenceClause(
-    //        @NotNull Resolve.CorrespondenceClauseContext ctx) {
-    //    repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-    //}
+    @Override public void exitCorrespondenceClause(
+            @NotNull Resolve.CorrespondenceClauseContext ctx) {
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    }
 
     @Override public void exitConstraintClause(
             @NotNull Resolve.ConstraintClauseContext ctx) {
