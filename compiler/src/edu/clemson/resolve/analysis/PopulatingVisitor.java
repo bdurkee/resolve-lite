@@ -321,7 +321,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.TypeRepresentationDeclContext ctx) {
         symtab.startScope(ctx);
         ProgTypeModelSymbol typeDefnSym = null;
-        this.visitChildren(ctx);
+        ParseTree reprTypeNode = ctx.type() != null ? ctx.type() : ctx.record();
+        this.visit(reprTypeNode);
+
+        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
+        if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         try {
             typeDefnSym = symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(null, ctx.name.getText(),
@@ -335,9 +339,32 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
         }
+
+        PTRepresentation reprType =
+                new PTRepresentation(g, tr.progTypeValues.get(reprTypeNode),
+                        ctx.name.getText(), typeDefnSym, getRootModuleID());
+        try {
+            symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
+                            ctx.name.getText(), ctx, reprType,
+                            getRootModuleID()));
+        }
+        catch (DuplicateSymbolException dse) {
+            //This shouldn't be possible--the type declaration has a
+            //scope all its own and we're the first ones to get to
+            //introduce anything
+            throw new RuntimeException(dse);
+        }
         symtab.endScope();
         PExp convention = getPExpFor(ctx.conventionClause());
         //PExp correspondence = getPExpFor(ctx.correspondenceClause());
+        try {
+            symtab.getInnermostActiveScope().define(new ProgReprTypeSymbol(g,
+                            ctx.name.getText(), ctx, getRootModuleID(),
+                            typeDefnSym, reprType, convention, null));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
 
         return null;
     }
