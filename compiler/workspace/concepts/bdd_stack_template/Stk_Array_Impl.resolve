@@ -1,0 +1,8 @@
+Implementation Stk_Array_Impl for Bdd_Stack_Template;
+
+    Facility Ceramic_Arr_Fac is
+            Bdd_Ceramic_Array_Template<T>(1, Max_Depth)
+        externally implemented by Ceramic_Array_Impl;
+
+
+end Std_Array_Impl;

@@ -113,8 +113,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private Set<String> dependentTerms = new HashSet<>();
 
-    private MTType currentSegType = null;
-
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
@@ -316,6 +314,48 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
             tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
         }
+        return null;
+    }
+
+    @Override public Void visitTypeRepresentationDecl(
+            @NotNull Resolve.TypeRepresentationDeclContext ctx) {
+        symtab.startScope(ctx);
+        ProgTypeModelSymbol typeDefnSym = null;
+        this.visitChildren(ctx);
+        try {
+            typeDefnSym = symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name.getText(),
+                                            false)).toProgTypeModelSymbol();
+        }
+        catch (NoSuchSymbolException nsse) {
+            //this is actually ok for now. Facility module bound type reprs
+            //won't have a model.
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+        symtab.endScope();
+        PExp convention = getPExpFor(ctx.conventionClause());
+        //PExp correspondence = getPExpFor(ctx.correspondenceClause());
+
+        return null;
+    }
+
+    @Override public Void visitRecord(@NotNull Resolve.RecordContext ctx) {
+        Map<String, PTType> fields = new LinkedHashMap<>();
+        for (Resolve.RecordVariableDeclGroupContext fieldGrp : ctx
+                .recordVariableDeclGroup()) {
+            this.visit(fieldGrp);
+            PTType grpType = tr.progTypeValues.get(fieldGrp.type());
+            for (TerminalNode t : fieldGrp.ID()) {
+                fields.put(t.getText(), grpType);
+            }
+        }
+        PTRecord record = new PTRecord(g, fields);
+        tr.progTypeValues.put(ctx, record);
+        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypeValues.put(ctx, record.toMath());
         return null;
     }
 
@@ -1158,22 +1198,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
                                          MTType expectedType) {
-            //boolean result = g.isKnownToBeIn(foundValue, expectedType);
             return true;
-         /*   if ( !result && foundValue instanceof PLambda
-                    && expectedType instanceof MTFunction ) {
-                PLambda foundValueAsLambda = (PLambda) foundValue;
-                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
-                MTFunction foundTypeAsFunction =
-                        (MTFunction) foundValue.getMathType();
-                result =
-                        g.isSubtype(foundTypeAsFunction.getDomain(),
-                                expectedTypeAsFunction.getDomain())
-                                && g.isKnownToBeIn(
-                                foundValueAsLambda.getBody(),
-                                expectedTypeAsFunction.getRange());
-            }*/
-            // return result;
         }
 
         @Override public String description() {

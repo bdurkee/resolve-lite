@@ -37,11 +37,8 @@ options {
 module
     :   precisModule
     |   conceptModule
+    |   conceptImplModule
     |   facilityModule
-    ;
-
-usesList
-    :   USES ID (COMMA ID)* SEMI
     ;
 
 // concept modules
@@ -62,11 +59,31 @@ conceptBlock
         )+
     ;
 
+// implementation modules
+
+conceptImplModule
+    :   IMPL name=ID (implModuleParameterList)? FOR concept=ID SEMI
+        (usesList)?
+        (requiresClause)?
+        (implBlock)?
+        END closename=ID SEMI
+    ;
+
+//Todo: Apparently impls can have constraints too.
+implBlock
+    :   ( //typeRepresentationDecl
+        //| operationProcedureDecl
+       // | procedureDecl
+        facilityDecl
+        )+
+    ;
+
 // facility modules
 
 facilityModule
     :   FACILITY name=ID SEMI
         (usesList)?
+        (requiresClause)?
         (facilityBlock)?
         END closename=ID SEMI EOF
     ;
@@ -98,6 +115,12 @@ precisBlock
         )+
     ;
 
+// uses, imports
+
+usesList
+    :   USES ID (COMMA ID)* SEMI
+    ;
+
 // parameter and parameter-list related rules
 
 operationParameterList
@@ -108,13 +131,18 @@ specModuleParameterList
     :   LPAREN specModuleParameterDecl (SEMI specModuleParameterDecl)* RPAREN
     ;
 
-moduleParameterDecl
-    :   parameterDeclGroup
+implModuleParameterList
+    :   LPAREN implModuleParameterDecl (SEMI implModuleParameterDecl)* RPAREN
     ;
 
 specModuleParameterDecl
     :   parameterDeclGroup
     |   mathDefinitionDecl
+    ;
+
+implModuleParameterDecl
+    :   parameterDeclGroup
+    |   operationDecl
     ;
 
 genericType
@@ -141,11 +169,26 @@ type
     :   (qualifier=ID COLONCOLON)? name=ID
     ;
 
+record
+    :   RECORD (recordVariableDeclGroup)+ END
+    ;
+
+recordVariableDeclGroup
+    :   ID (COMMA ID)* COLON type SEMI
+    ;
+
 typeModelDecl
     :   TYPE FAMILY name=ID IS MODELED BY mathTypeExp SEMI
         EXEMPLAR exemplar=ID SEMI
         (constraintClause)?
         (typeModelInit)?
+    ;
+
+typeRepresentationDecl
+    :   TYPE name=ID EQUALS (type|record) SEMI
+        (conventionClause)?
+        //(correspondenceClause)?
+        (typeImplInit)?
     ;
 
 // type initialization rules

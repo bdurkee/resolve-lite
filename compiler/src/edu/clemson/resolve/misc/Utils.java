@@ -124,6 +124,8 @@ public class Utils {
                 return ((Resolve.ConceptModuleContext) ctx).name.getText();
             case ResolveLexer.FACILITY:
                 return ((Resolve.FacilityModuleContext) ctx).name.getText();
+            case ResolveLexer.IMPL:
+                return ((Resolve.ConceptImplModuleContext) ctx).name.getText();
             default:
                 throw new IllegalArgumentException("unrecognized module type");
         }
