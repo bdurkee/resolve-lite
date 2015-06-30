@@ -741,8 +741,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     curType = g.INVALID;
                 }
             }
-
-            tr.mathTypes.put(nextSeg.getParent(), curType);
             tr.mathTypes.put(nextSeg, curType);
         }
         tr.mathTypes.put(ctx, curType);
