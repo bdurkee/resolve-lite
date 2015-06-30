@@ -717,8 +717,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(nextSeg);
         if (nextSeg.getText().equals("conc")) {
             nextSeg = segsIter.next();
-            this.visit(nextSeg);
         }
+
         MTType curType = tr.mathTypes.get(nextSeg);
         MTCartesian curTypeCartesian;
         while (segsIter.hasNext()) {
@@ -749,6 +749,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             currentMathSegType = curType;
             this.visit(nextSeg);
+            currentMathSegType = null;
         }
         currentMathSegType = null;
         tr.mathTypes.put(ctx, curType);
@@ -881,11 +882,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
         if (currentMathSegType != null) { //we're walking a segment expr
             tr.mathTypes.put(ctx, currentMathSegType);
+            currentMathSegType = null; //Todo: I really hate this. Very confusing.
+            // Come up with a better way for handling dots.
         }
-        else {
+        ctx.mathExp().forEach(this::visit);
+
+        if (currentMathSegType == null) {
             typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
         }
         return null;
@@ -907,6 +911,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.MathVariableExpContext ctx) {
         if (currentMathSegType != null) { //we're walking a segment expr
             tr.mathTypes.put(ctx, currentMathSegType);
+            currentMathSegType = null;  //Todo: I really hate this. Very confusing.
+            // Come up with a better way for handling dots.
         }
         else {
             exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
