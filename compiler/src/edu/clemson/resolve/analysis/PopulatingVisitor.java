@@ -807,13 +807,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTType establishedTypeValue = null;
         for (Resolve.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
+            this.visit(alt.result);
+            if (alt.condition != null) this.visit(alt.condition);
             if ( establishedType == null ) {
                 establishedType = tr.mathTypes.get(alt.result);
                 establishedTypeValue = tr.mathTypeValues.get(alt.result);
             }
             else {
                 if ( alt.condition != null ) {
-                   // expectType(alt, establishedType);
+                    // expectType(alt, establishedType);
                 }
             }
         }
@@ -965,10 +967,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                List<Resolve.MathExpContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
-        for (Resolve.MathExpContext exp : args) {
-            System.out.println("arg: " + exp.getText() + " : " + tr.mathTypes.get(exp));
-
-        }
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
