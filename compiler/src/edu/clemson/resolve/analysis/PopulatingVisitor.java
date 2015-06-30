@@ -731,7 +731,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
                             segmentName);
                     curType = g.INVALID;
-                    break;
                 }
             }
             catch (NoSuchElementException nsee) {
@@ -741,11 +740,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
                             segmentName);
                     curType = g.INVALID;
-                    break;
                 }
             }
+            tr.mathTypes.put(nextSeg, curType);
         }
-        tr.mathTypes.put(nextSeg, curType);
+        tr.mathTypes.put(ctx, curType);
         return null;
     }
 
@@ -961,6 +960,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                List<Resolve.MathExpContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
+        for (Resolve.MathExpContext exp : args) {
+            System.out.println("arg: " + exp.getText() + " : " + tr.mathTypes.get(exp));
+
+        }
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
