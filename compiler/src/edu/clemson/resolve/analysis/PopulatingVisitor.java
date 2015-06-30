@@ -204,12 +204,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toOperationSymbol();
         } catch (NoSuchSymbolException nse) {
             compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
-                    ctx.getStart(), ctx.getText());
+                    ctx.getStart(), ctx.name.getText());
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-
         symtab.startScope(ctx);
         this.visit(ctx.operationParameterList());
         PTType returnType = null;
@@ -233,8 +232,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             symtab.getInnermostActiveScope().define(
                     new ProcedureSymbol(ctx.name.getText(), ctx,
                             getRootModuleID(), correspondingOp));
-        }
-        catch (DuplicateSymbolException dse) {
+        } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }

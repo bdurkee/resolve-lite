@@ -15,8 +15,7 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
                         lambda(i : Z).(<S.Contents(i)>)));
 
     Proc Push (alters e : T; updates S : Stack);
-        Var X : Std_Integer_Fac::Integer;
-
+        Var X, Y : Std_Integer_Fac::Integer;
 
     end Push;
 
