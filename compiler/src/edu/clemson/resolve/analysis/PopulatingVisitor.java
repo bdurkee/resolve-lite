@@ -37,6 +37,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -48,9 +49,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
@@ -113,11 +112,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
     private Set<String> dependentTerms = new HashSet<>();
-
-    /**
-     * When not null, we're walking the segments of a MathSegmentsExp.
-     */
-    private MTType currentMathSegType = null;
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -747,11 +741,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     curType = g.INVALID;
                 }
             }
-            currentMathSegType = curType;
-            this.visit(nextSeg);
-            currentMathSegType = null;
+
+            tr.mathTypes.put(nextSeg.getParent(), curType);
+            tr.mathTypes.put(nextSeg, curType);
         }
-        currentMathSegType = null;
         tr.mathTypes.put(ctx, curType);
         return null;
     }
@@ -882,16 +875,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
-        if (currentMathSegType != null) { //we're walking a segment expr
-            tr.mathTypes.put(ctx, currentMathSegType);
-            currentMathSegType = null; //Todo: I really hate this. Very confusing.
-            // Come up with a better way for handling dots.
-        }
         ctx.mathExp().forEach(this::visit);
-
-        if (currentMathSegType == null) {
-            typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
-        }
+        typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
         return null;
     }
 
@@ -909,14 +894,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        if (currentMathSegType != null) { //we're walking a segment expr
-            tr.mathTypes.put(ctx, currentMathSegType);
-            currentMathSegType = null;  //Todo: I really hate this. Very confusing.
-            // Come up with a better way for handling dots.
-        }
-        else {
-            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
-        }
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         return null;
     }
 
@@ -1209,6 +1187,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 new PExpBuildingListener<>(symtab.mathPExps, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
+    }
+
+    private class SegmentTypeDistributor {
+
+        public void distribute(ParseTree root, ParseTreeProperty<MTType> types,
+                               MTType typeToDistribute) {
+            ParseTreeVisitor x = new ResolveBaseVisitor<Void>() {
+                @Override public Void visitMathPrimaryExp(
+                        @NotNull Resolve.MathPrimaryExpContext ctx) {
+                    this.visit(ctx.getChild(0));
+                    types.put(ctx, typeToDistribute);
+                    return null;
+                }
+                @Override public Void visitMathPrimeExp(
+                        @NotNull Resolve.MathPrimeExpContext ctx) {
+                    System.out.println("HEREERERERE: " + typeToDistribute);
+                    this.visit(ctx.mathPrimaryExp());
+                    types.put(ctx, typeToDistribute);
+                    return null;
+                }
+                @Override public Void visitMathVariableExp(
+                        @NotNull Resolve.MathVariableExpContext ctx) {
+                    types.put(ctx, typeToDistribute);
+                    return null;
+                }
+                @Override public Void visitMathFunctionExp(
+                        @NotNull Resolve.MathFunctionExpContext ctx) {
+                    types.put(ctx, typeToDistribute);
+                    return null;
+                }
+            };
+            x.visit(root);
+        }
     }
 
     private void chainMathTypes(ParseTree current, ParseTree child) {
