@@ -163,6 +163,10 @@ parameterMode
         | EVALUATES )
     ;
 
+variableDeclGroup
+    :   VAR ID (COMMA ID)* COLON type SEMI
+    ;
+
 // type and record related rules
 
 type
@@ -202,7 +206,7 @@ typeModelInit
 //So to save ourselves an extra redundant rule, we just allow it here.
 typeImplInit
     :   INIT (ensuresClause)?
-        //(variableDeclGroup)* (stmt)*
+        (variableDeclGroup)* //(stmt)*
         END SEMI
     ;
 
@@ -213,10 +217,21 @@ operationDecl
         (requiresClause)? (ensuresClause)?
     ;
 
+operationProcedureDecl
+    :   (recursive=RECURSIVE)? OPERATION
+        name=ID operationParameterList (COLON mathTypeExp)? SEMI
+        (requiresClause)?
+        (ensuresClause)?
+        PROCEDURE
+        (variableDeclGroup)*
+        //(stmt)*
+        END closename=ID SEMI
+    ;
+
 procedureDecl
     :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
         (COLON type)? SEMI
-        //(variableDeclGroup)*
+        (variableDeclGroup)*
         //(stmt)*
         END closename=ID SEMI
     ;

@@ -229,7 +229,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             returnType = PTVoid.getInstance(g);
         }
-
         try {
             symtab.getInnermostActiveScope().define(
                     new ProcedureSymbol(ctx.name.getText(), ctx,
@@ -239,6 +238,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
+        ctx.variableDeclGroup().forEach(this::visit);
+        symtab.endScope();
         return null;
     }
 
@@ -434,6 +435,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.progTypeValues.put(ctx, record);
         tr.mathTypes.put(ctx, g.MTYPE);
         tr.mathTypeValues.put(ctx, record.toMath());
+        return null;
+    }
+
+    @Override public Void visitVariableDeclGroup(
+            @NotNull Resolve.VariableDeclGroupContext ctx) {
+        this.visit(ctx.type());
+        insertVariables(ctx, ctx.ID(), ctx.type());
         return null;
     }
 
@@ -675,6 +683,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
+            }
+        }
+    }
+
+    private void insertVariables(ParserRuleContext ctx,
+                 List<TerminalNode> terminalGroup, Resolve.TypeContext type) {
+        PTType progType = tr.progTypeValues.get(type);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), ctx, progType,
+                                getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
             }
         }
     }

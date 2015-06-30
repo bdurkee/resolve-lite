@@ -75,6 +75,7 @@ THEOREM			:	'Theorem'						;
 TYPE			:	'Type'							;
 USES        	:   'uses'							;
 UNION			:	'union'							;
+VAR				:	'Var'							;
 
 // parameter modes
 
