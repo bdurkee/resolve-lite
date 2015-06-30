@@ -26,4 +26,6 @@ Precis Basic_Spiral_Theory; @DependentTerms{k}
         Corollary C3: Forall k : N2, Forall n : N,
             SCD(k)(RS(k)(0, SS(k)(n, Cen(k)))) = k * n + 1;
 
+    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k));
+
 end Basic_Spiral_Theory;

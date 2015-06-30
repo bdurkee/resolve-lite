@@ -114,6 +114,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private Set<String> dependentTerms = new HashSet<>();
 
+    /**
+     * When not null, we're walking the segments of a MathSegmentsExp.
+     */
+    private MTType currentMathSegType = null;
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
@@ -742,8 +747,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     curType = g.INVALID;
                 }
             }
-            tr.mathTypes.put(nextSeg, curType);
+            currentMathSegType = curType;
+            this.visit(nextSeg);
         }
+        currentMathSegType = null;
         tr.mathTypes.put(ctx, curType);
         return null;
     }
@@ -875,7 +882,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
+        if (currentMathSegType != null) { //we're walking a segment expr
+            tr.mathTypes.put(ctx, currentMathSegType);
+        }
+        else {
+            typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
+        }
         return null;
     }
 
@@ -893,7 +905,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        if (currentMathSegType != null) { //we're walking a segment expr
+            tr.mathTypes.put(ctx, currentMathSegType);
+        }
+        else {
+            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        }
         return null;
     }
 
@@ -1016,6 +1033,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
                 args, tr.mathTypes));
         PSymbol e = (PSymbol)getPExpFor(ctx);
+
         MTFunction eType = (MTFunction)e.getMathType();
 
         List<MathSymbol> sameNameFunctions =
