@@ -90,6 +90,8 @@ facilityModule
 
 facilityBlock
     :   ( facilityDecl
+        | operationProcedureDecl
+        | typeRepresentationDecl
         )+
     ;
 

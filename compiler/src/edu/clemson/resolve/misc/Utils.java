@@ -32,6 +32,7 @@ package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -129,6 +130,23 @@ public class Utils {
             default:
                 throw new IllegalArgumentException("unrecognized module type");
         }
+    }
+
+    public static Token getNameFromProgramOp(Token op) {
+        CommonToken result = new CommonToken(op);
+        switch (op.getType()) {
+            case ResolveLexer.PLUS: result.setText("Sum");
+            case ResolveLexer.MINUS: result.setText("Difference");
+            case ResolveLexer.MULT: result.setText("Product");
+            case ResolveLexer.DIVIDE: result.setText("Divide");
+            case ResolveLexer.LTE: result.setText("Less_Or_Equal");
+            case ResolveLexer.LT: result.setText("Less");
+            case ResolveLexer.GTE: result.setText("Greater_Or_Equal");
+            case ResolveLexer.GT: result.setText("Greater");
+            case ResolveLexer.EQUALS: result.setText("Are_Equal");
+            case ResolveLexer.NEQUALS: result.setText("/=");
+        }
+        return result;
     }
 
     public interface Builder<T> {

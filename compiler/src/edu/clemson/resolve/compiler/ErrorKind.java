@@ -144,7 +144,16 @@ public enum ErrorKind {
      * <em>exp first-component</em> must refer to a record".
      */
     ILLEGAL_MEMBER_ACCESS(22, "illegal member access expression: <arg>; <arg2>"
-            + " must refer to a record/aggregate type", ErrorSeverity.ERROR);
+            + " must refer to a record/aggregate type", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 30: no operation found corresponding to call
+     * <em>callname</em> with the following arguments: <em>arg : type ...</em>"
+     */
+    NO_SUCH_OPERATION(30, "no operation found corresponding to call "
+            + "<arg> <if(arg2)>" + "with the following arguments: "
+            + "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]"
+            + "<endif>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

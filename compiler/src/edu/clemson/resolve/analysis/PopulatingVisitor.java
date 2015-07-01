@@ -52,10 +52,7 @@ import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.*;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.*;
-import org.rsrg.semantics.query.MathFunctionNamedQuery;
-import org.rsrg.semantics.query.MathSymbolQuery;
-import org.rsrg.semantics.query.NameQuery;
-import org.rsrg.semantics.query.ProgVariableQuery;
+import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
@@ -827,6 +824,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.progTypes.put(ctx, curFieldType);
         tr.mathTypes.put(ctx, curFieldType.toMath());
         return null;
+    }
+
+    @Override public Void visitProgParamExp(
+            @NotNull Resolve.ProgParamExpContext ctx) {
+        ctx.progExp().forEach(this::visit);
+        typeOperationSym(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+        return null;
+    }
+
+    protected void typeOperationSym(ParserRuleContext ctx,
+                                    Token qualifier, Token name,
+                                    List<Resolve.ProgExpContext> args) {
+        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
+                .collect(Collectors.toList());
+        Token opAsName = Utils.getNameFromProgramOp(name);
+        try {
+            OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
+                    new OperationQuery(qualifier, opAsName, argTypes,
+                            SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                            SymbolTable.ImportStrategy.IMPORT_NAMED));
+            tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
+            return;
+        }
+        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            List<String> argStrList = args.stream()
+                    .map(Resolve.ProgExpContext::getText)
+                    .collect(Collectors.toList());
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
+                    ctx.getStart(), name, argStrList, argTypes);
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
     }
 
     //---------------------------------------------------
