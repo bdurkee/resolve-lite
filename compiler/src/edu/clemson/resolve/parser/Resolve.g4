@@ -167,6 +167,33 @@ variableDeclGroup
     :   VAR ID (COMMA ID)* COLON type SEMI
     ;
 
+// statements
+
+stmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
+    |   whileStmt
+    ;
+
+assignStmt
+    :   left=progExp ASSIGN right=progExp SEMI
+    ;
+
+swapStmt
+    :   left=progExp SWAP right=progExp SEMI
+    ;
+
+callStmt
+    :   progParamExp SEMI
+    ;
+
+whileStmt
+    :   WHILE progExp DO
+        (stmt)*
+        END SEMI
+    ;
+
 // type and record related rules
 
 type
@@ -232,7 +259,7 @@ procedureDecl
     :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
         (COLON type)? SEMI
         (variableDeclGroup)*
-        //(stmt)*
+        (stmt)*
         END closename=ID SEMI
     ;
 
@@ -295,8 +322,6 @@ moduleArgumentList
     :   LPAREN moduleArgument (COMMA moduleArgument)* RPAREN
     ;
 
-//Todo: Placeholder. I don't want to add the whole prog exp tree right now.
-//I want to focus on the math.
 moduleArgument
     :   progExp
     ;
@@ -436,10 +461,6 @@ progPrimary
     |   progMemberExp
     ;
 
-progMemberExp
-    :   (progParamExp|progNamedExp) (DOT ID)+
-    ;
-
 progParamExp
     :   (qualifier=ID COLONCOLON)? name=ID
         LPAREN (progExp (COMMA progExp)*)? RPAREN
@@ -447,6 +468,10 @@ progParamExp
 
 progNamedExp
     :   (qualifier=ID COLONCOLON)? name=ID
+    ;
+
+progMemberExp
+    :   (progParamExp|progNamedExp) ('.' ID)+
     ;
 
 progLiteralExp

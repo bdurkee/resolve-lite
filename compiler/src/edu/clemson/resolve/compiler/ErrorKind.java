@@ -133,11 +133,18 @@ public enum ErrorKind {
     NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 34: procedure <em>name</em> does not implement any known
+     * Compiler Error 21: procedure <em>name</em> does not implement any known
      * operation.
      */
-    DANGLING_PROCEDURE(34, "procedure <arg> does not implement any known "
-            + "operation", ErrorSeverity.ERROR);
+    DANGLING_PROCEDURE(21, "procedure <arg> does not implement any known "
+            + "operation", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler error 22: "illegal member access expression: <em>exp</em>;
+     * <em>exp first-component</em> must refer to a record".
+     */
+    ILLEGAL_MEMBER_ACCESS(22, "illegal member access expression: <arg>; <arg2>"
+            + " must refer to a record/aggregate type", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

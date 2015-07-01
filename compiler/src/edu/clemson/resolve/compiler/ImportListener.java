@@ -41,7 +41,7 @@ public class ImportListener extends ResolveBaseListener {
     }
 
     protected static void registerStandardModule(String moduleName,
-                                         String... defaultImports) {
+                                        String... defaultImports) {
         STD_MODULES.put(moduleName,
                 new LinkedHashSet<>(Arrays.asList(defaultImports)));
     }

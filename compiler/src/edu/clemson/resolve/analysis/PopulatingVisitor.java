@@ -55,6 +55,7 @@ import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
+import org.rsrg.semantics.query.ProgVariableQuery;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
@@ -237,6 +238,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), ctx.getText());
         }
         ctx.variableDeclGroup().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         return null;
     }
@@ -731,7 +733,104 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     //---------------------------------------------------
-    //  M A T H   E X P   V I S I T O R   M E T H O D S
+    // P R O G    E X P    T Y P I N G
+    //---------------------------------------------------
+
+    @Override public Void visitProgNestedExp(
+            @NotNull Resolve.ProgNestedExpContext ctx) {
+        this.visit(ctx.progExp());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimaryExp(
+            @NotNull Resolve.ProgPrimaryExpContext ctx) {
+        this.visit(ctx.progPrimary());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progPrimary()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progPrimary()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimary(
+            @NotNull Resolve.ProgPrimaryContext ctx) {
+        this.visit(ctx.getChild(0));
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
+        return null;
+    }
+
+    @Override public Void visitProgNamedExp(
+            @NotNull Resolve.ProgNamedExpContext ctx) {
+        try {
+            ProgVariableSymbol variable =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new ProgVariableQuery(ctx.qualifier, ctx.name,
+                                    false));
+            tr.progTypes.put(ctx, variable.getProgramType());
+            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+            return null;
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a variable reference", ctx.name.getText(),
+                    use.getActualSymbolDescription());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+        return null;
+    }
+
+    @Override public Void visitProgMemberExp(
+            @NotNull Resolve.ProgMemberExpContext ctx) {
+        ParseTree firstRecordRef = ctx.getChild(0);
+        this.visit(firstRecordRef);
+        PTType first = tr.progTypes.get(firstRecordRef);
+
+        //start by checking the first to ensure we're dealing with a record
+        if ( !first.isAggregateType() ) {
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
+                    ctx.getText(), ctx.getChild(0).getText());
+            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.mathTypes.put(ctx, g.INVALID);
+            return null;
+        }
+        PTRepresentation curAggregateType = (PTRepresentation) first;
+
+        //note this will represent the rightmost field type when finished.
+        PTType curFieldType = curAggregateType;
+
+        //now we need to make sure our mem accesses aren't nonsense.
+        for (TerminalNode term : ctx.ID()) {
+            PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
+            curFieldType = recordType.getFieldType(term.getText());
+            if ( curFieldType == null ) {
+                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                        term.getSymbol(), term.getText());
+                curFieldType = PTInvalid.getInstance(g);
+                tr.progTypes.put(term, curFieldType);
+                tr.mathTypes.put(term, curFieldType.toMath());
+                break;
+            }
+            tr.progTypes.put(term, curFieldType);
+            tr.mathTypes.put(term, curFieldType.toMath());
+
+            if ( curFieldType.isAggregateType() ) {
+                curAggregateType = (PTRepresentation) curFieldType;
+            }
+        }
+        tr.progTypes.put(ctx, curFieldType);
+        tr.mathTypes.put(ctx, curFieldType.toMath());
+        return null;
+    }
+
+    //---------------------------------------------------
+    //  M A T H   E X P   T Y P I N G
     //---------------------------------------------------
 
     @Override public Void visitMathTypeExp(
@@ -1328,6 +1427,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void chainMathTypes(ParseTree current, ParseTree child) {
         tr.mathTypes.put(current, tr.mathTypes.get(child));
         tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
+    }
+
+    private void chainProgTypes(ParseTree current, ParseTree child) {
+        tr.progTypes.put(current, tr.progTypes.get(child));
+        tr.progTypeValues.put(current, tr.progTypeValues.get(child));
     }
 
     private String getRootModuleID() {

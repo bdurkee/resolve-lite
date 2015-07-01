@@ -42,6 +42,7 @@ COROLLARY		:	'Corollary'						;
 CORRESPONDENCE 	:	'correspondence'				;
 DEFINITION		:	'Definition'					;
 DEPENDENT		:	'DependentTerms'				;
+DO 				:	'do'							;
 END         	:   'end'							;
 ENTAILS			:	'which_entails'					;
 EXISTS			:	'Exists'						;
@@ -76,6 +77,7 @@ TYPE			:	'Type'							;
 USES        	:   'uses'							;
 UNION			:	'union'							;
 VAR				:	'Var'							;
+WHILE			:	'While'							;
 
 // parameter modes
 
@@ -106,6 +108,8 @@ INDUCT_CASE :	'(ii.)'							;
 
 // operators
 
+ASSIGN		:	':='							;
+SWAP		:	':=:'							;
 DIVIDE		:	'/'								;
 PLUS		:	'+'								;
 MINUS		:	'-'								;

@@ -10,8 +10,8 @@ Concept Bdd_Stack_Template<T>
         initialization
                 ensures S = Empty_String;
 
-     (*   Oper Push (alters e : T; updates S : Stack);
+        Oper Push (alters e : T; updates S : Stack);
             requires 1 + |S| <= Max_Depth;
-            ensures  S = <@e> o @S; *)
+            ensures  S = <@e> o @S;
 
 end Bdd_Stack_Template;
