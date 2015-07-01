@@ -52,30 +52,30 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
- /*   @Override public void exitCorrespondenceClause(
+    @Override public void exitCorrespondenceClause(
             @NotNull Resolve.CorrespondenceClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitConstraintClause(
-            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+            @NotNull Resolve.ConstraintClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitConventionClause(
-            @NotNull ResolveParser.ConventionClauseContext ctx) {
+            @NotNull Resolve.ConventionClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitRequiresClause(
-            @NotNull ResolveParser.RequiresClauseContext ctx) {
+            @NotNull Resolve.RequiresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     @Override public void exitEnsuresClause(
-            @NotNull ResolveParser.EnsuresClauseContext ctx) {
+            @NotNull Resolve.EnsuresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-    }*/
+    }
 
     @Override public void exitMathTypeAssertionExp(
             @NotNull Resolve.MathTypeAssertionExpContext ctx) {
@@ -162,12 +162,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-   /* @Override public void exitMathLambdaExp(
+    @Override public void exitMathLambdaExp(
             @NotNull Resolve.MathLambdaExpContext ctx) {
         List<PLambda.Parameter> parameters = new ArrayList<>();
-        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
-                .definitionParameterList().mathVariableDeclGroup()) {
-            for (TerminalNode term : grp.Identifier()) {
+        for (Resolve.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            for (TerminalNode term : grp.ID()) {
                 parameters.add(new PLambda.Parameter(term.getText(),
                         getMathTypeValue(grp.mathTypeExp())));
             }
@@ -176,12 +176,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathAlternativeExp(
-            @NotNull ResolveParser.MathAlternativeExpContext ctx) {
+            @NotNull Resolve.MathAlternativeExpContext ctx) {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
         PExp otherwiseResult = null;
 
-        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+        for (Resolve.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
             if ( alt.condition != null ) {
                 conditions.add(repo.get(alt.condition));
@@ -195,7 +195,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 new PAlternatives(conditions, results, otherwiseResult,
                         getMathType(ctx), getMathTypeValue(ctx));
         repo.put(ctx, result);
-    }*/
+    }
 
     @Override public void exitMathSegmentsExp(
             @NotNull Resolve.MathSegmentsExpContext ctx) {
@@ -220,13 +220,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-  /*  @Override public void exitMathSetCollectionExp(
-            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+    @Override public void exitMathSetCollectionExp(
+            @NotNull Resolve.MathSetCollectionExpContext ctx) {
         List<PExp> elements = ctx.mathExp().stream()
                 .map(repo::get)
                 .collect(Collectors.toList());
         repo.put(ctx, new PSet(getMathType(ctx), getMathTypeValue(ctx), elements));
-    }*/
+    }
 
     @Override public void exitMathBooleanExp(
             @NotNull Resolve.MathBooleanExpContext ctx) {

@@ -16,10 +16,12 @@ public class HardCoded {
     public static void addBuiltInSymbols(TypeGraph g, RESOLVECompiler rc,
             ScopeBuilder b) {
         try {
+            b.addBinding("El", null, g.MTYPE, g.ELEMENT);
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
+            b.addBinding("conc", null, g.SSET, g.BOOLEAN);
 
             b.addBinding("true", null, g.BOOLEAN);
             b.addBinding("false", null, g.BOOLEAN);
@@ -30,10 +32,15 @@ public class HardCoded {
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
             b.addBinding("and", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+            b.addBinding("not", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.BOOLEAN).build());
             b.addBinding("=", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.ENTITY).build());
+            b.addBinding("/=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
             b.addBinding("implies", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+
             /* b.addBinding("Is_Initial", null,
                      new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
                              .build());*/
@@ -43,7 +50,14 @@ public class HardCoded {
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
-
+            b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET).build());
+            b.addBinding("is_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.SSET).build());
+            b.addBinding("is_not_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.ENTITY, g.SSET).build());
+            b.addBinding("~", null, new MTFunctionBuilder(g, g.CARD)
+                    .paramTypes(g.SSET, g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
             rc.errMgr.semanticError(ErrorKind.DUP_SYMBOL, null,

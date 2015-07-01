@@ -34,24 +34,29 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.ImportCollection;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathFunctionNamedQuery;
 import org.rsrg.semantics.query.MathSymbolQuery;
-import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.query.NameQuery;
+import org.rsrg.semantics.query.ProgVariableQuery;
+import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,11 +78,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /**
      * Keeps track of an inductive defn's (top level declared) induction
      * variable for access later in the (lower level) signature. This is
-     * {@code null} we're not visiting the children of an inductive defn.
+     * {@code null} if we're not visiting the children of an inductive defn.
      */
     private Resolve.MathVariableDeclContext currentInductionVar = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
+
+    private ProgTypeModelSymbol currentTypeModelSym = null;
 
     protected RESOLVECompiler compiler;
     protected SymbolTable symtab;
@@ -105,6 +112,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
+    private Set<String> dependentTerms = new HashSet<>();
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
@@ -114,14 +123,347 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.g = symtab.getTypeGraph();
     }
 
-    @Override public Void visitPrecisModule(
-            @NotNull Resolve.PrecisModuleContext ctx) {
-        symtab.startModuleScope(ctx, ctx.name.getText()).addImports(
+    @Override public Void visitModule(@NotNull Resolve.ModuleContext ctx) {
+        symtab.startModuleScope(ctx, Utils.getModuleName(ctx)).addImports(
                 tr.imports.getImportsOfType(ImportCollection.ImportType.NAMED));
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
     }
+
+    @Override public Void visitDependentTermOptions(
+            @NotNull Resolve.DependentTermOptionsContext ctx) {
+        dependentTerms.addAll(ctx.ID().stream().map(TerminalNode::getText)
+                .collect(Collectors.toList()));
+        return null;
+    }
+
+    @Override public Void visitGenericType(
+            @NotNull Resolve.GenericTypeContext ctx) {
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GenericSymbol(g, new PTElement(g), ctx.getText(),
+                            ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.ID().getText());
+        }
+        return null;
+    }
+
+    @Override public Void visitTypeModelDecl(
+            @NotNull Resolve.TypeModelDeclContext ctx) {
+        symtab.startScope(ctx);
+        this.visit(ctx.mathTypeExp());
+        MathSymbol exemplarSymbol = null;
+        try {
+            exemplarSymbol =
+                    symtab.getInnermostActiveScope().addBinding(
+                            ctx.exemplar.getText(), ctx,
+                            tr.mathTypeValues.get(ctx.mathTypeExp()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        if (ctx.constraintClause() != null) this.visit(ctx.constraintClause());
+        if (ctx.typeModelInit() != null) this.visit(ctx.typeModelInit());
+        symtab.endScope();
+        try {
+            PExp constraint =
+                    getPExpFor(ctx.constraintClause() != null ? ctx
+                            .constraintClause() : null);
+            PExp initEnsures =
+                    getPExpFor(ctx.typeModelInit() != null ? ctx
+                            .typeModelInit().ensuresClause() : null);
+            MTType modelType = tr.mathTypeValues.get(ctx.mathTypeExp());
+
+            ProgTypeSymbol progType =
+                    new ProgTypeModelSymbol(symtab.getTypeGraph(),
+                            ctx.name.getText(), modelType,
+                                new PTFamily(modelType, ctx.name.getText(),
+                                    ctx.exemplar.getText(), constraint,
+                                    initEnsures, getRootModuleID()),
+                            exemplarSymbol, ctx, getRootModuleID());
+            symtab.getInnermostActiveScope().define(progType);
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+        return null;
+    }
+
+    @Override public Void visitProcedureDecl(
+            @NotNull Resolve.ProcedureDeclContext ctx) {
+        OperationSymbol correspondingOp = null;
+        try {
+            correspondingOp =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toOperationSymbol();
+        } catch (NoSuchSymbolException nse) {
+            compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
+                    ctx.getStart(), ctx.name.getText());
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        symtab.startScope(ctx);
+        this.visit(ctx.operationParameterList());
+        PTType returnType = null;
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            returnType = tr.progTypeValues.get(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                returnType, getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                        ctx.name.getText());
+            }
+        }
+        else {
+            returnType = PTVoid.getInstance(g);
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProcedureSymbol(ctx.name.getText(), ctx,
+                            getRootModuleID(), correspondingOp));
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        ctx.variableDeclGroup().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
+        symtab.endScope();
+        return null;
+    }
+
+    @Override public Void visitOperationDecl(
+            @NotNull Resolve.OperationDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
+                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+            } catch (DuplicateSymbolException e) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
+    private void insertFunction(Token name, Resolve.TypeContext type,
+            Resolve.RequiresClauseContext requires,
+            Resolve.EnsuresClauseContext ensures, ParserRuleContext ctx) {
+        try {
+            List<ProgParameterSymbol> params =
+                    symtab.scopes.get(ctx).getSymbolsOfType(
+                            ProgParameterSymbol.class);
+            PTType returnType;
+            if ( type == null ) {
+                returnType = PTVoid.getInstance(g);
+            }
+            else {
+                returnType = tr.progTypeValues.get(type);
+            }
+            symtab.getInnermostActiveScope().define(
+                    new OperationSymbol(name.getText(), ctx, requires, ensures,
+                            returnType, getRootModuleID(), params,
+                            false));
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
+        }
+    }
+
+    @Override public Void visitParameterDeclGroup(
+            @NotNull Resolve.ParameterDeclGroupContext ctx) {
+        this.visit(ctx.type());
+        PTType groupType = tr.progTypeValues.get(ctx.type());
+        for (TerminalNode term : ctx.ID()) {
+            try {
+                ProgParameterSymbol.ParameterMode mode =
+                        ProgParameterSymbol.getModeMapping().get(
+                                ctx.parameterMode().getText());
+                symtab.getInnermostActiveScope().define(
+                        new ProgParameterSymbol(symtab.getTypeGraph(), term
+                                .getText(), mode, groupType, ctx,
+                                getRootModuleID()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        term.getSymbol(), term.getText());
+            }
+        }
+        return null;
+    }
+
+    @Override public Void visitFacilityDecl(
+            @NotNull Resolve.FacilityDeclContext ctx) {
+        int i = 0;
+        try {
+            List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
+            for (Resolve.TypeContext generic : ctx.type()) {
+                suppliedGenericSyms.add(symtab
+                        .getInnermostActiveScope()
+                        .queryForOne(
+                                new NameQuery(generic.qualifier, generic.name,
+                                        true)).toProgTypeSymbol());
+                i++;
+            }
+            symtab.getInnermostActiveScope().define(
+                    new FacilitySymbol(ctx, getRootModuleID(),
+                            suppliedGenericSyms, symtab));
+        }
+        catch (DuplicateSymbolException | NoSuchSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a program type", ctx.type(i).getText(),
+                    use.getActualSymbolDescription());
+        }
+        return null;
+    }
+
+    @Override public Void visitType(@NotNull Resolve.TypeContext ctx) {
+        try {
+            ProgTypeSymbol type =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(ctx.qualifier, ctx.name, true))
+                            .toProgTypeSymbol();
+            tr.progTypeValues.put(ctx, type.getProgramType());
+            tr.mathTypes.put(ctx, g.MTYPE);
+            tr.mathTypeValues.put(ctx, type.getModelType());
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(),
+                    ctx.getStart(), ctx.name.getText());
+            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
+            tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+            tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
+        }
+        return null;
+    }
+
+    @Override public Void visitTypeRepresentationDecl(
+            @NotNull Resolve.TypeRepresentationDeclContext ctx) {
+        symtab.startScope(ctx);
+        ProgTypeModelSymbol typeDefnSym = null;
+        ParseTree reprTypeNode = ctx.type() != null ? ctx.type() : ctx.record();
+        this.visit(reprTypeNode);
+
+        try {
+            typeDefnSym = symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name.getText(),
+                                            false)).toProgTypeModelSymbol();
+        }
+        catch (NoSuchSymbolException nsse) {
+            //this is actually ok for now. Facility module bound type reprs
+            //won't have a model.
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+
+        PTRepresentation reprType =
+                new PTRepresentation(g, tr.progTypeValues.get(reprTypeNode),
+                        ctx.name.getText(), typeDefnSym, getRootModuleID());
+        try {
+            String exemplarName = typeDefnSym != null ?
+                    typeDefnSym.getExemplar().getName() : ctx.name.getText()
+                    .substring(0, 1).toUpperCase();
+            symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
+                    exemplarName, ctx, reprType, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException dse) {
+            //This shouldn't be possible--the type declaration has a
+            //scope all its own and we're the first ones to get to
+            //introduce anything
+            throw new RuntimeException(dse);
+        }
+        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
+        if (ctx.correspondenceClause() != null) this.visit(ctx.correspondenceClause());
+        if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
+        symtab.endScope();
+        PExp convention = getPExpFor(ctx.conventionClause());
+        PExp correspondence = getPExpFor(ctx.correspondenceClause());
+        try {
+            symtab.getInnermostActiveScope().define(new ProgReprTypeSymbol(g,
+                            ctx.name.getText(), ctx, getRootModuleID(),
+                            typeDefnSym, reprType, convention, null));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+
+        return null;
+    }
+
+    @Override public Void visitRecord(@NotNull Resolve.RecordContext ctx) {
+        Map<String, PTType> fields = new LinkedHashMap<>();
+        for (Resolve.RecordVariableDeclGroupContext fieldGrp : ctx
+                .recordVariableDeclGroup()) {
+            this.visit(fieldGrp);
+            PTType grpType = tr.progTypeValues.get(fieldGrp.type());
+            for (TerminalNode t : fieldGrp.ID()) {
+                fields.put(t.getText(), grpType);
+            }
+        }
+        PTRecord record = new PTRecord(g, fields);
+        tr.progTypeValues.put(ctx, record);
+        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypeValues.put(ctx, record.toMath());
+        return null;
+    }
+
+    @Override public Void visitVariableDeclGroup(
+            @NotNull Resolve.VariableDeclGroupContext ctx) {
+        this.visit(ctx.type());
+        insertVariables(ctx, ctx.ID(), ctx.type());
+        return null;
+    }
+
+    @Override public Void visitMathTheoremDecl(
+            @NotNull Resolve.MathTheoremDeclContext ctx) {
+        symtab.startScope(ctx);
+        this.visit(ctx.mathAssertionExp());
+        symtab.endScope();
+        checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
+        try {
+            PExp assertion = getPExpFor(ctx.mathAssertionExp());
+            symtab.getInnermostActiveScope().define(
+                    new TheoremSymbol(g, ctx.name.getText(), assertion,
+                            ctx, getRootModuleID()));
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.name, ctx.name.getText());
+        }
+        compiler.info("new theorem: " + ctx.name.getText());
+        return null;
+    }
+
 
     @Override public Void visitMathCategoricalDefinitionDecl(
             @NotNull Resolve.MathCategoricalDefinitionDeclContext ctx) {
@@ -164,8 +506,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(indHypo);
 
         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-        checkMathTypes(baseCase, tr.mathTypes.get(baseCase), g.BOOLEAN);
-        checkMathTypes(indHypo, tr.mathTypes.get(indHypo), g.BOOLEAN);
+        checkMathTypes(baseCase, g.BOOLEAN);
+        checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
@@ -181,11 +523,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    private void checkMathTypes(ParserRuleContext ctx,
-                                MTType found, MTType expected) {
-        if (!found.equals(expected)) {
+    private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
+        MTType foundType = tr.mathTypes.get(ctx);
+        if (!foundType.equals(expected)) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                    ctx.getStart(), expected, found);
+                    ctx.getStart(), expected, foundType);
         }
     }
 
@@ -196,10 +538,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     @Override public Void visitMathDefinitionDecl(
             @NotNull Resolve.MathDefinitionDeclContext ctx) {
-        if (ctx.mathDefinitionSig().inductionVar != null) {
-            System.err.println("illegal usage of induction variable in standard"
-                    + " definition.");
-        }
         Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         symtab.startScope(ctx);
         this.visit(sig);
@@ -246,7 +584,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
         walkingDefParams = true;
-        ctx.mathVariableDeclGroup().forEach(this::visit);
+        ctx.mathDefinitionParameter().forEach(this::visit);
         walkingDefParams = false;
         activeQuantifications.pop();
 
@@ -262,34 +600,35 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //if there ARE params, then our type needs to be an MTFunction.
         //this if check needs to be here or else, even if there were no params,
         //our type would end up MTFunction: Void -> T (which we don't want)
-        if ( !ctx.mathVariableDeclGroup().isEmpty() ) {
-            for (Resolve.MathVariableDeclGroupContext grp :
-                    ctx.mathVariableDeclGroup()) {
-                MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
-                for (TerminalNode t : grp.ID()) {
-                    System.out.println("t: " + t.getText() + ": " + grpType);
-
-                    builder.paramTypes(grpType);
-                    builder.paramNames(t.getText());
+        if ( !ctx.mathDefinitionParameter().isEmpty() ) {
+            for (Resolve.MathDefinitionParameterContext p :
+                    ctx.mathDefinitionParameter()) {
+                if (p.mathVariableDeclGroup() != null) {
+                    MTType grpType = tr.mathTypeValues.get(
+                            p.mathVariableDeclGroup().mathTypeExp());
+                    for (TerminalNode t : p.mathVariableDeclGroup().ID()) {
+                        builder.paramTypes(grpType);
+                        builder.paramNames(t.getText());
+                    }
                 }
+                if (p.ID() != null) {
+                        //Todo: Get rid of this global eventually and simply
+                        //query here for this guy (you need to add him to scope though).
+                        if (currentInductionVar == null) {
+                            throw new RuntimeException("induction variable missing!?");
+                        }
+                        MTType inductionVarType =
+                                tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
+                        builder.paramTypes(inductionVarType)
+                                .paramNames(currentInductionVar.ID().getText());
+                    //The induction var itself should've already been visited in
+                    //visitMathInductiveDefnDecl
+                    }
+                //if the definition has parameters then it's type should be an
+                //MTFunction (e.g. something like a * b ... -> ...)
+                defnType = builder.build();
             }
-            if (ctx.inductionVar != null) {
-                if (currentInductionVar == null) {
-                    throw new RuntimeException("induction variable missing!?");
-                }
-                MTType inductionVarType =
-                        tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
-                builder.paramTypes(inductionVarType)
-                        .paramNames(currentInductionVar.ID().getText());
-                //The induction var itself should've already been visited in
-                //visitMathInductiveDefnDecl
-            }
-            //if the definition has parameters then it's type should be an
-            //MTFunction (e.g. something like a * b ... -> ...)
-            defnType = builder.build();
         }
-        System.out.println("result: " + defnType);
-
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, ctx.name.getText(),
@@ -300,6 +639,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getStart(), ctx.name.getText());
         }
         tr.mathTypes.put(ctx, defnType);
+        return null;
+    }
+
+    @Override public Void visitMathDefinitionParameter(
+            @NotNull Resolve.MathDefinitionParameterContext ctx) {
+        visitChildren(ctx);
         return null;
     }
 
@@ -342,8 +687,150 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    private void insertVariables(ParserRuleContext ctx,
+                 List<TerminalNode> terminalGroup, Resolve.TypeContext type) {
+        PTType progType = tr.progTypeValues.get(type);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), ctx, progType,
+                                getRootModuleID());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
+    @Override public Void visitRequiresClause(
+            @NotNull Resolve.RequiresClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitEnsuresClause(
+            @NotNull Resolve.EnsuresClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitConstraintClause(
+            @NotNull Resolve.ConstraintClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitCorrespondenceClause(
+            @NotNull Resolve.CorrespondenceClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
     //---------------------------------------------------
-    //  M A T H   E X P   V I S I T O R   M E T H O D S
+    // P R O G    E X P    T Y P I N G
+    //---------------------------------------------------
+
+    @Override public Void visitProgNestedExp(
+            @NotNull Resolve.ProgNestedExpContext ctx) {
+        this.visit(ctx.progExp());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimaryExp(
+            @NotNull Resolve.ProgPrimaryExpContext ctx) {
+        this.visit(ctx.progPrimary());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progPrimary()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progPrimary()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimary(
+            @NotNull Resolve.ProgPrimaryContext ctx) {
+        this.visit(ctx.getChild(0));
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
+        return null;
+    }
+
+    @Override public Void visitProgNamedExp(
+            @NotNull Resolve.ProgNamedExpContext ctx) {
+        try {
+            ProgVariableSymbol variable =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new ProgVariableQuery(ctx.qualifier, ctx.name,
+                                    false));
+            tr.progTypes.put(ctx, variable.getProgramType());
+            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+            return null;
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+                    ctx.name.getText());
+        }
+        catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a variable reference", ctx.name.getText(),
+                    use.getActualSymbolDescription());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+        return null;
+    }
+
+    @Override public Void visitProgMemberExp(
+            @NotNull Resolve.ProgMemberExpContext ctx) {
+        ParseTree firstRecordRef = ctx.getChild(0);
+        this.visit(firstRecordRef);
+        PTType first = tr.progTypes.get(firstRecordRef);
+
+        //start by checking the first to ensure we're dealing with a record
+        if ( !first.isAggregateType() ) {
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
+                    ctx.getText(), ctx.getChild(0).getText());
+            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.mathTypes.put(ctx, g.INVALID);
+            return null;
+        }
+        PTRepresentation curAggregateType = (PTRepresentation) first;
+
+        //note this will represent the rightmost field type when finished.
+        PTType curFieldType = curAggregateType;
+
+        //now we need to make sure our mem accesses aren't nonsense.
+        for (TerminalNode term : ctx.ID()) {
+            PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
+            curFieldType = recordType.getFieldType(term.getText());
+            if ( curFieldType == null ) {
+                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_SYMBOL,
+                        term.getSymbol(), term.getText());
+                curFieldType = PTInvalid.getInstance(g);
+                tr.progTypes.put(term, curFieldType);
+                tr.mathTypes.put(term, curFieldType.toMath());
+                break;
+            }
+            tr.progTypes.put(term, curFieldType);
+            tr.mathTypes.put(term, curFieldType.toMath());
+
+            if ( curFieldType.isAggregateType() ) {
+                curAggregateType = (PTRepresentation) curFieldType;
+            }
+        }
+        tr.progTypes.put(ctx, curFieldType);
+        tr.mathTypes.put(ctx, curFieldType.toMath());
+        return null;
+    }
+
+    //---------------------------------------------------
+    //  M A T H   E X P   T Y P I N G
     //---------------------------------------------------
 
     @Override public Void visitMathTypeExp(
@@ -361,6 +848,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         tr.mathTypes.put(ctx, type);
         tr.mathTypeValues.put(ctx, typeValue);
+        return null;
+    }
+
+    @Override public Void visitMathCrossTypeExp(
+            @NotNull Resolve.MathCrossTypeExpContext ctx) {
+        typeValueDepth++;
+        ctx.mathVariableDeclGroup().forEach(this::visit);
+
+        List<MTCartesian.Element> fieldTypes = new ArrayList<>();
+        for (Resolve.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                fieldTypes.add(new MTCartesian.Element(t.getText(), grpType));
+            }
+        }
+        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypeValues.put(ctx, new MTCartesian(g, fieldTypes));
+        typeValueDepth--;
         return null;
     }
 
@@ -409,6 +915,92 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathSetCollectionExp(
+            @NotNull Resolve.MathSetCollectionExpContext ctx) {
+        tr.mathTypes.put(ctx, g.SSET);
+        ctx.mathExp().forEach(this::visit);
+        if (ctx.mathExp().isEmpty()) {
+            tr.mathTypeValues.put(ctx, g.EMPTY_SET);
+        }
+        else {
+            List<MTType> powersets = ctx.mathExp().stream()
+                    .map(e -> new MTPowersetApplication(g, tr.mathTypes.get(e)))
+                    .collect(Collectors.toList());
+            MTUnion u = new MTUnion(g, powersets);
+            tr.mathTypeValues.put(ctx, u);
+        }
+        if (typeValueDepth > 0) {
+
+            // construct a union chain and see if all the component types
+            // are known to contain only sets.
+            List<MTType> elementTypes = ctx.mathExp().stream()
+                    .map(tr.mathTypes::get).collect(Collectors.toList());
+
+            MTUnion chainedTypes = new MTUnion(g, elementTypes);
+
+            /*if (!chainedTypes.isKnownToContainOnlyMTypes() ||
+                    ctx.mathExp().isEmpty()) {
+                compiler.errMgr
+                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                ctx.getStart(), ctx.getText());
+                tr.mathTypeValues.put(ctx, g.INVALID);
+                return null;
+            }*/
+            tr.mathTypeValues.put(ctx, chainedTypes);
+        }
+        return null;
+    }
+
+    @Override public Void visitMathSegmentsExp(
+            @NotNull Resolve.MathSegmentsExpContext ctx) {
+        Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =
+                ctx.mathFunctionApplicationExp().iterator();
+        Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
+        nextSeg = segsIter.next();
+        this.visit(nextSeg);
+        if (nextSeg.getText().equals("conc")) {
+            nextSeg = segsIter.next();
+            this.visit(nextSeg);
+        }
+
+        MTType curType = tr.mathTypes.get(nextSeg);
+        MTCartesian curTypeCartesian;
+        while (segsIter.hasNext()) {
+            lastSeg = nextSeg;
+            nextSeg = segsIter.next();
+            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                }
+            }
+            tr.mathTypes.put(nextSeg, curType);
+            if (nextSeg instanceof Resolve.MathFunctionExpContext) {
+                ((Resolve.MathFunctionExpContext)nextSeg).mathExp()
+                        .forEach(this::visit);
+            }
+        }
+        tr.mathTypes.put(ctx, curType);
+        return null;
+    }
+
     @Override public Void visitMathAssertionExp(
             @NotNull Resolve.MathAssertionExpContext ctx) {
         this.visit(ctx.getChild(0));
@@ -430,6 +1022,96 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathLambdaExp(
+            @NotNull Resolve.MathLambdaExpContext ctx) {
+        symtab.startScope(ctx);
+        compiler.info("lambda exp: " + ctx.getText());
+
+        walkingDefParams = true;
+        activeQuantifications.push(Quantification.UNIVERSAL);
+        ctx.mathVariableDeclGroup().forEach(this::visit);
+        activeQuantifications.pop();
+        walkingDefParams = false;
+
+        this.visit(ctx.mathExp());
+        symtab.endScope();
+
+        List<MTType> parameterTypes = new LinkedList<>();
+        for (Resolve.MathVariableDeclGroupContext grp :
+                ctx.mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            parameterTypes.addAll(grp.ID().stream()
+                    .map(term -> grpType).collect(Collectors.toList()));
+        }
+        tr.mathTypes.put(ctx, new MTFunction.MTFunctionBuilder(g, tr.mathTypes
+                .get(ctx.mathExp())).paramTypes(parameterTypes).build());
+        return null;
+    }
+
+    @Override public Void visitMathAlternativeExp(
+            @NotNull Resolve.MathAlternativeExpContext ctx) {
+
+        MTType establishedType = null;
+        MTType establishedTypeValue = null;
+        for (Resolve.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
+            this.visit(alt.result);
+            if (alt.condition != null) this.visit(alt.condition);
+            if ( establishedType == null ) {
+                establishedType = tr.mathTypes.get(alt.result);
+                establishedTypeValue = tr.mathTypeValues.get(alt.result);
+            }
+            else {
+                if ( alt.condition != null ) {
+                    // expectType(alt, establishedType);
+                }
+            }
+        }
+        tr.mathTypes.put(ctx, establishedType);
+        tr.mathTypeValues.put(ctx, establishedTypeValue);
+        return null;
+    }
+
+    @Override public Void visitMathAlternativeItemExp(
+            @NotNull Resolve.MathAlternativeItemExpContext ctx) {
+        if ( ctx.condition != null ) {
+            //expectType(ctx.condition, g.BOOLEAN);
+        }
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
+        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
+        return null;
+    }
+
+    @Override public Void visitMathQuantifiedExp(
+            @NotNull Resolve.MathQuantifiedExpContext ctx) {
+        compiler.info("entering mathQuantifiedExp...");
+        symtab.startScope(ctx);
+        Quantification quantification;
+
+        switch (ctx.q.getType()) {
+            case ResolveLexer.FORALL:
+                quantification = Quantification.UNIVERSAL;
+                break;
+            case ResolveLexer.EXISTS:
+                quantification = Quantification.EXISTENTIAL;
+                break;
+            default:
+                throw new RuntimeException("unrecognized quantification type: "
+                        + ctx.q.getText());
+        }
+        activeQuantifications.push(quantification);
+        this.visit(ctx.mathVariableDeclGroup());
+        activeQuantifications.pop();
+
+        activeQuantifications.push(Quantification.NONE);
+        this.visit(ctx.mathAssertionExp());
+        activeQuantifications.pop();
+        compiler.info("exiting mathQuantifiedExp.");
+        symtab.endScope();
+        tr.mathTypes.put(ctx, g.BOOLEAN);
+        return null;
+    }
+
     @Override public Void visitMathInfixExp(
             @NotNull Resolve.MathInfixExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
@@ -437,12 +1119,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public void exitMathOutfixExp(
-            @NotNull ResolveParser.MathOutfixExpContext ctx) {
-                    ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, new ResolveToken(ctx.lop.getText()
-                + "..." + ctx.rop.getText()), ctx.mathExp());
-    }*/
+    @Override public Void visitMathOutfixExp(
+            @NotNull Resolve.MathOutfixExpContext ctx) {
+        this.visit(ctx.mathExp());
+        typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
+                ctx.lop.getText()+ "..."+ctx.rop.getText()), ctx.mathExp());
+        return null;
+    }
 
     @Override public Void visitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
@@ -465,7 +1148,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        MathSymbol sym = exitMathSymbolExp(ctx, ctx.qualifier, ctx.getText());
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         return null;
     }
 
@@ -511,9 +1194,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         catch (SymbolNotOfKindTypeException snokte) {
             if ( typeValueDepth > 0 ) {
                 //I had better identify a type
-                compiler.errMgr
-                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
-                                ctx.getStart(), symbolName);
+                if (!dependentTerms.contains(symbolName)) {
+                    compiler.errMgr
+                            .semanticError(ErrorKind.INVALID_MATH_TYPE,
+                                    ctx.getStart(), symbolName);
+                }
                 tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
@@ -530,8 +1215,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                List<Resolve.MathExpContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
-        List<MTType> foundArgTypes =
-                Utils.collect(MTType.class, args, tr.mathTypes);
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
@@ -553,7 +1236,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());
         if ( typeValueDepth > 0 ) {
-            //  if ( typeValueDepth > 0 ) {
 
             //I had better identify a type
             MTFunction entryType = (MTFunction) intendedEntry.getType();
@@ -562,7 +1244,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTType argTypeValue;
             for (ParserRuleContext arg : args) {
                 argTypeValue = tr.mathTypeValues.get(arg);
-                if ( argTypeValue == null ) {
+                if (dependentTerms.contains(arg.getText())) {
+                    argTypeValue = new MTNamed(g, arg.getText());
+                }
+                else if ( argTypeValue == null ) {
                     compiler.errMgr.semanticError(
                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                             arg.getText());
@@ -582,8 +1267,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
                 args, tr.mathTypes));
         PSymbol e = (PSymbol)getPExpFor(ctx);
+
         MTFunction eType = (MTFunction)e.getMathType();
-        String operatorStr = name.getText();
 
         List<MathSymbol> sameNameFunctions =
                 symtab.getInnermostActiveScope() //
@@ -721,22 +1406,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         @Override public boolean compare(PExp foundValue, MTType foundType,
                                          MTType expectedType) {
-            //boolean result = g.isKnownToBeIn(foundValue, expectedType);
             return true;
-         /*   if ( !result && foundValue instanceof PLambda
-                    && expectedType instanceof MTFunction ) {
-                PLambda foundValueAsLambda = (PLambda) foundValue;
-                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
-                MTFunction foundTypeAsFunction =
-                        (MTFunction) foundValue.getMathType();
-                result =
-                        g.isSubtype(foundTypeAsFunction.getDomain(),
-                                expectedTypeAsFunction.getDomain())
-                                && g.isKnownToBeIn(
-                                foundValueAsLambda.getBody(),
-                                expectedTypeAsFunction.getRange());
-            }*/
-            // return result;
         }
 
         @Override public String description() {
@@ -754,10 +1424,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return builder.getBuiltPExp(ctx);
     }
 
-
     private void chainMathTypes(ParseTree current, ParseTree child) {
         tr.mathTypes.put(current, tr.mathTypes.get(child));
         tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
+    }
+
+    private void chainProgTypes(ParseTree current, ParseTree child) {
+        tr.progTypes.put(current, tr.progTypes.get(child));
+        tr.progTypeValues.put(current, tr.progTypeValues.get(child));
     }
 
     private String getRootModuleID() {

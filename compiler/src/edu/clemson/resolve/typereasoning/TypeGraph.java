@@ -11,14 +11,6 @@ import java.util.*;
 
 public class TypeGraph {
 
-    /**
-     * A set of non-thread-safe resources to be used during general type
-     * reasoning. This really doesn't belong here, but anything that's reasoning
-     * about types should already have access to a type graph, and only one type
-     * graph is created per thread, so this is a convenient place to put it.
-     */
-    public final PerThreadReasoningResources threadResources =
-            new PerThreadReasoningResources();
     private final ExpValuePathStrategy EXP_VALUE_PATH =
             new ExpValuePathStrategy();
     private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
@@ -155,82 +147,13 @@ public class TypeGraph {
 
     public PExp getValidTypeConditions(PExp value, MTType expected)
             throws TypeMismatchException {
-        PExp result;
-        MTType valueTypeValue = value.getMathTypeValue();
-
-        if ( expected == ENTITY && valueTypeValue != MTYPE
-                && valueTypeValue != ENTITY ) {
-            result = getTrueExp();
-        }
-        else if ( valueTypeValue == MTYPE || valueTypeValue == ENTITY ) {
-            //Cls and Entity aren't in anything (except hyper-whatever, which we aren't concerned with)
-            throw TypeMismatchException.INSTANCE;
-        }
-        else if ( valueTypeValue == null ) {
-            result =
-                    getValidTypeConditions(value, value.getMathType(),
-                            expected, EXP_VALUE_PATH);
-        }
-        else {
-            result = getValidTypeConditions(valueTypeValue, expected);
-        }
-        return result;
+        return getTrueExp();
     }
 
     private <V> PExp getValidTypeConditions(V foundValue, MTType foundType,
             MTType expected, NodePairPathStrategy<V> pathStrategy)
             throws TypeMismatchException {
-
-        if ( foundType == null ) {
-            throw new IllegalArgumentException(foundValue + " has no type");
-        }
-
-        Map<MTType, Map<String, MTType>> potentialFoundNodes =
-                getSyntacticSubtypesWithRelationships(foundType);
-        Map<MTType, Map<String, MTType>> potentialExpectedNodes =
-                getSyntacticSubtypesWithRelationships(expected);
-
-        PExp result = getFalseExp();
-        PExp newCondition;
-
-        Iterator<Map.Entry<MTType, Map<String, MTType>>> expectedEntries;
-        Iterator<Map.Entry<MTType, Map<String, MTType>>> foundEntries =
-                potentialFoundNodes.entrySet().iterator();
-        Map.Entry<MTType, Map<String, MTType>> foundEntry, expectedEntry;
-
-        boolean foundPath = false;
-
-        //If foundType equals expected, we're done
-        boolean foundTrivialPath = foundType.equals(expected);
-
-        while (!foundTrivialPath && foundEntries.hasNext()) {
-            foundEntry = foundEntries.next();
-
-            expectedEntries = potentialExpectedNodes.entrySet().iterator();
-
-            while (!foundTrivialPath && expectedEntries.hasNext()) {
-                expectedEntry = expectedEntries.next();
-                try {
-                    newCondition =
-                            getPathConditions(foundValue, foundEntry,
-                                    expectedEntry, pathStrategy);
-
-                    foundPath = foundPath | !newCondition.isLiteralFalse();
-                    foundTrivialPath = newCondition.isObviouslyTrue();
-                    result = formDisjunct(newCondition, result);
-                }
-                catch (TypeMismatchException e) {}
-            }
-        }
-
-        if ( foundTrivialPath ) {
-            result = getTrueExp();
-        }
-        else if ( !foundPath ) {
-            throw TypeMismatchException.INSTANCE;
-        }
-
-        return result;
+        return getTrueExp();
     }
 
     /**
@@ -273,45 +196,6 @@ public class TypeGraph {
                         combinedBindings);
 
         return newCondition;
-    }
-
-    public void addRelationship(PExp bindingExpression, MTType destination,
-            Scope environment) {
-
-        if ( destination == null ) {
-            throw new IllegalArgumentException("destination type==null");
-        }
-
-        MTType source = bindingExpression.getMathType();
-        if ( source == null ) {
-            throw new IllegalArgumentException("bindingExpression type==null");
-        }
-
-        CanonicalizationResult sourceCanonicalResult =
-                canonicalize(source, environment, "s");
-        CanonicalizationResult destinationCanonicalResult =
-                canonicalize(destination, environment, "d");
-
-        TypeRelationship relationship =
-                new TypeRelationship(this,
-                        destinationCanonicalResult.canonicalType,
-                        bindingExpression);
-
-        TypeNode sourceNode = getTypeNode(sourceCanonicalResult.canonicalType);
-        sourceNode.addRelationship(relationship);
-
-        //We'd like to force the presence of the destination node
-        getTypeNode(destinationCanonicalResult.canonicalType);
-    }
-
-    private TypeNode getTypeNode(MTType t) {
-        TypeNode result = typeNodes.get(t);
-
-        if ( result == null ) {
-            result = new TypeNode(this, t);
-            typeNodes.put(t, result);
-        }
-        return result;
     }
 
     private PExp getValidTypeConditions(MTType value, MTType expected)
@@ -357,50 +241,6 @@ public class TypeGraph {
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return true;
-    }
-
-    private CanonicalizationResult canonicalize(MTType t, Scope environment,
-            String suffix) {
-        //CanonicalizingVisitor canonicalizer =
-        //        new CanonicalizingVisitor(this, environment, suffix);
-        //t.accept(canonicalizer);
-
-        //TEMP. Use the visitor when ready..
-        //TODO: Learn how to canonicalize MTType's properly by reading the visitor file for it
-        Map<String, MTType> quantifiedVariables = new HashMap<>();
-        if ( quantifiedVariables.isEmpty() ) {
-            quantifiedVariables.put("", MTYPE);
-        }
-        MTType finalExpression = new MTBigUnion(this, quantifiedVariables, t);
-        return new CanonicalizationResult(finalExpression, new HashMap<>());
-    }
-
-    private class CanonicalizationResult {
-        public final MTType canonicalType;
-        public final Map<String, String> canonicalToEnvironmental;
-
-        public CanonicalizationResult(MTType canonicalType,
-                Map<String, String> canonicalToOriginal) {
-            this.canonicalType = canonicalType;
-            this.canonicalToEnvironmental = canonicalToOriginal;
-        }
-    }
-
-    private Map<MTType, Map<String, MTType>>
-            getSyntacticSubtypesWithRelationships(MTType query) {
-
-        Map<MTType, Map<String, MTType>> result = new HashMap<>();
-        Map<String, MTType> bindings;
-
-        for (MTType potential : typeNodes.keySet()) {
-            try {
-                bindings = query.getSyntacticSubtypeBindings(potential);
-                result.put(potential, new HashMap<String, MTType>(bindings));
-            }
-            catch (NoSolutionException nse) {}
-        }
-
-        return result;
     }
 
     public static MTType getCopyWithVariablesSubstituted(MTType original,

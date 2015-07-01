@@ -99,15 +99,6 @@ public class ErrorManager extends BaseErrorListener {
         emit(ErrorKind.SYNTAX_ERROR, m);
     }
 
-    //Todo: A temporary method that halts on semantic errors. Ideally this
-    //will eventually become unnecessary and we can recover and continue
-    //processing after encountering an error, for instance: a dup symbol exception.
-    public void fatalSemanticError(ErrorKind etype, Token offendingSymbol,
-                                   Object... args) {
-        semanticError(etype, offendingSymbol, args);
-        compiler.exit(1);
-    }
-
     public void semanticError(ErrorKind etype, Token offendingSymbol,
                               Object... args) {
         RESOLVEMessage msg =

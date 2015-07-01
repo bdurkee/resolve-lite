@@ -1,0 +1,9 @@
+Concept Integer_Template;
+    uses Basic_Integer_Theory;
+
+    Type Family Integer is modeled by Z;
+        exemplar i;
+        initialization ensures i = 0;
+
+
+end Integer_Template;

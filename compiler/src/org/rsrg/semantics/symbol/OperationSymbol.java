@@ -18,12 +18,12 @@ public class OperationSymbol extends Symbol {
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
     private final boolean moduleParameter;
 
-    //private final Resolve.RequiresClauseContext requires;
-    //private final Resolve.EnsuresClauseContext ensures;
+    private final Resolve.RequiresClauseContext requires;
+    private final Resolve.EnsuresClauseContext ensures;
 
     public OperationSymbol(String name, ParserRuleContext definingTree,
-           // ResolveParser.RequiresClauseContext requires,
-           // ResolveParser.EnsuresClauseContext ensures,
+            Resolve.RequiresClauseContext requires,
+                           Resolve.EnsuresClauseContext ensures,
             PTType type,
             String moduleID, List<ProgParameterSymbol> params,
             boolean moduleParameter) {
@@ -31,17 +31,17 @@ public class OperationSymbol extends Symbol {
         this.parameters.addAll(params);
         this.returnType = type;
         this.moduleParameter = moduleParameter;
-      //  this.requires = requires;
-      //  this.ensures = ensures;
+        this.requires = requires;
+        this.ensures = ensures;
     }
 
-  //  public ResolveParser.RequiresClauseContext getRequires() {
-  //      return requires;
-  //  }
+    public Resolve.RequiresClauseContext getRequires() {
+        return requires;
+    }
 
- //   public ResolveParser.EnsuresClauseContext getEnsures() {
- //       return ensures;
- //   }
+    public Resolve.EnsuresClauseContext getEnsures() {
+        return ensures;
+    }
 
     public boolean isModuleParameter() {
         return moduleParameter;
@@ -76,8 +76,8 @@ public class OperationSymbol extends Symbol {
                         instantiatingFacility);
         List<ProgParameterSymbol> newParams = parameters.stream()
                 .map(f::apply).collect(Collectors.toList());
-        return new OperationSymbol(getName(), getDefiningTree(),
-                returnType.instantiateGenerics(genericInstantiations,
+        return new OperationSymbol(getName(), getDefiningTree(), requires,
+                ensures, returnType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getModuleID(), newParams,
                 moduleParameter);
     }

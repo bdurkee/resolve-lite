@@ -37,7 +37,7 @@ public class TestCompileOrder extends BaseTest {
         String[] pairs = new String[] {
                 "Precis Flawed;\n uses U;\n end Flawed;",
                 "error(" + ErrorKind.CIRCULAR_DEPENDENCY.code + "):  circular dependency: U depends on V, but V also depends on U\n"+
-                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "):  module X was unable to find the file corresponding to import reference 'Y'"
+                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "):  module X was unable to find the file corresponding to uses reference 'Y'"
         };
         writeModules(modules, "U", "X", "V");
         super.testErrors(pairs, "Flawed");

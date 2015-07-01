@@ -41,7 +41,7 @@ public class ImportListener extends ResolveBaseListener {
     }
 
     protected static void registerStandardModule(String moduleName,
-                                         String... defaultImports) {
+                                        String... defaultImports) {
         STD_MODULES.put(moduleName,
                 new LinkedHashSet<>(Arrays.asList(defaultImports)));
     }
@@ -65,12 +65,12 @@ public class ImportListener extends ResolveBaseListener {
         }
     }
 
-/*    @Override public void enterConceptImplModule(
-            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+    @Override public void enterConceptImplModule(
+            @NotNull Resolve.ConceptImplModuleContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.concept.getText());
     }
 
-    @Override public void enterEnhancementModule(
+    /*@Override public void enterEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
         importCollection.imports(ImportType.NAMED, ctx.concept.getText());
     }
@@ -86,12 +86,12 @@ public class ImportListener extends ResolveBaseListener {
         importCollection.imports(ImportType.NAMED, ctx.ID());
     }
 
-   /* @Override public void exitFacilityDecl(
-            @NotNull ResolveParser.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(
+            @NotNull Resolve.FacilityDeclContext ctx) {
         importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
         ImportCollection.ImportType type =
                 (ctx.externally != null) ? ImportType.EXTERNAL
                         : ImportType.IMPLICIT;
         importCollection.imports(type, ctx.impl.getText());
-    }*/
+    }
 }
