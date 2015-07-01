@@ -117,18 +117,30 @@ public class Utils {
         if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
-        int moduleType = ((ParserRuleContext)ctx).getStart().getType();
-        switch(moduleType) {
-            case ResolveLexer.PRECIS:
-                return ((Resolve.PrecisModuleContext) ctx).name.getText();
-            case ResolveLexer.CONCEPT:
-                return ((Resolve.ConceptModuleContext) ctx).name.getText();
-            case ResolveLexer.FACILITY:
-                return ((Resolve.FacilityModuleContext) ctx).name.getText();
-            case ResolveLexer.IMPL:
-                return ((Resolve.ConceptImplModuleContext) ctx).name.getText();
-            default:
-                throw new IllegalArgumentException("unrecognized module type");
+
+        if ( ctx instanceof Resolve.PrecisModuleContext ) {
+            return ((Resolve.PrecisModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.ConceptModuleContext ) {
+            return ((Resolve.ConceptModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.FacilityModuleContext ) {
+            return ((Resolve.FacilityModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.ConceptImplModuleContext ) {
+            return ((Resolve.ConceptImplModuleContext) ctx).name
+                    .getText();
+        }
+        else if ( ctx instanceof Resolve.EnhancementModuleContext ) {
+            return ((Resolve.EnhancementModuleContext) ctx).name
+                    .getText();
+        }
+        else if ( ctx instanceof Resolve.EnhancementImplModuleContext ) {
+            return ((Resolve.EnhancementImplModuleContext) ctx).name
+                    .getText();
+        }
+        else {
+            throw new IllegalArgumentException("unrecognized module");
         }
     }
 

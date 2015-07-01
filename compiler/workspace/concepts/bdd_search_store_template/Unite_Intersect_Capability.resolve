@@ -1,0 +1,4 @@
+Enhancement Unite_Intersect_Capability for Bdd_Search_Store_Template;
+    Oper Unite_Intersect (updates U, V : Store);
+        ensures U = (@U union @V) and V = (@U intersect @V);
+end Unite_Intersect_Capability;

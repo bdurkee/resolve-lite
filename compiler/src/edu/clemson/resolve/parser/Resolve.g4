@@ -38,6 +38,8 @@ module
     :   precisModule
     |   conceptModule
     |   conceptImplModule
+    |   enhancementImplModule
+    |   enhancementModule
     |   facilityModule
     ;
 
@@ -59,10 +61,37 @@ conceptBlock
         )+
     ;
 
+// enhancement module
+
+enhancementModule
+    :   ENHANCEMENT name=ID (specModuleParameterList)?
+        FOR concept=ID SEMI
+        (usesList)?
+        (requiresClause)?
+        (enhancementBlock)?
+        END closename=ID SEMI
+    ;
+
+enhancementBlock
+    :   ( operationDecl
+        | typeModelDecl
+        | mathDefinitionDecl
+        )+
+    ;
+
 // implementation modules
 
 conceptImplModule
     :   IMPL name=ID (implModuleParameterList)? FOR concept=ID SEMI
+        (usesList)?
+        (requiresClause)?
+        (implBlock)?
+        END closename=ID SEMI
+    ;
+
+enhancementImplModule
+    :   IMPL name=ID (specModuleParameterList)?
+        FOR enhancement=ID OF concept=ID SEMI
         (usesList)?
         (requiresClause)?
         (implBlock)?
