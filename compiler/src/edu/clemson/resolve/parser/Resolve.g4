@@ -476,11 +476,11 @@ mathSegmentsExp
 // program expressions
 
 progExp
-    :   op=MINUS progExp                        #progApplicationExp
-    |   progExp op=(MULT|DIVIDE) progExp        #progApplicationExp
-    |   progExp op=(PLUS|MINUS) progExp         #progApplicationExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp      #progApplicationExp
-    |   progExp op=(EQUALS|NEQUALS) progExp     #progApplicationExp
+    :   op=MINUS progExp                        #progInfixExp
+    |   progExp op=(MULT|DIVIDE) progExp        #progInfixExp
+    |   progExp op=(PLUS|MINUS) progExp         #progInfixExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp      #progInfixExp
+    |   progExp op=(EQUALS|NEQUALS) progExp     #progInfixExp
     |   LPAREN progExp RPAREN                   #progNestedExp
     |   progPrimary                             #progPrimaryExp
     ;
