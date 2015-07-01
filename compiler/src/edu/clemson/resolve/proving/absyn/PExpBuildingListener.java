@@ -153,9 +153,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbol.PSymbolBuilder result =
                 new PSymbol.PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
-                        .incoming(
-                                ctx.getParent().getStart().toString()
-                                        .equals("@"))
+                        .incoming(ctx.AT() != null)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
