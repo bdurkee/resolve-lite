@@ -1,5 +1,9 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.model.AssertiveBlock;
+import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+
 import java.util.List;
 
 public interface StatRuleApplicationStrategy {
