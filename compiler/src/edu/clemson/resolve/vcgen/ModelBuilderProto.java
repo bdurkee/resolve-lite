@@ -107,6 +107,41 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.chunks.add(block.build());
     }
 
+    @Override public void enterTypeImplInit(
+            @NotNull Resolve.TypeImplInitContext ctx) {
+
+        PExp convention = currentTypeReprSym.getConvention();
+        PExp correspondence = currentTypeReprSym.getCorrespondence();
+        PExp typeInitEnsures = g.getTrueExp();
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                        "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
+                        .assume(getModuleLevelAssertionsOfType(requires()));
+        assertiveBlocks.push(block);
+    }
+
+    @Override public void exitTypeImplInit(
+            @NotNull Resolve.TypeImplInitContext ctx) {
+        PExp typeInitEnsures = g.getTrueExp();
+        PExp convention = currentTypeReprSym.getConvention();
+        PExp correspondence = currentTypeReprSym.getCorrespondence();
+        if ( currentTypeReprSym.getDefinition() != null ) {
+            typeInitEnsures =
+                    currentTypeReprSym.getDefinition().getProgramType()
+                            .getInitializationEnsures();
+        }
+        PExp newInitEnsures =
+                typeInitEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
+                        currentTypeReprSym.conceptualExemplarAsPSymbol());
+        newInitEnsures =
+                withCorrespondencePartsSubstituted(newInitEnsures,
+                        correspondence);
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        block.confirm(convention).finalConfirm(newInitEnsures);
+        outputFile.chunks.add(block.build());
+    }
+
     public List<Symbol> getFreeVars(Scope s) {
         return s.getSymbolsOfType(Symbol.class).stream()
                 .filter(x -> x instanceof ProgParameterSymbol ||
