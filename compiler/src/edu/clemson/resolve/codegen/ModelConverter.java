@@ -48,7 +48,7 @@ import java.util.*;
  * We identify those nested objects by the list of arguments in the template
  * definition. For example, here is the definition of the parser template:
  * 
- * {@pre Parser(parser, scopes, funcs) ::= <<...>>}
+ * {@code Parser(parser, scopes, funcs) ::= <<...>>}
  * <p>
  * The first template argument is always the output model object from which this
  * walker will create the template. Any other arguments identify the field names
@@ -75,6 +75,8 @@ public class ModelConverter {
         // CREATE TEMPLATE FOR THIS OUTPUT OBJECT
         Class<? extends OutputModelObject> cl = omo.getClass();
         String templateName = cl.getSimpleName();
+        if ( templates == null ) return new ST("[invalid]");
+
         ST st = templates.getInstanceOf(templateName);
         if ( st == null ) {
             compiler.errMgr.toolError(

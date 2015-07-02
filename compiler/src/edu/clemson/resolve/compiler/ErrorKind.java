@@ -156,8 +156,9 @@ public enum ErrorKind {
             + "<endif>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 31: no mapping to template name for output model
-     * class <em>class</em>.
+     * Compiler Error 31:
+     * <p>
+     * no mapping to template name for output model class <em>class</em>.</p>
      */
     NO_MODEL_TO_TEMPLATE_MAPPING(31, "no mapping to template name for output "
             + "model class <arg>", ErrorSeverity.ERROR),
@@ -190,8 +191,10 @@ public enum ErrorKind {
             + "<stackTrace; separator=\"\\n\"><endif>", ErrorSeverity.WARNING),
 
     /**
-     * Compiler Error 36: RESOLVE cannot generate <em>language</em> code as
-     * of version <em>version</em>.
+     * Compiler Error 36:
+     * <p>
+     * RESOLVE cannot generate <em>language</em> code as of version
+     * <em>version</em>.</p>
      */
     CANNOT_CREATE_TARGET_GENERATOR(36, "RESOLVE cannot generate <arg> code as "
             + "of version " + RESOLVECompiler.VERSION,

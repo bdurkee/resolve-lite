@@ -15,8 +15,7 @@ import java.io.Writer;
 
 public abstract class AbstractCodeGenerator {
 
-    public static final String TEMPLATE_ROOT =
-            "org/resolvelite/templates/codegen";
+    public static final String TEMPLATE_ROOT =  "edu/clemson/resolve/templates/codegen/";
 
     protected final String language;
     protected final RESOLVECompiler compiler;
