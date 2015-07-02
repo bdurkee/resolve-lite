@@ -504,7 +504,7 @@ progNamedExp
     ;
 
 progMemberExp
-    :   (progParamExp|progNamedExp) ('.' ID)+
+    :   (progParamExp|progNamedExp) (DOT ID)+
     ;
 
 progLiteralExp
