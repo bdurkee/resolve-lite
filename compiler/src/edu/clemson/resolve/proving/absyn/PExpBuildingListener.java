@@ -255,7 +255,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
         PSymbolBuilder result =
-                new PSymbolBuilder(Utils.getNameFromProgramOp(ctx.op.getText())
+                new PSymbolBuilder(Utils.convertProgramOp(ctx.op.getText())
                         .getText())
                         .arguments(
                                 Utils.collect(PExp.class, ctx.progExp(), repo))

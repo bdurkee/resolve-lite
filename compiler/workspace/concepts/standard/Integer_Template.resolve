@@ -1,9 +1,15 @@
 Concept Integer_Template;
     uses Basic_Integer_Theory;
 
+    Definition min_int: Z;
+    Definition max_int: Z;
+
     Type Family Integer is modeled by Z;
         exemplar i;
         initialization ensures i = 0;
 
+    Oper Sum(evaluates i, j : Integer) : Integer;
+        requires min_int <= i + j and i + j <= max_int;
+        ensures	Sum = (i + j);
 
 end Integer_Template;

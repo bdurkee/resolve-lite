@@ -57,6 +57,7 @@ conceptModule
 
 conceptBlock
     :   ( typeModelDecl
+        | mathDefinitionDecl
         | operationDecl
         )+
     ;
@@ -264,7 +265,7 @@ typeModelInit
 //So to save ourselves an extra redundant rule, we just allow it here.
 typeImplInit
     :   INIT (ensuresClause)?
-        (variableDeclGroup)* //(stmt)*
+        (variableDeclGroup)* (stmt)*
         END SEMI
     ;
 
@@ -372,7 +373,7 @@ constraintClause
     ;
 
 conventionClause
-    :   CONVENTION mathAssertionExp SEMI
+    :   CONVENTION mathAssertionExp (entailsClause)? SEMI
     ;
 
 correspondenceClause

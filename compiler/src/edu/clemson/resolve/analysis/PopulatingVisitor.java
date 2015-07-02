@@ -37,7 +37,6 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
-import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -109,7 +108,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
-    private Set<String> dependentTerms = new HashSet<>();
+    private ModuleScopeBuilder moduleScope = null;
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                    @NotNull SymbolTable symtab, AnnotatedTree annotatedTree) {
@@ -121,17 +120,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModule(@NotNull Resolve.ModuleContext ctx) {
-        symtab.startModuleScope(ctx, Utils.getModuleName(ctx)).addImports(
-                tr.imports.getImportsOfType(ImportCollection.ImportType.NAMED));
+        moduleScope = symtab.startModuleScope(ctx, Utils.getModuleName(ctx))
+                .addImports(tr.imports.getImportsOfType(
+                        ImportCollection.ImportType.NAMED));
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
     }
 
+    @Override public Void visitConceptImplModule(
+            @NotNull Resolve.ConceptImplModuleContext ctx) {
+        moduleScope.addDependentTerms(symtab.moduleScopes.get(
+                ctx.concept.getText()).getDependentTerms());
+        super.visitChildren(ctx);
+        return null;
+    }
+
     @Override public Void visitDependentTermOptions(
             @NotNull Resolve.DependentTermOptionsContext ctx) {
-        dependentTerms.addAll(ctx.ID().stream().map(TerminalNode::getText)
-                .collect(Collectors.toList()));
+        moduleScope.addDependentTerms(ctx.ID().stream()
+                .map(TerminalNode::getText).collect(Collectors.toList()));
         return null;
     }
 
@@ -826,10 +834,36 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProgInfixExp(
+            @NotNull Resolve.ProgInfixExpContext ctx) {
+        ctx.progExp().forEach(this::visit);
+        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
+        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        return null;
+    }
+
     @Override public Void visitProgParamExp(
             @NotNull Resolve.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         typeOperationSym(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+        return null;
+    }
+
+    @Override public Void visitProgIntegerExp(
+            @NotNull Resolve.ProgIntegerExpContext ctx) {
+        try {
+            ProgTypeSymbol integerType =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery("Std_Integer_Fac", "Integer",
+                                            false)).toProgTypeSymbol();
+            tr.progTypes.put(ctx, integerType.getProgramType());
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(),
+                    ctx.getStart(), "Integer");
+            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        }
         return null;
     }
 
@@ -838,10 +872,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     List<Resolve.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
-        Token opAsName = Utils.getNameFromProgramOp(name);
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
-                    new OperationQuery(qualifier, opAsName, argTypes,
+                    new OperationQuery(qualifier, name, argTypes,
                             SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                             SymbolTable.ImportStrategy.IMPORT_NAMED));
             tr.progTypes.put(ctx, opSym.getReturnType());
@@ -853,7 +886,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     .map(Resolve.ProgExpContext::getText)
                     .collect(Collectors.toList());
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                    ctx.getStart(), name, argStrList, argTypes);
+                    ctx.getStart(), name.getText(), argStrList, argTypes);
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
@@ -987,13 +1020,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ctx.mathFunctionApplicationExp().iterator();
         Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
         nextSeg = segsIter.next();
+        MTType curType = null;
         this.visit(nextSeg);
         if (nextSeg.getText().equals("conc")) {
             nextSeg = segsIter.next();
-            this.visit(nextSeg);
+            this.visit(nextSeg);    //type conc.
+            try {
+                ProgVariableSymbol programmaticExemplar =
+                        symtab.getInnermostActiveScope().queryForOne(
+                                new ProgVariableQuery(null, nextSeg.getStart(),
+                                        false));
+                PTRepresentation repr =
+                        ((PTRepresentation) programmaticExemplar
+                                .toProgVariableSymbol()
+                                .getProgramType());
+                try {
+                    curType = repr.getFamily().getModelType();
+                }
+                catch (NoneProvidedException e) {
+                    //if a model was not provided to us, then we're a locally defined
+                    //type representation and should not be referring to conceptual
+                    //variables (because there are none in this case).
+                    //Todo: give a better, more official error for this.
+                    e.printStackTrace();
+                }
+            }
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            curType = tr.mathTypes.get(nextSeg);
         }
 
-        MTType curType = tr.mathTypes.get(nextSeg);
         MTCartesian curTypeCartesian;
         while (segsIter.hasNext()) {
             lastSeg = nextSeg;
@@ -1224,7 +1283,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         catch (SymbolNotOfKindTypeException snokte) {
             if ( typeValueDepth > 0 ) {
                 //I had better identify a type
-                if (!dependentTerms.contains(symbolName)) {
+                if (!moduleScope.getDependentTerms().contains(symbolName)) {
                     compiler.errMgr
                             .semanticError(ErrorKind.INVALID_MATH_TYPE,
                                     ctx.getStart(), symbolName);
@@ -1274,7 +1333,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTType argTypeValue;
             for (ParserRuleContext arg : args) {
                 argTypeValue = tr.mathTypeValues.get(arg);
-                if (dependentTerms.contains(arg.getText())) {
+                if (moduleScope.getDependentTerms().contains(arg.getText())) {
                     argTypeValue = new MTNamed(g, arg.getText());
                 }
                 else if ( argTypeValue == null ) {

@@ -144,21 +144,56 @@ public class Utils {
         }
     }
 
-    public static Token getNameFromProgramOp(Token op) {
-        CommonToken result = new CommonToken(op);
+    public static BuiltInOpAttributes convertProgramOp(Token op) {
+        BuiltInOpAttributes result = new BuiltInOpAttributes(op);
         switch (op.getType()) {
-            case ResolveLexer.PLUS: result.setText("Sum");
-            case ResolveLexer.MINUS: result.setText("Difference");
-            case ResolveLexer.MULT: result.setText("Product");
-            case ResolveLexer.DIVIDE: result.setText("Divide");
-            case ResolveLexer.LTE: result.setText("Less_Or_Equal");
-            case ResolveLexer.LT: result.setText("Less");
-            case ResolveLexer.GTE: result.setText("Greater_Or_Equal");
-            case ResolveLexer.GT: result.setText("Greater");
-            case ResolveLexer.EQUALS: result.setText("Are_Equal");
-            case ResolveLexer.NEQUALS: result.setText("/=");
+            case ResolveLexer.PLUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Sum");
+                break;
+            case ResolveLexer.MINUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Difference");
+                break;
+            case ResolveLexer.MULT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Product");
+                break;
+            case ResolveLexer.DIVIDE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Divide");
+                break;
+            case ResolveLexer.LTE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less_Or_Equal");
+                break;
+            case ResolveLexer.LT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less");
+                break;
+            case ResolveLexer.GTE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater_Or_Equal");
+                break;
+            case ResolveLexer.GT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater");
+                break;
+            case ResolveLexer.EQUALS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Equal");
+                break;
+            case ResolveLexer.NEQUALS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Not_Equal");
+                break;
         }
         return result;
+    }
+
+    public static class BuiltInOpAttributes {
+        public CommonToken qualifier, name;
+
+        public BuiltInOpAttributes(Token op) {
+            this.name = new CommonToken(op);
+        }
+
+        public BuiltInOpAttributes(String qualifier, Token original,
+                                   String opAsText) {
+            this.name = new CommonToken(original);
+            this.name.setText(opAsText);
+            this.qualifier = new CommonToken(ResolveLexer.ID, qualifier);
+        }
     }
 
     public interface Builder<T> {
