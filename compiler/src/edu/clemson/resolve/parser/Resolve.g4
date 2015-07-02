@@ -102,7 +102,7 @@ enhancementImplModule
 //Todo: Apparently impls can have constraints too.
 implBlock
     :   ( typeRepresentationDecl
-        //| operationProcedureDecl
+        | operationProcedureDecl
         | procedureDecl
         | facilityDecl
         )+
@@ -120,6 +120,7 @@ facilityModule
 
 facilityBlock
     :   ( facilityDecl
+        | mathDefinitionDecl
         | operationProcedureDecl
         | typeRepresentationDecl
         )+
