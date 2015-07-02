@@ -47,8 +47,7 @@ import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.rsrg.semantics.SymbolTable;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.*;
@@ -385,6 +384,102 @@ public  class RESOLVECompiler {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
         return null;
+    }
+
+    /**
+     * This method is used by all code generators to create new output
+     * files. If the outputDir set by -o is not present it will be created.
+     * The final filename is sensitive to the output directory and
+     * the directory where the grammar file was found. If -o is /tmp
+     * and the original resolve file was foo/T.facility then output files
+     * go in /tmp/foo.
+     *
+     * The output dir -o spec takes precedence if it's absolute.
+     * E.g., if the grammar file dir is absolute the output dir is given
+     * precendence. "-o /tmp /usr/lib/T.facility" results in "/tmp/T.java" as
+     * output (assuming T.facility holds T.java).
+     *
+     * If no -o is specified, then just write to the directory where the
+     * grammar file was found.
+     *
+     * If outputDirectory==null then write a String.
+     */
+    public Writer getOutputFileWriter(AnnotatedTree t, String fileName)
+            throws IOException {
+        if ( outputDirectory == null ) {
+            return new StringWriter();
+        }
+        // output directory is a function of where the file lives
+        // for subdir/T.facility, you get subdir here.  Well, depends on -o etc...
+        File outputDir = getOutputDirectory(t.getFileName());
+        File outputFile = new File(outputDir, fileName);
+
+        if ( !outputDir.exists() ) {
+            outputDir.mkdirs();
+        }
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        OutputStreamWriter osw;
+        osw = new OutputStreamWriter(fos);
+
+        return new BufferedWriter(osw);
+    }
+
+    /**
+     * Return the location where the compiler will generate output files for a
+     * given file. This is a base directory and output files will be relative to
+     * here in some cases such as when -o option is used and input files are
+     * given relative to the input directory.
+     *
+     * @param fileNameWithPath path to input source
+     */
+    public File getOutputDirectory(String fileNameWithPath) {
+        File outputDir;
+        String fileDirectory;
+
+        // Some files are given to us without a PATH but should should
+        // still be written to the output directory in the relative path of
+        // the output directory. The file directory is either the set of sub directories
+        // or just or the relative path recorded for the parent file.
+        if ( fileNameWithPath.lastIndexOf(File.separatorChar) == -1 ) {
+            // No path is included in the file name, so make the file
+            // directory the same as the parent module (which might sitll be just ""
+            // but when it is not, we will write the file in the correct place.
+            fileDirectory = ".";
+
+        }
+        else {
+            fileDirectory =
+                    fileNameWithPath.substring(0,
+                            fileNameWithPath.lastIndexOf(File.separatorChar));
+        }
+        if ( haveOutputDir ) {
+            // -o /tmp /var/lib/T.facility => /tmp/T.java
+            // -o subdir/output /usr/lib/T.facility => subdir/output/T.java
+            // -o . /usr/lib/T.facility => ./T.java
+            if ( fileDirectory != null
+                    && (new File(fileDirectory).isAbsolute() || fileDirectory
+                    .startsWith("~")) ) { // isAbsolute doesn't count this :(
+                // somebody set the dir, it takes precendence; write new file there
+                outputDir = new File(outputDirectory);
+            }
+            else {
+                // -o /tmp subdir/t.facility => /tmp/subdir/t.facility
+                if ( fileDirectory != null ) {
+                    outputDir = new File(outputDirectory, fileDirectory);
+                }
+                else {
+                    outputDir = new File(outputDirectory);
+                }
+            }
+        }
+        else {
+            // they didn't specify a -o dir so just write to location
+            // where module is, absolute or relative, this will only happen
+            // with command line invocation as build tools will always
+            // supply an output directory.
+            outputDir = new File(fileDirectory);
+        }
+        return outputDir;
     }
 
     public void log(@Nullable String component, String msg) {

@@ -273,6 +273,32 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitOperationProcedureDecl(
+            @NotNull Resolve.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
+                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+            } catch (DuplicateSymbolException e) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        ctx.stmt().forEach(this::visit);
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
     private void insertFunction(Token name, Resolve.TypeContext type,
             Resolve.RequiresClauseContext requires,
             Resolve.EnsuresClauseContext ensures, ParserRuleContext ctx) {
