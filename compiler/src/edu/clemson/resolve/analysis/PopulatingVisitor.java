@@ -82,12 +82,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private ProgTypeModelSymbol currentTypeModelSym = null;
 
-    protected RESOLVECompiler compiler;
-    protected SymbolTable symtab;
-    protected AnnotatedTree tr;
-    protected TypeGraph g;
+    private RESOLVECompiler compiler;
+    private SymbolTable symtab;
+    private AnnotatedTree tr;
+    private TypeGraph g;
 
-    protected int typeValueDepth = 0;
+    private int typeValueDepth = 0;
+    private int globalSpecCount = 0;
 
     /**
      * Any quantification-introducing syntactic context (e.g., an
@@ -740,6 +741,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
+        if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+        }
         return null;
     }
 
@@ -754,6 +758,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull Resolve.ConstraintClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
+        if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
+            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+        }
         return null;
     }
 
@@ -1454,10 +1461,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 if ( comparison.compare(e, eType, candidateType) ) {
                     if ( match != null ) {
-                        compiler.errMgr.semanticError(
+                       /* compiler.errMgr.semanticError(
                                 ErrorKind.AMBIGIOUS_DOMAIN,null, match
                                         .getName(), match.getType(), candidate
-                                        .getName(), candidate.getType());
+                                        .getName(), candidate.getType());*/
                         return match;
                     }
                     match = candidate;
@@ -1527,6 +1534,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         @Override public String description() {
             return "inexact";
+        }
+    }
+
+    private void insertGlobalAssertion(ParserRuleContext ctx,
+                            Resolve.MathAssertionExpContext assertion) {
+        String name = ctx.getText() + "_" + globalSpecCount++;
+        PExp assertionAsPExp = getPExpFor(assertion);
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, ctx,
+                            getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
         }
     }
 

@@ -1,6 +1,7 @@
 package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.typereasoning.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -41,6 +42,11 @@ public class AnnotatedTree {
         else {
             this.imports = new ImportCollection();
         }
+    }
+
+    public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
+        PExp result = mathPExps.get(ctx);
+        return result != null ? result : g.getTrueExp();
     }
 
     @NotNull public String getName() {

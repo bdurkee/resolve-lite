@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.MTFunction;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
+import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,8 +34,8 @@ public class PSymbol extends PExp {
 
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.lprint, builder.rprint,
-                builder.arguments.iterator()), builder.mathType,
-                builder.mathTypeValue);
+                        builder.arguments.iterator()), builder.mathType,
+                builder.mathTypeValue, builder.progType, builder.progTypeValue);
         this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -171,7 +172,9 @@ public class PSymbol extends PExp {
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
                         .mathType(getMathType()) //
-                        .mathTypeValue(getMathTypeValue()).build();
+                        .mathTypeValue(getMathTypeValue()) //
+                        .progType(getProgType()) //
+                        .progTypeValue(getProgTypeValue()).build();
                 PExp functionSubstitution = substitutions.get(asVariable);
 
                 if ( functionSubstitution != null ) {
@@ -201,7 +204,8 @@ public class PSymbol extends PExp {
                     .mathTypeValue(getMathTypeValue()) //
                     .quantification(newQuantification) //
                     .arguments(newArgs).style(dispStyle) //
-                    .incoming(incomingFlag).build();
+                    .incoming(incomingFlag).progType(getProgType()) //
+                    .progTypeValue(getProgTypeValue()).build();
         }
         return result;
     }
@@ -259,7 +263,8 @@ public class PSymbol extends PExp {
                         leftPrint, rightPrint) : new PSymbolBuilder(name);
         PSymbolBuilder result =
                 temp.mathType(getMathType()).mathTypeValue(getMathTypeValue())
-                        .style(dispStyle).quantification(quantification);
+                        .style(dispStyle).quantification(quantification)
+                        .progType(getProgType()).progTypeValue(getProgTypeValue());
         for (PExp arg : arguments) {
             result.arguments(arg.withIncomingSignsErased());
         }
@@ -273,6 +278,7 @@ public class PSymbol extends PExp {
         return new PSymbolBuilder(name).literal(literalFlag)
                 .incoming(incomingFlag).style(dispStyle).arguments(flippedArgs)
                 .mathType(getMathType()).mathTypeValue(getMathTypeValue())
+                .progType(getProgType()).progTypeValue(getProgTypeValue())
                 .quantification(this.quantification.flipped()).build();
     }
 
@@ -413,6 +419,7 @@ public class PSymbol extends PExp {
         protected DisplayStyle style = DisplayStyle.PREFIX;
         protected Quantification quantification = Quantification.NONE;
         protected MTType mathType, mathTypeValue;
+        protected PTType progType, progTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
 
         public PSymbolBuilder(String name) {
@@ -456,6 +463,16 @@ public class PSymbol extends PExp {
 
         public PSymbolBuilder mathTypeValue(MTType e) {
             this.mathTypeValue = e;
+            return this;
+        }
+
+        public PSymbolBuilder progType(PTType e) {
+            this.progType = e;
+            return this;
+        }
+
+        public PSymbolBuilder progTypeValue(PTType e) {
+            this.progTypeValue = e;
             return this;
         }
 

@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
 
@@ -10,25 +11,56 @@ public abstract class PExp {
     public final int valueHash;
     private final MTType type, typeValue;
 
+    /**
+     * Since the removal of the Exp hierarchy, the role of PExps has
+     * expanded considerably.
+     * <p>
+     * In other words, if this {@code PExp} was born out of a
+     * programmatic expression (for vcgen), program type info should be
+     * present, if not, then these should/will be {@code null}.</p>
+     */
+    private final PTType progType, progTypeValue;
+
     private Set<String> cachedSymbolNames = null;
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
     public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
-        this(hashes.structureHash, hashes.valueHash, type, typeValue);
+        this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
+                null);
+    }
+
+    public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue,
+                PTType progType, PTType progTypeValue) {
+        this(hashes.structureHash, hashes.valueHash, type, typeValue, progType,
+                progTypeValue);
+    }
+
+    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
+        this(structureHash, valueHash, type, typeValue, null, null);
     }
 
     public PExp(int structureHash, int valueHash, MTType type,
-                MTType typeValue) {
+                MTType typeValue, PTType progType, PTType progTypeValue) {
         this.type = type;
         this.typeValue = typeValue;
+        this.progType = progType;
+        this.progTypeValue = progTypeValue;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
     }
 
     @Override public int hashCode() {
         return valueHash;
+    }
+
+    public final PTType getProgType() {
+        return progType;
+    }
+
+    public final PTType getProgTypeValue() {
+        return progTypeValue;
     }
 
     public final MTType getMathType() {

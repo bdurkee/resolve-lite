@@ -36,6 +36,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
+import edu.clemson.resolve.vcgen.VCGenPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
@@ -240,14 +241,14 @@ public  class RESOLVECompiler {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        //VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
+        VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
         //codegenPipe.process();
-        //vcsPipe.process();
+        vcsPipe.process();
     }
 
     public List<AnnotatedTree> sortTargetModulesByUsesReferences() {

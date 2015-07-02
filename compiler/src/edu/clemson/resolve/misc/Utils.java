@@ -94,10 +94,10 @@ public class Utils {
     /**
      * Returns a list of {@code E} given: an expected type {@code T}, some
      * number
-     * of concrete syntax {@code nodes}, and mapping from rule contexts to
+     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
      * some number of elements descending from {@code E}.
      *
-     * @param expectedType The class type to inhabit the returned container
+     * @param expectedType The class type to inhabit the returned list
      * @param nodes A list of concrete syntax nodes, as obtained through
      *        a visitor, listener, etc.
      * @param annotations A map from rule context to the primary supertype
