@@ -11,11 +11,11 @@ import org.stringtemplate.v4.ST;
 
 public class VCGenerator extends AbstractCodeGenerator {
 
-    public static final String DEFAULT_LANGUAGE = "vcs";
+    public static final String LANGUAGE = "vcs";
 
     public VCGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget)
             throws IllegalStateException {
-        super(rc, rootTarget, DEFAULT_LANGUAGE);
+        super(rc, rootTarget, LANGUAGE);
     }
 
     private OutputModelObject buildVCOutputModel() {
@@ -25,8 +25,7 @@ public class VCGenerator extends AbstractCodeGenerator {
         return o.getOutputFile();
     }
 
-    @Nullable
-    public ST generateAssertions() {
+    @Nullable public ST generateAssertions() {
         return walk(buildVCOutputModel());
     }
 

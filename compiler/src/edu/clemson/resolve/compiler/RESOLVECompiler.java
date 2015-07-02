@@ -392,13 +392,13 @@ public  class RESOLVECompiler {
      * files. If the outputDir set by -o is not present it will be created.
      * The final filename is sensitive to the output directory and
      * the directory where the grammar file was found. If -o is /tmp
-     * and the original resolve file was foo/T.facility then output files
+     * and the original resolve file was foo/T.resolve then output files
      * go in /tmp/foo.
      *
      * The output dir -o spec takes precedence if it's absolute.
      * E.g., if the grammar file dir is absolute the output dir is given
-     * precendence. "-o /tmp /usr/lib/T.facility" results in "/tmp/T.java" as
-     * output (assuming T.facility holds T.java).
+     * precendence. "-o /tmp /usr/lib/T.resolve" results in "/tmp/T.java" as
+     * output (assuming T.resolve holds T.java).
      *
      * If no -o is specified, then just write to the directory where the
      * grammar file was found.
@@ -411,7 +411,7 @@ public  class RESOLVECompiler {
             return new StringWriter();
         }
         // output directory is a function of where the file lives
-        // for subdir/T.facility, you get subdir here.  Well, depends on -o etc...
+        // for subdir/T.resolve, you get subdir here.  Well, depends on -o etc...
         File outputDir = getOutputDirectory(t.getFileName());
         File outputFile = new File(outputDir, fileName);
 
@@ -454,9 +454,9 @@ public  class RESOLVECompiler {
                             fileNameWithPath.lastIndexOf(File.separatorChar));
         }
         if ( haveOutputDir ) {
-            // -o /tmp /var/lib/T.facility => /tmp/T.java
-            // -o subdir/output /usr/lib/T.facility => subdir/output/T.java
-            // -o . /usr/lib/T.facility => ./T.java
+            // -o /tmp /var/lib/T.resolve => /tmp/T.java
+            // -o subdir/output /usr/lib/T.resolve => subdir/output/T.java
+            // -o . /usr/lib/T.resolve => ./T.java
             if ( fileDirectory != null
                     && (new File(fileDirectory).isAbsolute() || fileDirectory
                     .startsWith("~")) ) { // isAbsolute doesn't count this :(
@@ -464,7 +464,7 @@ public  class RESOLVECompiler {
                 outputDir = new File(outputDirectory);
             }
             else {
-                // -o /tmp subdir/t.facility => /tmp/subdir/t.facility
+                // -o /tmp subdir/t.resolve => /tmp/subdir/t.resolve
                 if ( fileDirectory != null ) {
                     outputDir = new File(outputDirectory, fileDirectory);
                 }

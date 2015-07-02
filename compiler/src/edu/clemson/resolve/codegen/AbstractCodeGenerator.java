@@ -31,9 +31,7 @@ public abstract class AbstractCodeGenerator {
         this.module = rootTarget;
         this.language = language;
         this.templates = loadTemplates();
-        if ( templates == null ) {
-            throw new IllegalStateException();
-        }
+        //if (templates == null) throw new IllegalStateException();
     }
 
     @NotNull public AnnotatedTree getModule() {
