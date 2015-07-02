@@ -18,13 +18,11 @@ public class VCGenPipeline extends AbstractCompilationPipeline {
     @Override public void process() {
         for (AnnotatedTree unit : compilationUnits) {
             if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
-                    VCGenerator gen = new VCGenerator(compiler, unit);
-                    compiler.info("generating vcs for: " + unit.getName());
+                VCGenerator gen = new VCGenerator(compiler, unit);
+                compiler.info("generating vcs for: " + unit.getName());
 
-                    ST x = gen.generateAssertions();
-                    System.out.println(x.render());
-
-
+                ST x = gen.generateAssertions();
+                System.out.println(x.render());
             }
         }
     }

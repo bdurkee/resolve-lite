@@ -445,7 +445,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             symtab.getInnermostActiveScope().define(new ProgReprTypeSymbol(g,
                             ctx.name.getText(), ctx, getRootModuleID(),
-                            typeDefnSym, reprType, convention, null));
+                            typeDefnSym, reprType, convention, correspondence));
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
