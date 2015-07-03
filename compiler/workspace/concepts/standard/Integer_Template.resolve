@@ -12,6 +12,10 @@ Concept Integer_Template;
         requires min_int <= i + j and i + j <= max_int;
         ensures	Sum = (i + j);
 
+    Operation Difference (evaluates i, j: Integer): Integer;
+        requires min_int <= i - j and i - j <= max_int;
+        ensures Difference = (i - j);
+
     Oper Increment (updates i : Integer);
         requires i + 1 <= max_int;
         ensures	i = @i + 1;

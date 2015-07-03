@@ -176,7 +176,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-
     public List<Symbol> getFreeVars(Scope s) {
         return s.getSymbolsOfType(Symbol.class).stream()
                 .filter(x -> x instanceof ProgParameterSymbol ||

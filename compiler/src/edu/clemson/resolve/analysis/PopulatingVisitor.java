@@ -351,6 +351,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitFacilityDecl(
             @NotNull Resolve.FacilityDeclContext ctx) {
+        ctx.moduleArgumentList().forEach(this::visit);
         int i = 0;
         try {
             List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
@@ -741,10 +742,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitRequiresClause(
             @NotNull Resolve.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
+        if ( ctx.entailsClause() != null ) this.visit(ctx.entailsClause());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
             insertGlobalAssertion(ctx, ctx.mathAssertionExp());
         }
+        return null;
+    }
+
+    @Override public Void visitEntailsClause(
+            @NotNull Resolve.EntailsClauseContext ctx) {
+        this.visitChildren(ctx);    //Todo : For now.
         return null;
     }
 
@@ -825,6 +833,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitModuleArgument(
+            @NotNull Resolve.ModuleArgumentContext ctx) {
+        this.visit(ctx.progExp());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
+        return null;
+    }
+
     @Override public Void visitProgMemberExp(
             @NotNull Resolve.ProgMemberExpContext ctx) {
         ParseTree firstRecordRef = ctx.getChild(0);
@@ -893,11 +909,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     new NameQuery("Std_Integer_Fac", "Integer",
                                             false)).toProgTypeSymbol();
             tr.progTypes.put(ctx, integerType.getProgramType());
+            tr.mathTypes.put(ctx, integerType.getModelType());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(),
                     ctx.getStart(), "Integer");
             tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+            tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
         }
         return null;
     }
