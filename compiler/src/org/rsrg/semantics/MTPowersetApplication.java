@@ -1,7 +1,5 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.typereasoning.TypeGraph;
-
 public class MTPowersetApplication extends MTFunctionApplication {
 
     public MTPowersetApplication(TypeGraph g, MTType argument) {

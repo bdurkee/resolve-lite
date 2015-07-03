@@ -6,7 +6,7 @@ import org.rsrg.semantics.NoneProvidedException;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
 import org.rsrg.semantics.symbol.ProgTypeModelSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 
 import java.util.Map;
 

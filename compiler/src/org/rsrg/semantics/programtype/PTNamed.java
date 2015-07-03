@@ -1,7 +1,7 @@
 package org.rsrg.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 
 /**
  * Named types for which we know initialization and exemplar info. Note then

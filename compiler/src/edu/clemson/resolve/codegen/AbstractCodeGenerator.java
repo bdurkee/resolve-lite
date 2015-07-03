@@ -4,7 +4,6 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.stringtemplate.v4.*;
@@ -15,7 +14,7 @@ import java.io.Writer;
 
 public abstract class AbstractCodeGenerator {
 
-    public static final String TEMPLATE_ROOT =  "edu/clemson/resolve/templates/codegen/";
+    public static final String TEMPLATE_ROOT = "edu/clemson/resolve/templates/codegen";
 
     protected final String language;
     protected final RESOLVECompiler compiler;
@@ -25,12 +24,11 @@ public abstract class AbstractCodeGenerator {
     public final int lineWidth = 72;
 
     public AbstractCodeGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget,
-                                 String language) throws IllegalStateException {
+                                 String language) {
         this.compiler = rc;
         this.module = rootTarget;
         this.language = language;
         this.templates = loadTemplates();
-        //if (templates == null) throw new IllegalStateException();
     }
 
     @NotNull public AnnotatedTree getModule() {
@@ -72,7 +70,7 @@ public abstract class AbstractCodeGenerator {
 
     @Nullable public STGroup loadTemplates() {
         String groupFileName =
-                CodeGenerator.TEMPLATE_ROOT + "/" + language + "/" + language
+                TEMPLATE_ROOT + "/" + language
                         + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {

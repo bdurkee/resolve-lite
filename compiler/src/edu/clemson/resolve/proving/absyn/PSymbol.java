@@ -1,7 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;

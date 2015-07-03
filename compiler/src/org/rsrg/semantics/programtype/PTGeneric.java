@@ -3,7 +3,7 @@ package org.rsrg.semantics.programtype;
 import org.rsrg.semantics.MTNamed;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 
 import java.util.Map;
 

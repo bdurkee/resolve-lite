@@ -8,7 +8,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSegments;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.StatRuleApplicationStrategy;
@@ -19,7 +19,6 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 

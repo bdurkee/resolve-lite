@@ -3,9 +3,8 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSegments;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.rsrg.semantics.programtype.PTRepresentation;
 import org.rsrg.semantics.programtype.PTType;
 

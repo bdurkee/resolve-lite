@@ -1,7 +1,6 @@
-package edu.clemson.resolve.typereasoning;
+package org.rsrg.semantics;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import org.rsrg.semantics.MTType;
 
 import java.util.Map;
 

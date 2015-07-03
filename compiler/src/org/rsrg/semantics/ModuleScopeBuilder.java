@@ -1,8 +1,6 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.typereasoning.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
 

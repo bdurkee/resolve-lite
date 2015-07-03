@@ -1,6 +1,6 @@
 package org.rsrg.semantics.programtype;
 
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 

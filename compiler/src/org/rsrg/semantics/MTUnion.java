@@ -1,7 +1,6 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.typereasoning.TypeGraph;
 
 import java.util.*;
 

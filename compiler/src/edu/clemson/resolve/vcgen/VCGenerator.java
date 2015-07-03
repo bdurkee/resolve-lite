@@ -13,8 +13,7 @@ public class VCGenerator extends AbstractCodeGenerator {
 
     public static final String LANGUAGE = "vcs";
 
-    public VCGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget)
-            throws IllegalStateException {
+    public VCGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget) {
         super(rc, rootTarget, LANGUAGE);
     }
 

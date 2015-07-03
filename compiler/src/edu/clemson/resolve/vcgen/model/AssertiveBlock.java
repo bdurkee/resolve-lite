@@ -5,7 +5,7 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.*;

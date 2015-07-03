@@ -4,7 +4,7 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.symbol.Symbol;

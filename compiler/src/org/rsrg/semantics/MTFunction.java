@@ -1,9 +1,7 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.misc.Utils.Builder;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.typereasoning.TypeGraph;
 
 import java.util.*;
 

@@ -42,7 +42,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -132,7 +132,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitConceptImplModule(
             @NotNull Resolve.ConceptImplModuleContext ctx) {
         moduleScope.addDependentTerms(symtab.moduleScopes.get(
-                ctx.concept.getText()).getDependentTerms());
+                ctx.concept.getText()).getDependentTerms())
+                .addParentSpecificationRelationship(ctx.concept.getText());
         super.visitChildren(ctx);
         return null;
     }
