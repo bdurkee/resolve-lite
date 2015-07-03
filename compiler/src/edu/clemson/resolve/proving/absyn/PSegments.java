@@ -44,6 +44,7 @@ public class PSegments extends PExp {
     }
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+        
         PExp result = substitutions.get(this);
 
         if ( result == null ) {

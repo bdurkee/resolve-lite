@@ -205,7 +205,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
             PSymbol eAsPSym = (PSymbol) e;
             PSegments elhs = (PSegments) eAsPSym.getArguments().get(0);
-            PSymbol erhs = (PSymbol) eAsPSym.getArguments().get(1);
+            PExp erhs = eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }
         return start;
