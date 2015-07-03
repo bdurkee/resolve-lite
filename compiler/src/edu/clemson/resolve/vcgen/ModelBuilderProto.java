@@ -109,7 +109,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterTypeImplInit(
             @NotNull Resolve.TypeImplInitContext ctx) {
-
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
@@ -141,6 +140,42 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.confirm(convention).finalConfirm(newInitEnsures);
         outputFile.chunks.add(block.build());
     }
+
+    //-----------------------------------------------
+    // S T A T S
+    //-----------------------------------------------
+
+    @Override public void exitStmt(@NotNull Resolve.StmtContext ctx) {
+        stats.put(ctx, stats.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitCallStmt(
+            @NotNull Resolve.CallStmtContext ctx) {
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
+                        .progParamExp()));
+        stats.put(ctx, s);
+    }
+
+    @Override public void exitSwapStmt(
+            @NotNull Resolve.SwapStmtContext ctx) {
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                        SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
+                        tr.mathPExps.get(ctx.right));
+        stats.put(ctx, s);
+    }
+
+    @Override public void exitAssignStmt(
+            @NotNull Resolve.AssignStmtContext ctx) {
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                        FUNCTION_ASSIGN_APPLICATION,
+                        tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
+        stats.put(ctx, s);
+    }
+
 
     public List<Symbol> getFreeVars(Scope s) {
         return s.getSymbolsOfType(Symbol.class).stream()
