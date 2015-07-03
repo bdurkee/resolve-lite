@@ -32,6 +32,7 @@ package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -93,10 +94,10 @@ public class Utils {
     /**
      * Returns a list of {@code E} given: an expected type {@code T}, some
      * number
-     * of concrete syntax {@code nodes}, and mapping from rule contexts to
+     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
      * some number of elements descending from {@code E}.
      *
-     * @param expectedType The class type to inhabit the returned container
+     * @param expectedType The class type to inhabit the returned list
      * @param nodes A list of concrete syntax nodes, as obtained through
      *        a visitor, listener, etc.
      * @param annotations A map from rule context to the primary supertype
@@ -116,18 +117,82 @@ public class Utils {
         if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
-        int moduleType = ((ParserRuleContext)ctx).getStart().getType();
-        switch(moduleType) {
-            case ResolveLexer.PRECIS:
-                return ((Resolve.PrecisModuleContext) ctx).name.getText();
-            case ResolveLexer.CONCEPT:
-                return ((Resolve.ConceptModuleContext) ctx).name.getText();
-            case ResolveLexer.FACILITY:
-                return ((Resolve.FacilityModuleContext) ctx).name.getText();
-            case ResolveLexer.IMPL:
-                return ((Resolve.ConceptImplModuleContext) ctx).name.getText();
-            default:
-                throw new IllegalArgumentException("unrecognized module type");
+
+        if ( ctx instanceof Resolve.PrecisModuleContext ) {
+            return ((Resolve.PrecisModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.ConceptModuleContext ) {
+            return ((Resolve.ConceptModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.FacilityModuleContext ) {
+            return ((Resolve.FacilityModuleContext) ctx).name.getText();
+        }
+        else if ( ctx instanceof Resolve.ConceptImplModuleContext ) {
+            return ((Resolve.ConceptImplModuleContext) ctx).name
+                    .getText();
+        }
+        else if ( ctx instanceof Resolve.EnhancementModuleContext ) {
+            return ((Resolve.EnhancementModuleContext) ctx).name
+                    .getText();
+        }
+        else if ( ctx instanceof Resolve.EnhancementImplModuleContext ) {
+            return ((Resolve.EnhancementImplModuleContext) ctx).name
+                    .getText();
+        }
+        else {
+            throw new IllegalArgumentException("unrecognized module");
+        }
+    }
+
+    public static BuiltInOpAttributes convertProgramOp(Token op) {
+        BuiltInOpAttributes result = new BuiltInOpAttributes(op);
+        switch (op.getType()) {
+            case ResolveLexer.PLUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Sum");
+                break;
+            case ResolveLexer.MINUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Difference");
+                break;
+            case ResolveLexer.MULT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Product");
+                break;
+            case ResolveLexer.DIVIDE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Divide");
+                break;
+            case ResolveLexer.LTE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less_Or_Equal");
+                break;
+            case ResolveLexer.LT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less");
+                break;
+            case ResolveLexer.GTE:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater_Or_Equal");
+                break;
+            case ResolveLexer.GT:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater");
+                break;
+            case ResolveLexer.EQUALS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Equal");
+                break;
+            case ResolveLexer.NEQUALS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Not_Equal");
+                break;
+        }
+        return result;
+    }
+
+    public static class BuiltInOpAttributes {
+        public CommonToken qualifier, name;
+
+        public BuiltInOpAttributes(Token op) {
+            this.name = new CommonToken(op);
+        }
+
+        public BuiltInOpAttributes(String qualifier, Token original,
+                                   String opAsText) {
+            this.name = new CommonToken(original);
+            this.name.setText(opAsText);
+            this.qualifier = new CommonToken(ResolveLexer.ID, qualifier);
         }
     }
 

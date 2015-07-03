@@ -1,8 +1,6 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.typereasoning.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
 
@@ -19,6 +17,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
      * will always contain at least one element.
      */
     private Set<String> relatedModules = new HashSet<>();
+    private Set<String> dependentTerms = new HashSet<>();
 
     ModuleScopeBuilder(TypeGraph g, String name, ParserRuleContext definingTree,
                        Scope parent, SymbolTable symbolTable) {
@@ -48,6 +47,15 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     public boolean imports(String i) {
         return i.equals(getModuleID()) || importedModules.contains(i);
+    }
+
+    public ModuleScopeBuilder addDependentTerms(Collection<String> terms) {
+        dependentTerms.addAll(terms);
+        return this;
+    }
+
+    public Set<String> getDependentTerms() {
+        return dependentTerms;
     }
 
     public Set<String> getRelatedModules() {

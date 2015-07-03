@@ -45,6 +45,7 @@ DEPENDENT		:	'DependentTerms'				;
 DO 				:	'do'							;
 END         	:   'end'							;
 ENTAILS			:	'which_entails'					;
+ENHANCEMENT		:	'Enhancement'					;
 EXISTS			:	'Exists'						;
 EXTERNALLY		:	'externally'					;
 EXEMPLAR		:	'exemplar'						;

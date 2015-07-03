@@ -1,7 +1,5 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.typereasoning.TypeGraph;
-
 import java.util.List;
 
 public interface FunctionApplicationFactory {

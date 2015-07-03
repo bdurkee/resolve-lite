@@ -1,10 +1,9 @@
-package edu.clemson.resolve.typereasoning;
+package org.rsrg.semantics;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.DisplayStyle;
-import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;

@@ -101,14 +101,14 @@ public abstract class BaseTest {
     }
 
     protected ErrorCollector resolve(String moduleFileName, String moduleStr,
-                                     boolean defaultListener, String ... extraOptions) {
+                             boolean defaultListener, String ... extraOptions) {
         mkdir(tmpdir);
         writeFile(tmpdir, moduleFileName, moduleStr);
         return resolve(moduleFileName, defaultListener, extraOptions);
     }
 
     protected ErrorCollector resolve(String moduleFileName,
-                                     boolean defaultListener, String ... extraOptions) {
+                             boolean defaultListener, String ... extraOptions) {
         final List<String> options = new ArrayList<>();
         Collections.addAll(options, extraOptions);
         if ( !options.contains("-o") ) {

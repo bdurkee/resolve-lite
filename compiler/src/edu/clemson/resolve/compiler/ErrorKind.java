@@ -140,11 +140,65 @@ public enum ErrorKind {
             + "operation", ErrorSeverity.ERROR),
 
     /**
-     * Compiler error 22: "illegal member access expression: <em>exp</em>;
+     * Compiler Error 22: "illegal member access expression: <em>exp</em>;
      * <em>exp first-component</em> must refer to a record".
      */
     ILLEGAL_MEMBER_ACCESS(22, "illegal member access expression: <arg>; <arg2>"
-            + " must refer to a record/aggregate type", ErrorSeverity.ERROR);
+            + " must refer to a record/aggregate type", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 30: no operation found corresponding to call
+     * <em>callname</em> with the following arguments: <em>arg : type ...</em>"
+     */
+    NO_SUCH_OPERATION(30, "no operation found corresponding to call "
+            + "<arg> <if(arg2)>" + "with the following arguments: "
+            + "[<arg2, arg3 : {name,type| <name> : <type>}; separator={,\n}>]"
+            + "<endif>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 31:
+     * <p>
+     * no mapping to template name for output model class <em>class</em>.</p>
+     */
+    NO_MODEL_TO_TEMPLATE_MAPPING(31, "no mapping to template name for output "
+            + "model class <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 32: missing code generation template <em>template</em>.
+     */
+    CODE_GEN_TEMPLATES_INCOMPLETE(32, "missing code generation template <arg>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 33: code generation template <em>template</em> has
+     * missing, misnamed, or incomplete arg list; missing <em>field</em>.
+     */
+    CODE_TEMPLATE_ARG_ISSUE(33, "code generation template <arg> has missing, "
+            + "misnamed, or incomplete arg list; missing <arg2>",
+            ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Error 34: can't find code generation templates: <em>group</em>.
+     */
+    MISSING_CODE_GEN_TEMPLATES(34,
+            "can't find code generation templates: <arg>", ErrorSeverity.ERROR),
+
+    /**
+     * Compiler Warning 35: template error: <em>message</em>.
+     */
+    STRING_TEMPLATE_WARNING(35, "template error: <arg> "
+            + "<arg2><if(exception&&verbose)>: <exception>"
+            + "<stackTrace; separator=\"\\n\"><endif>", ErrorSeverity.WARNING),
+
+    /**
+     * Compiler Error 36:
+     * <p>
+     * RESOLVE cannot generate <em>language</em> code as of version
+     * <em>version</em>.</p>
+     */
+    CANNOT_CREATE_TARGET_GENERATOR(36, "RESOLVE cannot generate <arg> code as "
+            + "of version " + RESOLVECompiler.VERSION,
+            ErrorSeverity.ERROR_ONE_OFF);
 
     public final int code;
     public final String message;

@@ -4,6 +4,7 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -127,10 +128,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixExp(
             @NotNull Resolve.MathInfixExpContext ctx) {
-        PSymbol.PSymbolBuilder result =
-                new PSymbol.PSymbolBuilder(ctx.op.getText())
-                        .arguments(
-                                Utils.collect(PExp.class, ctx.mathExp(), repo))
+        PSymbolBuilder result =
+                new PSymbolBuilder(ctx.op.getText())
+                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
                         .style(PSymbol.DisplayStyle.INFIX)
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
@@ -139,8 +139,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathOutfixExp(
             @NotNull Resolve.MathOutfixExpContext ctx) {
-        PSymbol.PSymbolBuilder result =
-                new PSymbol.PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText()) //
+        PSymbolBuilder result =
+                new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText()) //
                         .arguments(repo.get(ctx.mathExp())) //
                         .style(PSymbol.DisplayStyle.OUTFIX) //
                         .mathTypeValue(getMathTypeValue(ctx)) //
@@ -150,12 +150,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathVariableExp(
             @NotNull Resolve.MathVariableExpContext ctx) {
-        PSymbol.PSymbolBuilder result =
-                new PSymbol.PSymbolBuilder(ctx.name.getText())
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
-                        .incoming(
-                                ctx.getParent().getStart().toString()
-                                        .equals("@"))
+                        .incoming(ctx.AT() != null)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
@@ -210,10 +207,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathFunctionExp(
             @NotNull Resolve.MathFunctionExpContext ctx) {
         List<PExp> s = Utils.collect(PExp.class, ctx.mathExp(), repo);
-        PSymbol.PSymbolBuilder result =
-                new PSymbol.PSymbolBuilder(ctx.name.getText())
-                        .arguments(
-                                Utils.collect(PExp.class, ctx.mathExp(), repo))
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
+                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
@@ -230,20 +225,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathBooleanExp(
             @NotNull Resolve.MathBooleanExpContext ctx) {
-        PSymbol.PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
     }
 
     @Override public void exitMathIntegerExp(
             @NotNull Resolve.MathIntegerExpContext ctx) {
-        PSymbol.PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
     }
 
-  /*  @Override public void exitProgParamExp(
-            @NotNull ResolveParser.ProgParamExpContext ctx) {
+    @Override public void exitProgParamExp(
+            @NotNull Resolve.ProgParamExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .arguments(
@@ -254,14 +249,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitProgApplicationExp(
-            @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+    @Override public void exitProgInfixExp(
+            @NotNull Resolve.ProgInfixExpContext ctx) {
+        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
         PSymbolBuilder result =
-                new PSymbolBuilder(Utils.getNameFromProgramOp(ctx.op.getText())
-                        .getText())
-                        .arguments(
-                                Utils.collect(PExp.class, ctx.progExp(), repo))
-                        .qualifier("Std_Integer_Fac")
+                new PSymbolBuilder(attr.name.getText())
+                        .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+                        .qualifier(attr.qualifier)
                         .progType(progTypes.get(ctx)) //
                         .mathTypeValue(getMathTypeValue(ctx)) //
                         .mathType(getMathType(ctx));
@@ -269,17 +263,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitProgPrimaryExp(
-            @NotNull ResolveParser.ProgPrimaryExpContext ctx) {
+            @NotNull Resolve.ProgPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progPrimary()));
     }
 
     @Override public void exitProgPrimary(
-            @NotNull ResolveParser.ProgPrimaryContext ctx) {
+            @NotNull Resolve.ProgPrimaryContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
     @Override public void exitProgNamedExp(
-            @NotNull ResolveParser.ProgNamedExpContext ctx) {
+            @NotNull Resolve.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .mathTypeValue(getMathTypeValue(ctx)) //
                 .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
@@ -288,10 +282,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitProgMemberExp(
-            @NotNull ResolveParser.ProgMemberExpContext ctx) {
+            @NotNull Resolve.ProgMemberExpContext ctx) {
         List<PSymbol> segs = new ArrayList<>();
         segs.add((PSymbol) repo.get(ctx.getChild(0)));
-        for (TerminalNode term : ctx.Identifier()) {
+        for (TerminalNode term : ctx.ID()) {
             segs.add(new PSymbol.PSymbolBuilder(term.getText())
                     .mathType(getMathType(term)).progType(progTypes.get(term))
                     .build());
@@ -300,14 +294,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitProgIntegerExp(
-            @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        PSymbolBuilder result =
+            @NotNull Resolve.ProgIntegerExpContext ctx) {
+        PSymbol.PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
                         .mathTypeValue(getMathTypeValue(ctx))
                         .progType(progTypes.get(ctx))
                         .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
-    }*/
+    }
 
     private MTType getMathType(ParseTree t) {
         return types.get(t) == null ? dummyType : types.get(t);

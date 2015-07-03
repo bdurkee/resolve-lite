@@ -3,7 +3,7 @@ package edu.clemson.resolve.misc;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.Resolve;
-import edu.clemson.resolve.typereasoning.TypeGraph;
+import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.MTFunction;

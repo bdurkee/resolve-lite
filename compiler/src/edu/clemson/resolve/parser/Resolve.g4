@@ -38,6 +38,8 @@ module
     :   precisModule
     |   conceptModule
     |   conceptImplModule
+    |   enhancementImplModule
+    |   enhancementModule
     |   facilityModule
     ;
 
@@ -55,7 +57,26 @@ conceptModule
 
 conceptBlock
     :   ( typeModelDecl
+        | mathDefinitionDecl
         | operationDecl
+        )+
+    ;
+
+// enhancement module
+
+enhancementModule
+    :   ENHANCEMENT name=ID (specModuleParameterList)?
+        FOR concept=ID SEMI
+        (usesList)?
+        (requiresClause)?
+        (enhancementBlock)?
+        END closename=ID SEMI
+    ;
+
+enhancementBlock
+    :   ( operationDecl
+        | typeModelDecl
+        | mathDefinitionDecl
         )+
     ;
 
@@ -69,10 +90,19 @@ conceptImplModule
         END closename=ID SEMI
     ;
 
+enhancementImplModule
+    :   IMPL name=ID (specModuleParameterList)?
+        FOR enhancement=ID OF concept=ID SEMI
+        (usesList)?
+        (requiresClause)?
+        (implBlock)?
+        END closename=ID SEMI
+    ;
+
 //Todo: Apparently impls can have constraints too.
 implBlock
     :   ( typeRepresentationDecl
-        //| operationProcedureDecl
+        | operationProcedureDecl
         | procedureDecl
         | facilityDecl
         )+
@@ -90,6 +120,9 @@ facilityModule
 
 facilityBlock
     :   ( facilityDecl
+        | mathDefinitionDecl
+        | operationProcedureDecl
+        | typeRepresentationDecl
         )+
     ;
 
@@ -233,7 +266,7 @@ typeModelInit
 //So to save ourselves an extra redundant rule, we just allow it here.
 typeImplInit
     :   INIT (ensuresClause)?
-        (variableDeclGroup)* //(stmt)*
+        (variableDeclGroup)* (stmt)*
         END SEMI
     ;
 
@@ -246,12 +279,12 @@ operationDecl
 
 operationProcedureDecl
     :   (recursive=RECURSIVE)? OPERATION
-        name=ID operationParameterList (COLON mathTypeExp)? SEMI
+        name=ID operationParameterList (COLON type)? SEMI
         (requiresClause)?
         (ensuresClause)?
         PROCEDURE
         (variableDeclGroup)*
-        //(stmt)*
+        (stmt)*
         END closename=ID SEMI
     ;
 
@@ -341,7 +374,7 @@ constraintClause
     ;
 
 conventionClause
-    :   CONVENTION mathAssertionExp SEMI
+    :   CONVENTION mathAssertionExp (entailsClause)? SEMI
     ;
 
 correspondenceClause
@@ -445,11 +478,11 @@ mathSegmentsExp
 // program expressions
 
 progExp
-    :   op=MINUS progExp                        #progApplicationExp
-    |   progExp op=(MULT|DIVIDE) progExp        #progApplicationExp
-    |   progExp op=(PLUS|MINUS) progExp         #progApplicationExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp      #progApplicationExp
-    |   progExp op=(EQUALS|NEQUALS) progExp     #progApplicationExp
+    :   op=MINUS progExp                        #progInfixExp
+    |   progExp op=(MULT|DIVIDE) progExp        #progInfixExp
+    |   progExp op=(PLUS|MINUS) progExp         #progInfixExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp      #progInfixExp
+    |   progExp op=(EQUALS|NEQUALS) progExp     #progInfixExp
     |   LPAREN progExp RPAREN                   #progNestedExp
     |   progPrimary                             #progPrimaryExp
     ;
@@ -471,7 +504,7 @@ progNamedExp
     ;
 
 progMemberExp
-    :   (progParamExp|progNamedExp) ('.' ID)+
+    :   (progParamExp|progNamedExp) (DOT ID)+
     ;
 
 progLiteralExp
