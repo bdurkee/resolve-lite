@@ -169,11 +169,12 @@ public class PSymbol extends PExp {
         PExp result = substitutions.get(this);
 
         if ( result == null ) {
+            String newName = substituteNamedComponents(substitutions);
             String newLeft = leftPrint, newRight = rightPrint;
             Quantification newQuantification = quantification;
 
             if ( arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX) ) {
-                PSymbol asVariable = new PSymbolBuilder(name) //
+                PSymbol asVariable = new PSymbolBuilder(newName) //
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
                         .mathType(getMathType()) //
@@ -204,7 +205,7 @@ public class PSymbol extends PExp {
             }
             PSymbolBuilder temp =
                     (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
-                            leftPrint, rightPrint) : new PSymbolBuilder(name);
+                            leftPrint, rightPrint) : new PSymbolBuilder(newName);
 
             result = temp.mathType(getMathType()) //
                     .mathTypeValue(getMathTypeValue()) //
@@ -214,6 +215,31 @@ public class PSymbol extends PExp {
                     .progTypeValue(getProgTypeValue()).build();
         }
         return result;
+    }
+
+    /**
+     * TODO
+     * @return
+     */
+    private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
+        if ( !name.contains(".") ) return name;
+        if ( name.contains("...") ) return name;
+
+        List<String> components = Arrays.asList(name.split("\\."));
+
+        for (Map.Entry<PExp, PExp> e : substitutions.entrySet()) {
+            for (String c : components) {
+                if (!(e.getKey() instanceof PSymbol &&
+                        e.getValue() instanceof PSymbol)) {
+                    continue;
+                }
+                if (c.equals(((PSymbol) e.getKey()).getName())) {
+                    Collections.replaceAll(components, c,
+                            ((PSymbol) e.getValue()).getName());
+                }
+            }
+        }
+        return Utils.join(components, ".");
     }
 
     @Override public boolean isObviouslyTrue() {
@@ -437,7 +463,7 @@ public class PSymbol extends PExp {
             if ( rprint == null ) {
                 if ( lprint == null ) {
                     throw new IllegalStateException("null name; all psymbols "
-                            + "symbols must be named.");
+                            + "must be named.");
                 }
                 rprint = lprint;
                 this.name = lprint;

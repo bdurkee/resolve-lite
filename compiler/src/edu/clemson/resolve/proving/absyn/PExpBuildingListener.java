@@ -288,14 +288,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgMemberExp(
             @NotNull Resolve.ProgMemberExpContext ctx) {
-        List<PSymbol> segs = new ArrayList<>();
-        segs.add((PSymbol) repo.get(ctx.getChild(0)));
-        for (TerminalNode term : ctx.ID()) {
-            segs.add(new PSymbol.PSymbolBuilder(term.getText())
-                    .mathType(getMathType(term)).progType(progTypes.get(term))
-                    .build());
-        }
-        repo.put(ctx, new PSegments(segs));
+        List<String> nameComponents = ctx.ID().stream()
+                .map(TerminalNode::getText).collect(Collectors.toList());
+        repo.put(ctx, new PSymbolBuilder(Utils.join(nameComponents, "."))
+                .mathType(types.get(ctx)).build());
     }
 
     @Override public void exitProgIntegerExp(

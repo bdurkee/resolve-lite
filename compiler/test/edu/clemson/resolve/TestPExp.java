@@ -286,7 +286,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, ((PSymbol) exps.next()).isIncoming());
         Assert.assertEquals(false, ((PSymbol) exps.next()).isIncoming());
         Assert.assertEquals(false, ((PSymbol) exps.next()).isIncoming());
-        Assert.assertEquals(true, ((PSegments) exps.next()).isIncoming());
     }
 
     @Test public void testGetIncomingVariables() {
