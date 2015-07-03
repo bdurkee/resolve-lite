@@ -197,11 +197,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathSegmentsExp(
             @NotNull Resolve.MathSegmentsExpContext ctx) {
         //Todo: Type the individual segs of a seg exp.
-        List<PSymbol> segs = ctx.mathFunctionApplicationExp().stream()
-                .map(app -> (PSymbol) repo.get(app))
+        List<String> nameComponents = ctx.mathFunctionApplicationExp().stream()
+                .map(app -> ((PSymbol) repo.get(app)).getName())
                 .collect(Collectors.toList());
-        repo.put(ctx, new PSegments(segs, ctx.getStart() //
-                .getText().equals("@")));
+        PSymbol last = (PSymbol)repo.get(ctx.mathFunctionApplicationExp()
+                .get(ctx.mathFunctionApplicationExp().size() - 1));
+
+        String name = Utils.join(nameComponents, ".");
+        PSymbolBuilder result = new PSymbolBuilder(name).arguments(
+                last.getArguments()).mathType(last.getMathType());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathFunctionExp(

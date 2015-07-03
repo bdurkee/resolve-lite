@@ -5,7 +5,6 @@ import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
-import edu.clemson.resolve.proving.absyn.PSegments;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ANTLRInputStream;

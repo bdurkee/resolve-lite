@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
  * as function calls, with the former two represented as functions with no
  * arguments.
  */
+
+//Todo: Make the name for this guy a list of string. PSymbols can now have
+    //segmeneted names as well, our methods will need updating to take this
+    //change into account.
 public class PSymbol extends PExp {
 
     public static enum DisplayStyle {
@@ -31,6 +35,7 @@ public class PSymbol extends PExp {
     private final boolean literalFlag, incomingFlag;
     private Quantification quantification;
     private final DisplayStyle dispStyle;
+    private final List<String> nameComponents = new ArrayList<>();
 
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.lprint, builder.rprint,
@@ -177,7 +182,8 @@ public class PSymbol extends PExp {
                         .progTypeValue(getProgTypeValue()).build();
                 PExp functionSubstitution = substitutions.get(asVariable);
 
-                if ( functionSubstitution != null ) {
+                if ( functionSubstitution != null &&
+                        functionSubstitution instanceof PSymbol ) {
                     newLeft = ((PSymbol) functionSubstitution).leftPrint;
                     newRight = ((PSymbol) functionSubstitution).rightPrint;
                     newQuantification =
@@ -421,6 +427,7 @@ public class PSymbol extends PExp {
         protected MTType mathType, mathTypeValue;
         protected PTType progType, progTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
+        private final List<String> nameComponents = new ArrayList<>();
 
         public PSymbolBuilder(String name) {
             this(name, null);

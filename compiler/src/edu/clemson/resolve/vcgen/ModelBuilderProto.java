@@ -6,7 +6,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSegments;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
@@ -204,7 +203,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 + "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
             }
             PSymbol eAsPSym = (PSymbol) e;
-            PSegments elhs = (PSegments) eAsPSym.getArguments().get(0);
+            PExp elhs = eAsPSym.getArguments().get(0);
             PExp erhs = eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }
