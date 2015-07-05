@@ -26,7 +26,8 @@ public class AnnotatedTree {
     public boolean hasErrors;
     public ImportCollection imports;
 
-    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
+    public AnnotatedTree(boolean noStdUses,
+                         @NotNull ParseTree root, @NotNull String name,
                          String fileName, boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
@@ -35,7 +36,7 @@ public class AnnotatedTree {
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
         if ( !hasErrors ) {
-            ImportListener l = new ImportListener();
+            ImportListener l = new ImportListener(noStdUses);
             ParseTreeWalker.DEFAULT.walk(l, root);
             this.imports = l.getImports();
         }

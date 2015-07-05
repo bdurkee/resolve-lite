@@ -15,7 +15,10 @@ import java.util.*;
  * various {@link ParseTree} nodes that reference other modules.
  */
 public class ImportListener extends ResolveBaseListener {
-
+    private final boolean noStdUses;
+    public ImportListener(boolean noStdUses) {
+        this.noStdUses = noStdUses;
+    }
     private final ImportCollection importCollection = new ImportCollection();
 
     @NotNull public ImportCollection getImports() {
@@ -56,29 +59,31 @@ public class ImportListener extends ResolveBaseListener {
         if ( !(moduleChild instanceof Resolve.PrecisModuleContext) ) {
             LinkedHashSet<String> stdImports =
                     STD_MODULES.get(Utils.getModuleName(moduleChild));
-            if ( stdImports != null ) { // if this is a standard module
-                importCollection.addTokenSet(ImportType.NAMED, stdImports);
+            if (!noStdUses) {
+                if ( stdImports != null) { // if this is a standard module
+                    importCollection.addStringSet(ImportType.NAMED, stdImports);
+                }
+                else {
+                    importCollection.addStringSet(ImportType.NAMED, DEFAULT_IMPORTS);
+                }
             }
-            else {
-                importCollection.addTokenSet(ImportType.NAMED, DEFAULT_IMPORTS);
-            }
+
         }
     }
 
     @Override public void enterConceptImplModule(
             @NotNull Resolve.ConceptImplModuleContext ctx) {
-        importCollection.imports(ImportType.NAMED, ctx.concept.getText());
+        importCollection.imports(ImportType.NAMED, ctx.concept);
     }
 
     @Override public void enterEnhancementModule(
             @NotNull Resolve.EnhancementModuleContext ctx) {
-        importCollection.imports(ImportType.NAMED, ctx.concept.getText());
+        importCollection.imports(ImportType.NAMED, ctx.concept);
     }
 
     @Override public void enterEnhancementImplModule(
             @NotNull Resolve.EnhancementImplModuleContext ctx) {
-        importCollection.imports(ImportType.NAMED, ctx.enhancement.getText(),
-                ctx.concept.getText());
+        importCollection.imports(ImportType.NAMED, ctx.enhancement, ctx.concept);
     }
 
     @Override public void exitUsesList(
@@ -88,10 +93,10 @@ public class ImportListener extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             @NotNull Resolve.FacilityDeclContext ctx) {
-        importCollection.imports(ImportType.IMPLICIT, ctx.spec.getText());
+        importCollection.imports(ImportType.IMPLICIT, ctx.spec);
         ImportCollection.ImportType type =
                 (ctx.externally != null) ? ImportType.EXTERNAL
                         : ImportType.IMPLICIT;
-        importCollection.imports(type, ctx.impl.getText());
+        importCollection.imports(type, ctx.impl);
     }
 }

@@ -88,7 +88,8 @@ public  class RESOLVECompiler {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of edu.clemson.resolve source files"),
+            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("noStdUses",         "-noStdUses", "don't import standard facilities (e.g. boolean, integer, char)"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
             new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
@@ -105,7 +106,7 @@ public  class RESOLVECompiler {
 
     public final String[] args;
     protected boolean haveOutputDir = false;
-
+    public boolean noStdUses = false;
     public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
@@ -119,6 +120,8 @@ public  class RESOLVECompiler {
     public final List<String> targetNames = new ArrayList<>();
     public final ErrorManager errMgr;
     public LogManager logMgr = new LogManager();
+
+    public RESOLVECompiler() { this(null); }
 
     public RESOLVECompiler(String[] args) {
         this.errMgr = new ErrorManager(this);
@@ -241,14 +244,14 @@ public  class RESOLVECompiler {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
+        //VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
         //codegenPipe.process();
-        vcsPipe.process();
+        //vcsPipe.process();
     }
 
     public List<AnnotatedTree> sortTargetModulesByUsesReferences() {
@@ -282,9 +285,9 @@ public  class RESOLVECompiler {
     private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
                                   AnnotatedTree root,
                                   Map<String, AnnotatedTree> roots) {
-        for (String importRequest : root.imports
+        for (ImportCollection.ImportReference importRequest : root.imports
                 .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
-            AnnotatedTree module = roots.get(importRequest);
+            AnnotatedTree module = roots.get(importRequest.name);
             try {
                 File file = findResolveFile(importRequest, NATIVE_EXTENSION);
                 if ( module == null ) {
@@ -293,8 +296,9 @@ public  class RESOLVECompiler {
                 }
             }
             catch (IOException ioe) {
-                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, null,
-                        root.getName(), importRequest);
+                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
+                        importRequest.location, root.getName(),
+                        importRequest.name);
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
@@ -355,9 +359,10 @@ public  class RESOLVECompiler {
         return false;
     }
 
-    private File findResolveFile(String baseName, List<String> extensions)
+    private File findResolveFile(ImportCollection.ImportReference ref,
+                                 List<String> extensions)
             throws IOException {
-        FileLocator l = new FileLocator(baseName, extensions);
+        FileLocator l = new FileLocator(ref.name, extensions);
         Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();
     }
@@ -377,7 +382,7 @@ public  class RESOLVECompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.module();
-            return new AnnotatedTree(start, Utils.getModuleName(start),
+            return new AnnotatedTree(noStdUses, start, Utils.getModuleName(start),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);
         }

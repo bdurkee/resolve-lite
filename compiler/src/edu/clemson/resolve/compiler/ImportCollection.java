@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
@@ -21,11 +22,33 @@ import java.util.stream.Collectors;
  * our language can't load external files atm and the only place they should
  * appear is in the context of a facility declaration.</p>
  */
+
+//Todo: Since adding ImportReference object, this class should perhaps be rethought.
+    //maybe add a field for ImportType to ImportReference? That seems like it should be there.
 public class ImportCollection {
 
     public static enum ImportType { NAMED, IMPLICIT, EXTERNAL }
 
-    private final Map<ImportType, LinkedHashSet<String>> imports =
+    public static class ImportReference {
+        public Token location;
+        public String name;
+        public ImportReference(Token loc, String name) {
+            this.location = loc;
+            this.name = name;
+        }
+
+        @Override public int hashCode() {
+            return name.hashCode();
+        }
+        @Override public boolean equals(Object o) {
+            boolean result = (o instanceof ImportReference);
+            if (result) {
+                result = ((ImportReference)o).name.equals(this.name);
+            }
+            return result;
+        }
+    }
+    private final Map<ImportType, LinkedHashSet<ImportReference>> imports =
             new HashMap<>();
 
     public ImportCollection() {
@@ -44,8 +67,8 @@ public class ImportCollection {
      * @param type {@code ImportType}s to filter by.
      * @return a set of filtered import .
      */
-    public Set<String> getImportsExcluding(ImportType... type) {
-        Set<String> result = new HashSet<>();
+    public Set<ImportReference> getImportsExcluding(ImportType... type) {
+        Set<ImportReference> result = new HashSet<>();
         List<ImportType> typesToExclude = Arrays.asList(type);
         for (ImportType s : imports.keySet()) {
             if ( !typesToExclude.contains(s) ) result.addAll(imports.get(s));
@@ -53,11 +76,20 @@ public class ImportCollection {
         return result;
     }
 
-    public List<String> getImportsOfType(ImportType type) {
+    public List<ImportReference> getImportsOfType(ImportType type) {
         return new ArrayList<>(imports.get(type));
     }
 
-    public void imports(ImportType type, String... t) {
+    public void imports(ImportType type, Token... t) {
+        List<Token> starting = Arrays.asList(t);
+        List<ImportReference> result = new ArrayList<>();
+        for (Token e : starting) {
+            result.add(new ImportReference(e, e.getText()));
+        }
+        addTokenSet(type, result);
+    }
+
+    public void imports(ImportType type, ImportReference... t) {
         addTokenSet(type, Arrays.asList(t));
     }
 
@@ -66,19 +98,20 @@ public class ImportCollection {
     }
 
     public void imports(ImportType type, List<TerminalNode> terminals) {
-        List<String> convertedTerms = terminals.stream()
-                .map(t -> t.getSymbol().getText()).collect(Collectors.toList());
+        List<ImportReference> convertedTerms = terminals.stream()
+                .map(t -> new ImportReference(t.getSymbol(), t.getText()))
+                .collect(Collectors.toList());
         addTokenSet(type, convertedTerms);
     }
 
-    public void addImports(ImportType type, String... t) {
+    public void addImports(ImportType type, ImportReference... t) {
         addTokenSet(type, Arrays.asList(t));
     }
 
-    public void addTokenSet(ImportType type, Collection<String> newToks) {
-        LinkedHashSet<String> tokSet = imports.get(type);
+    public void addTokenSet(ImportType type, Collection<ImportReference> newToks) {
+        LinkedHashSet<ImportReference> tokSet = imports.get(type);
         if ( tokSet == null ) {
-            tokSet = new LinkedHashSet<String>();
+            tokSet = new LinkedHashSet<ImportReference>();
         }
         //Todo: Do a little normalization here on additions. For instance,
         //if something already exists in the map as an implicit import,
@@ -87,6 +120,22 @@ public class ImportCollection {
         // it's already listed as an implicit import). So in other words,
         //we need cull duplicate references in multiple categories...
         tokSet.addAll(newToks);
+    }
+
+    public void addStringSet(ImportType type, Collection<String> l) {
+        LinkedHashSet<ImportReference> tokSet = imports.get(type);
+        if ( tokSet == null ) {
+            tokSet = new LinkedHashSet<ImportReference>();
+        }
+        //Todo: Do a little normalization here on additions. For instance,
+        //if something already exists in the map as an implicit import,
+        //but is later added as an explicit import too, then the import
+        //will appear twice in two different categories (especially if
+        // it's already listed as an implicit import). So in other words,
+        //we need cull duplicate references in multiple categories...
+        for (String s : l) {
+            tokSet.add(new ImportReference(null, s));
+        }
     }
 
     /**
@@ -101,10 +150,10 @@ public class ImportCollection {
         return imports.get(type).contains(t);
     }
 
-    public Set<String> getAllImports() {
-        Set<String> aggregateImports = new HashSet<>();
+    public Set<ImportReference> getAllImports() {
+        Set<ImportReference> aggregateImports = new HashSet<>();
 
-        for (Set<String> typeSet : imports.values()) {
+        for (Set<ImportReference> typeSet : imports.values()) {
             aggregateImports.addAll(typeSet);
         }
         return aggregateImports;
