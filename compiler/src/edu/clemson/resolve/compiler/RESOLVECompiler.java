@@ -302,8 +302,9 @@ public  class RESOLVECompiler {
             }
 
             if ( pathExists(g, module.getName(), root.getName()) ) {
-                errMgr.toolError(ErrorKind.CIRCULAR_DEPENDENCY,
-                        module.getName(), root.getName());
+                errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
+                        importRequest.location,
+                        importRequest.name, root.getName());
                 break;
             }
             Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
