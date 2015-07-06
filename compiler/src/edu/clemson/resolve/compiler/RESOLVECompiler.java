@@ -36,7 +36,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VCGenPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
@@ -62,7 +61,6 @@ public  class RESOLVECompiler {
 
     public static final List<String> NATIVE_EXTENSION = Collections
             .unmodifiableList(Collections.singletonList(FILE_EXTENSION));
-
     public static final List<String> NON_NATIVE_EXTENSION = Collections
             .unmodifiableList(Collections.singletonList(".java"));
 
@@ -285,11 +283,10 @@ public  class RESOLVECompiler {
     private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
                                   AnnotatedTree root,
                                   Map<String, AnnotatedTree> roots) {
-        for (ImportCollection.ImportReference importRequest : root.imports
-                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
+        for (AnnotatedTree.UsesRef importRequest : root.uses) {
             AnnotatedTree module = roots.get(importRequest.name);
             try {
-                File file = findResolveFile(importRequest, NATIVE_EXTENSION);
+                File file = findResolveFile(importRequest.name, NATIVE_EXTENSION);
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
                     roots.put(module.getName(), module);
@@ -304,17 +301,6 @@ public  class RESOLVECompiler {
                 continue;
             }
 
-            if ( root.imports.inCategory(ImportCollection.ImportType.NAMED,
-                    module.getName()) ) {
-                /*
-                   if (!module.appropriateForImport()) {
-                    errorManager.toolError(ErrorKind.INVALID_IMPORT,
-                    "MODULE TYPE GOES HERE", root.getName().getText(),
-                    "IMPORTED MODULE TYPE GOES HERE", module.getName()
-                        .getText());
-                    }
-                 */
-            }
             if ( pathExists(g, module.getName(), root.getName()) ) {
                 errMgr.toolError(ErrorKind.CIRCULAR_DEPENDENCY,
                         module.getName(), root.getName());
@@ -359,10 +345,9 @@ public  class RESOLVECompiler {
         return false;
     }
 
-    private File findResolveFile(ImportCollection.ImportReference ref,
-                                 List<String> extensions)
-            throws IOException {
-        FileLocator l = new FileLocator(ref.name, extensions);
+    private File findResolveFile(String fileName,
+                        List<String> extensions) throws IOException {
+        FileLocator l = new FileLocator(fileName, extensions);
         Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();
     }
@@ -382,7 +367,7 @@ public  class RESOLVECompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.module();
-            return new AnnotatedTree(noStdUses, start, Utils.getModuleName(start),
+            return new AnnotatedTree(start, Utils.getModuleName(start),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);
         }

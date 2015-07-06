@@ -1,6 +1,5 @@
 Facility Integer_Do_Nothing;
-    uses x;
-
+        uses Standard_Integers;
 
 end Integer_Do_Nothing;
 

@@ -1,6 +1,6 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.compiler.ImportCollection;
+import edu.clemson.resolve.compiler.AnnotatedTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.*;
@@ -30,9 +30,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return moduleID;
     }
 
-    public ModuleScopeBuilder addImports(
-            List<ImportCollection.ImportReference> importList) {
-        for (ImportCollection.ImportReference ref : importList) {
+    public ModuleScopeBuilder addUses(Collection<AnnotatedTree.UsesRef> refs) {
+        for (AnnotatedTree.UsesRef ref : refs) {
             if (!importedModules.contains(ref.name) && !moduleID.equals(ref.name)) {
                 importedModules.add(ref.name);
             }

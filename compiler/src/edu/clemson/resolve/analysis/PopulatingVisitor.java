@@ -32,7 +32,6 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.ImportCollection;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
@@ -122,8 +121,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitModule(@NotNull Resolve.ModuleContext ctx) {
         moduleScope = symtab.startModuleScope(ctx, Utils.getModuleName(ctx))
-                .addImports(tr.imports.getImportsOfType(
-                        ImportCollection.ImportType.NAMED));
+                .addUses(tr.uses);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'

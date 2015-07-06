@@ -361,7 +361,7 @@ public class TestPExp extends BaseTest {
      */
     protected static PExp parseMathAssertionExp(TypeGraph g, String input) {
         ParseTree t = getTree(input);
-        AnnotatedTree dummy = new AnnotatedTree(true, t, "test", null, false);
+        AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
         PExpBuildingListener<PExp> l =
                 new PExpBuildingListener<>(new ParseTreeProperty<>(), dummy,
                         g.INVALID); //dummyType
