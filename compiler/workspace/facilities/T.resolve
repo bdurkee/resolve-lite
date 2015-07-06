@@ -1,7 +1,6 @@
-Facility Integer_Do_Nothing;
-        uses Standard_Integers;
-
-end Integer_Do_Nothing;
+Facility T;
+    uses U;
+end T;
 
 (**
 1. procedure decl rule

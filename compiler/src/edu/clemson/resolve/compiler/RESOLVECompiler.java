@@ -263,8 +263,8 @@ public  class RESOLVECompiler {
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
-        for (AnnotatedTree t : Collections.unmodifiableCollection(roots
-                .values())) {
+
+        for (AnnotatedTree t : Collections.unmodifiableCollection(roots.values())) {
             g.addVertex(t.getName());
             findDependencies(g, t, roots);
         }

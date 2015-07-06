@@ -28,6 +28,16 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
+    @Test public void testTrivialOrdering2() throws Exception {
+        String[] modules = new String[] {
+                "Precis T;\n uses U;\n end T;",
+                "Precis U;\n end U;",
+        };
+        String expected = "populating: U\npopulating: T";
+        writeModules(modules, "T", "U");
+        testOrdering(expected, "T");
+    }
+
     @Test public void testFlawedOrdering() throws Exception {
         String[] modules = new String[] {
                 "Precis U;\n uses X;\n end U;",
