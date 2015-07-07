@@ -271,7 +271,7 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override public void accept(PExpListener v) {
+    @Override public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
         v.beginChildren(this);

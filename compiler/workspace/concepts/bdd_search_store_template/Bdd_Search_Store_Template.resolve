@@ -6,7 +6,7 @@ Concept Bdd_Search_Store_Template<T>
     Type Family Store is
                 modeled by Powerset(T);
         exemplar S;
-        constraint ||S|| <= Max_Capacity;
+        constraints ||S|| <= Max_Capacity;
         initialization
                 ensures S = {};
 

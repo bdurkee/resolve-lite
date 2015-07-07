@@ -9,7 +9,7 @@ Implementation Do_Nothing_Impl
     end Do_Nothing;
 end Do_Nothing_Impl;
 
-(**
+(*
 apply procedure decl rule
 
 C / assume S /= {};

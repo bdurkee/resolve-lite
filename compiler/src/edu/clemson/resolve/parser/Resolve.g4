@@ -65,6 +65,7 @@ conceptBlock
 enhancementModule
     :   ENHANCEMENT name=ID (specModuleParameterList)?
         FOR concept=ID SEMI
+        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (enhancementBlock)
@@ -82,6 +83,7 @@ enhancementBlock
 
 conceptImplModule
     :   IMPLEMENTATION name=ID (implModuleParameterList)?
+        (dependentTermOptions)?
         FOR concept=ID SEMI
         (usesList)?
         (requiresClause)?
@@ -91,6 +93,7 @@ conceptImplModule
 
 enhancementImplModule
    :   IMPLEMENTATION name=ID (specModuleParameterList)?
+       (dependentTermOptions)?
        FOR enhancement=ID OF concept=ID SEMI
        (usesList)?
        (requiresClause)?
@@ -110,6 +113,7 @@ implBlock
 
 facilityModule
     :   FACILITY name=ID SEMI
+        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (facilityBlock)
@@ -125,6 +129,7 @@ facilityBlock
 
 precisModule
     :   PRECIS name=ID SEMI
+        (dependentTermOptions)?
         (usesList)?
         precisBlock
         END closename=ID SEMI EOF

@@ -1,39 +1,5 @@
 Facility T;
     uses Standard_Booleans;
 
-    Operation Foo(evaluates x : Std_Boolan_Fac :: Boolean);
-        Procedure
 
-    end Foo;
 end T;
-
-(**
-1. procedure decl rule
-
-C / assume ((min_int <= i) and (i <= max_int));
-        remember;
-        Increment(I);
-        Decrement(I);
-    confirm I = @I;
-
-2. simple call rule (Decrement)
-
-C / assume ((min_int <= i) and (i <= max_int));
-        remember;
-        Increment(I);
-    confirm min_int <= i - 1[i -> I] and
-            I = @I [I -> @i - 1 [@i -> I]]
----------------------->
-    confirm min_int <= I - 1 and
-            I - 1 = @I
-
-3. simple call rule (Increment)
-
-C / assume ((min_int <= i) and (i <= max_int));
-       remember;
-    confirm i + 1 <= max_int [i -> I] and
-            min_int <= I - 1 and I - 1 = @I [I -> @i + 1[@i -> I]]
----------------------->
-    confirm I + 1 <= max_int and
-            min_int <= I + 1 - 1 and I + 1 - 1 = @I
-*)

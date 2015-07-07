@@ -1,6 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
-public abstract class PExpListener {
+public abstract class PExpVisitor {
 
     public void beginPExp(PExp p) {}
 
@@ -9,8 +9,6 @@ public abstract class PExpListener {
     public void beginPAlternatives(PAlternatives p) {}
 
     public void beginPSet(PSet p) {}
-
-    //public void beginPSegments(PSegments p) {}
 
     public void beginPLambda(PLambda p) {}
 
@@ -29,8 +27,6 @@ public abstract class PExpListener {
     public void endPAlternatives(PAlternatives p) {}
 
     public void endPLambda(PLambda p) {}
-
-    //public void endPSegments(PSegments p) {}
 
     public void endPSet(PSet p) {}
 
