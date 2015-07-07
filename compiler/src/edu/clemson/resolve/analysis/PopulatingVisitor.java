@@ -408,7 +408,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         try {
             typeDefnSym = symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(null, ctx.name.getText(),
+                            .queryForOne(new NameQuery(null, ctx.name,
                                             false)).toProgTypeModelSymbol();
         }
         catch (NoSuchSymbolException nsse) {
@@ -904,7 +904,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ProgTypeSymbol integerType =
                     symtab.getInnermostActiveScope()
                             .queryForOne(
-                                    new NameQuery("Std_Integer_Fac", "Integer",
+                                    new NameQuery(
+                                            new CommonToken(ResolveLexer.ID, "Std_Integer_Fac"),
+                                            new CommonToken(ResolveLexer.ID, "Integer"),
                                             false)).toProgTypeSymbol();
             tr.progTypes.put(ctx, integerType.getProgramType());
             tr.mathTypes.put(ctx, integerType.getModelType());

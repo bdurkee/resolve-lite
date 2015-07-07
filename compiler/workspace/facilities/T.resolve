@@ -1,5 +1,10 @@
 Facility T;
-    uses U;
+    uses Standard_Booleans;
+
+    Operation Foo(evaluates x : Std_Boolan_Fac :: Boolean);
+        Procedure
+
+    end Foo;
 end T;
 
 (**

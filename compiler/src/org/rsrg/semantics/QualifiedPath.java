@@ -1,5 +1,7 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.compiler.ErrorKind;
+import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.SymbolTable.FacilityStrategy;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -13,9 +15,9 @@ import java.util.List;
 public class QualifiedPath implements ScopeSearchPath {
 
     private final boolean instantiateGenerics;
-    private final String qualifier;
+    private final Token qualifier;
 
-    public QualifiedPath(String qualifier, FacilityStrategy facilityStrategy) {
+    public QualifiedPath(Token qualifier, FacilityStrategy facilityStrategy) {
         this.instantiateGenerics =
                 facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
@@ -28,7 +30,8 @@ public class QualifiedPath implements ScopeSearchPath {
         try {
             FacilitySymbol facility =
                     (FacilitySymbol) source
-                            .queryForOne(new UnqualifiedNameQuery(qualifier));
+                            .queryForOne(new UnqualifiedNameQuery(
+                                    qualifier.getText()));
 
             Scope facilityScope = facility.getFacility().getSpecification() //
                     .getScope(instantiateGenerics);
@@ -36,13 +39,18 @@ public class QualifiedPath implements ScopeSearchPath {
         }
         catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
-            try {
-                ModuleScopeBuilder moduleScope = repo.getModuleScope(qualifier);
-                result =
-                        moduleScope.getMatches(searcher,
-                                TableSearcher.SearchContext.IMPORT);
+
+            ModuleScopeBuilder moduleScope = repo.moduleScopes.get(
+                    qualifier.getText());
+            if (moduleScope == null) {
+                repo.getCompiler().errMgr.semanticError(
+                        ErrorKind.NO_SUCH_MODULE, qualifier, qualifier.getText());
+                return result;
             }
-            catch (NoSuchSymbolException nsse2) {}
+            result =
+                    moduleScope.getMatches(searcher,
+                            TableSearcher.SearchContext.IMPORT);
+
         }
         return result;
     }

@@ -165,6 +165,10 @@ public class SymbolTable {
         return typeGraph;
     }
 
+    public RESOLVECompiler getCompiler() {
+        return compiler;
+    }
+
     public ModuleScopeBuilder startModuleScope(
             ParserRuleContext ctx, String name) {
 
@@ -243,11 +247,6 @@ public class SymbolTable {
     public ModuleScopeBuilder getModuleScope(String name)
             throws NoSuchSymbolException {
         ModuleScopeBuilder module = moduleScopes.get(name);
-        if ( module == null ) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, null,
-                    name);
-            throw new NoSuchSymbolException();
-        }
         return module;
     }
 }

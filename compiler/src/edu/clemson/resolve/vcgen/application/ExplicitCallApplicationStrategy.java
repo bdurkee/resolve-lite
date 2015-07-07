@@ -1,10 +1,12 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
+import org.antlr.v4.runtime.CommonToken;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
@@ -92,8 +94,9 @@ public class ExplicitCallApplicationStrategy
         List<PTType> argTypes = app.getArguments().stream()
                 .map(PExp::getProgType).collect(Collectors.toList());
         try {
-            return s.queryForOne(new OperationQuery(app.getQualifier(),
-                    app.getName(), argTypes));
+            return s.queryForOne(new OperationQuery(
+                    new CommonToken(ResolveLexer.ID, app.getQualifier()),
+                        app.getName(), argTypes));
         }
         catch (NoSuchSymbolException|DuplicateSymbolException e) {
             //shouldn't happen. Well, depends on s.

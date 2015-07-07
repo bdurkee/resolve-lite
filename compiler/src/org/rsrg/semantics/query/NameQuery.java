@@ -29,11 +29,4 @@ public class NameQuery extends BaseMultimatchSymbolQuery<Symbol>
         this(qualifier, name.getText(), ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_IGNORE, localPriority);
     }
-
-    public NameQuery(String qualifier, String name, boolean localPriority) {
-        super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
-                FacilityStrategy.FACILITY_IGNORE, localPriority),
-                new NameSearcher(name, false));
-    }
-
 }

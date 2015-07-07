@@ -1,5 +1,7 @@
 package org.rsrg.semantics.query;
 
+import edu.clemson.resolve.parser.ResolveLexer;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.PossiblyQualifiedPath;
 import org.rsrg.semantics.SymbolTable;
@@ -33,13 +35,6 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
     }
 
     public OperationQuery(Token qualifier, String name,
-                          List<PTType> argumentTypes) {
-        super(new PossiblyQualifiedPath(qualifier, SymbolTable.ImportStrategy.IMPORT_NAMED,
-                SymbolTable.FacilityStrategy.FACILITY_IGNORE, false),
-                new OperationSearcher(name, argumentTypes));
-    }
-
-    public OperationQuery(String qualifier, String name,
                           List<PTType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, SymbolTable.ImportStrategy.IMPORT_NAMED,
                 SymbolTable.FacilityStrategy.FACILITY_IGNORE, false),
