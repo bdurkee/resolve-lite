@@ -34,6 +34,7 @@ options {
 	tokenVocab=ResolveLexer;
 }
 
+//test comment
 module
     :   precisModule
     |   conceptModule
