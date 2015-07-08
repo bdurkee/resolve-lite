@@ -38,12 +38,10 @@ module
     :   precisModule
     |   conceptModule
     |   conceptImplModule
+    |   facilityModule
     |   enhancementImplModule
     |   enhancementModule
-    |   facilityModule
     ;
-
-// concept modules
 
 conceptModule
     :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
@@ -51,15 +49,15 @@ conceptModule
         (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
-        (conceptBlock)?
+        (conceptBlock)
         END closename=ID SEMI EOF
     ;
 
 conceptBlock
     :   ( typeModelDecl
-        | mathDefinitionDecl
         | operationDecl
-        )+
+        | mathDefinitionDecl
+        )*
     ;
 
 // enhancement module
@@ -69,7 +67,7 @@ enhancementModule
         FOR concept=ID SEMI
         (usesList)?
         (requiresClause)?
-        (enhancementBlock)?
+        (enhancementBlock)
         END closename=ID SEMI
     ;
 
@@ -77,35 +75,35 @@ enhancementBlock
     :   ( operationDecl
         | typeModelDecl
         | mathDefinitionDecl
-        )+
+        )*
     ;
 
 // implementation modules
 
 conceptImplModule
-    :   IMPL name=ID (implModuleParameterList)? FOR concept=ID SEMI
+    :   IMPLEMENTATION name=ID (implModuleParameterList)?
+        FOR concept=ID SEMI
         (usesList)?
         (requiresClause)?
-        (implBlock)?
+        (implBlock)
         END closename=ID SEMI
     ;
 
 enhancementImplModule
-    :   IMPL name=ID (specModuleParameterList)?
-        FOR enhancement=ID OF concept=ID SEMI
-        (usesList)?
-        (requiresClause)?
-        (implBlock)?
-        END closename=ID SEMI
-    ;
+   :   IMPLEMENTATION name=ID (specModuleParameterList)?
+       FOR enhancement=ID OF concept=ID SEMI
+       (usesList)?
+       (requiresClause)?
+       (implBlock)
+       END closename=ID SEMI
+   ;
 
-//Todo: Apparently impls can have constraints too.
 implBlock
     :   ( typeRepresentationDecl
         | operationProcedureDecl
         | procedureDecl
         | facilityDecl
-        )+
+        )*
     ;
 
 // facility modules
@@ -114,30 +112,22 @@ facilityModule
     :   FACILITY name=ID SEMI
         (usesList)?
         (requiresClause)?
-        (facilityBlock)?
+        (facilityBlock)
         END closename=ID SEMI EOF
     ;
 
 facilityBlock
-    :   ( facilityDecl
-        | mathDefinitionDecl
-        | operationProcedureDecl
+    :   ( operationProcedureDecl
+        | facilityDecl
         | typeRepresentationDecl
-        )+
+        )*
     ;
-
-// precis modules
 
 precisModule
     :   PRECIS name=ID SEMI
-        (dependentTermOptions)?
         (usesList)?
-        (precisBlock)?
+        precisBlock
         END closename=ID SEMI EOF
-    ;
-
-dependentTermOptions
-    :   AT DEPENDENT LBRACE ID (COMMA ID)* RBRACE
     ;
 
 precisBlock
@@ -145,13 +135,18 @@ precisBlock
         | mathCategoricalDefinitionDecl
         | mathInductiveDefinitionDecl
         | mathTheoremDecl
-        )+
+        )*
     ;
 
 // uses, imports
 
 usesList
     :   USES ID (COMMA ID)* SEMI
+    ;
+
+// temp soln.
+dependentTermOptions
+    :   AT DEPENDENT LBRACE ID (COMMA ID)* RBRACE
     ;
 
 // parameter and parameter-list related rules
@@ -178,10 +173,6 @@ implModuleParameterDecl
     |   operationDecl
     ;
 
-genericType
-    :   ID
-    ;
-
 parameterDeclGroup
     :   parameterMode ID (COMMA ID)* COLON type
     ;
@@ -201,6 +192,10 @@ variableDeclGroup
     ;
 
 // statements
+
+stmtBlock
+    :   stmt+
+    ;
 
 stmt
     :   assignStmt
@@ -233,6 +228,10 @@ type
     :   (qualifier=ID COLONCOLON)? name=ID
     ;
 
+genericType
+    :   ID
+    ;
+
 record
     :   RECORD (recordVariableDeclGroup)+ END
     ;
@@ -258,43 +257,16 @@ typeRepresentationDecl
 // type initialization rules
 
 typeModelInit
-    :   INIT (ensuresClause)?
+    :   INITIALIZATION (ensuresClause)?
     ;
 
-//Yes, typeImpl initialization technically shouldn't require *another* ensures
-//clause, but it does in the case of those defined in a facility module.
-//So to save ourselves an extra redundant rule, we just allow it here.
 typeImplInit
-    :   INIT (ensuresClause)?
-        (variableDeclGroup)* (stmt)*
+    :   INITIALIZATION (ensuresClause)?
+        (variableDeclGroup)* (stmtBlock)?
         END SEMI
     ;
 
-// functions
-
-operationDecl
-    :   OPERATION name=ID operationParameterList (COLON type)? SEMI
-        (requiresClause)? (ensuresClause)?
-    ;
-
-operationProcedureDecl
-    :   (recursive=RECURSIVE)? OPERATION
-        name=ID operationParameterList (COLON type)? SEMI
-        (requiresClause)?
-        (ensuresClause)?
-        PROCEDURE
-        (variableDeclGroup)*
-        (stmt)*
-        END closename=ID SEMI
-    ;
-
-procedureDecl
-    :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
-        (COLON type)? SEMI
-        (variableDeclGroup)*
-        (stmt)*
-        END closename=ID SEMI
-    ;
+// math constructs
 
 mathTheoremDecl
     :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
@@ -327,7 +299,7 @@ mathDefinitionDecl
 mathInductiveDefinitionDecl
     :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig IS
         BASE_CASE mathAssertionExp SEMI
-        INDUCT_CASE mathAssertionExp SEMI
+        INDUCTIVE_CASE mathAssertionExp SEMI
     ;
 
 mathSymbol
@@ -345,6 +317,8 @@ mathVariableDecl
     :   ID COLON mathTypeExp
     ;
 
+// facilitydecls, enhancements, etc
+
 facilityDecl
     :   FACILITY name=ID IS spec=ID (LT type (COMMA type)* GT)?
         (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? IMPLEMENTED
@@ -357,6 +331,32 @@ moduleArgumentList
 
 moduleArgument
     :   progExp
+    ;
+
+// functions
+
+operationDecl
+    :   OPERATION name=ID operationParameterList (COLON type)? SEMI
+        (requiresClause)? (ensuresClause)?
+    ;
+
+operationProcedureDecl
+    :   (recursive=RECURSIVE)? OPERATION
+        name=ID operationParameterList (COLON type)? SEMI
+        (requiresClause)?
+        (ensuresClause)?
+        PROCEDURE
+        (variableDeclGroup)*
+        (stmtBlock)?
+        END closename=ID SEMI
+    ;
+
+procedureDecl
+    :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
+        (COLON type)? SEMI
+        (variableDeclGroup)*
+        (stmtBlock)?
+        END closename=ID SEMI
     ;
 
 // mathematical clauses
@@ -381,8 +381,6 @@ correspondenceClause
     :   CORRESPONDENCE mathAssertionExp SEMI
     ;
 
-//within the compiler we'll restrict this guy to be a
-//mathTypeAssertionExp
 entailsClause
     :   ENTAILS mathExp (COMMA mathExp)* COLON mathTypeExp
     ;

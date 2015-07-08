@@ -22,7 +22,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             P.Curr_Place := 0;
         end;
 
-        Proc Lengthen (alters e : T; updates P : Spiral_Pos);
+        Procedure Lengthen (alters e : T; updates P : Spiral_Pos);
             Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;

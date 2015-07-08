@@ -243,7 +243,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), ctx.getText());
         }
         ctx.variableDeclGroup().forEach(this::visit);
-        ctx.stmt().forEach(this::visit);
+        this.visit(ctx.stmtBlock());
         symtab.endScope();
         return null;
     }
@@ -293,7 +293,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
         ctx.variableDeclGroup().forEach(this::visit);
-        ctx.stmt().forEach(this::visit);
+        this.visit(ctx.stmtBlock());
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);

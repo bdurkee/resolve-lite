@@ -10,15 +10,15 @@ Concept Bdd_Search_Store_Template<T>
         initialization
                 ensures S = {};
 
-        Oper Add (restores e : T; updates S : Store);
+        Operation Add (restores e : T; updates S : Store);
             requires ||S|| < Max_Capacity;
             ensures S = @S union {e};
 
-        Oper Remove (restores e : T; updates S : Store);
+        Operation Remove (restores e : T; updates S : Store);
             requires e is_in S;
             ensures S = @S ~ {e};
 
-        Oper Count (restores S : Store) :
+        Operation Count (restores S : Store) :
                     Std_Integer_Fac :: Integer;
             ensures Count = (||S||);
 

@@ -135,7 +135,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 withCorrespondencePartsSubstituted(newInitEnsures,
                         correspondence);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        //block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention).finalConfirm(newInitEnsures);
         outputFile.chunks.add(block.build());
     }
