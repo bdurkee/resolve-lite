@@ -32,7 +32,6 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.ImportCollection;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
@@ -122,8 +121,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitModule(@NotNull Resolve.ModuleContext ctx) {
         moduleScope = symtab.startModuleScope(ctx, Utils.getModuleName(ctx))
-                .addImports(tr.imports.getImportsOfType(
-                        ImportCollection.ImportType.NAMED));
+                .addUses(tr.uses);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
@@ -245,7 +243,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), ctx.getText());
         }
         ctx.variableDeclGroup().forEach(this::visit);
-        ctx.stmt().forEach(this::visit);
+        this.visit(ctx.stmtBlock());
         symtab.endScope();
         return null;
     }
@@ -295,7 +293,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
         ctx.variableDeclGroup().forEach(this::visit);
-        ctx.stmt().forEach(this::visit);
+        this.visit(ctx.stmtBlock());
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
@@ -410,7 +408,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         try {
             typeDefnSym = symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(null, ctx.name.getText(),
+                            .queryForOne(new NameQuery(null, ctx.name,
                                             false)).toProgTypeModelSymbol();
         }
         catch (NoSuchSymbolException nsse) {
@@ -906,7 +904,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ProgTypeSymbol integerType =
                     symtab.getInnermostActiveScope()
                             .queryForOne(
-                                    new NameQuery("Std_Integer_Fac", "Integer",
+                                    new NameQuery(
+                                            new CommonToken(ResolveLexer.ID, "Std_Integer_Fac"),
+                                            new CommonToken(ResolveLexer.ID, "Integer"),
                                             false)).toProgTypeSymbol();
             tr.progTypes.put(ctx, integerType.getProgramType());
             tr.mathTypes.put(ctx, integerType.getModelType());

@@ -1,7 +1,6 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSegments;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -36,8 +35,10 @@ public class ProgReprTypeSymbol extends Symbol {
                 .mathType(representation.toMath()).build();
     }
 
-    public PSegments conceptualExemplarAsPSymbol() {
-        return new PSegments(typeGraph.formConcExp(), exemplarAsPSymbol());
+    public PSymbol conceptualExemplarAsPSymbol() {
+        return new PSymbol.PSymbolBuilder(
+                "conc."+representation.getExemplarName())
+                .mathType(representation.toMath()).build();
     }
 
     public PTRepresentation getRepresentationType() {

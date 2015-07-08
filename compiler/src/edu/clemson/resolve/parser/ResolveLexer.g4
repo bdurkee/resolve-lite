@@ -30,127 +30,125 @@
  */
 lexer grammar ResolveLexer;
 
-// keywords
-
-BY				:	'by'							;
-CATEGORICAL		:	'Categorical'					;
-CART_PROD		:	'Cart_Prod'						;
-CONCEPT	    	:	'Concept'						;
-CONSTRAINT		:	('constraint'|'constraints')	;
-CONVENTION		:	'convention'					;
-COROLLARY		:	'Corollary'						;
-CORRESPONDENCE 	:	'correspondence'				;
-DEFINITION		:	'Definition'					;
-DEPENDENT		:	'DependentTerms'				;
-DO 				:	'do'							;
-END         	:   'end'							;
-ENTAILS			:	'which_entails'					;
-ENHANCEMENT		:	'Enhancement'					;
-EXISTS			:	'Exists'						;
-EXTERNALLY		:	'externally'					;
-EXEMPLAR		:	'exemplar'						;
-FACILITY		:	'Facility'						;
-FAMILY			:	'Family'						;
-FOR 			:	'for'							;
-FORALL			:	'Forall'						;
-IMPLEMENTED		:	'implemented'					;
-IMPL			:	'Implementation'				;
-IMPLICIT		:	'Implicit'						;
-INIT			:	'initialization'				;
-INDUCTIVE		:	'Inductive'						;
-INTERSECT		:	'intersect'						;
-IS				:	'is'							;
-IF				:	'if'							;
-LAMBDA			:	'lambda'						;
-MODELED			:	'modeled'						;
-OF				:	'of'							;
-ON 				:	'on'							;
-OPERATION		:	('Operation'|'Oper')			;
-OTHERWISE		:	'otherwise'						;
-RECORD			:	'Record'						;
-RECURSIVE		:	'Recursive'						;
-REQUIRES		:	'requires'						;
-PRECIS      	:   'Precis'						;
-PROCEDURE		:	('Procedure'|'Proc')			;
-ENSURES			:	'ensures'						;
-THEOREM			:	'Theorem'						;
-TYPE			:	'Type'							;
-USES        	:   'uses'							;
-UNION			:	'union'							;
-VAR				:	'Var'							;
-WHILE			:	'While'							;
-
-// parameter modes
-
-ALTERS		:	('alters'|'alt')					;
-UPDATES		:	('updates'|'upd')					;
-EVALUATES	:	('evaluates'|'eval')				;
-CLEARS		:	('clears'|'clr')					;
-RESTORES	:	('restores'|'rest')					;
-PRESERVES	:	('preserves'|'pres')				;
-REPLACES	:	('replaces'|'rpl')					;
-
-// punctuation
-
-CAT 		:	'o'								;
-COLON		:	':'								;
-COLONCOLON	:	'::'							;
-COMMA       :	','								;
-DBL_LBRACE	:	'{{'							;
-DBL_RBRACE	:	'}}'							;
-DOT			:	'.'								;
-RBRACE		:	'}'								;
-LPAREN		:	'('								;
-RPAREN		:	')'								;
-SEMI        :   ';'								;
-LBRACE		:	'{'								;
-BASE_CASE	:	'(i.)'							;
-INDUCT_CASE :	'(ii.)'							;
-
-// operators
-
-ASSIGN		:	':='							;
-SWAP		:	':=:'							;
-DIVIDE		:	'/'								;
-PLUS		:	'+'								;
-MINUS		:	'-'								;
-CUTMINUS	:	'.-.'							;
-MULT		:	'*'								;
-TILDE		:	'~'								;
-AND			:	'and'							;
-OR 			:	'or'							;
-IMPLIES		:	'implies'						;
-IS_IN		:	'is_in'							;
-IS_NOT_IN	:	'is_not_in'						;
-RANGE		:	'..'							;
-TRIPLEDOT	:	'...'							;
-RARROW		:	'->'							;
-LT 			:	'<'								;
-GT			:	'>'								;
-LTE			:	'<='							;
-GTE			:	'>='							;
-EQUALS		:	'='								;
-NEQUALS		:	'/='							;
-AT			:	'@'								;
-BAR			:	'|'								;
-DBL_BAR		:	'||'							;
-
-INT			:	('0'|[1-9]+ [0-9]*)				;
-BOOL		:	('B'|'true'|'false')			;
-ID			:	NameStartChar NameChar*         ;
-WS          :	[ \t\r\n\f]+ -> channel(HIDDEN)	;
-
 DOC_COMMENT
-	:	'(**' .*? ('*)' | EOF) -> channel(HIDDEN)
+	:	'(**' .*? ('*)' | EOF)
 	;
 
 BLOCK_COMMENT
-	:	'(*' .*? ('*)' | EOF)  -> channel(HIDDEN)
-	;
+	:	'/*' .*? ('*/' | EOF)  -> channel(HIDDEN)
+    ;
 
 LINE_COMMENT
 	:	'--' ~[\r\n]*  -> channel(HIDDEN)
 	;
+
+// keywords
+
+PRECIS			:   'Precis'			;
+BY				:	'by'				;
+CART_PROD		:	'Cart_Prod'			;
+CATEGORICAL		:	'Categorical'		;
+CONCEPT			:	'Concept'			;
+CONSTRAINT		:	'constraints'		;
+CONVENTION		:	'convention'		;
+COROLLARY		:	'Corollary'			;
+CORRESPONDENCE 	:	'correspondence'	;
+DEFINITION		:	'Definition'		;
+DEPENDENT		:	'Dependent_Terms'	;
+DO 				:	'do'				;
+ELSE			:	'else'				;
+END         	:   'end'				;
+ENSURES			:	'ensures'			;
+ENTAILS			:	'which_entails'		;
+ENHANCEMENT		:	'Enhancement'		;
+EXEMPLAR		:	'exemplar'			;
+EXISTS			:	'Exists'			;
+EXTERNALLY		:	'externally'		;
+FACILITY		:	'Facility'			;
+FAMILY			:	'Family'			;
+FOR				:	'for'				;
+FORALL			:	'Forall'			;
+IF				:	'if'				;
+IMPLICIT		:	'Implicit'			;
+INITIALIZATION	:	'initialization'	;
+IS 				:	'is'				;
+IMPLEMENTATION	:	'Implementation'	;
+IMPLEMENTED		:	'implemented'		;
+INDUCTIVE		:	'Inductive'			;
+LAMBDA			:	'lambda'			;
+MODELED			:	'modeled'			;
+OF				:	'of'				;
+ON 				:	'on'				;
+OTHERWISE		:	'otherwise'			;
+OPERATION		:	'Operation'			;
+PROCEDURE		:	'Procedure'			;
+RECORD			:	'Record'			;
+RECURSIVE		:	'Recursive'			;
+REQUIRES		:	'requires'			;
+THEOREM			:	'Theorem'			;
+TYPE			:	'Type'				;
+USES			:	'uses'				;
+VAR				:	'Var'				;
+WHILE			:	'While'				;
+
+// parameter modes
+
+ALTERS			:	'alters'		;
+UPDATES			:	'updates'		;
+CLEARS			:	'clears'		;
+RESTORES		:	'restores'		;
+PRESERVES		:	'preserves'		;
+REPLACES		:	'replaces'		;
+EVALUATES		:	'evaluates'		;
+
+// punctuation
+
+AT				:	'@'				;
+BASE_CASE		:	'(i.)'			;
+COLON			:	':'				;
+COLONCOLON		:	'::'			;
+COMMA			:	','				;
+DOT 			:	'.'				;
+DBL_RBRACE		:	'}}'			;
+DBL_LBRACE		:	'{{'			;
+INDUCTIVE_CASE	:	'(ii.)'			;
+LBRACE 			:	'{'				;
+RBRACE  		:	'}'				;
+LPAREN			:	'('				;
+RPAREN			:	')'				;
+SEMI			:	';'				;
+
+// operators
+
+AND				:	'and'			;
+ASSIGN			:	':='			;
+BAR				:	'|'				;
+CAT				:	'o'				;
+CUTMINUS		:	'.-.'			;
+DBL_BAR			:	'||'			;
+DIVIDE			:	'/'				;
+EQUALS			:	'='				;
+GT				:	'>'				;
+GTE				:	'>='			;
+IMPLIES			:	'implies'		;
+INTERSECT		:	'intersect'		;
+IS_IN			:	'is_in'			;
+IS_NOT_IN		:	'is_not_in'		;
+LT 				:	'<'				;
+LTE				:	'<='			;
+MINUS			:	'-'				;
+MULT			:	'*'				;
+NEQUALS			:	'/='			;
+OR 				:	'or'			;
+PLUS			:	'+'				;
+RANGE			:	'..'			;
+RARROW			:	'->'			;
+SWAP			:	':=:'			;
+TILDE			:	'~'				;
+TRIPLEDOT		:	'...'			;
+UNION			:	'union'			;
+
+ID	:	NameStartChar NameChar*;
 
 fragment
 NameChar
@@ -164,6 +162,17 @@ NameStartChar
 	:   'A'..'Z'
 	|   'a'..'z'
 	;
+
+INT	: [0-9]+
+	;
+
+BOOL
+	:	'B'
+	|	'true'
+	|	'false'
+	;
+
+WS  :	[ \t\r\n\f]+ -> channel(HIDDEN)	;
 
 // -----------------
 // Illegal Character

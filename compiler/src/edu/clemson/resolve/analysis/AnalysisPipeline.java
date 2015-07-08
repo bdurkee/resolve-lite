@@ -22,13 +22,11 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
         for (AnnotatedTree unit : compilationUnits) {
             compiler.info("populating: " + unit.getName());
             ParseTreeWalker walker = new ParseTreeWalker();
-            System.out.println("----------------------\nModule: "
-                    + unit.getName() + "\n----------------------");
             PopulatingVisitor defSymsAndScopes =
                     new PopulatingVisitor(compiler, compiler.symbolTable,
                             unit);
             defSymsAndScopes.visit(unit.getRoot());
-            PExpBuildingListener<PExp> pexpAnnotator =
+            /*PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             unit);
             //SanityChecker sanityChecker = new SanityChecker(compiler, unit);
@@ -36,7 +34,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             //walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
             walker.walk(pexpAnnotator, unit.getRoot());
-            unit.mathPExps = compiler.symbolTable.mathPExps;
+            unit.mathPExps = compiler.symbolTable.mathPExps;*/
         }
     }
 }

@@ -101,6 +101,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     }
 
     private String parseExtensions(List<String> extensions) {
-        return "*{" + Utils.join(extensions, ",") + "}";
+        return "{" + Utils.join(extensions, ",") + "}";
     }
 }

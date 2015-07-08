@@ -1,0 +1,5 @@
+Facility T;
+    uses Standard_Booleans;
+
+
+end T;

@@ -197,11 +197,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathSegmentsExp(
             @NotNull Resolve.MathSegmentsExpContext ctx) {
         //Todo: Type the individual segs of a seg exp.
-        List<PSymbol> segs = ctx.mathFunctionApplicationExp().stream()
-                .map(app -> (PSymbol) repo.get(app))
+        List<String> nameComponents = ctx.mathFunctionApplicationExp().stream()
+                .map(app -> ((PSymbol) repo.get(app)).getName())
                 .collect(Collectors.toList());
-        repo.put(ctx, new PSegments(segs, ctx.getStart() //
-                .getText().equals("@")));
+        PSymbol last = (PSymbol)repo.get(ctx.mathFunctionApplicationExp()
+                .get(ctx.mathFunctionApplicationExp().size() - 1));
+
+        String name = Utils.join(nameComponents, ".");
+        PSymbolBuilder result = new PSymbolBuilder(name).arguments(
+                last.getArguments()).mathType(last.getMathType());
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathFunctionExp(
@@ -283,14 +288,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgMemberExp(
             @NotNull Resolve.ProgMemberExpContext ctx) {
-        List<PSymbol> segs = new ArrayList<>();
-        segs.add((PSymbol) repo.get(ctx.getChild(0)));
-        for (TerminalNode term : ctx.ID()) {
-            segs.add(new PSymbol.PSymbolBuilder(term.getText())
-                    .mathType(getMathType(term)).progType(progTypes.get(term))
-                    .build());
-        }
-        repo.put(ctx, new PSegments(segs));
+        List<String> nameComponents = ctx.ID().stream()
+                .map(TerminalNode::getText).collect(Collectors.toList());
+        repo.put(ctx, new PSymbolBuilder(Utils.join(nameComponents, "."))
+                .mathType(types.get(ctx)).build());
     }
 
     @Override public void exitProgIntegerExp(

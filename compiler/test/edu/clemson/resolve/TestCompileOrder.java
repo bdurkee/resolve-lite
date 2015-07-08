@@ -28,6 +28,16 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
+    @Test public void testTrivialOrdering2() throws Exception {
+        String[] modules = new String[] {
+                "Precis T;\n uses U;\n end T;",
+                "Precis U;\n end U;",
+        };
+        String expected = "populating: U\npopulating: T";
+        writeModules(modules, "T", "U");
+        testOrdering(expected, "T");
+    }
+
     @Test public void testFlawedOrdering() throws Exception {
         String[] modules = new String[] {
                 "Precis U;\n uses X;\n end U;",
@@ -36,8 +46,8 @@ public class TestCompileOrder extends BaseTest {
         };
         String[] pairs = new String[] {
                 "Precis Flawed;\n uses U;\n end Flawed;",
-                "error(" + ErrorKind.CIRCULAR_DEPENDENCY.code + "):  circular dependency: U depends on V, but V also depends on U\n"+
-                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "):  module X was unable to find the file corresponding to uses reference 'Y'"
+                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "): X.resolve:2:6: module X was unable to find the file corresponding to uses reference 'Y'" + "\n"+
+                "error(" + ErrorKind.CIRCULAR_DEPENDENCY.code + "): V.resolve:2:6: circular dependency: U depends on V, but V also depends on U"
         };
         writeModules(modules, "U", "X", "V");
         super.testErrors(pairs, "Flawed");

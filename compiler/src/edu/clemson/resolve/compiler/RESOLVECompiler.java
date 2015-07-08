@@ -36,7 +36,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VCGenPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
@@ -62,7 +61,6 @@ public  class RESOLVECompiler {
 
     public static final List<String> NATIVE_EXTENSION = Collections
             .unmodifiableList(Collections.singletonList(FILE_EXTENSION));
-
     public static final List<String> NON_NATIVE_EXTENSION = Collections
             .unmodifiableList(Collections.singletonList(".java"));
 
@@ -88,7 +86,8 @@ public  class RESOLVECompiler {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of edu.clemson.resolve source files"),
+            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("noStdUses",         "-noStdUses", "don't import standard facilities (e.g. boolean, integer, char)"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
             new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
@@ -105,7 +104,7 @@ public  class RESOLVECompiler {
 
     public final String[] args;
     protected boolean haveOutputDir = false;
-
+    public boolean noStdUses = false;
     public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
@@ -119,6 +118,8 @@ public  class RESOLVECompiler {
     public final List<String> targetNames = new ArrayList<>();
     public final ErrorManager errMgr;
     public LogManager logMgr = new LogManager();
+
+    public RESOLVECompiler() { this(null); }
 
     public RESOLVECompiler(String[] args) {
         this.errMgr = new ErrorManager(this);
@@ -241,14 +242,14 @@ public  class RESOLVECompiler {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
+        //VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
         //codegenPipe.process();
-        vcsPipe.process();
+        //vcsPipe.process();
     }
 
     public List<AnnotatedTree> sortTargetModulesByUsesReferences() {
@@ -262,8 +263,8 @@ public  class RESOLVECompiler {
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
-        for (AnnotatedTree t : Collections.unmodifiableCollection(roots
-                .values())) {
+
+        for (AnnotatedTree t : Collections.unmodifiableCollection(roots.values())) {
             g.addVertex(t.getName());
             findDependencies(g, t, roots);
         }
@@ -282,38 +283,28 @@ public  class RESOLVECompiler {
     private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
                                   AnnotatedTree root,
                                   Map<String, AnnotatedTree> roots) {
-        for (String importRequest : root.imports
-                .getImportsExcluding(ImportCollection.ImportType.EXTERNAL)) {
-            AnnotatedTree module = roots.get(importRequest);
+        for (AnnotatedTree.UsesRef importRequest : root.uses) {
+            AnnotatedTree module = roots.get(importRequest.name);
             try {
-                File file = findResolveFile(importRequest, NATIVE_EXTENSION);
+                File file = findResolveFile(importRequest.name, NATIVE_EXTENSION);
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
                     roots.put(module.getName(), module);
                 }
             }
             catch (IOException ioe) {
-                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, null,
-                        root.getName(), importRequest);
+                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
+                        importRequest.location, root.getName(),
+                        importRequest.name);
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
 
-            if ( root.imports.inCategory(ImportCollection.ImportType.NAMED,
-                    module.getName()) ) {
-                /*
-                   if (!module.appropriateForImport()) {
-                    errorManager.toolError(ErrorKind.INVALID_IMPORT,
-                    "MODULE TYPE GOES HERE", root.getName().getText(),
-                    "IMPORTED MODULE TYPE GOES HERE", module.getName()
-                        .getText());
-                    }
-                 */
-            }
             if ( pathExists(g, module.getName(), root.getName()) ) {
-                errMgr.toolError(ErrorKind.CIRCULAR_DEPENDENCY,
-                        module.getName(), root.getName());
+                errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
+                        importRequest.location,
+                        importRequest.name, root.getName());
                 break;
             }
             Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
@@ -355,9 +346,9 @@ public  class RESOLVECompiler {
         return false;
     }
 
-    private File findResolveFile(String baseName, List<String> extensions)
-            throws IOException {
-        FileLocator l = new FileLocator(baseName, extensions);
+    private File findResolveFile(String fileName,
+                        List<String> extensions) throws IOException {
+        FileLocator l = new FileLocator(fileName, extensions);
         Files.walkFileTree(new File(libDirectory).toPath(), l);
         return l.getFile();
     }

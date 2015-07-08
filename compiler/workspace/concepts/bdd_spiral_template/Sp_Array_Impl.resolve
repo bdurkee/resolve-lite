@@ -1,12 +1,12 @@
 Implementation Sp_Array_Impl for Bdd_Spiral_Template;
-        uses Basic_Natural_Number_Theory;
+        uses Basic_Natural_Number_Theory, Standard_Integers;
 
-    Facility Ceramic_Arr_Fac is
-            Bdd_Ceramic_Array_Template<T>(0, Max_Length - 1)
+    Facility Arr_Fac is Bdd_Ceramic_Array_Template
+                <Bdd_Spiral_Template :: T>(0, Max_Length - 1)
         externally implemented by Ceramic_Array_Impl;
 
     Type Spiral_Pos = Record
-            Labl : Ceramic_Arr_Fac :: Ceramic_Array;
+            Labl : Arr_Fac :: Ceramic_Array;
             Length, Curr_Place : Std_Integer_Fac :: Integer;
         end;
         convention 0 <= P.Curr_Place and
@@ -14,7 +14,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
                 which_entails P.Curr_Place, P.Length : N;
         correspondence
             conc.P.Trmnl_Loc = SS(k)(P.Length, Cen(k)) and
-            --conc.P.Curr_Loc = SS(k)(P.Curr_Place, Cen(k)); --and
+            conc.P.Curr_Loc = SS(k)(P.Curr_Place, Cen(k)) and
             conc.P.Lab = lambda (q : Sp_Loc(k)).(
                 {{P.Labl(SCD(k)(q)) if SCD(k)(q) + 1 <= P.Length;
                         T.Base_Point otherwise;}});
@@ -22,9 +22,13 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             P.Curr_Place := 0;
         end;
 
-        Proc Lengthen (alters e : T; updates P : Spiral_Pos);
-            Ceramic_Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
+        Procedure Lengthen (alters e : Arr_Fac :: T; updates P : Spiral_Pos);
+            Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;
+
+        Procedure Spiral_Out (updates P : Spiral_Pos);
+
+        end Spiral_Out;
 
 end Sp_Array_Impl;

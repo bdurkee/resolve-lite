@@ -33,7 +33,7 @@ public class PAlternatives extends PExp {
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
 
-    public void accept(PExpListener v) {
+    public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPAlternatives(this);
         v.beginChildren(this);
