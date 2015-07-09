@@ -28,7 +28,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         end Lengthen;
 
         Procedure Spiral_Out (updates P : Spiral_Pos);
-
+            P.Curr_Place := P.Curr_Place + 1;
         end Spiral_Out;
 
 end Sp_Array_Impl;

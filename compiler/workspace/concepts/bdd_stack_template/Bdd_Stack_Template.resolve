@@ -6,11 +6,11 @@ Concept Bdd_Stack_Template<T>
     Type Family Stack is
                 modeled by Str(T);
         exemplar S;
-        constraint |S| <= Max_Depth;
+        constraints |S| <= Max_Depth;
         initialization
                 ensures S = Empty_String;
 
-        Oper Push (alters e : T; updates S : Stack);
+        Operation Push (alters e : T; updates S : Stack);
             requires 1 + |S| <= Max_Depth;
             ensures  S = <@e> o @S;
 
