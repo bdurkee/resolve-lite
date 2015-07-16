@@ -28,7 +28,7 @@
 
     <modules>
         <module>compiler</module>
-        <module>runtime</module>
+       <!-- <module>runtime</module> -->
     </modules>
 
     <properties>
