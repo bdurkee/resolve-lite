@@ -30,6 +30,7 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
@@ -242,14 +243,14 @@ public  class RESOLVECompiler {
         List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
         VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
-        //codegenPipe.process();
+        codegenPipe.process();
         vcsPipe.process();
     }
 

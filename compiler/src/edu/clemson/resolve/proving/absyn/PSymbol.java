@@ -19,10 +19,6 @@ import java.util.stream.Collectors;
  * as function calls, with the former two represented as functions with no
  * arguments.
  */
-
-//Todo: Make the name for this guy a list of string. PSymbols can now have
-    //segmeneted names as well, our methods will need updating to take this
-    //change into account.
 public class PSymbol extends PExp {
 
     public static enum DisplayStyle {
@@ -357,7 +353,7 @@ public class PSymbol extends PExp {
 
     @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new LinkedList<>();
-        if ( this.arguments.size() > 0 ) {
+        if ( this.isFunction() ) {
             result.add(this);
         }
         for (PExp argument : arguments) {

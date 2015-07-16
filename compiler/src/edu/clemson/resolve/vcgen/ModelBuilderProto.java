@@ -21,10 +21,7 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -200,7 +197,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 throw new IllegalStateException(
                         "malformed correspondence, "
                                 + "should be of the form "
-                                + "conceptualvar1 = [exp_1]; ... conceptualvar_n = [exp_n]");
+                                + "conceptualvar_1 = [exp_1]; ... conceptualvar_n = [exp_n]");
             }
             PSymbol eAsPSym = (PSymbol) e;
             PExp elhs = eAsPSym.getArguments().get(0);
