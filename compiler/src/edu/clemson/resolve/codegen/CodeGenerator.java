@@ -14,7 +14,7 @@ import java.io.Writer;
 
 public class CodeGenerator extends AbstractCodeGenerator {
 
-    public static final String DEFAULT_LANGUAGE = "java";
+    public static final String DEFAULT_LANGUAGE = "Java";
 
     public CodeGenerator(@NotNull RESOLVECompiler rc,
                          @NotNull AnnotatedTree rootTarget) throws IllegalStateException {

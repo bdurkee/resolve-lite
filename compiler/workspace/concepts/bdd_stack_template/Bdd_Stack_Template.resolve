@@ -1,6 +1,7 @@
 Concept Bdd_Stack_Template<T>
         (evaluates Max_Depth : Std_Integer_Fac :: Integer);
-            uses Basic_Integer_Theory, String_Theory, Standard_Integers;
+            uses Basic_Integer_Theory, Basic_Natural_Number_Theory,
+                    String_Theory, Standard_Integers;
     requires 1 <= Max_Depth which_entails Max_Depth : N;
 
     Type Family Stack is
@@ -10,8 +11,8 @@ Concept Bdd_Stack_Template<T>
         initialization
                 ensures S = Empty_String;
 
-        Operation Push (alters e : T; updates S : Stack);
-            requires 1 + |S| <= Max_Depth;
-            ensures  S = <@e> o @S;
+     --   Operation Push (alters e : T; updates S : Stack);
+     --       requires 1 + |S| <= Max_Depth;
+     --       ensures  S = <@e> o @S;
 
 end Bdd_Stack_Template;

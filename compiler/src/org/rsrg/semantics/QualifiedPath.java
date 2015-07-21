@@ -43,6 +43,7 @@ public class QualifiedPath implements ScopeSearchPath {
             ModuleScopeBuilder moduleScope = repo.moduleScopes.get(
                     qualifier.getText());
             if (moduleScope == null) {
+                System.out.println("NO SUCH MODULE: " + qualifier);
                 repo.getCompiler().errMgr.semanticError(
                         ErrorKind.NO_SUCH_MODULE, qualifier, qualifier.getText());
                 return result;

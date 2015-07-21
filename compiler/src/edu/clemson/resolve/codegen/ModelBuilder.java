@@ -66,7 +66,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
                                 .parameterDeclGroup(), ctx.variableDeclGroup(),
-                        ctx.stmtBlock().stmt());
+                        ctx.stmtBlock() != null ? ctx.stmtBlock().stmt() :
+                                new ArrayList<Resolve.StmtContext>());
         built.put(ctx, f);
     }
 
@@ -254,6 +255,9 @@ public class ModelBuilder extends ResolveBaseListener {
                 e =
                         new AnonOpParameterClassInstance(buildQualifier(
                                 argAsNamedExp.qualifier, argAsNamedExp.name), s);
+            }
+            catch (UnexpectedSymbolException use) {
+                e = new VarNameRef(null, "get" + argAsNamedExp.name.getText() + "()");
             }
             catch (NoSuchSymbolException | DuplicateSymbolException e1) {
                 e1.printStackTrace();

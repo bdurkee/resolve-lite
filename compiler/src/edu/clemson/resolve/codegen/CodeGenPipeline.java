@@ -35,7 +35,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 compiler.info("generating code: " + unit.getName());
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
-                    //System.out.println(x.render());
+                    System.out.println(x.render());
                     gen.writeFile(x);
                 }
                 /*for (String external : unit.imports

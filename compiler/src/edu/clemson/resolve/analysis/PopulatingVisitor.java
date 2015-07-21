@@ -293,7 +293,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
         ctx.variableDeclGroup().forEach(this::visit);
-        this.visit(ctx.stmtBlock());
+        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
@@ -354,19 +354,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
             for (Resolve.TypeContext generic : ctx.type()) {
-                suppliedGenericSyms.add(symtab
-                        .getInnermostActiveScope()
-                        .queryForOne(
-                                new NameQuery(generic.qualifier, generic.name,
-                                        true)).toProgTypeSymbol());
+                try {
+                    suppliedGenericSyms.add(symtab
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(generic.qualifier,
+                                            generic.name,
+                                            true)).toProgTypeSymbol());
+                }
+                catch (DuplicateSymbolException | NoSuchSymbolException e) {
+                    compiler.errMgr.semanticError(e.getErrorKind(), generic.name,
+                            generic.name.getText());
+                }
                 i++;
             }
             symtab.getInnermostActiveScope().define(
                     new FacilitySymbol(ctx, getRootModuleID(),
                             suppliedGenericSyms, symtab));
         }
-        catch (DuplicateSymbolException | NoSuchSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
         catch (UnexpectedSymbolException use) {
@@ -900,14 +907,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgIntegerExp(
             @NotNull Resolve.ProgIntegerExpContext ctx) {
+        CommonToken qualifier = new CommonToken(ctx.getStart());
+        qualifier.setText("Std_Integer_Fac"); qualifier.setType(ResolveLexer.ID);
+        CommonToken name = new CommonToken(ctx.getStart());
+        name.setText("Integer"); name.setType(ResolveLexer.ID);
         try {
             ProgTypeSymbol integerType =
                     symtab.getInnermostActiveScope()
                             .queryForOne(
-                                    new NameQuery(
-                                            new CommonToken(ResolveLexer.ID, "Std_Integer_Fac"),
-                                            new CommonToken(ResolveLexer.ID, "Integer"),
-                                            false)).toProgTypeSymbol();
+                                    new NameQuery(qualifier, name,false))
+                            .toProgTypeSymbol();
             tr.progTypes.put(ctx, integerType.getProgramType());
             tr.mathTypes.put(ctx, integerType.getModelType());
         }

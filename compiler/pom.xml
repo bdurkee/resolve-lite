@@ -73,6 +73,7 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
                             <mainClass>edu.clemson.resolve.compiler.RESOLVECompiler</mainClass>
                         </manifest>
                     </archive>
