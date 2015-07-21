@@ -4,6 +4,7 @@ import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.Archiver;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -11,12 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
@@ -30,9 +26,9 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
 
         //a map from a unit tree -> list of translated java sources necessary
         //to run unit (including unit itself)
-        Map<AnnotatedTree, List<String>> targetUnitsToAllRequiredJavaSrcs =
+        Map<AnnotatedTree, List<JarUnit>> targetUnitsToAllRequiredJavaSrcs =
                 new HashMap<>();
-        List<String> translatedSoFar = new ArrayList<>();
+        List<JarUnit> translatedSoFar = new ArrayList<>();
         for (AnnotatedTree unit : compilationUnits) {
             try {
                 if ( unit.getRoot().getChild(0) instanceof Resolve.PrecisModuleContext )
@@ -40,7 +36,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 if ( compiler.genCode.equalsIgnoreCase("java") ) {
                     ST generatedST = gen.generateModule();
-                    translatedSoFar.add(generatedST.render());
+                    translatedSoFar.add(new JarUnit(unit.getName(), generatedST.render()));
                     if (compiler.targetNames.contains(unit.getName())) {
                         //gets everything processed so far + itself.
                         targetUnitsToAllRequiredJavaSrcs.put(unit, translatedSoFar);
@@ -57,16 +53,21 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 return; //if the templates were unable to be loaded, etc.
             }
         }
+
         if ( compiler.jar ) {
-            for (Map.Entry<AnnotatedTree, List<String>> group :
+            Archiver archiver;
+
+            for (Map.Entry<AnnotatedTree, List<JarUnit>> group :
                     targetUnitsToAllRequiredJavaSrcs.entrySet()) {
                 AnnotatedTree t = group.getKey();
                 if (!containsValidMain(t.getRoot())) {
                     compiler.errMgr.toolError(ErrorKind.NO_MAIN_SPECIFIED,
                             t.getName());
                 }
+                archiver = new Archiver(compiler, group.getKey().getName(),
+                        group.getValue());
                 System.out.println("CREATING JAR FOR: " + t.getName());
-
+                archiver.archive();
             }
         }
     }
@@ -76,12 +77,12 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             root = root.getChild(0);
         }
         if (!(root instanceof Resolve.FacilityModuleContext)) return false;
-        MainListener l = new MainListener();
+        MainFunctionListener l = new MainFunctionListener();
         ParseTreeWalker.DEFAULT.walk(l, root);
         return l.containsValidMain;
     }
 
-    protected class MainListener extends ResolveBaseListener {
+    protected class MainFunctionListener extends ResolveBaseListener {
         public boolean containsValidMain = false;
 
         @Override public void enterOperationProcedureDecl(
@@ -90,6 +91,15 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     ctx.name.getText().equals("main"));
             containsValidMain = containsValidMain &&
                     ctx.operationParameterList().parameterDeclGroup().isEmpty();
+        }
+    }
+
+    public class JarUnit {
+        public final String javaClassName, javaClassSrc;
+
+        public JarUnit(String className, String classSrc) {
+            this.javaClassName = className;
+            this.javaClassSrc = classSrc;
         }
     }
 }

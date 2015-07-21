@@ -40,6 +40,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +90,17 @@ public class Utils {
             }
         }
         return builder.toString();
+    }
+
+    public static void writeFile(String dir, String fileName, String content) {
+        try {
+            org.antlr.v4.runtime.misc.Utils.writeFile(dir + "/" +
+                    fileName, content, "UTF-8");
+        }
+        catch (IOException ioe) {
+            System.err.println("can't write file");
+            ioe.printStackTrace(System.err);
+        }
     }
 
     /**

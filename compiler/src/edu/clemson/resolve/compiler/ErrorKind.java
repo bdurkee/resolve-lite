@@ -209,7 +209,13 @@ public enum ErrorKind {
     NO_MAIN_SPECIFIED(37, "no main() operation defined in: <arg>; "
             + "cannot create executable jar without a main "
             + "(note: main is expected to have zero arguments)",
-            ErrorSeverity.ERROR_ONE_OFF);
+            ErrorSeverity.ERROR_ONE_OFF),
+
+    /**
+     * Compiler Warning 38: template error: <em>message</em>.
+     */
+    GENERATED_JAVA_ERROR(38, "generated java error: <arg> ",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
