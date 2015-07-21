@@ -198,6 +198,17 @@ public enum ErrorKind {
      */
     CANNOT_CREATE_TARGET_GENERATOR(36, "RESOLVE cannot generate <arg> code as "
             + "of version " + RESOLVECompiler.VERSION,
+            ErrorSeverity.ERROR_ONE_OFF),
+
+    /**
+     * Compiler Error 37:
+     * <p>
+     * no main operation defined in: <em>moduleName</em>; cannot create
+     * executable jar without a main.</p>
+     */
+    NO_MAIN_SPECIFIED(37, "no main() operation defined in: <arg>; "
+            + "cannot create executable jar without a main "
+            + "(note: main is expected to have zero arguments)",
             ErrorSeverity.ERROR_ONE_OFF);
 
     public final int code;
