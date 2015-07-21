@@ -91,6 +91,7 @@ public  class RESOLVECompiler {
             new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("noStdUses",         "-noStdUses", "don't import standard facilities (e.g. boolean, integer, char)"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
+            new Option("jar",               "-jar", "generate an executable for generated code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
             new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
     };
