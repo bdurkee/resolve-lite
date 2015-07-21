@@ -25,8 +25,6 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         if ( compiler.genCode == null ) return;
-        File outputDir = new File(compiler.outputDirectory);
-
         for (AnnotatedTree unit : compilationUnits) {
             try {
                 if ( unit.getRoot().getChild(0) instanceof Resolve.PrecisModuleContext )
@@ -35,9 +33,9 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 compiler.info("generating code: " + unit.getName());
                 if ( compiler.genCode.equals("Java") ) {
                     ST x = gen.generateModule();
-                    System.out.println(x.render());
                     gen.writeFile(x);
                 }
+
                 /*for (String external : unit.imports
                         .getImportsOfType(ImportCollection.ImportType.EXTERNAL)) {
                     FileLocator l =
