@@ -18,6 +18,7 @@ import java.util.jar.Manifest;
 public class Archiver {
 
     public static final String BASE_CLASS_DIR = System.getProperty("java.io.tmpdir");
+    public static int BUFFER_SIZE = 10240;
 
     private final List<CodeGenPipeline.JarUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
@@ -59,6 +60,23 @@ public class Archiver {
         Boolean result = task.call(); // Line 7
         if ( result ){
             System.out.println("Compilation has succeeded");
+            byte buffer[] = new byte[BUFFER_SIZE];
+            Manifest manifest = new Manifest();
+            manifest.getMainAttributes().put(
+                    Attributes.Name.MANIFEST_VERSION, "1.0");
+            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS,
+                    entryPointName);
+            try {
+                FileOutputStream stream = new FileOutputStream(entryPointName + ".java");
+                JarOutputStream jarOut = new JarOutputStream(stream, manifest);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            for (CodeGenPipeline.JarUnit u : rawJavaSrcs) {
+
+            }
         }
         eraseTempDir();
     }

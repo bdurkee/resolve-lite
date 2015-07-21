@@ -31,8 +31,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         List<JarUnit> translatedSoFar = new ArrayList<>();
         for (AnnotatedTree unit : compilationUnits) {
             try {
-                if ( unit.getRoot().getChild(0) instanceof Resolve.PrecisModuleContext )
-                    continue;
+                if ( unit.getRoot().getChild(0) instanceof Resolve.PrecisModuleContext ) continue;
+
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 if ( compiler.genCode.equalsIgnoreCase("java") ) {
                     ST generatedST = gen.generateModule();
@@ -55,8 +55,6 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         }
 
         if ( compiler.jar ) {
-            Archiver archiver;
-
             for (Map.Entry<AnnotatedTree, List<JarUnit>> group :
                     targetUnitsToAllRequiredJavaSrcs.entrySet()) {
                 AnnotatedTree t = group.getKey();
@@ -64,8 +62,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     compiler.errMgr.toolError(ErrorKind.NO_MAIN_SPECIFIED,
                             t.getName());
                 }
-                archiver = new Archiver(compiler, group.getKey().getName(),
-                        group.getValue());
+                Archiver archiver = new Archiver(compiler, group.getKey()
+                        .getName(), group.getValue());
                 System.out.println("CREATING JAR FOR: " + t.getName());
                 archiver.archive();
             }
