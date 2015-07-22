@@ -1,6 +1,6 @@
-Facility U;
+Facility Foo;
 
     Operation Main();
         Procedure
     end Main;
-end U;
+end Foo;

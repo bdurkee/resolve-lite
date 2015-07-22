@@ -89,7 +89,6 @@ public  class RESOLVECompiler {
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
             new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
-            new Option("noStdUses",         "-noStdUses", "don't import standard facilities (e.g. boolean, integer, char)"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
             new Option("jar",               "-jar", "generate an executable for generated code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
@@ -107,7 +106,7 @@ public  class RESOLVECompiler {
 
     public final String[] args;
     protected boolean haveOutputDir = false;
-    public boolean noStdUses = false;
+    public boolean jar = false;
     public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;

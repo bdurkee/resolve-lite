@@ -198,7 +198,30 @@ public enum ErrorKind {
      */
     CANNOT_CREATE_TARGET_GENERATOR(36, "RESOLVE cannot generate <arg> code as "
             + "of version " + RESOLVECompiler.VERSION,
-            ErrorSeverity.ERROR_ONE_OFF);
+            ErrorSeverity.ERROR_ONE_OFF),
+
+    /**
+     * Compiler Error 37:
+     * <p>
+     * no main operation defined in: <em>moduleName</em>; cannot create
+     * executable jar without a main.</p>
+     */
+    NO_MAIN_SPECIFIED(37, "no main() operation defined in: <arg>; "
+            + "cannot create executable jar without a main "
+            + "(note: main is expected to have zero arguments)",
+            ErrorSeverity.ERROR_ONE_OFF),
+
+    /**
+     * Compiler Error 38: generated Java error: <em>message</em>.
+     */
+    GENERATED_JAVA_ERROR(38, "generated java error: <arg> ",
+            ErrorSeverity.ERROR);
+
+    /**
+     * Compiler Warning 39: generated Java warning: <em>message</em>.
+     */
+    //GENERATED_JAVA_WARNING(39, "generated java warning: <arg> ",
+    //                     ErrorSeverity.WARNING);
 
     public final int code;
     public final String message;
