@@ -54,7 +54,12 @@ public class Archiver {
 
         Iterable<? extends JavaFileObject> fileObjects =
                 fileManager.getJavaFileObjectsFromStrings(filesToCompile);
-
+        JavaCompiler.CompilationTask task = compiler.getTask(null,
+                fileManager, listener, null, null, fileObjects);
+        Boolean result = task.call(); // Line 7
+        if ( result ){
+            System.out.println("Compilation has succeeded");
+        }
         eraseTempDir();
     }
 
@@ -83,8 +88,10 @@ public class Archiver {
             this.compiler = rc;
         }
         @Override public void report(Diagnostic diagnostic) {
-            compiler.errMgr.toolError(ErrorKind.GENERATED_JAVA_ERROR,
-                    diagnostic.getMessage(Locale.ENGLISH));
+            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                compiler.errMgr.toolError(ErrorKind.GENERATED_JAVA_ERROR,
+                        diagnostic.getMessage(Locale.ENGLISH));
+            }
         }
     }
 }

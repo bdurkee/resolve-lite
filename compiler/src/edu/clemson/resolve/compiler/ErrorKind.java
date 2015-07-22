@@ -212,10 +212,16 @@ public enum ErrorKind {
             ErrorSeverity.ERROR_ONE_OFF),
 
     /**
-     * Compiler Warning 38: template error: <em>message</em>.
+     * Compiler Error 38: generated Java error: <em>message</em>.
      */
     GENERATED_JAVA_ERROR(38, "generated java error: <arg> ",
             ErrorSeverity.ERROR);
+
+    /**
+     * Compiler Warning 39: generated Java warning: <em>message</em>.
+     */
+    //GENERATED_JAVA_WARNING(39, "generated java warning: <arg> ",
+    //                     ErrorSeverity.WARNING);
 
     public final int code;
     public final String message;

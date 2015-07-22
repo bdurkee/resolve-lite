@@ -1,3 +1,6 @@
 Facility U;
 
+    Operation Main();
+        Procedure
+    end Main;
 end U;
