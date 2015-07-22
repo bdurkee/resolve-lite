@@ -53,7 +53,6 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 return; //if the templates were unable to be loaded, etc.
             }
         }
-
         if ( compiler.jar ) {
             for (Map.Entry<AnnotatedTree, List<JarUnit>> group :
                     targetUnitsToAllRequiredJavaSrcs.entrySet()) {
@@ -76,18 +75,16 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         if (!(root instanceof Resolve.FacilityModuleContext)) return false;
         MainFunctionListener l = new MainFunctionListener();
         ParseTreeWalker.DEFAULT.walk(l, root);
-        return l.containsValidMain;
+        return l.containsMain;
     }
 
     protected class MainFunctionListener extends ResolveBaseListener {
-        public boolean containsValidMain = false;
+        public boolean containsMain = false;
 
         @Override public void enterOperationProcedureDecl(
                 @NotNull Resolve.OperationProcedureDeclContext ctx) {
-            containsValidMain = (ctx.name.getText().equals("Main") ||
-                    ctx.name.getText().equals("main"));
-            containsValidMain = containsValidMain &&
-                    ctx.operationParameterList().parameterDeclGroup().isEmpty();
+            if (ctx.name.getText().equals("Main") ||
+                    ctx.name.getText().equals("main")) containsMain = true;
         }
     }
 
