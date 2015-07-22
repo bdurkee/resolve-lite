@@ -65,6 +65,7 @@ public abstract class AbstractCodeGenerator {
             w.close();
         }
         catch (IOException ioe) {
+            System.out.println(ioe.getMessage());
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE, ioe,
                     fileName);
         }

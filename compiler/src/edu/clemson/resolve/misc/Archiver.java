@@ -66,7 +66,9 @@ public class Archiver {
             JarOutputStream target = null;
             try {
                 target = new JarOutputStream(
-                        new FileOutputStream(entryPointName+".jar"), manifest);
+                        new FileOutputStream(resolveCompiler.outputDirectory
+                                + File.separator
+                                + entryPointName+".jar"), manifest);
                 add(new File(tmpdir), target);
                 target.close();
             }
