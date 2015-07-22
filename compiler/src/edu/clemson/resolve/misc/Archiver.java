@@ -7,6 +7,8 @@ import org.antlr.v4.runtime.misc.NotNull;
 
 import javax.tools.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -14,11 +16,9 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
 
 public class Archiver {
-
-    public static final String BASE_CLASS_DIR = System.getProperty("java.io.tmpdir");
-    public static int BUFFER_SIZE = 10240;
 
     private final List<CodeGenPipeline.JarUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
@@ -31,14 +31,14 @@ public class Archiver {
         this.entryPointName = entryPoint;
 
         //create the temp dir that will house our .java and .class files.
-        this.tmpdir = new File(BASE_CLASS_DIR).getAbsolutePath();
+        try {
+            this.tmpdir = Files.createTempDirectory("RESOLVE_").toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void archive() {
-        runJavaCompiler();
-    }
-
-    public void runJavaCompiler() {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         GenCodeDiagnosticListener listener =
                 new GenCodeDiagnosticListener(resolveCompiler);
@@ -57,31 +57,48 @@ public class Archiver {
                 fileManager.getJavaFileObjectsFromStrings(filesToCompile);
         JavaCompiler.CompilationTask task = compiler.getTask(null,
                 fileManager, listener, null, null, fileObjects);
-        Boolean result = task.call(); // Line 7
-        if ( result ){
-            System.out.println("Compilation has succeeded");
-            byte buffer[] = new byte[BUFFER_SIZE];
+        Boolean result = task.call();
+        if ( result ) {
             Manifest manifest = new Manifest();
-            manifest.getMainAttributes().put(
-                    Attributes.Name.MANIFEST_VERSION, "1.0");
-            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS,
-                    entryPointName);
+            manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+            manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, ".");
+            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, entryPointName);
+            JarOutputStream target = null;
             try {
-                FileOutputStream stream = new FileOutputStream(entryPointName + ".java");
-                JarOutputStream jarOut = new JarOutputStream(stream, manifest);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                target = new JarOutputStream(
+                        new FileOutputStream(entryPointName+".jar"), manifest);
+                add(new File(tmpdir), target);
+                target.close();
             }
-
-            for (CodeGenPipeline.JarUnit u : rawJavaSrcs) {
-
+            catch (IOException e) {
+                e.printStackTrace();
             }
         }
         eraseTempDir();
     }
 
-    //eraseTempDir();
+    private void add(File source, JarOutputStream target) throws IOException {
+        BufferedInputStream in = null;
+        try {
+            for (File f : source.listFiles()) {
+                JarEntry entry = new JarEntry(f.getName());
+                entry.setTime(source.lastModified());
+                target.putNextEntry(entry);
+                in = new BufferedInputStream(new FileInputStream(f));
+
+                byte[] buffer = new byte[1024];
+                while (true) {
+                    int count = in.read(buffer);
+                    if (count == -1) break;
+                    target.write(buffer, 0, count);
+                }
+                target.closeEntry();
+            }
+        }
+        finally {
+            if ( in != null ) in.close();
+        }
+    }
 
     protected void eraseFiles() {
         File tmpdirF = new File(tmpdir);

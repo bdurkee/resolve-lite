@@ -64,7 +64,6 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 }
                 Archiver archiver = new Archiver(compiler, group.getKey()
                         .getName(), group.getValue());
-                System.out.println("CREATING JAR FOR: " + t.getName());
                 archiver.archive();
             }
         }
