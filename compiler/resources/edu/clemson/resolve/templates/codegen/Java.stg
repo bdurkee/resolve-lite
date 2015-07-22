@@ -31,6 +31,8 @@
 
 ModuleFile(file, module) ::= <<
 <fileHeader(file.resolveFileName, file.RESOLVEVersion)>
+//package gen;
+
 //import org.resolvelite.runtime.*;
 import java.lang.reflect.*;
 
