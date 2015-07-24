@@ -54,6 +54,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             }
         }
         if ( compiler.jar ) {
+
             for (Map.Entry<AnnotatedTree, List<JarUnit>> group :
                     targetUnitsToAllRequiredJavaSrcs.entrySet()) {
                 AnnotatedTree t = group.getKey();

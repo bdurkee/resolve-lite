@@ -4,11 +4,13 @@ import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.codehaus.plexus.util.FileUtils;
 
 import javax.tools.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +55,25 @@ public class Archiver {
             filesToCompile.add(tmpdir + File.separator + javaClassName);
         }
 
+        //copy over the external java files
+        File source = new File(RESOLVECompiler.getCoreLibraryDirectory()
+                + File.separator + "external");
+        if (source == null) {
+            throw new IllegalStateException("invalid installation -- missing"
+                    + "external folder");
+        }
+        for (File externalFile : source.listFiles()) {
+            try {
+                File destFile = new File(tmpdir + File.separator
+                                + externalFile.getName());
+                Files.copy(externalFile.toPath(), destFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+                filesToCompile.add(destFile.getAbsolutePath());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         Iterable<? extends JavaFileObject> fileObjects =
                 fileManager.getJavaFileObjectsFromStrings(filesToCompile);
         JavaCompiler.CompilationTask task = compiler.getTask(null,
