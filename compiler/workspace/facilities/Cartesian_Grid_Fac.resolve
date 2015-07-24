@@ -1,8 +1,0 @@
-Facility Cartesian_Grid_Fac;
-        uses Standard_Integers;
-
-    Operation Main();
-        Procedure
-
-        end Main;
-end Cartesian_Grid_Fac;

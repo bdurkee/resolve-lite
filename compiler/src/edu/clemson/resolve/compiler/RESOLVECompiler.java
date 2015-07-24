@@ -39,6 +39,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VCGenPipeline;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -52,6 +53,7 @@ import org.rsrg.semantics.SymbolTable;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -88,9 +90,9 @@ public  class RESOLVECompiler {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory",      "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of custom, working source files"),
             new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
-            new Option("jar",               "-jar", "generate an executable for generated code"),
+            new Option("jar",               "-jar", "generate an executable jar"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
             new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
     };
@@ -107,7 +109,7 @@ public  class RESOLVECompiler {
     public final String[] args;
     protected boolean haveOutputDir = false;
     public boolean jar = false;
-    public String libDirectory;
+    public String workingDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
@@ -188,27 +190,27 @@ public  class RESOLVECompiler {
             if ( outDir.exists() && !outDir.isDirectory() ) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
                         outputDirectory);
-                libDirectory = ".";
+                workingDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
         }
-        if ( libDirectory != null ) {
-            if ( libDirectory.endsWith("/") || libDirectory.endsWith("\\") ) {
-                libDirectory =
-                        libDirectory
-                                .substring(0, libDirectory.length() - 1);
+        if ( workingDirectory != null ) {
+            if ( workingDirectory.endsWith("/") || workingDirectory.endsWith("\\") ) {
+                workingDirectory =
+                        workingDirectory
+                                .substring(0, workingDirectory.length() - 1);
             }
-            File outDir = new File(libDirectory);
+            File outDir = new File(workingDirectory);
             if ( !outDir.exists() ) {
                 errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
-                        libDirectory);
-                libDirectory = ".";
+                        workingDirectory);
+                workingDirectory = ".";
             }
         }
         else {
-            libDirectory = ".";
+            workingDirectory = ".";
         }
     }
 
@@ -240,6 +242,8 @@ public  class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
+        System.out.println("HERE IS OUR ENVIRONMENTAL RESOLVE ROOT: " + System.getenv("RESOLVEROOT"));
+
         List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
@@ -351,15 +355,24 @@ public  class RESOLVECompiler {
     private File findResolveFile(String fileName,
                         List<String> extensions) throws IOException {
         FileLocator l = new FileLocator(fileName, extensions);
-        Files.walkFileTree(new File(libDirectory).toPath(), l);
-        return l.getFile();
+        File result = null;
+        try {
+            Files.walkFileTree(new File(workingDirectory).toPath(), l);
+            result = l.getFile();
+        } catch (NoSuchFileException nsfe) {
+            //couldn't find what we were looking for in the local directory?
+            //well, let's try the core libraries then
+            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
+            result = l.getFile();
+        }
+        return result;
     }
 
     private AnnotatedTree parseModule(String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
-                file = new File(libDirectory, fileName);
+                file = new File(workingDirectory, fileName);
             }
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
@@ -378,6 +391,18 @@ public  class RESOLVECompiler {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
         return null;
+    }
+
+    @NotNull public static String getCoreLibraryDirectory() {
+        String rootDir = System.getenv("RESOLVEROOT");
+        if (rootDir == null) {
+            return ".";
+        }
+        return rootDir + File.separator + getCoreLibraryName();
+    }
+
+    @NotNull public static String getCoreLibraryName() {
+        return "src";
     }
 
     /**

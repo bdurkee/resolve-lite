@@ -1,5 +1,0 @@
-Facility Standard_Integers;
-        uses Standard_Booleans;
-    Facility Std_Integer_Fac is Integer_Template
-        externally implemented by Integer_Impl;
-end Standard_Integers;

@@ -1,6 +1,6 @@
 Facility U;
+        uses Standard_Booleans;
 
-    Operation Main();
-        Procedure
-    end Main;
+    Operation Main(); Procedure
+        end Main;
 end U;
