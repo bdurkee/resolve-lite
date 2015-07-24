@@ -11,7 +11,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class AnnotatedTree {
@@ -25,7 +27,9 @@ public class AnnotatedTree {
     //convenience too.
     public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
     public final Set<UsesRef> uses = new LinkedHashSet<>();
-    public final Set<UsesRef> externalUses = new LinkedHashSet<>();
+    //use a map for more efficiency when checking whether a module references
+    //an external impl
+    public final Map<String, UsesRef> externalUses = new HashMap<>();
 
     private final String name, fileName;
     private final ParseTree root;
@@ -72,6 +76,10 @@ public class AnnotatedTree {
             result = this.name.equals(((AnnotatedTree) o).name);
         }
         return result;
+    }
+
+    @Override public String toString() {
+        return name;
     }
 
     public static class UsesRef {

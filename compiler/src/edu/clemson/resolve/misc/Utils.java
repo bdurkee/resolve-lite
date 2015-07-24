@@ -40,6 +40,8 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -247,5 +249,18 @@ public class Utils {
         int lastDot = name.lastIndexOf('.');
         if ( lastDot < 0 ) return name;
         return name.substring(0, lastDot);
+    }
+
+    //TODO: Add charset parameter 'StandardCharset.' etc.
+    public static String readFile(String file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        String ls = System.getProperty("line.separator");
+        while((line = reader.readLine()) != null ) {
+            stringBuilder.append( line );
+            stringBuilder.append( ls );
+        }
+        return stringBuilder.toString();
     }
 }

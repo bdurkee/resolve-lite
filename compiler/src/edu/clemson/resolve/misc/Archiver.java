@@ -1,16 +1,13 @@
 package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.codegen.CodeGenPipeline;
+import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.codehaus.plexus.util.FileUtils;
 
 import javax.tools.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -18,19 +15,20 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.regex.Matcher;
 
 public class Archiver {
 
-    private final List<CodeGenPipeline.JarUnit> rawJavaSrcs = new ArrayList<>();
+    private final List<CodeGenPipeline.JavaUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
     private final RESOLVECompiler resolveCompiler;
+    private final AnnotatedTree entryPoint;
 
-    public Archiver(RESOLVECompiler rc, String entryPoint,
-                    List<CodeGenPipeline.JarUnit> javaSrcsToPackage) {
+    public Archiver(RESOLVECompiler rc, AnnotatedTree entryPoint,
+                    List<CodeGenPipeline.JavaUnit> javaSrcsToPackage) {
         this.resolveCompiler = rc;
         this.rawJavaSrcs.addAll(javaSrcsToPackage);
-        this.entryPointName = entryPoint;
+        this.entryPointName = entryPoint.getName();
+        this.entryPoint = entryPoint;
 
         //create the temp dir that will house our .java and .class files.
         try {
@@ -49,31 +47,12 @@ public class Archiver {
 
         List<String> filesToCompile = new ArrayList<>();
         //write all .java files to tmpdir
-        for (CodeGenPipeline.JarUnit u : rawJavaSrcs) {
+        for (CodeGenPipeline.JavaUnit u : rawJavaSrcs) {
             String javaClassName = u.javaClassName+".java";
             Utils.writeFile(tmpdir, javaClassName, u.javaClassSrc);
             filesToCompile.add(tmpdir + File.separator + javaClassName);
         }
 
-        //copy over the external java files
-        File source = new File(RESOLVECompiler.getCoreLibraryDirectory()
-                + File.separator + "external");
-        if (source == null) {
-            throw new IllegalStateException("invalid installation -- missing"
-                    + "external folder");
-        }
-        for (File externalFile : source.listFiles()) {
-            try {
-                File destFile = new File(tmpdir + File.separator
-                                + externalFile.getName());
-                Files.copy(externalFile.toPath(), destFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-                filesToCompile.add(destFile.getAbsolutePath());
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         Iterable<? extends JavaFileObject> fileObjects =
                 fileManager.getJavaFileObjectsFromStrings(filesToCompile);
         JavaCompiler.CompilationTask task = compiler.getTask(null,

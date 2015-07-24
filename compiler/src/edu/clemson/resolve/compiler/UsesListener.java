@@ -47,7 +47,8 @@ public class UsesListener extends ResolveBaseListener {
             @NotNull Resolve.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         if ( ctx.externally != null ) {
-            tr.externalUses.add(new AnnotatedTree.UsesRef(ctx.impl));
+            tr.externalUses.put(ctx.impl.getText(),
+                    new AnnotatedTree.UsesRef(ctx.impl));
         }
         else {
             tr.uses.add(new AnnotatedTree.UsesRef(ctx.impl));
