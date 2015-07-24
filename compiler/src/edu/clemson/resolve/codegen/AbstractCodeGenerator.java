@@ -54,7 +54,7 @@ public abstract class AbstractCodeGenerator {
         write(outputFileST, getFileName());
     }
 
-    private void write(ST code, String fileName) {
+    public void write(ST code, String fileName) {
         try {
             Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);

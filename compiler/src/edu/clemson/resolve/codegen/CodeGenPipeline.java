@@ -15,6 +15,9 @@ import org.stringtemplate.v4.ST;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -46,13 +49,12 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                     ST generatedST = gen.generateModule();
                     translatedSoFar.add(new JavaUnit(unit.getName(), generatedST.render()));
 
+                    //Todo: Try to coalecse this and "addAdditionalFiles" into the same method
                     for (File externalFile : external.listFiles()) {
                         try {
                             String content = Utils.readFile(externalFile.getAbsolutePath());
-
                             String externalName =
                                     Utils.stripFileExtension(externalFile.getName());
-
                             if (unit.externalUses.containsKey(externalName)) {
                                 translatedSoFar.add(new JavaUnit(externalName, content));
                             }
@@ -70,7 +72,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                         addAdditionalFiles(Arrays.asList(runtime.listFiles()),
                                 unit);
                     }
-                    gen.writeFile(generatedST);
+                    //gen.writeFile(generatedST);
                 }
                 else {
                     compiler.errMgr.toolError(
@@ -82,10 +84,21 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 return; //if the templates were unable to be loaded, etc.
             }
         }
-        for (Map.Entry<AnnotatedTree, List<JavaUnit>> e :
-                targetUnitsToAllRequiredJavaSrcs.entrySet()) {
 
-        }
+        /*Set<JavaUnit> someSet = new HashSet<>();
+        targetUnitsToAllRequiredJavaSrcs.values().forEach(someSet::addAll);
+        for (JavaUnit u : someSet) {
+            File outputFile =
+                    new File(compiler.outputDirectory + File.separator
+                            + u.javaClassName + ".java");
+            try {
+                Files.write(outputFile.toPath(),
+                        u.javaClassSrc.getBytes(Charset.forName("UTF-8")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+
         if ( compiler.jar ) {
 
             for (Map.Entry<AnnotatedTree, List<JavaUnit>> group :
@@ -143,6 +156,18 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         public JavaUnit(String className, String classSrc) {
             this.javaClassName = className;
             this.javaClassSrc = classSrc;
+        }
+
+        @Override public boolean equals(Object o) {
+            boolean result = o instanceof JavaUnit;
+            if ( result ) {
+                result = ((JavaUnit)o).javaClassName.equals(this.javaClassName);
+            }
+            return result;
+        }
+
+        @Override public int hashCode() {
+            return javaClassName.hashCode();
         }
     }
 }

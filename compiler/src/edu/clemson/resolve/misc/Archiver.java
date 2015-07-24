@@ -21,14 +21,12 @@ public class Archiver {
     private final List<CodeGenPipeline.JavaUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
     private final RESOLVECompiler resolveCompiler;
-    private final AnnotatedTree entryPoint;
 
     public Archiver(RESOLVECompiler rc, AnnotatedTree entryPoint,
                     List<CodeGenPipeline.JavaUnit> javaSrcsToPackage) {
         this.resolveCompiler = rc;
         this.rawJavaSrcs.addAll(javaSrcsToPackage);
         this.entryPointName = entryPoint.getName();
-        this.entryPoint = entryPoint;
 
         //create the temp dir that will house our .java and .class files.
         try {
