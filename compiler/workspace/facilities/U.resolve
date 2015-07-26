@@ -1,5 +1,9 @@
 Facility U;
-    uses Test2;
+    uses Standard_Booleans;
+
+    Type Foo = Record
+            x, y : Std_Boolean_Fac :: Boolean;
+        end;
 
     Operation Main();
         Procedure

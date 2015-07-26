@@ -428,6 +428,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //this is actually ok for now. Facility module bound type reprs
             //won't have a model.
         }
+        catch (UnexpectedSymbolException use) {
+            //this is ok too, type representations appearing in facilities wont
+            //have a model
+        }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());

@@ -85,7 +85,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             }
         }
 
-    /*    Set<JavaUnit> someSet = new HashSet<>();
+        Set<JavaUnit> someSet = new HashSet<>();
         targetUnitsToAllRequiredJavaSrcs.values().forEach(someSet::addAll);
         for (JavaUnit u : someSet) {
             File outputFile =
@@ -97,7 +97,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }*/
+        }
 
         if ( compiler.jar ) {
 
