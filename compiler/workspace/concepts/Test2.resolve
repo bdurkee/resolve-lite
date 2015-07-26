@@ -1,0 +1,7 @@
+Concept Test2;
+
+    Type Family Boolean is modeled by B;
+        exemplar e;
+
+    Operation Foo() : Boolean;
+end Test2;

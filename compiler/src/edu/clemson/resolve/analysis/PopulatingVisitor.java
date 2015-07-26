@@ -394,15 +394,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.progTypeValues.put(ctx, type.getProgramType());
             tr.mathTypes.put(ctx, g.MTYPE);
             tr.mathTypeValues.put(ctx, type.getModelType());
+            return null;
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(),
                     ctx.getStart(), ctx.name.getText());
-            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-            tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
-            tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-            tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
         }
+        catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a type", ctx.name.getText(),
+                    use.getActualSymbolDescription());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+        tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
         return null;
     }
 

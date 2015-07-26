@@ -41,6 +41,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
@@ -92,17 +93,6 @@ public class Utils {
             }
         }
         return builder.toString();
-    }
-
-    public static void writeFile(String dir, String fileName, String content) {
-        try {
-            org.antlr.v4.runtime.misc.Utils.writeFile(dir + "/" +
-                    fileName, content, "UTF-8");
-        }
-        catch (IOException ioe) {
-            System.err.println("can't write file");
-            ioe.printStackTrace(System.err);
-        }
     }
 
     /**
@@ -262,5 +252,16 @@ public class Utils {
             stringBuilder.append( ls );
         }
         return stringBuilder.toString();
+    }
+
+    public static void writeFile(String dir, String fileName, String content) {
+        try {
+            org.antlr.v4.runtime.misc.Utils.writeFile(dir + File.separator +
+                    fileName, content, "UTF-8");
+        }
+        catch (IOException ioe) {
+            System.err.println("can't write file");
+            ioe.printStackTrace(System.err);
+        }
     }
 }
