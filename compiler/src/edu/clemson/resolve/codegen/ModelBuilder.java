@@ -472,7 +472,7 @@ public class ModelBuilder extends ResolveBaseListener {
     protected CallStat buildPrimitiveInfixStat(@NotNull String name,
                                @NotNull Resolve.ProgExpContext left,
                                @NotNull Resolve.ProgExpContext right) {
-        Qualifier.NormalQualifier qualifier = new NormalQualifier("ResolveBase");
+        Qualifier.NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
         return new CallStat(qualifier, name, (Expr) built.get(left),
                 (Expr) built.get(right));
     }

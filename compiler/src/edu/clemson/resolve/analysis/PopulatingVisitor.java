@@ -917,24 +917,56 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgIntegerExp(
             @NotNull Resolve.ProgIntegerExpContext ctx) {
-        CommonToken qualifier = new CommonToken(ctx.getStart());
-        qualifier.setText("Std_Integer_Fac"); qualifier.setType(ResolveLexer.ID);
-        CommonToken name = new CommonToken(ctx.getStart());
-        name.setText("Integer"); name.setType(ResolveLexer.ID);
+        ProgTypeSymbol p =
+                getProgTypeSymbol(ctx, "Std_Integer_Fac", "Integer");
+        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
+                PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, p != null ? p.getModelType() :
+                MTInvalid.getInstance(g));
+        return null;
+    }
+
+    @Override public Void visitProgCharacterExp(
+            @NotNull Resolve.ProgCharacterExpContext ctx) {
+        ProgTypeSymbol p =
+                getProgTypeSymbol(ctx, "Std_Character_Fac", "Character");
+        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
+                PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, p != null ? p.getModelType() :
+                MTInvalid.getInstance(g));
+        return null;
+    }
+
+    @Override public Void visitProgStringExp(
+            @NotNull Resolve.ProgStringExpContext ctx) {
+        ProgTypeSymbol p =
+                getProgTypeSymbol(ctx, "Std_Char_Str_Fac", "Char_Str");
+        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
+                PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, p != null ? p.getModelType() :
+                MTInvalid.getInstance(g));
+        return null;
+    }
+
+    private ProgTypeSymbol getProgTypeSymbol(ParserRuleContext ctx,
+            String typeQualifier, String typeName) {
+        CommonToken qualifierToken = new CommonToken(ctx.getStart());
+        qualifierToken.setText(typeQualifier);
+        qualifierToken.setType(ResolveLexer.ID);
+
+        CommonToken nameToken = new CommonToken(ctx.getStart());
+        nameToken.setText(typeName);
+        nameToken.setType(ResolveLexer.ID);
+
+        ProgTypeSymbol result = null;
         try {
-            ProgTypeSymbol integerType =
-                    symtab.getInnermostActiveScope()
-                            .queryForOne(
-                                    new NameQuery(qualifier, name,false))
+            result = symtab.getInnermostActiveScope().queryForOne(
+                            new NameQuery(qualifierToken, nameToken,false))
                             .toProgTypeSymbol();
-            tr.progTypes.put(ctx, integerType.getProgramType());
-            tr.mathTypes.put(ctx, integerType.getModelType());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(),
-                    ctx.getStart(), "Integer");
-            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-            tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+                    ctx.getStart(), typeName);
         }
         return null;
     }
