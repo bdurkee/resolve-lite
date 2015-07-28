@@ -244,7 +244,9 @@ toJavaPrimitive ::= [
 
 toStdFacilityName ::= [
     "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",
-    "Std_Integer_Fac":"Standard_Integers.INSTANCE"
+    "Std_Integer_Fac":"Standard_Integers.INSTANCE",
+    "Std_Character_Fac":"Standard_Characters.INSTANCE",
+    "Std_Char_Str_Fac":"Standard_Char_Strings.INSTANCE"
 ]
 
 fileExtension() ::= ".java"
