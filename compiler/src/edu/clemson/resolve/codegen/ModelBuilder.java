@@ -147,7 +147,7 @@ public class ModelBuilder extends ResolveBaseListener {
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
-        /*for (Resolve.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
+        for (Resolve.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
@@ -162,7 +162,7 @@ public class ModelBuilder extends ResolveBaseListener {
             else {
                 layers.get(i).child = basePtr;
             }
-        }*/
+        }
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
     }

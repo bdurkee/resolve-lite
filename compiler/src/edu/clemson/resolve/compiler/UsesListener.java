@@ -61,4 +61,16 @@ public class UsesListener extends ResolveBaseListener {
             tr.uses.add(new AnnotatedTree.UsesRef(ctx.impl));
         }
     }
+
+    @Override public void exitEnhancementPairDecl(
+            @NotNull Resolve.EnhancementPairDeclContext ctx) {
+        tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
+        if ( ctx.externally != null ) {
+            tr.externalUses.put(ctx.impl.getText(),
+                    new AnnotatedTree.UsesRef(ctx.impl));
+        }
+        else {
+            tr.uses.add(new AnnotatedTree.UsesRef(ctx.impl));
+        }
+    }
 }
