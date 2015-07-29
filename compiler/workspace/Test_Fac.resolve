@@ -1,0 +1,26 @@
+Facility Test_Fac;
+        uses Standard_Integers, Standard_Char_Strings;
+
+    Type Goo = Record
+            a, b, c : Std_Integer_Fac :: Integer;
+        end;
+        initialization
+                G.a := 44;
+            end;
+
+    Type Foo = Record
+            x, y : Std_Integer_Fac :: Integer;
+            v : Goo;
+        end;
+        initialization
+                F.x := 3;
+                F.v.a := 80085;
+            end;
+
+    Operation Main ();
+        Procedure
+            Var f : Foo;
+            Std_Integer_Fac :: Write_Line(f.v.a);
+    end Main;
+
+end Test_Fac;
