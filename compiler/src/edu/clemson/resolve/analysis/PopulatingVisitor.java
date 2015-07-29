@@ -349,39 +349,53 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitFacilityDecl(
             @NotNull Resolve.FacilityDeclContext ctx) {
+        //Todo: visit the generic arg types too
         ctx.moduleArgumentList().forEach(this::visit);
-        int i = 0;
+        ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
+                new ParseTreeProperty<>();
         try {
-            List<ProgTypeSymbol> suppliedGenericSyms = new ArrayList<>();
-            for (Resolve.TypeContext generic : ctx.type()) {
-                try {
-                    suppliedGenericSyms.add(symtab
-                            .getInnermostActiveScope()
-                            .queryForOne(
-                                    new NameQuery(generic.qualifier,
-                                            generic.name,
-                                            true)).toProgTypeSymbol());
-                }
-                catch (DuplicateSymbolException | NoSuchSymbolException e) {
-                    compiler.errMgr.semanticError(e.getErrorKind(), generic.name,
-                            generic.name.getText());
-                }
-                i++;
+            //map the base facility to any generic symbols parameterizing it
+            facOrEnhToGenericArgs.put(ctx,
+                    getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
+
+            //now do the same for each enhancement pair
+            for (Resolve.EnhancementPairDeclContext enh : ctx.enhancementPairDecl()) {
+                //Todo: visit the generic arg types too
+                enh.moduleArgumentList().forEach(this::visit);
+                facOrEnhToGenericArgs.put(enh,
+                        getGenericArgumentSymsForFacilityOrEnh(enh.type()));
             }
             symtab.getInnermostActiveScope().define(
                     new FacilitySymbol(ctx, getRootModuleID(),
-                            suppliedGenericSyms, symtab));
+                            facOrEnhToGenericArgs, symtab));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
-        catch (UnexpectedSymbolException use) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.getStart(), "a program type", ctx.type(i).getText(),
-                    use.getActualSymbolDescription());
-        }
         return null;
+    }
+
+    private List<ProgTypeSymbol> getGenericArgumentSymsForFacilityOrEnh(
+            @NotNull List<Resolve.TypeContext> actualTypes) {
+        List<ProgTypeSymbol> result = new ArrayList<>();
+        for (Resolve.TypeContext generic : actualTypes) {
+            try {
+                result.add(symtab.getInnermostActiveScope()
+                        .queryForOne(new NameQuery(generic.qualifier,
+                                generic.name, true)).toProgTypeSymbol());
+            }
+            catch (DuplicateSymbolException | NoSuchSymbolException e) {
+                compiler.errMgr.semanticError(e.getErrorKind(), generic.name,
+                        generic.name.getText());
+            }
+            catch (UnexpectedSymbolException use) {
+                compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                        generic.getStart(), "a program type", generic.getText(),
+                        use.getActualSymbolDescription());
+            }
+        }
+        return result;
     }
 
     @Override public Void visitType(@NotNull Resolve.TypeContext ctx) {
@@ -839,6 +853,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getText());
         }
         catch (UnexpectedSymbolException use) {
+            //ok, maybe we're dealing with a reference to an operation then?
+            try {
+                OperationSymbol o = symtab.getInnermostActiveScope()
+                        .queryForOne(new NameQuery(ctx.qualifier, ctx.name, true))
+                        .toOperationSymbol();
+                tr.progTypes.put(ctx, o.getReturnType());
+                tr.mathTypes.put(ctx, o.getReturnType().toMath());
+                return null;
+            }
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+                        ctx.name.getText());
+            }
+            //nope.
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.name, "a variable reference", ctx.name.getText(),
                     use.getActualSymbolDescription());

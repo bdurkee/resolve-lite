@@ -57,6 +57,7 @@ DEFINITION		:	'Definition'		;
 DEPENDENT		:	'Dependent_Terms'	;
 DO 				:	'do'				;
 ELSE			:	'else'				;
+ENHANCED		:	'enhanced'			;
 END         	:   'end'				;
 ENSURES			:	'ensures'			;
 ENTAILS			:	'which_entails'		;

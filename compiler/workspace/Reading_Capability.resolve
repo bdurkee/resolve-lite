@@ -1,0 +1,3 @@
+Enhancement Reading_Capability for Bdd_Stack_Template;
+    Operation Read(restores S : Stack);
+end Reading_Capability;
