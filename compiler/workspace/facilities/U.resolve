@@ -1,12 +1,24 @@
 Facility U;
-    uses Standard_Booleans;
+    uses Standard_Booleans, Standard_Integers, Standard_Characters,
+            Standard_Char_Strings;
 
     Type Foo = Record
-            x, y : Std_Boolean_Fac :: Boolean;
+            x, y : Std_Integer_Fac :: Integer;
         end;
+        initialization
+                F.x := 3;
+            end;
 
-    Operation Main();
+    Operation Foo2(updates i, j : Std_Integer_Fac :: Integer);
         Procedure
-            Var x : Foo;
+            Var x : Std_Integer_Fac :: Integer;
+            x := i + 0;
+
+    end Foo;
+    Operation main();
+        Procedure
+            Var f : Std_Char_Str_Fac :: Char_Str;
+            f := 'x';
+           -- Std_Integer_Fac :: Write_Line(f.x);
     end Main;
 end U;

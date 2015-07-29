@@ -239,7 +239,9 @@ NormalQualifier(q) ::= "<q.name>"
 
 toJavaPrimitive ::= [
     "Boolean":"boolean",
-    "Integer":"int"
+    "Integer":"int",
+    "Character":"char",
+    "Char_Str":"String"
 ]
 
 toStdFacilityName ::= [

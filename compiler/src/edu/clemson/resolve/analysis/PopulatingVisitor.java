@@ -234,17 +234,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             returnType = PTVoid.getInstance(g);
         }
+        ctx.variableDeclGroup().forEach(this::visit);
+        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
+        symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
                     new ProcedureSymbol(ctx.name.getText(), ctx,
                             getRootModuleID(), correspondingOp));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), ctx.getText());
+                    ctx.getStart(), ctx.name.getText());
         }
-        ctx.variableDeclGroup().forEach(this::visit);
-        this.visit(ctx.stmtBlock());
-        symtab.endScope();
         return null;
     }
 
@@ -968,7 +968,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(e.getErrorKind(),
                     ctx.getStart(), typeName);
         }
-        return null;
+        return result;
     }
 
     protected void typeOperationSym(ParserRuleContext ctx,

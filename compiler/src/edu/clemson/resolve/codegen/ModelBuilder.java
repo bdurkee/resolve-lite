@@ -77,7 +77,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
                                 .parameterDeclGroup(), ctx.variableDeclGroup(),
-                        ctx.stmtBlock().stmt());
+                        ctx.stmtBlock() != null ? ctx.stmtBlock().stmt() :
+                                new ArrayList<Resolve.StmtContext>());
         f.implementsOper = true;
         built.put(ctx, f);
     }
@@ -359,6 +360,18 @@ public class ModelBuilder extends ResolveBaseListener {
                 "Integer_Template"), "Integer", ctx.getText()));
     }
 
+    @Override public void exitProgCharacterExp(
+            @NotNull Resolve.ProgCharacterExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Character_Fac",
+                "Character_Template"), "Character", ctx.getText()));
+    }
+
+    @Override public void exitProgStringExp(
+            @NotNull Resolve.ProgStringExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Char_Str_Fac",
+                "Char_Str_Template"), "Char_Str", ctx.getText()));
+    }
+
     @Override public void exitConceptImplModule(
             @NotNull Resolve.ConceptImplModuleContext ctx) {
         ModuleFile file = buildFile();
@@ -449,7 +462,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        return isJavaLocallyAccessibleSymbol(s.getModuleID());
+        //System.out.println("symbol: " + s.getName() + ":" + s.getModuleID() + " is locally accessible?");
+        boolean result = isJavaLocallyAccessibleSymbol(s.getModuleID());
+        //System.out.println(result);
+        return result;
     }
 
     protected boolean isJavaLocallyAccessibleSymbol(String symbolModuleID) {
@@ -459,7 +475,10 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else { //was s defined in our parent concept?
             ParseTree thisTree = moduleScope.getDefiningTree();
-            if ( moduleScope.getDefiningTree() instanceof Resolve.ConceptImplModuleContext ) {
+            if (thisTree instanceof Resolve.ModuleContext) {
+                thisTree = thisTree.getChild(0);
+            }
+            if ( thisTree instanceof Resolve.ConceptImplModuleContext ) {
                 Resolve.ConceptImplModuleContext asConceptImpl =
                         (Resolve.ConceptImplModuleContext) thisTree;
                 return symbolModuleID.equals(asConceptImpl.concept.getText());
