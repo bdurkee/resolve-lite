@@ -288,7 +288,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgMemberExp(
             @NotNull Resolve.ProgMemberExpContext ctx) {
-
         List<String> nameComponents = new ArrayList<>();
         nameComponents.add(ctx.progNamedExp().getText());
         nameComponents.addAll(ctx.ID().stream()
@@ -299,12 +298,29 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgIntegerExp(
             @NotNull Resolve.ProgIntegerExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    @Override public void exitProgCharacterExp(
+            @NotNull Resolve.ProgCharacterExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    @Override public void exitProgStringExp(
+            @NotNull Resolve.ProgStringExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    private PExp buildLiteral(String literalText, MTType type, MTType typeValue,
+                              PTType progType) {
         PSymbol.PSymbolBuilder result =
-                new PSymbolBuilder(ctx.getText())
-                        .mathTypeValue(getMathTypeValue(ctx))
-                        .progType(progTypes.get(ctx))
-                        .mathType(getMathType(ctx)).literal(true);
-        repo.put(ctx, result.build());
+                new PSymbolBuilder(literalText).mathType(type)
+                        .progType(progType).mathTypeValue(typeValue)
+                        .literal(true);
+        return result.build();
     }
 
     private MTType getMathType(ParseTree t) {
