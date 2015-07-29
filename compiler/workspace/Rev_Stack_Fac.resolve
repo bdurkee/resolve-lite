@@ -6,7 +6,7 @@ Facility Rev_Stack_Fac;
             <Std_Char_Str_Fac :: Char_Str>(4)
         implemented by Stk_Array_Impl;
 
-	Operation Read_Stack (replaces S : Stack);
+	Operation Read_Stack (replaces S : SF :: Stack);
 	    Procedure
 
 	end Read_Stack;

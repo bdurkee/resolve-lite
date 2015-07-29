@@ -52,7 +52,7 @@ public class UsesListener extends ResolveBaseListener {
     @Override public void exitFacilityDecl(
             @NotNull Resolve.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
-        tr.semanticallyVisibleUses.add(ctx.spec.getText());
+        //tr.semanticallyVisibleUses.add(ctx.spec.getText());
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),
                     new AnnotatedTree.UsesRef(ctx.impl));
