@@ -1,12 +1,16 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.parser.Resolve;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.ModuleParameterization;
 import org.rsrg.semantics.SpecImplementationPairing;
 import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,28 +18,33 @@ public class FacilitySymbol extends Symbol {
 
     private final SpecImplementationPairing type;
     private final SymbolTable scopeRepo;
-    private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
+
+    private final ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
+
+    private final Map<ModuleParameterization, ModuleParameterization>
+            enhancementImplementations = new HashMap<>();
+    private final List<ModuleParameterization> enhancements = new ArrayList<>();
 
     public FacilitySymbol(Resolve.FacilityDeclContext facility,
-            String moduleID, List<ProgTypeSymbol> actualGenerics,
+            String moduleID,
+            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             SymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleID);
         this.scopeRepo = scopeRepo;
-        this.actualGenerics.addAll(actualGenerics);
+        this.genericsPerFacility = actualGenerics;
         ModuleParameterization spec =
                 new ModuleParameterization(facility.spec.getText(),
-                        actualGenerics, facility.specArgs, this, scopeRepo);
+                        genericsPerFacility.get(facility), facility.specArgs,
+                        this, scopeRepo);
 
         ModuleParameterization impl = null;
 
-        if ( facility.impl != null ) {
-            List<Resolve.ModuleArgumentContext> actualArgs =
-                    facility.implArgs != null ? facility.implArgs
-                            .moduleArgument() : new ArrayList<>();
-            impl =
-                    new ModuleParameterization(facility.impl.getText(),
-                            actualGenerics, facility.implArgs, this, scopeRepo);
-        }
+        List<Resolve.ModuleArgumentContext> actualArgs =
+                facility.implArgs != null ? facility.implArgs
+                        .moduleArgument() : new ArrayList<>();
+        impl = new ModuleParameterization(facility.impl.getText(),
+                        new ArrayList<>(), facility.implArgs, this, scopeRepo);
+
         this.type = new SpecImplementationPairing(spec, impl);
 
         //These are realized by the concept realization
@@ -50,24 +59,22 @@ public class FacilitySymbol extends Symbol {
 
             myEnhancements.add(spec);
             myEnhancementRealizations.put(spec, realization);
-        }
+        }*/
 
         //These are realized by individual enhancement realizations
-        for (EnhancementBodyItem enhancement : facility.getEnhancementBodies()) {
+        for (Resolve.EnhancementPairDeclContext enhancement :
+                facility.enhancementPairDecl()) {
 
-            spec =
-                    new ModuleParameterization(new ModuleIdentifier(enhancement
-                            .getName().getName()), enhancement.getParams(),
-                            this, mySourceRepository);
+            spec = new ModuleParameterization(enhancement.spec.getText(),
+                            genericsPerFacility.get(enhancement),
+                            enhancement.specArgs, this, scopeRepo);
 
-            realization =
-                    new ModuleParameterization(new ModuleIdentifier(enhancement
-                            .getBodyName().getName()), enhancement
-                            .getBodyParams(), this, mySourceRepository);
-
-            myEnhancements.add(spec);
-            myEnhancementRealizations.put(spec, realization);
-        }*/
+            impl = new ModuleParameterization(enhancement.impl.getText(),
+                        new ArrayList<>(), enhancement.implArgs,
+                            this, scopeRepo);
+            enhancements.add(spec);
+            enhancementImplementations.put(spec, impl);
+        }
     }
 
     public SpecImplementationPairing getFacility() {

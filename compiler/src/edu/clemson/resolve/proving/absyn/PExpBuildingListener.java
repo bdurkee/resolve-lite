@@ -283,6 +283,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .mathTypeValue(getMathTypeValue(ctx)) //
                 .progType(progTypes.get(ctx)).qualifier(ctx.qualifier) //
                 .mathType(getMathType(ctx));
+        //System.out.println("progNamedExp="+ctx.getText());
         repo.put(ctx, result.build());
     }
 

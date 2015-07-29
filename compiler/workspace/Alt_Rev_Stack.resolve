@@ -1,0 +1,14 @@
+Facility Alt_Rev_Stack;
+        uses Standard_Integers;
+
+    Facility SF is Bdd_Stack_Template<Std_Integer_Fac :: Integer>(4)
+            implemented by Stk_Array_Impl
+        enhanced by Reading_Capability
+            implemented by Obvious_Reading_Impl(Std_Integer_Fac :: Read);
+
+    Operation Main();
+        Procedure
+
+    end Main;
+
+end Alt_Rev_Stack;
