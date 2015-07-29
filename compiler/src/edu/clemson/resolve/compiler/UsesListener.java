@@ -23,17 +23,21 @@ public class UsesListener extends ResolveBaseListener {
     @Override public void enterConceptImplModule(
             @NotNull Resolve.ConceptImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
+        tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementModule(
             @NotNull Resolve.EnhancementModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
+        tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementImplModule(
             @NotNull Resolve.EnhancementImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.enhancement));
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
+        tr.semanticallyVisibleUses.add(ctx.enhancement.getText());
+        tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void exitUsesList(
@@ -41,11 +45,14 @@ public class UsesListener extends ResolveBaseListener {
         tr.uses.addAll(ctx.ID().stream()
                 .map(t -> new AnnotatedTree.UsesRef(t.getSymbol()))
                 .collect(Collectors.toList()));
+        tr.semanticallyVisibleUses.addAll(ctx.ID().stream()
+                .map(ParseTree::getText).collect(Collectors.toList()));
     }
 
     @Override public void exitFacilityDecl(
             @NotNull Resolve.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
+        tr.semanticallyVisibleUses.add(ctx.spec.getText());
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),
                     new AnnotatedTree.UsesRef(ctx.impl));

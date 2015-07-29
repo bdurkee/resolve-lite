@@ -121,7 +121,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitModule(@NotNull Resolve.ModuleContext ctx) {
         moduleScope = symtab.startModuleScope(ctx, Utils.getModuleName(ctx))
-                .addUses(tr.uses);
+                .addImports(tr.semanticallyVisibleUses);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'

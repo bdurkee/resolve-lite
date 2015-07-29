@@ -2,6 +2,8 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
 
@@ -30,12 +32,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return moduleID;
     }
 
-    public ModuleScopeBuilder addUses(Collection<AnnotatedTree.UsesRef> refs) {
-        for (AnnotatedTree.UsesRef ref : refs) {
-            if (!importedModules.contains(ref.name) && !moduleID.equals(ref.name)) {
-                importedModules.add(ref.name);
-            }
-        }
+    public ModuleScopeBuilder addImports(Collection<String> imports) {
+        importedModules.addAll(imports);
         return this;
     }
 
