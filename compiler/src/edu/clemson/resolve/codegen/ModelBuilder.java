@@ -616,13 +616,11 @@ public class ModelBuilder extends ResolveBaseListener {
                             new NameQuery(null,
                                     refQualifier, true)).toFacilitySymbol();
             //ok, it's referring to a facility alright. Now let's assign
-            //correspondingSym using a namequery with s as the qualifier,
-            //since we're sure it's a facility.
+            //correspondingSym using a namequery with 'refqualifier' as the qualifier,
+            //since we're now sure it's a facility (we would be kicked below if it wasn't).
             corresondingSym =
                     moduleScope.queryForOne(new NameQuery(refQualifier,
                             refName, true));
-            //Ok, so let's build a facility qualifier from the found 's'.
-            //TODO: We need to find the specific module where symName is declared
             return new Qualifier.FacilityQualifier(
                     corresondingSym.getModuleID(), s.getName());
         }
