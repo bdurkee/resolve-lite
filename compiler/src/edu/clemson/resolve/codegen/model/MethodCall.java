@@ -33,4 +33,14 @@ public class MethodCall extends Expr {
         this(genericTypeInit.q, "get" + genericTypeInit.typeName, Collections
                 .emptyList());
     }
+
+    //i.e.: ((OperationParameter) Read_Element).op(Next);
+    public static class OperationParameterMethodCall extends Expr {
+        public String name;
+        @ModelElement public List<Expr> args = new ArrayList<>();
+        public OperationParameterMethodCall(String name, List<Expr> args) {
+            this.name = name;
+            this.args.addAll(args);
+        }
+    }
 }

@@ -244,7 +244,7 @@ public<if(clazz.isStatic)> static<endif> RType get<clazz.name>() {
 }
 >>
 
-CallStat(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>);"
+CallStat(call, methodParamExp) ::= "<methodParamExp>;"
 
 ReturnStat(ret) ::= "return <ret.name>;"
 
@@ -255,6 +255,9 @@ while (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
 >>
 
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
+
+OperationParameterMethodCall(call, args) ::=
+    "((OperationParameter)<call.name>).op(<args; separator={, }>)"
 
 VarNameRef(v) ::= "<v.name>"
 

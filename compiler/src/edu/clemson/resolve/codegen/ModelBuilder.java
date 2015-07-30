@@ -290,8 +290,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitCallStmt(
             @NotNull Resolve.CallStmtContext ctx) {
-        built.put(ctx, new CallStat((MethodCall) built.get(ctx.progParamExp())));
-
+        built.put(ctx, new CallStat((Expr) built.get(ctx.progParamExp())));
     }
 
     @Override public void exitWhileStmt(
@@ -319,8 +318,22 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitProgParamExp(
             @NotNull Resolve.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText(), args));
+        if ( referencesOperationParameter(ctx.name.getText()) ) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(
+                    ctx.name.getText(), args));
+        }
+        else {
+            built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier,
+                    ctx.name), ctx.name.getText(), args));
+        }
+    }
+
+    private boolean referencesOperationParameter(String name) {
+        return !moduleScope.getSymbolsOfType(OperationSymbol.class).stream()
+                .filter(f -> f.getName().equals(name))
+                .filter(OperationSymbol::isModuleParameter)
+                .collect(Collectors.toList())
+                .isEmpty();
     }
 
     @Override public void exitProgInfixExp(
