@@ -603,10 +603,13 @@ public class ModelBuilder extends ResolveBaseListener {
             FacilitySymbol s =
                     moduleScope.queryForOne(
                             new NameQuery(null,
+                                    //Todo: this is an npe waiting to happen.
+                                    //We need tokens in this method, REAL tokens;
                             new CommonToken(ResolveLexer.ID, symQualifier), true))
                             .toFacilitySymbol();
 
             //Ok, so let's build a facility qualifier from the found 's'.
+            //TODO: We need to find the specific module where symName is declared
             return new Qualifier.FacilityQualifier(s);
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
