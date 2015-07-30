@@ -14,7 +14,7 @@ Facility Test_Fac;
         end;
         initialization
                 F.x := 3;
-                F.v.a := 80085;
+                F.v.a := 88;
             end;
 
     Operation Main ();

@@ -82,7 +82,28 @@ public class <impl.name>
     <delegateMethods; separator="\n">
     @Override public Object invoke(Object proxy, Method method,
             Object[] args) throws Throwable {
-        return null;
+        <if(funcImpls)><\\>
+        switch (method.getName()) {
+        <funcImpls: {f | case "<f.func.name>": return method.invoke(this, args);}; separator="\n">
+        default: return method.invoke(delegate, args);
+        }
+        <else>
+        return method.invoke(delegate, args);
+        <endif>
+    }
+
+    public static <impl.concept> createProxy(<[{<memberVars: {m|RType <m.var.name>}; anchor, separator=", \n">},
+                                               {<impl.concept> toWrap}]; anchor, separator=", \n">) {
+        <impl.name> eObj =
+                new <impl.name>(<[{<memberVars: {m|<m.var.name>}; separator=", ">}, "toWrap"]; separator=", ">);
+        Class[] toWrapInterfaces = toWrap.getClass().getInterfaces();
+        Class[] thisInterfaces = new Class[toWrapInterfaces.length+1];
+        Class[] tmpInterfaces = eObj.getClass().getInterfaces();
+        thisInterfaces[0] = tmpInterfaces[0];
+        System.arraycopy(toWrapInterfaces, 0, thisInterfaces, 1,
+                toWrapInterfaces.length);
+        return (<impl.concept>)(Proxy.newProxyInstance(<impl.concept>
+                .class.getClassLoader(), thisInterfaces, eObj));
     }
 }
 >>
@@ -121,8 +142,8 @@ public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
  * The only reason it's here is simplicity. If the compiler is correct,
  * this will never get invoked from the wrong place.\</p>
  */
-public <ctor.name>(<[{<ctor.members: {c|RType <c>}; separator=", ">},
-                     {<ctor.delegateInterface> delegate}]; separator=", ">) {
+public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
+                     {<ctor.delegateInterface> delegate}]; anchor, separator=", \n">) {
     <ctor.members: {c|this.<c> = <c>;}; separator="\n">
     <facMems: {f|this.<f.facility.name> = <f.root>;}; separator="\n">
     this.delegate = delegate;

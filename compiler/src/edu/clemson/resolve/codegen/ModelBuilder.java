@@ -291,6 +291,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitCallStmt(
             @NotNull Resolve.CallStmtContext ctx) {
         built.put(ctx, new CallStat((MethodCall) built.get(ctx.progParamExp())));
+
     }
 
     @Override public void exitWhileStmt(
@@ -545,7 +546,11 @@ public class ModelBuilder extends ResolveBaseListener {
                         (Resolve.ConceptImplModuleContext) thisTree;
                 return symbolModuleID.equals(asConceptImpl.concept.getText());
             }
-            //Todo: enhancement case.
+            else if ( thisTree instanceof Resolve.EnhancementImplModuleContext ) {
+                Resolve.EnhancementImplModuleContext asEnhancementImpl =
+                        (Resolve.EnhancementImplModuleContext) thisTree;
+                return symbolModuleID.equals(asEnhancementImpl.concept.getText());
+            }
         }
         return false;
     }
