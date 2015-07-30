@@ -196,7 +196,8 @@ public class Utils {
                                    String opAsText) {
             this.name = new CommonToken(original);
             this.name.setText(opAsText);
-            this.qualifier = new CommonToken(ResolveLexer.ID, qualifier);
+            this.qualifier = new CommonToken(original);
+            this.qualifier.setText(qualifier);
         }
     }
 
