@@ -193,8 +193,9 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitType(@NotNull Resolve.TypeContext ctx) {
-        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText(), ""));
+        built.put(ctx, new TypeInit(buildQualifier(
+                findSymbolFor(ctx.qualifier, ctx.name),
+                ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
 
     @Override public void exitTypeRepresentationDecl(
@@ -261,7 +262,7 @@ public class ModelBuilder extends ResolveBaseListener {
                                         argAsNamedExp.name, true))
                                 .toOperationSymbol();
                 e =
-                        new AnonOpParameterClassInstance(buildQualifier(
+                        new AnonOpParameterClassInstance(buildQualifier(s,
                                 argAsNamedExp.qualifier, argAsNamedExp.name), s);
             }
             catch (UnexpectedSymbolException use) {
@@ -272,6 +273,15 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         built.put(ctx, e);
+    }
+
+    private Symbol findSymbolFor(Token qualifier, Token name) {
+        try {
+            return symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(qualifier, name, true));
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            throw new RuntimeException();//shouldn't happen
+        }
     }
 
     @Override public void exitStmt(@NotNull Resolve.StmtContext ctx) {
@@ -338,13 +348,13 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgInfixExp(
             @NotNull Resolve.ProgInfixExpContext ctx) {
-        Token name = Utils.convertProgramOp(ctx.op).name;
+        Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
         built.put(
                 ctx,
                 new MethodCall(
-                        buildQualifier("Std_Integer_Fac", name.getText()), name
-                        .getText(), args));
+                        buildQualifier(, o.qualifier, o.name),
+                        o.name.getText(), args));
     }
 
     @Override public void exitProgNamedExp(
@@ -576,12 +586,13 @@ public class ModelBuilder extends ResolveBaseListener {
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(String symQualifier, String symName) {
+    protected Qualifier buildQualifier(Symbol referencedSymbol,
+                                       Token refQualifier, Token refName) {
         try {
-            if ( symQualifier == null ) {
+            if ( refQualifier == null ) {
                 Symbol s =
                         moduleScope.queryForOne(new NameQuery(null,
-                                new CommonToken(ResolveLexer.ID, symName), true));
+                                refName, true));
                 Qualifier.NormalQualifier q;
                 if ( isJavaLocallyAccessibleSymbol(s) ) {
                     //this.<symName>
@@ -603,10 +614,7 @@ public class ModelBuilder extends ResolveBaseListener {
             FacilitySymbol s =
                     moduleScope.queryForOne(
                             new NameQuery(null,
-                                    //Todo: this is an npe waiting to happen.
-                                    //We need tokens in this method, REAL tokens;
-                            new CommonToken(ResolveLexer.ID, symQualifier), true))
-                            .toFacilitySymbol();
+                                    refQualifier, true)).toFacilitySymbol();
 
             //Ok, so let's build a facility qualifier from the found 's'.
             //TODO: We need to find the specific module where symName is declared
@@ -614,19 +622,13 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            if ( isJavaLocallyAccessibleSymbol(symQualifier) ) {
+            if ( isJavaLocallyAccessibleSymbol(refQualifier) ) {
                 return new Qualifier.NormalQualifier("this");
             }
-            return new Qualifier.NormalQualifier(symQualifier);
+            return new Qualifier.NormalQualifier(refQualifier);
         }
         catch (UnexpectedSymbolException use) {
             throw new RuntimeException(); //should've been caught looong ago.
         }
-    }
-
-    protected Qualifier buildQualifier(Token symQualifier,
-                                       @NotNull Token symName) {
-        return buildQualifier(symQualifier != null ? symQualifier.getText()
-                : null, symName.getText());
     }
 }
