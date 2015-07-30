@@ -434,7 +434,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitConceptModule(
             @NotNull Resolve.ConceptModuleContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
+        SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
@@ -446,6 +446,48 @@ public class ModelBuilder extends ResolveBaseListener {
                 .query(new SymbolTypeQuery<>(Symbol.class)));
 
         file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override public void exitEnhancementModule(
+            @NotNull Resolve.EnhancementModuleContext ctx) {
+        ModuleFile file = buildFile();
+        SpecModule spec = new SpecModule.EnhancementModule(ctx.name.getText(),
+                ctx.concept.getText(), file);
+
+        if ( ctx.enhancementBlock() != null ) {
+            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
+                    .enhancementBlock().typeModelDecl(), built));
+            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
+                    .enhancementBlock().operationDecl(), built));
+        }
+        //Note that here we only need to query locally for symbols. Meaning
+        //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
+        //etc from the concept. We just want the ones (if any) from enhancement.
+        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+                moduleScope.getSymbolsOfType(Symbol.class));
+        file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override public void exitEnhancementImplModule(
+            @NotNull Resolve.EnhancementImplModuleContext ctx) {
+        ModuleFile file = buildFile();
+        EnhancementImplModule impl =
+                new EnhancementImplModule(ctx.name.getText(),
+                        ctx.enhancement.getText(), ctx.concept.getText(), file);
+        Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
+        impl.addDelegateMethods(
+                conceptScope.getSymbolsOfType(OperationSymbol.class,
+                        GenericSymbol.class, ProgParameterSymbol.class,
+                        ProgTypeModelSymbol.class));
+        if ( ctx.implBlock() != null ) {
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
+                    .implBlock().operationProcedureDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
+                    .implBlock().procedureDecl(), built));
+        }
+        file.module = impl;
         built.put(ctx, file);
     }
 
@@ -462,7 +504,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        //System.out.println("symbol: " + s.getName() + ":" + s.getModuleID() + " is locally accessible?");
+        //System.out.println("symbol: "+s.getName()+":"+s.getModuleID()+" is locally accessible?");
         boolean result = isJavaLocallyAccessibleSymbol(s.getModuleID());
         //System.out.println(result);
         return result;

@@ -33,4 +33,7 @@ public interface Scope {
     public Symbol define(Symbol s) throws DuplicateSymbolException;
 
     public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
+
+    public List<Symbol> getSymbolsOfType(Class<?> ... types);
+
 }

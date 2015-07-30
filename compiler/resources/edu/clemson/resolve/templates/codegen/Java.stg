@@ -43,8 +43,15 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
  */
 >>
 
-Concept(concept, types, funcs) ::= <<
+ConceptModule(concept, types, funcs) ::= <<
 public interface <concept.name> {
+    <types; separator="\n">
+    <funcs; separator="\n">
+}
+>>
+
+EnhancementModule(enhancement, types, funcs) ::= <<
+public interface <enhancement.name> extends <enhancement.concept> {
     <types; separator="\n">
     <funcs; separator="\n">
 }
@@ -58,6 +65,22 @@ public class <impl.name> implements <impl.concept> {
     <repClasses; separator="\n">
     <ctor>
     <funcImpls; separator="\n\n">
+}
+>>
+
+EnhancementImplModule(impl, ctor, funcImpls, delegateMethods, repClasses) ::= <<
+public class <impl.name>
+    implements
+        <impl.enhancement>, <impl.concept>, InvocationHandler {
+
+    <impl.concept> delegate;
+
+    <funcImpls; separator="\n">
+    <delegateMethods; separator="\n">
+    @Override public Object invoke(Object proxy, Method method,
+            Object[] args) throws Throwable {
+        return null;
+    }
 }
 >>
 
@@ -113,6 +136,14 @@ public <if(func.isStatic)>static <endif><\\>
 <func.name>(<params; separator=", ">) {
     <vars; separator="\n">
     <stats; separator="\n">
+}
+>>
+
+ConceptDelegateMethod(method) ::= <<
+@Override public <if(method.hasReturn)>RType <else>void <endif><method.name><\\>
+(<method.parameters : {p | RType <p>}; separator=", ">) {
+    <if(method.hasReturn)>return <endif>delegate.<method.name><\\>
+    (<method.parameters; separator=", ">);
 }
 >>
 

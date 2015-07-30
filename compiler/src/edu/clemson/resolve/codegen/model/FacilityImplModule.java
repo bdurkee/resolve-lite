@@ -23,8 +23,7 @@ public class FacilityImplModule extends Module {
     }
 
     //does nothing for impls. No module params or generics possible...
-    @Override public void
-    addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
             List<? extends Symbol> symbols) {}
 
     @Override public void addOperationParameterModelObjects(
