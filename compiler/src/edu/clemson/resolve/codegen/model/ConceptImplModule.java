@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConceptImplModule extends AbstractSpecImplModule {
-    public String concept;
     public ConceptImplModule(String name, String concept, ModuleFile file) {
-        super(name, file);
-        this.concept = concept;
+        super(name, concept, file);
     }
 }

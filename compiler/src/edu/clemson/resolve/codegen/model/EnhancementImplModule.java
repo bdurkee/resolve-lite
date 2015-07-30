@@ -10,13 +10,12 @@ import java.util.stream.Collectors;
 public class EnhancementImplModule extends AbstractSpecImplModule {
     @ModelElement public List<ConceptDelegateMethod> delegateMethods =
             new ArrayList<>();
-    public final String enhancement, concept;
+    public final String enhancement;
 
     public EnhancementImplModule(String name, String enhancement,
                                  String concept, ModuleFile file) {
-        super(name, file);
+        super(name, concept, file);
         this.enhancement = enhancement;
-        this.concept = concept;
     }
 
     public void addDelegateMethods(List<? extends Symbol> symbols) {

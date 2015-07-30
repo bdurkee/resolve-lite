@@ -155,6 +155,7 @@ public class ModelBuilder extends ResolveBaseListener {
                             Expr.class, pair.specArgs.moduleArgument(), built);
             implArgs = pair.implArgs == null ? new ArrayList<>() : Utils.collect(
                             Expr.class, pair.implArgs.moduleArgument(), built);
+            layer.args.addAll(basePtr.args); // always prefaced with the base facility args
             layer.args.addAll(specArgs);
             layer.args.addAll(implArgs);
             layers.add(layer);
@@ -505,7 +506,7 @@ public class ModelBuilder extends ResolveBaseListener {
                         .get(f.getDefiningTree()));
             }
         }
-
+        impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
     }

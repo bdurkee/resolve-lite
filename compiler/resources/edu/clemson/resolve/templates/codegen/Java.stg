@@ -60,6 +60,7 @@ public interface <enhancement.name> extends <enhancement.concept> {
 ConceptImplModule(impl, ctor, funcImpls, repClasses, memberVars, facilityVars, opParams) ::= <<
 public class <impl.name> implements <impl.concept> {
     <memberVars: {m|RType <m.var.name>;}; separator="\n">
+    <impl.concept> delegate;
     <opParams; separator="\n">
     <facilityVars: {f|<f.facility.concept> <f.facility.name>;}; separator="\n">
     <repClasses; separator="\n">
@@ -75,6 +76,8 @@ public class <impl.name>
     <memberVars: {m|RType <m.var.name>;}; separator="\n">
     <impl.concept> delegate;
 
+    <repClasses; separator="\n">
+    <ctor>
     <funcImpls; separator="\n">
     <delegateMethods; separator="\n">
     @Override public Object invoke(Object proxy, Method method,
@@ -108,8 +111,21 @@ public class <impl.name> {
 
 CtorDef(ctor, facMems) ::= <<
 public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
+    this(<[ctor.members, "null"]; separator=", ">);
+}
+
+/**
+ * This constructor should only get invoked in the case of enhancements; as
+ * the last parameter 'delegate' takes an instance of the base concept.
+ * \<p>
+ * The only reason it's here is simplicity. If the compiler is correct,
+ * this will never get invoked from the wrong place.\</p>
+ */
+public <ctor.name>(<[{<ctor.members: {c|RType <c>}; separator=", ">},
+                     {<ctor.delegateInterface> delegate}]; separator=", ">) {
     <ctor.members: {c|this.<c> = <c>;}; separator="\n">
     <facMems: {f|this.<f.facility.name> = <f.root>;}; separator="\n">
+    this.delegate = delegate;
 }
 >>
 

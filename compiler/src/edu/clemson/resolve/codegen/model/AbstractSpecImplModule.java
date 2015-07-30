@@ -16,9 +16,11 @@ public abstract class AbstractSpecImplModule extends Module {
     @ModelElement public List<OperationParameterDef> opParams =
             new ArrayList<>();
     @ModelElement public CtorDef ctor;
+    public String concept;
 
-    public AbstractSpecImplModule(String name, ModuleFile file) {
+    public AbstractSpecImplModule(String name, String concept, ModuleFile file) {
         super(name, file);
+        this.concept = concept;
     }
 
     @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
@@ -46,7 +48,7 @@ public abstract class AbstractSpecImplModule extends Module {
     }
 
     public void addCtor() {
-        this.ctor = new CtorDef(this.name, facilityVars, memberVars);
+        this.ctor = new CtorDef(this.name, concept, facilityVars, memberVars);
     }
 
     protected FunctionImpl buildInitMethod(String name) {
