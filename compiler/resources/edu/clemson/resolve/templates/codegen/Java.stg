@@ -68,11 +68,11 @@ public class <impl.name> implements <impl.concept> {
 }
 >>
 
-EnhancementImplModule(impl, ctor, funcImpls, delegateMethods, repClasses) ::= <<
+EnhancementImplModule(impl, ctor, memberVars, repClasses, funcImpls, delegateMethods, opParams) ::= <<
 public class <impl.name>
     implements
         <impl.enhancement>, <impl.concept>, InvocationHandler {
-
+    <memberVars: {m|RType <m.var.name>;}; separator="\n">
     <impl.concept> delegate;
 
     <funcImpls; separator="\n">

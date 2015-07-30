@@ -34,7 +34,6 @@ options {
 	tokenVocab=ResolveLexer;
 }
 
-//test comment
 module
     :   precisModule
     |   conceptModule
@@ -93,7 +92,7 @@ conceptImplModule
     ;
 
 enhancementImplModule
-   :   IMPLEMENTATION name=ID (specModuleParameterList)?
+   :   IMPLEMENTATION name=ID (implModuleParameterList)?
        (dependentTermOptions)?
        FOR enhancement=ID OF concept=ID SEMI
        (usesList)?

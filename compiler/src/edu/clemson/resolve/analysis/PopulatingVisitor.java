@@ -69,7 +69,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             new InexactParameterMatch();
 
     private boolean walkingDefParams = false;
-
+    private boolean walkingModuleParams = false;
     /**
      * Keeps track of an inductive defn's (top level declared) induction
      * variable for access later in the (lower level) signature. This is
@@ -125,6 +125,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
+    }
+
+    @Override public Void visitImplModuleParameterList(
+            @NotNull Resolve.ImplModuleParameterListContext ctx) {
+        walkingModuleParams = true;
+        super.visitChildren(ctx);
+        walkingModuleParams = false;
+        return null;
+    }
+
+    @Override public Void visitSpecModuleParameterList(
+            @NotNull Resolve.SpecModuleParameterListContext ctx) {
+        walkingModuleParams = true;
+        super.visitChildren(ctx);
+        walkingModuleParams = false;
+        return null;
     }
 
     @Override public Void visitConceptImplModule(
@@ -317,7 +333,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(name.getText(), ctx, requires, ensures,
                             returnType, getRootModuleID(), params,
-                            false));
+                            walkingModuleParams));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,

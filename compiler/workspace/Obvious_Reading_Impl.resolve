@@ -1,4 +1,4 @@
-Implementation Obvious_Reading_Impl for
+Implementation Obvious_Reading_Impl(Operation Read_Element(replaces e : E);) for
             Reading_Capability of Bdd_Stack_Template;
 
     Procedure Read (restores S : Stack);

@@ -7,25 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EnhancementImplModule extends Module {
-
+public class EnhancementImplModule extends AbstractSpecImplModule {
     @ModelElement public List<ConceptDelegateMethod> delegateMethods =
             new ArrayList<>();
-
     public final String enhancement, concept;
+
     public EnhancementImplModule(String name, String enhancement,
                                  String concept, ModuleFile file) {
         super(name, file);
         this.enhancement = enhancement;
         this.concept = concept;
-    }
-
-    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
-            List<? extends Symbol> symbols) {
-    }
-
-    @Override public void addOperationParameterModelObjects(
-            FunctionDef wrappedFunction) {
     }
 
     public void addDelegateMethods(List<? extends Symbol> symbols) {
