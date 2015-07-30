@@ -194,7 +194,6 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitType(@NotNull Resolve.TypeContext ctx) {
         built.put(ctx, new TypeInit(buildQualifier(
-                findSymbolFor(ctx.qualifier, ctx.name),
                 ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
 
@@ -262,7 +261,7 @@ public class ModelBuilder extends ResolveBaseListener {
                                         argAsNamedExp.name, true))
                                 .toOperationSymbol();
                 e =
-                        new AnonOpParameterClassInstance(buildQualifier(s,
+                        new AnonOpParameterClassInstance(buildQualifier(
                                 argAsNamedExp.qualifier, argAsNamedExp.name), s);
             }
             catch (UnexpectedSymbolException use) {
@@ -353,7 +352,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(
                 ctx,
                 new MethodCall(
-                        buildQualifier(, o.qualifier, o.name),
+                        buildQualifier(o.qualifier, o.name),
                         o.name.getText(), args));
     }
 
@@ -387,20 +386,20 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgIntegerExp(
             @NotNull Resolve.ProgIntegerExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Integer_Fac",
-                "Integer_Template"), "Integer", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
+                "Std_Integer_Fac"), "Integer", ctx.getText()));
     }
 
     @Override public void exitProgCharacterExp(
             @NotNull Resolve.ProgCharacterExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Character_Fac",
-                "Character_Template"), "Character", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Character_Template",
+                "Std_Character_Fac"), "Character", ctx.getText()));
     }
 
     @Override public void exitProgStringExp(
             @NotNull Resolve.ProgStringExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Char_Str_Fac",
-                "Char_Str_Template"), "Char_Str", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
+                "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
     }
 
     @Override public void exitConceptImplModule(
@@ -559,7 +558,7 @@ public class ModelBuilder extends ResolveBaseListener {
         if ( moduleScope.getModuleID().equals(symbolModuleID) ) {
             return true;
         }
-        else { //was s defined in our parent concept?
+        else { //was s defined in our parent concept or enhancement?
             ParseTree thisTree = moduleScope.getDefiningTree();
             if (thisTree instanceof Resolve.ModuleContext) {
                 thisTree = thisTree.getChild(0);
@@ -586,15 +585,15 @@ public class ModelBuilder extends ResolveBaseListener {
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(Symbol referencedSymbol,
-                                       Token refQualifier, Token refName) {
+    protected Qualifier buildQualifier(Token refQualifier, Token refName) {
         try {
+            Symbol corresondingSym = null;
             if ( refQualifier == null ) {
-                Symbol s =
+                corresondingSym =
                         moduleScope.queryForOne(new NameQuery(null,
                                 refName, true));
                 Qualifier.NormalQualifier q;
-                if ( isJavaLocallyAccessibleSymbol(s) ) {
+                if ( isJavaLocallyAccessibleSymbol(corresondingSym) ) {
                     //this.<symName>
                     if ( withinFacilityModule() ) {
                         q = new Qualifier.NormalQualifier(moduleScope.getModuleID());
@@ -605,7 +604,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 }
                 else {
                     //Test_Fac.<symName>
-                    q = new Qualifier.NormalQualifier(s.getModuleID());
+                    q = new Qualifier.NormalQualifier(
+                            corresondingSym.getModuleID());
                 }
                 return q;
             }
@@ -615,17 +615,24 @@ public class ModelBuilder extends ResolveBaseListener {
                     moduleScope.queryForOne(
                             new NameQuery(null,
                                     refQualifier, true)).toFacilitySymbol();
-
+            //ok, it's referring to a facility alright. Now let's assign
+            //correspondingSym using a namequery with s as the qualifier,
+            //since we're sure it's a facility.
+            corresondingSym =
+                    moduleScope.queryForOne(new NameQuery(refQualifier,
+                            refName, true));
             //Ok, so let's build a facility qualifier from the found 's'.
             //TODO: We need to find the specific module where symName is declared
-            return new Qualifier.FacilityQualifier(s);
+            return new Qualifier.FacilityQualifier(
+                    corresondingSym.getModuleID(), s.getName());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            if ( isJavaLocallyAccessibleSymbol(refQualifier) ) {
+            assert refQualifier != null;
+            if ( isJavaLocallyAccessibleSymbol(refQualifier.getText()) ) {
                 return new Qualifier.NormalQualifier("this");
             }
-            return new Qualifier.NormalQualifier(refQualifier);
+            return new Qualifier.NormalQualifier(refQualifier.getText());
         }
         catch (UnexpectedSymbolException use) {
             throw new RuntimeException(); //should've been caught looong ago.

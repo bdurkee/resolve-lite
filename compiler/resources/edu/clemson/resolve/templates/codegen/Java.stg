@@ -303,7 +303,7 @@ new OperationParameter() {
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.facilitySpecName>)<if(toStdFacilityName.(q.facilityName))>
+((<q.referencedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
 <toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
 
 NormalQualifier(q) ::= "<q.name>"
