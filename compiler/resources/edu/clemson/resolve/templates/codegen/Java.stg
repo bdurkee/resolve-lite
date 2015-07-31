@@ -272,7 +272,7 @@ MemberRef(ref, child) ::= <%
 %>
 
 AnonOpParameterClassInstance(wrappedFunc, q) ::= <<
-new OperationParameter() {
+new BaseOperationParameter() {
         @Override public RType op(RType... e) {
             <if(!wrappedFunc.hasReturn)><\\>
                 <q>.<wrappedFunc.name>(<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
@@ -281,21 +281,6 @@ new OperationParameter() {
                 return <q>.<wrappedFunc.name><\\>
                 (<wrappedFunc.params: {p|e[<i0>]};separator=", ">);
             <endif>
-        }
-
-        @Override public Object getRep() {
-            throw new UnsupportedOperationException("getRep() shouldn't be "
-                + "getting called from: " + this.getClass());
-        }
-
-        @Override public void setRep(Object setRep) {
-            throw new UnsupportedOperationException("setRep() shouldn't be "
-                + "getting called from: " + this.getClass());
-        }
-
-        @Override public RType initialValue() {
-            throw new UnsupportedOperationException("initialValue() shouldn't"
-                   + " be getting called from: " + this.getClass());
         }
     }
 >>
