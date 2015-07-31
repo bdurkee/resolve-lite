@@ -9,9 +9,14 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -33,6 +38,7 @@ public abstract class BaseTest {
      * property.</p>
      */
     public static final String BASE_TEST_DIR = System.getProperty("java.io.tmpdir");
+    public static final String CLASSPATH = System.getProperty("java.class.path");
 
     public String tmpdir = null;
 
@@ -100,6 +106,30 @@ public abstract class BaseTest {
         }
     }
 
+    protected String execCode(String resolveFileName, String moduleStr,
+            String moduleName, String input,  boolean debug) {
+        boolean success = rawGenerateAndCompileCode(
+                resolveFileName, moduleStr, moduleName, false);
+        return null;
+    }
+
+    /**
+     * Returns {@code true} if there are no problems; {@code false} otherwise.
+     */
+    protected boolean rawGenerateAndCompileCode(String resolveFileName,
+                                                String moduleStr,
+                                                String moduleName,
+                                                boolean defaultListener) {
+        ErrorCollector errorCollector =
+                resolve(resolveFileName, moduleStr, defaultListener, "-genCode", "Java");
+        if (!errorCollector.errors.isEmpty()) return false;
+        List<String> files = new ArrayList<>();
+        if (moduleName != null) {
+            files.add(moduleName+".java");
+        }
+        return compile(files.toArray(new String[files.size()]));
+    }
+
     protected ErrorCollector resolve(String moduleFileName, String moduleStr,
                              boolean defaultListener, String ... extraOptions) {
         mkdir(tmpdir);
@@ -130,7 +160,8 @@ public abstract class BaseTest {
         }
         resolve.processCommandLineTargets();
 
-        if ( !defaultListener && !equeue.errors.isEmpty() ) {
+        if ( (!defaultListener && !equeue.errors.isEmpty()) ||
+                resolve.errMgr.getErrorCount() > 0) {
             System.err.println("resolve reports errors from "+options);
             for (int i = 0; i < equeue.errors.size(); i++) {
                 RESOLVEMessage msg = equeue.errors.get(i);
@@ -153,6 +184,35 @@ public abstract class BaseTest {
             }
         }
         return equeue;
+    }
+
+    protected boolean compile(String ... fileNames) {
+        List<File> files = new ArrayList<>();
+        for (String fileName : fileNames) {
+            File f = new File(tmpdir, fileName);
+            files.add(f);
+        }
+
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fileManager =
+                compiler.getStandardFileManager(null, null, null);
+        Iterable<? extends JavaFileObject> compilationUnits =
+                fileManager.getJavaFileObjectsFromFiles(files);
+        Iterable<String> compileOptions =
+                Arrays.asList("-g", "-source", "1.6", "-target", "1.6", "-implicit:class", "-Xlint:-options", "-d", tmpdir, "-cp", tmpdir + pathSep + CLASSPATH);
+
+        JavaCompiler.CompilationTask task =
+                compiler.getTask(null, fileManager, null, compileOptions, null,
+                        compilationUnits);
+        boolean ok = task.call();
+
+        try {
+            fileManager.close();
+        }
+        catch (IOException ioe) {
+            ioe.printStackTrace(System.err);
+        }
+        return ok;
     }
 
     /**
