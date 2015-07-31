@@ -14,13 +14,4 @@ public class DecoratedFacilityInstantiation extends OutputModelObject {
         this.specName = specName;
         this.specRealizName = specRealizName;
     }
-    /*
-     * public FacilityLayerItem(ASTModuleParameterization spec,
-     * ASTModuleParameterization impl) {
-     * this(factory, spec.getName().getText(), impl.getName().getText());
-     * }
-     * public void addArguments(List<AbstractArgRef> argRefs) {
-     * args.addAll(argRefs);
-     * }
-     */
 }

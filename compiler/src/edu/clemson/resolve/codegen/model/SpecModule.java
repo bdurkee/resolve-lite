@@ -15,16 +15,16 @@ public abstract class SpecModule extends Module {
         super(name, file);
     }
 
-    public static class Concept extends SpecModule {
-        public Concept(String name, ModuleFile file) {
+    public static class ConceptModule extends SpecModule {
+        public ConceptModule(String name, ModuleFile file) {
             super(name, file);
         }
     }
 
-    public static class Enhancement extends SpecModule {
+    public static class EnhancementModule extends SpecModule {
         public String concept;
 
-        public Enhancement(String name, String concept, ModuleFile file) {
+        public EnhancementModule(String name, String concept, ModuleFile file) {
             super(name, file);
             this.concept = concept;
         }
@@ -33,10 +33,10 @@ public abstract class SpecModule extends Module {
     @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof ProgParameterSymbol) {
+            if ( s instanceof ProgParameterSymbol ) {
                 funcs.add(buildGetterSignature(s.getName()));
             }
-            else if ( s instanceof GenericSymbol) {
+            else if ( s instanceof GenericSymbol ) {
                 funcs.add(buildGetterSignature(s.getName()));
             }
         }

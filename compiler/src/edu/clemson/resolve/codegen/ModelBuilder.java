@@ -151,6 +151,13 @@ public class ModelBuilder extends ResolveBaseListener {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
+            specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(
+                            Expr.class, pair.specArgs.moduleArgument(), built);
+            implArgs = pair.implArgs == null ? new ArrayList<>() : Utils.collect(
+                            Expr.class, pair.implArgs.moduleArgument(), built);
+            layer.args.addAll(basePtr.args); // always prefaced with the base facility args
+            layer.args.addAll(specArgs);
+            layer.args.addAll(implArgs);
             layers.add(layer);
         }
 
@@ -186,8 +193,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitType(@NotNull Resolve.TypeContext ctx) {
-        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText(), ""));
+        built.put(ctx, new TypeInit(buildQualifier(
+                ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
 
     @Override public void exitTypeRepresentationDecl(
@@ -267,6 +274,15 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, e);
     }
 
+    private Symbol findSymbolFor(Token qualifier, Token name) {
+        try {
+            return symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(qualifier, name, true));
+        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+            throw new RuntimeException();//shouldn't happen
+        }
+    }
+
     @Override public void exitStmt(@NotNull Resolve.StmtContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
@@ -283,7 +299,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitCallStmt(
             @NotNull Resolve.CallStmtContext ctx) {
-        built.put(ctx, new CallStat((MethodCall) built.get(ctx.progParamExp())));
+        built.put(ctx, new CallStat((Expr) built.get(ctx.progParamExp())));
     }
 
     @Override public void exitWhileStmt(
@@ -311,19 +327,33 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitProgParamExp(
             @NotNull Resolve.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier, ctx.name),
-                ctx.name.getText(), args));
+        if ( referencesOperationParameter(ctx.name.getText()) ) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(
+                    ctx.name.getText(), args));
+        }
+        else {
+            built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier,
+                    ctx.name), ctx.name.getText(), args));
+        }
+    }
+
+    private boolean referencesOperationParameter(String name) {
+        return !moduleScope.getSymbolsOfType(OperationSymbol.class).stream()
+                .filter(f -> f.getName().equals(name))
+                .filter(OperationSymbol::isModuleParameter)
+                .collect(Collectors.toList())
+                .isEmpty();
     }
 
     @Override public void exitProgInfixExp(
             @NotNull Resolve.ProgInfixExpContext ctx) {
-        Token name = Utils.convertProgramOp(ctx.op).name;
+        Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
         built.put(
                 ctx,
                 new MethodCall(
-                        buildQualifier("Std_Integer_Fac", name.getText()), name
-                        .getText(), args));
+                        buildQualifier(o.qualifier, o.name),
+                        o.name.getText(), args));
     }
 
     @Override public void exitProgNamedExp(
@@ -356,20 +386,20 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgIntegerExp(
             @NotNull Resolve.ProgIntegerExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Integer_Fac",
-                "Integer_Template"), "Integer", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
+                "Std_Integer_Fac"), "Integer", ctx.getText()));
     }
 
     @Override public void exitProgCharacterExp(
             @NotNull Resolve.ProgCharacterExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Character_Fac",
-                "Character_Template"), "Character", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Character_Template",
+                "Std_Character_Fac"), "Character", ctx.getText()));
     }
 
     @Override public void exitProgStringExp(
             @NotNull Resolve.ProgStringExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Std_Char_Str_Fac",
-                "Char_Str_Template"), "Char_Str", ctx.getText()));
+        built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
+                "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
     }
 
     @Override public void exitConceptImplModule(
@@ -434,7 +464,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitConceptModule(
             @NotNull Resolve.ConceptModuleContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.Concept(ctx.name.getText(), file);
+        SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
 
         if ( ctx.conceptBlock() != null ) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
@@ -446,6 +476,61 @@ public class ModelBuilder extends ResolveBaseListener {
                 .query(new SymbolTypeQuery<>(Symbol.class)));
 
         file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override public void exitEnhancementModule(
+            @NotNull Resolve.EnhancementModuleContext ctx) {
+        ModuleFile file = buildFile();
+        SpecModule spec = new SpecModule.EnhancementModule(ctx.name.getText(),
+                ctx.concept.getText(), file);
+
+        if ( ctx.enhancementBlock() != null ) {
+            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
+                    .enhancementBlock().typeModelDecl(), built));
+            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
+                    .enhancementBlock().operationDecl(), built));
+        }
+        //Note that here we only need to query locally for symbols. Meaning
+        //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
+        //etc from the concept. We just want the ones (if any) from enhancement.
+        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+                moduleScope.getSymbolsOfType(Symbol.class));
+        file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override public void exitEnhancementImplModule(
+            @NotNull Resolve.EnhancementImplModuleContext ctx) {
+        ModuleFile file = buildFile();
+        EnhancementImplModule impl =
+                new EnhancementImplModule(ctx.name.getText(),
+                        ctx.enhancement.getText(), ctx.concept.getText(), file);
+        Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
+        impl.addDelegateMethods(
+                conceptScope.getSymbolsOfType(OperationSymbol.class,
+                        //GenericSymbol.class, //ProgParameterSymbol.class,
+                        ProgTypeModelSymbol.class));
+        if ( ctx.implBlock() != null ) {
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
+                    .implBlock().operationProcedureDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
+                    .implBlock().procedureDecl(), built));
+        }
+        impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+                conceptScope.getSymbolsOfType(
+                    GenericSymbol.class, ProgParameterSymbol.class));
+
+        for (OperationSymbol f : moduleScope
+                .query(new SymbolTypeQuery<OperationSymbol>(
+                        OperationSymbol.class))) {
+            if ( f.isModuleParameter() ) {
+                impl.addOperationParameterModelObjects((FunctionDef) built
+                        .get(f.getDefiningTree()));
+            }
+        }
+        impl.addCtor();
+        file.module = impl;
         built.put(ctx, file);
     }
 
@@ -462,7 +547,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        //System.out.println("symbol: " + s.getName() + ":" + s.getModuleID() + " is locally accessible?");
+        //System.out.println("symbol: "+s.getName()+":"+s.getModuleID()+" is locally accessible?");
         boolean result = isJavaLocallyAccessibleSymbol(s.getModuleID());
         //System.out.println(result);
         return result;
@@ -473,7 +558,7 @@ public class ModelBuilder extends ResolveBaseListener {
         if ( moduleScope.getModuleID().equals(symbolModuleID) ) {
             return true;
         }
-        else { //was s defined in our parent concept?
+        else { //was s defined in our parent concept or enhancement?
             ParseTree thisTree = moduleScope.getDefiningTree();
             if (thisTree instanceof Resolve.ModuleContext) {
                 thisTree = thisTree.getChild(0);
@@ -483,7 +568,11 @@ public class ModelBuilder extends ResolveBaseListener {
                         (Resolve.ConceptImplModuleContext) thisTree;
                 return symbolModuleID.equals(asConceptImpl.concept.getText());
             }
-            //Todo: enhancement case.
+            else if ( thisTree instanceof Resolve.EnhancementImplModuleContext ) {
+                Resolve.EnhancementImplModuleContext asEnhancementImpl =
+                        (Resolve.EnhancementImplModuleContext) thisTree;
+                return symbolModuleID.equals(asEnhancementImpl.concept.getText());
+            }
         }
         return false;
     }
@@ -496,14 +585,15 @@ public class ModelBuilder extends ResolveBaseListener {
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(String symQualifier, String symName) {
+    protected Qualifier buildQualifier(Token refQualifier, Token refName) {
         try {
-            if ( symQualifier == null ) {
-                Symbol s =
+            Symbol corresondingSym = null;
+            if ( refQualifier == null ) {
+                corresondingSym =
                         moduleScope.queryForOne(new NameQuery(null,
-                                new CommonToken(ResolveLexer.ID, symName), true));
+                                refName, true));
                 Qualifier.NormalQualifier q;
-                if ( isJavaLocallyAccessibleSymbol(s) ) {
+                if ( isJavaLocallyAccessibleSymbol(corresondingSym) ) {
                     //this.<symName>
                     if ( withinFacilityModule() ) {
                         q = new Qualifier.NormalQualifier(moduleScope.getModuleID());
@@ -514,7 +604,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 }
                 else {
                     //Test_Fac.<symName>
-                    q = new Qualifier.NormalQualifier(s.getModuleID());
+                    q = new Qualifier.NormalQualifier(
+                            corresondingSym.getModuleID());
                 }
                 return q;
             }
@@ -523,27 +614,26 @@ public class ModelBuilder extends ResolveBaseListener {
             FacilitySymbol s =
                     moduleScope.queryForOne(
                             new NameQuery(null,
-                            new CommonToken(ResolveLexer.ID, symQualifier), true))
-                            .toFacilitySymbol();
-
-            //Ok, so let's build a facility qualifier from the found 's'.
-            return new Qualifier.FacilityQualifier(s);
+                                    refQualifier, true)).toFacilitySymbol();
+            //ok, it's referring to a facility alright. Now let's assign
+            //correspondingSym using a namequery with 'refqualifier' as the qualifier,
+            //since we're now sure it's a facility (we would be kicked below if it wasn't).
+            corresondingSym =
+                    moduleScope.queryForOne(new NameQuery(refQualifier,
+                            refName, true));
+            return new Qualifier.FacilityQualifier(
+                    corresondingSym.getModuleID(), s.getName());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            if ( isJavaLocallyAccessibleSymbol(symQualifier) ) {
+            assert refQualifier != null;
+            if ( isJavaLocallyAccessibleSymbol(refQualifier.getText()) ) {
                 return new Qualifier.NormalQualifier("this");
             }
-            return new Qualifier.NormalQualifier(symQualifier);
+            return new Qualifier.NormalQualifier(refQualifier.getText());
         }
         catch (UnexpectedSymbolException use) {
             throw new RuntimeException(); //should've been caught looong ago.
         }
-    }
-
-    protected Qualifier buildQualifier(Token symQualifier,
-                                       @NotNull Token symName) {
-        return buildQualifier(symQualifier != null ? symQualifier.getText()
-                : null, symName.getText());
     }
 }

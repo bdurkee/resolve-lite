@@ -3,17 +3,14 @@ package edu.clemson.resolve.codegen.model;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
 public abstract class Qualifier extends OutputModelObject {
-    //Todo: Pull this out and make it extend a generic, abstract "Qualifier"
+
     public static class FacilityQualifier extends Qualifier {
-        public String facilitySpecName, facilityName;
+        public String referencedSymbolSpecName, facilityName;
 
-        public FacilityQualifier(FacilitySymbol f) {
-            this(f.getName(), f.getFacility().getSpecification().getName());
-        }
-
-        public FacilityQualifier(String facilityName, String facilitySpecName) {
+        public FacilityQualifier(String referencedSymbolSpecName,
+                                 String facilityName) {
             this.facilityName = facilityName;
-            this.facilitySpecName = facilitySpecName;
+            this.referencedSymbolSpecName = referencedSymbolSpecName;
         }
     }
 

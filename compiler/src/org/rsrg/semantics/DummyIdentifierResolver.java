@@ -39,4 +39,8 @@ public class DummyIdentifierResolver extends AbstractScope {
     @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
         return new ArrayList<>();
     }
+
+    @Override public List<Symbol> getSymbolsOfType(Class<?>... type) {
+        return new ArrayList<>();
+    }
 }

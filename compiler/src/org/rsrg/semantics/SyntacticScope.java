@@ -100,11 +100,23 @@ public abstract class SyntacticScope extends AbstractScope {
         return finished;
     }
 
+
+
     @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
         return symbols.values().stream()
                 .filter(type::isInstance)
                 .map(type::cast)
                 .collect(Collectors.toList());
+    }
+
+    public List<Symbol> getSymbolsOfType(Class<?> ... types) {
+        List<Symbol> result = new ArrayList<>();
+        for (Symbol s : symbols.values()) {
+            for (Class<?> t : types) {
+                if (t.isInstance(s)) result.add(s);
+            }
+        }
+        return result;
     }
 
     private Map<String, Symbol> updateSymbols(

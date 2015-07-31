@@ -36,6 +36,11 @@ public class QualifiedPath implements ScopeSearchPath {
             Scope facilityScope = facility.getFacility().getSpecification() //
                     .getScope(instantiateGenerics);
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
+            //Dtw test:
+            for (ModuleParameterization enh : facility.getEnhancements()) {
+                Scope enhScope = enh.getScope(instantiateGenerics);
+                result.addAll(enhScope.getMatches(searcher, SearchContext.FACILITY));
+            }
         }
         catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
@@ -43,7 +48,6 @@ public class QualifiedPath implements ScopeSearchPath {
             ModuleScopeBuilder moduleScope = repo.moduleScopes.get(
                     qualifier.getText());
             if (moduleScope == null) {
-                System.out.println("NO SUCH MODULE: " + qualifier);
                 repo.getCompiler().errMgr.semanticError(
                         ErrorKind.NO_SUCH_MODULE, qualifier, qualifier.getText());
                 return result;

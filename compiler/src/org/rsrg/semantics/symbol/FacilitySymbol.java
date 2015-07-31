@@ -77,6 +77,10 @@ public class FacilitySymbol extends Symbol {
         }
     }
 
+    public List<ModuleParameterization> getEnhancements() {
+        return enhancements;
+    }
+
     public SpecImplementationPairing getFacility() {
         return type;
     }

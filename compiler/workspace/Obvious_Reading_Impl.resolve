@@ -1,8 +1,18 @@
-Implementation Obvious_Reading_Impl for
+Implementation Obvious_Reading_Impl(Operation Read_Element(replaces e : E);) for
             Reading_Capability of Bdd_Stack_Template;
+				uses Standard_Integers;
+	Procedure Read_upto(replaces S : Stack; preserves Count :
+	        Std_Integer_Fac :: Integer);
+		Var Next : E;
+		Clear(S);
+		While (Depth(S) < Count) do
+			Read_Element(Next);
+			Push(Next, S);
+		end;
+	end Read_upto;
 
-    Procedure Read (restores S : Bdd_Stack_Template :: Stack);
-
-    end Read;
+	Procedure Read(replaces S : Stack);
+		Read_upto(S, Max_Depth);
+	end Read;
 
 end Obvious_Reading_Impl;
