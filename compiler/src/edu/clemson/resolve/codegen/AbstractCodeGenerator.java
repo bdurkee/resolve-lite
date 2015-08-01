@@ -4,8 +4,6 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;
 
@@ -31,11 +29,11 @@ public abstract class AbstractCodeGenerator {
         this.templates = loadTemplates();
     }
 
-    @NotNull public AnnotatedTree getModule() {
+    public AnnotatedTree getModule() {
         return module;
     }
 
-    @NotNull public RESOLVECompiler getCompiler() {
+    public RESOLVECompiler getCompiler() {
         return compiler;
     }
 
@@ -69,7 +67,7 @@ public abstract class AbstractCodeGenerator {
         }
     }
 
-    @Nullable public STGroup loadTemplates() {
+    public STGroup loadTemplates() {
         String groupFileName =
                 TEMPLATE_ROOT + "/" + language
                         + STGroup.GROUP_FILE_EXTENSION;

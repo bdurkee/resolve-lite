@@ -15,7 +15,6 @@ import edu.clemson.resolve.vcgen.application.SwapApplicationStrategy;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
@@ -58,12 +57,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return outputFile;
     }
 
-    @Override public void enterModule(@NotNull Resolve.ModuleContext ctx) {
+    @Override public void enterModule(Resolve.ModuleContext ctx) {
         moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
     @Override public void enterTypeRepresentationDecl(
-            @NotNull Resolve.TypeRepresentationDeclContext ctx) {
+            Resolve.TypeRepresentationDeclContext ctx) {
         currentTypeReprSym = null;
         try {
             currentTypeReprSym =
@@ -83,7 +82,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitTypeRepresentationDecl(
-            @NotNull Resolve.TypeRepresentationDeclContext ctx) {
+            Resolve.TypeRepresentationDeclContext ctx) {
         PExp constraint = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
         if (currentTypeReprSym == null) return;
@@ -103,8 +102,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.chunks.add(block.build());
     }
 
-    @Override public void enterTypeImplInit(
-            @NotNull Resolve.TypeImplInitContext ctx) {
+    @Override public void enterTypeImplInit(Resolve.TypeImplInitContext ctx) {
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
@@ -115,8 +113,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         assertiveBlocks.push(block);
     }
 
-    @Override public void exitTypeImplInit(
-            @NotNull Resolve.TypeImplInitContext ctx) {
+    @Override public void exitTypeImplInit(Resolve.TypeImplInitContext ctx) {
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -141,12 +138,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
     // S T A T S
     //-----------------------------------------------
 
-    @Override public void exitStmt(@NotNull Resolve.StmtContext ctx) {
+    @Override public void exitStmt(Resolve.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
-    @Override public void exitCallStmt(
-            @NotNull Resolve.CallStmtContext ctx) {
+    @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
@@ -154,8 +150,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-    @Override public void exitSwapStmt(
-            @NotNull Resolve.SwapStmtContext ctx) {
+    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
@@ -163,8 +158,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-    @Override public void exitAssignStmt(
-            @NotNull Resolve.AssignStmtContext ctx) {
+    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,

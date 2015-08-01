@@ -39,8 +39,6 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VCGenPipeline;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -393,7 +391,7 @@ public  class RESOLVECompiler {
         return null;
     }
 
-    @NotNull public static String getCoreLibraryDirectory() {
+    public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
         if (rootDir == null) {
             return ".";
@@ -401,7 +399,7 @@ public  class RESOLVECompiler {
         return rootDir + File.separator + getCoreLibraryName();
     }
 
-    @NotNull public static String getCoreLibraryName() {
+    public static String getCoreLibraryName() {
         return "src";
     }
 
@@ -501,7 +499,7 @@ public  class RESOLVECompiler {
         return outputDir;
     }
 
-    public void log(@Nullable String component, String msg) {
+    public void log(String component, String msg) {
         logMgr.log(component, msg);
     }
 

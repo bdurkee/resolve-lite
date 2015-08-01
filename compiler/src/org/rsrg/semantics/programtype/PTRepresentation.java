@@ -1,6 +1,5 @@
 package org.rsrg.semantics.programtype;
 
-import org.antlr.v4.runtime.misc.Nullable;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.NoneProvidedException;
 import org.rsrg.semantics.symbol.FacilitySymbol;
@@ -30,7 +29,7 @@ public class PTRepresentation extends PTNamed {
     private ProgReprTypeSymbol repr;
 
     public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            @Nullable ProgTypeModelSymbol family, String enclosingModuleID) {
+            ProgTypeModelSymbol family, String enclosingModuleID) {
         super(g, name, g.getTrueExp(), enclosingModuleID);
         this.name = name;
         this.baseType = baseType;
