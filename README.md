@@ -16,8 +16,8 @@ fundamental axioms, definitions, and results necessary/useful in establishing
 program correctness.
 
 All phases of the verification process spanning verification condition (VC)
-generation to proving are performed in-house, while RESOLVE programs themselves
-are translated to Java and run on the JVM.
+generation to proving are performed in-house, while RESOLVE programs are
+translated to Java and run on the JVM.
 
 ##Authors and major contributors
 The creation and continual evolution of the RESOLVE language is owed to an
