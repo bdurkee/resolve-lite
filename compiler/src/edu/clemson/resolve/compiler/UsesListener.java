@@ -21,27 +21,26 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Override public void enterConceptImplModule(
-            @NotNull Resolve.ConceptImplModuleContext ctx) {
+            Resolve.ConceptImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementModule(
-            @NotNull Resolve.EnhancementModuleContext ctx) {
+            Resolve.EnhancementModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementImplModule(
-            @NotNull Resolve.EnhancementImplModuleContext ctx) {
+            Resolve.EnhancementImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.enhancement));
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.enhancement.getText());
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
-    @Override public void exitUsesList(
-            @NotNull Resolve.UsesListContext ctx) {
+    @Override public void exitUsesList(Resolve.UsesListContext ctx) {
         tr.uses.addAll(ctx.ID().stream()
                 .map(t -> new AnnotatedTree.UsesRef(t.getSymbol()))
                 .collect(Collectors.toList()));
@@ -49,8 +48,7 @@ public class UsesListener extends ResolveBaseListener {
                 .map(ParseTree::getText).collect(Collectors.toList()));
     }
 
-    @Override public void exitFacilityDecl(
-            @NotNull Resolve.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         //tr.semanticallyVisibleUses.add(ctx.spec.getText());
         if ( ctx.externally != null ) {
@@ -63,7 +61,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Override public void exitEnhancementPairDecl(
-            @NotNull Resolve.EnhancementPairDeclContext ctx) {
+            Resolve.EnhancementPairDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),
