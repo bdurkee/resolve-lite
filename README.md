@@ -7,10 +7,13 @@ RESOLVE (REusable SOftware Language with VErification) is a programming and
 specification language designed for verifying correctness of object oriented
 programs.
 
-The RESOLVE language provides syntactic slots for mathematical assertions such
+The RESOLVE language is designed from the ground up to facilitate *mathematical
+reasoning*. As such, the language provides syntactic slots for assertions such
 as pre-post conditions that are capable of abstractly describing a program's
-intended behavior. Users write these assertions using definitions from a variety
-of pre-existing and user-defined mathematical theories.
+intended behavior. In writing these assertions, users are free to draw from from
+a variety of pre-existing and user-defined mathematical theories containing a
+fundamental axioms, definitions, and results necessary/useful in establishing
+program correctness.
 
 All phases of the verification process spanning verification condition (VC)
 generation to proving are performed in-house, while RESOLVE programs themselves
@@ -32,7 +35,7 @@ include:
 
 ###Requirements
 To get started, you really only need to have Java JDK 1.8 installed on either
-Windows, Mac OSX, or linux (any distribution should do).
+Windows, Mac OSX, or Linux (any distribution should do).
 
 ###Installing
 1. You can download the latest stable build of the tool from the [releases page]
@@ -40,7 +43,9 @@ Windows, Mac OSX, or linux (any distribution should do).
 RESOLVE libraries and other core `.java` classes required by generated code.
 
 2. Unpack the `.zip` to the directory of your choosing, for example, on OSX:
-`/usr/local/<resolve_root_zip_directory>`.
+`/usr/local/<resolve_root_zip_directory>` (that is: `/usr/local/resolve/`).
+*The rest of these instructions will assume this directory -- so make changes
+accordingly.*
 
 3. To help the compiler find the location of standard RESOLVE libraries, it is
 necessary to set a `RESOLVEROOT` environment variable:
@@ -51,21 +56,80 @@ necessary to set a `RESOLVEROOT` environment variable:
 
   2. **Windows**: Todo
 
-###Optional (but recommended): Creating a compiler alias
+###Setting classpath
 
-To allow running the compiler by simply
+With the above steps complete, we need to make sure that Java will be able to
+find the RESOLVE tool -- which means we need to set the classpath variable
+accordingly. So once again, open a terminal and type the following:
 
+```
+export CLASSPATH=".:$RESOLVEROOT/tool/resolve-<VERSION>-complete.jar:$CLASSPATH"
+```
+
+where `<VERSION>` corresponds to the three digit semantic version contained
+within the name of `.zip` (and in the release notes) for the desired build of
+the tool. For this tutorial, we assume `0.0.1`.
+
+To ensure all is well, restart the terminal and run the following command to
+launch the tool without arguments:
+
+```
+java -jar /usr/local/resolve/tool/resolve-0.0.1-complete.jar
+```
+
+and you should receive the following help prompt:
+
+```
+RESOLVE Compiler Version 0.0.1
+ -longMessages        show exception details on errors
+ -o ___               specify an output directory where all output is generated
+ -lib ___             specify working directory containing *.resolve source files
+ ...
+```
+
+###Optional* (but recommended): creating an alias
+
+Typing the above command to run the tool over an over again would be admittedly
+painful. So to facilitate easier usage of the compiler from the terminal, we
+can set an alias as follows:
+
+```
+alias resolve='java -jar $RESOLVEROOT/tool/resolve-0.0.1-complete.jar'
+```
+now simply typing `resolve` gives the same effect as the (long) command given
+in the previous section.
 
 ### The obligatory "hello world" example
-Once installed, go ahead and punch in the following bit of RESOLVE:
+Now that we have the compiler setup, go ahead create a new file called
+`Hello.resolve` and punch in the following bit of RESOLVE:
 
 ```
 Facility Hello;
-        uses Standard_Characters;
+        uses Standard_Char_Strings;
 
     Operation Main();
         Procedure
-            Std_Character_Fac :: Write_Line("hello world!");
+            Std_Char_Str_Fac :: Write_Line("hello world!");
         end Main;
 end Hello;
 ```
+To run, open the terminal, cd to the directory where you've
+saved the file and type:
+
+```
+resolve Hello.resolve -genCode Java -jar
+```
+
+The compiler will do some thinking, and eventually produce `Hello.jar`, which is run as follows:
+```
+$java -jar Hello.jar
+>hello world!
+```
+
+##Useful information
+
+* [Release notes]()
+* [Official site](http://www.cs.clemson.edu/resolve/)
+* [RESOLVE wiki] (https://github.com/Welchd1/resolve-lite/wiki)
+
+##Copyright and license
