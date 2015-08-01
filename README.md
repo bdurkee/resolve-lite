@@ -9,12 +9,12 @@ programs.
 
 The RESOLVE language provides syntactic slots for mathematical assertions such
 as pre-post conditions that are capable of abstractly describing a program's
-intended behavior. Users can write these assertions using 'facts' from a variety
+intended behavior. Users write these assertions using 'facts' from a variety
 of pre-existing and user-authored mathematical theories.
 
 All phases of the verification process spanning verification condition (VC)
 generation to proving are performed in-house, while RESOLVE programs themselves
-are compiled to Java and run on the JVM.
+are translated to Java and run on the JVM.
 
 ##Authors and major contributors
 The creation and continual evolution of the RESOLVE language is owed to an
@@ -39,3 +39,4 @@ You can obtain the latest stable build of the tool from the [releases page]
 (). Note that the tool comes packaged in a `.zip` containing both standard
 RESOLVE libraries and other core `.java` classes required at runtime for
 generated code.
+
