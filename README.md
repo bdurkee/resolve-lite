@@ -120,7 +120,8 @@ saved the file and type:
 resolve Hello.resolve -genCode Java -jar
 ```
 
-The compiler will do some thinking, and eventually produce `Hello.jar`, which is run as follows:
+The compiler will do some thinking, and eventually produce `Hello.jar`, which
+is run as follows:
 ```
 $java -jar Hello.jar
 >hello world!
@@ -133,3 +134,10 @@ $java -jar Hello.jar
 * [RESOLVE wiki] (https://github.com/Welchd1/resolve-lite/wiki)
 
 ##Copyright and license
+
+Copyright (c) Clemson University, 2015. All rights reserved. The use and
+distribution terms for this software are covered by the BSD 3-clause license
+which can be found in the file `LICENSE.txt` at the root of this repository.
+By using this software in any fashion, you are agreeing to be bound by the terms
+of this license. You must not remove this notice, or any other, from this
+software.
