@@ -198,7 +198,6 @@ public class ModelBuilder extends ResolveBaseListener {
                 new MemberClassDef(ctx.name.getText());
         String exemplarName = "";
         try {
-            //Maybe in the future we can assign program types to the ctxs?
             ProgReprTypeSymbol x =
                     moduleScope.queryForOne(
                             new UnqualifiedNameQuery(ctx.name.getText()))
@@ -595,9 +594,10 @@ public class ModelBuilder extends ResolveBaseListener {
                     moduleScope.queryForOne(
                             new NameQuery(null,
                                     refQualifier, true)).toFacilitySymbol();
-            //ok, it's referring to a facility alright. Now let's assign
-            //correspondingSym using a namequery with 'refqualifier' as the qualifier,
-            //since we're now sure it's a facility (we would be kicked below if it wasn't).
+            //ok, it's referring to a facility alright
+            //(we would've already been kicked to catch below if it wasn't).
+            //So let's assign correspondingSym using a namequery with 'refqualifier'
+            //as the qualifier.
             corresondingSym =
                     moduleScope.queryForOne(new NameQuery(refQualifier,
                             refName, true));

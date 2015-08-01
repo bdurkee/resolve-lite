@@ -6,7 +6,7 @@ public class OperationParameterDef extends OutputModelObject {
     @ModelElement public FunctionDef func;
     public String name;
 
-    public OperationParameterDef(@NotNull FunctionDef f) {
+    public OperationParameterDef(FunctionDef f) {
         this.func = f;
         this.name = f.name;
     }
