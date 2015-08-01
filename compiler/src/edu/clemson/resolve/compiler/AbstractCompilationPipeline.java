@@ -9,8 +9,8 @@ public abstract class AbstractCompilationPipeline {
     protected final List<AnnotatedTree> compilationUnits;
     protected final RESOLVECompiler compiler;
 
-    public AbstractCompilationPipeline(@NotNull RESOLVECompiler rc,
-                @NotNull List<AnnotatedTree> compilationUnits) {
+    public AbstractCompilationPipeline(RESOLVECompiler rc,
+                List<AnnotatedTree> compilationUnits) {
         this.compilationUnits = compilationUnits;
         this.compiler = rc;
     }

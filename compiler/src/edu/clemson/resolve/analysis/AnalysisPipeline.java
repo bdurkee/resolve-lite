@@ -12,8 +12,8 @@ import java.util.List;
 
 public class AnalysisPipeline extends AbstractCompilationPipeline {
 
-    public AnalysisPipeline(@NotNull RESOLVECompiler rc,
-                        @NotNull List<AnnotatedTree> compilationUnits) {
+    public AnalysisPipeline(RESOLVECompiler rc,
+                            List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }
 

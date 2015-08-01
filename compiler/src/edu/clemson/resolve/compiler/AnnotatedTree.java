@@ -43,8 +43,8 @@ public class AnnotatedTree {
     private final ParseTree root;
     public boolean hasErrors;
 
-    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-                         String fileName, boolean hasErrors) {
+    public AnnotatedTree(ParseTree root, String name, String fileName,
+                         boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
@@ -62,15 +62,15 @@ public class AnnotatedTree {
         return result != null ? result : g.getTrueExp();
     }
 
-    @NotNull public String getName() {
+    public String getName() {
         return name;
     }
 
-    @NotNull public String getFileName() {
+    public String getFileName() {
         return fileName;
     }
 
-    @NotNull public ParseTree getRoot() {
+    public ParseTree getRoot() {
         return root;
     }
 

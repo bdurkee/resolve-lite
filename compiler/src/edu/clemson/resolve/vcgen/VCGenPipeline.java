@@ -10,8 +10,8 @@ import java.util.List;
 
 public class VCGenPipeline extends AbstractCompilationPipeline {
 
-    public VCGenPipeline(@NotNull RESOLVECompiler rc,
-                         @NotNull List<AnnotatedTree> compilationUnits) {
+    public VCGenPipeline(RESOLVECompiler rc,
+                         List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }
 

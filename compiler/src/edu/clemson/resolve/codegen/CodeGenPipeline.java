@@ -29,8 +29,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     Map<AnnotatedTree, List<JavaUnit>> targetUnitsToAllRequiredJavaSrcs =
             new HashMap<>();
 
-    public CodeGenPipeline(@NotNull RESOLVECompiler rc,
-                @NotNull List<AnnotatedTree> compilationUnits) {
+    public CodeGenPipeline(RESOLVECompiler rc,
+                           List<AnnotatedTree> compilationUnits) {
         super(rc, compilationUnits);
     }
 
@@ -129,7 +129,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         public boolean containsMain = false;
 
         @Override public void enterOperationProcedureDecl(
-                @NotNull Resolve.OperationProcedureDeclContext ctx) {
+                Resolve.OperationProcedureDeclContext ctx) {
             if (ctx.name.getText().equals("Main") ||
                     ctx.name.getText().equals("main")) containsMain = true;
         }
@@ -157,7 +157,6 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             this.javaClassName = className;
             this.javaClassSrc = classSrc;
         }
-
         @Override public boolean equals(Object o) {
             boolean result = o instanceof JavaUnit;
             if ( result ) {
