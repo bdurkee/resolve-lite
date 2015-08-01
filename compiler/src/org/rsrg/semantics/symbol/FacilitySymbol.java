@@ -27,7 +27,7 @@ public class FacilitySymbol extends Symbol {
 
     public FacilitySymbol(Resolve.FacilityDeclContext facility,
             String moduleID,
-            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
+            ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             SymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleID);
         this.scopeRepo = scopeRepo;

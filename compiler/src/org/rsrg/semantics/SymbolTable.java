@@ -148,7 +148,7 @@ public class SymbolTable {
     private final TypeGraph typeGraph;
     private final RESOLVECompiler compiler;
 
-    public SymbolTable(@NotNull RESOLVECompiler rc) {
+    public SymbolTable(RESOLVECompiler rc) {
         this.typeGraph = new TypeGraph();
         this.compiler = rc;
 
