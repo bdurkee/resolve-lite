@@ -4,7 +4,6 @@ import edu.clemson.resolve.codegen.AbstractCodeGenerator;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
@@ -24,11 +23,11 @@ public class VCGenerator extends AbstractCodeGenerator {
         return o.getOutputFile();
     }
 
-    @Nullable public ST generateAssertions() {
+    public ST generateAssertions() {
         return walk(buildVCOutputModel());
     }
 
-    @Nullable public ST generateXMLAssertions() {
+    public ST generateXMLAssertions() {
         throw new UnsupportedOperationException();
     }
 

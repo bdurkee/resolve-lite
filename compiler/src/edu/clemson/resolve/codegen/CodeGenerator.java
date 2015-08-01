@@ -3,8 +3,6 @@ package edu.clemson.resolve.codegen;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
@@ -16,8 +14,8 @@ public class CodeGenerator extends AbstractCodeGenerator {
 
     public static final String DEFAULT_LANGUAGE = "Java";
 
-    public CodeGenerator(@NotNull RESOLVECompiler rc,
-             @NotNull AnnotatedTree rootTarget) throws IllegalStateException {
+    public CodeGenerator(RESOLVECompiler rc,
+             AnnotatedTree rootTarget) throws IllegalStateException {
         super(rc, rootTarget, DEFAULT_LANGUAGE);
     }
 
@@ -28,7 +26,7 @@ public class CodeGenerator extends AbstractCodeGenerator {
         return builder.built.get(root);
     }
 
-    @Nullable public ST generateModule() {
+    public ST generateModule() {
         return walk(buildModuleOutputModel());
     }
 }

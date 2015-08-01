@@ -1,8 +1,6 @@
 package edu.clemson.resolve.compiler;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.stringtemplate.v4.ST;
 
 import java.util.Arrays;
@@ -11,9 +9,9 @@ public class RESOLVEMessage {
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 
-    @NotNull private final ErrorKind errorType;
-    @Nullable private final Object[] args;
-    @Nullable private final Throwable e;
+    private final ErrorKind errorType;
+    private final Object[] args;
+    private final Throwable e;
 
     // used for location template
     public String fileName;
@@ -21,16 +19,16 @@ public class RESOLVEMessage {
     public int charPosition = -1;
     public Token offendingToken;
 
-    public RESOLVEMessage(@NotNull ErrorKind errorKind) {
+    public RESOLVEMessage(ErrorKind errorKind) {
         this(errorKind, (Throwable) null, null);
     }
 
-    public RESOLVEMessage(@NotNull ErrorKind errorType, Token offendingToken,
+    public RESOLVEMessage(ErrorKind errorType, Token offendingToken,
                           Object... args) {
         this(errorType, null, offendingToken, args);
     }
 
-    public RESOLVEMessage(@NotNull ErrorKind errorType, @Nullable Throwable e,
+    public RESOLVEMessage(ErrorKind errorType, Throwable e,
                           Token offendingToken, Object... args) {
         this.errorType = errorType;
         this.e = e;
@@ -38,11 +36,11 @@ public class RESOLVEMessage {
         this.offendingToken = offendingToken;
     }
 
-    @NotNull public ErrorKind getErrorType() {
+    public ErrorKind getErrorType() {
         return errorType;
     }
 
-    @NotNull public Object[] getArgs() {
+    public Object[] getArgs() {
         if ( args == null ) {
             return EMPTY_ARGS;
         }
@@ -77,7 +75,7 @@ public class RESOLVEMessage {
         return messageST;
     }
 
-    @Nullable public Throwable getCause() {
+    public Throwable getCause() {
         return e;
     }
 
