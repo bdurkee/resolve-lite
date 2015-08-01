@@ -33,9 +33,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <antlr.testinprocess>true</antlr.testinprocess>
+        <resolve.testinprocess>true</resolve.testinprocess>
         <java.version>1.8</java.version>
-        <antlr4.version>4.5</antlr4.version>
+        <antlr4.version>4.5.1</antlr4.version>
     </properties>
 
     <issueManagement>

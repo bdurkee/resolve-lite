@@ -31,15 +31,15 @@
 lexer grammar ResolveLexer;
 
 DOC_COMMENT
-	:	'(**' .*? ('*)' | EOF)
+	:	'/**' .*? ('*/' | EOF)
 	;
 
 BLOCK_COMMENT
 	:	'/*' .*? ('*/' | EOF)  -> channel(HIDDEN)
-    ;
+	;
 
 LINE_COMMENT
-	:	'--' ~[\r\n]*  -> channel(HIDDEN)
+	:	'//' ~[\r\n]*  -> channel(HIDDEN)
 	;
 
 // keywords
