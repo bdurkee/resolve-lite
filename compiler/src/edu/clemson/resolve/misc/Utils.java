@@ -36,7 +36,6 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
@@ -117,7 +116,7 @@ public class Utils {
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    public static String getModuleName(@NotNull ParseTree ctx) {
+    public static String getModuleName(ParseTree ctx) {
         if ( ctx instanceof Resolve.ModuleContext ) {
             ctx = ctx.getChild(0);
         }

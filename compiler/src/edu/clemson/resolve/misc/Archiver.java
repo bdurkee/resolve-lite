@@ -15,8 +15,10 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.logging.Logger;
 
 public class Archiver {
+    private static Logger LOGGER = Logger.getLogger("Archiver");
 
     private final List<CodeGenPipeline.JavaUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
@@ -61,7 +63,7 @@ public class Archiver {
             manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
             manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, ".");
             manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, entryPointName);
-            JarOutputStream target = null;
+            JarOutputStream target;
             try {
                 target = new JarOutputStream(
                         new FileOutputStream(resolveCompiler.outputDirectory
@@ -100,7 +102,7 @@ public class Archiver {
         }
     }
 
-    protected void eraseFiles() {
+    public void eraseFiles() {
         File tmpdirF = new File(tmpdir);
         String[] files = tmpdirF.list();
         for(int i = 0; files!=null && i < files.length; i++) {
@@ -116,7 +118,7 @@ public class Archiver {
         }
     }
 
-    class GenCodeDiagnosticListener implements DiagnosticListener {
+    class GenCodeDiagnosticListener implements DiagnosticListener<JavaFileObject> {
         private final RESOLVECompiler compiler;
 
         public GenCodeDiagnosticListener(RESOLVECompiler rc) {

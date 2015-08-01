@@ -28,4 +28,14 @@ include:
 * [The Resuable Software Research Group (RSRG)]
 (http://www.cs.clemson.edu/resolve/) - School of Computing, Clemson University
 
-##First steps 
+##First steps with RESOLVE
+
+###Requirements
+To get started, you really only need to have Java JDK 1.8 installed on either
+Windows, Mac OSX, or linux (any distribution should do).
+
+###Installing
+You can obtain the latest stable build of the tool from the [releases page]
+(). Note that the tool comes packaged in a `.zip` containing both standard
+RESOLVE libraries and other core `.java` classes required at runtime for
+generated code.
