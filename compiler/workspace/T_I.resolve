@@ -1,0 +1,5 @@
+Implementation T_I(Operation P(alters j,k : U ) : Std_Boolean_Fac :: Boolean;) for T;
+        uses Standard_Booleans, Standard_Char_Strings;
+    Procedure Op_Requiring_Predicate_P();
+    end Op_Requiring_Predicate_P;
+end T_I;

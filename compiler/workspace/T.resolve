@@ -1,14 +1,5 @@
-Facility T;
-        uses Standard_Integers, Standard_Char_Strings;
-
-    Operation Prefix_Dog_with (alters prefix : Std_Char_Str_Fac :: Char_Str) :
-            Std_Char_Str_Fac :: Char_Str;
-        Procedure Prefix_Dog_with:=prefix++"Dog";
-    end Prefix_Dog_with;
-
-    Operation Main();
-        Procedure Var x: Std_Char_Str_Fac :: Char_Str;
-        x:="cat";
-        x:=Prefix_Dog_with(x); Std_Char_Str_Fac :: Write_Line(x);
-    end Main;
+Concept T<U>(evaluates i,j,k : Std_Integer_Fac :: Integer;
+        Definition Is_LEQ(i,j : U) : B;);
+            uses Standard_Booleans, Standard_Integers;
+    Operation Op_Requiring_Predicate_P();
 end T;

@@ -69,7 +69,7 @@ enhancementModule
         (usesList)?
         (requiresClause)?
         (enhancementBlock)
-        END closename=ID SEMI
+        END closename=ID SEMI EOF
     ;
 
 enhancementBlock
@@ -88,7 +88,7 @@ conceptImplModule
         (usesList)?
         (requiresClause)?
         (implBlock)
-        END closename=ID SEMI
+        END closename=ID SEMI EOF
     ;
 
 enhancementImplModule
@@ -98,7 +98,7 @@ enhancementImplModule
        (usesList)?
        (requiresClause)?
        (implBlock)
-       END closename=ID SEMI
+       END closename=ID SEMI EOF
    ;
 
 implBlock
@@ -121,7 +121,8 @@ facilityModule
     ;
 
 facilityBlock
-    :   ( operationProcedureDecl
+    :   ( mathDefinitionDecl
+        | operationProcedureDecl
         | facilityDecl
         | typeRepresentationDecl
         )*

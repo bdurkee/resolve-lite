@@ -1,0 +1,13 @@
+Facility U;
+        uses Standard_Integers, Standard_Booleans, Basic_Integer_Theory;
+    Definition Int_Leq(i, j : Z) : B;
+    Operation My_Test(alters x,y : Std_Integer_Fac :: Integer) : Std_Boolean_Fac :: Boolean;
+        Procedure My_Test:=x<=y;
+    end My_Test;
+
+    Facility TF is T<Std_Integer_Fac :: Integer>(0,1,2,Int_Leq)
+        implemented by T_I(My_Test);
+
+    Operation Main(); Procedure
+    end Main;
+end U;

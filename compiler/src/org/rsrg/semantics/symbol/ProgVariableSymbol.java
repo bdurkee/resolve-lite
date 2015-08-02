@@ -2,12 +2,13 @@ package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-public class ProgVariableSymbol extends Symbol {
+public class ProgVariableSymbol extends Symbol implements ModuleArgSymbol {
 
     private final PTType type;
     private final MathSymbol mathSymbolAlterEgo;
@@ -22,12 +23,16 @@ public class ProgVariableSymbol extends Symbol {
                         type.toMath(), null, definingTree, moduleID);
     }
 
-    public PTType getProgramType() {
+    @Override public PTType getProgramType() {
         return type;
     }
 
     @Override public String getSymbolDescription() {
         return "a program variable";
+    }
+
+    @Override public MTType getMathType() {
+        return mathSymbolAlterEgo.getType();
     }
 
     @Override public ProgVariableSymbol toProgVariableSymbol() {
