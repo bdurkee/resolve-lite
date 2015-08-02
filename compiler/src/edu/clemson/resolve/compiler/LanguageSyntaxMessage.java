@@ -36,7 +36,8 @@ import org.antlr.v4.runtime.Token;
 public class LanguageSyntaxMessage extends RESOLVEMessage {
 
     public LanguageSyntaxMessage(ErrorKind etype, Token offendingToken,
-                         RecognitionException antlrException, Object... args) {
+                                 RecognitionException antlrException,
+                                 Object... args) {
         super(etype, antlrException, offendingToken, args);
         this.offendingToken = offendingToken;
         if ( offendingToken != null ) {

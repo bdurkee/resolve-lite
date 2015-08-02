@@ -15,7 +15,8 @@ public class CodeGenerator extends AbstractCodeGenerator {
     public static final String DEFAULT_LANGUAGE = "Java";
 
     public CodeGenerator(RESOLVECompiler rc,
-             AnnotatedTree rootTarget) throws IllegalStateException {
+                         AnnotatedTree rootTarget)
+            throws IllegalStateException {
         super(rc, rootTarget, DEFAULT_LANGUAGE);
     }
 

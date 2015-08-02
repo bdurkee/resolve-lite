@@ -180,6 +180,9 @@ public class Utils {
             case ResolveLexer.NEQUALS:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Not_Equal");
                 break;
+            case ResolveLexer.PLUSPLUS:
+                result = new BuiltInOpAttributes("Std_Char_Str_Fac", op, "Merger");
+                break;
         }
         return result;
     }

@@ -142,6 +142,7 @@ MULT			:	'*'				;
 NEQUALS			:	'/='			;
 OR 				:	'or'			;
 PLUS			:	'+'				;
+PLUSPLUS		:	'++'			;
 RANGE			:	'..'			;
 RARROW			:	'->'			;
 SWAP			:	':=:'			;

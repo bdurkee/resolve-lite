@@ -274,8 +274,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.type() != null) {
             this.visit(ctx.type());
             try {
-                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
-                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                tr.progTypeValues.get(ctx.type()),
+                                getRootModuleID()));
             } catch (DuplicateSymbolException e) {
                 //This shouldn't be possible--the operation declaration has a
                 //scope all its own and we're the first ones to get to
@@ -854,10 +856,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
                         ctx.name.getText());
             }
-            //nope.
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.name, "a variable reference", ctx.name.getText(),
-                    use.getActualSymbolDescription());
+            catch (UnexpectedSymbolException use2) {
+                //nope.
+                compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                        ctx.name, "a variable reference", ctx.name.getText(),
+                        use.getActualSymbolDescription());
+            }
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));

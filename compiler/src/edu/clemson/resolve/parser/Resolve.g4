@@ -488,13 +488,13 @@ mathSegmentsExp
 // program expressions
 
 progExp
-    :   op=MINUS progExp                        #progInfixExp
-    |   progExp op=(MULT|DIVIDE) progExp        #progInfixExp
-    |   progExp op=(PLUS|MINUS) progExp         #progInfixExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp      #progInfixExp
-    |   progExp op=(EQUALS|NEQUALS) progExp     #progInfixExp
-    |   LPAREN progExp RPAREN                   #progNestedExp
-    |   progPrimary                             #progPrimaryExp
+    :   op=MINUS progExp                            #progUnaryExp
+    |   progExp op=(MULT|DIVIDE|PLUSPLUS) progExp   #progInfixExp
+    |   progExp op=(PLUS|MINUS) progExp             #progInfixExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp          #progInfixExp
+    |   progExp op=(EQUALS|NEQUALS) progExp         #progInfixExp
+    |   LPAREN progExp RPAREN                       #progNestedExp
+    |   progPrimary                                 #progPrimaryExp
     ;
 
 progPrimary

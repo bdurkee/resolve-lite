@@ -240,8 +240,6 @@ public  class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
-        System.out.println("HERE IS OUR ENVIRONMENTAL RESOLVE ROOT: " + System.getenv("RESOLVEROOT"));
-
         List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
@@ -351,7 +349,7 @@ public  class RESOLVECompiler {
     }
 
     private File findResolveFile(String fileName,
-                        List<String> extensions) throws IOException {
+                                 List<String> extensions) throws IOException {
         FileLocator l = new FileLocator(fileName, extensions);
         File result = null;
         try {
