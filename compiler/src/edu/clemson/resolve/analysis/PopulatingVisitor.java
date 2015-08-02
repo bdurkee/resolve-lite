@@ -69,6 +69,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingDefParams = false;
 
     /**
+     * Set to {@code true} when we're walking the arguments to a module
+     * (i.e. walking some set of args to a facility decl); or when we're walking
+     * module formal parameters. Should be {@code false} otherwise;
+     */
+    private boolean walkingModuleArgOrParamList = false;
+
+    /**
      * Keeps track of an inductive defn's (top level declared) induction
      * variable for access later in the (lower level) signature. This is
      * {@code null} if we're not visiting the children of an inductive defn.
@@ -133,6 +140,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         return null;
     }
+
+    @Override public Void visitImplModuleParameterList(
+            Resolve.ImplModuleParameterListContext ctx) {
+        walkingModuleArgOrParamList = true;
+        this.visitChildren(ctx);
+        walkingModuleArgOrParamList = false;
+        return null;
+    }
+
+    @Override public Void visitSpecModuleParameterList(
+            Resolve.SpecModuleParameterListContext ctx) {
+        walkingModuleArgOrParamList = true;
+        this.visitChildren(ctx);
+        walkingModuleArgOrParamList = false;
+        return null;
+    }
+
 
     @Override public Void visitDependentTermOptions(
             Resolve.DependentTermOptionsContext ctx) {
@@ -274,8 +298,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.type() != null) {
             this.visit(ctx.type());
             try {
-                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
-                        ctx.getParent(), tr.mathTypeValues.get(ctx.type()));
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                tr.progTypeValues.get(ctx.type()),
+                                getRootModuleID()));
             } catch (DuplicateSymbolException e) {
                 //This shouldn't be possible--the operation declaration has a
                 //scope all its own and we're the first ones to get to
@@ -311,7 +337,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(name.getText(), ctx, requires, ensures,
                             returnType, getRootModuleID(), params,
-                            false));
+                            walkingModuleArgOrParamList));
         }
         catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -842,19 +868,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         catch (UnexpectedSymbolException use) {
             //ok, maybe we're dealing with a reference to an operation then?
-            try {
-                OperationSymbol o = symtab.getInnermostActiveScope()
-                        .queryForOne(new NameQuery(ctx.qualifier, ctx.name, true))
-                        .toOperationSymbol();
-                tr.progTypes.put(ctx, o.getReturnType());
-                tr.mathTypes.put(ctx, o.getReturnType().toMath());
-                return null;
+            if (walkingModuleArgOrParamList) {
+                Symbol s = null;
+                try {
+                    s = symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(ctx.qualifier,
+                                    ctx.name, true));
+                    if (s instanceof ModuleArgSymbol) {
+                        tr.progTypes.put(ctx, ((ModuleArgSymbol) s).getProgramType());
+                        tr.mathTypes.put(ctx, ((ModuleArgSymbol) s).getMathType());
+                        return null;
+                    }
+                } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+                    compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
+                            ctx.name.getText());
+                }
             }
-            catch (NoSuchSymbolException | DuplicateSymbolException e) {
-                compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
-                        ctx.name.getText());
-            }
-            //nope.
+            //nope. not expecting this at all if we got here. Let's indicate this
+            //and type the thing as invalid.
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.name, "a variable reference", ctx.name.getText(),
                     use.getActualSymbolDescription());
@@ -869,6 +900,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.progExp());
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
+        return null;
+    }
+
+    @Override public Void visitModuleArgumentList(
+            Resolve.ModuleArgumentListContext ctx) {
+        walkingModuleArgOrParamList = true;
+        this.visitChildren(ctx);
+        walkingModuleArgOrParamList = false;
         return null;
     }
 

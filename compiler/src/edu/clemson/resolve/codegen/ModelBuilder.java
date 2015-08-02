@@ -8,8 +8,6 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveLexer;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -243,6 +241,11 @@ public class ModelBuilder extends ResolveBaseListener {
             Resolve.ModuleArgumentContext ctx) {
         Expr e = (Expr) built.get(ctx.progExp());
         if ( e instanceof VarNameRef ) {
+            //If this is true, then we're likely dealing with a math definition
+            //(which has no sensible prog type), so we ignore the rest of our
+            //logic here
+            if (tr.progTypes.get(ctx.progExp()) == null) return;
+
             //Todo: I think it's ok to do getChild(0) here; we know we're
             //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
             Resolve.ProgNamedExpContext argAsNamedExp =
@@ -297,6 +300,16 @@ public class ModelBuilder extends ResolveBaseListener {
         WhileStat w = new WhileStat((Expr) built.get(ctx.progExp()));
         w.stats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
         built.put(ctx, w);
+    }
+
+    @Override public void exitIfStmt(Resolve.IfStmtContext ctx) {
+        IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
+        i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
+        if ( ctx.elsePart() != null ) {
+            i.elseStats.addAll(Utils.collect(Stat.class,
+                    ctx.elsePart().stmt(), built));
+        }
+        built.put(ctx, i);
     }
 
     @Override public void exitProgNestedExp(Resolve.ProgNestedExpContext ctx) {
@@ -399,26 +412,13 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx
                     .implBlock().facilityDecl(), built));
         }
-        try {
-            ModuleScopeBuilder conceptScope =
-                    symtab.getModuleScope(ctx.concept.getText());
-            impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(conceptScope
-                    .query(new SymbolTypeQuery<>(Symbol.class)));
+        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
+                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
+        allSymsFromConceptAndImpl.addAll(moduleScope
+                .getSymbolsOfType(Symbol.class));
+        impl.addGettersAndMembersForModuleParameterizableSyms(
+                allSymsFromConceptAndImpl);
 
-            for (OperationSymbol f : moduleScope
-                    .query(new SymbolTypeQuery<OperationSymbol>(
-                            OperationSymbol.class))) {
-                if ( f.isModuleParameter() ) {
-                    impl.addOperationParameterModelObjects((FunctionDef) built
-                            .get(f.getDefiningTree()));
-                }
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Shouldn't happen, if it does, should've yelled about it in semantics
-            gen.compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    ctx.concept, ctx.concept.getText());
-        }
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
@@ -451,7 +451,7 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
                     .conceptBlock().operationDecl(), built));
         }
-        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(moduleScope
+        spec.addGettersAndMembersForModuleParameterizableSyms(moduleScope
                 .query(new SymbolTypeQuery<>(Symbol.class)));
 
         file.module = spec;
@@ -473,7 +473,7 @@ public class ModelBuilder extends ResolveBaseListener {
         //Note that here we only need to query locally for symbols. Meaning
         //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
         //etc from the concept. We just want the ones (if any) from enhancement.
-        spec.addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+        spec.addGettersAndMembersForModuleParameterizableSyms(
                 moduleScope.getSymbolsOfType(Symbol.class));
         file.module = spec;
         built.put(ctx, file);
@@ -496,18 +496,10 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
         }
-        impl.addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+        impl.addGettersAndMembersForModuleParameterizableSyms(
                 conceptScope.getSymbolsOfType(
-                    GenericSymbol.class, ProgParameterSymbol.class));
+                        GenericSymbol.class, ProgParameterSymbol.class));
 
-        for (OperationSymbol f : moduleScope
-                .query(new SymbolTypeQuery<OperationSymbol>(
-                        OperationSymbol.class))) {
-            if ( f.isModuleParameter() ) {
-                impl.addOperationParameterModelObjects((FunctionDef) built
-                        .get(f.getDefiningTree()));
-            }
-        }
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);

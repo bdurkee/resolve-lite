@@ -3,6 +3,7 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import edu.clemson.resolve.parser.Resolve;
+import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OperationSymbol extends Symbol {
+public class OperationSymbol extends Symbol implements ModuleArgSymbol {
 
     private final PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
@@ -80,6 +81,14 @@ public class OperationSymbol extends Symbol {
                 ensures, returnType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getModuleID(), newParams,
                 moduleParameter);
+    }
+
+    @Override public MTType getMathType() {
+        return getProgramType().toMath();
+    }
+
+    @Override public PTType getProgramType() {
+        return getReturnType();
     }
 
     private static class InstantiationFunction

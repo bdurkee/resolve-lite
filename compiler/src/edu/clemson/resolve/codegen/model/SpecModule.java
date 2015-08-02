@@ -30,7 +30,7 @@ public abstract class SpecModule extends Module {
         }
     }
 
-    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+    @Override public void addGettersAndMembersForModuleParameterizableSyms(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
             if ( s instanceof ProgParameterSymbol ) {

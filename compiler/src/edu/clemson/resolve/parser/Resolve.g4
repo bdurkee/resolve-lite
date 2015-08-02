@@ -69,7 +69,7 @@ enhancementModule
         (usesList)?
         (requiresClause)?
         (enhancementBlock)
-        END closename=ID SEMI
+        END closename=ID SEMI EOF
     ;
 
 enhancementBlock
@@ -88,7 +88,7 @@ conceptImplModule
         (usesList)?
         (requiresClause)?
         (implBlock)
-        END closename=ID SEMI
+        END closename=ID SEMI EOF
     ;
 
 enhancementImplModule
@@ -98,7 +98,7 @@ enhancementImplModule
        (usesList)?
        (requiresClause)?
        (implBlock)
-       END closename=ID SEMI
+       END closename=ID SEMI EOF
    ;
 
 implBlock
@@ -121,7 +121,8 @@ facilityModule
     ;
 
 facilityBlock
-    :   ( operationProcedureDecl
+    :   ( mathDefinitionDecl
+        | operationProcedureDecl
         | facilityDecl
         | typeRepresentationDecl
         )*
@@ -207,6 +208,7 @@ stmt
     |   swapStmt
     |   callStmt
     |   whileStmt
+    |   ifStmt
     ;
 
 assignStmt
@@ -225,6 +227,14 @@ whileStmt
     :   WHILE progExp DO
         (stmt)*
         END SEMI
+    ;
+
+ifStmt
+    :   IF progExp THEN stmt* (elsePart)? END SEMI
+    ;
+
+elsePart
+    :   ELSE stmt*
     ;
 
 // type and record related rules
@@ -488,13 +498,13 @@ mathSegmentsExp
 // program expressions
 
 progExp
-    :   op=MINUS progExp                        #progInfixExp
-    |   progExp op=(MULT|DIVIDE) progExp        #progInfixExp
-    |   progExp op=(PLUS|MINUS) progExp         #progInfixExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp      #progInfixExp
-    |   progExp op=(EQUALS|NEQUALS) progExp     #progInfixExp
-    |   LPAREN progExp RPAREN                   #progNestedExp
-    |   progPrimary                             #progPrimaryExp
+    :   op=MINUS progExp                            #progUnaryExp
+    |   progExp op=(MULT|DIVIDE|PLUSPLUS) progExp   #progInfixExp
+    |   progExp op=(PLUS|MINUS) progExp             #progInfixExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp          #progInfixExp
+    |   progExp op=(EQUALS|NEQUALS) progExp         #progInfixExp
+    |   LPAREN progExp RPAREN                       #progNestedExp
+    |   progPrimary                                 #progPrimaryExp
     ;
 
 progPrimary

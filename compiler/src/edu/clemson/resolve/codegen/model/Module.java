@@ -22,7 +22,7 @@ public abstract class Module extends OutputModelObject {
      * Like the name suggests, adds getters and member variabes for the formal
      * parameters to a concept (or enhancement).
      */
-    public abstract void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+    public abstract void addGettersAndMembersForModuleParameterizableSyms(
             List<? extends Symbol> symbols);
 
     /**

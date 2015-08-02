@@ -1,6 +1,7 @@
 package edu.clemson.resolve.codegen.model;
 
 import org.rsrg.semantics.symbol.GenericSymbol;
+import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -23,7 +24,7 @@ public abstract class AbstractSpecImplModule extends Module {
         this.concept = concept;
     }
 
-    @Override public void addGetterMethodsAndVarsForConceptualParamsAndGenerics(
+    @Override public void addGettersAndMembersForModuleParameterizableSyms(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
             if ( s instanceof ProgParameterSymbol) {
@@ -34,6 +35,12 @@ public abstract class AbstractSpecImplModule extends Module {
                 memberVars.add(new VariableDef(s.getName(), null));
             }
             else if ( s instanceof GenericSymbol) {
+                funcImpls.add(buildGetterMethod(s.getName()));
+                funcImpls.add(buildInitMethod(s.getName()));
+                memberVars.add(new VariableDef(s.getName(), null));
+            }
+            else if (s instanceof OperationSymbol && ((OperationSymbol) s)
+                    .isModuleParameter()) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 funcImpls.add(buildInitMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));
@@ -60,7 +67,7 @@ public abstract class AbstractSpecImplModule extends Module {
 
     protected FunctionImpl buildGetterMethod(String name) {
         FunctionImpl getterFunc = new FunctionImpl("get" + name);
-        getterFunc.implementsOper = true;
+        //getterFunc.implementsOper = true;
         getterFunc.hasReturn = true;
         getterFunc.stats.add(new ReturnStat(name));
         return getterFunc;
