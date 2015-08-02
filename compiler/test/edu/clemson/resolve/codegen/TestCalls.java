@@ -60,7 +60,7 @@ public class TestCalls extends BaseTest {
         String facility = facilityST.render();
 
         String found = execCode("T.resolve", facility, "T", "", false);
-        
+
         Assert.assertEquals("catDog\n", found);
     }
 
