@@ -69,7 +69,7 @@ FACILITY		:	'Facility'			;
 FAMILY			:	'Family'			;
 FOR				:	'for'				;
 FORALL			:	'Forall'			;
-IF				:	'if'				;
+IF				:	('if'|'If')			;
 IMPLICIT		:	'Implicit'			;
 INITIALIZATION	:	'initialization'	;
 IS 				:	'is'				;

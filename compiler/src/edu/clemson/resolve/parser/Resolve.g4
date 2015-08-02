@@ -230,7 +230,11 @@ whileStmt
     ;
 
 ifStmt
-    :   IF progExp THEN stmt* (ELSE stmt*)? END SEMI
+    :   IF progExp THEN stmt* (elsePart)? END SEMI
+    ;
+
+elsePart
+    :   ELSE stmt*
     ;
 
 // type and record related rules

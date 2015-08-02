@@ -302,6 +302,16 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, w);
     }
 
+    @Override public void exitIfStmt(Resolve.IfStmtContext ctx) {
+        IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
+        i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
+        if ( ctx.elsePart() != null ) {
+            i.elseStats.addAll(Utils.collect(Stat.class,
+                    ctx.elsePart().stmt(), built));
+        }
+        built.put(ctx, i);
+    }
+
     @Override public void exitProgNestedExp(Resolve.ProgNestedExpContext ctx) {
         built.put(ctx, built.get(ctx.progExp()));
     }

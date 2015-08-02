@@ -134,11 +134,11 @@ public abstract class BaseTest {
     }
 
     protected String execCode(String resolveFileName, String moduleStr,
-            String moduleName, String input,  boolean debug) {
+            String startModuleName, boolean debug) {
         boolean success = rawGenerateAndCompileCode(
-                resolveFileName, moduleStr, moduleName, false);
+                resolveFileName, moduleStr, startModuleName, false);
         assertTrue(success);
-        String output = execClass(moduleName);
+        String output = execClass(startModuleName);
         if ( stderrDuringGenClassExec!=null && stderrDuringGenClassExec.length()>0 ) {
             System.err.println(stderrDuringGenClassExec);
         }

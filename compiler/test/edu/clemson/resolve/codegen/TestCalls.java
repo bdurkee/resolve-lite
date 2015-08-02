@@ -8,7 +8,6 @@ import org.stringtemplate.v4.ST;
 public class TestCalls extends BaseTest {
 
     @Test public void testArglessOpCall() throws Exception {
-        mkdir(tmpdir);
         ST facilityST = new ST(
                 "Facility T; uses Standard_Integers, Standard_Characters;" +
                 "Operation Foo(); Procedure \n end Foo;" +
@@ -24,7 +23,7 @@ public class TestCalls extends BaseTest {
                 "end T;");
         String facility = facilityST.render();
 
-        String found = execCode("T.resolve", facility, "T", "", false);
+        String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("00 \n1\n", found);
     }
 
@@ -41,7 +40,7 @@ public class TestCalls extends BaseTest {
                         "end T;");
         String facility = facilityST.render();
 
-        String found = execCode("T.resolve", facility, "T", "", false);
+        String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("01\n", found);
     }
 
@@ -58,9 +57,7 @@ public class TestCalls extends BaseTest {
                         "end Main;" +
                         "end T;");
         String facility = facilityST.render();
-
-        String found = execCode("T.resolve", facility, "T", "", false);
-
+        String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("catDog\n", found);
     }
 

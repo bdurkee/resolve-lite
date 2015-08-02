@@ -254,6 +254,15 @@ while (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
 }
 >>
 
+IfStat(if, cond, ifStats, elseStats) ::= <<
+if (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
+    <ifStats; separator="\n">
+}<if(elseStats)>
+else {
+    <elseStats; separator="\n">
+}<endif>
+>>
+
 MethodCall(call, q, args) ::= "<q>.<call.name>(<args; separator={, }>)"
 
 OperationParameterMethodCall(call, args) ::=
