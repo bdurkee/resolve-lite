@@ -208,6 +208,7 @@ stmt
     |   swapStmt
     |   callStmt
     |   whileStmt
+    |   ifStmt
     ;
 
 assignStmt
@@ -226,6 +227,10 @@ whileStmt
     :   WHILE progExp DO
         (stmt)*
         END SEMI
+    ;
+
+ifStmt
+    :   IF progExp THEN stmt* (ELSE stmt*)? END SEMI
     ;
 
 // type and record related rules

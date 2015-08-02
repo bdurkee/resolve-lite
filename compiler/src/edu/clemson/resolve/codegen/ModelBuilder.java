@@ -402,20 +402,13 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx
                     .implBlock().facilityDecl(), built));
         }
-        try {
-            List<Symbol> allSymsFromConceptAndImpl =
-                    symtab.getModuleScope(ctx.concept.getText())
-                            .getSymbolsOfType(Symbol.class);
-            allSymsFromConceptAndImpl.addAll(moduleScope
-                    .getSymbolsOfType(Symbol.class));
-            impl.addGettersAndMembersForModuleParameterizableSyms(
-                    allSymsFromConceptAndImpl);
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Shouldn't happen, if it does, should've yelled about it in semantics
-            gen.compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    ctx.concept, ctx.concept.getText());
-        }
+        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
+                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
+        allSymsFromConceptAndImpl.addAll(moduleScope
+                .getSymbolsOfType(Symbol.class));
+        impl.addGettersAndMembersForModuleParameterizableSyms(
+                allSymsFromConceptAndImpl);
+
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);

@@ -87,6 +87,7 @@ RECORD			:	'Record'			;
 RECURSIVE		:	'Recursive'			;
 REQUIRES		:	'requires'			;
 THEOREM			:	'Theorem'			;
+THEN            :   'then'              ;
 TYPE			:	'Type'				;
 USES			:	'uses'				;
 VAR				:	'Var'				;
