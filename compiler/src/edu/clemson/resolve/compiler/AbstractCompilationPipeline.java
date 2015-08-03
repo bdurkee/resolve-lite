@@ -1,7 +1,5 @@
 package edu.clemson.resolve.compiler;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
 import java.util.List;
 
 public abstract class AbstractCompilationPipeline {

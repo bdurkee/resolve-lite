@@ -5,6 +5,7 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Archiver;
+import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
@@ -46,6 +47,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 if ( compiler.genCode.equalsIgnoreCase("java") ) {
                     ST generatedST = gen.generateModule();
+                    String t = generatedST.render();
                     translatedSoFar.add(new JavaUnit(unit.getName(), generatedST.render()));
 
                     //Todo: Try to coalecse this and "addAdditionalFiles" into the same method
@@ -66,10 +68,10 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                         targetUnitsToAllRequiredJavaSrcs.put(unit, translatedSoFar);
 
                         //add external runtime java files
-                        File runtime = new File(RESOLVECompiler.getCoreLibraryDirectory()
-                                + File.separator + "runtime");
-                        addAdditionalFiles(Arrays.asList(runtime.listFiles()),
-                                unit);
+                        FileLocator f = new FileLocator("java");
+                        Files.walkFileTree(new File(RESOLVECompiler.getCoreLibraryDirectory()
+                                        + File.separator + "runtime").toPath(), f);
+                        addAdditionalFiles(f.getFiles(), unit);
                     }
                     //gen.writeFile(generatedST);
                 }
@@ -81,6 +83,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             }
             catch (IllegalStateException ise) {
                 return; //if the templates were unable to be loaded, etc.
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 

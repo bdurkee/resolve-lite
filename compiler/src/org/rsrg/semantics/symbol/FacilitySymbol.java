@@ -1,7 +1,6 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.parser.Resolve;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.ModuleParameterization;
