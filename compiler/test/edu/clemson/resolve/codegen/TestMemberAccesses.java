@@ -43,5 +43,17 @@ public class TestMemberAccesses extends BaseTest {
     }
 
     @Test public void testMemberAccessWithInitialization() throws Exception {
+        String[] modules = new String[]{
+                "Facility T; uses Standard_Integers, Standard_Booleans;" +
+                        "Type Foo = Record x,y : Std_Integer_Fac :: Integer; end;" +
+                        "initialization F.x:=33; F.y:=44; end;" +
+                        "Operation Main(); Procedure Var F : Foo;" +
+                        "Std_Integer_Fac :: Write_Line(F.x);" +
+                        "Std_Integer_Fac :: Write_Line(F.y);" +
+                        "end Main; end T;"
+        };
+        writeModules(modules, "T");
+        String found = execCode("T.resolve", modules[0], "T", false);
+        Assert.assertEquals("33\n44\n", found);
     }
 }

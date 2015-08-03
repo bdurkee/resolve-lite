@@ -56,6 +56,5 @@ public class TestFacilityDecls extends BaseTest {
         Assert.assertEquals("P=true:P=true:P=false:\n", found);
     }
 
-    //Todo : write test where type has initialization code and put print stmts there
-    //maybe even loops!
+    //Todo : write tests for one then two or more enhancements (w/simple params -- numbers and types)
 }
