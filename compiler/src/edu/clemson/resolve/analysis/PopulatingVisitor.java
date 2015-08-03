@@ -874,9 +874,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     s = symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(ctx.qualifier,
                                     ctx.name, true));
-                    if (s instanceof ModuleArgSymbol) {
-                        tr.progTypes.put(ctx, ((ModuleArgSymbol) s).getProgramType());
-                        tr.mathTypes.put(ctx, ((ModuleArgSymbol) s).getMathType());
+                    if (s instanceof ModuleParameterizableSymbol) {
+                        tr.progTypes.put(ctx, ((ModuleParameterizableSymbol) s).getProgramType());
+                        tr.mathTypes.put(ctx, ((ModuleParameterizableSymbol) s).getMathType());
                         return null;
                     }
                 } catch (NoSuchSymbolException|DuplicateSymbolException e) {

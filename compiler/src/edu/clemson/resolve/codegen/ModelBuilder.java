@@ -496,9 +496,12 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
         }
+        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
+                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
+        allSymsFromConceptAndImpl.addAll(moduleScope
+                .getSymbolsOfType(Symbol.class));
         impl.addGettersAndMembersForModuleParameterizableSyms(
-                conceptScope.getSymbolsOfType(
-                        GenericSymbol.class, ProgParameterSymbol.class));
+                allSymsFromConceptAndImpl);
 
         impl.addCtor();
         file.module = impl;

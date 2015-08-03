@@ -7,6 +7,8 @@ import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
@@ -17,6 +19,10 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTNamed;
+import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 
@@ -134,6 +140,46 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.chunks.add(block.build());
     }
 
+    @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        //If a formal parameter 'p' comes in as a PTRepresentation, THEN we
+        //need to replace all instances of 'p' with 'conc.p' in the precondition
+        //AND postcondition, then once again substitute conc.p for the
+        //full correspondence expression.
+        try {
+            List<PTType> argTypes =
+                    s.getSymbolsOfType(ProgParameterSymbol.class).stream()
+                            .map(ProgParameterSymbol::getDeclaredType)
+                            .collect(Collectors.toList());
+            OperationSymbol op = s.queryForOne(
+                    new OperationQuery(null, ctx.name, argTypes));
+
+            PExp localRequires = modifyRequiresByParams(ctx, op.getRequires());
+            PExp localEnsures = modifyEnsuresByParams(ctx, op.getEnsures());
+
+            VCAssertiveBlockBuilder block =
+                    new VCAssertiveBlockBuilder(g, s,
+                            "Proc_Decl_Rule="+ctx.name.getText() , ctx, tr)
+                            .freeVars(getFreeVars(s)) //
+                            .assume(localRequires) //
+                            .assume(getModuleLevelAssertionsOfType(requires()))
+                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .finalConfirm(localEnsures).remember();
+            assertiveBlocks.push(block);
+        }
+        catch (DuplicateSymbolException|NoSuchSymbolException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class,
+                (ctx.stmtBlock() != null) ? ctx.stmtBlock().stmt() : new ArrayList<ParseTree>(), stats));
+        //Todo: change the damn stmt rule. I really hate this stmtBlock intermediate rule.
+        outputFile.chunks.add(block.build());
+    }
+
     //-----------------------------------------------
     // S T A T S
     //-----------------------------------------------
@@ -216,5 +262,106 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     .collect(Collectors.toList()));
         }
         return result;
+    }
+
+    private PExp modifyRequiresByParams(ParserRuleContext functionCtx,
+                                        Resolve.RequiresClauseContext requires) {
+        List<ProgParameterSymbol> params =
+                symtab.scopes.get(functionCtx).getSymbolsOfType(
+                        ProgParameterSymbol.class);
+        List<PExp> additionalConjuncts = new ArrayList<>();
+        PExp resultingRequires = tr.getPExpFor(g, requires);
+
+        for (ProgParameterSymbol p : params) {
+            PTType t = p.getDeclaredType();
+            PExp param = p.asPSymbol();
+            PExp exemplar = null;
+            PExp init = g.getTrueExp();
+            if ( t instanceof PTNamed) { //covers the PTFamily case (it's a subclass of PTNamed)
+                exemplar =
+                        new PSymbol.PSymbolBuilder(
+                                ((PTNamed) t).getExemplarName()).mathType(
+                                t.toMath()).build();
+                init = ((PTNamed) t).getInitializationEnsures();
+                init = init.substitute(exemplar, param);
+                additionalConjuncts.add(init);
+                //existingRequires = g.formConjunct(existingRequires, init);
+            }
+            //but if we're a representation we need to add conventions for that
+            if ( t instanceof PTRepresentation) {
+                //not that exemplar should have already been set in the if above
+                //PTRepresentation is also a subclass.
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) t).getReprTypeSymbol();
+                PExp convention = repr.getConvention();
+                PExp corrFnExp = repr.getCorrespondence();
+                convention = convention.substitute(exemplar, param);
+                additionalConjuncts.add(convention);
+
+                //existingRequires = g.formConjunct(existingRequires, convention);
+                //now substitute whereever param occurs in the requires clause
+                //with the correspondence function
+                resultingRequires =
+                        resultingRequires.substitute(exemplar,
+                                repr.conceptualExemplarAsPSymbol());
+                resultingRequires =
+                        withCorrespondencePartsSubstituted(resultingRequires,
+                                corrFnExp);
+            }
+            else { //generic.
+
+            }
+        }
+        additionalConjuncts.add(resultingRequires);
+        return g.formConjuncts(additionalConjuncts);
+    }
+
+    private PExp modifyEnsuresByParams(ParserRuleContext functionCtx,
+                                       Resolve.EnsuresClauseContext ensures) {
+        List<ProgParameterSymbol> params =
+                symtab.scopes.get(functionCtx).getSymbolsOfType(
+                        ProgParameterSymbol.class);
+        PExp existingEnsures = tr.getPExpFor(g, ensures);
+        for (ProgParameterSymbol p : params) {
+            PSymbol.PSymbolBuilder temp =
+                    new PSymbol.PSymbolBuilder(p.getName()).mathType(p
+                            .getDeclaredType().toMath());
+
+            PExp incParamExp = temp.incoming(true).build();
+            PExp paramExp = temp.incoming(false).build();
+
+            if ( p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
+                    || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES ) {
+                PExp equalsExp =
+                        new PSymbol.PSymbolBuilder("=")
+                                .arguments(paramExp, incParamExp)
+                                .style(PSymbol.DisplayStyle.INFIX)
+                                .mathType(g.BOOLEAN).build();
+
+                existingEnsures =
+                        !existingEnsures.isLiteral() ? g.formConjunct(
+                                existingEnsures, equalsExp) : equalsExp;
+            }
+            else if ( p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS ) {
+                PExp init = null;
+                if ( p.getDeclaredType() instanceof PTNamed ) {
+                    PTNamed t = (PTNamed) p.getDeclaredType();
+                    PExp exemplar =
+                            new PSymbol.PSymbolBuilder(t.getExemplarName())
+                                    .mathType(t.toMath()).build();
+                    init = ((PTNamed) p.getDeclaredType()) //
+                            .getInitializationEnsures() //
+                            .substitute(exemplar, paramExp);
+                }
+                else { //we're dealing with a generic
+                    throw new UnsupportedOperationException(
+                            "generics not yet handled");
+                }
+                existingEnsures =
+                        !existingEnsures.isLiteral() ? g.formConjunct(
+                                existingEnsures, init) : init;
+            }
+        }
+        return existingEnsures;
     }
 }

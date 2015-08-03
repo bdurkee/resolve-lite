@@ -1,7 +1,6 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import edu.clemson.resolve.parser.Resolve;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
@@ -13,7 +12,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OperationSymbol extends Symbol implements ModuleArgSymbol {
+public class OperationSymbol
+        extends
+            Symbol implements ModuleParameterizableSymbol {
 
     private final PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
@@ -23,11 +24,12 @@ public class OperationSymbol extends Symbol implements ModuleArgSymbol {
     private final Resolve.EnsuresClauseContext ensures;
 
     public OperationSymbol(String name, ParserRuleContext definingTree,
-            Resolve.RequiresClauseContext requires,
+                           Resolve.RequiresClauseContext requires,
                            Resolve.EnsuresClauseContext ensures,
-            PTType type,
-            String moduleID, List<ProgParameterSymbol> params,
-            boolean moduleParameter) {
+                           PTType type,
+                           String moduleID,
+                           List<ProgParameterSymbol> params,
+                           boolean moduleParameter) {
         super(name, definingTree, moduleID);
         this.parameters.addAll(params);
         this.returnType = type;

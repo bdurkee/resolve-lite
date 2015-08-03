@@ -1,14 +1,13 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-public class ProgVariableSymbol extends Symbol implements ModuleArgSymbol {
+public class ProgVariableSymbol extends Symbol implements ModuleParameterizableSymbol {
 
     private final PTType type;
     private final MathSymbol mathSymbolAlterEgo;
