@@ -1,18 +1,6 @@
-/**
- * ArrayBackedImmutableList.java
- * ---------------------------------
- * Copyright (c) 2015
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving.immutableadts;
 
-import edu.clemson.cs.r2jt.rewriteprover.iterators.ArrayIterator;
+import edu.clemson.resolve.proving.iterators.ArrayIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +14,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 
     private final int myHashCode;
 
-    @SuppressWarnings("unchecked")
-    public ArrayBackedImmutableList(Iterable<E> i) {
+    @SuppressWarnings("unchecked") public ArrayBackedImmutableList(Iterable<E> i) {
         List<E> tempList = new ArrayList<E>();
 
         for (E e : i) {
@@ -59,18 +46,15 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
         return result;
     }
 
-    @Override
-    public E get(int index) {
+    @Override public E get(int index) {
         return myElements[index];
     }
 
-    @Override
-    public ImmutableList<E> head(int length) {
+    @Override public ImmutableList<E> head(int length) {
         return new ImmutableListSubview<E>(this, 0, length);
     }
 
-    @Override
-    public Iterator<E> iterator() {
+    @Override public Iterator<E> iterator() {
         return new ArrayIterator<E>(myElements);
     }
 
@@ -78,31 +62,25 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
         return new ArrayIterator<E>(myElements, start, length);
     }
 
-    @Override
-    public int size() {
+    @Override public int size() {
         return myElementsLength;
     }
 
-    @Override
-    public ImmutableList<E> tail(int startIndex) {
+    @Override public ImmutableList<E> tail(int startIndex) {
         return new ImmutableListSubview<E>(this, startIndex, myElementsLength
                 - startIndex);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return myHashCode;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         boolean result = (o instanceof ArrayBackedImmutableList);
 
         if (result) {
             ArrayBackedImmutableList oAsABIL = (ArrayBackedImmutableList) o;
-
             result = (myElementsLength == oAsABIL.size());
-
             if (result) {
                 int i = 0;
                 while (i < myElementsLength && result) {
@@ -111,7 +89,6 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
                 }
             }
         }
-
         return result;
     }
 }

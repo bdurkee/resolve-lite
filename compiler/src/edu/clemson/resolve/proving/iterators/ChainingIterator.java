@@ -11,12 +11,10 @@ public class ChainingIterator<T> implements Iterator<T> {
     private boolean myLastFromStartFlag;
 
     public ChainingIterator(Iterator<T> start, Iterator<T> end) {
-
         //TODO : This can be removed to increase performance
         if (start == null || end == null) {
             throw new IllegalArgumentException();
         }
-
         myStartIterator = start;
         myEndIterator = end;
     }
@@ -25,17 +23,14 @@ public class ChainingIterator<T> implements Iterator<T> {
         if (myStartHasNext) {
             myStartHasNext = myStartIterator.hasNext();
         }
-
         return (myStartHasNext || myEndIterator.hasNext());
     }
 
     public T next() {
         T retval;
-
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-
         if (myStartHasNext) {
             retval = myStartIterator.next();
             myLastFromStartFlag = true;
@@ -44,7 +39,6 @@ public class ChainingIterator<T> implements Iterator<T> {
             retval = myEndIterator.next();
             myLastFromStartFlag = false;
         }
-
         return retval;
     }
 

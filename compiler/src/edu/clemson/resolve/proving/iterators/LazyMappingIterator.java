@@ -1,51 +1,35 @@
-/**
- * LazyMappingIterator.java
- * ---------------------------------
- * Copyright (c) 2015
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving.iterators;
-
-import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.function.Function;
 
 /**
- * <p>A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
- * iterates over objects of type <code>I</code> and presents an interface for
- * mapping over objects of type <code>O</code>.  A <code>Mapping</code> from
- * <code>I</code> to <code>O</code> is used to transform each object as it is
- * requested.</p>
-
+ * A {@code LazyMappingIterator} wraps an {@code Iterator} that iterates over
+ * objects of type {@code I} and presents an interface for mapping over objects
+ * of type {@code O}.  A function from {@code I} to {@code O} is used to
+ * transform each object as it is requested.
+ *
  * @param <I> The type of the objects in the source iterator.
  * @param <O> The type of the final objects.
  */
 public final class LazyMappingIterator<I, O> implements Iterator<O> {
 
     private final Iterator<I> mySource;
-    private final Mapping<I, O> myMapper;
+    private final Function<I, O> myMapper;
 
-    public LazyMappingIterator(Iterator<I> source, Mapping<I, O> mapper) {
+    public LazyMappingIterator(Iterator<I> source, Function<I, O> mapper) {
         mySource = source;
         myMapper = mapper;
     }
 
-    @Override
-    public boolean hasNext() {
+    @Override public boolean hasNext() {
         return mySource.hasNext();
     }
 
-    @Override
-    public O next() {
+    @Override public O next() {
         try {
-            return myMapper.map(mySource.next());
+            return myMapper.apply(mySource.next());
         }
         catch (ConcurrentModificationException cme) {
             int i = 5;
@@ -53,8 +37,7 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
         }
     }
 
-    @Override
-    public void remove() {
+    @Override public void remove() {
         mySource.remove();
     }
 }

@@ -1,43 +1,26 @@
-/**
- * AbstractImmutableList.java
- * ---------------------------------
- * Copyright (c) 2015
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving.immutableadts;
 
 import java.util.Iterator;
 
 public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
 
-    @Override
-    public ImmutableList<E> appended(E e) {
+    @Override public ImmutableList<E> appended(E e) {
         return appended(new SingletonImmutableList<E>(e));
     }
 
-    @Override
-    public ImmutableList<E> appended(ImmutableList<E> l) {
+    @Override public ImmutableList<E> appended(ImmutableList<E> l) {
         return new ImmutableListConcatenation<E>(this, l);
     }
 
-    @Override
-    public ImmutableList<E> appended(Iterable<E> i) {
+    @Override public ImmutableList<E> appended(Iterable<E> i) {
         return appended(new ArrayBackedImmutableList<E>(i));
     }
 
-    @Override
-    public E first() {
+    @Override public E first() {
         return get(0);
     }
 
-    @Override
-    public ImmutableList<E> removed(int index) {
+    @Override public ImmutableList<E> removed(int index) {
         ImmutableList<E> retval;
 
         if (index == 0) {
@@ -55,10 +38,8 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         return retval;
     }
 
-    @Override
-    public ImmutableList<E> set(int index, E e) {
+    @Override public ImmutableList<E> set(int index, E e) {
         ImmutableList<E> first, second;
-
         ImmutableList<E> insertedList = new SingletonImmutableList<E>(e);
 
         if (index == 0) {
@@ -74,17 +55,14 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
                     new ImmutableListConcatenation<E>(head(index), insertedList);
             second = tail(index + 1);
         }
-
         return new ImmutableListConcatenation<E>(first, second);
     }
 
-    @Override
-    public ImmutableList<E> insert(int index, E e) {
+    @Override public ImmutableList<E> insert(int index, E e) {
         return insert(index, new SingletonImmutableList<E>(e));
     }
 
-    @Override
-    public ImmutableList<E> insert(int index, ImmutableList<E> l) {
+    @Override public ImmutableList<E> insert(int index, ImmutableList<E> l) {
         ImmutableList<E> first, second;
 
         if (index == 0) {
@@ -99,17 +77,14 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             first = new ImmutableListConcatenation<E>(head(index), l);
             second = tail(index);
         }
-
         return new ImmutableListConcatenation<E>(first, second);
     }
 
-    @Override
-    public ImmutableList<E> subList(int startIndex, int length) {
+    @Override public ImmutableList<E> subList(int startIndex, int length) {
         return tail(startIndex).head(length);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuffer buffer = new StringBuffer("[");
 
         int sizeSanityCheck = 0;
@@ -120,19 +95,14 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             if (!first) {
                 buffer.append(", ");
             }
-
             buffer.append(iterator.next());
-
             first = false;
             sizeSanityCheck++;
         }
-
         buffer.append("]");
-
         if (sizeSanityCheck != size()) {
             throw new RuntimeException();
         }
-
         return buffer.toString();
     }
 }

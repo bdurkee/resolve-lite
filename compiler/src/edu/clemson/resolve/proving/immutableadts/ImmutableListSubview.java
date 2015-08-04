@@ -1,15 +1,3 @@
-/**
- * ImmutableListSubview.java
- * ---------------------------------
- * Copyright (c) 2015
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving.immutableadts;
 
 import java.util.Iterator;
@@ -44,8 +32,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         myFirstAfterIndex = mySubviewStart + mySubviewLength;
     }
 
-    @Override
-    public E get(int index) {
+    @Override public E get(int index) {
         if (index < 0 || index >= myFirstAfterIndex) {
             throw new IndexOutOfBoundsException();
         }
@@ -53,8 +40,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         return myBaseList.get(index + mySubviewStart);
     }
 
-    @Override
-    public ImmutableList<E> head(int length) {
+    @Override public ImmutableList<E> head(int length) {
         if (length > mySubviewLength) {
             throw new IndexOutOfBoundsException();
         }
@@ -62,18 +48,15 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         return new ImmutableListSubview<E>(myBaseList, mySubviewStart, length);
     }
 
-    @Override
-    public Iterator<E> iterator() {
+    @Override public Iterator<E> iterator() {
         return myBaseList.subsequenceIterator(mySubviewStart, mySubviewLength);
     }
 
-    @Override
-    public int size() {
+    @Override public int size() {
         return mySubviewLength;
     }
 
-    @Override
-    public ImmutableList<E> tail(int startIndex) {
+    @Override public ImmutableList<E> tail(int startIndex) {
         if (startIndex < 0 || startIndex > mySubviewLength) {
             throw new IndexOutOfBoundsException();
         }

@@ -1,18 +1,6 @@
-/**
- * SingletonImmutableList.java
- * ---------------------------------
- * Copyright (c) 2015
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving.immutableadts;
 
-import edu.clemson.cs.r2jt.rewriteprover.iterators.SingletonIterator;
+import edu.clemson.resolve.proving.iterators.SingletonIterator;
 
 import java.util.Iterator;
 
@@ -26,8 +14,7 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         myElement = e;
     }
 
-    @Override
-    public E get(int index) {
+    @Override public E get(int index) {
         if (index != 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -35,10 +22,8 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         return myElement;
     }
 
-    @Override
-    public ImmutableList<E> head(int length) {
+    @Override public ImmutableList<E> head(int length) {
         ImmutableList<E> retval;
-
         switch (length) {
         case 0:
             retval = EMPTY;
@@ -49,25 +34,19 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         default:
             throw new IndexOutOfBoundsException();
         }
-
         return retval;
     }
 
-    @Override
-    public Iterator<E> iterator() {
+    @Override public Iterator<E> iterator() {
         return new SingletonIterator<E>(myElement);
     }
 
-    @Override
-    public int size() {
+    @Override public int size() {
         return 1;
     }
 
-    @Override
-    public ImmutableList<E> tail(int startIndex) {
-
+    @Override public ImmutableList<E> tail(int startIndex) {
         ImmutableList<E> retval;
-
         switch (startIndex) {
         case 0:
             retval = this;
@@ -78,7 +57,6 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
         default:
             throw new IndexOutOfBoundsException();
         }
-
         return retval;
     }
 }

@@ -1,6 +1,6 @@
 package edu.clemson.resolve.proving.immutableadts;
 
-import edu.clemson.cs.r2jt.rewriteprover.iterators.ChainingIterator;
+import edu.clemson.resolve.proving.iterators.ChainingIterator;
 
 import java.util.Iterator;
 
@@ -26,24 +26,19 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         myTotalSize = myFirstListSize + mySecondListSize;
     }
 
-    @Override
-    public E get(int index) {
+    @Override public E get(int index) {
         E retval;
-
         if (index < myFirstListSize) {
             retval = myFirstList.get(index);
         }
         else {
             retval = mySecondList.get(index - myFirstListSize);
         }
-
         return retval;
     }
 
-    @Override
-    public ImmutableList<E> head(int length) {
+    @Override public ImmutableList<E> head(int length) {
         ImmutableList<E> retval;
-
         if (length <= myFirstListSize) {
             retval = myFirstList.head(length);
         }
@@ -52,12 +47,10 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
                     new ImmutableListConcatenation<E>(myFirstList, mySecondList
                             .head(length - myFirstListSize));
         }
-
         return retval;
     }
 
-    @Override
-    public Iterator<E> iterator() {
+    @Override public Iterator<E> iterator() {
         return new ChainingIterator<E>(myFirstList.iterator(), mySecondList
                 .iterator());
     }
