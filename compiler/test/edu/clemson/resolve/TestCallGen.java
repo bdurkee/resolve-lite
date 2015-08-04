@@ -1,11 +1,11 @@
-package edu.clemson.resolve.codegen;
+package edu.clemson.resolve;
 
 import edu.clemson.resolve.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
-public class TestCalls extends BaseTest {
+public class TestCallGen extends BaseTest {
 
     @Test public void testArglessOpCall() throws Exception {
         ST facilityST = new ST(

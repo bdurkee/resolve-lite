@@ -1,10 +1,10 @@
-package edu.clemson.resolve.codegen;
+package edu.clemson.resolve;
 
 import edu.clemson.resolve.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestFacilityDecls extends BaseTest {
+public class TestFacilityDeclsGen extends BaseTest {
 
     @Test public void testUnenhancedFacilityDecl() throws Exception {
         String[] modules = new String[] {

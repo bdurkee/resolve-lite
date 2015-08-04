@@ -7,6 +7,7 @@ public interface ImmutableList<E> extends Iterable<E> {
     /*
      * "Mutator" methods that return a new, changed version of this list
      */
+
     public ImmutableList<E> appended(E e);
 
     public ImmutableList<E> appended(ImmutableList<E> l);
@@ -24,6 +25,7 @@ public interface ImmutableList<E> extends Iterable<E> {
     /*
      * Methods that return a view of this list
      */
+
     public ImmutableList<E> subList(int startIndex, int length);
 
     public ImmutableList<E> tail(int startIndex);
@@ -33,6 +35,7 @@ public interface ImmutableList<E> extends Iterable<E> {
     /*
      * Methods for getting out elements
      */
+
     public E first();
 
     public E get(int index);
@@ -42,5 +45,6 @@ public interface ImmutableList<E> extends Iterable<E> {
     /*
      * Utility methods.
      */
+
     public int size();
 }
