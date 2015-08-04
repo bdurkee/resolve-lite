@@ -48,9 +48,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(List<PExp> assumes) {
-            for (PExp e : assumes) {
-                assume(e);
-            }
+            assumes.forEach(this::assume);
             return this;
         }
 
@@ -116,7 +114,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         /**
-         * Same as {@link #build()} but this one doesn't automatically apply
+         * Same as {@link #build()}, but this one doesn't automatically apply
          * proof rules to the stats within this block.
          */
         public VCAssertiveBlock snapshot() {
