@@ -258,7 +258,7 @@ public class PSymbol extends PExp {
     }
 
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
-        if ( arguments.size() == 2 && name.equals("and") ) {
+        if ( arguments.size() == 2 && (name.equals("and") || name.equals("implies"))) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }

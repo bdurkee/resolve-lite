@@ -49,7 +49,6 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             //is immutable.
             ImmutableConjuncts expsAsImmutableConjuncts =
                     (ImmutableConjuncts) exps;
-
             myConjuncts = expsAsImmutableConjuncts.myConjuncts;
             myCachedSymbolNames = expsAsImmutableConjuncts.myCachedSymbolNames;
             myCachedQuantifiedVariables =
@@ -59,7 +58,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         }
         else {
             List<PExp> newExps = new ArrayList<>();
-            exps.forEach(newExps :: add);
+            exps.forEach(newExps::add);
             myConjuncts = new ArrayBackedImmutableList<>(newExps);
         }
         myConjunctsSize = myConjuncts.size();
@@ -281,7 +280,6 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             first = false;
         }
         if (retval.equals("")) retval = "True";
-        retval += "\n";
         return retval;
     }
 

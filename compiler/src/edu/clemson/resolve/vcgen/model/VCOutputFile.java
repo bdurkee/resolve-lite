@@ -2,12 +2,18 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.proving.Antecedent;
+import edu.clemson.resolve.proving.Consequent;
+import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class VCOutputFile extends OutputModelObject {
+
+    private int assertiveBatchCt;
 
     /**
      * All completed {@link AssertiveBlock} objects; where each
@@ -21,4 +27,46 @@ public class VCOutputFile extends OutputModelObject {
      */
     @ModelElement public List<VC> finalVcs = new ArrayList<>();
 
+    public VCOutputFile() {
+        assertiveBatchCt = 0;
+    }
+
+    public List<VC> getProverOutput() {
+        return this.finalVcs;
+    }
+
+    public void addAssertiveBlock(AssertiveBlock b) {
+        chunks.add(b);
+        addVCsInContext(b, assertiveBatchCt);
+        assertiveBatchCt++;
+    }
+
+    /**
+     * Each {@code AssertiveBlock} contains a set of VCs that refer to
+     * the same set of free variables.  This method adds each {@code VC} to the
+     * final list.
+     *
+     * @param batch the set of {@code VC}s in context.
+     * @param sectionNumber The batch number so that we can mirror the numbering
+     *                      used by the Verifier. (Ideally, we should eventually
+     *                      embed the name of each {@code VC} from the Verifier
+     *                      with its name for greater robustness.)
+     */
+    private void addVCsInContext(final AssertiveBlock batch,
+                                 final int sectionNumber) {
+        PExp topLevelImplication = batch.getFinalConfirm().getConfirmExp();
+        List<PExp> antecedentConjuncts = topLevelImplication.getSubExpressions()
+                .get(0).splitIntoConjuncts();
+        List<PExp> consequentConjuncts = topLevelImplication.getSubExpressions()
+                .get(1).splitIntoConjuncts();
+
+        int vcIndex = 1;
+        for (PExp consequent : consequentConjuncts) {
+            VC curVC = new VC(sectionNumber + "_" + vcIndex,
+                    new Antecedent(antecedentConjuncts),
+                    new Consequent(consequent));
+            finalVcs.add(curVC);
+            vcIndex++;
+        }
+    }
 }

@@ -141,6 +141,13 @@ public abstract class PExp {
 
     public abstract boolean isFunction();
 
+    //Todo:
+    /*public List<PExp> splitOn(String ... names) {
+        return splitOn(Arrays.asList(names));
+    }
+
+    public abstract List<PExp> splitOn(List<String> names);*/
+
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
         splitIntoConjuncts(conjuncts);
@@ -152,7 +159,7 @@ public abstract class PExp {
     /**
      * Returns a copy of this {@code PExp} where all variables prefixed with
      * an '@' are replaced by just the variable. This is essentially applying
-     * the 'remember' rule useful in {@link org.resolvelite.vcgen.VCGenerator}.
+     * the 'remember' rule useful in vcgeneration.
      * 
      * @return A '@-clean' version of this {@code PExp}.
      */

@@ -19,6 +19,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
 import org.rsrg.semantics.programtype.PTType;
@@ -105,7 +106,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         correspondence);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         block.finalConfirm(newConstraint);
-        outputFile.chunks.add(block.build());
+        outputFile.addAssertiveBlock(block.build());
     }
 
     @Override public void enterTypeImplInit(Resolve.TypeImplInitContext ctx) {
@@ -137,7 +138,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmtBlock().stmt(), stats));
         block.confirm(convention).finalConfirm(newInitEnsures);
-        outputFile.chunks.add(block.build());
+        outputFile.addAssertiveBlock(block.build());
     }
 
     @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
@@ -177,7 +178,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.stats(Utils.collect(VCRuleBackedStat.class,
                 (ctx.stmtBlock() != null) ? ctx.stmtBlock().stmt() : new ArrayList<ParseTree>(), stats));
         //Todo: change the damn stmt rule. I really hate this stmtBlock intermediate rule.
-        outputFile.chunks.add(block.build());
+        outputFile.addAssertiveBlock(block.build());
     }
 
     //-----------------------------------------------
@@ -277,7 +278,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp param = p.asPSymbol();
             PExp exemplar = null;
             PExp init = g.getTrueExp();
-            if ( t instanceof PTNamed) { //covers the PTFamily case (it's a subclass of PTNamed)
+            PExp constraint = g.getTrueExp();
+            if ( t instanceof PTNamed) { //both PTFamily AND PTRepresentation are a PTNamed
                 exemplar =
                         new PSymbol.PSymbolBuilder(
                                 ((PTNamed) t).getExemplarName()).mathType(
@@ -285,28 +287,34 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 init = ((PTNamed) t).getInitializationEnsures();
                 init = init.substitute(exemplar, param);
                 additionalConjuncts.add(init);
-                //existingRequires = g.formConjunct(existingRequires, init);
-            }
-            //but if we're a representation we need to add conventions for that
-            if ( t instanceof PTRepresentation) {
-                //not that exemplar should have already been set in the if above
-                //PTRepresentation is also a subclass.
-                ProgReprTypeSymbol repr =
-                        ((PTRepresentation) t).getReprTypeSymbol();
-                PExp convention = repr.getConvention();
-                PExp corrFnExp = repr.getCorrespondence();
-                convention = convention.substitute(exemplar, param);
-                additionalConjuncts.add(convention);
+                if (t instanceof PTFamily ) { //if we're a family we'll add constraints
+                    constraint = ((PTFamily) t).getConstraint();
+                    constraint = constraint.substitute(exemplar, param);
 
-                //existingRequires = g.formConjunct(existingRequires, convention);
-                //now substitute whereever param occurs in the requires clause
-                //with the correspondence function
-                resultingRequires =
-                        resultingRequires.substitute(exemplar,
-                                repr.conceptualExemplarAsPSymbol());
-                resultingRequires =
-                        withCorrespondencePartsSubstituted(resultingRequires,
-                                corrFnExp);
+                    additionalConjuncts.add(constraint);
+                }
+                //else our type refers to a PTRepresentation, so we need to deal with conventions and
+                //correspondence stuff.
+                else  {
+                    //not that exemplar should have already been set in the if above
+                    //PTRepresentation is also a subclass.
+                    ProgReprTypeSymbol repr =
+                            ((PTRepresentation) t).getReprTypeSymbol();
+                    PExp convention = repr.getConvention();
+                    PExp corrFnExp = repr.getCorrespondence();
+                    convention = convention.substitute(exemplar, param);
+                    additionalConjuncts.add(convention);
+
+                    //existingRequires = g.formConjunct(existingRequires, convention);
+                    //now substitute whereever param occurs in the requires clause
+                    //with the correspondence function
+                    resultingRequires =
+                            resultingRequires.substitute(exemplar,
+                                    repr.conceptualExemplarAsPSymbol());
+                    resultingRequires =
+                            withCorrespondencePartsSubstituted(resultingRequires,
+                                    corrFnExp);
+                }
             }
             else { //generic.
 

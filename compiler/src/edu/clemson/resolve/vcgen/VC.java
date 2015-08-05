@@ -1,28 +1,32 @@
 package edu.clemson.resolve.vcgen;
 
+import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
+import edu.clemson.resolve.proving.absyn.PExp;
+
+import java.util.List;
 
 /**
  * Represents an immutable vc (verification condition), which takes the form
  * of a mathematical implication.
  */
-public class VC {
+public class VC extends OutputModelObject {
 
     /**
-     * A human-readable name for the VC used for debugging purposes.
+     * A human-readable name for the VC; used for debugging purposes.
      */
-    private final String name;
+    public final String name;
 
     /**
      * This is set to true to indicate that this vc is not the
      * original version of the vc with 'name'--rather, it was derived from a
      * vc named 'name' (or derived from a vc derived from a vc named 'name').
      */
-    private final boolean derived;
+    public final boolean derived;
 
-    private final Antecedent antecedent;
-    private final Consequent consequent;
+    public final Antecedent antecedent;
+    public final Consequent consequent;
 
     public VC(String name, Antecedent antecedent, Consequent consequent) {
         this(name, antecedent, consequent, false);
@@ -42,22 +46,10 @@ public class VC {
         return result;
     }
 
-    public String getSourceName() {
-        return name;
-    }
-
-    public Antecedent getAntecedent() {
-        return antecedent;
-    }
-
-    public Consequent getConsequent() {
-        return consequent;
-    }
-
-    @Override public String toString() {
+    /*@Override public String toString() {
         String retval =
                 "========== " + getName() + " ==========\n" + antecedent
                             + "  -->\n" + consequent;
         return retval;
-    }
+    }*/
 }

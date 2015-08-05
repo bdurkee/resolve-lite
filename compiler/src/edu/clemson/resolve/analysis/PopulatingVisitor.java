@@ -141,6 +141,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitEnhancementImplModule(
+            Resolve.EnhancementImplModuleContext ctx) {
+        moduleScope
+                .addDependentTerms(symtab.moduleScopes.get(ctx.concept.getText()).getDependentTerms())
+                .addDependentTerms(symtab.moduleScopes.get(ctx.enhancement.getText()).getDependentTerms())
+                .addParentSpecificationRelationship(ctx.concept.getText());
+        super.visitChildren(ctx);
+        return null;
+    }
+
     @Override public Void visitImplModuleParameterList(
             Resolve.ImplModuleParameterListContext ctx) {
         walkingModuleArgOrParamList = true;
