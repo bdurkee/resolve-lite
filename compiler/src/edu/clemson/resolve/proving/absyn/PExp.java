@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -141,12 +142,42 @@ public abstract class PExp {
 
     public abstract boolean isFunction();
 
-    //Todo:
-    /*public List<PExp> splitOn(String ... names) {
+    public List<PExp> partitionVCs() {
+        List<PExp> resultingPartitions = new ArrayList<>();
+        List<PExp> conjuncts = splitIntoConjuncts();
+        // x and y and z implies a implies b => z
+        TypeGraph g = getMathType().getTypeGraph();
+        PExp curConjuncts = null;
+        for (PExp seg : conjuncts) {
+            if (seg.containsName("implies")) {
+                List<PExp> a = seg.splitOn("implies");
+                PExp last = a.get(a.size() - 1);
+                List<PExp> sublist = a.subList(0, a.size() - 1);
+                PExp conjuncted = g.formConjuncts(sublist);
+                PExp result = curConjuncts != null ?
+                    g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
+                result = g.formImplies(result, last);
+                resultingPartitions.add(result);
+            }
+            else {
+                if (curConjuncts == null) curConjuncts = seg;
+                else g.formConjunct(curConjuncts, seg);
+            }
+        }
+        return resultingPartitions;
+    }
+
+    public final List<PExp> splitOn(String ... names) {
         return splitOn(Arrays.asList(names));
     }
 
-    public abstract List<PExp> splitOn(List<String> names);*/
+    public final List<PExp> splitOn(List<String> names) {
+        List<PExp> segments = new ArrayList<>();
+        splitOn(segments, names);
+        return segments;
+    }
+
+    protected abstract void splitOn(List<PExp> accumulator, List<String> names);
 
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();

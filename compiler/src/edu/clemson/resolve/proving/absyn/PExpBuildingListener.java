@@ -30,7 +30,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final ParseTreeProperty<PExp> repo;
 
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
-    private final MTType dummyType;
+    private final MTInvalid dummyType;
 
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
                                 AnnotatedTree annotations) {

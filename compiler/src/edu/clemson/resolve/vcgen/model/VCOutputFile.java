@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
+import org.rsrg.semantics.TypeGraph;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -59,7 +60,19 @@ public class VCOutputFile extends OutputModelObject {
                 .get(0).splitIntoConjuncts();
         List<PExp> consequentConjuncts = topLevelImplication.getSubExpressions()
                 .get(1).splitIntoConjuncts();
+        //Todo: Once we write our split method figured out, let's test it on the following chunk of assertive code:
+        //(((((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  (1 <= |S''|)))))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  ((1 + |Temp'|) <= Max_Depth)))))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  (S'' = (<Next_Entry'> o S') implies      S = (Reverse((<Next_Entry'> o Temp')) o S')))))))
 
+        //idea: 1. List conjuncts = targetExp.splitIntoConjuncts()
+        // 2. for each seg : conjuncts, if seg contains 'implies', .. else, coalesce into the next segment regardless
+
+        //which should produce the following list of length 4:
+        //1. ((((1 <= Max_Depth) and (|S| <= Max_Depth)) and Temp = Empty_String) implies      S = (Reverse(Temp) o S))
+        //2. (((((1 <= Max_Depth) and (|S| <= Max_Depth)) and S = (Reverse(Temp') o S'')) and (1 <= |S''|)) implies  (1 <= |S''|))
+        //3. (((((1 <= Max_Depth) and (|S| <= Max_Depth)) and S = (Reverse(Temp') o S'')) and (1 <= |S''|)) implies  ((1 + |Temp'|) <= Max_Depth))
+        //4. ((((((1 <= Max_Depth) and (|S| <= Max_Depth)) and S = (Reverse(Temp') o S'')) and (1 <= |S''|)) and S'' = (<Next_Entry'> o S')) implies      S = (Reverse((<Next_Entry'> o Temp')) o S'))
+
+        //partitionVCs()
         int vcIndex = 1;
         for (PExp consequent : consequentConjuncts) {
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
@@ -69,4 +82,6 @@ public class VCOutputFile extends OutputModelObject {
             vcIndex++;
         }
     }
+
+
 }

@@ -12,5 +12,4 @@ public class VCConfirm extends VCRuleBackedStat {
     public PExp getConfirmExp() {
         return statComponents.get(0);
     }
-
 }

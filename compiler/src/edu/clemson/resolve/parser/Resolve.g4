@@ -436,7 +436,6 @@ mathExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
-
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp

@@ -347,17 +347,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
         Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        built.put(
-                ctx,
-                new MethodCall(
-                        buildQualifier(o.qualifier, o.name),
+        built.put(ctx, new MethodCall(buildQualifier(o.qualifier, o.name),
                         o.name.getText(), args));
     }
 
     @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
-        //Todo: this ... isn't right yet..
-        built.put(ctx,
-                new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
+        built.put(ctx, new VarNameRef(new NormalQualifier("this"),
+                ctx.name.getText()));
     }
 
     @Override public void exitProgMemberExp(Resolve.ProgMemberExpContext ctx) {
@@ -380,7 +376,8 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, refs.get(0));
     }
 
-    @Override public void exitProgIntegerExp(Resolve.ProgIntegerExpContext ctx) {
+    @Override public void exitProgIntegerExp(
+            Resolve.ProgIntegerExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
                 "Std_Integer_Fac"), "Integer", ctx.getText()));
     }
@@ -391,7 +388,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 "Std_Character_Fac"), "Character", ctx.getText()));
     }
 
-    @Override public void exitProgStringExp(Resolve.ProgStringExpContext ctx) {
+    @Override public void exitProgStringExp(
+            Resolve.ProgStringExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
                 "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
     }
@@ -488,7 +486,6 @@ public class ModelBuilder extends ResolveBaseListener {
         Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
         impl.addDelegateMethods(
                 conceptScope.getSymbolsOfType(OperationSymbol.class,
-                        //GenericSymbol.class, //ProgParameterSymbol.class,
                         ProgTypeModelSymbol.class));
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx

@@ -4,7 +4,7 @@ import edu.clemson.resolve.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestMemberAccessesGen extends BaseTest {
+public class TestCodegenMemberAccesses extends BaseTest {
     @Test public void testNestedMemberAccess() throws Exception {
         String[] modules = new String[]{
                 "Facility T; uses Standard_Integers, Standard_Booleans;" +

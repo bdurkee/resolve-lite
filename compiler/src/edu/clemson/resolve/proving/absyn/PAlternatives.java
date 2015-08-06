@@ -198,6 +198,10 @@ public class PAlternatives extends PExp {
         return false;
     }
 
+    @Override protected void splitOn(List<PExp> accumulator,
+                                     List<String> names) {
+    }
+
     @Override public boolean isVariable() {
         return false;
     }

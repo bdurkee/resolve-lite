@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.stringtemplate.v4.ST;
 
-public class TestCallGen extends BaseTest {
+public class TestCodegenCalls extends BaseTest {
 
     @Test public void testArglessOpCall() throws Exception {
         ST facilityST = new ST(

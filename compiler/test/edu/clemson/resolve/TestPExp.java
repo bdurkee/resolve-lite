@@ -325,6 +325,14 @@ public class TestPExp extends BaseTest {
 
     @Test public void testSubstitute() {}
 
+    @Test public void testPartition() {
+        TypeGraph g = new TypeGraph();
+        //(((((1 <= Max_Depth) implies ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  (1 <= |S''|)))))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  ((1 + |Temp'|) <= Max_Depth)))))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies  (S'' = (<Next_Entry'> o S') implies      S = (Reverse((<Next_Entry'> o Temp')) o S')))))))
+
+        PExp result = parseMathAssertionExp(g, "1 <= Max_Depth implies |S| <= Max_Depth implies Temp = Empty_String implies S = Reverse(Temp) o S and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 <= |S_pp| and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 + |Temp_p| <= Max_Depth and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp') o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p'");
+        result.partitionVCs();
+    }
+
     protected static ParseTree getTree(String input) {
         try {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
@@ -332,7 +340,8 @@ public class TestPExp extends BaseTest {
             TokenStream tokens = new CommonTokenStream(lexer);
             Resolve parser = new Resolve(tokens);
 
-            //Todo: For some reason this doesn't seem to be catching atm.
+            //Todo: For some reason this never seems to be getting tripped atm,
+            //even in the presence of errors.
             if ( parser.getNumberOfSyntaxErrors() > 0 ) {
                 throw new IllegalArgumentException("input string: " + input
                         + " for PExp test contains syntax error");
@@ -350,16 +359,17 @@ public class TestPExp extends BaseTest {
      * Building even moderately sized {@link PExp}s is a pain; building one
      * with real type information is an even bigger pain. Thus, for test methods
      * where this function is used, know that we don't care about types so much
-     * as we do about correct exp structure and quantifier distribution.</p>
+     * as we do about correct expression structure and quantifier
+     * distribution.</p>
      * <p>
      * In other words, if you want to test something math type related, just
-     * construct smaller exps manually using {@link PSymbol.PSymbolBuilder},
-     * otherwise parse the actual expression using this method.</p>
+     * construct smaller exprs manually using {@link PSymbol.PSymbolBuilder},
+     * otherwise parse the actual larger expr using this method.</p>
      *
      * @param input The input to parse.
-     * @return The dummy-typed {@link PExp} representation.
+     * @return The dummy-typed {@link PExp} representation of {@code input}.
      */
-    protected static PExp parseMathAssertionExp(TypeGraph g, String input) {
+    public static PExp parseMathAssertionExp(TypeGraph g, String input) {
         ParseTree t = getTree(input);
         AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
         PExpBuildingListener<PExp> l =
