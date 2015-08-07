@@ -362,7 +362,6 @@ public abstract class BaseTest {
         }
     }
 
-
     /**
      * Loads a collection of module strings into {@code tmpdir}.
      *

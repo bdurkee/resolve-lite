@@ -5,7 +5,6 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.List;

@@ -125,6 +125,14 @@ public class PSymbol extends PExp {
         return name;
     }
 
+    public String getLeftPrint() {
+        return leftPrint;
+    }
+
+    public String getRightPrint() {
+        return rightPrint;
+    }
+
     public String getQualifier() {
         return qualifier;
     }

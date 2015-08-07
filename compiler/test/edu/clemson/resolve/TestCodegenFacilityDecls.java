@@ -48,6 +48,7 @@ public class TestCodegenFacilityDecls extends BaseTest {
                     "Operation Main(); Procedure " +
                     "tf :: Op(1, 1);" +
                     "tf :: Op(0, 1);" +
+                    "tf :: Op(2, 1);" +
                     "end Main; end U;"
         };
         writeModules(modules, "T", "T_I", "U");

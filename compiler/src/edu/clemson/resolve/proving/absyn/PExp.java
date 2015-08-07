@@ -4,6 +4,7 @@ import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
 
+import java.io.StringWriter;
 import java.util.*;
 
 public abstract class PExp {
@@ -13,8 +14,8 @@ public abstract class PExp {
     private final MTType type, typeValue;
 
     /**
-     * Since the removal of the Exp hierarchy, the role of PExps has
-     * expanded considerably.
+     * Since the removal of the Exp hierarchy, the role of PExps has expanded
+     * considerably.
      * <p>
      * In other words, if this {@code PExp} was born out of a
      * programmatic expression (for vcgen), program type info should be
@@ -106,10 +107,11 @@ public abstract class PExp {
     }
 
     public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
-        /* PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
-         PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
+        //PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
+         //PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
+         //this.accept(finalVisitor);
+        //this.accept(renderer);
 
-         this.accept(finalVisitor);*/
     }
 
     public boolean typeMatches(MTType other) {
@@ -145,12 +147,11 @@ public abstract class PExp {
     public List<PExp> partitionVCs() {
         List<PExp> resultingPartitions = new ArrayList<>();
         List<PExp> conjuncts = splitIntoConjuncts();
-        // x and y and z implies a implies b => z
         TypeGraph g = getMathType().getTypeGraph();
         PExp curConjuncts = null;
-        for (PExp seg : conjuncts) {
-            if (seg.containsName("implies")) {
-                List<PExp> a = seg.splitOn("implies");
+        for (PExp conjunct : conjuncts) {
+            if (conjunct.containsName("implies")) {
+                List<PExp> a = conjunct.splitOn("implies");
                 PExp last = a.get(a.size() - 1);
                 List<PExp> sublist = a.subList(0, a.size() - 1);
                 PExp conjuncted = g.formConjuncts(sublist);
@@ -160,8 +161,8 @@ public abstract class PExp {
                 resultingPartitions.add(result);
             }
             else {
-                if (curConjuncts == null) curConjuncts = seg;
-                else g.formConjunct(curConjuncts, seg);
+                if (curConjuncts == null) curConjuncts = conjunct;
+                else curConjuncts = g.formConjunct(curConjuncts, conjunct);
             }
         }
         return resultingPartitions;

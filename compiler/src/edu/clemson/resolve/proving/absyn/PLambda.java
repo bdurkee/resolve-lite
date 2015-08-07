@@ -72,6 +72,10 @@ public class PLambda extends PExp {
         return body.isObviouslyTrue();
     }
 
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
     public PExp getBody() {
         return body;
     }
