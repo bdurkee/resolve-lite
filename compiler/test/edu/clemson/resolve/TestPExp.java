@@ -328,33 +328,31 @@ public class TestPExp extends BaseTest {
     @Test public void testPartition() {
         TypeGraph g = new TypeGraph();
         PExp e = parseMathAssertionExp(g, "x implies y");
-        Assert.assertEquals(1, e.partitionVCs().size());
-        Assert.assertEquals("(x implies y)", e.partitionVCs().get(0).toString());
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("(x implies y)", e.partition().get(0).toString());
         e = parseMathAssertionExp(g, "x and y implies z");
 
-        Assert.assertEquals(1, e.partitionVCs().size());
-        Assert.assertEquals("((x and y) implies z)", e.partitionVCs().get(0).toString());
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("((x and y) implies z)", e.partition().get(0).toString());
 
         e = parseMathAssertionExp(g, "x and y and z implies f");
-        Assert.assertEquals(1, e.partitionVCs().size());
-        Assert.assertEquals("(((x and y) and z) implies f)", e.partitionVCs().get(0).toString());
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("(((x and y) and z) implies f)", e.partition().get(0).toString());
 
         //since ' (or ?) are are (rightly) not recognized by the parser or lexer,
         //I'm using *_pp .. to indicate how many 'p'rimes mark a variable
         e = parseMathAssertionExp(g, "1 <= Max_Depth implies |S| <= Max_Depth implies Temp = Empty_String implies S = Reverse(Temp) o S and " +
                 "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 <= |S_pp| and " +
                 "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 + |Temp_p| <= Max_Depth and " +
-                "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p'");
-        List<PExp> partitions = e.partitionVCs();
+                "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p");
+        List<PExp> partitions = e.partition();
         Iterator<PExp> partitionIter = partitions.iterator();
 
         Assert.assertEquals(4, partitions.size());
         Assert.assertEquals("((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (Temp = Empty_String)) implies (S = ((Reverse(Temp)) o S)))", partitionIter.next().toString());
-        //Assert.assertEquals("(((x and y) and z) implies f)", e.partitionVCs().get(0).toString());
-        //PExp first
-        //(((((1 <= Max_Depth) implies ((|S| <= Max_Depth) implies (Temp = Empty_String implies S = (Reverse(Temp) o S)))) and ((1 <= Max_Depth) implies ((|S| <= Max_Depth) implies (S = (Reverse(Temp') o S'') implies ((1 <= |S''|) implies  (1 <= |S''|)))))) and ((1 <= Max_Depth) implies ((|S| <= Max_Depth) implies (S = (Reverse(Temp') o S'') implies  ((1 <= |S''|) implies ((1 + |Temp'|) <= Max_Depth)))))) and ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies (S = (Reverse(Temp') o S'') implies ((1 <= |S''|) implies (S'' = (<Next_Entry'> o S') implies      S = (Reverse((<Next_Entry'> o Temp')) o S')))))))
-        //PExp result = parseMathAssertionExp(g, "1 <= Max_Depth implies |S| <= Max_Depth implies Temp = Empty_String implies S = Reverse(Temp) o S and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 <= |S_pp| and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 + |Temp_p| <= Max_Depth and 1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p'");
-       // result.partitionVCs();
+        Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) implies (1 <= |S_pp|))", partitionIter.next().toString());
+        Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) implies ((1 + |Temp_p|) <= Max_Depth))", partitionIter.next().toString());
+        Assert.assertEquals("((((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) and (S_pp = (<Next_Entry_p> o S_p))) implies (S = ((Reverse((<Next_Entry_p> o Temp_p))) o S_p)))", partitionIter.next().toString());
     }
 
     protected static ParseTree getTree(String input) {

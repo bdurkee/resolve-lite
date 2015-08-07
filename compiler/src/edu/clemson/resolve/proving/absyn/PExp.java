@@ -144,7 +144,26 @@ public abstract class PExp {
 
     public abstract boolean isFunction();
 
-    public List<PExp> partitionVCs() {
+    /**
+     * Converts {@code this} expression, containing an arbitrary number of
+     * conjuncts with possibly nested implications, into a list of ((n) antecedent
+     * -consequent) pairs. For example, if {@code this} expression is:
+     * <pre>
+     *     x and y implies z implies a
+     * </pre>
+     * this method will convert it to {@code x and y and z implies a} by the
+     * following rule:
+     * <pre>
+     *     Cfrm (A /\ B) -> C
+     *     ------------------------
+     *     Cfrm A -> B -> C
+     * </pre>
+     * if an application of the {@code and} function does <em>not</em> contain
+     * an implication, it's snowballed into the next conjunct that does.
+     *
+     * @return a list of antecedent - consequent expressions
+     */
+    public List<PExp> partition() {
         List<PExp> resultingPartitions = new ArrayList<>();
         List<PExp> conjuncts = splitIntoConjuncts();
         TypeGraph g = getMathType().getTypeGraph();
