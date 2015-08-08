@@ -119,6 +119,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathInfixExp(Resolve.MathInfixExpContext ctx) {
+        //System.out.println("mathInfixExp="+ctx.getText());
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.op.getText())
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))

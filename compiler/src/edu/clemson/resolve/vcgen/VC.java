@@ -28,6 +28,10 @@ public class VC extends OutputModelObject {
     public final Antecedent antecedent;
     public final Consequent consequent;
 
+    public VC(String name, PExp antecedent, PExp consequent) {
+        this(name, new Antecedent(antecedent), new Consequent(consequent), false);
+    }
+
     public VC(String name, Antecedent antecedent, Consequent consequent) {
         this(name, antecedent, consequent, false);
     }

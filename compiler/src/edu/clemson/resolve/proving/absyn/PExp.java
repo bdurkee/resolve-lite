@@ -1,11 +1,13 @@
 package edu.clemson.resolve.proving.absyn;
 
+import edu.clemson.resolve.vcgen.VCPartitioningListener;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class PExp {
 
@@ -154,37 +156,42 @@ public abstract class PExp {
      * this method will convert it to {@code x and y and z implies a} by the
      * following rule:
      * <pre>
-     *     Cfrm (A /\ B) -> C
+     *     Confirm (A /\ B) -> C
      *     ------------------------
-     *     Cfrm A -> B -> C
+     *     Confirm A -> B -> C
      * </pre>
-     * if an application of the {@code and} function does <em>not</em> contain
-     * an implication, it's snowballed into the next conjunct that does.
+     * Similarly, if the expression ends with multiple consequents conjuncted
+     * together (e.g.: {@code a and b implies x and y}), then we return a list
+     * of all antecedent-grouping and paired with each consequent. For example:
+     * <pre>
+     *     [a and b implies x,
+     *      a and b implies y]
+     * </pre>
+     *
+     * The following simplification rule permits this:
+     * <pre>
+     *     Confirm (A and ...
+     * </pre>
      *
      * @return a list of antecedent - consequent expressions
      */
     public List<PExp> partition() {
-        List<PExp> resultingPartitions = new ArrayList<>();
-        List<PExp> conjuncts = splitIntoConjuncts();
-        TypeGraph g = getMathType().getTypeGraph();
-        PExp curConjuncts = null;
-        for (PExp conjunct : conjuncts) {
-            if (conjunct.containsName("implies")) {
-                List<PExp> a = conjunct.splitOn("implies");
-                PExp last = a.get(a.size() - 1);
-                List<PExp> sublist = a.subList(0, a.size() - 1);
-                PExp conjuncted = g.formConjuncts(sublist);
-                PExp result = curConjuncts != null ?
-                    g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
-                result = g.formImplies(result, last);
-                resultingPartitions.add(result);
-            }
-            else {
-                if (curConjuncts == null) curConjuncts = conjunct;
-                else curConjuncts = g.formConjunct(curConjuncts, conjunct);
-            }
+        if ( !(this instanceof PSymbol) ) {
+            throw new UnsupportedOperationException("no vc partitioning " +
+                    "possible for a top level " +
+                    this.getClass().getSimpleName() + " expression.");
         }
-        return resultingPartitions;
+        TypeGraph g = this.getMathType().getTypeGraph();
+        PExp leftSubtree = ((PSymbol) this).getArguments().get(0);
+        PExp rightSubtree = ((PSymbol) this).getArguments().get(1);
+
+        List<PExp> result = new ArrayList<>();
+        List<PExp> consequents = rightSubtree.splitIntoConjuncts();
+
+        //Todo: Nope, we need a listner for the line below. Needs to split on ands still.
+        PExp antecedent = g.formConjuncts(leftSubtree.splitOn("implies"));
+        return consequents.stream().map(consequent -> g.formImplies(antecedent, consequent))
+                .collect(Collectors.toList());
     }
 
     public final List<PExp> splitOn(String ... names) {
@@ -210,7 +217,7 @@ public abstract class PExp {
     /**
      * Returns a copy of this {@code PExp} where all variables prefixed with
      * an '@' are replaced by just the variable. This is essentially applying
-     * the 'remember' rule useful in vcgeneration.
+     * the 'remember' vcgen rule.
      * 
      * @return A '@-clean' version of this {@code PExp}.
      */
