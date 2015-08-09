@@ -175,6 +175,8 @@ public abstract class PExp {
      *
      * @return a list of antecedent - consequent expressions
      */
+
+    //SEE AN IMPLIES FOLLOWED BY AN AND
     public List<PExp> partition() {
         if ( !(this instanceof PSymbol) ) {
             throw new UnsupportedOperationException("no vc partitioning " +
@@ -182,16 +184,27 @@ public abstract class PExp {
                     this.getClass().getSimpleName() + " expression.");
         }
         TypeGraph g = this.getMathType().getTypeGraph();
+        VCPartitioningListener l = new VCPartitioningListener();
+        this.accept(l);
+     /*   TypeGraph g = this.getMathType().getTypeGraph();
         PExp leftSubtree = ((PSymbol) this).getArguments().get(0);
         PExp rightSubtree = ((PSymbol) this).getArguments().get(1);
-
-        List<PExp> result = new ArrayList<>();
         List<PExp> consequents = rightSubtree.splitIntoConjuncts();
 
-        //Todo: Nope, we need a listner for the line below. Needs to split on ands still.
-        PExp antecedent = g.formConjuncts(leftSubtree.splitOn("implies"));
-        return consequents.stream().map(consequent -> g.formImplies(antecedent, consequent))
-                .collect(Collectors.toList());
+        LinkedHashSet<PExp> antecedentSet = new LinkedHashSet<>();
+        for (PExp antecedentPart : leftSubtree.splitOn("implies")) {
+            if (antecedentPart.containsName("and")) {
+                antecedentSet.addAll(antecedentPart.splitIntoConjuncts());
+            }
+            else {
+                antecedentSet.add(antecedentPart);
+            }
+        }
+        PExp antecedent = g.formConjuncts(new ArrayList<PExp>(antecedentSet));
+        return consequents.stream()
+                .map(consequent -> g.formImplies(antecedent, consequent))
+                .collect(Collectors.toList());*/
+        return new ArrayList<>();
     }
 
     public final List<PExp> splitOn(String ... names) {
