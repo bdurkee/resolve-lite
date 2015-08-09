@@ -125,6 +125,14 @@ public class PSymbol extends PExp {
         return name;
     }
 
+    public String getLeftPrint() {
+        return leftPrint;
+    }
+
+    public String getRightPrint() {
+        return rightPrint;
+    }
+
     public String getQualifier() {
         return qualifier;
     }
@@ -148,6 +156,7 @@ public class PSymbol extends PExp {
     @Override public boolean isFunction() {
         return arguments.size() > 0;
     }
+
 
     @Override public boolean isLiteralFalse() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("false"));
@@ -261,6 +270,18 @@ public class PSymbol extends PExp {
         if ( arguments.size() == 2 && name.equals("and") ) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
+        }
+        else {
+            accumulator.add(this);
+        }
+    }
+
+    @Override protected void splitOn(List<PExp> accumulator,
+                                     List<String> names) {
+        if (names.contains(name)) {
+            for (PExp arg : arguments) {
+                arg.splitOn(accumulator, names);
+            }
         }
         else {
             accumulator.add(this);
@@ -563,5 +584,4 @@ public class PSymbol extends PExp {
             return new PSymbol(this);
         }
     }
-
 }

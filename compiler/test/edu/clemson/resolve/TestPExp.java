@@ -166,6 +166,10 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
         result = parseMathAssertionExp(g, "f(p and q, a and b)");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
+        result = parseMathAssertionExp(g, "x or y");
+        Assert.assertEquals(1, result.splitIntoConjuncts().size());
+        result = parseMathAssertionExp(g, "x");
+        Assert.assertEquals(1, result.splitIntoConjuncts().size());
     }
 
     @Test public void testWithQuantifiersFlipped1() {
@@ -325,6 +329,41 @@ public class TestPExp extends BaseTest {
 
     @Test public void testSubstitute() {}
 
+    @Test public void testPartition() {
+        TypeGraph g = new TypeGraph();
+   /*     PExp e = parseMathAssertionExp(g, "x implies y");
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("(x implies y)", e.partition().get(0).toString());
+
+        e = parseMathAssertionExp(g, "x and y implies z");
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("((x and y) implies z)", e.partition().get(0).toString());
+
+        e = parseMathAssertionExp(g, "x and y and z implies f");
+        Assert.assertEquals(1, e.partition().size());
+        Assert.assertEquals("(((x and y) and z) implies f)", e.partition().get(0).toString());
+*/
+        //since ' (or ?) are are (rightly) not recognized by the parser or lexer,
+        //I'm using *_pp .. to indicate how many 'p'rimes mark a variable
+        PExp e = parseMathAssertionExp(g, "1 <= Max_Depth implies |S| <= Max_Depth implies Temp = Empty_String implies S = Reverse(Temp) o S and " +
+                "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 <= |S_pp|");//and " +
+            //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 + |Temp_p| <= Max_Depth and " +
+            //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p");
+        List<PExp> partitions = e.partition();
+      //  Iterator<PExp> partitionIter = partitions.iterator();
+
+      //  Assert.assertEquals(4, partitions.size());
+     //   Assert.assertEquals("((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (Temp = Empty_String)) implies (S = ((Reverse(Temp)) o S)))", partitionIter.next().toString());
+     //   Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) implies (1 <= |S_pp|))", partitionIter.next().toString());
+     //   Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) implies ((1 + |Temp_p|) <= Max_Depth))", partitionIter.next().toString());
+     //   Assert.assertEquals("((((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_pp))) and (1 <= |S_pp|)) and (S_pp = (<Next_Entry_p> o S_p))) implies (S = ((Reverse((<Next_Entry_p> o Temp_p))) o S_p)))", partitionIter.next().toString());
+/*
+        PExp e = parseMathAssertionExp(g, "b implies y and bv implies a and b and c implies z");
+        List<PExp> parts = e.partition();
+        Assert.assertEquals(1, parts.size());
+        Assert.assertEquals("(((((b and y) and bv) and a) and c) implies z)", e.partition().get(0).toString());*/
+    }
+
     protected static ParseTree getTree(String input) {
         try {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
@@ -332,7 +371,8 @@ public class TestPExp extends BaseTest {
             TokenStream tokens = new CommonTokenStream(lexer);
             Resolve parser = new Resolve(tokens);
 
-            //Todo: For some reason this doesn't seem to be catching atm.
+            //Todo: For some reason this never seems to be getting tripped atm,
+            //even in the presence of errors.
             if ( parser.getNumberOfSyntaxErrors() > 0 ) {
                 throw new IllegalArgumentException("input string: " + input
                         + " for PExp test contains syntax error");
@@ -350,16 +390,17 @@ public class TestPExp extends BaseTest {
      * Building even moderately sized {@link PExp}s is a pain; building one
      * with real type information is an even bigger pain. Thus, for test methods
      * where this function is used, know that we don't care about types so much
-     * as we do about correct exp structure and quantifier distribution.</p>
+     * as we do about correct expression structure and quantifier
+     * distribution.</p>
      * <p>
      * In other words, if you want to test something math type related, just
-     * construct smaller exps manually using {@link PSymbol.PSymbolBuilder},
-     * otherwise parse the actual expression using this method.</p>
+     * construct smaller exprs manually using {@link PSymbol.PSymbolBuilder},
+     * otherwise parse the actual larger expr using this method.</p>
      *
      * @param input The input to parse.
-     * @return The dummy-typed {@link PExp} representation.
+     * @return The dummy-typed {@link PExp} representation of {@code input}.
      */
-    protected static PExp parseMathAssertionExp(TypeGraph g, String input) {
+    public static PExp parseMathAssertionExp(TypeGraph g, String input) {
         ParseTree t = getTree(input);
         AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
         PExpBuildingListener<PExp> l =

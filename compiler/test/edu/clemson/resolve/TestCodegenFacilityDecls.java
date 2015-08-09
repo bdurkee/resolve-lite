@@ -1,10 +1,10 @@
-package edu.clemson.resolve.codegen;
+package edu.clemson.resolve;
 
 import edu.clemson.resolve.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestFacilityDecls extends BaseTest {
+public class TestCodegenFacilityDecls extends BaseTest {
 
     @Test public void testUnenhancedFacilityDecl() throws Exception {
         String[] modules = new String[] {
@@ -43,12 +43,12 @@ public class TestFacilityDecls extends BaseTest {
                     "Definition Int_Leq(i, j : Z) : B;" +
                     "Operation My_Test(alters x,y : Std_Integer_Fac :: Integer) : Std_Boolean_Fac :: Boolean;" +
                     "Procedure My_Test:=x<=y;end My_Test;" +
-                    "Facility TF is T<Std_Integer_Fac :: Integer>(0,1,2,Int_Leq) " +
+                    "Facility tf is T<Std_Integer_Fac :: Integer>(0,1,2,Int_Leq) " +
                     "implemented by T_I(My_Test); " +
                     "Operation Main(); Procedure " +
-                    "TF :: Op(1, 1);" +
-                    "TF :: Op(0, 1);" +
-                    "TF :: Op(2, 0);" +
+                    "tf :: Op(1, 1);" +
+                    "tf :: Op(0, 1);" +
+                    "tf :: Op(2, 1);" +
                     "end Main; end U;"
         };
         writeModules(modules, "T", "T_I", "U");

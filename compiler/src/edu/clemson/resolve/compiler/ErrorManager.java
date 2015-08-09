@@ -161,8 +161,7 @@ public class ErrorManager extends BaseErrorListener {
                 .equals("true");
     }
 
-    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind,
-                                                      RESOLVEMessage msg) {
+    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind, RESOLVEMessage msg) {
         switch (kind.severity) {
             case WARNING_ONE_OFF:
                 if ( errorTypes.contains(kind) ) {

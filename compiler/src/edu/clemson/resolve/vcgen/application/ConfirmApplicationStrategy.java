@@ -16,8 +16,9 @@ public class ConfirmApplicationStrategy implements StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                               List<PExp> statComponents) {
-        block.finalConfirm(block.g.formConjunct(statComponents.get(0),
-                block.finalConfirm.getConfirmExp()));
+        PExp e = block.g.formConjunct(statComponents.get(0),
+                block.finalConfirm.getConfirmExp());
+        block.finalConfirm(e);
         return block.snapshot();
     }
 

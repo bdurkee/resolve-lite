@@ -95,7 +95,8 @@ public class ExplicitCallApplicationStrategy
                 .map(PExp::getProgType).collect(Collectors.toList());
         try {
             return s.queryForOne(new OperationQuery(
-                    new CommonToken(ResolveLexer.ID, app.getQualifier()),
+                    (app.getQualifier() != null) ?
+                            new CommonToken(ResolveLexer.ID, app.getQualifier()) : null,
                         app.getName(), argTypes));
         }
         catch (NoSuchSymbolException|DuplicateSymbolException e) {

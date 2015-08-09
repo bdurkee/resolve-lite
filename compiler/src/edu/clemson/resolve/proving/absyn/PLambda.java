@@ -72,6 +72,10 @@ public class PLambda extends PExp {
         return body.isObviouslyTrue();
     }
 
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
     public PExp getBody() {
         return body;
     }
@@ -90,6 +94,10 @@ public class PLambda extends PExp {
 
     @Override public boolean isFunction() {
         return false;
+    }
+
+    @Override protected void splitOn(List<PExp> accumulator,
+                                     List<String> names) {
     }
 
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {

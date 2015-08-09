@@ -29,10 +29,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-VCOutputFile(vcs, chunks) ::= <<
+VCOutputFile(vcs, chunks, finalVcs) ::= <<
+<finalVcs;separator="\n">
+
 <chunks : {c|<c.assertCode.description>
 <c.assertCode.text>    <!print out the big, starting construct!>
 
+\< S T E P S >
 <c.applicationSteps; separator="\n">}; separator="\n"> <!now print the steps!>
 >>
 
@@ -40,6 +43,14 @@ RuleApplicationStep(app, step) ::= <<
 <app.description>
 <step>
 --------------------
+>>
+
+VC(vc) ::= <<
+\< <vc.name> >
+<vc.antecedent>
+--->
+<vc.consequent>
+
 >>
 
 VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<

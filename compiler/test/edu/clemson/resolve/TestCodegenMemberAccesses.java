@@ -1,10 +1,10 @@
-package edu.clemson.resolve.codegen;
+package edu.clemson.resolve;
 
 import edu.clemson.resolve.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestMemberAccesses extends BaseTest {
+public class TestCodegenMemberAccesses extends BaseTest {
     @Test public void testNestedMemberAccess() throws Exception {
         String[] modules = new String[]{
                 "Facility T; uses Standard_Integers, Standard_Booleans;" +
@@ -55,5 +55,25 @@ public class TestMemberAccesses extends BaseTest {
         writeModules(modules, "T");
         String found = execCode("T.resolve", modules[0], "T", false);
         Assert.assertEquals("33\n44\n", found);
+    }
+
+    @Test public void testExcessivelyNestedMemberAccess() throws Exception {
+        String[] modules = new String[]{
+                "Facility T; uses Standard_Integers, Standard_Booleans;" +
+                        "Type Moo = Record i,j : Std_Boolean_Fac :: Boolean; end;" +
+                        "initialization M.i:= Std_Boolean_Fac :: True(); end;" +
+
+                        "Type Doo = Record g : Moo; h : Std_Integer_Fac :: Integer; end;" +
+                        "Type Goo = Record e : Doo; f : Std_Integer_Fac :: Integer; end;" +
+                        "Type Boo = Record c : Goo; d : Std_Integer_Fac :: Integer; end;" +
+                        "Type Foo = Record a : Boo; b : Std_Integer_Fac :: Integer; end;" +
+
+                        "Operation Main(); Procedure Var F : Foo;" +
+                        "Std_Boolean_Fac :: Write_Line(F.a.c.e.g.i);" +
+                        "end Main; end T;"
+        };
+        writeModules(modules, "T");
+        String found = execCode("T.resolve", modules[0], "T", false);
+        Assert.assertEquals("true\n", found);
     }
 }

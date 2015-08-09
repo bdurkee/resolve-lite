@@ -1,0 +1,5 @@
+Enhancement Store_Do_Nothing_Capability for Bdd_Search_Store_Template;
+        uses Basic_Integer_Theory;
+    Operation Do_Nothing(restores S : Store);
+        requires 1 <= ||S||;
+end Store_Do_Nothing_Capability;

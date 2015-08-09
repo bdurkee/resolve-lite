@@ -30,7 +30,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final ParseTreeProperty<PExp> repo;
 
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
-    private final MTType dummyType;
+    private final MTInvalid dummyType;
 
     public PExpBuildingListener(ParseTreeProperty<PExp> repo,
                                 AnnotatedTree annotations) {
@@ -119,6 +119,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathInfixExp(Resolve.MathInfixExpContext ctx) {
+        //System.out.println("mathInfixExp="+ctx.getText());
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.op.getText())
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))

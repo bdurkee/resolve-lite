@@ -10,7 +10,7 @@ import org.rsrg.semantics.query.GenericQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MathSymbol extends Symbol implements ModuleArgSymbol {
+public class MathSymbol extends Symbol implements ModuleParameterizableSymbol {
 
     private MTType type, typeValue;
     private final Quantification quantification;

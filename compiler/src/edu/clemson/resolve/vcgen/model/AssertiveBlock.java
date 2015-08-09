@@ -18,7 +18,7 @@ public abstract class AssertiveBlock extends OutputModelObject {
     private final TypeGraph g;
     private final String blockDescription;
 
-    @ModelElement public final VCRuleBackedStat finalConfirm;
+    @ModelElement public final VCConfirm finalConfirm;
     @ModelElement public final List<VCRuleBackedStat> stats = new ArrayList<>();
     @ModelElement public final List<RuleApplicationStep> applicationSteps =
             new ArrayList<>();
@@ -57,7 +57,7 @@ public abstract class AssertiveBlock extends OutputModelObject {
         return Utils.getRawText(definingTree);
     }
 
-    public VCRuleBackedStat getFinalConfirm() {
+    public VCConfirm getFinalConfirm() {
         return finalConfirm;
     }
 
