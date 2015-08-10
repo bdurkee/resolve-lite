@@ -53,10 +53,14 @@ public class Archiver {
             filesToCompile.add(tmpdir + File.separator + javaClassName);
         }
 
+        List<String> options = new ArrayList<>();
+        //plugin apparently requires this (since it needs to be built using 1.6 to work)
+        options.add("-source"); options.add("1.6");
+        options.add("-target"); options.add("1.6");
         Iterable<? extends JavaFileObject> fileObjects =
                 fileManager.getJavaFileObjectsFromStrings(filesToCompile);
         JavaCompiler.CompilationTask task = compiler.getTask(null,
-                fileManager, listener, null, null, fileObjects);
+                fileManager, listener, options, null, fileObjects);
         Boolean result = task.call();
         if ( result ) {
             Manifest manifest = new Manifest();

@@ -51,8 +51,8 @@ accordingly.*
 necessary to set a `RESOLVEROOT` environment variable:
 
   1. **OSX & Linux**: Simply open a new terminal and type the following:
-    `export RESOLVEROOT="/usr/local/resolve"`
-    which should add the variable to your `.bash_profile`
+    `export RESOLVEROOT=/usr/local/resolve`
+    which should add the correct environment variable to your `.bash_profile`
 
   2. **Windows**: Todo
 

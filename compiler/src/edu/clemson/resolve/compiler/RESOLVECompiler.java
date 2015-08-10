@@ -124,6 +124,7 @@ public  class RESOLVECompiler {
     public RESOLVECompiler() { this(null); }
 
     public RESOLVECompiler(String[] args) {
+        //System.out.println("RESOLVE ROOT: "+System.getenv("RESOLVEROOT"));
         this.errMgr = new ErrorManager(this);
         this.args = args;
         handleArgs();
