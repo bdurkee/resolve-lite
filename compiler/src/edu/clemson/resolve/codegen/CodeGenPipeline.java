@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
     //a map from a unit tree -> list of translated java sources necessary
-    //to run unit (including unit itself)
+    //to run unit (including unit itself
     Map<AnnotatedTree, List<JavaUnit>> targetUnitsToAllRequiredJavaSrcs =
             new HashMap<>();
 
