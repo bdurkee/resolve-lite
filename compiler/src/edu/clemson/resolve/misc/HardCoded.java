@@ -47,6 +47,7 @@ public class HardCoded {
 
             //S E T   R E L A T E D
             b.addBinding("Powerset", null, g.POWERSET);
+            b.addBinding("Card", null, g.SSET, g.CARD);
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);

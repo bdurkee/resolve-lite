@@ -17,12 +17,8 @@ public class VCPartitioningListener extends PExpVisitor {
     public final List<PExp> result = new ArrayList<>();
     boolean seenAndAfterImplies;
     //anywhere you see an implies in a subtree, take the right child
-    @Override public void beginPSymbol(PSymbol e) {
-        if (e.getName().equals("implies") &&
-                e.getArguments().get(1).containsName("and")) {
-            List<PExp> stub = e.getArguments().get(1).splitIntoConjuncts();
-            System.out.println("SPLIT: " + e.getArguments().get(0) + " IMPLIES " + stub.get(0));
-        }
+    @Override public void endPSymbol(PSymbol e) {
+        System.out.println("exitPSymbol: " + e.toString());
     }
 
 

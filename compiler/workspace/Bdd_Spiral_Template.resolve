@@ -2,7 +2,7 @@ Concept Bdd_Spiral_Template<T>
         (evaluates k, Max_Length : Std_Integer_Fac :: Integer); @Dependent_Terms{k}
             uses Basic_Integer_Theory, Basic_Spiral_Theory, Standard_Integers;
     requires k >= 2 and Max_Length > 0 which_entails k : N2;
-
+    O
     Type Family Spiral_Pos is modeled by Cart_Prod
             Lab : Sp_Loc(k) -> T;
             Curr_Loc, Trmnl_Loc : Sp_Loc(k);

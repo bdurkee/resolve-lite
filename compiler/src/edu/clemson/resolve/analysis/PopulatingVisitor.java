@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
+    private static final boolean EMIT_DEBUG = false;
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
@@ -553,7 +554,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
         }
-        compiler.info("new theorem: " + ctx.name.getText());
+        emit("new theorem: " + ctx.name.getText());
         return null;
     }
 
@@ -1130,7 +1131,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 definitionSchematicTypes.put(ctx.mathExp().getText(),
                         tr.mathTypes.get(ctx.mathTypeExp()));
-                compiler.info("Added schematic variable: "
+                emit("Added schematic variable: "
                         + ctx.mathExp().getText());
             }
             catch (DuplicateSymbolException dse) {
@@ -1275,7 +1276,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathLambdaExp(Resolve.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
-        compiler.info("lambda exp: " + ctx.getText());
+        emit("lambda exp: " + ctx.getText());
 
         walkingDefParams = true;
         activeQuantifications.push(Quantification.UNIVERSAL);
@@ -1334,7 +1335,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathQuantifiedExp(
             Resolve.MathQuantifiedExpContext ctx) {
-        compiler.info("entering mathQuantifiedExp...");
+        emit("entering mathQuantifiedExp...");
         symtab.startScope(ctx);
         Quantification quantification;
 
@@ -1356,7 +1357,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         activeQuantifications.push(Quantification.NONE);
         this.visit(ctx.mathAssertionExp());
         activeQuantifications.pop();
-        compiler.info("exiting mathQuantifiedExp.");
+        emit("exiting mathQuantifiedExp.");
         symtab.endScope();
         tr.mathTypes.put(ctx, g.BOOLEAN);
         return null;
@@ -1466,7 +1467,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         foundExpType =
                 PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
 
-        compiler.info("expression: " + ctx.getText() + "("
+        emit("expression: " + ctx.getText() + "("
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
                 + foundExpType.toString());
@@ -1549,7 +1550,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (intendedFunction == null) return null;
         MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
 
-        compiler.info("matching " + name.getText() + " : " + eType
+        emit("matching " + name.getText() + " : " + eType
                 + " to " + intendedFunction.getName() + " : " + intendedEntryType);
 
         return intendedFunction;
@@ -1581,7 +1582,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                 definitionSchematicTypes,
                                 symtab.getInnermostActiveScope());
                 candidateType = (MTFunction) candidate.getType();
-                compiler.info(originalCandidateType + " deschematizes to "
+                emit(originalCandidateType + " deschematizes to "
                         + candidateType);
 
                 if ( comparison.compare(e, eType, candidateType) ) {
@@ -1597,7 +1598,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             catch (NoSolutionException nse) {
                 //couldn't deschematize--try the next one
-                compiler.info(candidate.getType() + " doesn't deschematize "
+                emit(candidate.getType() + " doesn't deschematize "
                         + "against " + e.getArguments());
             }
         }
@@ -1699,5 +1700,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
+    }
+
+    private void emit(String msg) {
+        if (EMIT_DEBUG) {
+            emit(msg);
+        }
     }
 }
