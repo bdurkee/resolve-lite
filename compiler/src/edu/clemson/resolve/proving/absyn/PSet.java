@@ -95,6 +95,10 @@ public class PSet extends PExp {
         return new HashSet<>();
     }
 
+    @Override public List<PExp> partitionIntoVCs(PExp accumulatedAssumptions) {
+        return new ArrayList<>();
+    }
+
     @Override public String toString() {
         return "{" + Utils.join(elements, ", ") + "}";
     }

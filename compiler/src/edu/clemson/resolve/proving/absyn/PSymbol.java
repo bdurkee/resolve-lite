@@ -262,6 +262,30 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    public List<PExp> experimentalSplit() {
+        List<PExp> resultingPartitions = new ArrayList<>();
+        TypeGraph g = getMathType().getTypeGraph();
+        List<PExp> conjuncts = splitIntoConjuncts();
+        PExp curConjuncts = null;
+        for (PExp conjunct : conjuncts) {
+            if (conjunct.containsName("implies")) {
+                List<PExp> a = conjunct.splitOn("implies");
+                PExp last = a.get(a.size() - 1);
+                List<PExp> sublist = a.subList(0, a.size() - 1);
+                PExp conjuncted = g.formConjuncts(sublist);
+                PExp result = curConjuncts != null ?
+                        g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
+                result = g.formImplies(result, last);
+                resultingPartitions.add(result);
+            }
+            else {
+                if (curConjuncts == null) curConjuncts = conjunct;
+                else curConjuncts = g.formConjunct(curConjuncts, conjunct);
+            }
+        }
+        return resultingPartitions;
+    }
+
     @Override public List<? extends PExp> getSubExpressions() {
         return arguments;
     }
@@ -274,6 +298,60 @@ public class PSymbol extends PExp {
         else {
             accumulator.add(this);
         }
+    }
+
+    @Override public PExp getAssumptions() {
+        if (name.equals("implies") || name.equals("and")) {
+            return getMathType().getTypeGraph().formConjunct(
+                    arguments.get(0).getAssumptions(),
+                    arguments.get(1).getAssumptions());
+        }
+        else {
+            return this;
+        }
+    }
+
+    @Override public PExp getAssertions() {
+        if (name.equals("and")) {
+            return getMathType().getTypeGraph().formConjunct(
+                    arguments.get(0).getAssertions(),
+                    arguments.get(1).getAssertions());
+        }
+        else if (!(this.getName().equals("implies"))) {
+            return this;
+        }
+        return null;
+    }
+
+    //Todo: Just closely read InfixExp's split method. It's not too bad.
+    @Override public List<PExp> partitionIntoVCs(PExp assumptions) {
+        PExp tempLeft, tempRight = null;
+        List<PExp> result = new ArrayList<>();
+        if (name.equals("and")) {
+            result.addAll(arguments.get(0).partitionIntoVCs(assumptions));
+            result.addAll(arguments.get(1).partitionIntoVCs(assumptions));
+        }
+        else if (name.equals("implies")) {
+            tempLeft = arguments.get(0).getAssumptions(); //get assumptions for left;
+            result = tempLeft.partitionIntoVCs(assumptions);
+
+            if (assumptions != null) {
+                tempLeft = getMathType().getTypeGraph()
+                        .formConjunct(assumptions, tempLeft);
+            }
+            if (arguments.get(1).isFunction()) {
+                tempRight = arguments.get(1).getAssertions();
+                result = arguments.get(1).partitionIntoVCs(tempLeft);
+                if (tempRight == null) return result;
+            }
+            else {
+                tempRight = arguments.get(1);
+
+            }
+            result.add(getMathType()
+                    .getTypeGraph().formImplies(tempLeft, tempRight));
+        }
+        return result;
     }
 
     @Override protected void splitOn(List<PExp> accumulator,

@@ -54,7 +54,7 @@ public class VCOutputFile extends OutputModelObject {
      */
     private void addVCsInContext(final AssertiveBlock batch,
                                  final int sectionNumber) {
-        List<PExp> vcs = batch.getFinalConfirm().getConfirmExp().partition();
+        /*List<PExp> vcs = batch.getFinalConfirm().getConfirmExp().partition();
 
         int vcIndex = 1;
         for (PExp vc : vcs) {
@@ -64,7 +64,7 @@ public class VCOutputFile extends OutputModelObject {
 
             finalVcs.add(curVC);
             vcIndex++;
-        }
+        }*/
     }
 
 

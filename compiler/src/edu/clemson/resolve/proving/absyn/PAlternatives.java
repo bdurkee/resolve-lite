@@ -198,6 +198,10 @@ public class PAlternatives extends PExp {
         return false;
     }
 
+    @Override public List<PExp> partitionIntoVCs(PExp accumulatedAssumptions) {
+        return new ArrayList<>();
+    }
+
     @Override protected void splitOn(List<PExp> accumulator,
                                      List<String> names) {
     }

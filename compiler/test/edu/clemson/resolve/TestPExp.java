@@ -351,7 +351,17 @@ public class TestPExp extends BaseTest {
         PExp e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp_p) o S_p) implies  (not((1 <= |S_p|)) implies  Temp_p = Reverse(S))))))");//and " +
             //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies 1 + |Temp_p| <= Max_Depth and " +
             //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p");
-        List<PExp> partitions = e.partition();
+        List<PExp> partitions = e.partitionIntoVCs(null);
+
+        e = parseMathAssertionExp(g, "a implies b and g implies c implies d and e");
+
+      //  VCPartitioningListener l = new VCPartitioningListener();
+      //  e.accept(l);
+        //List<PExp> components = l.currentAssumptions;
+        partitions = ((PSymbol)e).experimentalSplit();
+        int i;
+        i = 0;
+
       //  Iterator<PExp> partitionIter = partitions.iterator();
 
       //  Assert.assertEquals(4, partitions.size());
@@ -364,8 +374,8 @@ public class TestPExp extends BaseTest {
         List<PExp> parts = e.partition();
         Assert.assertEquals(1, parts.size());
         Assert.assertEquals("(((((b and y) and bv) and a) and c) implies z)", e.partition().get(0).toString());*/
-        VCPartitioningListener l = new VCPartitioningListener();
-        e.accept(l);
+        //VCPartitioningListener l = new VCPartitioningListener();
+        //e.accept(l);
     }
 
     protected static ParseTree getTree(String input) {

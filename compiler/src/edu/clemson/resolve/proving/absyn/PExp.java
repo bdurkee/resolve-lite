@@ -174,37 +174,16 @@ public abstract class PExp {
      * </pre>
      *
      * @return a list of antecedent - consequent expressions
+     * @param accumulatedAssumptions
      */
+    public abstract List<PExp> partitionIntoVCs(PExp accumulatedAssumptions);
 
-    //SEE AN IMPLIES FOLLOWED BY AN AND
-    public List<PExp> partition() {
-        if ( !(this instanceof PSymbol) ) {
-            throw new UnsupportedOperationException("no vc partitioning " +
-                    "possible for a top level " +
-                    this.getClass().getSimpleName() + " expression.");
-        }
-        TypeGraph g = this.getMathType().getTypeGraph();
-        VCPartitioningListener l = new VCPartitioningListener();
-        this.accept(l);
-     /*   TypeGraph g = this.getMathType().getTypeGraph();
-        PExp leftSubtree = ((PSymbol) this).getArguments().get(0);
-        PExp rightSubtree = ((PSymbol) this).getArguments().get(1);
-        List<PExp> consequents = rightSubtree.splitIntoConjuncts();
+    public PExp getAssumptions() {
+        return this;
+    }
 
-        LinkedHashSet<PExp> antecedentSet = new LinkedHashSet<>();
-        for (PExp antecedentPart : leftSubtree.splitOn("implies")) {
-            if (antecedentPart.containsName("and")) {
-                antecedentSet.addAll(antecedentPart.splitIntoConjuncts());
-            }
-            else {
-                antecedentSet.add(antecedentPart);
-            }
-        }
-        PExp antecedent = g.formConjuncts(new ArrayList<PExp>(antecedentSet));
-        return consequents.stream()
-                .map(consequent -> g.formImplies(antecedent, consequent))
-                .collect(Collectors.toList());*/
-        return new ArrayList<>();
+    public PExp getAssertions() {
+        return null;
     }
 
     public final List<PExp> splitOn(String ... names) {
