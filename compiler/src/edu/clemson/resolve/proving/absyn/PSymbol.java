@@ -262,6 +262,7 @@ public class PSymbol extends PExp {
         return result;
     }
 
+
     public List<PExp> experimentalSplit() {
         List<PExp> resultingPartitions = new ArrayList<>();
         TypeGraph g = getMathType().getTypeGraph();
