@@ -1182,7 +1182,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathFunctionRestrictionExp(
             Resolve.MathFunctionRestrictionExpContext ctx) {
-        return null;
+        throw new UnsupportedOperationException("no function restriction " +
+                "support yet (even though it's in the grammar)");
     }
     
     @Override public Void visitMathSegmentsExp(

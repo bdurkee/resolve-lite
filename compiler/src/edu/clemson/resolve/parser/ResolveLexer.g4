@@ -31,7 +31,7 @@
 lexer grammar ResolveLexer;
 
 DOC_COMMENT
-	:	'/**' .*? ('*/' | EOF)
+	:	'/**' .*? ('*/' | EOF) -> channel(HIDDEN)
 	;
 
 BLOCK_COMMENT

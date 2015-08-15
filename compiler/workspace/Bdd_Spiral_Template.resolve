@@ -1,3 +1,6 @@
+/*
+ *
+ */
 Concept Bdd_Spiral_Template<T>
         (evaluates k, Max_Length : Std_Integer_Fac :: Integer); @Dependent_Terms{k}
             uses Basic_Integer_Theory, Basic_Spiral_Theory, Standard_Integers;
@@ -10,8 +13,8 @@ Concept Bdd_Spiral_Template<T>
         exemplar P;
         constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
             P.Curr_Loc is_in Inward_Loc(P.Trmnl_Loc) and
-            P.Lab(P.Trmnl_Loc) = T.Base_Point and
-            P.Lab(Sp_Loc(k) ~ Inward_Loc(P.Trmnl_Loc)) = {T.Base_Point};
+            P.Lab(P.Trmnl_Loc) = T.Base_Point; //
+            //and P.Lab[Sp_Loc(k) ~ Inward_Loc(P.Trmnl_Loc)] = {T.Base_Point};
         initialization
                 ensures P.Trmnl_Loc = Cen(k);
 
