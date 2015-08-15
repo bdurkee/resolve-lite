@@ -278,6 +278,7 @@ public class PSymbol extends PExp {
                         g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
                 result = g.formImplies(result, last);
                 resultingPartitions.add(result);
+                curConjuncts = null;
             }
             else {
                 if (curConjuncts == null) curConjuncts = conjunct;
