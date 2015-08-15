@@ -353,9 +353,10 @@ public class TestPExp extends BaseTest {
             //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p");
         List<PExp> partitions = e.partitionIntoVCs(null);
 
-        e = parseMathAssertionExp(g, "a and b and g implies c and d");
+        e = parseMathAssertionExp(g, "a and b and g implies c and d implies f");
+        partitions = e.partitionIntoVCs(null);
 
-      //  VCPartitioningListener l = new VCPartitioningListener();
+        //  VCPartitioningListener l = new VCPartitioningListener();
       //  e.accept(l);
         //List<PExp> components = l.currentAssumptions;
         partitions = ((PSymbol)e).experimentalSplit();
