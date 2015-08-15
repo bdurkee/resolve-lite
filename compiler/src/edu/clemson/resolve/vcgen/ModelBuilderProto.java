@@ -300,6 +300,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     //PTRepresentation is also a subclass.
                     ProgReprTypeSymbol repr =
                             ((PTRepresentation) t).getReprTypeSymbol();
+
                     PExp convention = repr.getConvention();
                     PExp corrFnExp = repr.getCorrespondence();
                     convention = convention.substitute(exemplar, param);

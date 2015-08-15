@@ -116,8 +116,10 @@ DBL_LBRACE		:	'{{'			;
 INDUCTIVE_CASE	:	'(ii.)'			;
 LBRACE 			:	'{'				;
 RBRACE  		:	'}'				;
+LBRACKET		:	'['				;
 LPAREN			:	'('				;
 RPAREN			:	')'				;
+RBRACKET		:	']'				;
 SEMI			:	';'				;
 
 // operators

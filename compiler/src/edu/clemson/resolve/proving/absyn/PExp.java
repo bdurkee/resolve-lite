@@ -1,6 +1,5 @@
 package edu.clemson.resolve.proving.absyn;
 
-import edu.clemson.resolve.vcgen.VCPartitioningListener;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
@@ -174,16 +173,11 @@ public abstract class PExp {
      * </pre>
      *
      * @return a list of antecedent - consequent expressions
-     * @param accumulatedAssumptions
      */
-    public abstract List<PExp> partitionIntoVCs(PExp accumulatedAssumptions);
-
-    public PExp getAssumptions() {
-        return this;
-    }
-
-    public PExp getAssertions() {
-        return null;
+    public List<PExp> experimentalSplit() {
+        List<PExp> l = new ArrayList<>();
+        l.add(this);
+        return l;
     }
 
     public final List<PExp> splitOn(String ... names) {

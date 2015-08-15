@@ -6,7 +6,6 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.VCPartitioningListener;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -332,21 +331,6 @@ public class TestPExp extends BaseTest {
 
     @Test public void testPartition() {
         TypeGraph g = new TypeGraph();
-   /*     PExp e = parseMathAssertionExp(g, "x implies y");
-        Assert.assertEquals(1, e.partition().size());
-        Assert.assertEquals("(x implies y)", e.partition().get(0).toString());
-
-        e = parseMathAssertionExp(g, "x and y implies z");
-        Assert.assertEquals(1, e.partition().size());
-        Assert.assertEquals("((x and y) implies z)", e.partition().get(0).toString());
-
-        e = parseMathAssertionExp(g, "x and y and z implies f");
-        Assert.assertEquals(1, e.partition().size());
-        Assert.assertEquals("(((x and y) and z) implies f)", e.partition().get(0).toString());
-*/
-        //since ' (or ?) are are (rightly) not recognized by the parser or lexer,
-        //I'm using *_pp .. to indicate how many 'p'rimes mark a variable
-        //e = parseMathAssertionExp(g, "a and b and g implies c and d implies f");
 
         PExp e = parseMathAssertionExp(g, "p implies q");
         List<PExp> partitions = ((PSymbol) e).experimentalSplit();
@@ -380,19 +364,17 @@ public class TestPExp extends BaseTest {
 
         //keep climbing up implies exps until you find an and in the right subtree
         e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp_p) o S_p) implies  (not((1 <= |S_p|)) implies  Temp_p = Reverse(S))))))");//and " +
-        //    "1 <= Max_Depth implies |S| <= Max_Depth implies S = Reverse(Temp_p) o S_pp implies 1 <= |S_pp| implies S_pp = <Next_Entry_p> o S_p implies S = Reverse(<Next_Entry_p> o Temp_p) o S_p");
         partitions = ((PSymbol) e).experimentalSplit();
-
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (Temp = Empty_String)) implies (S = ((Reverse(Temp)) o S)))", partitions.get(0).toString());
         Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_p))) and (not((1 <= |S_p|)))) implies (Temp_p = (Reverse(S))))", partitions.get(1).toString());
         
         e = parseMathAssertionExp(g, "b implies y and bv implies a and b and c implies z");
- /*       List<PExp> parts = e.partition();
-        Assert.assertEquals(1, parts.size());
-        Assert.assertEquals("(((((b and y) and bv) and a) and c) implies z)", e.partition().get(0).toString());*/
-        //VCPartitioningListener l = new VCPartitioningListener();
-        //e.accept(l);
+        partitions = ((PSymbol) e).experimentalSplit();
+        Assert.assertEquals(3, partitions.size());
+        Assert.assertEquals("(b implies y)", partitions.get(0).toString());
+        Assert.assertEquals("(bv implies a)", partitions.get(1).toString());
+        Assert.assertEquals("((b and c) implies z)", partitions.get(2).toString());
     }
 
     protected static ParseTree getTree(String input) {

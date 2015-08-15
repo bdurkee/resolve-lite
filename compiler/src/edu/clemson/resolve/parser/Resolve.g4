@@ -437,6 +437,7 @@ mathExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
+
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
@@ -446,6 +447,7 @@ mathPrimaryExp
     |   mathSetExp
     |   mathTupleExp
     |   mathAlternativeExp
+    |   mathFunctionRestrictionExp
     |   mathLambdaExp
     ;
 
@@ -493,6 +495,10 @@ mathTupleExp
 
 mathSegmentsExp
     :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
+    ;
+
+mathFunctionRestrictionExp
+    :   (qualifier=ID)? name=ID RBRACKET mathExp RBRACKET
     ;
 
 // program expressions
