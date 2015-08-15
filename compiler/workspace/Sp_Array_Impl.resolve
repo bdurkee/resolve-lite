@@ -11,7 +11,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         end;
         convention 0 <= P.Curr_Place and
             P.Curr_Place <= P.Length and P.Length <= Max_Length
-                which_entails P.Curr_Place, P.Length : N;
+                                which_entails P.Curr_Place, P.Length : N;
         correspondence
             conc.P.Trmnl_Loc = SS(k)(P.Length, Cen(k)) and
             conc.P.Curr_Loc = SS(k)(P.Curr_Place, Cen(k)) and

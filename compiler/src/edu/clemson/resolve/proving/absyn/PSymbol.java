@@ -153,7 +153,7 @@ public class PSymbol extends PExp {
         return arguments.size() == 2 && name.equals("=");
     }
 
-    @Override public boolean isFunction() {
+    @Override public boolean isFunctionApplication() {
         return arguments.size() > 0;
     }
 
@@ -163,7 +163,7 @@ public class PSymbol extends PExp {
     }
 
     @Override public boolean isVariable() {
-        return !isFunction();
+        return !isFunctionApplication();
     }
 
     @Override public boolean isLiteral() {
@@ -400,7 +400,7 @@ public class PSymbol extends PExp {
 
     @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new LinkedList<>();
-        if ( this.isFunction() ) {
+        if ( this.isFunctionApplication() ) {
             result.add(this);
         }
         for (PExp argument : arguments) {
@@ -462,7 +462,7 @@ public class PSymbol extends PExp {
     @Override public String toString() {
         StringBuilder result = new StringBuilder();
         if ( incomingFlag ) result.append("@");
-        if ( isFunction() ) {
+        if ( isFunctionApplication() ) {
             if ( dispStyle == DisplayStyle.INFIX ) {
                 result.append(arguments.get(0)).append(" ").append(name)
                         .append(" ").append(arguments.get(1));
@@ -479,7 +479,7 @@ public class PSymbol extends PExp {
         else {
             result.append(name);
         }
-        if ( this.isFunction() && this.dispStyle != DisplayStyle.OUTFIX ) {
+        if ( this.isFunctionApplication() && this.dispStyle != DisplayStyle.OUTFIX ) {
             return "(" + result.toString() + ")";
         }
         return result.toString();

@@ -59,7 +59,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         this.compiler = gen.getCompiler();
         this.g = symtab.getTypeGraph();
     }
-
+    //~11:20
     public VCOutputFile getOutputFile() {
         return outputFile;
     }
@@ -230,8 +230,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 Resolve.RequiresClauseContext;
     }
 
+    //12:10, 12:15 for sure & 12:30P ended 33 or 34
     public PExp withCorrespondencePartsSubstituted(PExp start,
                                                    PExp correspondence) {
+        List<String> concAppNames = start.getFunctionApplications().stream()
+                .filter(ModelBuilderProto::isConcFunctionApplication)
+                .map(a -> ((PSymbol) a).getName()).collect(Collectors.toList());
+        List<PExp> conjunctsToAdd = new ArrayList<>();
         for (PExp e : correspondence.splitIntoConjuncts()) {
             if ( !e.isEquality() ) {
                 //Todo: This should be added to ErrorKind and checked somewhere better.
@@ -242,10 +247,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
             PSymbol eAsPSym = (PSymbol) e;
             PExp elhs = eAsPSym.getArguments().get(0);
+            if (elhs instanceof PSymbol &&
+                    concAppNames.contains(((PSymbol)elhs).getName())) {
+                conjunctsToAdd.add(e);
+            }
             PExp erhs = eAsPSym.getArguments().get(1);
             start = start.substitute(elhs, erhs);
         }
+        if (!conjunctsToAdd.isEmpty()) {
+            start = g.formConjunct(start, g.formConjuncts(conjunctsToAdd));
+        }
         return start;
+    }
+
+    public static boolean isConcFunctionApplication(PExp e) {
+        return e instanceof PSymbol && ((PSymbol)e).getName().startsWith("conc.");
     }
 
     private List<PExp> getModuleLevelAssertionsOfType(

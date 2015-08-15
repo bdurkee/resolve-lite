@@ -148,6 +148,18 @@ public class PAlternatives extends PExp {
         return result || otherwiseClauseResult.containsName(name);
     }
 
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{{");
+        for (Alternative alternative : alternatives) {
+            sb.append(alternative.toString());
+            sb.append("\n");
+        }
+        sb.append(otherwiseClauseResult).append(" otherwise;");
+        sb.append("}}");
+        return sb.toString();
+    }
+
     @Override public Set<String> getSymbolNamesNoCache() {
         Set<String> result = new HashSet<>();
 
@@ -194,7 +206,7 @@ public class PAlternatives extends PExp {
         return false;
     }
 
-    @Override public boolean isFunction() {
+    @Override public boolean isFunctionApplication() {
         return false;
     }
 
@@ -230,6 +242,10 @@ public class PAlternatives extends PExp {
         public Alternative(PExp condition, PExp result) {
             this.condition = condition;
             this.result = result;
+        }
+
+        public String toString() {
+            return result + " if " + condition + ";";
         }
     }
 }

@@ -92,7 +92,7 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @Override public boolean isFunction() {
+    @Override public boolean isFunctionApplication() {
         return false;
     }
 

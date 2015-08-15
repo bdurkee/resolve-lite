@@ -143,7 +143,7 @@ public abstract class PExp {
 
     public abstract boolean isLiteral();
 
-    public abstract boolean isFunction();
+    public abstract boolean isFunctionApplication();
 
     /**
      * Converts {@code this} expression, containing an arbitrary number of
