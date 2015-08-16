@@ -86,24 +86,23 @@ public class PSymbol extends PExp {
         return new HashDuple(structureHash, valueHash);
     }
 
-    /**
-     * This class represents function applications. The type of a
-     * function application is the type of the range of the function. Often we'd
-     * like to think about the type of the function itself, not the
-     * type of the result of its application. Unfortunately our AST does not
-     * consider that the 'function' part of a FunctionExp (as distinct from its
-     * parameters) might be a first-class citizen with a type of its own. This
-     * method emulates retrieving the (not actually extant) first-class function
-     * part and guessing its type. In this case, the guess is "conservative", in
-     * that we guess the smallest set that can't be contradicted by the
-     * available information. For nodes without a true, first-class function to
-     * consult (which, at the moment, is all of them), this means that for the
-     * formal parameter types, we'll guess the types of the actual parameters,
-     * and for the return type we'll guess Empty_Set (since we
-     * have no information about how the return value is used.) This guarantees
-     * that the type we return will be a subset of the actual type of the
-     * function the RESOLVE programmer intends (assuming she has called it
-     * correctly.)
+    /** This class represents function applications. The type of a
+     *  function application is the type of the range of the function. Often we'd
+     *  like to think about the type of the function itself, not the
+     *  type of the result of its application. Unfortunately our AST does not
+     *  consider that the 'function' part of a FunctionExp (as distinct from its
+     *  parameters) might be a first-class citizen with a type of its own. This
+     *  method emulates retrieving the (not actually extant) first-class function
+     *  part and guessing its type. In this case, the guess is "conservative", in
+     *  that we guess the smallest set that can't be contradicted by the
+     *  available information. For nodes without a true, first-class function to
+     *  consult (which, at the moment, is all of them), this means that for the
+     *  formal parameter types, we'll guess the types of the actual parameters,
+     *  and for the return type we'll guess Empty_Set (since we
+     *  have no information about how the return value is used.) This guarantees
+     *  that the type we return will be a subset of the actual type of the
+     *  function the RESOLVE programmer intends (assuming she has called it
+     *  correctly.)
      */
     public MTFunction getConservativePreApplicationType(TypeGraph g) {
         return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
@@ -266,14 +265,12 @@ public class PSymbol extends PExp {
     public List<PExp> experimentalSplit() {
         List<PExp> resultingPartitions = new ArrayList<>();
         TypeGraph g = getMathType().getTypeGraph();
-        List<PExp> conjuncts = splitIntoConjuncts();
         PExp curConjuncts = null;
-        for (PExp conjunct : conjuncts) {
+        for (PExp conjunct : splitIntoConjuncts()) {
             if (conjunct.containsName("implies")) {
                 List<PExp> a = conjunct.splitOn("implies");
                 PExp last = a.get(a.size() - 1);
-                List<PExp> sublist = a.subList(0, a.size() - 1);
-                PExp conjuncted = g.formConjuncts(sublist);
+                PExp conjuncted = g.formConjuncts(a.subList(0, a.size() - 1));
                 PExp result = curConjuncts != null ?
                         g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
                 result = g.formImplies(result, last);
@@ -285,7 +282,25 @@ public class PSymbol extends PExp {
                 else curConjuncts = g.formConjunct(curConjuncts, conjunct);
             }
         }
-        return resultingPartitions;
+        List<PExp> result = new ArrayList<>();
+        for (PExp partition : resultingPartitions) {
+            final PSymbol partAsPSym;
+            if (partition instanceof PSymbol) {
+                partAsPSym = (PSymbol) partition;
+            }
+            else {
+                continue;
+            }
+            if (partAsPSym.getName().equals("implies")) {
+                List<PExp> rhsConjuncts = partAsPSym.getArguments()
+                        .get(1).splitIntoConjuncts();
+                result.addAll(rhsConjuncts.stream()
+                        .map(e -> g.formImplies(partAsPSym.getArguments().get(0), e))
+                        .collect(Collectors.toList()));
+            }
+        }
+        if (result.isEmpty()) result.addAll(resultingPartitions);
+        return result;
     }
 
     @Override public List<? extends PExp> getSubExpressions() {
