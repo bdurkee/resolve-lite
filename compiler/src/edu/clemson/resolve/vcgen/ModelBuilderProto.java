@@ -232,7 +232,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     public PExp withCorrespondencePartsSubstituted(PExp start,
                                                    PExp correspondence) {
-        List<String> concFuncAppNamesInStartingExp = start
+        Map<String, PExp> correspondenceMappings = new HashMap<>();
+        for (PExp e : correspondence.splitIntoConjuncts()) {
+            PSymbol left = (PSymbol)e.getSubExpressions().get(0);
+            PExp right = e.getSubExpressions().get(1);
+            correspondenceMappings.put(left.getName(), right);
+        }
+        CorrespondenceSubstitutingVisitor v = new CorrespondenceSubstitutingVisitor(correspondenceMappings, start);
+        start.accept(v);
+        return v.getSubstitutedExp();
+      /*  List<String> concFuncAppNamesInStartingExp = start
                 .getFunctionApplications().stream()
                 .filter(ModelBuilderProto::isConcFunctionApplication)
                 .map(a -> ((PSymbol) a).getName()).collect(Collectors.toList());
@@ -255,7 +264,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 start = start.substitute(elhs, erhs);
             }
         }
-        return start;
+        return start;*/
     }
 
     public static boolean isConcFunctionApplication(PExp e) {
