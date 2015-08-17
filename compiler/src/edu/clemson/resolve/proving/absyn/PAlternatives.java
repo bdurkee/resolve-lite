@@ -106,7 +106,15 @@ public class PAlternatives extends PExp {
     }
 
     @Override public PExp withIncomingSignsErased() {
-        return null;
+        List<PExp> conditions = new ArrayList<>();
+        List<PExp> results = new ArrayList<>();
+        for (Alternative alt : alternatives) {
+            conditions.add(alt.condition.withIncomingSignsErased());
+            results.add(alt.result.withIncomingSignsErased());
+        }
+        PExp otherwise = otherwiseClauseResult.withIncomingSignsErased();
+        return new PAlternatives(conditions, results, otherwise, getMathType(),
+                getMathTypeValue());
     }
 
     @Override public PExp withQuantifiersFlipped() {
@@ -132,7 +140,18 @@ public class PAlternatives extends PExp {
             retval = substitutions.get(this);
         }
         else {
-            retval = this;
+            List<PExp> substitutedConditions = new ArrayList<>();
+            List<PExp> substitutedResults = new ArrayList<>();
+            PExp substitutedOtherwiseResult =
+                    otherwiseClauseResult.substitute(substitutions);
+
+            for (Alternative alt : alternatives) {
+                substitutedConditions.add(alt.condition.substitute(substitutions));
+                substitutedResults.add(alt.result.substitute(substitutions));
+            }
+            retval = new PAlternatives(substitutedConditions,
+                    substitutedResults, substitutedOtherwiseResult,
+                    getMathType(), getMathTypeValue());
         }
         return retval;
     }
@@ -146,6 +165,18 @@ public class PAlternatives extends PExp {
                             || a.result.containsName(name);
         }
         return result || otherwiseClauseResult.containsName(name);
+    }
+
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{{");
+        for (Alternative alternative : alternatives) {
+            sb.append(alternative.toString());
+            sb.append("\n");
+        }
+        sb.append(otherwiseClauseResult).append(" otherwise;");
+        sb.append("}}");
+        return sb.toString();
     }
 
     @Override public Set<String> getSymbolNamesNoCache() {
@@ -194,7 +225,7 @@ public class PAlternatives extends PExp {
         return false;
     }
 
-    @Override public boolean isFunction() {
+    @Override public boolean isFunctionApplication() {
         return false;
     }
 
@@ -230,6 +261,10 @@ public class PAlternatives extends PExp {
         public Alternative(PExp condition, PExp result) {
             this.condition = condition;
             this.result = result;
+        }
+
+        public String toString() {
+            return result + " if " + condition + ";";
         }
     }
 }

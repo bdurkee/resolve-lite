@@ -209,6 +209,7 @@ stmt
     |   callStmt
     |   whileStmt
     |   ifStmt
+ //   |   progExp //TODO: If we want things like i++, i--, and other cool stuff.
     ;
 
 assignStmt
@@ -432,11 +433,12 @@ mathExp
     |   mathExp op=(IS_IN|IS_NOT_IN) mathExp            #mathInfixExp
     |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
-    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
+    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
+
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
@@ -446,6 +448,7 @@ mathPrimaryExp
     |   mathSetExp
     |   mathTupleExp
     |   mathAlternativeExp
+    |   mathFunctionRestrictionExp
     |   mathLambdaExp
     ;
 
@@ -493,6 +496,10 @@ mathTupleExp
 
 mathSegmentsExp
     :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
+    ;
+
+mathFunctionRestrictionExp
+    :   (qualifier=ID)? name=ID RBRACKET mathExp RBRACKET
     ;
 
 // program expressions

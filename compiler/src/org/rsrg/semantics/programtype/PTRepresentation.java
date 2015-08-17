@@ -35,7 +35,7 @@ public class PTRepresentation extends PTNamed {
         this.baseType = baseType;
         this.family = family;
     }
-
+    
     public void setReprTypeSymbol(ProgReprTypeSymbol t) {
         this.repr = t;
     }

@@ -61,7 +61,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder remember() {
-            VCRemember remember = new VCRemember(this, g.getTrueExp());
+            VCRemember remember = new VCRemember(this);
             //Todo: not too sure if it's important where remember falls in
             //the stat sequence..
             if ( stats.size() > 1 ) {

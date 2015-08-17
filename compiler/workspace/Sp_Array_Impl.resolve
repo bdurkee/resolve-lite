@@ -11,24 +11,22 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         end;
         convention 0 <= P.Curr_Place and
             P.Curr_Place <= P.Length and P.Length <= Max_Length
-                which_entails P.Curr_Place, P.Length : N;
+                                which_entails P.Curr_Place, P.Length : N;
         correspondence
             conc.P.Trmnl_Loc = SS(k)(P.Length, Cen(k)) and
             conc.P.Curr_Loc = SS(k)(P.Curr_Place, Cen(k)) and
             conc.P.Lab = lambda (q : Sp_Loc(k)).(
                 {{P.Labl(SCD(k)(q)) if SCD(k)(q) + 1 <= P.Length;
                         T.Base_Point otherwise;}});
-        initialization P.Length := 0;
+        initialization
+            P.Length := 0;
             P.Curr_Place := 0;
         end;
 
-        Procedure Lengthen (alters e : Arr_Fac :: T; updates P : Spiral_Pos);
+        Procedure Lengthen (alters e : Bdd_Spiral_Template :: T;
+                updates P : Spiral_Pos);
             Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             P.Length := P.Length + 1;
         end Lengthen;
-
-        Procedure Spiral_Out (updates P : Spiral_Pos);
-            P.Curr_Place := P.Curr_Place + 1;
-        end Spiral_Out;
 
 end Sp_Array_Impl;

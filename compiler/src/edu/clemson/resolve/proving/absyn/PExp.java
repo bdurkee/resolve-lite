@@ -1,6 +1,5 @@
 package edu.clemson.resolve.proving.absyn;
 
-import edu.clemson.resolve.vcgen.VCPartitioningListener;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
@@ -144,7 +143,7 @@ public abstract class PExp {
 
     public abstract boolean isLiteral();
 
-    public abstract boolean isFunction();
+    public abstract boolean isFunctionApplication();
 
     /**
      * Converts {@code this} expression, containing an arbitrary number of
@@ -175,36 +174,10 @@ public abstract class PExp {
      *
      * @return a list of antecedent - consequent expressions
      */
-
-    //SEE AN IMPLIES FOLLOWED BY AN AND
-    public List<PExp> partition() {
-        if ( !(this instanceof PSymbol) ) {
-            throw new UnsupportedOperationException("no vc partitioning " +
-                    "possible for a top level " +
-                    this.getClass().getSimpleName() + " expression.");
-        }
-        TypeGraph g = this.getMathType().getTypeGraph();
-        VCPartitioningListener l = new VCPartitioningListener();
-        this.accept(l);
-     /*   TypeGraph g = this.getMathType().getTypeGraph();
-        PExp leftSubtree = ((PSymbol) this).getArguments().get(0);
-        PExp rightSubtree = ((PSymbol) this).getArguments().get(1);
-        List<PExp> consequents = rightSubtree.splitIntoConjuncts();
-
-        LinkedHashSet<PExp> antecedentSet = new LinkedHashSet<>();
-        for (PExp antecedentPart : leftSubtree.splitOn("implies")) {
-            if (antecedentPart.containsName("and")) {
-                antecedentSet.addAll(antecedentPart.splitIntoConjuncts());
-            }
-            else {
-                antecedentSet.add(antecedentPart);
-            }
-        }
-        PExp antecedent = g.formConjuncts(new ArrayList<PExp>(antecedentSet));
-        return consequents.stream()
-                .map(consequent -> g.formImplies(antecedent, consequent))
-                .collect(Collectors.toList());*/
-        return new ArrayList<>();
+    public List<PExp> experimentalSplit() {
+        List<PExp> l = new ArrayList<>();
+        l.add(this);
+        return l;
     }
 
     public final List<PExp> splitOn(String ... names) {

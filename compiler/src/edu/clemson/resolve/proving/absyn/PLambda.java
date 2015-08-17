@@ -72,6 +72,11 @@ public class PLambda extends PExp {
         return body.isObviouslyTrue();
     }
 
+    public List<PExp> getParametersAsPExps() {
+        return parameters.stream().map(p -> new PSymbol.PSymbolBuilder(p.name)
+                .mathType(p.type).build()).collect(Collectors.toList());
+    }
+
     public List<Parameter> getParameters() {
         return parameters;
     }
@@ -92,7 +97,7 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @Override public boolean isFunction() {
+    @Override public boolean isFunctionApplication() {
         return false;
     }
 
@@ -129,7 +134,6 @@ public class PLambda extends PExp {
     @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions =
                 new LinkedList<>(body.getFunctionApplications());
-
         bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(
                 getMathType()).build());
         return bodyFunctions;
@@ -157,7 +161,6 @@ public class PLambda extends PExp {
     }
 
     @Override public String toString() {
-        return "lambda" + "(" + Utils.join(parameters, ".") + ").(" + body
-                + ")";
+        return "lambda " + Utils.join(parameters, ", ") + ".(" + body + ")";
     }
 }

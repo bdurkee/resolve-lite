@@ -7,8 +7,8 @@ import java.util.List;
 
 public class VCRemember extends VCRuleBackedStat {
 
-    public VCRemember(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
-        super(null, block, new RememberApplicationStrategy(), e);
+    public VCRemember(VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        super(null, block, new RememberApplicationStrategy());
     }
 
     public List<PExp> getRememberVars() {

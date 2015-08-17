@@ -504,9 +504,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         PExp convention = getPExpFor(ctx.conventionClause());
         PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
-            symtab.getInnermostActiveScope().define(new ProgReprTypeSymbol(g,
-                            ctx.name.getText(), ctx, getRootModuleID(),
-                            typeDefnSym, reprType, convention, correspondence));
+            ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
+                    ctx.name.getText(), ctx, getRootModuleID(),
+                    typeDefnSym, reprType, convention, correspondence);
+            reprType.setReprTypeSymbol(rep);
+            symtab.getInnermostActiveScope().define(rep);
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
@@ -1178,6 +1180,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathFunctionRestrictionExp(
+            Resolve.MathFunctionRestrictionExpContext ctx) {
+        throw new UnsupportedOperationException("no function restriction " +
+                "support yet (even though it's in the grammar)");
+    }
+    
     @Override public Void visitMathSegmentsExp(
             Resolve.MathSegmentsExpContext ctx) {
         Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =

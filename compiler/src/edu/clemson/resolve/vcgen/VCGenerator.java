@@ -28,8 +28,4 @@ public class VCGenerator extends AbstractCodeGenerator {
         return walk(buildVCOutputModel());
     }
 
-    public ST generateXMLAssertions() {
-        throw new UnsupportedOperationException();
-    }
-
 }
