@@ -499,7 +499,7 @@ mathSegmentsExp
     ;
 
 mathFunctionRestrictionExp
-    :   (qualifier=ID)? name=ID RBRACKET mathExp RBRACKET
+    :   (qualifier=ID)? name=ID LBRACKET mathExp RBRACKET
     ;
 
 // program expressions

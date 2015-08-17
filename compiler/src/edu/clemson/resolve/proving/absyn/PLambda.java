@@ -78,8 +78,6 @@ public class PLambda extends PExp {
     }
 
     public List<Parameter> getParameters() {
-        int i = 0;
-
         return parameters;
     }
 

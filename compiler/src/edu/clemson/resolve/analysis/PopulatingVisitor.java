@@ -1004,7 +1004,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private Void typeProgLiteralExp(ParserRuleContext ctx,
                                     String typeQualifier, String typeName) {
         ProgTypeSymbol p =
-                getProgTypeSymbol(ctx, "Std_Char_Str_Fac", "Char_Str");
+                getProgTypeSymbol(ctx, typeQualifier, typeName);
         tr.progTypes.put(ctx, p != null ? p.getProgramType() :
                 PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, p != null ? p.getModelType() :
