@@ -55,9 +55,9 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
         }
     }
 
-    /** Doesn't handle many of the intricacies needed to performa fully correct,
-     *  canonical beta-reduction such as alpha renaming, etc.  Hence the
-     *  inclusion of 'basic' in the name.
+    /** Doesn't handle the many of intricacies involved in performing a full,
+     *  'canonical' beta-reduction such as alpha renaming, etc. Hence the
+     *  'basic' in the name.
      */
     private static class BasicBetaReducingVisitor extends PExpVisitor {
 

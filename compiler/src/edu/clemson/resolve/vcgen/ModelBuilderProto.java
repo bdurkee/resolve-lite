@@ -260,7 +260,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> params =
                 symtab.scopes.get(functionCtx).getSymbolsOfType(
                         ProgParameterSymbol.class);
-        List<PExp> additionalConjuncts = new ArrayList<>();
+        List<PExp> implContingentConjuncts = new ArrayList<>();
         PExp resultingRequires = tr.getPExpFor(g, requires);
 
         for (ProgParameterSymbol p : params) {
@@ -276,12 +276,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 t.toMath()).build();
                 init = ((PTNamed) t).getInitializationEnsures();
                 init = init.substitute(exemplar, param);
-                additionalConjuncts.add(init);
+                implContingentConjuncts.add(init);
                 if (t instanceof PTFamily ) { //if we're a family we'll add constraints
                     constraint = ((PTFamily) t).getConstraint();
                     constraint = constraint.substitute(exemplar, param);
 
-                    additionalConjuncts.add(constraint);
+                    implContingentConjuncts.add(constraint);
                 }
                 //else our type refers to a PTRepresentation, so we need to deal with conventions and
                 //correspondence stuff.
@@ -294,7 +294,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     PExp convention = repr.getConvention();
                     PExp corrFnExp = repr.getCorrespondence();
                     convention = convention.substitute(exemplar, param);
-                    additionalConjuncts.add(convention);
+                    implContingentConjuncts.add(convention);
 
                     //existingRequires = g.formConjunct(existingRequires, convention);
                     //now substitute whereever param occurs in the requires clause
@@ -311,8 +311,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
             }
         }
-        additionalConjuncts.add(resultingRequires);
-        return g.formConjuncts(additionalConjuncts);
+        implContingentConjuncts.add(resultingRequires);
+        return g.formConjuncts(implContingentConjuncts);
     }
 
     private PExp modifyEnsuresByParams(ParserRuleContext functionCtx,
@@ -320,7 +320,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> params =
                 symtab.scopes.get(functionCtx).getSymbolsOfType(
                         ProgParameterSymbol.class);
-        PExp existingEnsures = tr.getPExpFor(g, ensures);
+        List<PExp> implContingentConjuncts = new ArrayList<>();
+
+        PExp resultingEnsures = tr.getPExpFor(g, ensures);
         for (ProgParameterSymbol p : params) {
             PSymbol.PSymbolBuilder temp =
                     new PSymbol.PSymbolBuilder(p.getName()).mathType(p
@@ -328,39 +330,55 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
             PExp incParamExp = temp.incoming(true).build();
             PExp paramExp = temp.incoming(false).build();
+            if (p.getDeclaredType() instanceof PTNamed) {
+                PTNamed t = (PTNamed) p.getDeclaredType();
+                PExp exemplar =
+                        new PSymbol.PSymbolBuilder(t.getExemplarName())
+                                .mathType(t.toMath()).build();
 
-            if ( p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
-                    || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES ) {
-                PExp equalsExp =
-                        new PSymbol.PSymbolBuilder("=")
-                                .arguments(paramExp, incParamExp)
-                                .style(PSymbol.DisplayStyle.INFIX)
-                                .mathType(g.BOOLEAN).build();
+                if (t instanceof PTRepresentation) {
+                    ProgReprTypeSymbol repr =
+                            ((PTRepresentation) t).getReprTypeSymbol();
 
-                existingEnsures =
-                        !existingEnsures.isLiteral() ? g.formConjunct(
-                                existingEnsures, equalsExp) : equalsExp;
-            }
-            else if ( p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS ) {
-                PExp init = null;
-                if ( p.getDeclaredType() instanceof PTNamed ) {
-                    PTNamed t = (PTNamed) p.getDeclaredType();
-                    PExp exemplar =
-                            new PSymbol.PSymbolBuilder(t.getExemplarName())
-                                    .mathType(t.toMath()).build();
+                    PExp convention = repr.getConvention();
+                    PExp corrFnExp = repr.getCorrespondence();
+                    convention = convention.substitute(exemplar, paramExp);
+                    implContingentConjuncts.add(convention);
+
+                    //existingRequires = g.formConjunct(existingRequires, convention);
+                    //now substitute whereever param occurs in the requires clause
+                    //with the correspondence function
+                    resultingEnsures =
+                            resultingEnsures.substitute(exemplar,
+                                    repr.conceptualExemplarAsPSymbol());
+                    resultingEnsures =
+                            withCorrespondencePartsSubstituted(resultingEnsures,
+                                    corrFnExp);
+                }
+                if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
+                        || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
+                    PExp equalsExp =
+                            new PSymbol.PSymbolBuilder("=")
+                                    .arguments(paramExp, incParamExp)
+                                    .style(PSymbol.DisplayStyle.INFIX)
+                                    .mathType(g.BOOLEAN).build();
+
+                    resultingEnsures =
+                            !resultingEnsures.isLiteral() ? g.formConjunct(
+                                    resultingEnsures, equalsExp) : equalsExp;
+                } else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
+                    PExp init = null;
                     init = ((PTNamed) p.getDeclaredType()) //
                             .getInitializationEnsures() //
                             .substitute(exemplar, paramExp);
+
+                    resultingEnsures =
+                            !resultingEnsures.isLiteral() ? g.formConjunct(
+                                    resultingEnsures, init) : init;
                 }
-                else { //we're dealing with a generic
-                    throw new UnsupportedOperationException(
-                            "generics not yet handled");
-                }
-                existingEnsures =
-                        !existingEnsures.isLiteral() ? g.formConjunct(
-                                existingEnsures, init) : init;
             }
         }
-        return existingEnsures;
+        implContingentConjuncts.add(resultingEnsures);
+        return g.formConjuncts(implContingentConjuncts);
     }
 }
