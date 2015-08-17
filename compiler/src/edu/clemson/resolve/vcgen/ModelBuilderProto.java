@@ -136,7 +136,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 withCorrespondencePartsSubstituted(newInitEnsures,
                         correspondence);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmtBlock().stmt(), stats));
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention).finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
     }
@@ -175,8 +175,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(Utils.collect(VCRuleBackedStat.class,
-                (ctx.stmtBlock() != null) ? ctx.stmtBlock().stmt() : new ArrayList<ParseTree>(), stats));
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         //Todo: change the damn stmt rule. I really hate this stmtBlock intermediate rule.
         outputFile.addAssertiveBlock(block.build());
     }

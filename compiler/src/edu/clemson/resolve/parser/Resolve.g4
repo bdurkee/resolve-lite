@@ -199,10 +199,6 @@ variableDeclGroup
 
 // statements
 
-stmtBlock
-    :   stmt+
-    ;
-
 stmt
     :   assignStmt
     |   swapStmt
@@ -278,7 +274,7 @@ typeModelInit
 
 typeImplInit
     :   INITIALIZATION (ensuresClause)?
-        (variableDeclGroup)* (stmtBlock)?
+        (variableDeclGroup)* (stmt)*
         END SEMI
     ;
 
@@ -371,7 +367,7 @@ operationProcedureDecl
         (ensuresClause)?
         PROCEDURE
         (variableDeclGroup)*
-        (stmtBlock)?
+        (stmt)*
         END closename=ID SEMI
     ;
 
@@ -379,7 +375,7 @@ procedureDecl
     :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
         (COLON type)? SEMI
         (variableDeclGroup)*
-        (stmtBlock)?
+        (stmt)*
         END closename=ID SEMI
     ;
 

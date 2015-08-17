@@ -61,8 +61,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
                                 .parameterDeclGroup(), ctx.variableDeclGroup(),
-                        ctx.stmtBlock() != null ? ctx.stmtBlock().stmt() :
-                                new ArrayList<Resolve.StmtContext>());
+                        ctx.stmt());
         built.put(ctx, f);
     }
 
@@ -71,8 +70,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
                                 .parameterDeclGroup(), ctx.variableDeclGroup(),
-                        ctx.stmtBlock() != null ? ctx.stmtBlock().stmt() :
-                                new ArrayList<Resolve.StmtContext>());
+                        ctx.stmt());
         f.implementsOper = true;
         built.put(ctx, f);
     }
@@ -221,7 +219,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
                     built));
             representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
-                    .typeImplInit().stmtBlock().stmt(), built));
+                    .typeImplInit().stmt(), built));
         }
         built.put(ctx, representationClass);
     }

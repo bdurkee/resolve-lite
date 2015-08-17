@@ -265,7 +265,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             returnType = PTVoid.getInstance(g);
         }
         ctx.variableDeclGroup().forEach(this::visit);
-        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
@@ -324,7 +324,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
         ctx.variableDeclGroup().forEach(this::visit);
-        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
