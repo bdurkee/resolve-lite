@@ -6,5 +6,7 @@ Facility U;
     Facility TF is T<Std_Integer_Fac :: Integer>(0,1,2,Int_Leq) implemented by T_I(My_Test);
     Operation Main(); Procedure
         TF :: Op(1, 1);
+
+        "cat" +++ "dog"
     end Main;
 end U;

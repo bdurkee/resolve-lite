@@ -193,7 +193,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
-                        .progParamExp()));
+                        .progExp()));
         stats.put(ctx, s);
     }
 

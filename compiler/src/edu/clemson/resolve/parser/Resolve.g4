@@ -209,7 +209,6 @@ stmt
     |   callStmt
     |   whileStmt
     |   ifStmt
- //   |   progExp //TODO: If we want things like i++, i--, and other cool stuff.
     ;
 
 assignStmt
@@ -220,8 +219,9 @@ swapStmt
     :   left=progExp SWAP right=progExp SEMI
     ;
 
+//semantically restrict things like 1++ (<literal>++/--, etc)
 callStmt
-    :   progParamExp SEMI
+    :   progExp SEMI
     ;
 
 whileStmt
@@ -505,13 +505,14 @@ mathFunctionRestrictionExp
 // program expressions
 
 progExp
-    :   op=MINUS progExp                            #progUnaryExp
-    |   progExp op=(MULT|DIVIDE|PLUSPLUS) progExp   #progInfixExp
-    |   progExp op=(PLUS|MINUS) progExp             #progInfixExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp          #progInfixExp
-    |   progExp op=(EQUALS|NEQUALS) progExp         #progInfixExp
-    |   LPAREN progExp RPAREN                       #progNestedExp
-    |   progPrimary                                 #progPrimaryExp
+    :   progPrimary                                     #progPrimaryExp
+    |   LPAREN progExp RPAREN                           #progNestedExp
+    |   op=MINUS progExp                                #progUnaryExp
+    |   progExp op=(PLUSPLUS|MINUSMINUS)                #progPostfixExp
+    |   progExp op=(MULT|DIVIDE|PLUSPLUSPLUS) progExp   #progInfixExp
+    |   progExp op=(PLUS|MINUS) progExp                 #progInfixExp
+    |   progExp op=(LTE|GTE|LT|GT) progExp              #progInfixExp
+    |   progExp op=(EQUALS|NEQUALS) progExp             #progInfixExp
     ;
 
 progPrimary

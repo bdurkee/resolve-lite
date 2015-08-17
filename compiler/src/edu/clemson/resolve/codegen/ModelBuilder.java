@@ -293,7 +293,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
-        built.put(ctx, new CallStat((Expr) built.get(ctx.progParamExp())));
+        built.put(ctx, new CallStat((Expr) built.get(ctx.progExp())));
     }
 
     @Override public void exitWhileStmt(Resolve.WhileStmtContext ctx) {
