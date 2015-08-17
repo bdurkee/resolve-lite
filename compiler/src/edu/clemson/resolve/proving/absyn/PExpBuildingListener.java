@@ -195,7 +195,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         String name = Utils.join(nameComponents, ".");
         PSymbolBuilder result = new PSymbolBuilder(name).arguments(
-                last.getArguments()).mathType(last.getMathType());
+                last.getArguments()).incoming(ctx.AT() != null)
+                .mathType(last.getMathType());
+
         repo.put(ctx, result.build());
     }
 

@@ -34,8 +34,13 @@ public class TestPExpVisitor extends BaseTest {
             "<PSymbol:end>:(x + (1 * y))\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g, "x + 1 * y");
+        PExp e = TestPExp.parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp_p) o S_p) implies  (not((1 <= |S_p|)) implies  Temp_p = Reverse(S))))))");//and " +
+        PExp spiral_text = TestPExp.parseMathAssertionExp(g, "P.Trmnl_Loc = SS(k)(0, @P.Trmnl_Loc) and P.Curr_Loc = @P.Curr_Loc and P.Lab = lambda (q : Sp_Loc(k)).({{@e if q = @P.Trmnl_Loc; @P.Lab(q) otherwise;}})");
+
         DemoVisitor v = new DemoVisitor();
         tree.accept(v);
+        //Todo: Add @ incoming printing to PExpTextRenderingVisitor
+        System.out.println(spiral_text.getText() + "\n" + spiral_text.toString());
         Assert.assertEquals(expected[0], v.trace);
     }
 

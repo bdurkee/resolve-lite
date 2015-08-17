@@ -1,12 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.io.StringWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class PExp {
 
@@ -108,11 +105,18 @@ public abstract class PExp {
     }
 
     public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
+        throw new UnsupportedOperationException("not yet supported");
         //PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
          //PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
          //this.accept(finalVisitor);
         //this.accept(renderer);
+    }
 
+    public String getText() {
+        StringBuilder sb = new StringBuilder();
+        PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(sb);
+        this.accept(renderer);
+        return sb.toString();
     }
 
     public boolean typeMatches(MTType other) {
