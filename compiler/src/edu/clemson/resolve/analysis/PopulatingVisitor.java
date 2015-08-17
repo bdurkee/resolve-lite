@@ -265,7 +265,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             returnType = PTVoid.getInstance(g);
         }
         ctx.variableDeclGroup().forEach(this::visit);
-        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
@@ -324,7 +324,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
         ctx.variableDeclGroup().forEach(this::visit);
-        if (ctx.stmtBlock() != null) this.visit(ctx.stmtBlock());
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
@@ -975,6 +975,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
+        this.visit(ctx.progExp());
+        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
+        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        return null;
+    }
+
     @Override public Void visitProgParamExp(Resolve.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         typeOperationSym(ctx, ctx.qualifier, ctx.name, ctx.progExp());
@@ -982,29 +989,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitProgIntegerExp(Resolve.ProgIntegerExpContext ctx) {
-        ProgTypeSymbol p =
-                getProgTypeSymbol(ctx, "Std_Integer_Fac", "Integer");
-        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
-                PTInvalid.getInstance(g));
-        tr.mathTypes.put(ctx, p != null ? p.getModelType() :
-                MTInvalid.getInstance(g));
-        return null;
+        return typeProgLiteralExp(ctx, "Std_Integer_Fac", "Integer");
     }
 
     @Override public Void visitProgCharacterExp(
             Resolve.ProgCharacterExpContext ctx) {
-        ProgTypeSymbol p =
-                getProgTypeSymbol(ctx, "Std_Character_Fac", "Character");
-        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
-                PTInvalid.getInstance(g));
-        tr.mathTypes.put(ctx, p != null ? p.getModelType() :
-                MTInvalid.getInstance(g));
-        return null;
+        return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
     }
 
     @Override public Void visitProgStringExp(Resolve.ProgStringExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
+    }
+
+    private Void typeProgLiteralExp(ParserRuleContext ctx,
+                                    String typeQualifier, String typeName) {
         ProgTypeSymbol p =
-                getProgTypeSymbol(ctx, "Std_Char_Str_Fac", "Char_Str");
+                getProgTypeSymbol(ctx, typeQualifier, typeName);
         tr.progTypes.put(ctx, p != null ? p.getProgramType() :
                 PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, p != null ? p.getModelType() :
@@ -1033,6 +1033,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), typeName);
         }
         return result;
+    }
+
+    protected void typeOperationSym(ParserRuleContext ctx,
+                                    Token qualifier, Token name,
+                                    Resolve.ProgExpContext ... args) {
+        typeOperationSym(ctx, qualifier, name, Arrays.asList(args));
     }
 
     protected void typeOperationSym(ParserRuleContext ctx,

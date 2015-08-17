@@ -180,7 +180,13 @@ public class Utils {
             case ResolveLexer.NEQUALS:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Not_Equal");
                 break;
+            case ResolveLexer.MINUSMINUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Decrement");
+                break;
             case ResolveLexer.PLUSPLUS:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Increment");
+                break;
+            case ResolveLexer.PLUSPLUSPLUS:
                 result = new BuiltInOpAttributes("Std_Char_Str_Fac", op, "Merger");
                 break;
         }
