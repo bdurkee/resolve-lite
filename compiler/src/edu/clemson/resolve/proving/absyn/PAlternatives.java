@@ -40,15 +40,13 @@ public class PAlternatives extends PExp {
 
         boolean first = true;
         for (Alternative alt : alternatives) {
-            if ( !first ) {
+            if (!first) {
                 v.fencepostPAlternatives(this);
             }
-
             alt.result.accept(v);
             alt.condition.accept(v);
         }
         v.fencepostPAlternatives(this);
-
         otherwiseClauseResult.accept(v);
         v.endChildren(this);
         v.endPAlternatives(this);

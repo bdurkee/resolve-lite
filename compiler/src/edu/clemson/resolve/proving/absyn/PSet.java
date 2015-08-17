@@ -18,13 +18,17 @@ public class PSet extends PExp {
     @Override public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPSet(this);
-
         v.beginChildren(this);
+        boolean first = true;
+
         for (PExp e : elements) {
+            if (!first) {
+                v.fencepostPSet(this);
+            }
+            first = false;
             e.accept(v);
         }
         v.endChildren(this);
-
         v.endPSet(this);
         v.endPExp(this);
     }

@@ -14,15 +14,109 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A {@link PSymbol} represents a reference to a named element such as a
- * variable, constant, or function. More specifically, all three are represented
- * as function calls, with the former two represented as functions with no
- * arguments.
+ * Represents a reference to a named element such as a variable, constant, or
+ * function. More specifically, all three are represented as function calls,
+ * with the former two represented as functions with zero arguments.
  */
 public class PSymbol extends PExp {
 
     public static enum DisplayStyle {
-        INFIX, OUTFIX, PREFIX
+
+        PREFIX {
+            @Override protected String toString(PSymbol s) {
+                String argumentsAsString;
+
+                if (s.arguments.size() == 0) {
+                    argumentsAsString = "";
+                }
+                else {
+                    argumentsAsString =
+                            "(" + Utils.join(s.arguments, ", ") + ")";
+                }
+
+                return s.name + argumentsAsString;
+            }
+
+            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+                v.beginPrefixPSymbol(s);
+            }
+
+            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+                v.fencepostPrefixPSymbol(s);
+            }
+
+            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+                v.endPrefixPSymbol(s);
+            }
+        },
+        INFIX {
+
+            @Override protected String toString(PSymbol s) {
+                return "(" + Utils.join(s.arguments, " " + s.name + " ") + ")";
+            }
+
+            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+                v.beginInfixPSymbol(s);
+            }
+
+            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+                v.fencepostInfixPSymbol(s);
+            }
+
+            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+                v.endInfixPSymbol(s);
+            }
+        },
+        POSTFIX {
+
+            @Override protected String toString(PSymbol s) {
+                String retval = Utils.join(s.arguments, ", ");
+
+                if (s.arguments.size() > 1) {
+                    retval = "(" + retval + ")";
+                }
+                return retval + s.name;
+            }
+
+            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+                v.beginPostfixPSymbol(s);
+            }
+
+            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+                v.fencepostPostfixPSymbol(s);
+            }
+
+            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+                v.endPostfixPSymbol(s);
+            }
+        },
+        OUTFIX {
+
+            @Override protected String toString(PSymbol s) {
+                return s.leftPrint + Utils.join(s.arguments, ", ")
+                        + s.rightPrint;
+            }
+
+            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+                v.beginOutfixPSymbol(s);
+            }
+
+            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+                v.fencepostOutfixPSymbol(s);
+            }
+
+            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+                v.endOutfixPSymbol(s);
+            }
+        };
+
+        protected abstract String toString(PSymbol s);
+
+        protected abstract void beginAccept(PExpVisitor v, PSymbol s);
+
+        protected abstract void fencepostAccept(PExpVisitor v, PSymbol s);
+
+        protected abstract void endAccept(PExpVisitor v, PSymbol s);
     }
 
     private final String qualifier, leftPrint, rightPrint, name;
@@ -156,7 +250,6 @@ public class PSymbol extends PExp {
         return arguments.size() > 0;
     }
 
-
     @Override public boolean isLiteralFalse() {
         return (arguments.size() == 0 && name.equalsIgnoreCase("false"));
     }
@@ -222,8 +315,11 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * TODO
-     * @return
+     * A helper method to be used alongside this class's {@link #substitute}
+     * impl that allows the name of a PSymbol to be segmented into
+     * {@code .}-delimited segments. This is useful for instance when we need
+     * to replace a {@code PSymbol} such as {@code P.Length} with
+     * {@code conc.P.Length}.
      */
     private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
         if ( !name.contains(".") ) return name;
@@ -332,17 +428,20 @@ public class PSymbol extends PExp {
     @Override public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
-        v.beginChildren(this);
+        dispStyle.beginAccept(v, this);
 
+        v.beginChildren(this);
         boolean first = true;
         for (PExp arg : arguments) {
-            if ( !first ) {
+            if (!first) {
+                dispStyle.fencepostAccept(v, this);
                 v.fencepostPSymbol(this);
             }
             first = false;
             arg.accept(v);
         }
         v.endChildren(this);
+        dispStyle.endAccept(v, this);
         v.endPSymbol(this);
         v.endPExp(this);
     }
@@ -603,9 +702,7 @@ public class PSymbol extends PExp {
         }
 
         private void sanityCheckAdditions(Collection<PExp> exps) {
-            for (PExp e : exps) {
-                sanityCheckAddition(e);
-            }
+            exps.forEach(this::sanityCheckAddition);
         }
 
         private void sanityCheckAddition(PExp o) {
@@ -620,8 +717,7 @@ public class PSymbol extends PExp {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
             }
-            // System.out.println("building PSymbol name=" + name
-            //         + ",quantification=" + quantification);
+            //          System.out.println("building PSymbol name="+name+",quantification="+quantification);
             return new PSymbol(this);
         }
     }
