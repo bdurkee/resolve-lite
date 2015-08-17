@@ -49,7 +49,7 @@ public class TestCodegenCalls extends BaseTest {
                 "Facility T; uses Standard_Integers, Standard_Char_Strings;" +
                         "Operation Prefix_Dog_with (alters prefix : Std_Char_Str_Fac :: Char_Str) :" +
                         "   Std_Char_Str_Fac :: Char_Str; " +
-                        "   Procedure Prefix_Dog_with:=prefix++\"Dog\"; end Foo;" +
+                        "   Procedure Prefix_Dog_with:=prefix+++\"Dog\"; end Foo;" +
                         "Operation Main(); " +
                         "   Procedure Var x: Std_Char_Str_Fac :: Char_Str;" +
                         "   x:=\"cat\"; x:=Prefix_Dog_with(x); " +
