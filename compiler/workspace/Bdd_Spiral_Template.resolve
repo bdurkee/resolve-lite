@@ -15,4 +15,11 @@ Concept Bdd_Spiral_Template<T>
         initialization
                 ensures P.Trmnl_Loc = Cen(k);
 
+    Operation Lengthen (alters e : T; updates P : Spiral_Pos);
+        requires SCD(k)(P.Trmnl_Loc) < Max_Length;
+        ensures P.Trmnl_Loc = SS(k)(0, @P.Trmnl_Loc) and
+            P.Curr_Loc = @P.Curr_Loc and
+            P.Lab = lambda (q : Sp_Loc(k)).({{@e if q = @P.Trmnl_Loc;
+                @P.Lab(q) otherwise;}});
+
 end Bdd_Spiral_Template;

@@ -59,7 +59,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         this.compiler = gen.getCompiler();
         this.g = symtab.getTypeGraph();
     }
-    //~11:20
+
     public VCOutputFile getOutputFile() {
         return outputFile;
     }
@@ -160,7 +160,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
-                            "Proc_Decl_Rule="+ctx.name.getText() , ctx, tr)
+                            "Correct_Op_Hypo="+ctx.name.getText() , ctx, tr)
                             .freeVars(getFreeVars(s)) //
                             .assume(localRequires) //
                             .assume(getModuleLevelAssertionsOfType(requires()))
@@ -169,7 +169,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             assertiveBlocks.push(block);
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
-            e.printStackTrace();
+            e.printStackTrace();    //shouldn't happen, we wouldn't be in vcgen if it did
         }
     }
 
@@ -232,43 +232,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     public PExp withCorrespondencePartsSubstituted(PExp start,
                                                    PExp correspondence) {
-        Map<String, PExp> correspondenceMappings = new HashMap<>();
-        for (PExp e : correspondence.splitIntoConjuncts()) {
-            PSymbol left = (PSymbol)e.getSubExpressions().get(0);
-            PExp right = e.getSubExpressions().get(1);
-            correspondenceMappings.put(left.getName(), right);
-        }
-        CorrespondenceSubstitutingVisitor v = new CorrespondenceSubstitutingVisitor(correspondenceMappings, start);
+        CorrespondenceReducingVisitor v =
+                new CorrespondenceReducingVisitor(correspondence, start);
         start.accept(v);
-        return v.getSubstitutedExp();
-      /*  List<String> concFuncAppNamesInStartingExp = start
-                .getFunctionApplications().stream()
-                .filter(ModelBuilderProto::isConcFunctionApplication)
-                .map(a -> ((PSymbol) a).getName()).collect(Collectors.toList());
-        for (PExp e : correspondence.splitIntoConjuncts()) {
-            if ( !e.isEquality() ) {
-                //Todo: This should be added to ErrorKind and checked somewhere better.
-                throw new IllegalStateException(
-                        "malformed correspondence, "
-                                + "should be of the form "
-                                + "conceptualvar_1 = [exp_1]; ... conceptualvar_n = [exp_n]");
-            }
-            PSymbol eAsPSym = (PSymbol) e;
-            PExp elhs = eAsPSym.getArguments().get(0);
-            PExp erhs = eAsPSym.getArguments().get(1);
-            if (elhs instanceof PSymbol && concFuncAppNamesInStartingExp
-                    .contains(((PSymbol)elhs).getName())) {
-                System.out.println("HERERERERE: " + erhs);
-            }
-            else {
-                start = start.substitute(elhs, erhs);
-            }
-        }
-        return start;*/
-    }
-
-    public static boolean isConcFunctionApplication(PExp e) {
-        return e instanceof PSymbol && ((PSymbol)e).getName().startsWith("conc.");
+        return v.getReducedExp();
     }
 
     private List<PExp> getModuleLevelAssertionsOfType(
