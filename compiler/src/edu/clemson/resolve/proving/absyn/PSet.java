@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 public class PSet extends PExp {
 
+    //Todo: should this be a set?
     private final List<PExp> elements = new ArrayList<>();
 
     public PSet(MTType type, MTType typeValue, List<PExp> elements) {

@@ -30,6 +30,17 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
         }
     }
 
+    @Override public void beginPSymbol(PSymbol p) {
+        try {
+            if (p.isIncoming()) {
+                output.append("@");
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override public void beginPrefixPSymbol(PSymbol p) {
         try {
             output.append(p.getName());
@@ -74,7 +85,7 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
 
     @Override public void beginPAlternatives(PAlternatives p) {
         try {
-            output.append("{");
+            output.append("{{");
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -189,7 +200,7 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
 
     @Override public void endPAlternatives(PAlternatives p) {
         try {
-            output.append(", otherwise}");
+            output.append(", otherwise}}");
         }
         catch (IOException e) {
             throw new RuntimeException(e);

@@ -113,10 +113,14 @@ public abstract class PExp {
     }
 
     public String getText() {
+        return getText(false);
+    }
+
+    public String getText(boolean stripNewlines) {
         StringBuilder sb = new StringBuilder();
         PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(sb);
         this.accept(renderer);
-        return sb.toString();
+        return sb.toString().replace('\n', ' ');
     }
 
     public boolean typeMatches(MTType other) {
