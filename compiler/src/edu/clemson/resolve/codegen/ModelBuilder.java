@@ -342,6 +342,13 @@ public class ModelBuilder extends ResolveBaseListener {
                 .isEmpty();
     }
 
+    @Override public void exitProgPostfixExp(
+            Resolve.ProgPostfixExpContext ctx) {
+        Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
+        built.put(ctx, new MethodCall(buildQualifier(o.qualifier, o.name),
+                o.name.getText(), (Expr)built.get(ctx.progExp())));
+    }
+
     @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
         Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);

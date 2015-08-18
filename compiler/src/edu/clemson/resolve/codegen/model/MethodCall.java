@@ -1,6 +1,7 @@
 package edu.clemson.resolve.codegen.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,6 +15,10 @@ public class MethodCall extends Expr {
     public String name;
     @ModelElement public List<Expr> args = new ArrayList<>();
     @ModelElement public Qualifier q;
+
+    public MethodCall(Qualifier qualifier, String name, Expr ... args) {
+        this(qualifier, name, Arrays.asList(args));
+    }
 
     public MethodCall(Qualifier qualifier, String name, List<Expr> args) {
         this.name = name;

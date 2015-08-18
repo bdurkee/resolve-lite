@@ -61,5 +61,20 @@ public class TestCodegenCalls extends BaseTest {
         Assert.assertEquals("catDog\n", found);
     }
 
+    @Test public void testSugardDecrIncrCalls() throws Exception {
+        ST facilityST = new ST(
+                "Facility T; uses Standard_Integers;" +
+                        "Operation Main(); " +
+                        "   Procedure Var i : Std_Integer_Fac :: Integer;" +
+                        "   i++; " +
+                        "   Std_Integer_Fac :: Write_Line(i); " +
+                        "   i--;" +
+                        "   Std_Integer_Fac :: Write_Line(i); " +
+                        "end Main;" +
+                        "end T;");
+        String facility = facilityST.render();
+        String found = execCode("T.resolve", facility, "T", false);
+        Assert.assertEquals("1\n0\n", found);
+    }
 
 }
