@@ -627,6 +627,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    @Override public Void visitMathDefinesDefinitionDecl(
+            Resolve.MathDefinesDefinitionDeclContext ctx) {
+        this.visit(ctx.mathTypeExp());
+        MTType type = tr.mathTypes.get(ctx.mathTypeExp());
+        MTType typeValue = tr.mathTypeValues.get(ctx.mathTypeExp());
+        for (TerminalNode t : ctx.ID()) {
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, t.getSymbol().getText(),
+                                definitionSchematicTypes, type, typeValue,
+                                ctx, getRootModuleID()));
+            }
+            catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+        return null;
+    }
     /**
      * Note: Shouldn't be calling this.visit(sigature.xxxx) anywhere at this
      * level. Those visits should all be taken care of in the visitor method
