@@ -141,34 +141,30 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
-        //If a formal parameter 'p' comes in as a PTRepresentation, THEN we
-        //need to replace all instances of 'p' with 'conc.p' in the precondition
-        //AND postcondition, then once again substitute conc.p for the
-        //full correspondence expression.
         try {
             List<ProgParameterSymbol> paramSyms =
                     s.getSymbolsOfType(ProgParameterSymbol.class);
             OperationSymbol op = s.queryForOne(
                     new OperationQuery(null, ctx.name,
                             paramSyms.stream()
-                                .map(ProgParameterSymbol::getDeclaredType)
-                                .collect(Collectors.toList())));
+                                    .map(ProgParameterSymbol::getDeclaredType)
+                                    .collect(Collectors.toList())));
 
-            PExp localRequires = modifyRequiresByParams(paramSyms,
+            PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
                     ctx, op.getRequires());
-            PExp localEnsures = modifyEnsuresByParams(paramSyms,
+            PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
                     ctx, op.getEnsures());
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
-                            "Correct_Op_Hypo="+ctx.name.getText() , ctx, tr)
-                            .freeVars(getFreeVars(s));
-
-            addParameterAssumptionsToAssertiveBlock(paramSyms, block);
-            block.assume(getModuleLevelAssertionsOfType(requires()));
-            block.assume(getModuleLevelAssertionsOfType(constraint()));
-           //         .finalConfirm(localEnsures).remember()
-
+                            "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
+                            .freeVars(getFreeVars(s))
+                            .assume(getAllParameterAssumptions(paramSyms))
+                            .assume(getModuleLevelAssertionsOfType(requires()))
+                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .remember()
+                            .confirm(getAllParameterConfirms(paramSyms))
+                            .finalConfirm(corrFnExpEnsures);
             assertiveBlocks.push(block);
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
@@ -240,8 +236,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return v.getReducedExp();
     }
 
-    private void addParameterAssumptionsToAssertiveBlock(
-            List<ProgParameterSymbol> parameters, VCAssertiveBlockBuilder block) {
+    private List<PExp> getAllParameterAssumptions(
+            List<ProgParameterSymbol> parameters) {
+        List<PExp> resultingAssumptions = new ArrayList<>();
         for (ProgParameterSymbol p : parameters) {
             PExp paramExp = p.asPSymbol();
             if ( p.getDeclaredType() instanceof PTNamed) {
@@ -252,22 +249,71 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 declaredType.getExemplarName())
                                 .mathType(declaredType.toMath()).build();
                 PExp init = ((PTNamed) declaredType).getInitializationEnsures();
-                block.assume(init.substitute(exemplar, paramExp));  // ASSUME IC (initialization constraint -- not in correct_op_hypo -- BUT in proc_decl_rule!)
+                if (!init.equals(g.getTrueExp())) {
+                    resultingAssumptions.add(init.substitute(exemplar, paramExp));  // ASSUME IC (initialization constraint -- not in correct_op_hypo -- BUT in proc_decl_rule!)
+                }
                 if (declaredType instanceof PTFamily ) {
                     PExp constraint = ((PTFamily) declaredType).getConstraint();
-                    block.assume(constraint.substitute(
+                    resultingAssumptions.add(constraint.substitute(
                             declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME TC (type constraint -- if we're conceptual)
                 }
                 else  {
                     ProgReprTypeSymbol repr =
                             ((PTRepresentation) declaredType).getReprTypeSymbol();
                     PExp convention = repr.getConvention();
-                    block.assume(convention.substitute(
+
+                    resultingAssumptions.add(convention.substitute(
                             declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME RC (repr convention -- if we're conceptual)
-                    block.assume(repr.getCorrespondence()); // ASSUME RC (repr convention -- if we're conceptual)
+                    resultingAssumptions.add(repr.getCorrespondence()); // ASSUME Corr_Fn_Exp (the correspondence function/relation untouched)
                 }
             }
         }
+        return resultingAssumptions;
+    }
+
+    private List<PExp> getAllParameterConfirms(
+            List<ProgParameterSymbol> parameters) {
+        List<PExp> resultingConfirms = new ArrayList<>();
+        for (ProgParameterSymbol p : parameters) {
+            PSymbol.PSymbolBuilder temp =
+                    new PSymbol.PSymbolBuilder(p.getName()).mathType(p
+                            .getDeclaredType().toMath());
+
+            PExp incParamExp = temp.incoming(true).build();
+            PExp paramExp = temp.incoming(false).build();
+            if (p.getDeclaredType() instanceof PTNamed) {
+                PTNamed t = (PTNamed) p.getDeclaredType();
+                PExp exemplar =
+                        new PSymbol.PSymbolBuilder(t.getExemplarName())
+                                .mathType(t.toMath()).build();
+
+                if (t instanceof PTRepresentation) {
+                    ProgReprTypeSymbol repr =
+                            ((PTRepresentation) t).getReprTypeSymbol();
+
+                    PExp convention = repr.getConvention();
+                    PExp corrFnExp = repr.getCorrespondence();
+                    resultingConfirms.add(convention.substitute(
+                            t.getExemplarAsPSymbol(), paramExp));
+                }
+                if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
+                        || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
+                    PExp equalsExp =
+                            new PSymbol.PSymbolBuilder("=")
+                                    .arguments(paramExp, incParamExp)
+                                    .style(PSymbol.DisplayStyle.INFIX)
+                                    .mathType(g.BOOLEAN).build();
+                    resultingConfirms.add(equalsExp);
+                }
+                else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
+                    PExp init = ((PTNamed) p.getDeclaredType()) //
+                            .getInitializationEnsures() //
+                            .substitute(exemplar, paramExp);
+                    resultingConfirms.add(init);
+                }
+            }
+        }
+        return resultingConfirms;
     }
 
     private List<PExp> getModuleLevelAssertionsOfType(
@@ -290,95 +336,27 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
     //PTRepresentation). This method won't do anything otherwise.
-    private PExp modifyRequiresByParams(List<ProgParameterSymbol> params,
-                                        ParserRuleContext functionCtx,
-                                        Resolve.RequiresClauseContext requires) {
+    private PExp substituteCorrFnExpIntoClause(List<ProgParameterSymbol> params,
+                                               ParserRuleContext functionCtx,
+                                               ParserRuleContext reqOrEns) {
         List<PExp> result = new ArrayList<>();
-        PExp resultingRequires = tr.getPExpFor(g, requires);
+        PExp resultingClause = tr.getPExpFor(g, reqOrEns);
         for (ProgParameterSymbol p : params) {
             if (p.getDeclaredType() instanceof PTRepresentation) {
                 ProgReprTypeSymbol repr =
                         ((PTRepresentation) p.getDeclaredType()).getReprTypeSymbol();
 
                 PExp corrFnExp = repr.getCorrespondence();
-                resultingRequires =
-                        resultingRequires.substitute(repr.exemplarAsPSymbol(),
+                resultingClause =
+                        resultingClause.substitute(repr.exemplarAsPSymbol(),
                                 repr.conceptualExemplarAsPSymbol());
 
-                resultingRequires =
-                        withCorrespondencePartsSubstituted(resultingRequires,
+                resultingClause =
+                        withCorrespondencePartsSubstituted(resultingClause,
                                 corrFnExp);
-                result.add(resultingRequires);
+                result.add(resultingClause);
             }
         }
         return g.formConjuncts(result);
-    }
-
-    private PExp modifyEnsuresByParams(List<ProgParameterSymbol> parameters,
-                                       ParserRuleContext functionCtx,
-                                       Resolve.EnsuresClauseContext ensures) {
-        List<ProgParameterSymbol> params =
-                symtab.scopes.get(functionCtx).getSymbolsOfType(
-                        ProgParameterSymbol.class);
-        List<PExp> implContingentConjuncts = new ArrayList<>();
-
-        PExp resultingEnsures = tr.getPExpFor(g, ensures);
-        for (ProgParameterSymbol p : params) {
-            PSymbol.PSymbolBuilder temp =
-                    new PSymbol.PSymbolBuilder(p.getName()).mathType(p
-                            .getDeclaredType().toMath());
-
-            PExp incParamExp = temp.incoming(true).build();
-            PExp paramExp = temp.incoming(false).build();
-            if (p.getDeclaredType() instanceof PTNamed) {
-                PTNamed t = (PTNamed) p.getDeclaredType();
-                PExp exemplar =
-                        new PSymbol.PSymbolBuilder(t.getExemplarName())
-                                .mathType(t.toMath()).build();
-
-                if (t instanceof PTRepresentation) {
-                    ProgReprTypeSymbol repr =
-                            ((PTRepresentation) t).getReprTypeSymbol();
-
-                    PExp convention = repr.getConvention();
-                    PExp corrFnExp = repr.getCorrespondence();
-                    convention = convention.substitute(exemplar, paramExp);
-                    implContingentConjuncts.add(convention);
-
-                    //existingRequires = g.formConjunct(existingRequires, convention);
-                    //now substitute whereever param occurs in the requires clause
-                    //with the correspondence function
-                    resultingEnsures =
-                            resultingEnsures.substitute(exemplar,
-                                    repr.conceptualExemplarAsPSymbol());
-                    resultingEnsures =
-                            withCorrespondencePartsSubstituted(resultingEnsures,
-                                    corrFnExp);
-                }
-                if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
-                        || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
-                    PExp equalsExp =
-                            new PSymbol.PSymbolBuilder("=")
-                                    .arguments(paramExp, incParamExp)
-                                    .style(PSymbol.DisplayStyle.INFIX)
-                                    .mathType(g.BOOLEAN).build();
-
-                    resultingEnsures =
-                            !resultingEnsures.isLiteral() ? g.formConjunct(
-                                    resultingEnsures, equalsExp) : equalsExp;
-                } else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
-                    PExp init = null;
-                    init = ((PTNamed) p.getDeclaredType()) //
-                            .getInitializationEnsures() //
-                            .substitute(exemplar, paramExp);
-
-                    resultingEnsures =
-                            !resultingEnsures.isLiteral() ? g.formConjunct(
-                                    resultingEnsures, init) : init;
-                }
-            }
-        }
-        implContingentConjuncts.add(resultingEnsures);
-        return g.formConjuncts(implContingentConjuncts);
     }
 }

@@ -53,23 +53,20 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
-            if ( assume == null ) {
-                assume = g.getTrueExp();
+            if ( assume == null || assume.equals(g.getTrueExp())) {
+                return this;
             }
             stats.add(new VCAssume(this, assume));
             return this;
         }
 
         public VCAssertiveBlockBuilder remember() {
-            VCRemember remember = new VCRemember(this);
-            //Todo: not too sure if it's important where remember falls in
-            //the stat sequence..
-            if ( stats.size() > 1 ) {
-                stats.add(1, remember);
-            }
-            else {
-                stats.add(remember);
-            }
+            stats.add(new VCRemember(this));
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder confirm(List<PExp> confirms) {
+            confirms.forEach(this::confirm);
             return this;
         }
 
