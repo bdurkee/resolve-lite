@@ -4,6 +4,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import org.rsrg.semantics.MTNamed;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.ProgTypeModelSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.Map;
@@ -14,11 +15,11 @@ public class PTFamily extends PTNamed {
     private final String name, exemplarName;
     private final PExp constraint;
 
-    public PTFamily(MTType model, String familyName, String exemplarName,
-            PExp constraint, PExp initEnsures, String enclosingModuleID) {
-        super(model.getTypeGraph(), familyName, initEnsures, enclosingModuleID);
+    public PTFamily(MTType model, String name, String exemplarName,
+                         PExp constraint, PExp initEnsures, String enclosingModuleID) {
+        super(model.getTypeGraph(), name, initEnsures, enclosingModuleID);
         this.model = model;
-        this.name = familyName;
+        this.name = name;
         this.exemplarName = exemplarName;
         this.constraint = constraint;
     }

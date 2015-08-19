@@ -1,6 +1,7 @@
 package org.rsrg.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.rsrg.semantics.TypeGraph;
 
 /**
@@ -34,6 +35,11 @@ public abstract class PTNamed extends PTType {
     }
 
     public abstract String getExemplarName();
+
+    public PSymbol getExemplarAsPSymbol() {
+        return new PSymbol.PSymbolBuilder(getExemplarName())
+                .mathType(toMath()).build();
+    }
 
     public PExp getInitializationEnsures() {
         return initEnsures;

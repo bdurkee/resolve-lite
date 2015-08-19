@@ -165,8 +165,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .freeVars(getFreeVars(s));
 
             addParameterAssumptionsToAssertiveBlock(paramSyms, block);
-            block.assume(getModuleLevelAssertionsOfType(requires()))
-            block.assume(getModuleLevelAssertionsOfType(constraint()))
+            block.assume(getModuleLevelAssertionsOfType(requires()));
+            block.assume(getModuleLevelAssertionsOfType(constraint()));
            //         .finalConfirm(localEnsures).remember()
 
             assertiveBlocks.push(block);
@@ -255,13 +255,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 block.assume(init.substitute(exemplar, paramExp));  // ASSUME IC (initialization constraint -- not in correct_op_hypo -- BUT in proc_decl_rule!)
                 if (declaredType instanceof PTFamily ) {
                     PExp constraint = ((PTFamily) declaredType).getConstraint();
-                    block.assume(constraint.substitute(exemplar, paramExp)); // ASSUME TC (type constraint -- if we're conceptual)
+                    block.assume(constraint.substitute(
+                            declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME TC (type constraint -- if we're conceptual)
                 }
                 else  {
                     ProgReprTypeSymbol repr =
                             ((PTRepresentation) declaredType).getReprTypeSymbol();
                     PExp convention = repr.getConvention();
-                    block.assume(convention.substitute(exemplar, paramExp)); // ASSUME RC (repr convention -- if we're conceptual)
+                    block.assume(convention.substitute(
+                            declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME RC (repr convention -- if we're conceptual)
                     block.assume(repr.getCorrespondence()); // ASSUME RC (repr convention -- if we're conceptual)
                 }
             }
