@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public class CorrespondenceReducingVisitor extends PExpVisitor {
 
-    //"conc.P.Trmnl_Loc" -> SS(k)(P.Length, Cen(k))
-    //"conc.P.Curr_Loc" -> SS(k)(P.Curr_Place, Cen(k))
-    //"conc.P.Lab" -> \ q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});
+    //'conc.P.Trmnl_Loc' -> 'SS(k)(P.Length, Cen(k))'
+    //'conc.P.Curr_Loc' -> 'SS(k)(P.Curr_Place, Cen(k))'
+    //'conc.P.Lab' -> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
     private final Map<PExp, PExp> substitutions = new HashMap<>();
     private PExp startingExp;
 
@@ -50,8 +50,7 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
 
     @Override public void endPSymbol(PSymbol e) {
         if (substitutions.containsKey(e)) {
-            startingExp = startingExp
-                    .substitute(e, substitutions.get(e));
+            startingExp = startingExp.substitute(e, substitutions.get(e));
         }
     }
 

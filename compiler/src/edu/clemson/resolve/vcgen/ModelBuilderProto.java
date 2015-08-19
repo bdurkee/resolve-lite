@@ -151,9 +151,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                     .collect(Collectors.toList())));
 
             PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getRequires());
+                    ctx, op.getRequires()); //precondition[ps <-- corr_fn_exp]
             PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getEnsures());
+                    ctx, op.getEnsures()); //postcondition[ps <-- corr_fn_exp]
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
@@ -162,6 +162,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .assume(getAllParameterAssumptions(paramSyms))
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .assume(corrFnExpRequires)
                             .remember()
                             .confirm(getAllParameterConfirms(paramSyms))
                             .finalConfirm(corrFnExpEnsures);
