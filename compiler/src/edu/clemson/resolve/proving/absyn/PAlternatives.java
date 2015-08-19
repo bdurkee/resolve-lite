@@ -170,7 +170,6 @@ public class PAlternatives extends PExp {
         sb.append("{{");
         for (Alternative alternative : alternatives) {
             sb.append(alternative.toString());
-            sb.append("\n");
         }
         sb.append(otherwiseClauseResult).append(" otherwise;");
         sb.append("}}");

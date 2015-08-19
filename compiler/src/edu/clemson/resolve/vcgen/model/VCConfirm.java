@@ -3,6 +3,9 @@ package edu.clemson.resolve.vcgen.model;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ConfirmApplicationStrategy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VCConfirm extends VCRuleBackedStat {
 
     public VCConfirm(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {

@@ -54,6 +54,7 @@ CONVENTION		:	'convention'		;
 COROLLARY		:	'Corollary'			;
 CORRESPONDENCE 	:	'correspondence'	;
 DEFINITION		:	'Definition'		;
+DEFINES			:	'Defines'			;
 DEPENDENT		:	'Dependent_Terms'	;
 DO 				:	'do'				;
 ELSE			:	'else'				;

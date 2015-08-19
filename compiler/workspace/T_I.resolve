@@ -1,10 +1,12 @@
 Implementation T_I(Operation P(alters j,k : U ) : Std_Boolean_Fac :: Boolean;) for T;
         uses Standard_Booleans, Standard_Char_Strings;
     Procedure Op(evaluates i,j : U);
+        Var x : Std_Integer_Fac :: Integer;
         If P( i,j ) then
             Std_Char_Str_Fac :: Write_Line("P=true");
         else
             Std_Char_Str_Fac :: Write_Line("P=false");
         end;
+        x++;
     end Op;
 end T_I;

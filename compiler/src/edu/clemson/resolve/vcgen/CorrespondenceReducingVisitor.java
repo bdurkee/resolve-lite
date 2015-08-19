@@ -13,30 +13,30 @@ import java.util.Map;
  */
 public class CorrespondenceReducingVisitor extends PExpVisitor {
 
-    //"conc.P.Trmnl_Loc" -> SS(k)(P.Length, Cen(k))
-    //"conc.P.Curr_Loc" -> SS(k)(P.Curr_Place, Cen(k))
-    //"conc.P.Lab" -> \ q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});
-    private final Map<String, PExp> substitutions = new HashMap<>();
+    //'conc.P.Trmnl_Loc' -> 'SS(k)(P.Length, Cen(k))'
+    //'conc.P.Curr_Loc' -> 'SS(k)(P.Curr_Place, Cen(k))'
+    //'conc.P.Lab' -> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
+    private final Map<PExp, PExp> substitutions = new HashMap<>();
     private PExp startingExp;
 
     public CorrespondenceReducingVisitor(PExp correspondenceExp, PExp start) {
         for (PExp e : correspondenceExp.splitIntoConjuncts()) {
             PSymbol left = (PSymbol)e.getSubExpressions().get(0);
-            substitutions.put(left.getName(), e.getSubExpressions().get(1));
+            substitutions.put(left, e.getSubExpressions().get(1));
         }
         BasicBetaReducingVisitor r = betaReduce(substitutions, start);
         this.substitutions.putAll(r.substitutions);
         this.startingExp = r.betaReducedExp;
     }
 
-    public CorrespondenceReducingVisitor(Map<String, PExp> substitutions,
+    public CorrespondenceReducingVisitor(Map<PExp, PExp> substitutions,
                                          PExp start) {
         BasicBetaReducingVisitor r = betaReduce(substitutions, start);
         this.substitutions.putAll(substitutions);
         this.startingExp = r.betaReducedExp;
     }
 
-    private BasicBetaReducingVisitor betaReduce(Map<String, PExp> substitutions,
+    private BasicBetaReducingVisitor betaReduce(Map<PExp, PExp> substitutions,
                                                 PExp startingExp) {
         BasicBetaReducingVisitor r =
                 new BasicBetaReducingVisitor(substitutions, startingExp);
@@ -49,9 +49,8 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
     }
 
     @Override public void endPSymbol(PSymbol e) {
-        if (substitutions.containsKey(e.getName())) {
-            startingExp = startingExp
-                    .substitute(e, substitutions.get(e.getName()));
+        if (substitutions.containsKey(e)) {
+            startingExp = startingExp.substitute(e, substitutions.get(e));
         }
     }
 
@@ -61,10 +60,10 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
      */
     private static class BasicBetaReducingVisitor extends PExpVisitor {
 
-        public final Map<String, PExp> substitutions;
+        public final Map<PExp, PExp> substitutions;
         public PExp betaReducedExp;
 
-        public BasicBetaReducingVisitor(Map<String, PExp> substitutions,
+        public BasicBetaReducingVisitor(Map<PExp, PExp> substitutions,
                                         PExp startingExp) {
             this.substitutions = substitutions;
             this.betaReducedExp = startingExp;
@@ -72,14 +71,17 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
 
         @Override public void endPSymbol(PSymbol e) {
             if (e.isFunctionApplication() && e.getName().startsWith("conc.")) {
-                if (!(substitutions.get(e.getName()) instanceof PLambda)) {
-                    throw new UnsupportedOperationException("can't b-reduce " +
-                            "non-lambda function applications...");
+                PSymbol asPlainFunction =   //enables error check
+                        new PSymbol.PSymbolBuilder(e.getName())
+                                .mathType(e.getMathType())
+                                .mathTypeValue(e.getMathTypeValue())
+                                .incoming(e.isIncoming()).build();
+                if (substitutions.get(asPlainFunction) != null) {
+                    PLambda l = (PLambda) substitutions.get(asPlainFunction);
+                    PExp newBody = l.getBody().substitute(l.getParametersAsPExps(),
+                            e.getArguments());
+                    betaReducedExp = betaReducedExp.substitute(e, newBody);
                 }
-                PLambda l = (PLambda) substitutions.get(e.getName());
-                PExp newBody = l.getBody().substitute(l.getParametersAsPExps(),
-                        e.getArguments());
-                betaReducedExp = betaReducedExp.substitute(e, newBody);
             }
         }
     }

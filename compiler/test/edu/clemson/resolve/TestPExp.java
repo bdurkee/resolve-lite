@@ -327,8 +327,17 @@ public class TestPExp extends BaseTest {
 
     @Test public void testGetSymbolNames() {}
 
-    @Test public void testSubstitute() {}
+    @Test public void testSubstitute() {
+        TypeGraph g = new TypeGraph();
 
+        PExp e = parseMathAssertionExp(g, "p = @q");
+        PExp substitutee = new PSymbol.PSymbolBuilder("q").mathType(g.INVALID)
+                .incoming(true).build();
+        //e.substitute();
+    }
+
+    //Todo: These should be redone and retested after thinking more about
+    //parenthesization and consulting sami & murali w/ several test cases.
     @Test public void testPartition() {
         TypeGraph g = new TypeGraph();
 

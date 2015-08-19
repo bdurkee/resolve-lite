@@ -57,6 +57,7 @@ conceptBlock
     :   ( typeModelDecl
         | operationDecl
         | mathDefinitionDecl
+        | mathDefinesDefinitionDecl
         )*
     ;
 
@@ -301,6 +302,10 @@ mathCategoricalDefinitionDecl
     :   CATEGORICAL DEFINITION FOR
         mathDefinitionSig (COMMA mathDefinitionSig)+
         IS mathAssertionExp SEMI
+    ;
+
+mathDefinesDefinitionDecl
+    :   DEFINES ID (COMMA ID)* COLON mathTypeExp SEMI
     ;
 
 mathDefinitionDecl
