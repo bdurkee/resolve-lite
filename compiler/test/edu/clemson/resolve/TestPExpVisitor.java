@@ -10,7 +10,7 @@ import org.rsrg.semantics.TypeGraph;
 
 public class TestPExpVisitor extends BaseTest {
 
-    public static class DemoVisitor extends PExpVisitor {
+    private static class DemoVisitor extends PExpVisitor {
         public String trace = "";
         @Override public void beginChildren(PExp e) {
             trace += "<"+e.getClass().getSimpleName()+":"+"begin>:"+e.getText(true)+"\n";
@@ -43,27 +43,26 @@ public class TestPExpVisitor extends BaseTest {
     @Test public void testPAltStructure() {
         TypeGraph g = new TypeGraph();
         String[] expected = {
-            "<PAlternatives:begin>:{@e if q = @P.Trmnl_Loc; @P.Lab(q), otherwise}\n"+
-            "<PAlternatives:begin>:@e\n"+
-            "<PAlternatives:end>:@e\n"+
-            "<PAlternatives:begin>:(q = @P.Trmnl_Loc)\n"+
-            "<PAlternatives:begin>:q\n"+
-            "<PAlternatives:end>:q\n"+
-            "<PAlternatives:begin>:@P.Trmnl_Loc\n"+
-            "<PAlternatives:end>:@P.Trmnl_Loc\n"+
-            "<PAlternatives:end>:(q = @P.Trmnl_Loc)\n"+
-            "<PAlternatives:begin>:@P.Lab(q)\n"+
-            "<PAlternatives:begin>:q\n"+
-            "<PAlternatives:end>:q\n"+
-            "<PAlternatives:end>:@P.Lab(q)\n"+
-            "<PAlternatives:end>:{@e if q = @P.Trmnl_Loc; @P.Lab(q), otherwise}\n"
+            "<PAlternatives:begin>:{{@e(q = @P.Trmnl_Loc); @P.Lab(q), otherwise}}\n"+
+            "<PSymbol:begin>:@e\n"+
+            "<PSymbol:end>:@e\n"+
+            "<PSymbol:begin>:(q = @P.Trmnl_Loc)\n"+
+            "<PSymbol:begin>:q\n"+
+            "<PSymbol:end>:q\n"+
+            "<PSymbol:begin>:@P.Trmnl_Loc\n"+
+            "<PSymbol:end>:@P.Trmnl_Loc\n"+
+            "<PSymbol:end>:(q = @P.Trmnl_Loc)\n"+
+            "<PSymbol:begin>:@P.Lab(q)\n"+
+            "<PSymbol:begin>:q\n"+
+            "<PSymbol:end>:q\n"+
+            "<PSymbol:end>:@P.Lab(q)\n"+
+            "<PAlternatives:end>:{{@e(q = @P.Trmnl_Loc); @P.Lab(q), otherwise}}\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g,
                 "{{@e if q = @P.Trmnl_Loc;@P.Lab(q) otherwise;}}");
         DemoVisitor v = new DemoVisitor();
         tree.accept(v);
-        System.out.println(v.trace);
-        //Assert.assertEquals(expected[0], v.trace);
+        Assert.assertEquals(expected[0], v.trace);
     }
 
     @Test public void testPSetStructure() {
