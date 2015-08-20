@@ -216,8 +216,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
         //todo: You need the operation here, query for it  or factor out querying to a helper (because you need it in enter too)
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.confirm(getAllParameterConfirms(paramSyms))
-            .stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+            .confirm(getAllParameterConfirms(paramSyms))
             .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
