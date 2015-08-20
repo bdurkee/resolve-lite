@@ -20,7 +20,7 @@ public class FunctionAssignApplicationStrategy
         PExp leftReplacee = statComponents.get(0);
         PExp rightReplacer = statComponents.get(1);
 
-        if ( rightReplacer.isLiteral() ) {
+        if ( rightReplacer.isLiteral() || !(rightReplacer.isFunctionApplication()) ) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
             block.finalConfirm(workingConfirm.substitute(leftReplacee,
                     rightReplacer));

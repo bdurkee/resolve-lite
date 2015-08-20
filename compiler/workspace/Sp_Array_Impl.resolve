@@ -23,10 +23,14 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             P.Curr_Place := 0;
         end;
 
-        Procedure Lengthen (alters e : Bdd_Spiral_Template :: T;
+       /* Procedure Lengthen (alters e : Bdd_Spiral_Template :: T;
                 updates P : Spiral_Pos);
             //Arr_Fac :: Swap_Element(P.Labl, e, P.Length);
             //P.Length++;
-        end Lengthen;
+        end Lengthen;*/
 
+        Procedure Length_of (updates P : Spiral_Pos) :
+                                    Std_Integer_Fac :: Integer;
+            Length_of := P.Length;
+        end Length_of;
 end Sp_Array_Impl;
