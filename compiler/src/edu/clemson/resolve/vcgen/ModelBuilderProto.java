@@ -139,6 +139,47 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
+    //procedure decl rule
+    @Override public void enterOperationProcedureDecl(
+            Resolve.OperationProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        List<ProgParameterSymbol> paramSyms =
+                s.getSymbolsOfType(ProgParameterSymbol.class);
+        try {
+            OperationSymbol op = s.queryForOne(
+                    new OperationQuery(null, ctx.name,
+                            paramSyms.stream()
+                                    .map(ProgParameterSymbol::getDeclaredType)
+                                    .collect(Collectors.toList())));
+
+            PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
+                    ctx, op.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
+            PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
+                    ctx, op.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
+            VCAssertiveBlockBuilder block =
+                    new VCAssertiveBlockBuilder(g, s,
+                            "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
+                            .freeVars(getFreeVars(s))
+                            .assume(getAllParameterAssumptions(paramSyms))
+                            .assume(getModuleLevelAssertionsOfType(requires()))
+                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .assume(corrFnExpRequires)
+                            .remember()
+                            .confirm(getAllParameterConfirms(paramSyms))
+                            .finalConfirm(corrFnExpEnsures);
+            assertiveBlocks.push(block);
+        } catch (DuplicateSymbolException|NoSuchSymbolException e) {
+            e.printStackTrace();    //shouldn't happen, we wouldn't be in vcgen if it did
+        }
+    }
+
+    @Override public void exitOperationProcedureDecl(
+            Resolve.OperationProcedureDeclContext ctx) {
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        outputFile.addAssertiveBlock(block.build());
+    }
+
     @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         try {
@@ -172,7 +213,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
             e.printStackTrace();    //shouldn't happen, we wouldn't be in vcgen if it did
         }
     }
-
 
     @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
@@ -355,9 +395,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 resultingClause =
                         withCorrespondencePartsSubstituted(resultingClause,
                                 corrFnExp);
-                result.add(resultingClause);
             }
         }
-        return g.formConjuncts(result);
+        return resultingClause;
     }
 }
