@@ -53,7 +53,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
-            if ( assume == null || assume.equals(g.getTrueExp())) {
+            if ( assume == null ) {
                 return this;
             }
             stats.add(new VCAssume(this, assume));
