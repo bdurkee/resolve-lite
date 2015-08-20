@@ -156,6 +156,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     ctx, op.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
             PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
                     ctx, op.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
+
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
@@ -285,27 +286,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
             if ( p.getDeclaredType() instanceof PTNamed) {
                 //both PTFamily AND PTRepresentation are a PTNamed
                 PTNamed declaredType = (PTNamed)p.getDeclaredType();
-                PExp exemplar =
-                        new PSymbol.PSymbolBuilder(
-                                declaredType.getExemplarName())
-                                .mathType(declaredType.toMath()).build();
-                PExp init = ((PTNamed) declaredType).getInitializationEnsures();
-                if (!init.equals(g.getTrueExp())) {
-                    resultingAssumptions.add(init.substitute(exemplar, paramExp));  // ASSUME IC (initialization constraint -- not in correct_op_hypo -- BUT in proc_decl_rule!)
-                }
+                PExp exemplar = declaredType.getExemplarAsPSymbol();
                 if (declaredType instanceof PTFamily ) {
                     PExp constraint = ((PTFamily) declaredType).getConstraint();
                     resultingAssumptions.add(constraint.substitute(
                             declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME TC (type constraint -- if we're conceptual)
                 }
-                else  {
+                else if (declaredType instanceof PTRepresentation)  {
                     ProgReprTypeSymbol repr =
                             ((PTRepresentation) declaredType).getReprTypeSymbol();
                     PExp convention = repr.getConvention();
 
                     resultingAssumptions.add(convention.substitute(
                             declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME RC (repr convention -- if we're conceptual)
-                    resultingAssumptions.add(repr.getCorrespondence()); // ASSUME Corr_Fn_Exp (the correspondence function/relation untouched)
+                    resultingAssumptions.add(repr.getCorrespondence());
+                }
+                else { //PTGeneric
+                    resultingAssumptions.add(g.formInitializationPredicate(
+                            declaredType, p.getName()));
                 }
             }
         }

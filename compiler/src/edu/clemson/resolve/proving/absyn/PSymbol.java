@@ -308,8 +308,9 @@ public class PSymbol extends PExp {
                     .mathTypeValue(getMathTypeValue()) //
                     .quantification(newQuantification) //
                     .arguments(newArgs).style(dispStyle) //
-                    .incoming(incomingFlag).progType(getProgType()) //
-                    .progTypeValue(getProgTypeValue()).build();
+                    .incoming(incomingFlag).literal(literalFlag)
+                    .progType(getProgType()) .progTypeValue(getProgTypeValue())
+                    .build();
         }
         return result;
     }

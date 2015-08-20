@@ -5,6 +5,8 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -13,10 +15,7 @@ import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -246,15 +245,28 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
-        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
-        PSymbolBuilder result =
-                new PSymbolBuilder(attr.name.getText())
-                        .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+        repo.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+    }
+
+    @Override public void exitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
+        repo.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+    }
+
+    private PExp buildSugaredProgExp(ParserRuleContext ctx,
+                                     Token opName, ParserRuleContext ... args) {
+        return buildSugaredProgExp(ctx, opName, Arrays.asList(args));
+    }
+
+    private PExp buildSugaredProgExp(ParserRuleContext ctx,
+                                     Token opName,
+                                     List<? extends ParserRuleContext> args) {
+        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(opName);
+        return new PSymbolBuilder(attr.name.getText())
+                        .arguments(Utils.collect(PExp.class, args, repo))
                         .qualifier(attr.qualifier)
                         .progType(progTypes.get(ctx)) //
                         .mathTypeValue(getMathTypeValue(ctx)) //
-                        .mathType(getMathType(ctx));
-        repo.put(ctx, result.build());
+                        .mathType(getMathType(ctx)).build();
     }
 
     @Override public void exitProgPrimaryExp(Resolve.ProgPrimaryExpContext ctx) {
