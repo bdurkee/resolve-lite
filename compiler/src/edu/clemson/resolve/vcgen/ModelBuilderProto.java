@@ -51,6 +51,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private final Deque<VCAssertiveBlockBuilder> assertiveBlocks =
             new LinkedList<>();
+
+    private OperationSymbol currentProcOpSym = null;
+
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
@@ -145,39 +148,33 @@ public class ModelBuilderProto extends ResolveBaseListener {
         Scope s = symtab.scopes.get(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
-        try {
-            OperationSymbol op = s.queryForOne(
-                    new OperationQuery(null, ctx.name,
-                            paramSyms.stream()
-                                    .map(ProgParameterSymbol::getDeclaredType)
-                                    .collect(Collectors.toList())));
+        PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
+                ctx, ctx.requiresClause()); //precondition[params 1..i <-- corr_fn_exp]
 
-            PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
-            PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
-
-            VCAssertiveBlockBuilder block =
-                    new VCAssertiveBlockBuilder(g, s,
-                            "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
-                            .freeVars(getFreeVars(s))
-                            .assume(getAllParameterAssumptions(paramSyms))
-                            .assume(getModuleLevelAssertionsOfType(requires()))
-                            .assume(getModuleLevelAssertionsOfType(constraint()))
-                            .assume(corrFnExpRequires)
-                            .remember()
-                            .confirm(getAllParameterConfirms(paramSyms))
-                            .finalConfirm(corrFnExpEnsures);
-            assertiveBlocks.push(block);
-        } catch (DuplicateSymbolException|NoSuchSymbolException e) {
-            e.printStackTrace();    //shouldn't happen, we wouldn't be in vcgen if it did
-        }
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, s,
+                        "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
+                        .freeVars(getFreeVars(s))
+                        .assume(getAllParameterAssumptions(paramSyms))
+                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(corrFnExpRequires)
+                        .remember();
+        assertiveBlocks.push(block);
     }
 
     @Override public void exitOperationProcedureDecl(
             Resolve.OperationProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        List<ProgParameterSymbol> paramSyms =
+                s.getSymbolsOfType(ProgParameterSymbol.class);
+        PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
+                ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+                .confirm(getAllParameterConfirms(paramSyms))
+                .finalConfirm(corrFnExpEnsures);
+
         outputFile.addAssertiveBlock(block.build());
     }
 
@@ -186,28 +183,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         try {
             List<ProgParameterSymbol> paramSyms =
                     s.getSymbolsOfType(ProgParameterSymbol.class);
-            OperationSymbol op = s.queryForOne(
+            currentProcOpSym = s.queryForOne(
                     new OperationQuery(null, ctx.name,
                             paramSyms.stream()
                                     .map(ProgParameterSymbol::getDeclaredType)
                                     .collect(Collectors.toList())));
 
             PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
-            PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, op.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
+                    ctx, currentProcOpSym.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
                             .freeVars(getFreeVars(s))
-                            .assume(getAllParameterAssumptions(paramSyms))
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
                             .assume(corrFnExpRequires)
-                            .remember()
-                            .confirm(getAllParameterConfirms(paramSyms))
-                            .finalConfirm(corrFnExpEnsures);
+                            .assume(getAllParameterAssumptions(paramSyms))
+                            .remember();
             assertiveBlocks.push(block);
         }
         catch (DuplicateSymbolException|NoSuchSymbolException e) {
@@ -216,9 +209,19 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
+        List<ProgParameterSymbol> paramSyms =
+                s.getSymbolsOfType(ProgParameterSymbol.class);
+        PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
+                ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
+        //todo: You need the operation here, query for it  or factor out querying to a helper (because you need it in enter too)
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        block.confirm(getAllParameterConfirms(paramSyms))
+            .stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+            .finalConfirm(corrFnExpEnsures);
+
         outputFile.addAssertiveBlock(block.build());
+        currentProcOpSym = null;
     }
 
     //-----------------------------------------------
@@ -301,10 +304,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             declaredType.getExemplarAsPSymbol(), paramExp)); // ASSUME RC (repr convention -- if we're conceptual)
                     resultingAssumptions.add(repr.getCorrespondence());
                 }
-                else { //PTGeneric
-                    resultingAssumptions.add(g.formInitializationPredicate(
-                            declaredType, p.getName()));
-                }
+            }
+            else { //PTGeneric
+                resultingAssumptions.add(g.formInitializationPredicate(
+                        p.getDeclaredType(), p.getName()));
             }
         }
         return resultingAssumptions;

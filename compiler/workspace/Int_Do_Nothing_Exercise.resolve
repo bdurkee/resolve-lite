@@ -1,8 +1,7 @@
 Facility Int_Do_Nothing_Exercise;
         uses Standard_Integers, Basic_Integer_Theory;
     Operation Do_Nothing (restores i : Std_Integer_Fac :: Integer);
-           requires i = 0;
-        Procedure //i++; i--;
+        Procedure i++; i--;
     end Do_Nothing;
 
     Operation Main ();
