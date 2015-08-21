@@ -885,8 +885,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
-
-
         try {
             ProgVariableSymbol variable =
                     symtab.getInnermostActiveScope().queryForOne(
