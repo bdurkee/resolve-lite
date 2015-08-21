@@ -427,7 +427,7 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   mathPrimaryExp                                  #mathPrimeExp
+    :   op=NOT mathExp                                  #mathUnaryExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
     |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
@@ -439,6 +439,7 @@ mathExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    |   mathPrimaryExp                                  #mathPrimeExp
     ;
 
 mathPrimaryExp
@@ -509,7 +510,7 @@ mathFunctionRestrictionExp
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   LPAREN progExp RPAREN                           #progNestedExp
-    |   op=MINUS progExp                                #progUnaryExp
+    |   op=(MINUS|NOT) progExp                          #progUnaryExp
     |   progExp op=(PLUSPLUS|MINUSMINUS)                #progPostfixExp
     |   progExp op=(MULT|DIVIDE|PLUSPLUSPLUS) progExp   #progInfixExp
     |   progExp op=(PLUS|MINUS) progExp                 #progInfixExp

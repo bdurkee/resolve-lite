@@ -147,6 +147,9 @@ public class Utils {
         }
     }
 
+    //Todo: Move this to a different file. and rename convertIntegerProgramOp.
+    //we'll have a convertBooleanProgramOp, convertCharProgramOp, and convertChar_Str_ProgramOp too. (I think)...
+    //if we want to support easier syntax that is..
     public static BuiltInOpAttributes convertProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
         switch (op.getType()) {

@@ -79,6 +79,7 @@ IMPLEMENTED		:	'implemented'		;
 INDUCTIVE		:	'Inductive'			;
 LAMBDA			:	'lambda'			;
 MODELED			:	'modeled'			;
+NOT 			:	'not'				;
 OF				:	'of'				;
 ON 				:	'on'				;
 OTHERWISE		:	'otherwise'			;
