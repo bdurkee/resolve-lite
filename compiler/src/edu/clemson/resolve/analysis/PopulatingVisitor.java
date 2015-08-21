@@ -885,6 +885,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
+
+
         try {
             ProgVariableSymbol variable =
                     symtab.getInnermostActiveScope().queryForOne(
@@ -1393,6 +1395,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         emit("exiting mathQuantifiedExp.");
         symtab.endScope();
         tr.mathTypes.put(ctx, g.BOOLEAN);
+        return null;
+    }
+
+    @Override public Void visitMathUnaryExp(Resolve.MathUnaryExpContext ctx) {
+        this.visit(ctx.mathExp());
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
     }
 

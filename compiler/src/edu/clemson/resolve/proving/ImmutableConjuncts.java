@@ -1,7 +1,7 @@
 package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PExpVisitor;
+import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.resolve.proving.immutableadts.EmptyImmutableList;
@@ -283,7 +283,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         return retval;
     }
 
-    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
+    public void processStringRepresentation(PExpListener visitor, Appendable a) {
         try {
             boolean first = true;
             for (PExp e : this) {

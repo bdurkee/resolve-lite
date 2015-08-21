@@ -275,8 +275,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     public PExp withCorrespondencePartsSubstituted(PExp start,
                                                    PExp correspondence) {
-        CorrespondenceReducingVisitor v =
-                new CorrespondenceReducingVisitor(correspondence, start);
+        CorrespondenceReducingListener v =
+                new CorrespondenceReducingListener(correspondence, start);
         start.accept(v);
         return v.getReducedExp();
     }

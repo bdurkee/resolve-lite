@@ -2,14 +2,14 @@ package edu.clemson.resolve.proving.absyn;
 
 import java.io.IOException;
 
-public class PExpTextRenderingVisitor extends PExpVisitor {
+public class PExpTextRenderingListener extends PExpListener {
 
     private final Appendable output;
 
     private PAlternatives encounteredAlternative;
     private PExp encounteredResult;
 
-    public PExpTextRenderingVisitor(Appendable w) {
+    public PExpTextRenderingListener(Appendable w) {
         output = w;
     }
 

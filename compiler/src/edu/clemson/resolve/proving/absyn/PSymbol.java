@@ -37,15 +37,15 @@ public class PSymbol extends PExp {
                 return s.name + argumentsAsString;
             }
 
-            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void beginAccept(PExpListener v, PSymbol s) {
                 v.beginPrefixPSymbol(s);
             }
 
-            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void fencepostAccept(PExpListener v, PSymbol s) {
                 v.fencepostPrefixPSymbol(s);
             }
 
-            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void endAccept(PExpListener v, PSymbol s) {
                 v.endPrefixPSymbol(s);
             }
         },
@@ -55,15 +55,15 @@ public class PSymbol extends PExp {
                 return "(" + Utils.join(s.arguments, " " + s.name + " ") + ")";
             }
 
-            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void beginAccept(PExpListener v, PSymbol s) {
                 v.beginInfixPSymbol(s);
             }
 
-            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void fencepostAccept(PExpListener v, PSymbol s) {
                 v.fencepostInfixPSymbol(s);
             }
 
-            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void endAccept(PExpListener v, PSymbol s) {
                 v.endInfixPSymbol(s);
             }
         },
@@ -78,15 +78,15 @@ public class PSymbol extends PExp {
                 return retval + s.name;
             }
 
-            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void beginAccept(PExpListener v, PSymbol s) {
                 v.beginPostfixPSymbol(s);
             }
 
-            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void fencepostAccept(PExpListener v, PSymbol s) {
                 v.fencepostPostfixPSymbol(s);
             }
 
-            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void endAccept(PExpListener v, PSymbol s) {
                 v.endPostfixPSymbol(s);
             }
         },
@@ -97,26 +97,26 @@ public class PSymbol extends PExp {
                         + s.rightPrint;
             }
 
-            @Override protected void beginAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void beginAccept(PExpListener v, PSymbol s) {
                 v.beginOutfixPSymbol(s);
             }
 
-            @Override protected void fencepostAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void fencepostAccept(PExpListener v, PSymbol s) {
                 v.fencepostOutfixPSymbol(s);
             }
 
-            @Override protected void endAccept(PExpVisitor v, PSymbol s) {
+            @Override protected void endAccept(PExpListener v, PSymbol s) {
                 v.endOutfixPSymbol(s);
             }
         };
 
         protected abstract String toString(PSymbol s);
 
-        protected abstract void beginAccept(PExpVisitor v, PSymbol s);
+        protected abstract void beginAccept(PExpListener v, PSymbol s);
 
-        protected abstract void fencepostAccept(PExpVisitor v, PSymbol s);
+        protected abstract void fencepostAccept(PExpListener v, PSymbol s);
 
-        protected abstract void endAccept(PExpVisitor v, PSymbol s);
+        protected abstract void endAccept(PExpListener v, PSymbol s);
     }
 
     private final String qualifier, leftPrint, rightPrint, name;
@@ -426,7 +426,7 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
         dispStyle.beginAccept(v, this);

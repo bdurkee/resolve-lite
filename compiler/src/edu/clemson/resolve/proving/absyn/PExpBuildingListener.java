@@ -128,6 +128,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitMathUnaryExp(Resolve.MathUnaryExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.op.getText())
+                .argument(repo.get(ctx.mathExp()))
+                .mathTypeValue(getMathTypeValue(ctx)) //
+                .mathType(getMathType(ctx));
+        repo.put(ctx, result.build());
+    }
+
     @Override public void exitMathOutfixExp(Resolve.MathOutfixExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText()) //

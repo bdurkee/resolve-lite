@@ -1,7 +1,7 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PExpVisitor;
+import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PLambda;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 /** A visitor that replaces conceptual variables with their correspondence
  *  defined mathematical counterparts.
  */
-public class CorrespondenceReducingVisitor extends PExpVisitor {
+public class CorrespondenceReducingListener extends PExpListener {
 
     //'conc.P.Trmnl_Loc' -> 'SS(k)(P.Length, Cen(k))'
     //'conc.P.Curr_Loc' -> 'SS(k)(P.Curr_Place, Cen(k))'
@@ -19,27 +19,27 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
     private final Map<PExp, PExp> substitutions = new HashMap<>();
     private PExp startingExp;
 
-    public CorrespondenceReducingVisitor(PExp correspondenceExp, PExp start) {
+    public CorrespondenceReducingListener(PExp correspondenceExp, PExp start) {
         for (PExp e : correspondenceExp.splitIntoConjuncts()) {
             PSymbol left = (PSymbol)e.getSubExpressions().get(0);
             substitutions.put(left, e.getSubExpressions().get(1));
         }
-        BasicBetaReducingVisitor r = betaReduce(substitutions, start);
+        BasicBetaReducingListener r = betaReduce(substitutions, start);
         this.substitutions.putAll(r.substitutions);
         this.startingExp = r.betaReducedExp;
     }
 
-    public CorrespondenceReducingVisitor(Map<PExp, PExp> substitutions,
-                                         PExp start) {
-        BasicBetaReducingVisitor r = betaReduce(substitutions, start);
+    public CorrespondenceReducingListener(Map<PExp, PExp> substitutions,
+                                          PExp start) {
+        BasicBetaReducingListener r = betaReduce(substitutions, start);
         this.substitutions.putAll(substitutions);
         this.startingExp = r.betaReducedExp;
     }
 
-    private BasicBetaReducingVisitor betaReduce(Map<PExp, PExp> substitutions,
+    private BasicBetaReducingListener betaReduce(Map<PExp, PExp> substitutions,
                                                 PExp startingExp) {
-        BasicBetaReducingVisitor r =
-                new BasicBetaReducingVisitor(substitutions, startingExp);
+        BasicBetaReducingListener r =
+                new BasicBetaReducingListener(substitutions, startingExp);
         startingExp.accept(r);
         return r;
     }
@@ -58,13 +58,13 @@ public class CorrespondenceReducingVisitor extends PExpVisitor {
      *  'canonical' beta-reduction such as alpha renaming, etc. Hence the
      *  'basic' in the name.
      */
-    private static class BasicBetaReducingVisitor extends PExpVisitor {
+    private static class BasicBetaReducingListener extends PExpListener {
 
         public final Map<PExp, PExp> substitutions;
         public PExp betaReducedExp;
 
-        public BasicBetaReducingVisitor(Map<PExp, PExp> substitutions,
-                                        PExp startingExp) {
+        public BasicBetaReducingListener(Map<PExp, PExp> substitutions,
+                                         PExp startingExp) {
             this.substitutions = substitutions;
             this.betaReducedExp = startingExp;
         }

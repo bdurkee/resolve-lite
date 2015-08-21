@@ -1,6 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
-public abstract class PExpVisitor {
+public abstract class PExpListener {
 
     public void beginPExp(PExp p) {}
 

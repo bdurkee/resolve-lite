@@ -1,16 +1,14 @@
 package edu.clemson.resolve;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PExpVisitor;
-import edu.clemson.resolve.proving.absyn.PLambda;
-import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.proving.absyn.PExpListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rsrg.semantics.TypeGraph;
 
 public class TestPExpVisitor extends BaseTest {
 
-    private static class DemoVisitor extends PExpVisitor {
+    private static class DemoListener extends PExpListener {
         public String trace = "";
         @Override public void beginChildren(PExp e) {
             trace += "<"+e.getClass().getSimpleName()+":"+"begin>:"+e.getText(true)+"\n";
@@ -35,7 +33,7 @@ public class TestPExpVisitor extends BaseTest {
             "<PSymbol:end>:(x + (1 * y))\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g, "x + 1 * y");
-        DemoVisitor v = new DemoVisitor();
+        DemoListener v = new DemoListener();
         tree.accept(v);
         Assert.assertEquals(expected[0], v.trace);
     }
@@ -60,7 +58,7 @@ public class TestPExpVisitor extends BaseTest {
         };
         PExp tree = TestPExp.parseMathAssertionExp(g,
                 "{{@e if q = @P.Trmnl_Loc;@P.Lab(q) otherwise;}}");
-        DemoVisitor v = new DemoVisitor();
+        DemoListener v = new DemoListener();
         tree.accept(v);
         Assert.assertEquals(expected[0], v.trace);
     }

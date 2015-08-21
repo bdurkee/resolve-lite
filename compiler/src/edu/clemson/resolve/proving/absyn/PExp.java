@@ -104,7 +104,7 @@ public abstract class PExp {
         return substitute(e);
     }
 
-    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
+    public void processStringRepresentation(PExpListener visitor, Appendable a) {
         throw new UnsupportedOperationException("not yet supported");
         //PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
          //PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
@@ -118,7 +118,7 @@ public abstract class PExp {
 
     public String getText(boolean stripNewlines) {
         StringBuilder sb = new StringBuilder();
-        PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(sb);
+        PExpTextRenderingListener renderer = new PExpTextRenderingListener(sb);
         this.accept(renderer);
         return sb.toString().replace('\n', ' ');
     }
@@ -131,7 +131,7 @@ public abstract class PExp {
         return typeMatches(other.getMathType());
     }
 
-    public abstract void accept(PExpVisitor v);
+    public abstract void accept(PExpListener v);
 
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 

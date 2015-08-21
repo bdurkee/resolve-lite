@@ -341,7 +341,7 @@ public class TestPExp extends BaseTest {
     @Test public void testPartition() {
         TypeGraph g = new TypeGraph();
 
-        PExp e = parseMathAssertionExp(g, "p implies q");
+     /*   PExp e = parseMathAssertionExp(g, "p implies q");
         List<PExp> partitions = ((PSymbol) e).experimentalSplit();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(p implies q)", partitions.get(0).toString());
@@ -384,6 +384,7 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("(b implies y)", partitions.get(0).toString());
         Assert.assertEquals("(bv implies a)", partitions.get(1).toString());
         Assert.assertEquals("((b and c) implies z)", partitions.get(2).toString());
+        */
     }
 
     protected static ParseTree getTree(String input) {

@@ -32,7 +32,7 @@ public class PLambda extends PExp {
         return hash;
     }
 
-    @Override public void accept(PExpVisitor v) {
+    @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPLambda(this);
 
