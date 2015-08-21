@@ -4,16 +4,18 @@ import edu.clemson.resolve.codegen.model.*;
 import edu.clemson.resolve.codegen.model.Qualifier.NormalQualifier;
 import edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTNamed;
+import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
@@ -342,18 +344,32 @@ public class ModelBuilder extends ResolveBaseListener {
                 .isEmpty();
     }
 
+    @Override public void exitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+    }
+
     @Override public void exitProgPostfixExp(
             Resolve.ProgPostfixExpContext ctx) {
-        Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
-        built.put(ctx, new MethodCall(buildQualifier(o.qualifier, o.name),
-                o.name.getText(), (Expr)built.get(ctx.progExp())));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
     }
 
     @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
-        Utils.BuiltInOpAttributes o = Utils.convertProgramOp(ctx.op);
-        List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        built.put(ctx, new MethodCall(buildQualifier(o.qualifier, o.name),
-                        o.name.getText(), args));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+    }
+
+    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
+                                           ParseTree... args) {
+        return buildSugaredProgExp(ctx, op, Arrays.asList(args));
+    }
+
+    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
+                                           List<? extends ParseTree> args) {
+        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
+                .collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes o =
+                HardCodedProgOps.convert(op, argTypes);
+        return new MethodCall(buildQualifier(o.qualifier, o.name),
+                o.name.getText(), Utils.collect(Expr.class, args, built));
     }
 
     @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
@@ -381,20 +397,26 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, refs.get(0));
     }
 
-    @Override public void exitProgIntegerExp(
-            Resolve.ProgIntegerExpContext ctx) {
+    @Override public void exitProgBooleanLiteralExp(
+            Resolve.ProgBooleanLiteralExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier("Boolean_Template",
+                "Std_Boolean_Fac"), "Boolean", ctx.getText()));
+    }
+
+    @Override public void exitProgIntegerLiteralExp(
+            Resolve.ProgIntegerLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
                 "Std_Integer_Fac"), "Integer", ctx.getText()));
     }
 
-    @Override public void exitProgCharacterExp(
-            Resolve.ProgCharacterExpContext ctx) {
+    @Override public void exitProgCharacterLiteralExp(
+            Resolve.ProgCharacterLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Character_Template",
                 "Std_Character_Fac"), "Character", ctx.getText()));
     }
 
-    @Override public void exitProgStringExp(
-            Resolve.ProgStringExpContext ctx) {
+    @Override public void exitProgStringLiteralExp(
+            Resolve.ProgStringLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
                 "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
     }

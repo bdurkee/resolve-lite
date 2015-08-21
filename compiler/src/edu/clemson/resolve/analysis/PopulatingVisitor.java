@@ -34,6 +34,7 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
@@ -989,14 +990,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitProgInfixExp(
             Resolve.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
-        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
+        List<PTType> argTypes = ctx.progExp().stream()
+                .map(tr.progTypes::get).collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, argTypes);
         typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
     @Override public Void visitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
         this.visit(ctx.progExp());
-        Utils.BuiltInOpAttributes attr = Utils.convertProgramOp(ctx.op);
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
         typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
@@ -1007,16 +1012,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgIntegerExp(Resolve.ProgIntegerExpContext ctx) {
+    @Override public Void visitProgBooleanLiteralExp(
+            Resolve.ProgBooleanLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Boolean_Fac", "Boolean");
+    }
+
+    @Override public Void visitProgIntegerLiteralExp(
+            Resolve.ProgIntegerLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Integer_Fac", "Integer");
     }
 
-    @Override public Void visitProgCharacterExp(
-            Resolve.ProgCharacterExpContext ctx) {
+    @Override public Void visitProgCharacterLiteralExp(
+            Resolve.ProgCharacterLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
     }
 
-    @Override public Void visitProgStringExp(Resolve.ProgStringExpContext ctx) {
+    @Override public Void visitProgStringLiteralExp(
+            Resolve.ProgStringLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
     }
 
@@ -1422,14 +1434,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathBooleanExp(
-            Resolve.MathBooleanExpContext ctx) {
+    @Override public Void visitMathBooleanLiteralExp(
+            Resolve.MathBooleanLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
     }
 
-    @Override public Void visitMathIntegerExp(
-            Resolve.MathIntegerExpContext ctx) {
+    @Override public Void visitMathIntegerLiteralExp(
+            Resolve.MathIntegerLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
     }
