@@ -20,6 +20,7 @@ public class HardCodedProgOps {
             return convertBooleanProgramOp(op); //only thing we could possibly match that has no arguments is true or false
         }
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
+        if (!(args.get(0) instanceof PTNamed)) return result;
         PTNamed firstArgType = (PTNamed)args.get(0);
         if ( firstArgType.getName().equals("Boolean") ) {
             result = convertBooleanProgramOp(op);
@@ -111,7 +112,7 @@ public class HardCodedProgOps {
                 result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Or");
                 break;
         }
-        return null;
+        return result;
     }
 
     public static class BuiltInOpAttributes {

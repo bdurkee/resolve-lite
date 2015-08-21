@@ -42,7 +42,7 @@ public class ExplicitCallApplicationStrategy
          * and our statement reads as follows: {@code v := op(u);}. Informally
          * this next line substitutes appearances of the formal parameter
          * {@code x} in op's requires clause with the actuals (more formally,
-         * {@code pre[x -> u]}).
+         * {@code pre[x ~> u]}).
          */
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
         block.confirm(opRequires.substitute(formals, actuals));
@@ -65,7 +65,7 @@ public class ExplicitCallApplicationStrategy
         /**
          * Now we substitute the formals for actuals in the rhs of the ensures
          * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
-         * with the modified {@code f} (formally, {@code Q[v -> f[x -> u]]}).
+         * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
          */
         ensuresRight = ensuresRight.substitute(formals, actuals);
         Map<String, ProgParameterSymbol.ParameterMode> modes =

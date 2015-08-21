@@ -304,6 +304,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitProgNestedExp(Resolve.ProgNestedExpContext ctx) {
+        repo.put(ctx, repo.get(ctx.progExp()));
+    }
+
     @Override public void exitProgMemberExp(Resolve.ProgMemberExpContext ctx) {
         List<String> nameComponents = new ArrayList<>();
         nameComponents.add(ctx.progNamedExp().getText());
@@ -311,6 +315,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .map(TerminalNode::getText).collect(Collectors.toList()));
         repo.put(ctx, new PSymbolBuilder(Utils.join(nameComponents, "."))
                 .mathType(types.get(ctx)).progType(progTypes.get(ctx)).build());
+    }
+
+    @Override public void exitProgBooleanLiteralExp(
+            Resolve.ProgBooleanLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
     }
 
     @Override public void exitProgIntegerLiteralExp(

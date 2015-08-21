@@ -998,6 +998,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
+        this.visit(ctx.progExp());
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
+        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        return null;
+    }
+
     @Override public Void visitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
         this.visit(ctx.progExp());
         HardCodedProgOps.BuiltInOpAttributes attr =
