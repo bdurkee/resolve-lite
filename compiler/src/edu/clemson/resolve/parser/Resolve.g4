@@ -58,6 +58,7 @@ conceptBlock
         | operationDecl
         | mathDefinitionDecl
         | mathDefinesDefinitionDecl
+        | constraintClause
         )*
     ;
 
@@ -459,7 +460,7 @@ mathLiteralExp
     ;
 
 mathFunctionApplicationExp
-    :   (AT)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
+    :   (AT)? (qualifier=ID COLONCOLON)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
     ;
 

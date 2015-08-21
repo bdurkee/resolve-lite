@@ -49,7 +49,7 @@ BY				:	'by'				;
 CART_PROD		:	'Cart_Prod'			;
 CATEGORICAL		:	'Categorical'		;
 CONCEPT			:	'Concept'			;
-CONSTRAINT		:	'constraints'		;
+CONSTRAINT		:	('constraints'|'Constraints')		;
 CONVENTION		:	'convention'		;
 COROLLARY		:	'Corollary'			;
 CORRESPONDENCE 	:	'correspondence'	;
