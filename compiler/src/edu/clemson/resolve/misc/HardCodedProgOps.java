@@ -20,7 +20,9 @@ public class HardCodedProgOps {
             return convertBooleanProgramOp(op); //only thing we could possibly match that has no arguments is true or false
         }
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        if (!(args.get(0) instanceof PTNamed)) return result;
+        if (!(args.get(0) instanceof PTNamed)) {
+            return result;
+        }
         PTNamed firstArgType = (PTNamed)args.get(0);
         if ( firstArgType.getName().equals("Boolean") ) {
             result = convertBooleanProgramOp(op);
@@ -82,6 +84,9 @@ public class HardCodedProgOps {
                 break;
             case ResolveLexer.PLUSPLUS:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Increment");
+                break;
+            case ResolveLexer.MOD:
+                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Mod");
                 break;
         }
         return result;
