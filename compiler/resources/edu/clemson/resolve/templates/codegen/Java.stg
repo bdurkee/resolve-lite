@@ -80,13 +80,21 @@ public class <impl.name>
     <ctor>
     <funcImpls; separator="\n">
     <delegateMethods; separator="\n">
+    <! BELOW IS A JAVA 1.7+ version of the invoke() method below with switch stmt body (instead of elseif)!>
+    <!<if(funcImpls)><\\>
+    switch (method.getName()) {
+    <funcImpls: {f | case "<f.func.name>": return method.invoke(this, args);}; separator="\n">
+    default: return method.invoke(delegate, args);
+    }
+    <else>
+    return method.invoke(delegate, args);
+    <endif> !>
     @Override public Object invoke(Object proxy, Method method,
             Object[] args) throws Throwable {
         <if(funcImpls)><\\>
-        switch (method.getName()) {
-        <funcImpls: {f | case "<f.func.name>": return method.invoke(this, args);}; separator="\n">
-        default: return method.invoke(delegate, args);
-        }
+        <first(funcImpls): {f | if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
+        <rest(funcImpls) : {f | else if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
+        else return method.invoke(this, args);
         <else>
         return method.invoke(delegate, args);
         <endif>
