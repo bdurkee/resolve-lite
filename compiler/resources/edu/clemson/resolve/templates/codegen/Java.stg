@@ -94,7 +94,7 @@ public class <impl.name>
         <if(funcImpls)><\\>
         <first(funcImpls): {f | if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
         <rest(funcImpls) : {f | else if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
-        else return method.invoke(this, args);
+        else return method.invoke(delegate, args);
         <else>
         return method.invoke(delegate, args);
         <endif>
