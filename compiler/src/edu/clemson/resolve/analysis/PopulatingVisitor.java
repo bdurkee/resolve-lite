@@ -71,6 +71,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingDefParams = false;
 
     /**
+     * Keeps track of the current operationProcedure we're visiting;
+     * {@code null} otherwise. We use this to check whether a recursive call is
+     * being made to an operation procedure decl that hasn't been marked
+     * 'Recursive'.
+     */
+    private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
+
+    /**
      * Set to {@code true} when we're walking the arguments to a module
      * (i.e. walking some set of args to a facility decl); or when we're walking
      * module formal parameters. Should be {@code false} otherwise;
@@ -306,6 +314,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitOperationProcedureDecl(
             Resolve.OperationProcedureDeclContext ctx) {
         symtab.startScope(ctx);
+        currentOpProcedureDecl = ctx;
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
         if (ctx.type() != null) {
             this.visit(ctx.type());
@@ -324,9 +333,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        //if (ctx.recursive != null) {
+            // if we're a recursive fxn we need a pointer to the operation
+            // within this scope before we process stmts. NOTE: We shouldn't
+            // have to do this for normal ProcedureDecls since they should have
+            // and Operation signature declared *somewhere* the searcher can/should
+            // be able to find.
+            insertFunction(ctx.name, ctx.type(),
+                    ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        //}
         ctx.variableDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         symtab.endScope();
+        currentOpProcedureDecl = null;
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
         return null;
@@ -1090,6 +1109,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new OperationQuery(qualifier, name, argTypes,
                             SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                             SymbolTable.ImportStrategy.IMPORT_NAMED));
+            if (currentOpProcedureDecl != null && currentOpProcedureDecl.name
+                    .getText().equals(opSym.getName()) &&
+                    currentOpProcedureDecl.recursive == null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.UNMARKED_RECURSIVE_CALL, name, ctx.getText(),
+                        opSym.getName());
+            }
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;

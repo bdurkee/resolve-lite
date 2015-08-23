@@ -1,12 +1,7 @@
 Facility U;
-        uses Standard_Booleans, Standard_Char_Strings;
+     
     Operation Main ();
         Procedure
-            Var x, u : Std_Char_Str_Fac :: Char_Str;
-            Var y, z : Std_Boolean_Fac :: Boolean;
-            x:="cat";
-            u:="dog";
-            Std_Char_Str_Fac :: Write_Line(x++u);
-
+            Main();
     end Main;
 end U;

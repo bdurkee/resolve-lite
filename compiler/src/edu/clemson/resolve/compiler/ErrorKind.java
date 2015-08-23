@@ -215,7 +215,12 @@ public enum ErrorKind {
      * Compiler Error 38: generated Java error: <em>message</em>.
      */
     GENERATED_JAVA_ERROR(38, "generated java error: <arg> ",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    UNMARKED_RECURSIVE_CALL(39, "recursive call <arg> to unmarked " +
+            "recursive procedure '<arg2>'; correct definition is: " +
+            "Oper <arg2>(..); Recursive Procedure' ... end <arg2>;",
+                         ErrorSeverity.WARNING);
 
     /**
      * Compiler Warning 39: generated Java warning: <em>message</em>.

@@ -367,11 +367,11 @@ operationDecl
     ;
 
 operationProcedureDecl
-    :   (recursive=RECURSIVE)? OPERATION
+    :   OPERATION
         name=ID operationParameterList (COLON type)? SEMI
         (requiresClause)?
         (ensuresClause)?
-        PROCEDURE
+        (recursive=RECURSIVE)? PROCEDURE
         (variableDeclGroup)*
         (stmt)*
         END closename=ID SEMI
