@@ -62,6 +62,10 @@ public class OperationSymbol
         return this;
     }
 
+    @Override public ProgVariableSymbol toProgVariableSymbol() {
+        return new ProgVariableSymbol(name, definingTree, returnType, moduleID);
+    }
+
     @Override public String getSymbolDescription() {
         return "an operation";
     }

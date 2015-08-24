@@ -1,5 +1,7 @@
-Concept T<U>(evaluates i,j,k : Std_Integer_Fac :: Integer;
-        Definition Is_LEQ(i,j : U) : B;);
-            uses Standard_Booleans, Standard_Integers;
-    Operation Op(evaluates i, j : U);
+ Facility T;
+        uses Standard_Integers, Standard_Char_Strings, Basic_Integer_Theory;
+    Operation Main(evaluates x : Std_Integer_Fac :: Integer);
+            requires @x + x;
+        Procedure
+    end Main;
 end T;

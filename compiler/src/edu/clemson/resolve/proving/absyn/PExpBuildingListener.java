@@ -295,6 +295,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
+    @Override public void exitProgVarExp(Resolve.ProgVarExpContext ctx) {
+        repo.put(ctx, repo.get(ctx.getChild(0)));
+    }
+
     @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText()) //
                 .mathTypeValue(getMathTypeValue(ctx)) //

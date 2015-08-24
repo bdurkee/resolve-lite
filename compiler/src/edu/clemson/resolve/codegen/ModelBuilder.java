@@ -244,13 +244,15 @@ public class ModelBuilder extends ResolveBaseListener {
             //If this is true, then we're likely dealing with a math definition
             //(which has no sensible prog type), so we ignore the rest of our
             //logic here
+            //Yes, kind of weird, but then again, so is passing defs as params...
             if (tr.progTypes.get(ctx.progExp()) == null) return;
 
             //Todo: I think it's ok to do getChild(0) here; we know we're
             //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
+            //Todo2: this line below is pretty fugly. Change me eventually.
             Resolve.ProgNamedExpContext argAsNamedExp =
                     (Resolve.ProgNamedExpContext) ctx.progExp()
-                            .getChild(0).getChild(0);
+                            .getChild(0).getChild(0).getChild(0);
             try {
                 OperationSymbol s =
                         moduleScope.queryForOne(
@@ -370,6 +372,10 @@ public class ModelBuilder extends ResolveBaseListener {
                 HardCodedProgOps.convert(op, argTypes);
         return new MethodCall(buildQualifier(o.qualifier, o.name),
                 o.name.getText(), Utils.collect(Expr.class, args, built));
+    }
+
+    @Override public void exitProgVarExp(Resolve.ProgVarExpContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
     }
 
     @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
@@ -576,8 +582,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected CallStat buildPrimitiveInfixStat(String name,
-                                               Resolve.ProgExpContext left,
-                                               Resolve.ProgExpContext right) {
+                                               ParserRuleContext left,
+                                               ParserRuleContext right) {
         Qualifier.NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
         return new CallStat(qualifier, name, (Expr) built.get(left),
                 (Expr) built.get(right));

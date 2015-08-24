@@ -210,11 +210,11 @@ stmt
     ;
 
 assignStmt
-    :   left=progExp ASSIGN right=progExp SEMI
+    :   left=progVarExp ASSIGN right=progExp SEMI
     ;
 
 swapStmt
-    :   left=progExp SWAP right=progExp SEMI
+    :   left=progVarExp SWAP right=progVarExp SEMI
     ;
 
 //semantically restrict things like 1++ (<literal>++/--, etc)
@@ -367,11 +367,11 @@ operationDecl
     ;
 
 operationProcedureDecl
-    :   (recursive=RECURSIVE)? OPERATION
+    :   OPERATION
         name=ID operationParameterList (COLON type)? SEMI
         (requiresClause)?
         (ensuresClause)?
-        PROCEDURE
+        (recursive=RECURSIVE)? PROCEDURE
         (variableDeclGroup)*
         (stmt)*
         END closename=ID SEMI
@@ -522,8 +522,12 @@ progExp
 
 progPrimary
     :   progLiteralExp
-    |   progNamedExp
+    |   progVarExp
     |   progParamExp
+    ;
+
+progVarExp
+    :   progNamedExp
     |   progMemberExp
     ;
 

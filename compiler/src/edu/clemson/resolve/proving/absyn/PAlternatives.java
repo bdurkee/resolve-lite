@@ -121,7 +121,7 @@ public class PAlternatives extends PExp {
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
-        Set<PSymbol> result = new HashSet<>();
+        Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
             result.addAll(a.condition.getIncomingVariables());

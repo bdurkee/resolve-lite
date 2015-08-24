@@ -71,6 +71,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingDefParams = false;
 
     /**
+     * Keeps track of the current operationProcedure we're visiting;
+     * {@code null} otherwise. We use this to check whether a recursive call is
+     * being made to an operation procedure decl that hasn't been marked
+     * 'Recursive'.
+     */
+    private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
+
+    /**
      * Set to {@code true} when we're walking the arguments to a module
      * (i.e. walking some set of args to a facility decl); or when we're walking
      * module formal parameters. Should be {@code false} otherwise;
@@ -306,6 +314,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitOperationProcedureDecl(
             Resolve.OperationProcedureDeclContext ctx) {
         symtab.startScope(ctx);
+        currentOpProcedureDecl = ctx;
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
         if (ctx.type() != null) {
             this.visit(ctx.type());
@@ -324,9 +333,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+
         ctx.variableDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
+
         symtab.endScope();
+        currentOpProcedureDecl = null;
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
         return null;
@@ -885,6 +897,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProgVarExp(Resolve.ProgVarExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
+        return null;
+    }
+
     @Override public Void visitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
         try {
             ProgVariableSymbol variable =
@@ -1085,11 +1104,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     List<Resolve.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
+        if (currentOpProcedureDecl != null && currentOpProcedureDecl.name
+                .getText().equals(name.getText()) ) {
+            PTType t = tr.progTypes.get(currentOpProcedureDecl.type()) != null ?
+                    tr.progTypes.get(currentOpProcedureDecl.type()) :
+                    PTVoid.getInstance(g);
+            tr.progTypes.put(ctx, t);
+            tr.mathTypes.put(ctx, t.toMath());
+            return;
+        }
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
                             SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                             SymbolTable.ImportStrategy.IMPORT_NAMED));
+
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;

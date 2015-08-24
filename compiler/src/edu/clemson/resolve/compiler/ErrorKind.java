@@ -214,14 +214,30 @@ public enum ErrorKind {
     /**
      * Compiler Error 38: generated Java error: <em>message</em>.
      */
-    GENERATED_JAVA_ERROR(38, "generated java error: <arg> ",
-            ErrorSeverity.ERROR);
+    GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
+            ErrorSeverity.ERROR),
 
-    /**
-     * Compiler Warning 39: generated Java warning: <em>message</em>.
-     */
-    //GENERATED_JAVA_WARNING(39, "generated java warning: <arg> ",
-    //                     ErrorSeverity.WARNING);
+    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
+            "unmarked recursive procedure: '<arg2>'; should be: " +
+            "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
+                         ErrorSeverity.WARNING),
+
+    MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: " +
+            "'<arg>' != '<arg2>'",
+                            ErrorSeverity.WARNING),
+
+    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked as recursive, " +
+            "but contains no recursive calls",
+            ErrorSeverity.WARNING),
+
+    INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: " +
+            "<arg2>, <arg3>; these need to be the same types",
+            ErrorSeverity.ERROR),
+
+    ILLEGAL_INCOMING_REF_IN_REQUIRES(42, "found illegal '@'-valued " +
+            "variable ref(s): [<arg; separator={, }>] in requires " +
+            "clause: <arg2>; '@-variables' are not permitted in requires clauses",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;
