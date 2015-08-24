@@ -333,17 +333,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
-        //if (ctx.recursive != null) {
-            // if we're a recursive fxn we need a pointer to the operation
-            // within this scope before we process stmts. NOTE: We shouldn't
-            // have to do this for normal ProcedureDecls since they should have
-            // and Operation signature declared *somewhere* the searcher can/should
-            // be able to find.
-            insertFunction(ctx.name, ctx.type(),
-                    ctx.requiresClause(), ctx.ensuresClause(), ctx);
-        //}
+
         ctx.variableDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
+
         symtab.endScope();
         currentOpProcedureDecl = null;
         insertFunction(ctx.name, ctx.type(),
@@ -1104,18 +1097,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     List<Resolve.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
+        if (currentOpProcedureDecl != null && currentOpProcedureDecl.name
+                .getText().equals(name.getText()) ) {
+            PTType t = tr.progTypes.get(currentOpProcedureDecl.type()) != null ?
+                    tr.progTypes.get(currentOpProcedureDecl.type()) :
+                    PTVoid.getInstance(g);
+            tr.progTypes.put(ctx, t);
+            tr.mathTypes.put(ctx, t.toMath());
+            if (currentOpProcedureDecl.recursive == null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.UNMARKED_RECURSIVE_CALL, name, ctx.getText(),
+                        name.getText());
+            }
+            return;
+        }
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
                             SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                             SymbolTable.ImportStrategy.IMPORT_NAMED));
-            if (currentOpProcedureDecl != null && currentOpProcedureDecl.name
-                    .getText().equals(opSym.getName()) &&
-                    currentOpProcedureDecl.recursive == null) {
-                compiler.errMgr.semanticError(
-                        ErrorKind.UNMARKED_RECURSIVE_CALL, name, ctx.getText(),
-                        opSym.getName());
-            }
+
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;

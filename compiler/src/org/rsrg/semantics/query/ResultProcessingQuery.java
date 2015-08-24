@@ -32,8 +32,9 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
 
     @Override public List<R> searchFromContext(Scope source, SymbolTable repo)
             throws DuplicateSymbolException {
-        return baseQuery.searchFromContext(source, repo).stream()
+        List<R> processedList = baseQuery.searchFromContext(source, repo).stream()
                 .map(mapping::apply)
                 .collect(Collectors.toList());
+        return processedList ;
     }
 }
