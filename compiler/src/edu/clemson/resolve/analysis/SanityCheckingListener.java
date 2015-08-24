@@ -17,6 +17,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
     private final AnnotatedTree tr;
+
     public SanityCheckingListener(RESOLVECompiler rc, AnnotatedTree tr) {
         this.compiler = rc;
         this.tr = tr;
@@ -78,12 +79,13 @@ public class SanityCheckingListener extends ResolveBaseListener {
     private void sanityCheckRecursiveProcKeyword(ParserRuleContext ctx,
                                                  Token name,
                                                  Token recursiveToken) {
-        if (recursiveToken == null && hasRecursiveReference(ctx, name)) {
+        boolean hasRecRef = hasRecursiveReference(ctx, name);
+        if (recursiveToken == null && hasRecRef) {
             compiler.errMgr.semanticError(
                     ErrorKind.UNLABELED_RECURSIVE_FUNC, name, name.getText(),
                     name.getText());
         }
-        else if (recursiveToken != null && !hasRecursiveReference(ctx, name)) {
+        else if (recursiveToken != null && !hasRecRef) {
             compiler.errMgr.semanticError(
                     ErrorKind.LABELED_NON_RECURSIVE_FUNC, name, name.getText());
         }
@@ -98,13 +100,22 @@ public class SanityCheckingListener extends ResolveBaseListener {
     }
 
     private boolean hasRecursiveReference(ParserRuleContext ctx, Token name) {
-        return new ResolveBaseVisitor<Void>() { public boolean foundRef = false;
-            @Override public Void visitProgParamExp(
-                    Resolve.ProgParamExpContext paramExp) {
-                foundRef = paramExp.name.getText().equals(name.getText());
-                return null;
+        return new ResolveBaseVisitor<Boolean>() {
+            @Override public Boolean visitOperationProcedureDecl(
+                    Resolve.OperationProcedureDeclContext ctx) {
+                return ctx.stmt().stream().anyMatch(this::visit);
             }
-        }.foundRef;
+            @Override public Boolean visitStmt(Resolve.StmtContext ctx) {
+                return visit(ctx.getChild(0));
+            }
+            @Override public Boolean visitCallStmt(Resolve.CallStmtContext ctx) {
+                return visit(ctx.progExp());
+            }
+            @Override public Boolean visitProgParamExp(
+                    Resolve.ProgParamExpContext paramExp) {
+                return paramExp.name.getText().equals(name.getText());
+            }
+        }.visit(ctx);
     }
 
 }

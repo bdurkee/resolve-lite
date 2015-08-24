@@ -217,9 +217,9 @@ public enum ErrorKind {
     GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
             ErrorSeverity.ERROR),
 
-    UNLABELED_RECURSIVE_FUNC(39, "recursive call <arg> to unmarked " +
-            "recursive procedure '<arg2>'; correct definition is: " +
-            "Oper <arg2>(..); Recursive Procedure' ... end <arg2>;",
+    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
+            "unmarked recursive procedure: '<arg2>'; should be: " +
+            "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
                          ErrorSeverity.WARNING),
 
     MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: " +
