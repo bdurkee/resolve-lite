@@ -1,6 +1,12 @@
  Facility T; uses Standard_Integers, Standard_Char_Strings;
-     Operation Main ();
-         Recursive Procedure
-             Main();
-     end Main;
+     Operation Prefix_Dog_with (alters prefix : Std_Char_Str_Fac :: Char_Str) :
+             Std_Char_Str_Fac :: Char_Str;
+      Procedure Prefix_Dog_with:=prefix++"Dog"; end Prefix_Dog_with;
+
+
+       Operation Main();
+         Procedure Var x: Std_Char_Str_Fac :: Char_Str;
+                x:="cat"; x:=Prefix_Dog_with(x);
+                Std_Char_Str_Fac :: Write_Line(x);
+        end Main;
 end T;

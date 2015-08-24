@@ -576,8 +576,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected CallStat buildPrimitiveInfixStat(String name,
-                                               Resolve.ProgExpContext left,
-                                               Resolve.ProgExpContext right) {
+                                               ParserRuleContext left,
+                                               ParserRuleContext right) {
         Qualifier.NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
         return new CallStat(qualifier, name, (Expr) built.get(left),
                 (Expr) built.get(right));

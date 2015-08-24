@@ -897,6 +897,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitProgVarExp(Resolve.ProgVarExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
+        return null;
+    }
+
     @Override public Void visitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
         try {
             ProgVariableSymbol variable =
