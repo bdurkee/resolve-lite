@@ -1,6 +1,9 @@
  Facility T; uses Standard_Integers, Standard_Char_Strings;
      Operation Main ();
-         Procedure
+         Recursive Procedure
+            Var x : Std_Char_Str_Fac :: Char_Str;
+            Var y : Std_Integer_Fac :: Integer;
+            y := x;
              Main();
-     end Main;
-end T;
+     end Man;
+end Tao;

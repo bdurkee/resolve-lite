@@ -28,9 +28,9 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             PExpBuildingListener<PExp> pexpAnnotator =
                     new PExpBuildingListener<>(compiler.symbolTable.mathPExps,
                             unit);
-            //SanityChecker sanityChecker = new SanityChecker(compiler, unit);
-
-            //walker.walk(sanityChecker, unit.getRoot());
+            SanityCheckingListener sanityChecker =
+                    new SanityCheckingListener(compiler, unit);
+            walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
             walker.walk(pexpAnnotator, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;

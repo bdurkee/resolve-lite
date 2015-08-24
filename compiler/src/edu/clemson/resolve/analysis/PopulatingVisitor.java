@@ -1104,11 +1104,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     PTVoid.getInstance(g);
             tr.progTypes.put(ctx, t);
             tr.mathTypes.put(ctx, t.toMath());
-            if (currentOpProcedureDecl.recursive == null) {
-                compiler.errMgr.semanticError(
-                        ErrorKind.UNMARKED_RECURSIVE_CALL, name, ctx.getText(),
-                        name.getText());
-            }
             return;
         }
         try {
