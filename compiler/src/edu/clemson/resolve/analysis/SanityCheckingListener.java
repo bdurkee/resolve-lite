@@ -8,6 +8,8 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.RuleNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.programtype.PTType;
 
 /** Uses a combination of listeners and visitors to check for some semantic
@@ -63,7 +65,11 @@ public class SanityCheckingListener extends ResolveBaseListener {
     }
 
     @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
-        //TODO: Also check that lhs is a variable based expr.
+        sanityCheckProgOpTypes(ctx, tr.progTypes.get(ctx.left),
+                tr.progTypes.get(ctx.right));
+    }
+
+    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
         sanityCheckProgOpTypes(ctx,tr.progTypes.get(ctx.left),
                 tr.progTypes.get(ctx.right));
     }
@@ -114,6 +120,9 @@ public class SanityCheckingListener extends ResolveBaseListener {
             @Override public Boolean visitProgParamExp(
                     Resolve.ProgParamExpContext paramExp) {
                 return paramExp.name.getText().equals(name.getText());
+            }
+            @Override public Boolean visitTerminal(TerminalNode var1) {
+                return false;
             }
         }.visit(ctx);
     }
