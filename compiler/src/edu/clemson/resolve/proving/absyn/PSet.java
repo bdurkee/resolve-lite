@@ -85,7 +85,7 @@ public class PSet extends PExp {
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {

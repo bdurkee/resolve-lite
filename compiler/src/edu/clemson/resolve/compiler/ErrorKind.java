@@ -232,6 +232,11 @@ public enum ErrorKind {
 
     INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: " +
             "<arg2>, <arg3>; these need to be the same types",
+            ErrorSeverity.ERROR),
+
+    ILLEGAL_INCOMING_REF_IN_REQUIRES(42, "found illegal '@'-valued " +
+            "variable ref(s): [<arg; separator={, }>] in requires " +
+            "clause: <arg2>; '@-variables' are not permitted in requires clauses",
             ErrorSeverity.ERROR);
 
     public final int code;

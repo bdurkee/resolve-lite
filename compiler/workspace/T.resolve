@@ -1,6 +1,7 @@
- Facility T; uses Standard_Integers, Standard_Char_Strings;
-
-    Operation Main();
-        Recursive Procedure
+ Facility T;
+        uses Standard_Integers, Standard_Char_Strings, Basic_Integer_Theory;
+    Operation Main(evaluates x : Std_Integer_Fac :: Integer);
+            requires @x + x;
+        Procedure
     end Main;
 end T;

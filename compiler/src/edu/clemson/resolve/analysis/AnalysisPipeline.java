@@ -30,10 +30,10 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                             unit);
             SanityCheckingListener sanityChecker =
                     new SanityCheckingListener(compiler, unit);
-            walker.walk(sanityChecker, unit.getRoot());
-            if ( compiler.errMgr.getErrorCount() > 0 ) return;
             walker.walk(pexpAnnotator, unit.getRoot());
             unit.mathPExps = compiler.symbolTable.mathPExps;
+            walker.walk(sanityChecker, unit.getRoot());
+            if ( compiler.errMgr.getErrorCount() > 0 ) return;
         }
     }
 }
