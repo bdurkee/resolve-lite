@@ -1,6 +1,8 @@
 Facility U;
-     
-    Operation Main ();
+        uses Standard_Integers;
+    Operation Main (alters x : Std_Integer_Fac :: Integer);
+            requires true;
+            ensures false;
         Procedure
             Main();
     end Main;
