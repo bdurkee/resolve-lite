@@ -142,10 +142,10 @@ public class Utils {
             return ((Resolve.EnhancementImplModuleContext) ctx).name
                     .getText();
         }
-        else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
+        /*else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
             return ((Resolve.PrecisExtensionModuleContext) ctx).name
                     .getText();
-        }
+        }*/
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

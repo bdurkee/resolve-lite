@@ -1,0 +1,13 @@
+Extension Set_App_Op_Ext for Function_Theory;
+
+    //backed up by syntactic sugar that looks like:
+    Definition App_Op(f : ((U : SSet) -> (V : SSet)),
+        S : Powerset(U)) : Powerset(V) is {v : V | Exists x : S, f(x) = y};
+
+    Corollary A1: Forall U, V : SSet,
+                  Forall f : U -> V, f[Empty_Set] = Empty_Set;
+
+    Corollary A2: Forall U, V : SSet,
+                  Forall f : U -> V, f[Empty_Set] = Empty_Set;
+
+end Set_App_Op_Ext;
