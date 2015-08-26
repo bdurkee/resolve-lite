@@ -455,14 +455,12 @@ mathExp
 
 mathPrimaryExp
     :   mathLiteralExp
-    |   mathFunctionApplicationExp
     |   mathCrossTypeExp
     |   mathSegmentsExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
     |   mathAlternativeExp
-    |   mathFunctionRestrictionExp
     |   mathLambdaExp
     ;
 
@@ -473,6 +471,7 @@ mathLiteralExp
 
 mathFunctionApplicationExp
     :   (AT)? (qualifier=ID COLONCOLON)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
+    |         (qualifier=ID)? name=ID LBRACKET mathExp RBRACKET #mathFunctionRestrictionExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
     ;
 
@@ -510,10 +509,6 @@ mathTupleExp
 
 mathSegmentsExp
     :   (AT)? mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
-    ;
-
-mathFunctionRestrictionExp
-    :   (qualifier=ID)? name=ID LBRACKET mathExp RBRACKET
     ;
 
 // program expressions
