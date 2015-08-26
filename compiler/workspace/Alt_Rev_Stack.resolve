@@ -3,9 +3,9 @@ Facility Alt_Rev_Stack;
 
     Facility SF is Bdd_Stack_Template<Std_Integer_Fac :: Integer>(4)
             implemented by Stk_Array_Impl
-        enhanced by Writing_Capability
+        extended by Writing_Capability
             implemented by Obvious_Writing_Impl(Std_Integer_Fac :: Write)
-        enhanced by Reading_Capability
+        extended by Reading_Capability
             implemented by Obvious_Reading_Impl(Std_Integer_Fac :: Read);
 
     Operation Main();

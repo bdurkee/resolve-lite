@@ -36,6 +36,7 @@ options {
 
 module
     :   precisModule
+   // |   precisExtensionModule
     |   conceptModule
     |   conceptImplModule
     |   facilityModule
@@ -65,7 +66,7 @@ conceptBlock
 // enhancement module
 
 enhancementModule
-    :   ENHANCEMENT name=ID (specModuleParameterList)?
+    :   EXTENSION name=ID (specModuleParameterList)?
         FOR concept=ID SEMI
         (dependentTermOptions)?
         (usesList)?
@@ -145,6 +146,16 @@ precisBlock
         | mathTheoremDecl
         )*
     ;
+
+// precis extension
+
+/*precisExtensionModule
+    :   EXTENSION name=ID FOR precis=ID
+        (EXTENDED BY (ID (COMMA ID)*))? SEMI
+        (usesList)?
+        precisBlock
+        END closename=ID SEMI
+    ;*/
 
 // uses, imports
 
@@ -345,7 +356,7 @@ facilityDecl
     ;
 
 enhancementPairDecl
-    :   ENHANCED BY spec=ID (LT type (COMMA type)* GT)?
+    :   EXTENDED BY spec=ID (LT type (COMMA type)* GT)?
         (specArgs=moduleArgumentList)?
         (externally=EXTERNALLY)? IMPLEMENTED BY impl=ID
         (implArgs=moduleArgumentList)?

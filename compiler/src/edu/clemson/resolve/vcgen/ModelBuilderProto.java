@@ -85,7 +85,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getAllModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
     }
@@ -118,7 +118,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
-                        .assume(getModuleLevelAssertionsOfType(requires()));
+                        .assume(getAllModuleLevelAssertionsOfType(requires()));
         assertiveBlocks.push(block);
     }
 
@@ -157,8 +157,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(s))
                         .assume(getAllParameterAssumptions(paramSyms))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
-                        .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(getAllModuleLevelAssertionsOfType(requires()))
+                        .assume(getAllModuleLevelAssertionsOfType(constraint()))
                         .assume(corrFnExpRequires)
                         .remember();
         assertiveBlocks.push(block);
@@ -197,8 +197,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
                             .freeVars(getFreeVars(s))
-                            .assume(getModuleLevelAssertionsOfType(requires()))
-                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .assume(getAllModuleLevelAssertionsOfType(requires()))
+                            .assume(getAllModuleLevelAssertionsOfType(constraint()))
                             .assume(corrFnExpRequires)
                             .assume(getAllParameterAssumptions(paramSyms))
                             .remember();
@@ -359,7 +359,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return resultingConfirms;
     }
 
-    private List<PExp> getModuleLevelAssertionsOfType(
+    private List<PExp> getAllModuleLevelAssertionsOfType(
             Predicate<Symbol> assertionType) {
         List<GlobalMathAssertionSymbol> result = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
@@ -371,8 +371,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .map(GlobalMathAssertionSymbol::getEnclosedExp)
                 .collect(Collectors.toList());
     }
-
-
 
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type

@@ -1,4 +1,4 @@
-Enhancement Writing_Capability for Bdd_Stack_Template;
+Extension Writing_Capability for Bdd_Stack_Template;
 
 	Operation Write(clears S : Stack);
 end Writing_Capability;

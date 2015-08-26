@@ -3,5 +3,7 @@
     Operation Main(evaluates x : Std_Integer_Fac :: Integer);
             requires @x + x;
         Procedure
+            Var x : Integer;
+
     end Main;
 end T;
