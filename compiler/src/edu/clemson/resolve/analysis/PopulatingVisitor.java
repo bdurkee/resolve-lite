@@ -858,7 +858,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             Resolve.ConstraintClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
-        if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
+        if ( ctx.getParent().getParent().getParent() instanceof Resolve.ModuleContext ) {
             insertGlobalAssertion(ctx, ctx.mathAssertionExp());
         }
         return null;

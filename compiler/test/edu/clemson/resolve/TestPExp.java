@@ -341,17 +341,17 @@ public class TestPExp extends BaseTest {
     @Test public void testPartition() {
         TypeGraph g = new TypeGraph();
 
-     /*   PExp e = parseMathAssertionExp(g, "p implies q");
+        PExp e = parseMathAssertionExp(g, "p implies q");
         List<PExp> partitions = ((PSymbol) e).experimentalSplit();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(p implies q)", partitions.get(0).toString());
 
-        e = parseMathAssertionExp(g, "a and b and g and c and d implies f");
+        e = parseMathAssertionExp(g, "(a and (b and (g and (c and (d implies f))))))");
         partitions = ((PSymbol) e).experimentalSplit();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(((((a and b) and g) and c) and d) implies f)", partitions.get(0).toString());
 
-        e = parseMathAssertionExp(g, "g implies c and d implies f");
+       /* e = parseMathAssertionExp(g, "g implies c and d implies f");
         partitions = ((PSymbol) e).experimentalSplit();
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(g implies c)", partitions.get(0).toString());
@@ -377,14 +377,17 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (Temp = Empty_String)) implies (S = ((Reverse(Temp)) o S)))", partitions.get(0).toString());
         Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_p))) and (not((1 <= |S_p|)))) implies (Temp_p = (Reverse(S))))", partitions.get(1).toString());
-        
-        e = parseMathAssertionExp(g, "b implies y and bv implies a and b and c implies z");
+
+        PExp e = parseMathAssertionExp(g, "((b implies y) and (bv implies a) and ((b and c) implies z))");
+        List<PExp> partitions = ((PSymbol) e).experimentalSplit();
+        Assert.assertEquals(3, partitions.size());*/
+        //Assert.assertEquals("(b implies y)", partitions.get(0).toString());
+        //Assert.assertEquals("(bv implies a)", partitions.get(1).toString());
+        //Assert.assertEquals("((b and c) implies z)", partitions.get(2).toString());
+        e = parseMathAssertionExp(g, "((Max_Capacity > 0) implies ((1 <= ||S||) implies ((||S|| <= Max_Capacity) implies ((||S|| < Max_Capacity) and ((e is_in (S union {e})) and ((((S union {e}) ~ {e}) = S) and true))))))");
         partitions = ((PSymbol) e).experimentalSplit();
-        Assert.assertEquals(3, partitions.size());
-        Assert.assertEquals("(b implies y)", partitions.get(0).toString());
-        Assert.assertEquals("(bv implies a)", partitions.get(1).toString());
-        Assert.assertEquals("((b and c) implies z)", partitions.get(2).toString());
-        */
+        int i;
+        i=0;
     }
 
     protected static ParseTree getTree(String input) {

@@ -1,5 +1,4 @@
 Facility U;
-     
     Operation Main ();
         Procedure
             Main();

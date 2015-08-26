@@ -22,6 +22,7 @@ import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
 import org.rsrg.semantics.query.OperationQuery;
+import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 
@@ -360,20 +361,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private List<PExp> getModuleLevelAssertionsOfType(
             Predicate<Symbol> assertionType) {
-        List<PExp> result = new ArrayList<>();
-        for (String relatedScope : moduleScope.getRelatedModules()) {
-            List<GlobalMathAssertionSymbol> intermediates =
-                    symtab.moduleScopes.get(relatedScope)
-                            .getSymbolsOfType(GlobalMathAssertionSymbol.class)
-                            .stream().filter(assertionType)
-                            .collect(Collectors.toList());
-
-            result.addAll(intermediates.stream()
-                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
-                    .collect(Collectors.toList()));
-        }
-        return result;
+        List<GlobalMathAssertionSymbol> result = moduleScope.query(
+                new SymbolTypeQuery<GlobalMathAssertionSymbol>
+                        (GlobalMathAssertionSymbol.class,
+                                SymbolTable.ImportStrategy.IMPORT_NAMED,
+                                SymbolTable.FacilityStrategy.FACILITY_GENERIC));
+        return result.stream()
+                .filter(assertionType)
+                .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                .collect(Collectors.toList());
     }
+
+
 
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type

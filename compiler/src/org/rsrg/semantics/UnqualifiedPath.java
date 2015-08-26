@@ -75,12 +75,17 @@ public class UnqualifiedPath implements ScopeSearchPath {
                         genericInstantiations, instantiatingFacility,
                         SearchContext.SOURCE_MODULE);
 
-        //Next, if requested, we search any local facilities.
-        /*if ( !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
+        //Hws: Next, if requested, we search any local facilities.
+        //Dtw edit: added temporary first condition.. I want import recursive to search facilities even though normally we don't want to (unless the thing is qualified)
+        //
+        // TODO: ^^ Ideally we wouldn't change anything in here, but instead just fix the queries themselves with a facility ignore
+        //so we wouldn't even have to touch this class. This way we could just keep symbolTypeQuery w/ Facility_Instantiate, or Facility_Generic.
+        if ( searcher instanceof SymbolTypeSearcher && !finished &&
+                facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
             finished =
                     searchFacilities(searcher, results, source,
                             genericInstantiations, searchedScopes, repo);
-        }*/
+        }
 
         //Finally, if requested, we search imports
         if ( (results.isEmpty() || !localPriority)
