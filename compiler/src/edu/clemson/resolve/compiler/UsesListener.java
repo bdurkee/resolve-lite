@@ -39,6 +39,14 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
+    @Override public void enterPrecisExtensionModule(
+            Resolve.PrecisExtensionModuleContext ctx) {
+        for (TerminalNode t : ctx.ID()) { // this will automatically add <id> + 'for' <id> + extended by <id>s
+            tr.uses.add(new AnnotatedTree.UsesRef(ctx.precis));
+            tr.semanticallyVisibleUses.add(ctx.precis.getText());
+        }
+    }
+
     @Override public void exitUsesList(Resolve.UsesListContext ctx) {
         tr.uses.addAll(ctx.ID().stream()
                 .map(t -> new AnnotatedTree.UsesRef(t.getSymbol()))

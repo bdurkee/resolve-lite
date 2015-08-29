@@ -142,10 +142,10 @@ public class Utils {
             return ((Resolve.EnhancementImplModuleContext) ctx).name
                     .getText();
         }
-        /*else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
+        else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
             return ((Resolve.PrecisExtensionModuleContext) ctx).name
                     .getText();
-        }*/
+        }
         else {
             throw new IllegalArgumentException("unrecognized module");
         }
@@ -153,6 +153,22 @@ public class Utils {
 
     public interface Builder<T> {
         T build();
+    }
+
+    /**
+     * Returns a new {@link CommonToken} given some arbitrary, parser created
+     * {@link Token} {@code t}. This is useful for when you want create a token
+     * consisting of {@code desiredText} but with location information
+     * 'filled-in' and accounted for -- taken from {@code t}.
+     *
+     * @param t An existing token (preferablly near where {@code desiredText} should appear
+     * @param desiredText The text we want the resulting token to hold
+     * @return a new token
+     */
+    public static CommonToken createTokenFrom(Token t, String desiredText) {
+        CommonToken result = new CommonToken(t);
+        result.setText(desiredText);
+        return result;
     }
 
     /**

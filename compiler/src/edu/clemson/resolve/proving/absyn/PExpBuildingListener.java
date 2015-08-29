@@ -211,6 +211,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitMathFunctionRestrictionExp(
+            Resolve.MathFunctionRestrictionExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder("App_Op")
+                .arguments(repo.get(ctx.mathExp()))
+                //.quantification(quantifiedVars.get(ctx.name.getText()))
+                .mathTypeValue(getMathTypeValue(ctx))
+                .mathType(getMathType(ctx));
+    }
+
     @Override public void exitMathFunctionExp(
             Resolve.MathFunctionExpContext ctx) {
         List<PExp> s = Utils.collect(PExp.class, ctx.mathExp(), repo);

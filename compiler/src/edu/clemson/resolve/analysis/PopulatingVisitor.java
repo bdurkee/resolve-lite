@@ -145,8 +145,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitConceptImplModule(
             Resolve.ConceptImplModuleContext ctx) {
         moduleScope.addDependentTerms(symtab.moduleScopes.get(
-                ctx.concept.getText()).getDependentTerms())
-                .addParentSpecificationRelationship(ctx.concept.getText());
+                ctx.concept.getText()).getDependentTerms());
         super.visitChildren(ctx);
         return null;
     }
@@ -155,8 +154,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             Resolve.EnhancementImplModuleContext ctx) {
         moduleScope
                 .addDependentTerms(symtab.moduleScopes.get(ctx.concept.getText()).getDependentTerms())
-                .addDependentTerms(symtab.moduleScopes.get(ctx.enhancement.getText()).getDependentTerms())
-                .addParentSpecificationRelationship(ctx.concept.getText());
+                .addDependentTerms(symtab.moduleScopes.get(ctx.enhancement.getText()).getDependentTerms());
         super.visitChildren(ctx);
         return null;
     }
@@ -1455,6 +1453,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
                 ctx.lop.getText()+ "..."+ctx.rop.getText()), ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathFunctionRestrictionExp(
+            Resolve.MathFunctionRestrictionExpContext ctx) {
+        this.visit(ctx.mathExp());
+        typeMathFunctionLikeThing(ctx, Utils.createTokenFrom(ctx.getStart(),
+                "Set_App_Op_Ext"), Utils.createTokenFrom(ctx.getStart(), "App_Op"));
         return null;
     }
 

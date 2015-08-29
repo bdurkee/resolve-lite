@@ -1,0 +1,17 @@
+Precis Extension Closure_Op_Ext for Function_Theory extended by Set_App_Op_Ext;
+
+    Definition Is_Closed_wrt(U : SSet, FC : Powerset(U -> U),
+        S : Powerset(U)) : B;
+
+    Corollary C1: Forall U : SSet, Forall FC : Powerset(U -> U),
+        Is_Closed_wrt(U, FC, U) and Is_Closed_wrt(U, FC, Empty_Set);
+
+    Corollary C2: Forall U : SSet, Forall FC : Powerset(U -> U),
+        Forall S, T : Powerset(U), Is_Closed_wrt(U, FC, S) and
+            Is_Closed_wrt(U, FC, T) implies Is_Closed_wrt(U, FC, S union T);
+
+    Corollary C3: Forall U : SSet, Forall S : Powerset(U),
+        Is_Closed_wrt(U, Empty_Set, S);
+
+end Closure_Op_Ext;
+

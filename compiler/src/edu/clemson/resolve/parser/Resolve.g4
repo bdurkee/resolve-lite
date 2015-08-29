@@ -36,7 +36,7 @@ options {
 
 module
     :   precisModule
-   // |   precisExtensionModule
+    |   precisExtensionModule
     |   conceptModule
     |   conceptImplModule
     |   facilityModule
@@ -149,13 +149,13 @@ precisBlock
 
 // precis extension
 
-/*precisExtensionModule
-    :   EXTENSION name=ID FOR precis=ID
+precisExtensionModule
+    :   PRECIS EXTENSION name=ID FOR precis=ID
         (EXTENDED BY (ID (COMMA ID)*))? SEMI
         (usesList)?
         precisBlock
         END closename=ID SEMI
-    ;*/
+    ;
 
 // uses, imports
 

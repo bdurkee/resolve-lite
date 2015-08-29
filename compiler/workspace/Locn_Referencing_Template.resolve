@@ -1,0 +1,10 @@
+Concept Locn_Referencing_Template<I>
+    (evaluates k : Std_Integer_Fac :: Integer);
+        uses Standard_Integers, Basic_Integer_Theory, Function_Theory,
+            Closure_Op_Ext, Basic_Natural_Number_Theory;
+        requires 1 <= k which_entails k : N;
+
+    Defines Location : SSet;
+    Defines Void : Location;
+
+end Locn_Referencing_Template;
