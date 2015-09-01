@@ -160,6 +160,10 @@ public class Utils {
      * {@link Token} {@code t}. This is useful for when you want create a token
      * consisting of {@code desiredText} but with location information
      * 'filled-in' and accounted for -- taken from {@code t}.
+     * <p>
+     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
+     * the text for the resulting {@code CommonToken} will contain whatever
+     * text existed in {@code t} starting out.</p>
      *
      * @param t An existing token (preferablly near where {@code desiredText} should appear
      * @param desiredText The text we want the resulting token to hold

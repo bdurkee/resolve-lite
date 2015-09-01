@@ -7,6 +7,6 @@ Precis Extension Set_Op_App_Ext for Function_Theory;
         S : Powerset(U)) : Powerset(V) is {v : V | Exists x : S, f(x) = v};
 
     Corollary A1: Forall U, V : SSet,
-                  Forall f : U -> V, f[Empty_Set] = Empty_Set;
+        Forall f : U -> V, f[Empty_Set] = Empty_Set;
 
 end Set_Op_App_Ext;

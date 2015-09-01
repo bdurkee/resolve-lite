@@ -218,6 +218,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 //.quantification(quantifiedVars.get(ctx.name.getText()))
                 .mathTypeValue(getMathTypeValue(ctx))
                 .mathType(getMathType(ctx));
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathFunctionExp(

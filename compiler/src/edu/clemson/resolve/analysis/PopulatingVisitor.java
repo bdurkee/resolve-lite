@@ -793,9 +793,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void insertMathVariables(ParserRuleContext ctx,
             List<TerminalNode> terms, Resolve.MathTypeExpContext type) {
+        this.visit(type);
+        MTType mathTypeValue = tr.mathTypeValues.get(type);
         for (TerminalNode term : terms) {
-            this.visit(type);
-            MTType mathTypeValue = tr.mathTypeValues.get(type);
             if ( walkingDefParams
                     && mathTypeValue.isKnownToContainOnlyMTypes() ) {
                 definitionSchematicTypes.put(term.getText(), mathTypeValue);
@@ -810,6 +810,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
             }
+            tr.mathTypes.put(ctx, mathTypeValue);
         }
     }
 
@@ -1459,8 +1460,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathFunctionRestrictionExp(
             Resolve.MathFunctionRestrictionExpContext ctx) {
         this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, Utils.createTokenFrom(ctx.getStart(),
-                "Set_App_Op_Ext"), Utils.createTokenFrom(ctx.getStart(), "App_Op"));
+        MathSymbol x = getIntendedEntry(null, ctx.name.getText(), ctx);
+        Token qualifier = moduleScope.getModuleID().equals("Set_Op_App_Ext") ? null :
+                Utils.createTokenFrom(ctx.getStart(), "Set_Op_App_Ext");
+        Token name = Utils.createTokenFrom(ctx.getStart(), "App_Op");
+        typeMathFunctionLikeThing(ctx, qualifier, name,
+                x.getDefiningTree(), ctx.mathExp());
         return null;
     }
 
@@ -1543,13 +1548,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void typeMathFunctionLikeThing(ParserRuleContext ctx,
                                Token qualifier, Token name,
-                               Resolve.MathExpContext... args) {
+                               ParserRuleContext ... args) {
         typeMathFunctionLikeThing(ctx, qualifier, name, Arrays.asList(args));
     }
 
     private void typeMathFunctionLikeThing(ParserRuleContext ctx,
                                Token qualifier, Token name,
-                               List<Resolve.MathExpContext> args) {
+                               List<? extends ParserRuleContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
         foundExpType =
@@ -1600,7 +1605,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private MathSymbol getIntendedFunction(ParserRuleContext ctx,
                                Token qualifier, Token name,
-                               List<Resolve.MathExpContext> args) {
+                               List<? extends ParserRuleContext> args) {
         tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
                 args, tr.mathTypes));
         PSymbol e = (PSymbol)getPExpFor(ctx);
@@ -1792,7 +1797,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void emit(String msg) {
         if (EMIT_DEBUG) {
-            emit(msg);
+            compiler.info(msg);
         }
     }
 }
