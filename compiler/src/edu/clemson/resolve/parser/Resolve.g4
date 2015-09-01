@@ -332,11 +332,10 @@ mathInductiveDefinitionDecl
     ;
 
 mathSymbol
-    :   (PLUS|MINUS|CUTMINUS|DIVIDE|CAT|MULT|INT|LTE|LT|GT|GTE)
+    :   (ID|PLUS|MINUS|CUTMINUS|DIVIDE|CAT|MULT|INT|LTE|LT|GT|GTE)*
     |   BAR TRIPLEDOT BAR
     |   LT TRIPLEDOT GT
     |   DBL_BAR TRIPLEDOT DBL_BAR
-    |   ID
     ;
 
 mathVariableDeclGroup
@@ -448,6 +447,7 @@ mathExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
+    |   mathExp op=MATH_SYM mathExp                   #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     |   mathPrimaryExp                                  #mathPrimeExp
@@ -476,7 +476,7 @@ mathFunctionApplicationExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
     ;
 
- mathFunctionRestrictionExp
+mathFunctionRestrictionExp
     :   restrictionFunctionExp LBRACKET mathExp RBRACKET
     ;
 

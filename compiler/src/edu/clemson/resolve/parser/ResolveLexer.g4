@@ -182,6 +182,10 @@ CHAR: '\'' . '\'' ;
 
 STRING: '"' ~( '"' | '\r' | '\n' )* '"';
 
+MATH_SYM
+    :   (ID|'+'|'-')+
+    ;
+
 PROG_BOOL
     :   TRUE
     |   FALSE

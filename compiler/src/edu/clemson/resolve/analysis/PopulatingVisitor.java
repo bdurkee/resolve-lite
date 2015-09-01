@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = true;
+    private static final boolean EMIT_DEBUG = false;
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
