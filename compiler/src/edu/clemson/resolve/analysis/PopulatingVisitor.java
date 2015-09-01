@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = false;
+    private static final boolean EMIT_DEBUG = true;
     private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
@@ -1459,13 +1459,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathFunctionRestrictionExp(
             Resolve.MathFunctionRestrictionExpContext ctx) {
+        this.visit(ctx.restrictionFunctionExp());
         this.visit(ctx.mathExp());
-        MathSymbol x = getIntendedEntry(null, ctx.name.getText(), ctx);
         Token qualifier = moduleScope.getModuleID().equals("Set_Op_App_Ext") ? null :
                 Utils.createTokenFrom(ctx.getStart(), "Set_Op_App_Ext");
         Token name = Utils.createTokenFrom(ctx.getStart(), "App_Op");
         typeMathFunctionLikeThing(ctx, qualifier, name,
-                x.getDefiningTree(), ctx.mathExp());
+                ctx.restrictionFunctionExp(), ctx.mathExp());
+        return null;
+    }
+    //in a math function restriction exp, like 'P.Lab[e]', this node refers
+    //to the P.Lab part, exclusively.
+    @Override public Void visitRestrictionFunctionExp(
+            Resolve.RestrictionFunctionExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
         return null;
     }
 
