@@ -135,6 +135,7 @@ CAT				:	'o'				;
 CUTMINUS		:	'.-.'			;
 DBL_BAR			:	'||'			;
 DIVIDE			:	'/'				;
+LDIVIDE			:	'\\'			;
 EQUALS			:	'='				;
 GT				:	'>'				;
 GTE				:	'>='			;
@@ -152,7 +153,6 @@ NEQUALS			:	'/='			;
 OR 				:	'or'			;
 PLUS			:	'+'				;
 PLUSPLUS		:	'++'			;
-PLUSPLUSPLUS	:	'+++'			;
 RANGE			:	'..'			;
 RARROW			:	'->'			;
 SWAP			:	':=:'			;
@@ -181,10 +181,6 @@ INT	: [0-9]+
 CHAR: '\'' . '\'' ;
 
 STRING: '"' ~( '"' | '\r' | '\n' )* '"';
-
-MATH_SYM
-    :   (ID|'+'|'-')+
-    ;
 
 PROG_BOOL
     :   TRUE

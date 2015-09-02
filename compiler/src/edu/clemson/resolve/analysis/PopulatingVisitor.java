@@ -1450,6 +1450,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    //Todo: somehow merge this back with MathInfixExp. Prob. has to do with the op
+    //token in the rule not referring to lexer rule
+    @Override public Void visitMathCustomInfixExp(Resolve.MathCustomInfixExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        Token x = Utils.createTokenFrom(ctx.mathSymbol().getStart(), ctx.mathSymbol().getText());
+        typeMathFunctionLikeThing(ctx, null, x, ctx.mathExp());
+        return null;
+    }
+
     @Override public Void visitMathOutfixExp(Resolve.MathOutfixExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,

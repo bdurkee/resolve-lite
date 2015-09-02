@@ -139,6 +139,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    @Override public void exitMathCustomInfixExp(Resolve.MathCustomInfixExpContext ctx) {
+        PSymbolBuilder result =
+                new PSymbolBuilder(ctx.mathSymbol().getText())
+                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
+                        .style(PSymbol.DisplayStyle.INFIX)
+                        .mathTypeValue(getMathTypeValue(ctx))
+                        .mathType(getMathType(ctx));
+        repo.put(ctx, result.build());
+    }
+
     @Override public void exitMathOutfixExp(Resolve.MathOutfixExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText()) //

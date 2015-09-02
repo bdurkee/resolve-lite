@@ -305,6 +305,16 @@ mathDefinitionSig
             COLON mathTypeExp
     ;
 
+//Todo: Clean this up for god's sake.
+mathSymbol
+    :   ID (PLUS|MINUS|CUTMINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE)?
+    |   (PLUS|MINUS|CUTMINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
+    |   BAR TRIPLEDOT BAR
+    |   LT TRIPLEDOT GT
+    |   DBL_BAR TRIPLEDOT DBL_BAR
+    |   LDIVIDE TRIPLEDOT DIVIDE
+    ;
+
 mathDefinitionParameter
     :   mathVariableDeclGroup
     |   ID
@@ -329,13 +339,6 @@ mathInductiveDefinitionDecl
     :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig IS
         BASE_CASE mathAssertionExp SEMI
         INDUCTIVE_CASE mathAssertionExp SEMI
-    ;
-
-mathSymbol
-    :   (ID|PLUS|MINUS|CUTMINUS|DIVIDE|CAT|MULT|INT|LTE|LT|GT|GTE)*
-    |   BAR TRIPLEDOT BAR
-    |   LT TRIPLEDOT GT
-    |   DBL_BAR TRIPLEDOT DBL_BAR
     ;
 
 mathVariableDeclGroup
@@ -438,6 +441,7 @@ mathQuantifiedExp
 
 mathExp
     :   op=NOT mathExp                                  #mathUnaryExp
+    |   mathExp mathSymbol mathExp                      #mathCustomInfixExp     //TODO: Be careful with this alt.!
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
     |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
@@ -447,7 +451,6 @@ mathExp
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
-    |   mathExp op=MATH_SYM mathExp                   #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     |   mathPrimaryExp                                  #mathPrimeExp
@@ -493,6 +496,7 @@ mathOutfixExp
     :   lop=LT mathExp rop=GT
     |   lop=BAR mathExp rop=BAR
     |   lop=DBL_BAR mathExp rop=DBL_BAR
+    |   lop=LDIVIDE mathExp rop=DIVIDE
     ;
 
 mathSetExp

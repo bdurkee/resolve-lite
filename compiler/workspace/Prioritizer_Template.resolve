@@ -1,0 +1,27 @@
+Concept Prioritizer_Template<E>(
+                    evaluates Max_Capacity : Std_Integer_Fac :: Integer;
+                    Definition LEQV(x, y : E) : B;);
+        uses Standard_Integers, Basic_Ordering_Theory, Basic_Integer_Theory,
+            Basic_Natural_Number_Theory, Basic_Multiset_Theory;
+    requires Is_Total_Preordering(LEQV) and Max_Capacity > 0
+            which_entails Max_Capacity : N;
+
+    Type Family Element_Keeper is modeled by Cart_Prod
+            Element_Tally : FMSet(E);
+            Is_Accepting : B;
+        end;
+        exemplar K;
+        constraints ||K.Element_Tally|| <= Max_Capacity;
+        initialization
+            ensures K.Is_Accepting and K.Element_Tally = Empty_Multiset;
+
+    Operation Add_Element (clears e : E; updates K : Element_Keeper);
+        requires ||K.Element_Tally|| < Max_Capacity and K.Is_Accepting;
+        ensures K.Is_Accepting and
+            K.Element_Tally = @K.Element_Tally multiset_union+ \@e/;
+
+    Operation Change_Modes (updates K : Element_Keeper);
+        ensures K.Is_Accepting = not (@K.Is_Accepting and
+            K.Element_Tally = @K.Element_Tally);
+
+end Prioritizer_Template;
