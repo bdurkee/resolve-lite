@@ -49,7 +49,7 @@ public class TestCodegenCalls extends BaseTest {
                 "Facility T; uses Standard_Integers, Standard_Char_Strings;" +
                         "Operation Prefix_Dog_with (alters prefix : Std_Char_Str_Fac :: Char_Str) :" +
                         "   Std_Char_Str_Fac :: Char_Str; " +
-                        "   Procedure Prefix_Dog_with:=prefix++\"Dog\"; end Foo;" +
+                        "   Procedure Prefix_Dog_with:=prefix++\"Dog\"; end Prefix_Dog_with;" +
                         "Operation Main(); " +
                         "   Procedure Var x: Std_Char_Str_Fac :: Char_Str;" +
                         "   x:=\"cat\"; x:=Prefix_Dog_with(x); " +
@@ -75,6 +75,80 @@ public class TestCodegenCalls extends BaseTest {
         String facility = facilityST.render();
         String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("1\n0\n", found);
+    }
+
+    @Test public void testSugardArithmethticCalls() throws Exception {
+        ST facilityST = new ST(
+                "Facility T; uses Standard_Integers;" +
+                        "Operation Main(); " +
+                        "   Procedure Var i : Std_Integer_Fac :: Integer;" +
+                        "   Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i+1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i+1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i+1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i+1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i+1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i-1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i-1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i-1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i-1; Std_Integer_Fac :: Write_Line(i);" +
+                        "   i:=i-1; Std_Integer_Fac :: Write_Line(i);" +
+                        "end Main;" +
+                        "end T;");
+        String facility = facilityST.render();
+        String found = execCode("T.resolve", facility, "T", false);
+        Assert.assertEquals("0\n1\n2\n3\n4\n5\n4\n3\n2\n1\n0\n", found);
+    }
+
+    @Test public void testRelationalCalls() throws Exception {
+        ST facilityST = new ST(
+                "Facility T; uses Standard_Integers, Standard_Booleans;" +
+                        "Operation Main(); " +
+                        "   Procedure Var i,j : Std_Integer_Fac :: Integer;" +
+                        "   i++; " +
+                        "   Std_Boolean_Fac :: Write_Line(i\\<j); j++;" +
+                        "   Std_Boolean_Fac :: Write_Line(i\\<j); j++;" +
+                        "   Std_Boolean_Fac :: Write_Line(i\\<j);" +
+                        "   Std_Boolean_Fac :: Write_Line(i\\<=j); j--;" +
+                        "   Std_Boolean_Fac :: Write_Line(i\\<=j); j--;" +
+                        "   Std_Boolean_Fac :: Write_Line(i>j);" +
+                        "   Std_Boolean_Fac :: Write_Line(i>=j); i--;" +
+                        "   Std_Boolean_Fac :: Write_Line(i>j); " +
+                        "end Main;" +
+                        "end T;");
+        String facility = facilityST.render();
+        String found = execCode("T.resolve", facility, "T", false);
+        Assert.assertEquals("false\nfalse\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\n", found);
+    }
+
+    @Test public void testRelationalEqualCalls() throws Exception {
+        ST facilityST = new ST(
+                "Facility T; uses Standard_Integers, Standard_Booleans;" +
+                        "Operation Main(); " +
+                        "   Procedure Var i,j : Std_Integer_Fac :: Integer;" +
+                        "   i++; " +
+                        "   Std_Boolean_Fac :: Write_Line(i/=j); j++;" +
+                        "   Std_Boolean_Fac :: Write_Line(i=j);" +
+                        "end Main;" +
+                        "end T;");
+        String facility = facilityST.render();
+        String found = execCode("T.resolve", facility, "T", false);
+        Assert.assertEquals("true\ntrue\n", found);
+    }
+
+    @Test public void testWrappedArithmetic() throws Exception {
+        ST facilityST = new ST(
+                "Facility T; uses Standard_Integers, Standard_Booleans;" +
+                        "Operation Main(); " +
+                        "   Procedure Var i,j : Std_Integer_Fac :: Integer;" +
+                        "   i++; " +
+                        "   Std_Boolean_Fac :: Write_Line(i/=j); j++;" +
+                        "   Std_Boolean_Fac :: Write_Line(i=j);" +
+                        "end Main;" +
+                        "end T;");
+        String facility = facilityST.render();
+        String found = execCode("T.resolve", facility, "T", false);
+        Assert.assertEquals("true\ntrue\n", found);
     }
 
 }

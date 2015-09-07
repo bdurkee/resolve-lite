@@ -6,9 +6,9 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
- * Visits a statements within a parse tree context and looks for recursive
- * calls. The visit chain returns an {@code true} if a recursive call was found,
- * and {@code false} otherwise.
+ * Visits statements within a parse tree context and looks for recursive
+ * calls. The visit chain returns an {@code true} if a recursive call was found;
+ * {@code false} otherwise.
  */
 public class RecursiveStatementCheckingVisitor
         extends
