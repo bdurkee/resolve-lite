@@ -24,7 +24,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         end;
 
         Operation Fix_Pos (alters e : T; updates P : Spiral_Pos) : Std_Integer_Fac :: Integer;
-            Procedure
+            Recursive Procedure
                 Fix_Pos(e, P);
         end Fix_Pos;
 

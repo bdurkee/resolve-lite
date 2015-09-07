@@ -242,7 +242,11 @@ public enum ErrorKind {
     MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
             "recursive call: <arg>. I.e.: it fails to match in either " +
             "number or type (or both) for recursive operation: <arg2>",
-            ErrorSeverity.ERROR);
+            ErrorSeverity.ERROR),
+
+    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "the name for symbol s=<arg>, " +
+            "(which is <arg2>) shares the same name as the enclosing module; " +
+            "it needs a unique name", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

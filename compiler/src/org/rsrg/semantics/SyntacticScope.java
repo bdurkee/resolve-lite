@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.compiler.ErrorKind;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
@@ -43,6 +44,13 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
         if ( symbols.containsKey(s.getName()) ) {
             throw new DuplicateSymbolException(symbols.get(s.getName()));
+        }
+        if ( s.getName().equals(moduleID) ) {
+            symtab.getCompiler().errMgr.semanticError(
+                    ErrorKind.SYMBOL_NAME_MATCHES_MODULE_NAME,
+                    s.getDefiningTree().getStart(), s.toString(),
+                    s.getSymbolDescription());
+            return s;
         }
         symbols.put(s.getName(), s);
         return s;

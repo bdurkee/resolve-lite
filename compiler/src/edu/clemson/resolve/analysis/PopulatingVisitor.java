@@ -136,7 +136,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModule(Resolve.ModuleContext ctx) {
-        moduleScope = symtab.startModuleScope(ctx, Utils.getModuleName(ctx))
+        String moduleName = Utils.getModuleName(ctx);
+        moduleScope = symtab.startModuleScope(ctx, moduleName)
                 .addImports(tr.semanticallyVisibleUses);
         super.visitChildren(ctx);
         symtab.endScope();
@@ -284,6 +285,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.name.getText());
         }
+        currentProcedureDecl = null;
         return null;
     }
 
@@ -1136,7 +1138,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     return;
                 }
                 PTType t = declaredTypeCtx != null ?
-                        tr.progTypes.get(declaredTypeCtx) :
+                        tr.progTypeValues.get(declaredTypeCtx) :
                         PTVoid.getInstance(g);
                 tr.progTypes.put(ctx, t);
                 tr.mathTypes.put(ctx, t.toMath());
