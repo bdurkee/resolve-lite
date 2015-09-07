@@ -9,7 +9,6 @@ import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -100,7 +99,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
     private void sanityCheckRecursiveProcKeyword(ParserRuleContext ctx,
                                                  Token name,
                                                  Token recursiveToken) {
-        boolean hasRecRef = hasRecursiveReference(ctx, name);
+        boolean hasRecRef = hasRecursiveReferenceInStmts(ctx, name);
         if (recursiveToken == null && hasRecRef) {
             compiler.errMgr.semanticError(
                     ErrorKind.UNLABELED_RECURSIVE_FUNC, name, name.getText(),
@@ -120,7 +119,8 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
-    private boolean hasRecursiveReference(ParserRuleContext ctx, Token name) {
+    private boolean hasRecursiveReferenceInStmts(
+            ParserRuleContext ctx, Token name) {
         return new ResolveBaseVisitor<Boolean>() {
             @Override public Boolean visitOperationProcedureDecl(
                     Resolve.OperationProcedureDeclContext ctx) {
@@ -129,6 +129,19 @@ public class SanityCheckingListener extends ResolveBaseListener {
             @Override public Boolean visitProcedureDecl(
                     Resolve.ProcedureDeclContext ctx) {
                 return ctx.stmt().stream().anyMatch(this::visit);
+            }
+            //TODO: Add visit for whileStmt too (or else recursive calls
+            //appearing within while stmts won't be found
+            @Override public Boolean visitIfStmt(Resolve.IfStmtContext ctx) {
+                boolean result = false;
+                result = visit(ctx.progExp());
+                if (!result) result = ctx.stmt().stream().anyMatch(this::visit);
+                if (!result && ctx.elsePart() != null) {
+                    result = ctx.elsePart().stmt()
+                            .stream()
+                            .anyMatch(this::visit);
+                }
+                return result;
             }
             @Override public Boolean visitStmt(Resolve.StmtContext ctx) {
                 return visit(ctx.getChild(0));
