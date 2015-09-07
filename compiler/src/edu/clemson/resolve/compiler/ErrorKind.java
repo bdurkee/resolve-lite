@@ -244,7 +244,7 @@ public enum ErrorKind {
             "number or type (or both) for recursive operation: <arg2>",
             ErrorSeverity.ERROR),
 
-    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "the name for symbol s=<arg>, " +
+    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, " +
             "(which is <arg2>) shares the same name as the enclosing module; " +
             "it needs a unique name", ErrorSeverity.ERROR);
 

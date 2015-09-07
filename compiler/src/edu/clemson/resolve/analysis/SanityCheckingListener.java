@@ -121,50 +121,9 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     private boolean hasRecursiveReferenceInStmts(
             ParserRuleContext ctx, Token name) {
-        return new ResolveBaseVisitor<Boolean>() {
-            @Override public Boolean visitOperationProcedureDecl(
-                    Resolve.OperationProcedureDeclContext ctx) {
-                return ctx.stmt().stream().anyMatch(this::visit);
-            }
-            @Override public Boolean visitProcedureDecl(
-                    Resolve.ProcedureDeclContext ctx) {
-                return ctx.stmt().stream().anyMatch(this::visit);
-            }
-            //TODO: Add visit for whileStmt too (or else recursive calls
-            //appearing within while stmts won't be found
-            @Override public Boolean visitIfStmt(Resolve.IfStmtContext ctx) {
-                boolean result = false;
-                result = visit(ctx.progExp());
-                if (!result) result = ctx.stmt().stream().anyMatch(this::visit);
-                if (!result && ctx.elsePart() != null) {
-                    result = ctx.elsePart().stmt()
-                            .stream()
-                            .anyMatch(this::visit);
-                }
-                return result;
-            }
-            @Override public Boolean visitStmt(Resolve.StmtContext ctx) {
-                return visit(ctx.getChild(0));
-            }
-            @Override public Boolean visitCallStmt(Resolve.CallStmtContext ctx) {
-                return visit(ctx.progExp());
-            }
-            @Override public Boolean visitProgPrimary(Resolve.ProgPrimaryContext ctx) {
-                return visit(ctx.getChild(0));
-            }
-            @Override public Boolean visitProgPrimaryExp(Resolve.ProgPrimaryExpContext ctx) {
-                return visit(ctx.progPrimary());
-            }
-            @Override public Boolean visitProgParamExp(
-                    Resolve.ProgParamExpContext paramExp) {
-                return paramExp.name.getText().equals(name.getText()) &&
-                        (paramExp.qualifier == null);
-                //recursive calls are must be to a local operation (disregarding mutual rec.)
-            }
-            @Override public Boolean visitTerminal(TerminalNode var1) {
-                return false;
-            }
-        }.visit(ctx);
+        RecursiveStatementCheckingVisitor checker =
+                new RecursiveStatementCheckingVisitor(name);
+        return checker.visit(ctx);
     }
 
 }
