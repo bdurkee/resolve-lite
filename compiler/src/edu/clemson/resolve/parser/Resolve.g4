@@ -441,13 +441,13 @@ mathQuantifiedExp
 
 mathExp
     :   op=NOT mathExp                                  #mathUnaryExp
-    |   mathExp mathSymbol mathExp                      #mathCustomInfixExp     //TODO: Be careful with this alt.!
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
     |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
     |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
     |   mathExp op=(CAT|UNION|INTERSECT) mathExp        #mathInfixExp
     |   mathExp op=(IS_IN|IS_NOT_IN) mathExp            #mathInfixExp
     |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
+    |   mathExp mathSymbol mathExp                      #mathCustomInfixExp     //TODO: Be careful with this alt.!
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
@@ -527,17 +527,21 @@ mathSegmentsExp
 
 // program expressions
 
+//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
+//we could really use some unit tests to perhaps check precendence so that in the future when
+//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   LPAREN progExp RPAREN                           #progNestedExp
     |   op=(MINUS|NOT) progExp                          #progUnaryExp
     |   progExp op=(PLUSPLUS|MINUSMINUS)                #progPostfixExp
     |   progExp op=MOD progExp                          #progInfixExp
-    |   progExp op=(AND|OR) progExp                     #progInfixExp
     |   progExp op=(MULT|DIVIDE|PLUSPLUS) progExp       #progInfixExp
     |   progExp op=(PLUS|MINUS) progExp                 #progInfixExp
     |   progExp op=(LTE|GTE|LT|GT) progExp              #progInfixExp
     |   progExp op=(EQUALS|NEQUALS) progExp             #progInfixExp
+    |   progExp op=AND progExp                          #progInfixExp
+    |   progExp op=OR progExp                          #progInfixExp
     ;
 
 progPrimary

@@ -47,7 +47,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 if ( compiler.genCode.equalsIgnoreCase("java") ) {
                     ST generatedST = gen.generateModule();
-                    String t = generatedST.render();
+                    //System.out.println("t="+generatedST.render());
                     translatedSoFar.add(new JavaUnit(unit.getName(), generatedST.render()));
 
                     //Todo: Try to coalecse this and "addAdditionalFiles" into the same method

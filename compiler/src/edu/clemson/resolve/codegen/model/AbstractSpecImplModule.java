@@ -58,11 +58,8 @@ public abstract class AbstractSpecImplModule extends Module {
         this.ctor = new CtorDef(this.name, concept, facilityVars, memberVars);
     }
 
-    protected FunctionImpl buildInitMethod(String name) {
-        FunctionImpl initterFunc = new FunctionImpl("init" + name);
-        initterFunc.hasReturn = true;
-        initterFunc.stats.add(new ReturnStat(name));
-        return initterFunc;
+    protected FunctionImpl.InitterFunctionImpl buildInitMethod(String name) {
+        return new FunctionImpl.InitterFunctionImpl(name);
     }
 
     protected FunctionImpl buildGetterMethod(String name) {

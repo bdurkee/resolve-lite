@@ -1,0 +1,12 @@
+Extension Spiral_Checking_Ops for Bdd_Spiral_Template;
+    uses Standard_Booleans, Basic_Spiral_Theory;
+
+    Operation At_Center (restores P : Spiral_Pos) :
+            Std_Boolean_Fac :: Boolean;
+       ensures At_End = (P.Curr_Loc = Cen(k));
+
+    Operation At_End (restores P : Spiral_Pos) :
+            Std_Boolean_Fac :: Boolean;
+       // ensures At_End = (P.Curr_Loc = P.Trmnl_Loc);
+
+end Spiral_Checking_Ops;

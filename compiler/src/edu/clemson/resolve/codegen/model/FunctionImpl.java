@@ -13,4 +13,10 @@ public class FunctionImpl extends FunctionDef {
     public FunctionImpl(String name) {
         super(name);
     }
+
+    public static class InitterFunctionImpl extends FunctionImpl {
+        public InitterFunctionImpl(String name) {
+            super(name);
+        }
+    }
 }

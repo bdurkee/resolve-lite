@@ -184,6 +184,12 @@ public <if(func.isStatic)>static <endif><\\>
 }
 >>
 
+InitterFunctionImpl(func) ::= <<
+public RType init<func.name>() {
+    return <func.name>.initialValue();
+}
+>>
+
 ConceptDelegateMethod(method) ::= <<
 @Override public <if(method.hasReturn)>RType <else>void <endif><method.name><\\>
 (<method.parameters : {p | RType <p>}; separator=", ">) {
@@ -257,13 +263,13 @@ CallStat(call, methodParamExp) ::= "<methodParamExp>;"
 ReturnStat(ret) ::= "return <ret.name>;"
 
 WhileStat(while, cond, stats) ::= <<
-while (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
+while (((Boolean_Impl.Boolean)(<cond>)).val) {
     <stats; separator="\n">
 }
 >>
 
 IfStat(if, cond, ifStats, elseStats) ::= <<
-if (((Boolean_Impl.Boolean)(<cond>)).rep.val) {
+if (((Boolean_Impl.Boolean)(<cond>)).val) {
     <ifStats; separator="\n">
 }<if(elseStats)>
 else {

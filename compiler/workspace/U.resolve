@@ -1,7 +1,7 @@
 Facility U;
         uses Standard_Integers;
-    Operation Main (alters x : Std_Integer_Fac :: Integer);
-        Procedure
+    Operation Main ();
+        Recursive Procedure
             Main();
     end Main;
 end U;

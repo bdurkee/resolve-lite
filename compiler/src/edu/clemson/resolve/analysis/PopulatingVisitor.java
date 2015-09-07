@@ -71,12 +71,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingDefParams = false;
 
     /**
-     * Keeps track of the current operationProcedure we're visiting;
+     * Keeps track of the current operationProcedure (and procedure) we're visiting;
      * {@code null} otherwise. We use this to check whether a recursive call is
      * being made to an operation procedure decl that hasn't been marked
      * 'Recursive'.
      */
     private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
+    private Resolve.ProcedureDeclContext currentProcedureDecl = null;
 
     /**
      * Set to {@code true} when we're walking the arguments to a module
@@ -240,6 +241,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         OperationSymbol correspondingOp = null;
+        currentProcedureDecl = ctx;
         try {
             correspondingOp =
                     symtab.getInnermostActiveScope()
@@ -1012,7 +1014,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 .map(tr.progTypes::get).collect(Collectors.toList());
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, argTypes);
-        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
@@ -1020,7 +1022,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.progExp());
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
-        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
@@ -1028,13 +1030,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.progExp());
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
-        typeOperationSym(ctx, attr.qualifier, attr.name, ctx.progExp());
+        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
     @Override public Void visitProgParamExp(Resolve.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
-        typeOperationSym(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+        typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
         return null;
     }
 
@@ -1092,26 +1094,57 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return result;
     }
 
-    protected void typeOperationSym(ParserRuleContext ctx,
-                                    Token qualifier, Token name,
-                                    Resolve.ProgExpContext ... args) {
-        typeOperationSym(ctx, qualifier, name, Arrays.asList(args));
+    protected void typeOperationRefExp(ParserRuleContext ctx,
+                                       Token qualifier, Token name,
+                                       Resolve.ProgExpContext... args) {
+        typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
     }
 
-    protected void typeOperationSym(ParserRuleContext ctx,
-                                    Token qualifier, Token name,
-                                    List<Resolve.ProgExpContext> args) {
+    protected void typeOperationRefExp(ParserRuleContext ctx,
+                                       Token qualifier, Token name,
+                                       List<Resolve.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
-        if (currentOpProcedureDecl != null && currentOpProcedureDecl.name
-                .getText().equals(name.getText()) ) {
-            PTType t = tr.progTypes.get(currentOpProcedureDecl.type()) != null ?
-                    tr.progTypes.get(currentOpProcedureDecl.type()) :
-                    PTVoid.getInstance(g);
-            tr.progTypes.put(ctx, t);
-            tr.mathTypes.put(ctx, t.toMath());
-            return;
+        //for recursive calls
+        if (currentOpProcedureDecl != null || currentProcedureDecl != null) {
+            String currentName = currentOpProcedureDecl != null ?
+                    currentOpProcedureDecl.name.getText() :
+                    currentProcedureDecl.name.getText();
+
+            boolean isMarkedRecursive = currentOpProcedureDecl != null ?
+                    currentOpProcedureDecl.recursive != null :
+                    currentProcedureDecl.recursive != null;
+
+            Resolve.OperationParameterListContext formalParamListNode =
+                    currentOpProcedureDecl != null ?
+                            currentOpProcedureDecl.operationParameterList() :
+                            currentProcedureDecl.operationParameterList();
+
+            Resolve.TypeContext declaredTypeCtx =
+                    currentOpProcedureDecl != null ?
+                            currentOpProcedureDecl.type() :
+                            currentProcedureDecl.type();
+
+            if (currentName.equals(name.getText()) && qualifier == null) {
+                if (formalParamListNode.parameterDeclGroup().size() !=
+                        argTypes.size()) {
+                    compiler.errMgr.semanticError(ErrorKind.MALFORMED_RECURSIVE_OP_CALL,
+                            ctx.getStart(), ctx.getText(),
+                            currentOpProcedureDecl.name.getText());
+                    tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+                    tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+                    return;
+                }
+                PTType t = declaredTypeCtx != null ?
+                        tr.progTypes.get(declaredTypeCtx) :
+                        PTVoid.getInstance(g);
+                tr.progTypes.put(ctx, t);
+                tr.mathTypes.put(ctx, t.toMath());
+                return;
+            }
         }
+
+        //every other call
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
@@ -1121,8 +1154,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
             return;
-        }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = args.stream()
                     .map(Resolve.ProgExpContext::getText)
                     .collect(Collectors.toList());
@@ -1131,6 +1163,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+    }
+    private void handleRecursiveOperationRef(ParserRuleContext ctx,
+                                             Token qualifier, Token name,
+                                             List<PTType> actualArgTypes) {
     }
 
     //---------------------------------------------------

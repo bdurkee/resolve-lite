@@ -13,7 +13,8 @@ Precis Basic_Multiset_Theory;   @Dependent_Terms{aleph_nought}
     /** empty multiset */
     Definition Empty_Multiset : MSet is Multiset_Frmr(Empty_Set, ||Empty_Set||);
         Corollary EM1: Empty_Multiset = Empty_Set;
-        Corollary EM2: Forall M : MSet, M = Empty_Set implies M = Empty_Multiset;
+        Corollary EM2: Forall M : MSet,
+            M = Empty_Set implies M = Empty_Multiset;
 
     /** singleton multiset */
     Definition \.../(x : El) : MSet;

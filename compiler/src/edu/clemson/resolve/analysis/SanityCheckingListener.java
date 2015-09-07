@@ -126,15 +126,27 @@ public class SanityCheckingListener extends ResolveBaseListener {
                     Resolve.OperationProcedureDeclContext ctx) {
                 return ctx.stmt().stream().anyMatch(this::visit);
             }
+            @Override public Boolean visitProcedureDecl(
+                    Resolve.ProcedureDeclContext ctx) {
+                return ctx.stmt().stream().anyMatch(this::visit);
+            }
             @Override public Boolean visitStmt(Resolve.StmtContext ctx) {
                 return visit(ctx.getChild(0));
             }
             @Override public Boolean visitCallStmt(Resolve.CallStmtContext ctx) {
                 return visit(ctx.progExp());
             }
+            @Override public Boolean visitProgPrimary(Resolve.ProgPrimaryContext ctx) {
+                return visit(ctx.getChild(0));
+            }
+            @Override public Boolean visitProgPrimaryExp(Resolve.ProgPrimaryExpContext ctx) {
+                return visit(ctx.progPrimary());
+            }
             @Override public Boolean visitProgParamExp(
                     Resolve.ProgParamExpContext paramExp) {
-                return paramExp.name.getText().equals(name.getText());
+                return paramExp.name.getText().equals(name.getText()) &&
+                        (paramExp.qualifier == null);
+                //recursive calls are must be to a local operation (disregarding mutual rec.)
             }
             @Override public Boolean visitTerminal(TerminalNode var1) {
                 return false;

@@ -237,6 +237,11 @@ public enum ErrorKind {
     ILLEGAL_INCOMING_REF_IN_REQUIRES(42, "found illegal '@'-valued " +
             "variable ref(s): [<arg; separator={, }>] in requires " +
             "clause: <arg2>; '@-variables' are not permitted in requires clauses",
+            ErrorSeverity.ERROR),
+
+    MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
+            "recursive call: <arg>. I.e.: it fails to match in either " +
+            "number or type (or both) for recursive operation: <arg2>",
             ErrorSeverity.ERROR);
 
     public final int code;
