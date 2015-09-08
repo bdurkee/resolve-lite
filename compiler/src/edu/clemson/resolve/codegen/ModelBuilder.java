@@ -348,7 +348,16 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+        if (ctx.NOT() != null) {
+            built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+        }
+        else {
+            Token qualifier =
+                    Utils.createTokenFrom(ctx.getStart(), "Std_Integer_Fac");
+            Token name = Utils.createTokenFrom(ctx.getStart(), "Negate");
+            built.put(ctx, new MethodCall(buildQualifier(qualifier, name),
+                    name.getText(), (Expr) built.get(ctx.progExp())));
+        }
     }
 
     @Override public void exitProgPostfixExp(

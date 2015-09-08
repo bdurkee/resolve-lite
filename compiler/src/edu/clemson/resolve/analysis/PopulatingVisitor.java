@@ -1022,9 +1022,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());
-        HardCodedProgOps.BuiltInOpAttributes attr =
-                HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
-        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        if (ctx.NOT() != null) {
+            HardCodedProgOps.BuiltInOpAttributes attr =
+                    HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
+            typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        }
+        else {
+            //minus is overloaded WITHIN integer template, so for now we'll just handle it this way.
+            Token qualifier =  Utils.createTokenFrom(ctx.getStart(), "Std_Integer_Fac");
+            Token name =  Utils.createTokenFrom(ctx.getStart(), "Negate");
+            typeOperationRefExp(ctx, qualifier, name, ctx.progExp());
+        }
+
         return null;
     }
 

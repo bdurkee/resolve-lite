@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rsrg.semantics.TypeGraph;
 
-public class TestPExpVisitor extends BaseTest {
+public class TestASTStructure extends BaseTest {
 
     private static class DemoListener extends PExpListener {
         public String trace = "";
