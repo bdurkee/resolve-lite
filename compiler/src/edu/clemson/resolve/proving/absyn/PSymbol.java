@@ -358,45 +358,26 @@ public class PSymbol extends PExp {
         return result;
     }
 
-
-    public List<PExp> experimentalSplit() {
-        List<PExp> resultingPartitions = new ArrayList<>();
-        TypeGraph g = getMathType().getTypeGraph();
-        PExp curConjuncts = null;
-        for (PExp conjunct : splitIntoConjuncts()) {
-            if (conjunct.containsName("implies")) {
-                List<PExp> a = conjunct.splitOn("implies");
-                PExp last = a.get(a.size() - 1);
-                PExp conjuncted = g.formConjuncts(a.subList(0, a.size() - 1));
-                PExp result = curConjuncts != null ?
-                        g.formConjuncts(curConjuncts, conjuncted) : conjuncted;
-                result = g.formImplies(result, last);
-                resultingPartitions.add(result);
-                curConjuncts = null;
-            }
-            else {
-                if (curConjuncts == null) curConjuncts = conjunct;
-                else curConjuncts = g.formConjunct(curConjuncts, conjunct);
-            }
-        }
+    public List<PExp> experimentalSplit(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        for (PExp partition : resultingPartitions) {
-            final PSymbol partAsPSym;
-            if (partition instanceof PSymbol) {
-                partAsPSym = (PSymbol) partition;
-            }
-            else {
-                continue;
-            }
-            if (partAsPSym.getName().equals("implies")) {
-                List<PExp> rhsConjuncts = partAsPSym.getArguments()
-                        .get(1).splitIntoConjuncts();
-                result.addAll(rhsConjuncts.stream()
-                        .map(e -> g.formImplies(partAsPSym.getArguments().get(0), e))
-                        .collect(Collectors.toList()));
-            }
+        TypeGraph g = getMathType().getTypeGraph();
+        if (name.equals("and")) {
+            arguments.forEach(a -> result.addAll(a.experimentalSplit(assumptions)));
         }
-        if (result.isEmpty()) result.addAll(resultingPartitions);
+        else if (name.equals("implies")) {
+            PExp tempLeft, tempRight;
+            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
+            //tempList = arguments.get(0).experimentalSplit(assumptions);
+            if (!assumptions.isObviouslyTrue()) {
+                tempLeft = g.formConjunct(assumptions, tempLeft);
+            }
+
+            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
+            return arguments.get(1).experimentalSplit(tempLeft);
+        }
+        else {
+            result.add(g.formImplies(assumptions, this));
+        }
         return result;
     }
 

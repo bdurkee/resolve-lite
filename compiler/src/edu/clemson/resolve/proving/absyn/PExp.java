@@ -183,9 +183,11 @@ public abstract class PExp {
      * @return a list of antecedent - consequent expressions
      */
     public List<PExp> experimentalSplit() {
-        List<PExp> l = new ArrayList<>();
-        l.add(this);
-        return l;
+        return experimentalSplit(getMathType().getTypeGraph().getTrueExp());
+    }
+
+    protected List<PExp> experimentalSplit(PExp assumtions) {
+        return new ArrayList<>();
     }
 
     public final List<PExp> splitOn(String ... names) {
