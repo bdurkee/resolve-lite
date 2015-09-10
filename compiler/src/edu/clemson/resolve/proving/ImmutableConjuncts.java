@@ -290,11 +290,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 if (!first) {
                     a.append(" and \n");
                 }
-
                 e.processStringRepresentation(visitor, a);
                 first = false;
             }
-
             if (first) {
                 a.append("True");
             }
@@ -321,12 +319,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     public ImmutableConjuncts substitute(Map<PExp, PExp> mapping) {
 
         List<PExp> retvalConjuncts = new LinkedList<PExp>();
-
         Iterator<PExp> conjuncts = myConjuncts.iterator();
         PExp c;
         while (conjuncts.hasNext()) {
             c = conjuncts.next();
-
             retvalConjuncts.add(c.substitute(mapping));
         }
         return new ImmutableConjuncts(retvalConjuncts);

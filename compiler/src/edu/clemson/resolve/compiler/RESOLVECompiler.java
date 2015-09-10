@@ -37,7 +37,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VCGenPipeline;
+import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -245,7 +245,7 @@ public  class RESOLVECompiler {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        VCGenPipeline vcsPipe = new VCGenPipeline(this, targets);
+        VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
