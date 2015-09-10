@@ -357,42 +357,40 @@ public class TestPExp extends BaseTest {
         e = parseMathAssertionExp(g, "(P implies (Pre and (Post implies (Q and R))))");
         partitions = e.experimentalSplit();
         Assert.assertEquals(3, partitions.size());
+        Assert.assertEquals("(P implies Pre)", partitions.get(0).toString());
+        Assert.assertEquals("((P and Post) implies Q)", partitions.get(1).toString());
+        Assert.assertEquals("((P and Post) implies R)", partitions.get(2).toString());
 
-       /* e = parseMathAssertionExp(g, "g implies c and d implies f");
-        partitions = ((PSymbol) e).experimentalSplit();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(g implies c)", partitions.get(0).toString());
-        Assert.assertEquals("(d implies f)", partitions.get(1).toString());
-
-        e = parseMathAssertionExp(g, "a and b and g implies c and d implies f");
-        partitions = ((PSymbol) e).experimentalSplit();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(((a and b) and g) implies c)", partitions.get(0).toString());
-        Assert.assertEquals("(d implies f)", partitions.get(1).toString());
-
-        e = parseMathAssertionExp(g, "a implies b implies c implies d and e");
-        partitions = ((PSymbol) e).experimentalSplit();
+        e = parseMathAssertionExp(g, "(P implies Q)");
+        partitions = e.experimentalSplit();
         Assert.assertEquals(1, partitions.size());
-        Assert.assertEquals("(((a and b) and c) implies d)", partitions.get(0).toString());
-        //Assert.assertEquals(2, partitions.size());
-        //Assert.assertEquals("(((a and b) and c) implies d)", partitions.get(0).toString());
-        //Assert.assertEquals("(((a and b) and c) implies e)", partitions.get(0).toString());
+        Assert.assertEquals("(P implies Q)", partitions.get(0).toString());
 
-        //keep climbing up implies exps until you find an and in the right subtree
-        e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp_p) o S_p) implies  (not((1 <= |S_p|)) implies  Temp_p = Reverse(S))))))");//and " +
-        partitions = ((PSymbol) e).experimentalSplit();
+        e = parseMathAssertionExp(g, "P");
+        partitions = e.experimentalSplit();
+        Assert.assertEquals(1, partitions.size());
+        Assert.assertEquals("(true implies P)", partitions.get(0).toString());
+
+        e = parseMathAssertionExp(g, "(A and (P implies Q))");
+        partitions = e.experimentalSplit();
         Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (Temp = Empty_String)) implies (S = ((Reverse(Temp)) o S)))", partitions.get(0).toString());
-        Assert.assertEquals("(((((1 <= Max_Depth) and (|S| <= Max_Depth)) and (S = ((Reverse(Temp_p)) o S_p))) and (not((1 <= |S_p|)))) implies (Temp_p = (Reverse(S))))", partitions.get(1).toString());
+        Assert.assertEquals("(true implies A)", partitions.get(0).toString());
+        Assert.assertEquals("(P implies Q)", partitions.get(1).toString());
 
-        PExp e = parseMathAssertionExp(g, "((b implies y) and (bv implies a) and ((b and c) implies z))");
-        List<PExp> partitions = ((PSymbol) e).experimentalSplit();
-        Assert.assertEquals(3, partitions.size());*/
-        //Assert.assertEquals("(b implies y)", partitions.get(0).toString());
-        //Assert.assertEquals("(bv implies a)", partitions.get(1).toString());
-        //Assert.assertEquals("((b and c) implies z)", partitions.get(2).toString());
-        //e = parseMathAssertionExp(g, "((Max_Capacity > 0) implies ((1 <= ||S||) implies ((||S|| <= Max_Capacity) implies ((||S|| < Max_Capacity) and ((e is_in (S union {e})) and ((((S union {e}) ~ {e}) = S) and true))))))");
-        //partitions = ((PSymbol) e).experimentalSplit();
+        e = parseMathAssertionExp(g, "(A implies (B implies (C implies (D and (E and (F and G))))))");
+        partitions = e.experimentalSplit();
+        Assert.assertEquals(4, partitions.size());
+        Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
+        Assert.assertEquals("(((A and B) and C) implies E)", partitions.get(1).toString());
+        Assert.assertEquals("(((A and B) and C) implies F)", partitions.get(2).toString());
+        Assert.assertEquals("(((A and B) and C) implies G)", partitions.get(3).toString());
+
+        e = parseMathAssertionExp(g, "((A implies (B implies (C implies D))) and (E implies (F implies (G implies (H implies I)))))");
+        //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
+        partitions = e.experimentalSplit();
+        Assert.assertEquals(2, partitions.size());
+        Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
+        Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
     }
 
     protected static ParseTree getTree(String input) {

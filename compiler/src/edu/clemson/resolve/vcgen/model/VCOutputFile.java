@@ -57,6 +57,8 @@ public class VCOutputFile extends OutputModelObject {
         List<PExp> vcs = batch.getFinalConfirm().getConfirmExp()
                 .experimentalSplit();
 
+        System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
+
         int vcIndex = 1;
         for (PExp vc : vcs) {
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
