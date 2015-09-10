@@ -15,7 +15,7 @@ Concept Bdd_Stack_Template<E>
             requires 1 + |S| <= Max_Depth;
             ensures  S = <@e> o @S;
 
-        Operation Pop (replaces e : E; updates S : Stack);
+        /*Operation Pop (replaces e : E; updates S : Stack);
             requires 1 <= |S|;
             ensures @S = <e> o S;
 
@@ -27,5 +27,5 @@ Concept Bdd_Stack_Template<E>
                             Std_Integer_Fac :: Integer;
             ensures Rem_Capacity = (Max_Depth - |S|);
 
-        Operation Clear(clears S: Stack);
+        Operation Clear(clears S: Stack);*/
 end Bdd_Stack_Template;

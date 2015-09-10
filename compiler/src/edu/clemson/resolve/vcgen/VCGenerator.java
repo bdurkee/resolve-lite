@@ -1,12 +1,15 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.codegen.AbstractCodeGenerator;
-import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
+
+import java.util.List;
 
 public class VCGenerator extends AbstractCodeGenerator {
 
@@ -16,12 +19,15 @@ public class VCGenerator extends AbstractCodeGenerator {
         super(rc, rootTarget, LANGUAGE);
     }
 
-    private OutputModelObject buildVCOutputModel() {
+    private VCOutputFile buildVCOutputModel() {
         ModelBuilderProto o = new ModelBuilderProto(this, compiler.symbolTable);
         ParseTree root = module.getRoot();
         ParseTreeWalker.DEFAULT.walk(o, root);
-        OutputModelObject of = o.getOutputFile();
-        return of;
+        return o.getOutputFile();
+    }
+
+    public List<VC> getProverInput() {
+        return buildVCOutputModel().getFinalVCs();
     }
 
     public ST generateAssertions() {

@@ -31,7 +31,7 @@ public class VCOutputFile extends OutputModelObject {
         assertiveBatchCt = 0;
     }
 
-    public List<VC> getProverOutput() {
+    public List<VC> getFinalVCs() {
         return this.finalVcs;
     }
 
@@ -56,9 +56,7 @@ public class VCOutputFile extends OutputModelObject {
                                  final int sectionNumber) {
         List<PExp> vcs = batch.getFinalConfirm().getConfirmExp()
                 .experimentalSplit();
-
-        System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
-
+        //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
         for (PExp vc : vcs) {
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
