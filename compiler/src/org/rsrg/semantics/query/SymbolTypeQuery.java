@@ -11,7 +11,7 @@ import org.rsrg.semantics.symbol.Symbol;
  */
 public class SymbolTypeQuery<T extends Symbol>
         extends
-        BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
+            BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
 
     @SuppressWarnings("unchecked") public SymbolTypeQuery(
             Class<? extends Symbol> entryType, SymbolTable.ImportStrategy importStrategy,

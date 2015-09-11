@@ -7,7 +7,7 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import java.util.Arrays;
 import java.util.List;
 
-public class AssumeConfirmApplicationStrategy
+public class DefaultAssumeApplicationStrategy
         implements
             StatRuleApplicationStrategy {
 
@@ -18,14 +18,13 @@ public class AssumeConfirmApplicationStrategy
 
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                               List<PExp> statComponents) {
-        PExp curFinalConfirm = block.finalConfirm.getConfirmExp();
-        PExp statement = statComponents.get(0);
-
-        if ( curFinalConfirm.isObviouslyTrue() ) {
-            block.finalConfirm(statement);
+        PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
+        PExp assumeExp = statComponents.get(0);
+        if ( curFinalConfirmExp.isObviouslyTrue() ) {
+            block.finalConfirm(assumeExp);
         }
-        else if ( !statement.equals(block.g.getTrueExp()) ) {
-            block.finalConfirm(block.g.formImplies(statement, curFinalConfirm));
+        else if ( !assumeExp.equals(block.g.getTrueExp()) ) {
+            block.finalConfirm(block.g.formImplies(assumeExp, curFinalConfirmExp));
         }
         return block.snapshot();
     }

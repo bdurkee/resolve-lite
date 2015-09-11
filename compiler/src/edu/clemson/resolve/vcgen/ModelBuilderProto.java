@@ -81,19 +81,33 @@ public class ModelBuilderProto extends ResolveBaseListener {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
                     ctx.name.getText());
         }
-
-        //ok, looks like we need module parameters for the concept and the impl
-        //we need a specialized place in the modulescope that stores this info
-        //to make our lives here easier.
-
+        List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
-                        .assume(getAllParameterAssumptions(paramSyms))
+                        .assume(getAllParameterAssumptions(moduleParamSyms))
                         .assume(getAllModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
+    }
+
+    public List<ProgParameterSymbol> getAllModuleParameterSyms() {
+        ParserRuleContext moduleCtx = moduleScope.getDefiningTree();
+        List<ProgParameterSymbol> result = new ArrayList<>();
+        List<String> modulesToSearch = new ArrayList<>();
+
+        modulesToSearch.add(moduleScope.getModuleID());
+        if (moduleCtx instanceof Resolve.ConceptImplModuleContext) {
+            Resolve.ConceptImplModuleContext moduleCtxAsConceptImpl =
+                    (Resolve.ConceptImplModuleContext)moduleCtx;
+            modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
+        } //todo: enhancement impl module -- should be 'concept' and 'enhancement' for search
+        for (String moduleName : modulesToSearch) {
+            result.addAll(symtab.moduleScopes.get(moduleName)
+                            .getSymbolsOfType(ProgParameterSymbol.class));
+        }
+        return result;
     }
 
     @Override public void exitTypeRepresentationDecl(
@@ -106,13 +120,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
             constraint = currentTypeReprSym.getDefinition()
                     .getProgramType().getConstraint();
         }
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         PExp newConstraint =
                 constraint.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        newConstraint =
+        block.assume(correspondence);
+        /*newConstraint =
                 withCorrespondencePartsSubstituted(newConstraint,
-                        correspondence);
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+                        correspondence);*/
         block.finalConfirm(newConstraint);
         outputFile.addAssertiveBlock(block.build());
     }

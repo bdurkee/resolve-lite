@@ -395,18 +395,6 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
-        if (names.contains(name)) {
-            for (PExp arg : arguments) {
-                arg.splitOn(accumulator, names);
-            }
-        }
-        else {
-            accumulator.add(this);
-        }
-    }
-
     @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
@@ -489,7 +477,7 @@ public class PSymbol extends PExp {
             result.add(getCanonicalName());
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getSymbolNames());
+            result.addAll(argument.getSymbolNames(true));
         }
         return result;
     }

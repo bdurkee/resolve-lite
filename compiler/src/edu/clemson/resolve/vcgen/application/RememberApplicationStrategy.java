@@ -7,7 +7,9 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import java.util.Arrays;
 import java.util.List;
 
-public class RememberApplicationStrategy implements StatRuleApplicationStrategy {
+public class RememberApplicationStrategy
+        implements
+            StatRuleApplicationStrategy {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, List<PExp> statComponents) {

@@ -190,18 +190,6 @@ public abstract class PExp {
         return new ArrayList<>();
     }
 
-    public final List<PExp> splitOn(String ... names) {
-        return splitOn(Arrays.asList(names));
-    }
-
-    public final List<PExp> splitOn(List<String> names) {
-        List<PExp> segments = new ArrayList<>();
-        splitOn(segments, names);
-        return segments;
-    }
-
-    protected abstract void splitOn(List<PExp> accumulator, List<String> names);
-
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
         splitIntoConjuncts(conjuncts);
@@ -241,6 +229,13 @@ public abstract class PExp {
         return cachedQuantifiedVariables;
     }
 
+    /*public abstract Set<PSymbol> getAllVariablesNoCache();
+
+    public final Set<PSymbol> getAllVariables() {
+        //if (cachedV)
+        r
+    }*/
+
     public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
     public final List<PExp> getFunctionApplications() {
@@ -257,7 +252,8 @@ public abstract class PExp {
         if ( cachedSymbolNames == null ) {
             //We're immutable, so only do this once
             cachedSymbolNames =
-                    Collections.unmodifiableSet(getSymbolNamesNoCache());
+                    Collections.unmodifiableSet(
+                            getSymbolNamesNoCache());
         }
         return cachedSymbolNames;
     }

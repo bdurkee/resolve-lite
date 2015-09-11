@@ -137,7 +137,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitModule(Resolve.ModuleContext ctx) {
         String moduleName = Utils.getModuleName(ctx);
-        moduleScope = symtab.startModuleScope(ctx, moduleName)
+        moduleScope = symtab.startModuleScope(
+                (ParserRuleContext)ctx.getChild(0), moduleName)
                 .addImports(tr.semanticallyVisibleUses);
         super.visitChildren(ctx);
         symtab.endScope();
