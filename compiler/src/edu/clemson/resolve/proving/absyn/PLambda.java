@@ -121,7 +121,7 @@ public class PLambda extends PExp {
         return body.getIncomingVariablesNoCache();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache() {
+    @Override public Set<String> getSymbolNamesNoCache(boolean includeApplications) {
         Set<String> bodyNames = new HashSet<>(body.getSymbolNames());
         bodyNames.add("lambda");
         return bodyNames;

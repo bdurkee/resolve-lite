@@ -56,14 +56,14 @@ public class FrugalAssumeApplicationStrategy
         finalConfirmExp = finalConfirmExp.substitute(equalsReplacements);
 
         for (PExp assume : assumeConjuncts) {
-            Set<String> curAssumePieceNames = assume.getSymbolNames();
+            Set<String> curAssumePieceNames = assume.getSymbolNames(true);
             //if a variable in one of our assume-conjuncts makes an appearance
             //(anywhere!.. right?) in the final confirm expression
             //(and it's not in the valueset of our replacement mappings)
             //then we need to form an implication that reads assume => finalConfirm
-            if (finalConfirmExp.containsAtLeastOneOf(curAssumePieceNames)) { // AND
+           // if (finalConfirmExp.containsAtLeastOneOf(curAssumePieceNames)) {
 
-            }
+           // }
             //if (assume.)
         }
         //PExp currentFinalConfirm =

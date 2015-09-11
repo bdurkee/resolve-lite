@@ -229,13 +229,6 @@ public abstract class PExp {
         return cachedQuantifiedVariables;
     }
 
-    /*public abstract Set<PSymbol> getAllVariablesNoCache();
-
-    public final Set<PSymbol> getAllVariables() {
-        //if (cachedV)
-        r
-    }*/
-
     public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
     public final List<PExp> getFunctionApplications() {
@@ -248,17 +241,22 @@ public abstract class PExp {
 
     public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    public final Set<String> getSymbolNames() {
+    public final Set<String> getSymbolNames(boolean excludeApplications) {
         if ( cachedSymbolNames == null ) {
             //We're immutable, so only do this once
             cachedSymbolNames =
                     Collections.unmodifiableSet(
-                            getSymbolNamesNoCache());
+                            getSymbolNamesNoCache(excludeApplications));
         }
         return cachedSymbolNames;
     }
 
-    protected abstract Set<String> getSymbolNamesNoCache();
+    protected Set<String> getSymbolNamesNoCache() {
+        return getSymbolNamesNoCache(false);
+    }
+
+    protected abstract Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications);
 
     public static class HashDuple {
         public int structureHash;

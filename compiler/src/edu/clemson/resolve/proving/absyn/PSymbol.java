@@ -471,14 +471,18 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache() {
+    @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications) {
         Set<String> result = new HashSet<>();
-        if ( quantification == Quantification.NONE ) {
+        // if the caller doesn't want applications and we aren't an application, then add us
+        if ( !(excludeApplications && isFunctionApplication()) &&
+                quantification == Quantification.NONE ) {
             result.add(getCanonicalName());
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getSymbolNames(true));
+            result.addAll(argument.getSymbolNames(excludeApplications));
         }
+
         return result;
     }
 

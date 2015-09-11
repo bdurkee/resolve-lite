@@ -96,7 +96,7 @@ public class PSet extends PExp {
         return new ArrayList<>();
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache() {
+    @Override protected Set<String> getSymbolNamesNoCache(boolean includeApplications) {
         return new HashSet<>();
     }
 
