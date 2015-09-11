@@ -1,4 +1,5 @@
-Concept Locn_Referencing_Template<T>(evaluates k : Std_Integer_Fac :: Integer);
+Concept Locn_Referencing_Template<T>
+            (evaluates k : Std_Integer_Fac :: Integer);
         uses Standard_Integers, Basic_Integer_Theory, Function_Theory,
             Closure_Op_Ext, Basic_Natural_Number_Theory;
         requires 1 <= k which_entails k : N;

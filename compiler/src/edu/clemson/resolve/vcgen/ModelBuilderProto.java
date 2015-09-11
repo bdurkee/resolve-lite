@@ -81,10 +81,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
                     ctx.name.getText());
         }
+
+        //ok, looks like we need module parameters for the concept and the impl
+        //we need a specialized place in the modulescope that stores this info
+        //to make our lives here easier.
+
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
+                        .assume(getAllParameterAssumptions(paramSyms))
                         .assume(getAllModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
