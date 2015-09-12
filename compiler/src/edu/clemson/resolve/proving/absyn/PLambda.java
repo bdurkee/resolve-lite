@@ -101,10 +101,6 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
-    }
-
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
         accumulator.add(this);
     }

@@ -325,14 +325,43 @@ public class TestPExp extends BaseTest {
 
     @Test public void testGetFunctionApplications() {}
 
-    @Test public void testGetSymbolNames() {}
+    @Test public void testGetSymbolNames() {
+        TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "x + y");
+        Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
+                .collect(Collectors.toSet());
+        Set<String> foundNames = result.getSymbolNames();
+        Assert.assertEquals(3, foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "x + y"); //you actually have to do this again or else we'll retrieve a cached answer
+        foundNames = result.getSymbolNames(true); //now ignoring function applications..
+        expectedNames = Arrays.asList("x", "y").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(2, foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)"); //you actually have to do this again or else we'll retrieve a cached answer
+        foundNames = result.getSymbolNames(true); //now ignoring function applications..
+        expectedNames = Arrays.asList("y", "s", "z", "v").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(4, foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
+        foundNames = result.getSymbolNames();
+        expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(8, foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+    }
 
     @Test public void testSubstitute() {
         TypeGraph g = new TypeGraph();
 
-        PExp e = parseMathAssertionExp(g, "p = @q");
+        /*PExp e = parseMathAssertionExp(g, "p = @q");
         PExp substitutee = new PSymbol.PSymbolBuilder("q").mathType(g.INVALID)
-                .incoming(true).build();
+                .incoming(true).build();*/
         //e.substitute();
     }
 

@@ -69,10 +69,6 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
-    }
-
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
 
     @Override public PExp withIncomingSignsErased() {

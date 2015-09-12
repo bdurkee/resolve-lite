@@ -251,8 +251,8 @@ public abstract class PExp {
         return cachedSymbolNames;
     }
 
-    protected Set<String> getSymbolNamesNoCache() {
-        return getSymbolNamesNoCache(false);
+    public final Set<String> getSymbolNames() {
+        return getSymbolNames(false);
     }
 
     protected abstract Set<String> getSymbolNamesNoCache(
