@@ -117,9 +117,12 @@ public class PLambda extends PExp {
         return body.getIncomingVariablesNoCache();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(boolean includeApplications) {
-        Set<String> bodyNames = new HashSet<>(body.getSymbolNames());
-        bodyNames.add("lambda");
+    @Override public Set<String> getSymbolNamesNoCache(boolean excludeApplications) {
+        Set<String> bodyNames =
+                new HashSet<>(body.getSymbolNames(excludeApplications));
+        if (!excludeApplications) {
+            bodyNames.add("lambda");
+        }
         return bodyNames;
     }
 
@@ -151,9 +154,29 @@ public class PLambda extends PExp {
             this.type = type;
         }
 
+        @Override public boolean equals(Object o) {
+            boolean result = o instanceof Parameter;
+            if ( result ) {
+                result = this.name.equals(((Parameter)o).name) &&
+                        this.type.equals(((Parameter)o).type);
+            }
+            return result;
+        }
+
         @Override public String toString() {
             return name + ":" + type;
         }
+    }
+
+    //only checks extremely strict equality. No bound variable naming
+    //differences allowed.
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof PLambda);
+        if ( result ) {
+            result = parameters.size() == ((PLambda)o).parameters.size() &&
+                    body.equals(((PLambda)o).body);
+        }
+        return result;
     }
 
     @Override public String toString() {

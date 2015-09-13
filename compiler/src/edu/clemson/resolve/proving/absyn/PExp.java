@@ -98,6 +98,11 @@ public abstract class PExp {
         return substitute(result);
     }
 
+    public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
+        PExp thisSubstituted = substitute(substitutions);
+        return this.equals(thisSubstituted);
+    }
+
     public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
@@ -242,13 +247,7 @@ public abstract class PExp {
     public abstract List<PExp> getFunctionApplicationsNoCache();
 
     public final Set<String> getSymbolNames(boolean excludeApplications) {
-        if ( cachedSymbolNames == null ) {
-            //We're immutable, so only do this once
-            cachedSymbolNames =
-                    Collections.unmodifiableSet(
-                            getSymbolNamesNoCache(excludeApplications));
-        }
-        return cachedSymbolNames;
+        return getSymbolNamesNoCache(excludeApplications);
     }
 
     public final Set<String> getSymbolNames() {

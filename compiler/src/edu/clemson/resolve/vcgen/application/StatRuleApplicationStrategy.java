@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface StatRuleApplicationStrategy {
 
+    //TODO: maybe instead of statcomponents this should take a VCRuleBackedStat... hmmm.
     public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                     List<PExp> statComponents);
 

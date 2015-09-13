@@ -6,6 +6,7 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FrugalAssumeApplicationStrategy
         implements
@@ -21,9 +22,8 @@ public class FrugalAssumeApplicationStrategy
             List<PExp> statComponents) {
         PExp assumeExp = statComponents.get(0);
         PExp finalConfirmExp = block.finalConfirm.getConfirmExp();
-        List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
         Map<PExp, PExp> equalsReplacements = new HashMap<>();
-
+        List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
         for (PExp assume : assumeConjuncts) {
             if (assume instanceof PSymbol &&
                     ((PSymbol) assume).getName().equals("=")) {
@@ -39,27 +39,41 @@ public class FrugalAssumeApplicationStrategy
                 }
             }
         }
-
-        //before we do these substitutions, let's actually do the variable
-        //occurrence step, then replace the
-        assumeExp = assumeExp.substitute(equalsReplacements);
+        //assumeExp = assumeExp.substitute(equalsReplacements);
         finalConfirmExp = finalConfirmExp.substitute(equalsReplacements);
+        Set<String> confirmSymNames = finalConfirmExp.getSymbolNames(true);
 
-        for (PExp assume : assumeConjuncts) {
-            Set<String> curAssumePieceNames = assume.getSymbolNames(true);
-            //if a variable in one of our assume-conjuncts makes an appearance
-            //(anywhere.. right?) in the final confirm expression
-            //(and it doesn't appear in the valueset of our replacement mappings)
-            //then we need to form an implication that reads assume ==> finalConfirm
-           // if (finalConfirmExp.containsAtLeastOneOf(curAssumePieceNames)) {
+        List<PExp> relevantUntouchedAssumptions = assumeConjuncts.stream()
+                .filter(a -> a.staysSameAfterSubstitution(equalsReplacements))
+                .filter(a -> sharesNamesWithConfirm(a, confirmSymNames))
+                .filter(a -> !a.isObviouslyTrue())
+                .collect(Collectors.toList());
 
-           // }
-            //if (assume.)
+        List<PExp> relevantTouchedAssumptions = assumeConjuncts.stream()
+                .filter(a -> !a.staysSameAfterSubstitution(equalsReplacements))
+                .map(b -> b.substitute(equalsReplacements))
+                .filter(c -> !c.isObviouslyTrue())
+                .collect(Collectors.toList());
+
+        relevantUntouchedAssumptions.addAll(relevantTouchedAssumptions);
+        if (relevantUntouchedAssumptions.isEmpty()) {
+            block.finalConfirm(finalConfirmExp);
         }
-        //PExp currentFinalConfirm =
-        //        formParsimoniousVC(confirmExpList, assumeExpList, stmt
-        //                .getIsStipulate());
+        else {
+            PExp newConfirm =
+                    block.g.formImplies(
+                            block.g.formConjuncts(relevantUntouchedAssumptions),
+                            finalConfirmExp);
+            block.finalConfirm(newConfirm);
+        }
         return block.snapshot();
+    }
+
+    private boolean sharesNamesWithConfirm(PExp assume,
+                                           Set<String> confirmSyms) {
+        Set<String> assumeNames = assume.getSymbolNames(true);
+        assumeNames.retainAll(confirmSyms);
+        return !assumeNames.isEmpty();
     }
 
     @Override public String getDescription() {

@@ -208,7 +208,7 @@ public enum ErrorKind {
      */
     NO_MAIN_SPECIFIED(37, "no main() operation defined in: <arg>; "
             + "cannot create executable jar without a main "
-            + "(note: main is expected to have zero arguments)",
+            + "(note: main is expected to have zero parameters)",
             ErrorSeverity.ERROR_ONE_OFF),
 
     /**
@@ -240,7 +240,7 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
-            "recursive call: <arg>. I.e.: it fails to match in either " +
+            "recursive call: <arg>. I.e.: arguments fail to match in either " +
             "number or type (or both) for recursive operation: <arg2>",
             ErrorSeverity.ERROR),
 
