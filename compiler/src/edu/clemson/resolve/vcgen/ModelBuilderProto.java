@@ -136,10 +136,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
+        List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
+
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
-                        "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
-                        .assume(getAllModuleLevelAssertionsOfType(requires()));
+                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
+                    .assume(getAllModuleLevelAssertionsOfType(requires()))
+                    .assume(getAllParameterAssumptions(moduleParamSyms));
+
         assertiveBlocks.push(block);
     }
 
@@ -152,15 +156,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     currentTypeReprSym.getDefinition().getProgramType()
                             .getInitializationEnsures();
         }
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         PExp newInitEnsures =
                 typeInitEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        newInitEnsures =
-                withCorrespondencePartsSubstituted(newInitEnsures,
-                        correspondence);
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        //newInitEnsures =
+        //        withCorrespondencePartsSubstituted(newInitEnsures,
+        //                correspondence);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
-        block.confirm(convention).finalConfirm(newInitEnsures);
+        block.confirm(convention);  //order here is imp.
+        block.assume(correspondence);
+        block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
     }
 
