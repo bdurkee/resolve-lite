@@ -176,7 +176,7 @@ public class PAlternatives extends PExp {
         return sb.toString();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(boolean includeApplications) {
+    @Override public Set<String> getSymbolNamesNoCache(boolean includeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {

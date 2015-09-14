@@ -5,9 +5,9 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssume;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ParsimoniousAssumeApplicationStrategy
@@ -39,7 +39,8 @@ public class ParsimoniousAssumeApplicationStrategy
         }
         //assumeExp = assumeExp.substitute(equalsReplacements);
         finalConfirmExp = finalConfirmExp.substitute(equalsReplacements);
-        Set<String> confirmSymNames = finalConfirmExp.getSymbolNames(true);
+        //(true,true) excludes function applications and literals, respectively
+        Set<String> confirmSymNames = finalConfirmExp.getSymbolNames(true, true);
 
         List<PExp> relevantUntouchedAssumptions = assumeConjuncts.stream()
                 .filter(a -> a.staysSameAfterSubstitution(equalsReplacements))
@@ -69,7 +70,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
     private boolean sharesNamesWithConfirm(PExp assume,
                                            Set<String> confirmSyms) {
-        Set<String> assumeNames = assume.getSymbolNames(true);
+        Set<String> assumeNames = assume.getSymbolNames(true, true);
         assumeNames.retainAll(confirmSyms);
         return !assumeNames.isEmpty();
     }

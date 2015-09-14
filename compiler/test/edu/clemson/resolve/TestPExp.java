@@ -331,28 +331,43 @@ public class TestPExp extends BaseTest {
         Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
                 .collect(Collectors.toSet());
         Set<String> foundNames = result.getSymbolNames();
-        Assert.assertEquals(3, foundNames.size());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         result = parseMathAssertionExp(g, "x + y"); //you actually have to do this again or else we'll retrieve a cached answer
-        foundNames = result.getSymbolNames(true); //now ignoring function applications..
+        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
         expectedNames = Arrays.asList("x", "y").stream()
                 .collect(Collectors.toSet());
-        Assert.assertEquals(2, foundNames.size());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)"); //you actually have to do this again or else we'll retrieve a cached answer
-        foundNames = result.getSymbolNames(true); //now ignoring function applications..
+        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
         expectedNames = Arrays.asList("y", "s", "z", "v").stream()
                 .collect(Collectors.toSet());
-        Assert.assertEquals(4, foundNames.size());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
         foundNames = result.getSymbolNames();
         expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
                 .collect(Collectors.toSet());
-        Assert.assertEquals(8, foundNames.size());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
+        foundNames = result.getSymbolNames(false, true);
+        expectedNames = Arrays.asList("v", "Reverse", "x", "z", "+", "-").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
+        foundNames = result.getSymbolNames(false, false);
+        expectedNames =
+                Arrays.asList("5", "1", "4", "v", "Reverse", "x", "z", "+", "-")
+                        .stream().collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
     }
 

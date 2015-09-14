@@ -246,16 +246,17 @@ public abstract class PExp {
 
     public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    public final Set<String> getSymbolNames(boolean excludeApplications) {
-        return getSymbolNamesNoCache(excludeApplications);
+    public final Set<String> getSymbolNames(boolean excludeApplications,
+                                            boolean excludeLiterals) {
+        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
     }
 
     public final Set<String> getSymbolNames() {
-        return getSymbolNames(false);
+        return getSymbolNames(false, false);
     }
 
     protected abstract Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications);
+            boolean excludeApplications, boolean excludeLiterals);
 
     public static class HashDuple {
         public int structureHash;

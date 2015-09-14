@@ -32,15 +32,23 @@ public class ProgReprTypeSymbol extends Symbol {
         this.typeGraph = g;
     }
 
-    public PSymbol exemplarAsPSymbol() {
+    public PSymbol exemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
-                .mathType(representation.toMath()).build();
+                .mathType(representation.toMath()).incoming(incoming).build();
+    }
+
+    public PSymbol exemplarAsPSymbol() {
+        return exemplarAsPSymbol(false);
+    }
+
+    public PSymbol conceptualExemplarAsPSymbol(boolean incoming) {
+        return new PSymbol.PSymbolBuilder(
+                "conc."+representation.getExemplarName())
+                .mathType(representation.toMath()).incoming(incoming).build();
     }
 
     public PSymbol conceptualExemplarAsPSymbol() {
-        return new PSymbol.PSymbolBuilder(
-                "conc."+representation.getExemplarName())
-                .mathType(representation.toMath()).build();
+        return conceptualExemplarAsPSymbol(false);
     }
 
     public PTRepresentation getRepresentationType() {

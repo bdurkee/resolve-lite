@@ -176,8 +176,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         Scope s = symtab.scopes.get(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
-        PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
-                ctx, ctx.requiresClause()); //precondition[params 1..i <-- corr_fn_exp]
+
+        PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
+                ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
@@ -186,6 +187,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getAllParameterAssumptions(paramSyms))
                         .assume(getAllModuleLevelAssertionsOfType(requires()))
                         .assume(getAllModuleLevelAssertionsOfType(constraint()))
+                        //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
         assertiveBlocks.push(block);
@@ -197,7 +199,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
-        PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .confirm(getAllParameterConfirms(paramSyms))
@@ -217,8 +219,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                     .map(ProgParameterSymbol::getDeclaredType)
                                     .collect(Collectors.toList())));
 
-            PExp corrFnExpRequires = substituteCorrFnExpIntoClause(paramSyms,
-                    ctx, currentProcOpSym.getRequires()); //precondition[params 1..i <-- corr_fn_exp]
+            PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
+                    paramSyms, ctx, currentProcOpSym.getRequires());
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
@@ -226,8 +228,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .freeVars(getFreeVars(s))
                             .assume(getAllModuleLevelAssertionsOfType(requires()))
                             .assume(getAllModuleLevelAssertionsOfType(constraint()))
+                            .assume(getAllParameterAssumptions(paramSyms)) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
-                            .assume(getAllParameterAssumptions(paramSyms))
                             .remember();
             assertiveBlocks.push(block);
         }
@@ -240,10 +242,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
         Scope s = symtab.scopes.get(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
-        PExp corrFnExpEnsures = substituteCorrFnExpIntoClause(paramSyms,
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
         //todo: You need the operation here, query for it  or factor out querying to a helper (because you need it in enter too)
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
             .confirm(getAllParameterConfirms(paramSyms))
             .finalConfirm(corrFnExpEnsures);
@@ -402,9 +405,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
     //PTRepresentation). This method won't do anything otherwise.
-    private PExp substituteCorrFnExpIntoClause(List<ProgParameterSymbol> params,
-                                               ParserRuleContext functionCtx,
-                                               ParserRuleContext reqOrEns) {
+    private PExp perParameterCorrFnExpSubstitute(List<ProgParameterSymbol> params,
+                                                 ParserRuleContext functionCtx,
+                                                 ParserRuleContext reqOrEns) {
         List<PExp> result = new ArrayList<>();
         PExp resultingClause = tr.getPExpFor(g, reqOrEns);
         for (ProgParameterSymbol p : params) {
@@ -413,13 +416,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         ((PTRepresentation) p.getDeclaredType()).getReprTypeSymbol();
 
                 PExp corrFnExp = repr.getCorrespondence();
-                resultingClause =
-                        resultingClause.substitute(repr.exemplarAsPSymbol(),
-                                repr.conceptualExemplarAsPSymbol());
+                //block.assume(corrFnExp);
 
-                resultingClause =
-                        withCorrespondencePartsSubstituted(resultingClause,
-                                corrFnExp);
+                //TODO: build incoming conc symbol.
+
+                //distribute conc.X into the clause passed
+                Map<PExp, PExp> concReplMapping = new HashMap<>();
+                concReplMapping.put(repr.exemplarAsPSymbol(),
+                        repr.conceptualExemplarAsPSymbol());
+                concReplMapping.put(repr.exemplarAsPSymbol(true),
+                        repr.conceptualExemplarAsPSymbol(true));
+
+                resultingClause = resultingClause.substitute(concReplMapping);
+                //resultingClause =
+                //        withCorrespondencePartsSubstituted(resultingClause,
+                //                corrFnExp);
             }
         }
         return resultingClause;

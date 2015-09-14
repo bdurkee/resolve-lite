@@ -165,7 +165,7 @@ public class Utils {
      * the text for the resulting {@code CommonToken} will contain whatever
      * text existed in {@code t} starting out.</p>
      *
-     * @param t An existing token (preferablly near where {@code desiredText} should appear
+     * @param t An existing token (preferablly near where {@code desiredText} should appear)
      * @param desiredText The text we want the resulting token to hold
      * @return a new token
      */
