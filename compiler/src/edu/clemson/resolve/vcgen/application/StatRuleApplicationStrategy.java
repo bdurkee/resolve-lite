@@ -3,16 +3,14 @@ package edu.clemson.resolve.vcgen.application;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 
 import java.util.List;
 
-public interface StatRuleApplicationStrategy {
+public interface StatRuleApplicationStrategy<T extends VCRuleBackedStat> {
 
-    //TODO: maybe instead of statcomponents this should take a VCRuleBackedStat... hmmm.
-    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                    List<PExp> statComponents);
-
-    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, PExp... e);
+    //TODO: Honestly, we probably could get away by just passing the VCRuleBackedStat (it already contains the enclosing block)
+    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, T stat);
 
     public String getDescription();
 

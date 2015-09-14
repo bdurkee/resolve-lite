@@ -19,7 +19,8 @@ public class VCRuleBackedStat extends OutputModelObject {
     protected final VCAssertiveBlockBuilder enclosingBlock;
 
     public VCRuleBackedStat(ParserRuleContext ctx,
-            VCAssertiveBlockBuilder block, StatRuleApplicationStrategy apply,
+            VCAssertiveBlockBuilder block,
+            StatRuleApplicationStrategy apply,
             PExp... e) {
         this.statComponents.addAll(Arrays.asList(e));
         this.applicationStrategy = apply;
@@ -37,7 +38,7 @@ public class VCRuleBackedStat extends OutputModelObject {
     }
 
     public AssertiveBlock reduce() {
-        return applicationStrategy.applyRule(enclosingBlock, statComponents);
+        return applicationStrategy.applyRule(enclosingBlock, this);
     }
 
     public String getApplicationDescription() {

@@ -36,11 +36,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final RESOLVECompiler compiler;
     private final TypeGraph g;
 
-    public static final StatRuleApplicationStrategy EXPLICIT_CALL_APPLICATION =
+    public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
-    private final static StatRuleApplicationStrategy FUNCTION_ASSIGN_APPLICATION =
+    private final static StatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
-    private final static StatRuleApplicationStrategy SWAP_APPLICATION =
+    private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
     private final ParseTreeProperty<VCRuleBackedStat> stats =

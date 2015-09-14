@@ -4,25 +4,23 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.model.VCAssume;
+import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class FrugalAssumeApplicationStrategy
         implements
-            StatRuleApplicationStrategy {
+            StatRuleApplicationStrategy<VCAssume> {
 
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
-        return applyRule(block, Arrays.asList(e));
-    }
+            VCAssertiveBlock.VCAssertiveBlockBuilder block, VCAssume stat) {
 
-    @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block,
-            List<PExp> statComponents) {
-        PExp assumeExp = statComponents.get(0);
+        PExp assumeExp = stat.getStatComponents().get(0);
         PExp finalConfirmExp = block.finalConfirm.getConfirmExp();
         Map<PExp, PExp> equalsReplacements = new HashMap<>();
+
         List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
         for (PExp assume : assumeConjuncts) {
             if (assume instanceof PSymbol &&

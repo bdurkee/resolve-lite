@@ -5,20 +5,21 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class FunctionAssignApplicationStrategy
         implements
-            StatRuleApplicationStrategy {
+            StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                                              List<PExp> statComponents) {
+            VCRuleBackedStat stat) {
         AnnotatedTree annotations = block.annotations;
-        PExp leftReplacee = statComponents.get(0);
-        PExp rightReplacer = statComponents.get(1);
+        PExp leftReplacee = stat.getStatComponents().get(0);
+        PExp rightReplacer = stat.getStatComponents().get(1);
 
         if ( rightReplacer.isLiteral() || !(rightReplacer.isFunctionApplication()) ) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
@@ -29,12 +30,7 @@ public class FunctionAssignApplicationStrategy
 
         //apply explicit call rule to the 'exp-call-like-thing' on the rhs.
         return ModelBuilderProto.EXPLICIT_CALL_APPLICATION.applyRule(block,
-                statComponents.get(1));
-    }
-
-    @Override public AssertiveBlock applyRule(
-            VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
-        return applyRule(block, Arrays.asList(e));
+                stat);
     }
 
     @Override public String getDescription() {

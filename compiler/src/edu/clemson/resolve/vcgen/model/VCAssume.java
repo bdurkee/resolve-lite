@@ -11,7 +11,7 @@ public class VCAssume extends VCRuleBackedStat {
     }
 
     public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                    StatRuleApplicationStrategy strategy,
+                    StatRuleApplicationStrategy<VCAssume> strategy,
                     PExp... e) {
         super(null, block, strategy, e);
     }

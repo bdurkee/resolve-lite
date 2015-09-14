@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
+import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
@@ -20,16 +21,11 @@ import java.util.stream.Collectors;
 
 public class ExplicitCallApplicationStrategy
         implements
-            StatRuleApplicationStrategy {
+            StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlockBuilder block, PExp... e) {
-        return applyRule(block, Arrays.asList(e));
-    }
-
-    @Override public AssertiveBlock applyRule(
-            VCAssertiveBlockBuilder block, List<PExp> statComponents) {
-        PSymbol asPSym = (PSymbol) statComponents.get(0);
+            VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
+        PSymbol asPSym = (PSymbol) stat.getStatComponents().get(0);
         AnnotatedTree annotations = block.annotations;
 
         OperationSymbol op = getOperation(block.scope, asPSym);
