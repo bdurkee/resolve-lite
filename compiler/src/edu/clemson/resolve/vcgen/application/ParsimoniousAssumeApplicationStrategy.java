@@ -10,7 +10,7 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class FrugalAssumeApplicationStrategy
+public class ParsimoniousAssumeApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCAssume> {
 

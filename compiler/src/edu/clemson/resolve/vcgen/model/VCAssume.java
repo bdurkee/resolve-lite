@@ -6,6 +6,8 @@ import edu.clemson.resolve.vcgen.application.StatRuleApplicationStrategy;
 
 public class VCAssume extends VCRuleBackedStat {
 
+    protected boolean isStipulatedAssumption = false;
+
     public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
         this(block, new DefaultAssumeApplicationStrategy(), e);
     }
