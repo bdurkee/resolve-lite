@@ -176,14 +176,35 @@ public class PAlternatives extends PExp {
         return sb.toString();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(boolean includeApplications, boolean excludeLiterals) {
+    @Override public boolean equals(Object o) {
+        boolean result = o instanceof PAlternatives;
+        if ( result ) {
+            result = otherwiseClauseResult.equals(((PAlternatives)o)
+                            .otherwiseClauseResult);
+            result &= alternatives.size() ==
+                    ((PAlternatives)o).alternatives.size();
+            //now compare the actual alternatives exps
+            Iterator<Alternative> thisAltIter = alternatives.iterator();
+            Iterator<Alternative> oAltIter = ((PAlternatives)o).alternatives.iterator();
+            while (result && thisAltIter.hasNext()) {
+                Alternative oAlt = oAltIter.next();
+                Alternative thisAlt = thisAltIter.next();
+                result = oAlt.condition.equals(thisAlt.condition) &&
+                        oAlt.result.equals(thisAlt.result);
+            }
+        }
+        return result;
+    }
+
+    @Override public Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getSymbolNames());
-            result.addAll(a.result.getSymbolNames());
+            result.addAll(a.condition.getSymbolNames(excludeApplications, excludeLiterals));
+            result.addAll(a.result.getSymbolNames(excludeApplications, excludeLiterals));
         }
-        result.addAll(otherwiseClauseResult.getSymbolNames());
+        result.addAll(otherwiseClauseResult.getSymbolNames(excludeApplications, excludeLiterals));
         return result;
     }
 

@@ -100,7 +100,8 @@ public abstract class PExp {
 
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
         PExp thisSubstituted = substitute(substitutions);
-        return this.equals(thisSubstituted);
+        boolean result = this.equals(thisSubstituted);
+        return result;
     }
 
     public PExp substitute(PExp current, PExp replacement) {

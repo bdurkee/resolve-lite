@@ -54,6 +54,7 @@ public class ParsimoniousAssumeApplicationStrategy
                 .filter(c -> !c.isObviouslyTrue())
                 .collect(Collectors.toList());
 
+        //TODO: I'm not sure about this line... definitely seems counter intuitive
         relevantUntouchedAssumptions.addAll(relevantTouchedAssumptions);
         if (relevantUntouchedAssumptions.isEmpty()) {
             block.finalConfirm(finalConfirmExp);

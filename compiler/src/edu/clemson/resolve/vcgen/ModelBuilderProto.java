@@ -124,10 +124,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp newConstraint =
                 constraint.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        block.assume(correspondence);
-        /*newConstraint =
-                withCorrespondencePartsSubstituted(newConstraint,
-                        correspondence);*/
+        //If the correspondence is multi-part, we split it; E.g.:
+        //'conc.P.Trmnl_Loc' ~> 'SS(k)(P.Length, Cen(k))'
+        //'conc.P.Curr_Loc' ~> 'SS(k)(P.Curr_Place, Cen(k))'
+        //'conc.P.Lab' ~> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
+        newConstraint = betaReduce(newConstraint, correspondence);
+        block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newConstraint);
         outputFile.addAssertiveBlock(block.build());
     }
@@ -161,7 +163,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 typeInitEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
         //newInitEnsures =
-        //        withCorrespondencePartsSubstituted(newInitEnsures,
+        //        betaReduce(newInitEnsures,
         //                correspondence);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention);  //order here is imp.
@@ -199,10 +201,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
+
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .confirm(getAllParameterConfirms(paramSyms))
+                //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
@@ -244,12 +248,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 s.getSymbolsOfType(ProgParameterSymbol.class);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
 
+        List<PExp> corrFnExps = paramSyms.stream()
+                .filter(p -> p.getDeclaredType() instanceof PTRepresentation)
+                .map(p -> (PTRepresentation)p.getDeclaredType())
+                .map(p -> p.getReprTypeSymbol().getCorrespondence())
+                .collect(Collectors.toList());
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
-        //todo: You need the operation here, query for it  or factor out querying to a helper (because you need it in enter too)
+
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
             .confirm(getAllParameterConfirms(paramSyms))
-            .finalConfirm(corrFnExpEnsures);
+            .assume(corrFnExps)
+                .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;
@@ -304,12 +314,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 Resolve.RequiresClauseContext;
     }
 
-    public PExp withCorrespondencePartsSubstituted(PExp start,
-                                                   PExp correspondence) {
-        CorrespondenceReducingListener v =
-                new CorrespondenceReducingListener(correspondence, start);
+    public PExp betaReduce(PExp start, PExp correspondence) {
+        BasicBetaReducingListener v =
+                new BasicBetaReducingListener(correspondence, start);
         start.accept(v);
-        return v.getReducedExp();
+        return v.getBetaReducedExp();
     }
 
     private List<PExp> getAllParameterAssumptions(
@@ -416,10 +425,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         ((PTRepresentation) p.getDeclaredType()).getReprTypeSymbol();
 
                 PExp corrFnExp = repr.getCorrespondence();
-                //block.assume(corrFnExp);
-
-                //TODO: build incoming conc symbol.
-
                 //distribute conc.X into the clause passed
                 Map<PExp, PExp> concReplMapping = new HashMap<>();
                 concReplMapping.put(repr.exemplarAsPSymbol(),
@@ -429,7 +434,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
                 resultingClause = resultingClause.substitute(concReplMapping);
                 //resultingClause =
-                //        withCorrespondencePartsSubstituted(resultingClause,
+                //        betaReduce(resultingClause,
                 //                corrFnExp);
             }
         }
