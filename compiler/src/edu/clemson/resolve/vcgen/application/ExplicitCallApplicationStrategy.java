@@ -25,12 +25,46 @@ public class ExplicitCallApplicationStrategy
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
-        PSymbol asPSym = (PSymbol) stat.getStatComponents().get(0);
+        PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
+        OperationSymbol op = getOperation(block.scope, callExp);
+
+        PExp modifiedEnsures = modifyExplicitCallEnsures(block, callExp);
+        if (modifiedEnsures.equals(block.g.getTrueExp())) return block.snapshot();
+
+        Map<String, ProgParameterSymbol.ParameterMode> modes =
+                new LinkedHashMap<>();
+
+        //The collection of 'updates' actuals that should be replaced in the
+        //existing final confirm.
+        Iterator<ProgParameterSymbol> formalParamIter =
+                op.getParameters().iterator();
+        Iterator<PExp> actualParamIter = callExp.getArguments().iterator();
+        List<PExp> replacementActuals = new ArrayList<>();
+
+        while (formalParamIter.hasNext()) {
+            ProgParameterSymbol formal = formalParamIter.next();
+            PExp actual = actualParamIter.next();
+            if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
+                replacementActuals.add(actual);
+            }
+        }
+        block.finalConfirm(block.finalConfirm.getConfirmExp()
+                .substitute(replacementActuals, modifiedEnsures));
+        return block.snapshot();
+    }
+
+    /**
+     * In the explicit call rule, this helper method (used by both the
+     * explicit call rule & the function assignment rule) simply returns the
+     * result of the {@code f[x ~> u]} part in the overall
+     * step: {@code Q[v ~> f[x ~> u]]}.
+     */
+    protected static PExp modifyExplicitCallEnsures(VCAssertiveBlockBuilder block,
+                                                    PSymbol call) {
         AnnotatedTree annotations = block.annotations;
+        OperationSymbol op = getOperation(block.scope, call);
 
-        OperationSymbol op = getOperation(block.scope, asPSym);
-
-        List<PExp> actuals = asPSym.getArguments();
+        List<PExp> actuals = call.getArguments();
         List<PExp> formals = op.getParameters().stream()
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
         /**
@@ -45,7 +79,7 @@ public class ExplicitCallApplicationStrategy
 
         PSymbol opEnsures = (PSymbol)annotations
                 .getPExpFor(block.g, op.getEnsures());
-        if (opEnsures.isObviouslyTrue()) return block.snapshot();
+        if (opEnsures.isObviouslyTrue()) return opEnsures;
 
         List<PExp> con = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
 
@@ -64,26 +98,7 @@ public class ExplicitCallApplicationStrategy
          * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
          */
         ensuresRight = ensuresRight.substitute(formals, actuals);
-        Map<String, ProgParameterSymbol.ParameterMode> modes =
-                new LinkedHashMap<>();
-
-        //The collection of 'updates' actuals that should be replaced in the
-        //existing final confirm.
-        Iterator<ProgParameterSymbol> formalParamIter =
-                op.getParameters().iterator();
-        Iterator<PExp> actualParamIter = actuals.iterator();
-        List<PExp> replacementActuals = new ArrayList<>();
-
-        while (formalParamIter.hasNext()) {
-            ProgParameterSymbol formal = formalParamIter.next();
-            PExp actual = actualParamIter.next();
-            if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
-                replacementActuals.add(actual);
-            }
-        }
-        block.finalConfirm(block.finalConfirm.getConfirmExp()
-                .substitute(replacementActuals, ensuresRight));
-        return block.snapshot();
+        return ensuresRight;
     }
 
     protected static OperationSymbol getOperation(Scope s, PSymbol app) {

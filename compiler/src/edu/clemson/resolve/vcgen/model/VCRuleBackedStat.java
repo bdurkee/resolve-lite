@@ -48,4 +48,8 @@ public class VCRuleBackedStat extends OutputModelObject {
     public VCAssertiveBlockBuilder getEnclosingBlock() {
         return enclosingBlock;
     }
+
+    public ParserRuleContext getDefiningContext() {
+        return definingCtx;
+    }
 }

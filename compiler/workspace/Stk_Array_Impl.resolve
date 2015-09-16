@@ -19,7 +19,7 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
         end;
 
         Procedure Push (alters e : E; updates S : Stack);
-            //S.Top := S.Top + 1;
+            S.Top := S.Top + 1;
             //Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
         end Push;
 
