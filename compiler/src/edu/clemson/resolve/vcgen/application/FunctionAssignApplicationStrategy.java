@@ -31,14 +31,45 @@ public class FunctionAssignApplicationStrategy
                     rightReplacer));
             return block.snapshot();
         }
-        //we know rightReplacer is a function applications (see above)
-        PExp modifiedEnsures =
-                ExplicitCallApplicationStrategy.modifyExplicitCallEnsures(block,
-                        (PSymbol)rightReplacer);
-        if (modifiedEnsures.equals(block.g.getTrueExp())) return block.snapshot();
+        //we know rightReplacer is a function app, see if-catch above.
+        OperationSymbol op = ExplicitCallApplicationStrategy
+                .getOperation(block.scope, (PSymbol) rightReplacer);
+
+        List<PExp> actuals = ((PSymbol) rightReplacer).getArguments();
+        List<PExp> formals = op.getParameters().stream()
+                .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
+        /**
+         * So: {@pre Oper op (x: T): U; pre /_x_\; post op = f/_x_\} is in Ctx
+         * and our statement reads as follows: {@code v := op(u);}. Informally
+         * this next line substitutes appearances of the formal parameter
+         * {@code x} in op's requires clause with the actuals (more formally,
+         * {@code pre[x ~> u]}).
+         */
+        PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
+        block.confirm(opRequires.substitute(formals, actuals));
+        PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures());
+
+        if (opEnsures.isObviouslyTrue()) return block.snapshot();
+
+        //TODO: We had better check the form of the ensures clauses on ops
+        //that return something. Should just be an equality: <opname> = <expr>;
+        PExp ensuresRight = opEnsures.getSubExpressions().get(1);
+
+        //update our list of formal params to account for incoming-valued refs
+        //to themselves in the ensures clause
+        for (PSymbol f : ensuresRight.getIncomingVariables()) {
+            Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
+        }
+
+        /**
+         * Now we substitute the formals for actuals in the rhs of the ensures
+         * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
+         * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
+         */
+        ensuresRight = ensuresRight.substitute(formals, actuals);
 
         block.finalConfirm(block.finalConfirm.getConfirmExp()
-                .substitute(leftReplacee, modifiedEnsures));
+                .substitute(leftReplacee, ensuresRight));
         return block.snapshot();
     }
 

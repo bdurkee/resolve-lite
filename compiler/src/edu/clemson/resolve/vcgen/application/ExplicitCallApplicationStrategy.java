@@ -28,7 +28,8 @@ public class ExplicitCallApplicationStrategy
         PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
         OperationSymbol op = getOperation(block.scope, callExp);
 
-        PExp modifiedEnsures = modifyExplicitCallEnsures(block, callExp);
+        Map<PExp, PExp> modifiedEnsures =
+                getEnsuresReplacementBindings(block, callExp);
         if (modifiedEnsures.equals(block.g.getTrueExp())) return block.snapshot();
 
         Map<String, ProgParameterSymbol.ParameterMode> modes =
@@ -48,9 +49,9 @@ public class ExplicitCallApplicationStrategy
                 replacementActuals.add(actual);
             }
         }
-        //TODO: Return Map<PExp, PExp> from modifyExplicitCallEnsures(..)
-        block.finalConfirm(block.finalConfirm.getConfirmExp()
-                .substitute(replacementActuals, modifiedEnsures));
+        //TODO: Return Map<PExp, PExp> from getEnsuresReplacementBindings(..)
+        //block.finalConfirm(block.finalConfirm.getConfirmExp()
+        //        .substitute(replacementActuals, modifiedEnsures));
         return block.snapshot();
     }
 
@@ -60,34 +61,27 @@ public class ExplicitCallApplicationStrategy
      * result of the {@code f[x ~> u]} part in the overall
      * step: {@code Q[v ~> f[x ~> u]]}.
      */
-    protected static PExp modifyExplicitCallEnsures(VCAssertiveBlockBuilder block,
-                                                    PSymbol call) {
+    protected static Map<PExp, PExp> getEnsuresReplacementBindings(
+            VCAssertiveBlockBuilder block,
+            PSymbol call) {
         AnnotatedTree annotations = block.annotations;
         OperationSymbol op = getOperation(block.scope, call);
 
         List<PExp> actuals = call.getArguments();
         List<PExp> formals = op.getParameters().stream()
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
-        /**
-         * So: {@pre Oper op (x: T): U; pre /_x_\; post op = f/_x_\} is in Ctx
-         * and our statement reads as follows: {@code v := op(u);}. Informally
-         * this next line substitutes appearances of the formal parameter
-         * {@code x} in op's requires clause with the actuals (more formally,
-         * {@code pre[x ~> u]}).
-         */
+
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
         block.confirm(opRequires.substitute(formals, actuals));
 
         PSymbol opEnsures = (PSymbol)annotations
                 .getPExpFor(block.g, op.getEnsures());
 
-        if (opEnsures.isObviouslyTrue()) return opEnsures;
-
         Iterator<ProgParameterSymbol> formalParamIter =
                 op.getParameters().iterator();
         Iterator<PExp> actualParamIter = call.getArguments().iterator();
 
-        Map<PExp, PExp> resultingPieces = new LinkedHashMap<>();
+        Map<PExp, PExp> resultBindings = new LinkedHashMap<>();
         Map<PExp, PExp> ensuresEqualities = new HashMap<>();
 
         for (PExp equals : opEnsures.splitIntoConjuncts()) {
@@ -97,7 +91,6 @@ public class ExplicitCallApplicationStrategy
             }
         }
 
-        List<PExp> updateModeActualArgs = new ArrayList<>();
         while (formalParamIter.hasNext()) {
             ProgParameterSymbol formal = formalParamIter.next();
             PExp actual = actualParamIter.next();
@@ -105,28 +98,28 @@ public class ExplicitCallApplicationStrategy
                 if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
                     continue;
                 }
-                resultingPieces.put(actual,
+                resultBindings.put(actual,
                         ensuresEqualities.get(formal.asPSymbol()));
             }
         }
 
+        for (Map.Entry<PExp, PExp> e : resultBindings.entrySet()) {
+            //update our list of formal params to account for incoming-valued refs
+            //to themselves in the ensures clause
+            List<PExp> copyFormals = new ArrayList<>(formals);
+            for (PSymbol f : e.getValue().getIncomingVariables()) {
+                Collections.replaceAll(copyFormals,
+                        f.withIncomingSignsErased(), f);
+            }
 
-        List<PExp> con = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
-        PExp ensuresRight = opEnsures.getArguments().get(1);
-        //update our list of formal params to account for incoming-valued refs
-        //to themselves in the ensures clause
-        for (PSymbol f : ensuresRight.getIncomingVariables()) {
-            Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
+            /**
+             * Now we substitute the formals for actuals in the rhs of the ensures
+             * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
+             * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
+             */
+            e.getKey().substitute(copyFormals, actuals);
         }
-
-        /**
-         * Now we substitute the formals for actuals in the rhs of the ensures
-         * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
-         * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
-         */
-       // for (PExp e : )
-        ensuresRight = ensuresRight.substitute(formals, actuals);
-        return ensuresRight;
+        return resultBindings;
     }
 
     protected static OperationSymbol getOperation(Scope s, PSymbol app) {
