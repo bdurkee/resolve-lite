@@ -231,10 +231,6 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public boolean isEquality() {
-        return false;
-    }
-
     @Override public boolean isLiteralFalse() {
         return false;
     }

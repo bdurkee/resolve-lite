@@ -1,14 +1,13 @@
 package org.rsrg.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import edu.clemson.resolve.parser.Resolve;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,6 +52,33 @@ public class OperationSymbol
     public List<ProgParameterSymbol> getParameters() {
         return parameters;
     }
+
+     /*public ProgParameterSymbol.ParameterMode getModeFor(PExp parameterExp) {
+        if (parameterExp instanceof PSymbol) {
+            return getModeFor(((PSymbol) parameterExp).getName());
+        }
+        return null;
+    }
+
+   public ProgParameterSymbol.ParameterMode getModeFor(String parameterName) {
+        ProgParameterSymbol.ParameterMode result = null;
+        for (ProgParameterSymbol p : parameters) {
+            if (p.getName().equals(parameterName)) {
+                result = p.getMode();
+            }
+        }
+        return result;
+    }
+
+    public Map<String, ProgParameterSymbol.ParameterMode>
+            getFormalParameterModeMappings() {
+        LinkedHashMap<String, ProgParameterSymbol.ParameterMode> namesToModes =
+                new LinkedHashMap<>();
+        for (ProgParameterSymbol p : parameters) {
+            namesToModes.put(p.getName(), p.getMode());
+        }
+        return namesToModes;
+    }*/
 
     public PTType getReturnType() {
         return returnType;

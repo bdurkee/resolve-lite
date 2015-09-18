@@ -1,0 +1,17 @@
+Concept Nested_List_Template<T>(
+        evaluates Max_Total_Size : Std_Integer_Fac :: Integer);
+    uses Standard_Integers, Standard_Booleans, String_Theory,
+            General_Tree_Theory, Basic_Natural_Number_Theory;
+    requires Max_Total_Size > 0 which_entails Max_Total_Size : N;
+
+    Type Family Nstd_Lst_Pos is modeled by Cart_Prod
+                Path : Str(NL_Site(T));
+                Prec, Rem : Str(EStF_Tr(T));
+            end;
+        exemplar P;
+        initialization
+            ensures P.Path = Empty_String and
+                P.Prec = Empty_String and
+                P.Rem = Empty_String;
+
+end Nested_List_Template;

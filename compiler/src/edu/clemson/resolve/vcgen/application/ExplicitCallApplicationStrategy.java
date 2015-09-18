@@ -48,6 +48,7 @@ public class ExplicitCallApplicationStrategy
                 replacementActuals.add(actual);
             }
         }
+        //TODO: Return Map<PExp, PExp> from modifyExplicitCallEnsures(..)
         block.finalConfirm(block.finalConfirm.getConfirmExp()
                 .substitute(replacementActuals, modifiedEnsures));
         return block.snapshot();
@@ -79,13 +80,39 @@ public class ExplicitCallApplicationStrategy
 
         PSymbol opEnsures = (PSymbol)annotations
                 .getPExpFor(block.g, op.getEnsures());
+
         if (opEnsures.isObviouslyTrue()) return opEnsures;
 
+        Iterator<ProgParameterSymbol> formalParamIter =
+                op.getParameters().iterator();
+        Iterator<PExp> actualParamIter = call.getArguments().iterator();
+
+        Map<PExp, PExp> resultingPieces = new LinkedHashMap<>();
+        Map<PExp, PExp> ensuresEqualities = new HashMap<>();
+
+        for (PExp equals : opEnsures.splitIntoConjuncts()) {
+            if (equals.isEquality()) {
+                ensuresEqualities.put(equals.getSubExpressions().get(0),
+                        equals.getSubExpressions().get(1));
+            }
+        }
+
+        List<PExp> updateModeActualArgs = new ArrayList<>();
+        while (formalParamIter.hasNext()) {
+            ProgParameterSymbol formal = formalParamIter.next();
+            PExp actual = actualParamIter.next();
+            if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
+                if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
+                    continue;
+                }
+                resultingPieces.put(actual,
+                        ensuresEqualities.get(formal.asPSymbol()));
+            }
+        }
+
+
         List<PExp> con = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
-
-        PExp ensuresLeft = opEnsures.getArguments().get(0);
         PExp ensuresRight = opEnsures.getArguments().get(1);
-
         //update our list of formal params to account for incoming-valued refs
         //to themselves in the ensures clause
         for (PSymbol f : ensuresRight.getIncomingVariables()) {
@@ -97,6 +124,7 @@ public class ExplicitCallApplicationStrategy
          * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
          * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
          */
+       // for (PExp e : )
         ensuresRight = ensuresRight.substitute(formals, actuals);
         return ensuresRight;
     }

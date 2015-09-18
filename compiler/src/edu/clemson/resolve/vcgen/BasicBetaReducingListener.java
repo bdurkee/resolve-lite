@@ -41,14 +41,15 @@ public class BasicBetaReducingListener extends PExpListener {
     }
 
     @Override public void endPSymbol(PSymbol e) {
+        //TODO: Second condition here should be: is e.getName contained in the keyset of our substitution map?
         if (e.isFunctionApplication() && e.getName().startsWith("conc.")) {
-            PSymbol asPlainFunction =   //enables error check
+            PSymbol firstClassRefExp =   //enables error check
                     new PSymbol.PSymbolBuilder(e.getName())
                             .mathType(e.getMathType())
                             .mathTypeValue(e.getMathTypeValue())
                             .incoming(e.isIncoming()).build();
-            if (substitutions.get(asPlainFunction) != null) {
-                PLambda l = (PLambda) substitutions.get(asPlainFunction);
+            if (substitutions.get(firstClassRefExp) != null) {
+                PLambda l = (PLambda) substitutions.get(firstClassRefExp);
                 PExp newBody = l.getBody().substitute(l.getParametersAsPExps(),
                         e.getArguments());
                 betaReducedExp = betaReducedExp.substitute(e, newBody);
