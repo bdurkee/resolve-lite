@@ -299,7 +299,7 @@ public class TestPExp extends BaseTest {
                         "Forall x, y, z : Z, Exists u, v, w : N," +
                                 "@g(@u) + (h(@z, @w, @f(@u))) + " +
                         "lambda (q : Z).({{@x if g(x); @b(@k) otherwise;}})");
-        Set<String> incomingNames = result.getIncomingVariables().stream()
+        Set<String> incomingNames = result.getIncomingSymbols().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
                 Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream()

@@ -124,10 +124,10 @@ public class PAlternatives extends PExp {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getIncomingVariables());
-            result.addAll(a.result.getIncomingVariables());
+            result.addAll(a.condition.getIncomingSymbols());
+            result.addAll(a.result.getIncomingSymbols());
         }
-        result.addAll(otherwiseClauseResult.getIncomingVariables());
+        result.addAll(otherwiseClauseResult.getIncomingSymbols());
         return result;
     }
 

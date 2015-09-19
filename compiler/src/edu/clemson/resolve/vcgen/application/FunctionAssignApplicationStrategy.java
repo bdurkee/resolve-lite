@@ -3,7 +3,6 @@ package edu.clemson.resolve.vcgen.application;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -57,7 +56,7 @@ public class FunctionAssignApplicationStrategy
 
         //update our list of formal params to account for incoming-valued refs
         //to themselves in the ensures clause
-        for (PSymbol f : ensuresRight.getIncomingVariables()) {
+        for (PSymbol f : ensuresRight.getIncomingSymbols()) {
             Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
         }
 

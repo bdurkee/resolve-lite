@@ -447,7 +447,7 @@ public class PSymbol extends PExp {
             result.add(this);
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getIncomingVariables());
+            result.addAll(argument.getIncomingSymbols());
         }
         return result;
     }

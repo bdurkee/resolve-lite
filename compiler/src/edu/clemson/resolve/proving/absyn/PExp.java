@@ -215,7 +215,7 @@ public abstract class PExp {
 
     public abstract PExp withQuantifiersFlipped();
 
-    public final Set<PSymbol> getIncomingVariables() {
+    public final Set<PSymbol> getIncomingSymbols() {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
                             getIncomingVariablesNoCache());
