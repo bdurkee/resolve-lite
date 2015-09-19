@@ -444,9 +444,7 @@ public class PSymbol extends PExp {
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         if ( incomingFlag ) {
-            if ( arguments.size() == 0 ) {
-                result.add(this);
-            }
+            result.add(this);
         }
         for (PExp argument : arguments) {
             result.addAll(argument.getIncomingVariables());

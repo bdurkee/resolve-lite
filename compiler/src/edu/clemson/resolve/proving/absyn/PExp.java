@@ -217,8 +217,8 @@ public abstract class PExp {
 
     public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
-            cachedIncomingVariables =
-                    Collections.unmodifiableSet(getIncomingVariablesNoCache());
+            cachedIncomingVariables = Collections.unmodifiableSet(
+                            getIncomingVariablesNoCache());
         }
         return cachedIncomingVariables;
     }

@@ -81,7 +81,7 @@ public class ExplicitCallApplicationStrategy
                 op.getParameters().iterator();
         Iterator<PExp> actualParamIter = call.getArguments().iterator();
 
-        Map<PExp, PExp> resultBindings = new LinkedHashMap<>();
+        Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
         Map<PExp, PExp> ensuresEqualities = new HashMap<>();
 
         for (PExp equals : opEnsures.splitIntoConjuncts()) {
@@ -98,26 +98,27 @@ public class ExplicitCallApplicationStrategy
                 if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
                     continue;
                 }
-                resultBindings.put(actual,
+                intermediateBindings.put(actual,
                         ensuresEqualities.get(formal.asPSymbol()));
             }
         }
-
-        for (Map.Entry<PExp, PExp> e : resultBindings.entrySet()) {
+        Map<PExp, PExp> resultBindings = new LinkedHashMap<>();
+        for (Map.Entry<PExp, PExp> e : intermediateBindings.entrySet()) {
             //update our list of formal params to account for incoming-valued refs
             //to themselves in the ensures clause
-            List<PExp> copyFormals = new ArrayList<>(formals);
+            /*List<PExp> copyFormals = new ArrayList<>(formals);
             for (PSymbol f : e.getValue().getIncomingVariables()) {
                 Collections.replaceAll(copyFormals,
                         f.withIncomingSignsErased(), f);
-            }
+            }*/
 
             /**
              * Now we substitute the formals for actuals in the rhs of the ensures
              * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
              * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
              */
-            e.getKey().substitute(copyFormals, actuals);
+            PExp v = e.getValue().substitute(formals, actuals);
+            resultBindings.put(e.getKey(), v);
         }
         return resultBindings;
     }

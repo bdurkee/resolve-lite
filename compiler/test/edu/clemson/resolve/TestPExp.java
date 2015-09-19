@@ -295,15 +295,16 @@ public class TestPExp extends BaseTest {
     @Test public void testGetIncomingVariables() {
         TypeGraph g = new TypeGraph();
         PExp result =
-                parseMathAssertionExp(
-                        g,
-                        "Forall x, y, z : Z, Exists u, v, w : N,"
-                                + "g(@u) + (h(@z, @w, f(@u)))");
+                parseMathAssertionExp( g,
+                        "Forall x, y, z : Z, Exists u, v, w : N," +
+                                "@g(@u) + (h(@z, @w, @f(@u))) + " +
+                        "lambda (q : Z).({{@x if g(x); @b(@k) otherwise;}})");
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
-        Assert.assertEquals(3, incomingNames.size());
-        Set<String> expectedNames = Arrays.asList("u", "z", "w").stream()
+        Set<String> expectedNames =
+                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream()
                 .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }
 
