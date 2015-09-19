@@ -80,7 +80,7 @@ public class PSet extends PExp {
         return null;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @Override public Set<PSymbol> getIncomingVariablesNoCache(boolean convertApplications) {
         return new LinkedHashSet<>();
     }
 

@@ -216,14 +216,33 @@ public abstract class PExp {
     public abstract PExp withQuantifiersFlipped();
 
     public final Set<PSymbol> getIncomingSymbols() {
+        return getIncomingSymbols(false);
+    }
+
+    /**
+     * Returns the set of '@'-prefixed symbols appearing in  {@code this}
+     * expression. Note that when we say 'symbols' we mean both function
+     * applications and argument-less variables.
+     * <p>
+     * Optionally, if requested, we also convert any found '@'-prefixed
+     * function applications to their argumentless, first class form. This is
+     * useful for places in vcgen where we just want an expr form of an incoming
+     * symbol without the arguments.</p>
+     *
+     * @param convertApplications
+     * @return
+     */
+    public final Set<PSymbol> getIncomingSymbols(
+            final boolean convertApplications) {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
-                            getIncomingVariablesNoCache());
+                            getIncomingVariablesNoCache(convertApplications));
         }
         return cachedIncomingVariables;
     }
 
-    public abstract Set<PSymbol> getIncomingVariablesNoCache();
+    public abstract Set<PSymbol> getIncomingVariablesNoCache(
+            boolean convertApplications);
 
     public final Set<PSymbol> getQuantifiedVariables() {
         if ( cachedQuantifiedVariables == null ) {

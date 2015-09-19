@@ -107,13 +107,7 @@ public class ExplicitCallApplicationStrategy
             //update our list of formal params to account for incoming-valued refs
             //to themselves in the ensures clause
             List<PExp> copyFormals = new ArrayList<>(formals);
-            Set<PSymbol> x = e.getValue().getIncomingSymbols().stream()
-                    .filter(PExp :: isFunctionApplication)
-                    .map(e -> new PSymbol.PSymbolBuilder(e.getName())
-                            .mathType(e.getMathType())
-                            .mathTypeValue(e.getMathTypeValue())
-                            .incoming(true).build()).collect(Collectors.toList());
-            for (PSymbol f : e.getValue().getIncomingSymbols()) {
+            for (PSymbol f : e.getValue().getIncomingSymbols(true)) {
                 Collections.replaceAll(copyFormals,
                         f.withIncomingSignsErased(), f);
             }
@@ -123,7 +117,7 @@ public class ExplicitCallApplicationStrategy
              * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
              * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
              */
-            PExp v = e.getValue().substitute(formals, actuals);
+            PExp v = e.getValue().substitute(copyFormals, actuals);
             resultBindings.put(e.getKey(), v);
         }
         return resultBindings;
