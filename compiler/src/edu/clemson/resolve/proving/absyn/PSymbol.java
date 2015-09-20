@@ -441,6 +441,10 @@ public class PSymbol extends PExp {
                 .quantification(this.quantification.flipped()).build();
     }
 
+    @Override public PExp withArgumentsErased() {
+        return new PSymbolBuilder(this).clearArguments().build();
+    }
+
     @Override public Set<PSymbol> getIncomingVariablesNoCache(
             boolean convertApplications) {
         Set<PSymbol> result = new LinkedHashSet<>();
@@ -584,7 +588,7 @@ public class PSymbol extends PExp {
     }
 
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
-        protected String name, lprint, rprint;
+        protected final String name, lprint, rprint;
         protected String qualifier;
 
         protected boolean incoming = false;
@@ -630,11 +634,6 @@ public class PSymbol extends PExp {
             }
             this.lprint = lprint;
             this.rprint = rprint;
-        }
-
-        public PSymbolBuilder name(String e) {
-            this.name = e;
-            return this;
         }
 
         public PSymbolBuilder qualifier(Token q) {
@@ -706,7 +705,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder deleteArguments() {
+        public PSymbolBuilder clearArguments() {
             arguments.clear();
             return this;
         }

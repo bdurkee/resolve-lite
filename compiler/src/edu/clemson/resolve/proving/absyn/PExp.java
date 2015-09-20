@@ -215,6 +215,8 @@ public abstract class PExp {
 
     public abstract PExp withQuantifiersFlipped();
 
+    public abstract PExp withArgumentsErased();
+
     public final Set<PSymbol> getIncomingSymbols() {
         return getIncomingSymbols(false);
     }

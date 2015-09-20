@@ -120,6 +120,10 @@ public class PAlternatives extends PExp {
                 + "been implemented.");
     }
 
+    @Override public PExp withArgumentsErased() {
+        return this;
+    }
+
     @Override public Set<PSymbol> getIncomingVariablesNoCache(
             boolean convertApplications) {
         Set<PSymbol> result = new LinkedHashSet<>();

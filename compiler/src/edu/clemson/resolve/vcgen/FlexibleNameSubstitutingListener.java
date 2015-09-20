@@ -16,28 +16,19 @@ import java.util.Map;
 public class FlexibleNameSubstitutingListener extends PExpListener {
 
     private final Map<PExp, PExp> substitutions;
-    private final Map<PSymbol, PSymbol> scratchwork = new HashMap<>();
     private final PExp startingExp;
 
     public FlexibleNameSubstitutingListener(PExp startingExp,
                                             Map<PExp, PExp> substitutions) {
         this.substitutions = substitutions;
         this.startingExp = startingExp;
-
-        for (Map.Entry<PExp, PExp> e : substitutions.entrySet()) {
-            if (e.getKey() instanceof PSymbol &&
-                    e.getValue() instanceof PSymbol) {
-                scratchwork.put((PSymbol)e.getKey(), (PSymbol)e.getValue());
-            }
-        }
     }
 
     @Override public void beginPSymbol(PSymbol e) {
         if ( e.isFunctionApplication() ) {
-            PSymbol firstClassRefExp =
-                    new PSymbol.PSymbolBuilder(e).deleteArguments().build();
-            if (scratchwork.containsKey(firstClassRefExp) &&
-                    !scratchwork.get(firstClassRefExp)
+
+            if (substitutions.containsKey(e.withArgumentsErased()) &&
+                    !substitutions.get(e.withArgumentsErased())
                             .isFunctionApplication()) {
                 String newName = scratchwork.get(firstClassRefExp).getName();
                 PSymbol nameModifiedExp =
