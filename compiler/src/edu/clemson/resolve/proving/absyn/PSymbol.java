@@ -588,7 +588,7 @@ public class PSymbol extends PExp {
     }
 
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
-        protected final String name, lprint, rprint;
+        protected String name, lprint, rprint;
         protected String qualifier;
 
         protected boolean incoming = false;
@@ -634,6 +634,11 @@ public class PSymbol extends PExp {
             }
             this.lprint = lprint;
             this.rprint = rprint;
+        }
+
+        public PSymbolBuilder name(String name) {
+            this.name = name;
+            return this;
         }
 
         public PSymbolBuilder qualifier(Token q) {

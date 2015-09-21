@@ -4,6 +4,8 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
+import edu.clemson.resolve.vcgen.FlexibleNameSubstitutingListener;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -27,32 +29,24 @@ public class ExplicitCallApplicationStrategy
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
         PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
         OperationSymbol op = getOperation(block.scope, callExp);
+        PExp finalConfirm = block.finalConfirm.getConfirmExp();
 
-        Map<PExp, PExp> modifiedEnsures =
+        Map<PExp, PExp> ensuresReplacements =
                 getEnsuresReplacementBindings(block, callExp);
-        if (modifiedEnsures.equals(block.g.getTrueExp())) return block.snapshot();
+        FlexibleNameSubstitutingListener l =
+                new FlexibleNameSubstitutingListener(
+                        finalConfirm, ensuresReplacements);
+        finalConfirm.accept(l);
+        finalConfirm = l.getSubstitutedExp();
 
-        Map<String, ProgParameterSymbol.ParameterMode> modes =
-                new LinkedHashMap<>();
-
-        //The collection of 'updates' actuals that should be replaced in the
-        //existing final confirm.
-        Iterator<ProgParameterSymbol> formalParamIter =
-                op.getParameters().iterator();
-        Iterator<PExp> actualParamIter = callExp.getArguments().iterator();
-        List<PExp> replacementActuals = new ArrayList<>();
-
-        while (formalParamIter.hasNext()) {
-            ProgParameterSymbol formal = formalParamIter.next();
-            PExp actual = actualParamIter.next();
-            if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
-                replacementActuals.add(actual);
-            }
-        }
         //TODO: Return Map<PExp, PExp> from getEnsuresReplacementBindings(..)
         //block.finalConfirm(block.finalConfirm.getConfirmExp()
         //        .substitute(replacementActuals, modifiedEnsures));
-        return block.snapshot();
+        BasicBetaReducingListener b =
+                new BasicBetaReducingListener(ensuresReplacements, finalConfirm);
+        finalConfirm.accept(b);
+        finalConfirm = b.getBetaReducedExp();
+        return block.finalConfirm(finalConfirm).snapshot();
     }
 
     /**
@@ -106,9 +100,9 @@ public class ExplicitCallApplicationStrategy
         for (Map.Entry<PExp, PExp> e : intermediateBindings.entrySet()) {
             //update our list of formal params to account for incoming-valued refs
             //to themselves in the ensures clause
-            List<PExp> copyFormals = new ArrayList<>(formals);
+            List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
             for (PSymbol f : e.getValue().getIncomingSymbols(true)) {
-                Collections.replaceAll(copyFormals,
+                Collections.replaceAll(varsToReplaceInEnsures,
                         f.withIncomingSignsErased(), f);
             }
 
@@ -117,8 +111,14 @@ public class ExplicitCallApplicationStrategy
              * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
              * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
              */
-            PExp v = e.getValue().substitute(copyFormals, actuals);
-            resultBindings.put(e.getKey(), v);
+            PExp t = e.getValue();
+            FlexibleNameSubstitutingListener l =
+                    new FlexibleNameSubstitutingListener(
+                            t, varsToReplaceInEnsures, actuals);
+            t.accept(l);
+           // PExp v = e.getValue().substitute(copyFormals, actuals);
+            PExp substitutedExp = l.getSubstitutedExp();
+            resultBindings.put(e.getKey(), substitutedExp);
         }
         return resultBindings;
     }

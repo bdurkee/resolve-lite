@@ -24,14 +24,14 @@ public class BasicBetaReducingListener extends PExpListener {
 
     public BasicBetaReducingListener(PExp correspondenceExp, PExp start) {
         for (PExp e : correspondenceExp.splitIntoConjuncts()) {
-            PSymbol left = (PSymbol)e.getSubExpressions().get(0);
-            substitutions.put(left, e.getSubExpressions().get(1));
+            substitutions.put(e.getSubExpressions().get(0),
+                    e.getSubExpressions().get(1));
         }
         betaReducedExp = start;
     }
 
     public BasicBetaReducingListener(Map<PExp, PExp> substitutions,
-                                          PExp start) {
+                                     PExp start) {
         this.substitutions.putAll(substitutions);
         this.betaReducedExp = start;
     }
@@ -42,18 +42,14 @@ public class BasicBetaReducingListener extends PExpListener {
 
     @Override public void endPSymbol(PSymbol e) {
         //TODO: Second condition here should be: is e.getName contained in the keyset of our substitution map?
-        if (e.isFunctionApplication() && e.getName().startsWith("conc.")) {
-            PSymbol firstClassRefExp =   //enables error check
-                    new PSymbol.PSymbolBuilder(e.getName())
-                            .mathType(e.getMathType())
-                            .mathTypeValue(e.getMathTypeValue())
-                            .incoming(e.isIncoming()).build();
-            if (substitutions.get(firstClassRefExp) != null) {
-                PLambda l = (PLambda) substitutions.get(firstClassRefExp);
-                PExp newBody = l.getBody().substitute(l.getParametersAsPExps(),
-                        e.getArguments());
-                betaReducedExp = betaReducedExp.substitute(e, newBody);
-            }
+        if (e.isFunctionApplication() &&
+                substitutions.containsKey(e.withArgumentsErased()) &&
+                substitutions.get(e.withArgumentsErased()) instanceof PLambda) {
+            PLambda l = (PLambda) substitutions.get(e.withArgumentsErased());
+            PExp newBody = l.getBody().substitute(l.getParametersAsPExps(),
+                    e.getArguments());
+            betaReducedExp = betaReducedExp.substitute(e, newBody);
+
         }
     }
 }
