@@ -172,7 +172,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
-    //procedure decl rule
     @Override public void enterOperationProcedureDecl(
             Resolve.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);

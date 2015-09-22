@@ -12,9 +12,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Wraps a vanilla application of {@link PExp#substitute(Map)} with special
- * logic that updates/replaces key value pairs in the provided
- * {@code substitutions} map with information
+ * Wraps a standard call to {@link PExp#substitute(Map)} with special logic
+ * that preprocesses the underlying expression first, before substituting.
+ * <p>
+ * The preprocessing step takes any function application appearing in the
+ * underlying exp, {@code startingExp}, and if it's name matches one of the keys
+ * in {@code substitutions}, we perform some exp surgery on the application to
+ * make the names mesh. For example, if {@code startingExp} is:
+ * <pre>
+ *     \@A(i) + S.Contents(j)
+ * </pre> and our {@code substitutions} are:
+ * <pre>
+ *     \@A -> S.Contents
+ *     S.Contents -> 
+ * </pre>
  */
 public class FlexibleNameSubstitutingListener extends PExpListener {
 

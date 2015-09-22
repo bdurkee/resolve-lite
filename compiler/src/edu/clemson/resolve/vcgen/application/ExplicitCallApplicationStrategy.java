@@ -66,7 +66,8 @@ public class ExplicitCallApplicationStrategy
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
 
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
-        block.confirm(opRequires.substitute(formals, actuals));
+        opRequires = opRequires.substitute(formals, actuals);
+        block.confirm(opRequires);
 
         PSymbol opEnsures = (PSymbol)annotations
                 .getPExpFor(block.g, op.getEnsures());
