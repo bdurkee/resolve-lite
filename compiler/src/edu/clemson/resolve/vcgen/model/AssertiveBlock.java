@@ -12,8 +12,6 @@ import java.util.*;
 
 public abstract class AssertiveBlock extends OutputModelObject {
 
-    private final Set<PSymbol> freeVars = new LinkedHashSet<>();
-    private final AnnotatedTree annotations;
     private final ParserRuleContext definingTree;
     private final TypeGraph g;
     private final String blockDescription;
@@ -24,15 +22,13 @@ public abstract class AssertiveBlock extends OutputModelObject {
             new ArrayList<>();
 
     public AssertiveBlock(TypeGraph g, ParserRuleContext definingTree,
-                          VCConfirm finalConfirm, AnnotatedTree annotations,
-                          List<VCRuleBackedStat> stats, Collection<PSymbol> freeVars,
-                          List<RuleApplicationStep> applicationSteps, String blockDescription) {
+                          VCConfirm finalConfirm, List<VCRuleBackedStat> stats,
+                          List<RuleApplicationStep> applicationSteps,
+                          String blockDescription) {
         this.g = g;
         this.definingTree = definingTree;
-        this.annotations = annotations;
         this.finalConfirm = finalConfirm;
         this.stats.addAll(stats);
-        this.freeVars.addAll(freeVars);
         this.applicationSteps.addAll(applicationSteps);
         this.blockDescription = blockDescription;
     }
@@ -45,10 +41,6 @@ public abstract class AssertiveBlock extends OutputModelObject {
         return g;
     }
 
-    public AnnotatedTree getAnnotations() {
-        return annotations;
-    }
-
     public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
@@ -59,10 +51,6 @@ public abstract class AssertiveBlock extends OutputModelObject {
 
     public VCConfirm getFinalConfirm() {
         return finalConfirm;
-    }
-
-    public Set<PSymbol> getFreeVars() {
-        return freeVars;
     }
 
     public List<? extends VCRuleBackedStat> getStats() {

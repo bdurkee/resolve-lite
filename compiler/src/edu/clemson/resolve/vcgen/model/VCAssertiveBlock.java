@@ -23,7 +23,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
     public static class VCAssertiveBlockBuilder
             implements
-            Utils.Builder<VCAssertiveBlock> {
+                Utils.Builder<VCAssertiveBlock> {
 
         public final TypeGraph g;
         public final ParserRuleContext definingTree;
