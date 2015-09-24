@@ -66,6 +66,7 @@ public class ExplicitCallApplicationStrategy
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
 
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
+        //todo: substitute module formals for module actuals.
         opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires);
 

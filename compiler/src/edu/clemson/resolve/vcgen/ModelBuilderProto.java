@@ -27,6 +27,7 @@ import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
                        // .assume(getAllParameterAssumptions(moduleParamSyms))
-                        .assume(getAllModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
     }
@@ -143,7 +144,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
-                    .assume(getAllModuleLevelAssertionsOfType(requires()));
+                    .assume(getModuleLevelAssertionsOfType(requires()));
                     //.assume(getAllParameterAssumptions(moduleParamSyms));
 
         assertiveBlocks.push(block);
@@ -186,8 +187,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(s))
                         //.assume(getAllParameterAssumptions(paramSyms))
-                        .assume(getAllModuleLevelAssertionsOfType(requires()))
-                        .assume(getAllModuleLevelAssertionsOfType(constraint()))
+                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(constraint()))
                         //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
@@ -204,7 +205,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(getAllParameterConfirms(paramSyms))
+                .confirm(getSequentsFromFormalParameters(s, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
@@ -228,9 +229,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
                             .freeVars(getFreeVars(s))
-                            .assume(getAllModuleLevelAssertionsOfType(requires()))
-                            .assume(getAllModuleLevelAssertionsOfType(constraint()))
-                            .assume(getAllParameterAssumptions(s)) //we assume correspondence for reprs here automatically
+                            .assume(getModuleLevelAssertionsOfType(requires()))
+                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .assume(getSequentsFromFormalParameters(s, this::extractAssumptionsFromParameter)) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
             assertiveBlocks.push(block);
@@ -255,9 +256,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
 
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-            .confirm(getAllParameterConfirms(paramSyms))
+            .confirm(getSequentsFromFormalParameters(s, this::extractConsequentsFromParameter)) //we assume correspondence for reprs here automatically
             .assume(corrFnExps)
-                .finalConfirm(corrFnExpEnsures);
+            .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;
@@ -319,52 +320,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return v.getBetaReducedExp();
     }
 
-    private List<PExp> getAllParameterAssumptions(Scope opScope) {
-        //you really need to query for the parameters so that any generic types
-        //get properly substituted.
-        List<ProgParameterSymbol> formalParameters = opScope.query(
-                new SymbolTypeQuery<ProgParameterSymbol>(
-                        ProgParameterSymbol.class));
-        formalParameters = formalParameters.stream()
-                .filter(p -> !p.isModuleParameter()).collect(Collectors.toList());
-        List<PExp> result = new ArrayList<>();
-        for (ProgParameterSymbol p : formalParameters) {
-            result.addAll(extractAssumptionsFromParameter(p));
-        }
-        return result;
-    }
-
-    private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
-        List<PExp> resultingAssumptions = new ArrayList<>();
-        if ( p.getDeclaredType() instanceof PTNamed) {
-
-            //both PTFamily AND PTRepresentation are a PTNamed
-            PTNamed declaredType = (PTNamed)p.getDeclaredType();
-            PExp exemplar = declaredType.getExemplarAsPSymbol();
-            if (declaredType instanceof PTFamily ) {
-                PExp constraint = ((PTFamily) declaredType).getConstraint();
-                constraint = constraint.substitute(getFacilitySpecializations(
-                        symtab.mathPExps, moduleScope, p.getTypeQualifier()));
-                resultingAssumptions.add(constraint.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
-            }
-            else if (declaredType instanceof PTRepresentation)  {
-                ProgReprTypeSymbol repr =
-                        ((PTRepresentation) declaredType).getReprTypeSymbol();
-                PExp convention = repr.getConvention();
-
-                resultingAssumptions.add(convention.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- if we're conceptual)
-                resultingAssumptions.add(repr.getCorrespondence());
-            }
-        }
-        else { //PTGeneric
-            resultingAssumptions.add(g.formInitializationPredicate(
-                            p.getDeclaredType(), p.getName()));
-        }
-        return resultingAssumptions;
-    }
-
     public static Map<PExp, PExp> getFacilitySpecializations(
             ParseTreeProperty<PExp> repo, Scope s,
             String facilityQualifier) {
@@ -403,60 +358,103 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    private List<PExp> getAllParameterConfirms(
-            List<ProgParameterSymbol> parameters) {
-        List<PExp> resultingConfirms = new ArrayList<>();
-        for (ProgParameterSymbol p : parameters) {
-            PSymbol.PSymbolBuilder temp =
-                    new PSymbol.PSymbolBuilder(p.getName()).mathType(p
-                            .getDeclaredType().toMath());
-
-            PExp incParamExp = temp.incoming(true).build();
-            PExp paramExp = temp.incoming(false).build();
-            if (p.getDeclaredType() instanceof PTNamed) {
-                PTNamed t = (PTNamed) p.getDeclaredType();
-                PExp exemplar =
-                        new PSymbol.PSymbolBuilder(t.getExemplarName())
-                                .mathType(t.toMath()).build();
-
-                if (t instanceof PTRepresentation) {
-                    ProgReprTypeSymbol repr =
-                            ((PTRepresentation) t).getReprTypeSymbol();
-
-                    PExp convention = repr.getConvention();
-                    PExp corrFnExp = repr.getCorrespondence();
-                    resultingConfirms.add(convention.substitute(
-                            t.getExemplarAsPSymbol(), paramExp));
-                }
-                if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
-                        || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
-                    PExp equalsExp =
-                            new PSymbol.PSymbolBuilder("=")
-                                    .arguments(paramExp, incParamExp)
-                                    .style(PSymbol.DisplayStyle.INFIX)
-                                    .mathType(g.BOOLEAN).build();
-                    resultingConfirms.add(equalsExp);
-                }
-                else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
-                    PExp init = ((PTNamed) p.getDeclaredType()) //
-                            .getInitializationEnsures() //
-                            .substitute(exemplar, paramExp);
-                    resultingConfirms.add(init);
-                }
-            }
+    //I don't like this method. I think it should take a list of formalParameter symbols instead of
+    //a scope. The name of the method should somehow inform the sorts of params it takes..
+    private List<PExp> getSequentsFromFormalParameters(Scope scope,
+                           Function<ProgParameterSymbol, List<PExp>> extract) {
+        List<ProgParameterSymbol> formalParameters = scope.query(
+                new SymbolTypeQuery<ProgParameterSymbol>(
+                        ProgParameterSymbol.class));
+        formalParameters = formalParameters.stream()
+                .filter(p -> !p.isModuleParameter()).collect(Collectors.toList());
+        List<PExp> result = new ArrayList<>();
+        for (ProgParameterSymbol p : formalParameters) {
+            result.addAll(extract.apply(p));
         }
-        return resultingConfirms;
+        return result;
     }
 
-    private Set<PExp> getAllModuleLevelAssertionsOfType(
+    private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
+        List<PExp> resultingAssumptions = new ArrayList<>();
+        if ( p.getDeclaredType() instanceof PTNamed) {
+
+            //both PTFamily AND PTRepresentation are a PTNamed
+            PTNamed declaredType = (PTNamed)p.getDeclaredType();
+            PExp exemplar = declaredType.getExemplarAsPSymbol();
+            if (declaredType instanceof PTFamily ) {
+                PExp constraint = ((PTFamily) declaredType).getConstraint();
+                constraint = constraint.substitute(getFacilitySpecializations(
+                        symtab.mathPExps, moduleScope, p.getTypeQualifier()));
+                resultingAssumptions.add(constraint.substitute(
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
+            }
+            else if (declaredType instanceof PTRepresentation)  {
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) declaredType).getReprTypeSymbol();
+                PExp convention = repr.getConvention();
+
+                resultingAssumptions.add(convention.substitute(
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- if we're conceptual)
+                resultingAssumptions.add(repr.getCorrespondence());
+            }
+        }
+        else { //PTGeneric
+            resultingAssumptions.add(g.formInitializationPredicate(
+                    p.getDeclaredType(), p.getName()));
+        }
+        return resultingAssumptions;
+    }
+
+    private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {
+        List<PExp> result = new ArrayList<>();
+        PExp incParamExp = new PSymbol.PSymbolBuilder(p.asPSymbol())
+                .incoming(true).build();
+        PExp paramExp = new PSymbol.PSymbolBuilder(p.asPSymbol())
+                .incoming(false).build();
+
+        if (p.getDeclaredType() instanceof PTNamed) {
+            PTNamed t = (PTNamed) p.getDeclaredType();
+            PExp exemplar =
+                    new PSymbol.PSymbolBuilder(t.getExemplarName())
+                            .mathType(t.toMath()).build();
+
+            if (t instanceof PTRepresentation) {
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) t).getReprTypeSymbol();
+
+                PExp convention = repr.getConvention();
+                PExp corrFnExp = repr.getCorrespondence();
+                result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp));
+            }
+            if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
+                    || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
+                PExp equalsExp =
+                        new PSymbol.PSymbolBuilder("=")
+                                .arguments(paramExp, incParamExp)
+                                .style(PSymbol.DisplayStyle.INFIX)
+                                .mathType(g.BOOLEAN).build();
+                result.add(equalsExp);
+            }
+            else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
+                PExp init = ((PTNamed) p.getDeclaredType())
+                        .getInitializationEnsures()
+                        .substitute(exemplar, paramExp);
+                result.add(init);
+            }
+        }
+        return result;
+    }
+
+    private Set<PExp> getModuleLevelAssertionsOfType(
             Predicate<Symbol> assertionType) {
         Set<PExp> result = new LinkedHashSet<>();
         List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
-                        (GlobalMathAssertionSymbol.class));
+                        (GlobalMathAssertionSymbol.class)).stream()
+                        .filter(assertionType).collect(Collectors.toList());
+
         List<FacilitySymbol> facilities = moduleScope.query(
                 new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class));
-
         for (GlobalMathAssertionSymbol assertion : assertions) {
             result.add(substituteByFacilities(facilities, assertion));
         }
