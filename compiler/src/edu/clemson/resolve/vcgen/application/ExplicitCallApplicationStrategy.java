@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.FlexibleNameSubstitutingListener;
+import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -39,7 +40,6 @@ public class ExplicitCallApplicationStrategy
         finalConfirm.accept(l);
         finalConfirm = l.getSubstitutedExp();
 
-        //TODO: Return Map<PExp, PExp> from getEnsuresReplacementBindings(..)
         //block.finalConfirm(block.finalConfirm.getConfirmExp()
         //        .substitute(replacementActuals, modifiedEnsures));
         BasicBetaReducingListener b =
@@ -50,9 +50,8 @@ public class ExplicitCallApplicationStrategy
     }
 
     /**
-     * In the explicit call rule, this helper method (used by both the
-     * explicit call rule & the function assignment rule) simply returns the
-     * result of the {@code f[x ~> u]} part in the overall
+     * In the explicit call rule, this helper method simply returns the
+     * result of the {@code f[x ~> u]} part of the overall
      * step: {@code Q[v ~> f[x ~> u]]}.
      */
     protected static Map<PExp, PExp> getEnsuresReplacementBindings(
@@ -66,12 +65,18 @@ public class ExplicitCallApplicationStrategy
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
 
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
-        //todo: substitute module formals for module actuals.
+        opRequires = opRequires.substitute(
+                ModelBuilderProto.getFacilitySpecializations(
+                        block.symtab.mathPExps,
+                        block.scope, call.getQualifier()));
         opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires);
 
-        PSymbol opEnsures = (PSymbol)annotations
-                .getPExpFor(block.g, op.getEnsures());
+        PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures());
+        /*opEnsures = opEnsures.substitute(
+                ModelBuilderProto.getFacilitySpecializations(
+                        block.symtab.mathPExps,
+                        block.scope, call.getQualifier()));*/ //Todo: Hmmm. not sure about this one
 
         Iterator<ProgParameterSymbol> formalParamIter =
                 op.getParameters().iterator();
@@ -111,7 +116,7 @@ public class ExplicitCallApplicationStrategy
             /**
              * Now we substitute the formals for actuals in the rhs of the ensures
              * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
-             * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
+             * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
              */
             PExp t = e.getValue();
             FlexibleNameSubstitutingListener l =

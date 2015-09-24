@@ -5,6 +5,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
+import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.Scope;
@@ -17,8 +18,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
         super(builder.g, builder.definingTree, builder.finalConfirm,
-                builder.annotations, builder.stats, builder.freeVars,
-                builder.applicationSteps, builder.description);
+                builder.stats, builder.applicationSteps, builder.description);
     }
 
     public static class VCAssertiveBlockBuilder
@@ -28,23 +28,23 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final TypeGraph g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
-        public final AnnotatedTree annotations;
         public VCConfirm finalConfirm;
+        public SymbolTable symtab;
 
-        public final Set<PSymbol> freeVars = new LinkedHashSet<>();
         public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
         public final String description;
 
         public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
-                                       String description, ParserRuleContext ctx,
+                                       SymbolTable symtab, String description,
+                                       ParserRuleContext ctx,
                                        AnnotatedTree annotations) {
             this.g = g;
             this.definingTree = ctx;
-            this.annotations = annotations;
             this.finalConfirm = new VCConfirm(this, g.getTrueExp());
             this.scope = contextScope;
+            this.symtab = symtab;
             this.description = description;
         }
 
@@ -85,15 +85,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
             this.finalConfirm = new VCConfirm(this, confirm);
-            return this;
-        }
-
-        public VCAssertiveBlockBuilder freeVars(List<? extends Symbol> symbols) {
-            List<PSymbol> asPSyms =
-                    symbols.stream().map(s -> new PSymbol.PSymbolBuilder(s.getName())
-                            .mathType(s.toMathSymbol().getType())
-                            .build()).collect(Collectors.toList());
-            freeVars.addAll(asPSyms);
             return this;
         }
 

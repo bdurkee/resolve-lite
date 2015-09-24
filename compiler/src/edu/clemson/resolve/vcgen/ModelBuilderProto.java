@@ -84,7 +84,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx), symtab,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(symtab.scopes.get(ctx)))
                        // .assume(getAllParameterAssumptions(moduleParamSyms))
@@ -142,7 +142,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx),
+                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx), symtab,
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
                     .assume(getModuleLevelAssertionsOfType(requires()));
                     //.assume(getAllParameterAssumptions(moduleParamSyms));
@@ -183,7 +183,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, s,
+                new VCAssertiveBlockBuilder(g, s, symtab,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
                         .freeVars(getFreeVars(s))
                         //.assume(getAllParameterAssumptions(paramSyms))
@@ -226,7 +226,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     paramSyms, ctx, currentProcOpSym.getRequires());
 
             VCAssertiveBlockBuilder block =
-                    new VCAssertiveBlockBuilder(g, s,
+                    new VCAssertiveBlockBuilder(g, s, symtab,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
                             .freeVars(getFreeVars(s))
                             .assume(getModuleLevelAssertionsOfType(requires()))

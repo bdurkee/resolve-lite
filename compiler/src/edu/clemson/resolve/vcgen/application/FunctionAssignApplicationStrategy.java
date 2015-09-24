@@ -3,6 +3,7 @@ package edu.clemson.resolve.vcgen.application;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -30,11 +31,12 @@ public class FunctionAssignApplicationStrategy
                     rightReplacer));
             return block.snapshot();
         }
+        PSymbol call = (PSymbol)rightReplacer;
         //we know rightReplacer is a function app, see if-catch above.
         OperationSymbol op = ExplicitCallApplicationStrategy
                 .getOperation(block.scope, (PSymbol) rightReplacer);
 
-        List<PExp> actuals = ((PSymbol) rightReplacer).getArguments();
+        List<PExp> actuals = call.getArguments();
         List<PExp> formals = op.getParameters().stream()
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
         /**
@@ -45,7 +47,13 @@ public class FunctionAssignApplicationStrategy
          * {@code pre[x ~> u]}).
          */
         PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
+        opRequires = opRequires.substitute(
+                ModelBuilderProto.getFacilitySpecializations(
+                        block.symtab.mathPExps,
+                        block.scope, call.getQualifier()));
+        opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires.substitute(formals, actuals));
+
         PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures());
 
         if (opEnsures.isObviouslyTrue()) return block.snapshot();
