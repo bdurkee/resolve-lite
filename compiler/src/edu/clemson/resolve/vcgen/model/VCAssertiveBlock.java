@@ -48,7 +48,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.description = description;
         }
 
-        public VCAssertiveBlockBuilder assume(List<PExp> assumes) {
+        public VCAssertiveBlockBuilder assume(Collection<PExp> assumes) {
             assumes.forEach(this::assume);
             return this;
         }

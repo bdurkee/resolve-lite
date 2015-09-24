@@ -21,9 +21,7 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
-import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.OperationQuery;
-import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
@@ -367,33 +365,42 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return resultingAssumptions;
     }
 
+    public static Map<PExp, PExp> getFacilitySpecializations(
+            ParseTreeProperty<PExp> repo, Scope s,
+            String facilityQualifier) {
+        Map<PExp, PExp> result = new HashMap<>();
+        if (facilityQualifier == null) return result;
+        try {
+            FacilitySymbol facility = (FacilitySymbol) s.queryForOne(
+                    new UnqualifiedNameQuery(facilityQualifier));
+            result = getFacilitySpecializations(repo, s, facility);
+        }
+        catch (NoSuchSymbolException|DuplicateSymbolException e1) {
+            e1.printStackTrace();
+        }
+        return result;
+    }
+
     /**
      * Returns a mapping from formal -> actual args for facility,
      * {@code facilityQualifier}.
      */
     public static Map<PExp, PExp> getFacilitySpecializations(
             ParseTreeProperty<PExp> repo, Scope s,
-            String facilityQualifier) {
-        Map<PExp, PExp> specializations = new HashMap<>();
-        if (facilityQualifier == null) return specializations;
-        try {
-            FacilitySymbol facility = (FacilitySymbol) s.queryForOne(
-                    new UnqualifiedNameQuery(facilityQualifier));
-            SpecImplementationPairing facilityPair = facility.getFacility();
-            Scope specScope = facilityPair.getSpecification().getScope(false);
+            FacilitySymbol facility) {
+        Map<PExp, PExp> result = new HashMap<>();
+        SpecImplementationPairing facilityPair = facility.getFacility();
+        Scope specScope = facilityPair.getSpecification().getScope(false);
 
-            List<ProgParameterSymbol> specModuleFormals =
-                    specScope.getSymbolsOfType(ProgParameterSymbol.class);
-            Iterator<? extends ParserRuleContext> actualIter =
-                    facilityPair.getSpecification().getArguments().iterator();
+        List<ProgParameterSymbol> specModuleFormals =
+                specScope.getSymbolsOfType(ProgParameterSymbol.class);
+        Iterator<? extends ParserRuleContext> actualIter =
+                facilityPair.getSpecification().getArguments().iterator();
 
-            for (ProgParameterSymbol p : specModuleFormals) {
-                specializations.put(p.asPSymbol(), repo.get(actualIter.next()));
-            }
-        } catch (NoSuchSymbolException|DuplicateSymbolException e1) {
-            e1.printStackTrace();
+        for (ProgParameterSymbol p : specModuleFormals) {
+            result.put(p.asPSymbol(), repo.get(actualIter.next()));
         }
-        return specializations;
+        return result;
     }
 
     private List<PExp> getAllParameterConfirms(
@@ -441,19 +448,34 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return resultingConfirms;
     }
 
-    private List<PExp> getAllModuleLevelAssertionsOfType(
+    private Set<PExp> getAllModuleLevelAssertionsOfType(
             Predicate<Symbol> assertionType) {
-        List<GlobalMathAssertionSymbol> result = moduleScope.query(
+        Set<PExp> result = new LinkedHashSet<>();
+        List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
-                        (GlobalMathAssertionSymbol.class,
-                                SymbolTable.ImportStrategy.IMPORT_NAMED,
-                                SymbolTable.FacilityStrategy.FACILITY_GENERIC));
-        //ok for things like global constraints we need to do the PExp -> PExp instantiation in the symboltable.
-        //but that's ok since here its just a symbol wrapping a PExp
-        return result.stream()
-                .filter(assertionType)
-                .map(GlobalMathAssertionSymbol::getEnclosedExp)
-                .collect(Collectors.toList());
+                        (GlobalMathAssertionSymbol.class));
+        List<FacilitySymbol> facilities = moduleScope.query(
+                new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class));
+
+        for (GlobalMathAssertionSymbol assertion : assertions) {
+            result.add(substituteByFacilities(facilities, assertion));
+        }
+        //TODO: eventually if I get ambitious enough we could probably try to do these
+        //substitutions in the symboltable -- make them part of the result
+        //that comes back from a query..
+        return result;
+    }
+
+    private PExp substituteByFacilities(List<FacilitySymbol> facilities,
+                                        GlobalMathAssertionSymbol e) {
+        for (FacilitySymbol facility : facilities) {
+            if (facility.getFacility().getSpecification().getName()
+                    .equals(e.getModuleID())) {
+                return e.getEnclosedExp().substitute(getFacilitySpecializations(
+                        symtab.mathPExps, moduleScope, facility));
+            }
+        }
+        return e.getEnclosedExp();
     }
 
     //The only way I'm current aware of a local requires clause getting changed
