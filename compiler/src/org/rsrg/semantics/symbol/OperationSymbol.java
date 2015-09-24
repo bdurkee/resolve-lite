@@ -25,8 +25,7 @@ public class OperationSymbol
     public OperationSymbol(String name, ParserRuleContext definingTree,
                            Resolve.RequiresClauseContext requires,
                            Resolve.EnsuresClauseContext ensures,
-                           PTType type,
-                           String moduleID,
+                           PTType type, String moduleID,
                            List<ProgParameterSymbol> params,
                            boolean moduleParameter) {
         super(name, definingTree, moduleID);

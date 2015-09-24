@@ -81,24 +81,32 @@ public class ProgParameterSymbol extends Symbol {
     private final ParameterMode mode;
     private final PTType declaredType;
     private final TypeGraph typeGraph;
-    private final boolean isModuleParameter;
+    private final boolean moduleParameterFlag;
     private final MathSymbol mathSymbolAlterEgo;
 
+    private final String typeQualifier;
     private final ProgVariableSymbol progVariableAlterEgo;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
+                               String typeQualifier,
             PTType type, ParserRuleContext definingTree, boolean moduleParameter,
                                String moduleID) {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
         this.mode = mode;
+        this.typeQualifier = typeQualifier;
         this.declaredType = type;
+        this.moduleParameterFlag = moduleParameter;
         this.mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
                         null, definingTree, moduleID);
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleID());
+    }
+
+    public String getTypeQualifier() {
+        return typeQualifier;
     }
 
     public PTType getDeclaredType() {
@@ -110,7 +118,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     public boolean isModuleParameter() {
-
+        return moduleParameterFlag;
     }
 
     @Override public MathSymbol toMathSymbol() {
@@ -126,7 +134,6 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @Override public ProgTypeSymbol toProgTypeSymbol() {
-
         return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
                 typeGraph, getName()), new MTNamed(typeGraph, getName()),
                 getDefiningTree(), getModuleID());
@@ -134,6 +141,7 @@ public class ProgParameterSymbol extends Symbol {
 
     public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
+                .progType(declaredType)
                 .mathType(declaredType.toMath()).build();
     }
 
@@ -146,9 +154,10 @@ public class ProgParameterSymbol extends Symbol {
             FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
+                typeQualifier,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(),
-                getModuleID());
+                moduleParameterFlag, getModuleID());
     }
 
     @Override public String toString() {
