@@ -384,6 +384,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 symtab.getInnermostActiveScope().define(
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
                                 .getText(), mode, groupType, ctx,
+                                walkingModuleArgOrParamList,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {

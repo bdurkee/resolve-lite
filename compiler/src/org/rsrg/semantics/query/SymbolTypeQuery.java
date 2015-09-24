@@ -22,6 +22,6 @@ public class SymbolTypeQuery<T extends Symbol>
 
     public SymbolTypeQuery(Class<? extends Symbol> entryType) {
         this(entryType, SymbolTable.ImportStrategy.IMPORT_NAMED,
-                SymbolTable.FacilityStrategy.FACILITY_GENERIC);
+                SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE);
     }
 }

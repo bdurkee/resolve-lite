@@ -81,13 +81,14 @@ public class ProgParameterSymbol extends Symbol {
     private final ParameterMode mode;
     private final PTType declaredType;
     private final TypeGraph typeGraph;
-
+    private final boolean isModuleParameter;
     private final MathSymbol mathSymbolAlterEgo;
 
     private final ProgVariableSymbol progVariableAlterEgo;
 
     public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
-            PTType type, ParserRuleContext definingTree, String moduleID) {
+            PTType type, ParserRuleContext definingTree, boolean moduleParameter,
+                               String moduleID) {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
         this.mode = mode;
@@ -106,6 +107,10 @@ public class ProgParameterSymbol extends Symbol {
 
     public ParameterMode getMode() {
         return mode;
+    }
+
+    public boolean isModuleParameter() {
+
     }
 
     @Override public MathSymbol toMathSymbol() {

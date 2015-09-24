@@ -8,6 +8,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
@@ -21,6 +22,8 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
@@ -320,9 +323,65 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return v.getBetaReducedExp();
     }
 
-    private List<PExp> getAllParameterAssumptions(
-            List<ProgParameterSymbol> parameters) {
+    private List<PExp> getAllParameterAssumptions(Scope opScope) {
+        //you really need to query for the parameters so that any generic types
+        //get properly substituted.
+        List<ProgParameterSymbol> formalParameters = opScope.query(
+                new SymbolTypeQuery<ProgParameterSymbol>(
+                        ProgParameterSymbol.class));
+        formalParameters = formalParameters.stream()
+                .filter(p -> !p.isModuleParameter()).collect(Collectors.toList());
+
+        for (ProgParameterSymbol p : formalParameters) {
+
+        }
+      /*  for (Resolve.ParameterDeclGroupContext grp : parameterGroupings) {
+            PTType groupType = tr.progTypeValues.get(grp.type());
+            for (TerminalNode t : grp.ID()) {
+                PSymbol asPSym = new PSymbol.PSymbolBuilder(t.getText())
+                        .progType(groupType).mathType(groupType.toMath())
+                        .build();
+                extractRelevantAssumptionsFromType();
+            }
+        }*/
+    }
+
+    private OperationSymbol getOperation(String name)
+    private List<PExp> extractRelevantAssumptionsFromParameter(
+            String typeQualifier, PTType type, PSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
+        if ( type instanceof PTNamed) {
+            //both PTFamily AND PTRepresentation are a PTNamed
+            PTNamed declaredType = (PTNamed)type;
+            PExp exemplar = declaredType.getExemplarAsPSymbol();
+            if (declaredType instanceof PTFamily ) {
+                PExp constraint = ((PTFamily) declaredType).getConstraint();
+
+                resultingAssumptions.add(constraint.substitute(
+                        declaredType.getExemplarAsPSymbol(), p)); // ASSUME TC (type constraint -- if we're conceptual)
+            }
+            else if (declaredType instanceof PTRepresentation)  {
+                ProgReprTypeSymbol repr =
+                        ((PTRepresentation) declaredType).getReprTypeSymbol();
+                PExp convention = repr.getConvention();
+
+                resultingAssumptions.add(convention.substitute(
+                        declaredType.getExemplarAsPSymbol(), p)); // ASSUME RC (repr convention -- if we're conceptual)
+                resultingAssumptions.add(repr.getCorrespondence());
+            }
+        }
+        else { //PTGeneric
+            resultingAssumptions.add(
+                    g.formInitializationPredicate(type, p.getName()));
+        }
+        return resultingAssumptions;
+    }
+
+    private PExp substituteFacilityArgs(String facility, PExp e) {
+        FacilitySymbol facility = moduleScope.queryForOne(new NameQuery())
+    }
+     /*   List<PExp> resultingAssumptions = opScope
+
         for (ProgParameterSymbol p : parameters) {
             PExp paramExp = p.asPSymbol();
             if ( p.getDeclaredType() instanceof PTNamed) {
@@ -348,7 +407,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 resultingAssumptions.add(g.formInitializationPredicate(
                         p.getDeclaredType(), p.getName()));
             }
-        }
+        }*/
         return resultingAssumptions;
     }
 
