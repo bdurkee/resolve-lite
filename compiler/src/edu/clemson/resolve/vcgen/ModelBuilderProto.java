@@ -223,8 +223,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             paramSyms.stream()
                                     .map(ProgParameterSymbol::getDeclaredType)
                                     .collect(Collectors.toList())));
-            List<PExp> l = getAllParameterAssumptions(s);
-
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
                     paramSyms, ctx, currentProcOpSym.getRequires());
 
@@ -234,7 +232,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .freeVars(getFreeVars(s))
                             .assume(getAllModuleLevelAssertionsOfType(requires()))
                             .assume(getAllModuleLevelAssertionsOfType(constraint()))
-                            //.assume(getAllParameterAssumptions(paramSyms)) //we assume correspondence for reprs here automatically
+                            .assume(getAllParameterAssumptions(s)) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
             assertiveBlocks.push(block);
@@ -347,10 +345,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof PTFamily ) {
                 PExp constraint = ((PTFamily) declaredType).getConstraint();
-                String typeQualifier = p.getTypeQualifier();
-                constraint = (typeQualifier != null) ?
-                        substituteFacilityArgs(
-                                p.getTypeQualifier(), constraint) : constraint;
+                constraint = constraint.substitute(getFacilitySpecializations(
+                        symtab.mathPExps, moduleScope, p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
             }
@@ -371,30 +367,33 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return resultingAssumptions;
     }
 
-    private PExp substituteFacilityArgs(String facilityQualifier, PExp e) {
+    /**
+     * Returns a mapping from formal -> actual args for facility,
+     * {@code facilityQualifier}.
+     */
+    public static Map<PExp, PExp> getFacilitySpecializations(
+            ParseTreeProperty<PExp> repo, Scope s,
+            String facilityQualifier) {
+        Map<PExp, PExp> specializations = new HashMap<>();
+        if (facilityQualifier == null) return specializations;
         try {
-            FacilitySymbol facility =
-                    (FacilitySymbol) moduleScope
-                            .queryForOne(new UnqualifiedNameQuery(
-                                    facilityQualifier));
+            FacilitySymbol facility = (FacilitySymbol) s.queryForOne(
+                    new UnqualifiedNameQuery(facilityQualifier));
             SpecImplementationPairing facilityPair = facility.getFacility();
-            Scope s = facilityPair.getSpecification().getScope(false);
+            Scope specScope = facilityPair.getSpecification().getScope(false);
 
             List<ProgParameterSymbol> specModuleFormals =
-                    s.getSymbolsOfType(ProgParameterSymbol.class);
+                    specScope.getSymbolsOfType(ProgParameterSymbol.class);
             Iterator<? extends ParserRuleContext> actualIter =
                     facilityPair.getSpecification().getArguments().iterator();
-            Map<PExp, PExp> formalsToActuals = new HashMap<>();
 
             for (ProgParameterSymbol p : specModuleFormals) {
-                formalsToActuals.put(p.asPSymbol(),
-                        symtab.mathPExps.get(actualIter.next()));
+                specializations.put(p.asPSymbol(), repo.get(actualIter.next()));
             }
-            e = e.substitute(formalsToActuals);
         } catch (NoSuchSymbolException|DuplicateSymbolException e1) {
             e1.printStackTrace();
         }
-        return e;
+        return specializations;
     }
 
     private List<PExp> getAllParameterConfirms(
@@ -449,6 +448,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         (GlobalMathAssertionSymbol.class,
                                 SymbolTable.ImportStrategy.IMPORT_NAMED,
                                 SymbolTable.FacilityStrategy.FACILITY_GENERIC));
+        //ok for things like global constraints we need to do the PExp -> PExp instantiation in the symboltable.
+        //but that's ok since here its just a symbol wrapping a PExp
         return result.stream()
                 .filter(assertionType)
                 .map(GlobalMathAssertionSymbol::getEnclosedExp)
