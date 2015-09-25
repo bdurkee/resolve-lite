@@ -69,10 +69,6 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
-    }
-
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
 
     @Override public PExp withIncomingSignsErased() {
@@ -84,7 +80,11 @@ public class PSet extends PExp {
         return null;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @Override public PExp withArgumentsErased() {
+        return this;
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache(boolean convertApplications) {
         return new LinkedHashSet<>();
     }
 
@@ -96,7 +96,7 @@ public class PSet extends PExp {
         return new ArrayList<>();
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache() {
+    @Override protected Set<String> getSymbolNamesNoCache(boolean includeApplications, boolean excludeLiterals) {
         return new HashSet<>();
     }
 

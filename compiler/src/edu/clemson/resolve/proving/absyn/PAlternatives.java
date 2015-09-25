@@ -120,14 +120,20 @@ public class PAlternatives extends PExp {
                 + "been implemented.");
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @Override public PExp withArgumentsErased() {
+        return this;
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache(
+            boolean convertApplications) {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getIncomingVariables());
-            result.addAll(a.result.getIncomingVariables());
+            result.addAll(a.condition.getIncomingSymbols(convertApplications));
+            result.addAll(a.result.getIncomingSymbols(convertApplications));
         }
-        result.addAll(otherwiseClauseResult.getIncomingVariables());
+        result.addAll(otherwiseClauseResult
+                .getIncomingSymbols(convertApplications));
         return result;
     }
 
@@ -176,14 +182,35 @@ public class PAlternatives extends PExp {
         return sb.toString();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache() {
+    @Override public boolean equals(Object o) {
+        boolean result = o instanceof PAlternatives;
+        if ( result ) {
+            result = otherwiseClauseResult.equals(((PAlternatives)o)
+                            .otherwiseClauseResult);
+            result &= alternatives.size() ==
+                    ((PAlternatives)o).alternatives.size();
+            //now compare the actual alternatives exps
+            Iterator<Alternative> thisAltIter = alternatives.iterator();
+            Iterator<Alternative> oAltIter = ((PAlternatives)o).alternatives.iterator();
+            while (result && thisAltIter.hasNext()) {
+                Alternative oAlt = oAltIter.next();
+                Alternative thisAlt = thisAltIter.next();
+                result = oAlt.condition.equals(thisAlt.condition) &&
+                        oAlt.result.equals(thisAlt.result);
+            }
+        }
+        return result;
+    }
+
+    @Override public Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getSymbolNames());
-            result.addAll(a.result.getSymbolNames());
+            result.addAll(a.condition.getSymbolNames(excludeApplications, excludeLiterals));
+            result.addAll(a.result.getSymbolNames(excludeApplications, excludeLiterals));
         }
-        result.addAll(otherwiseClauseResult.getSymbolNames());
+        result.addAll(otherwiseClauseResult.getSymbolNames(excludeApplications, excludeLiterals));
         return result;
     }
 
@@ -210,10 +237,6 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public boolean isEquality() {
-        return false;
-    }
-
     @Override public boolean isLiteralFalse() {
         return false;
     }
@@ -224,10 +247,6 @@ public class PAlternatives extends PExp {
 
     @Override public boolean isFunctionApplication() {
         return false;
-    }
-
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
     }
 
     @Override public boolean isVariable() {

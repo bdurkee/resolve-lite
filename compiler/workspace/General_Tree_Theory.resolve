@@ -1,0 +1,13 @@
+Precis General_Tree_Theory;
+        uses String_Theory;
+    Definition Tr : Cls;
+
+    Definition Site : El * Str(Tr) * Str(Tr);
+
+    Definition EStF_Tr(e : El) : Powerset(Tr);
+
+    Definition NL_Site(Lab : El, LTS, RTS : Str(EStF_Tr)) :
+        (El * (Str(EStF_Tr) * Str(EStF_Tr)));
+    //Definition N_Lst_Pos :
+    //    (Path : Str(NL_Site)) * Z;
+end General_Tree_Theory;

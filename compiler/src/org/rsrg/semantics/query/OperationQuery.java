@@ -37,7 +37,7 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
     public OperationQuery(Token qualifier, String name,
                           List<PTType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, SymbolTable.ImportStrategy.IMPORT_NAMED,
-                SymbolTable.FacilityStrategy.FACILITY_IGNORE, false),
+                SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE, false),
                 new OperationSearcher(name, argumentTypes));
     }
 

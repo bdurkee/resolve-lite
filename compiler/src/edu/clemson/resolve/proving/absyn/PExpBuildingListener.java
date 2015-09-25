@@ -242,6 +242,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
                         .quantification(quantifiedVars.get(ctx.name.getText()))
+                        .incoming(ctx.getText().startsWith("@"))
                         .mathTypeValue(getMathTypeValue(ctx))
                         .mathType(getMathType(ctx));
         repo.put(ctx, result.build());
@@ -267,6 +268,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
+    }
+
+    @Override public void exitModuleArgument(Resolve.ModuleArgumentContext ctx) {
+        repo.put(ctx, repo.get(ctx.progExp()));
     }
 
     @Override public void exitProgParamExp(Resolve.ProgParamExpContext ctx) {

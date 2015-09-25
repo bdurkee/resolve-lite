@@ -137,7 +137,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitModule(Resolve.ModuleContext ctx) {
         String moduleName = Utils.getModuleName(ctx);
-        moduleScope = symtab.startModuleScope(ctx, moduleName)
+        moduleScope = symtab.startModuleScope(
+                (ParserRuleContext)ctx.getChild(0), moduleName)
                 .addImports(tr.semanticallyVisibleUses);
         super.visitChildren(ctx);
         symtab.endScope();
@@ -374,6 +375,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitParameterDeclGroup(
             Resolve.ParameterDeclGroupContext ctx) {
         this.visit(ctx.type());
+        String typeQualifier = ctx.type().qualifier != null ?
+                ctx.type().qualifier.getText() : null;
         PTType groupType = tr.progTypeValues.get(ctx.type());
         for (TerminalNode term : ctx.ID()) {
             try {
@@ -382,7 +385,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                 ctx.parameterMode().getText());
                 symtab.getInnermostActiveScope().define(
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
-                                .getText(), mode, groupType, ctx,
+                                .getText(), mode, typeQualifier, groupType,
+                                ctx, walkingModuleArgOrParamList,
                                 getRootModuleID()));
             }
             catch (DuplicateSymbolException dse) {
@@ -929,6 +933,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     s = symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(ctx.qualifier,
                                     ctx.name, true));
+                    //TODO: get rid of ModuleParameterizableSymbol and just use OperationSymbol here.
                     if (s instanceof ModuleParameterizableSymbol) {
                         tr.progTypes.put(ctx, ((ModuleParameterizableSymbol) s).getProgramType());
                         tr.mathTypes.put(ctx, ((ModuleParameterizableSymbol) s).getMathType());

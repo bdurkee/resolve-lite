@@ -98,6 +98,12 @@ public abstract class PExp {
         return substitute(result);
     }
 
+    public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
+        PExp thisSubstituted = substitute(substitutions);
+        boolean result = this.equals(thisSubstituted);
+        return result;
+    }
+
     public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
@@ -190,18 +196,6 @@ public abstract class PExp {
         return new ArrayList<>();
     }
 
-    public final List<PExp> splitOn(String ... names) {
-        return splitOn(Arrays.asList(names));
-    }
-
-    public final List<PExp> splitOn(List<String> names) {
-        List<PExp> segments = new ArrayList<>();
-        splitOn(segments, names);
-        return segments;
-    }
-
-    protected abstract void splitOn(List<PExp> accumulator, List<String> names);
-
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
         splitIntoConjuncts(conjuncts);
@@ -221,15 +215,36 @@ public abstract class PExp {
 
     public abstract PExp withQuantifiersFlipped();
 
-    public final Set<PSymbol> getIncomingVariables() {
+    public abstract PExp withArgumentsErased();
+
+    public final Set<PSymbol> getIncomingSymbols() {
+        return getIncomingSymbols(false);
+    }
+
+    /**
+     * Returns the set of '@'-prefixed symbols appearing in  {@code this}
+     * expression. Note that when we say 'symbols' we mean both function
+     * applications and argument-less variables.
+     * <p>
+     * Optionally, if requested, we also convert any found '@'-prefixed
+     * function applications to their argumentless, first class form. This is
+     * useful for places in vcgen where we just want an expr form of an incoming
+     * symbol without the arguments.</p>
+     *
+     * @param convertApplications
+     * @return
+     */
+    public final Set<PSymbol> getIncomingSymbols(
+            final boolean convertApplications) {
         if ( cachedIncomingVariables == null ) {
-            cachedIncomingVariables =
-                    Collections.unmodifiableSet(getIncomingVariablesNoCache());
+            cachedIncomingVariables = Collections.unmodifiableSet(
+                            getIncomingVariablesNoCache(convertApplications));
         }
         return cachedIncomingVariables;
     }
 
-    public abstract Set<PSymbol> getIncomingVariablesNoCache();
+    public abstract Set<PSymbol> getIncomingVariablesNoCache(
+            boolean convertApplications);
 
     public final Set<PSymbol> getQuantifiedVariables() {
         if ( cachedQuantifiedVariables == null ) {
@@ -253,16 +268,17 @@ public abstract class PExp {
 
     public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    public final Set<String> getSymbolNames() {
-        if ( cachedSymbolNames == null ) {
-            //We're immutable, so only do this once
-            cachedSymbolNames =
-                    Collections.unmodifiableSet(getSymbolNamesNoCache());
-        }
-        return cachedSymbolNames;
+    public final Set<String> getSymbolNames(boolean excludeApplications,
+                                            boolean excludeLiterals) {
+        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
     }
 
-    protected abstract Set<String> getSymbolNamesNoCache();
+    public final Set<String> getSymbolNames() {
+        return getSymbolNames(false, false);
+    }
+
+    protected abstract Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals);
 
     public static class HashDuple {
         public int structureHash;

@@ -59,9 +59,9 @@ public class VCOutputFile extends OutputModelObject {
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
         for (PExp vc : vcs) {
+            List<? extends PExp> args = vc.getSubExpressions();
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
-                    ((PSymbol)vc).getArguments().get(0),
-                    ((PSymbol)vc).getArguments().get(1));
+                    args.get(0), args.get(1));
 
             finalVcs.add(curVC);
             vcIndex++;

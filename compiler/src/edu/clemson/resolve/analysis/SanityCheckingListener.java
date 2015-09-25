@@ -5,11 +5,9 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.programtype.PTType;
 
 /**
@@ -80,10 +78,10 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     @Override public void exitRequiresClause(Resolve.RequiresClauseContext ctx) {
         PExp requires = tr.mathPExps.get(ctx);
-        if (requires != null && !requires.getIncomingVariables().isEmpty()) {
+        if (requires != null && !requires.getIncomingSymbols().isEmpty()) {
             compiler.errMgr.semanticError(
                     ErrorKind.ILLEGAL_INCOMING_REF_IN_REQUIRES, ctx.getStart(),
-                    requires.getIncomingVariables(),
+                    requires.getIncomingSymbols(),
                     ctx.mathAssertionExp().getText());
         }
     }

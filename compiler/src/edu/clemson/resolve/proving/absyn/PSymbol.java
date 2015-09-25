@@ -395,18 +395,6 @@ public class PSymbol extends PExp {
         }
     }
 
-    @Override protected void splitOn(List<PExp> accumulator,
-                                     List<String> names) {
-        if (names.contains(name)) {
-            for (PExp arg : arguments) {
-                arg.splitOn(accumulator, names);
-            }
-        }
-        else {
-            accumulator.add(this);
-        }
-    }
-
     @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
@@ -453,15 +441,27 @@ public class PSymbol extends PExp {
                 .quantification(this.quantification.flipped()).build();
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @Override public PExp withArgumentsErased() {
+        return new PSymbolBuilder(this).clearArguments().build();
+    }
+
+    @Override public Set<PSymbol> getIncomingVariablesNoCache(
+            boolean convertApplications) {
         Set<PSymbol> result = new LinkedHashSet<>();
         if ( incomingFlag ) {
-            if ( arguments.size() == 0 ) {
+            if ( convertApplications && isFunctionApplication() ) {
+                PSymbol withoutArgs = new PSymbolBuilder(name)
+                        .mathType(getMathType())
+                        .mathTypeValue(getMathTypeValue())
+                        .incoming(true).quantification(quantification).build();
+                result.add(withoutArgs);
+            }
+            else {
                 result.add(this);
             }
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getIncomingVariables());
+            result.addAll(argument.getIncomingSymbols(convertApplications));
         }
         return result;
     }
@@ -483,14 +483,20 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache() {
+    @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
-        if ( quantification == Quantification.NONE ) {
+        // if the caller doesn't want applications and we aren't an application, then add us
+        if (    !(excludeApplications && isFunctionApplication()) &&
+                !(excludeLiterals && isLiteral()) &&
+                quantification == Quantification.NONE ) {
             result.add(getCanonicalName());
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getSymbolNames());
+            result.addAll(argument.getSymbolNames(
+                    excludeApplications, excludeLiterals));
         }
+
         return result;
     }
 
@@ -582,7 +588,7 @@ public class PSymbol extends PExp {
     }
 
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
-        protected final String name, lprint, rprint;
+        protected String name, lprint, rprint;
         protected String qualifier;
 
         protected boolean incoming = false;
@@ -593,6 +599,22 @@ public class PSymbol extends PExp {
         protected PTType progType, progTypeValue;
         protected final List<PExp> arguments = new ArrayList<>();
         private final List<String> nameComponents = new ArrayList<>();
+
+        public PSymbolBuilder(PSymbol existing) {
+            this.name = existing.getName();
+            this.lprint = existing.getLeftPrint();
+            this.rprint = existing.getRightPrint();
+            this.incoming = existing.incomingFlag;
+            this.arguments.addAll(existing.getArguments());
+            this.literal = existing.literalFlag;
+            this.quantification = existing.quantification;
+            this.style = existing.dispStyle;
+
+            this.mathType = existing.getMathType();
+            this.mathTypeValue = existing.getMathTypeValue();
+            this.progType = existing.getProgType();
+            this.progTypeValue = existing.getProgTypeValue();
+        }
 
         public PSymbolBuilder(String name) {
             this(name, null);
@@ -612,6 +634,11 @@ public class PSymbol extends PExp {
             }
             this.lprint = lprint;
             this.rprint = rprint;
+        }
+
+        public PSymbolBuilder name(String name) {
+            this.name = name;
+            return this;
         }
 
         public PSymbolBuilder qualifier(Token q) {
@@ -680,6 +707,11 @@ public class PSymbol extends PExp {
         public PSymbolBuilder arguments(Collection<PExp> args) {
             sanityCheckAdditions(args);
             arguments.addAll(args);
+            return this;
+        }
+
+        public PSymbolBuilder clearArguments() {
+            arguments.clear();
             return this;
         }
 

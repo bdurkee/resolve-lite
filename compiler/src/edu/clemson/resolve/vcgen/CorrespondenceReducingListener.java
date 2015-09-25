@@ -11,11 +11,12 @@ import java.util.Map;
 /** A visitor that replaces conceptual variables with their correspondence
  *  defined mathematical counterparts.
  */
+@Deprecated
 public class CorrespondenceReducingListener extends PExpListener {
 
-    //'conc.P.Trmnl_Loc' -> 'SS(k)(P.Length, Cen(k))'
-    //'conc.P.Curr_Loc' -> 'SS(k)(P.Curr_Place, Cen(k))'
-    //'conc.P.Lab' -> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
+    //'conc.P.Trmnl_Loc' ~> 'SS(k)(P.Length, Cen(k))'
+    //'conc.P.Curr_Loc' ~> 'SS(k)(P.Curr_Place, Cen(k))'
+    //'conc.P.Lab' ~> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
     private final Map<PExp, PExp> substitutions = new HashMap<>();
     private PExp startingExp;
 

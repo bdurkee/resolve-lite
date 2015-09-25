@@ -295,15 +295,16 @@ public class TestPExp extends BaseTest {
     @Test public void testGetIncomingVariables() {
         TypeGraph g = new TypeGraph();
         PExp result =
-                parseMathAssertionExp(
-                        g,
-                        "Forall x, y, z : Z, Exists u, v, w : N,"
-                                + "g(@u) + (h(@z, @w, f(@u)))");
-        Set<String> incomingNames = result.getIncomingVariables().stream()
+                parseMathAssertionExp( g,
+                        "Forall x, y, z : Z, Exists u, v, w : N," +
+                                "@g(@u) + (h(@z, @w, @f(@u))) + " +
+                        "lambda (q : Z).({{@x if g(x); @b(@k) otherwise;}})");
+        Set<String> incomingNames = result.getIncomingSymbols().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
-        Assert.assertEquals(3, incomingNames.size());
-        Set<String> expectedNames = Arrays.asList("u", "z", "w").stream()
+        Set<String> expectedNames =
+                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream()
                 .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }
 
@@ -325,14 +326,73 @@ public class TestPExp extends BaseTest {
 
     @Test public void testGetFunctionApplications() {}
 
-    @Test public void testGetSymbolNames() {}
+    @Test public void testGetSymbolNames() {
+       TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "x + y");
+        Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
+                .collect(Collectors.toSet());
+        Set<String> foundNames = result.getSymbolNames();
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "x + y"); //you actually have to do this again or else we'll retrieve a cached answer
+        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
+        expectedNames = Arrays.asList("x", "y").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)"); //you actually have to do this again or else we'll retrieve a cached answer
+        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
+        expectedNames = Arrays.asList("y", "s", "z", "v").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
+        foundNames = result.getSymbolNames();
+        expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
+        foundNames = result.getSymbolNames(false, true);
+        expectedNames = Arrays.asList("v", "Reverse", "x", "z", "+", "-").stream()
+                .collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
+        foundNames = result.getSymbolNames(false, false);
+        expectedNames =
+                Arrays.asList("5", "1", "4", "v", "Reverse", "x", "z", "+", "-")
+                        .stream().collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        //This one's pretty good because it has PLambda's and PAlternatives
+        //inside. So it tests the implementation of getSymbolNames() in those
+        //classes..
+        result = parseMathAssertionExp(g, "((((SCD(k, conc.P.Trmnl_Loc)) <= Max_Length) and " +
+                "(conc.P.Curr_Loc is_in (Inward_Loc(conc.P.Trmnl_Loc)))) and " +
+                "({{(P.Labl((SCD(k, conc.P.Trmnl_Loc)))) if (((SCD(k, conc.P.Trmnl_Loc)) + 1) <= P.Length);" +
+                "   T.Base_Point otherwise;}} = T.Base_Point))");
+        foundNames = result.getSymbolNames(true, true);
+        expectedNames =
+                Arrays.asList("k", "conc.P.Trmnl_Loc", "conc.P.Curr_Loc",
+                        "P.Length", "T.Base_Point", "Max_Length")
+                        .stream().collect(Collectors.toSet());
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+    }
 
     @Test public void testSubstitute() {
         TypeGraph g = new TypeGraph();
 
-        PExp e = parseMathAssertionExp(g, "p = @q");
+        /*PExp e = parseMathAssertionExp(g, "p = @q");
         PExp substitutee = new PSymbol.PSymbolBuilder("q").mathType(g.INVALID)
-                .incoming(true).build();
+                .incoming(true).build();*/
         //e.substitute();
     }
 
@@ -391,6 +451,13 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
         Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
+
+        //e = parseMathAssertionExp(g, "(((0 <= 0) and  ((1 <= max_int) implies  ((min_int <= 0) implies  ((Max_Depth <= max_int) implies  ((min_int <= Max_Depth) implies  ((1 <= Max_Depth) implies  (0 <= Max_Depth))))))) and  (Array_Is_Initial_in_Range(S.Contents, Lower_Bound, Upper_Bound) implies      Reverse(Iterated_Concatenation(1, 0, lambda ( i : Z ).(<S.Contents(i)>))) = Empty_String))");
+        //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
+        //partitions = e.experimentalSplit();
+        //Assert.assertEquals(2, partitions.size());
+        //Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
+        //Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
     }
 
     protected static ParseTree getTree(String input) {
