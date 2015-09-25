@@ -21,7 +21,6 @@ public class FunctionAssignApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block,
             VCRuleBackedStat stat) {
-        AnnotatedTree annotations = block.annotations;
         PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
@@ -46,15 +45,14 @@ public class FunctionAssignApplicationStrategy
          * {@code x} in op's requires clause with the actuals (more formally,
          * {@code pre[x ~> u]}).
          */
-        PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
-        opRequires = opRequires.substitute(
+        PExp opRequires = block.getPExpFor(op.getRequires()).substitute(
                 ModelBuilderProto.getFacilitySpecializations(
                         block.symtab.mathPExps,
                         block.scope, call.getQualifier()));
         opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires.substitute(formals, actuals));
 
-        PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures());
+        PExp opEnsures = block.getPExpFor(op.getEnsures());
 
         if (opEnsures.isObviouslyTrue()) return block.snapshot();
 

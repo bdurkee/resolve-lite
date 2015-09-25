@@ -5,6 +5,7 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -13,7 +14,6 @@ import java.util.*;
 public abstract class AssertiveBlock extends OutputModelObject {
 
     private final ParserRuleContext definingTree;
-    private final TypeGraph g;
     private final String blockDescription;
 
     @ModelElement public final VCConfirm finalConfirm;
@@ -21,11 +21,10 @@ public abstract class AssertiveBlock extends OutputModelObject {
     @ModelElement public final List<RuleApplicationStep> applicationSteps =
             new ArrayList<>();
 
-    public AssertiveBlock(TypeGraph g, ParserRuleContext definingTree,
-                          VCConfirm finalConfirm, List<VCRuleBackedStat> stats,
+    public AssertiveBlock(ParserRuleContext definingTree, VCConfirm finalConfirm,
+                          List<VCRuleBackedStat> stats,
                           List<RuleApplicationStep> applicationSteps,
                           String blockDescription) {
-        this.g = g;
         this.definingTree = definingTree;
         this.finalConfirm = finalConfirm;
         this.stats.addAll(stats);
@@ -35,10 +34,6 @@ public abstract class AssertiveBlock extends OutputModelObject {
 
     public String getDescription() {
         return blockDescription;
-    }
-
-    public TypeGraph getTypeGraph() {
-        return g;
     }
 
     public ParserRuleContext getDefiningTree() {

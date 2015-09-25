@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 public class VCAssertiveBlock extends AssertiveBlock {
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
-        super(builder.g, builder.definingTree, builder.finalConfirm,
-                builder.stats, builder.applicationSteps, builder.description);
+        super(builder.definingTree, builder.finalConfirm, builder.stats,
+                builder.applicationSteps, builder.description);
     }
 
     public static class VCAssertiveBlockBuilder
@@ -26,25 +26,29 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 Utils.Builder<VCAssertiveBlock> {
 
         public final TypeGraph g;
+        public final SymbolTable symtab;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
-        public SymbolTable symtab;
 
-        public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        public final LinkedList<VCRuleBackedStat> stats =
+                new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
         public final String description;
 
-        public VCAssertiveBlockBuilder(TypeGraph g, Scope contextScope,
-                                       SymbolTable symtab, String description,
-                                       ParserRuleContext ctx,
-                                       AnnotatedTree annotations) {
-            this.g = g;
+        public PExp getPExpFor(ParserRuleContext ctx) {
+            PExp result = symtab.mathPExps.get(ctx);
+            return result != null ? result : g.getTrueExp();
+        }
+
+        public VCAssertiveBlockBuilder(SymbolTable symtab, String description,
+                                       ParserRuleContext ctx) {
+            this.g = symtab.getTypeGraph();
+            this.symtab = symtab;
             this.definingTree = ctx;
             this.finalConfirm = new VCConfirm(this, g.getTrueExp());
-            this.scope = contextScope;
-            this.symtab = symtab;
+            this.scope = symtab.scopes.get(ctx);
             this.description = description;
         }
 
@@ -67,7 +71,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        public VCAssertiveBlockBuilder confirm(List<PExp> confirms) {
+        public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
             confirms.forEach(this::confirm);
             return this;
         }
@@ -103,18 +107,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        /**
-         * Same as {@link #build()}, but this one doesn't automatically apply
-         * proof rules to the stats within this block.
+        /** Same as {@link #build()}, but this one doesn't automatically apply
+         *  proof rules to the stats within this block.
          */
         public VCAssertiveBlock snapshot() {
             return new VCAssertiveBlock(this);
         }
 
-        /**
-         * Applies the appropriate rule to each stat within this builder. In
-         * other words, a call to this will fully develop the final confirm
-         * for this particular block of assertive code.
+        /** Applies the appropriate rule to each stat within this builder. In
+         *  other words, a call to this will fully develop the final confirm
+         *  for this particular block of assertive code.
          */
         @Override public VCAssertiveBlock build() {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));

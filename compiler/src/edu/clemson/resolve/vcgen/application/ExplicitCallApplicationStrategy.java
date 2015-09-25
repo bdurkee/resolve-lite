@@ -11,6 +11,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
@@ -54,17 +55,15 @@ public class ExplicitCallApplicationStrategy
      * result of the {@code f[x ~> u]} part of the overall
      * step: {@code Q[v ~> f[x ~> u]]}.
      */
-    protected static Map<PExp, PExp> getEnsuresReplacementBindings(
-            VCAssertiveBlockBuilder block,
-            PSymbol call) {
-        AnnotatedTree annotations = block.annotations;
+    private Map<PExp, PExp> getEnsuresReplacementBindings(
+            VCAssertiveBlockBuilder block, PSymbol call) {
         OperationSymbol op = getOperation(block.scope, call);
 
         List<PExp> actuals = call.getArguments();
         List<PExp> formals = op.getParameters().stream()
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
 
-        PExp opRequires = annotations.getPExpFor(block.g, op.getRequires());
+        PExp opRequires = block.getPExpFor(op.getRequires());
         opRequires = opRequires.substitute(
                 ModelBuilderProto.getFacilitySpecializations(
                         block.symtab.mathPExps,
@@ -72,7 +71,7 @@ public class ExplicitCallApplicationStrategy
         opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires);
 
-        PExp opEnsures = annotations.getPExpFor(block.g, op.getEnsures());
+        PExp opEnsures = block.getPExpFor(op.getEnsures());
         /*opEnsures = opEnsures.substitute(
                 ModelBuilderProto.getFacilitySpecializations(
                         block.symtab.mathPExps,

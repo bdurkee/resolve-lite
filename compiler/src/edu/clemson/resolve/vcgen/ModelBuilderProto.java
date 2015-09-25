@@ -84,9 +84,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx), symtab,
-                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx, tr)
-                        .freeVars(getFreeVars(symtab.scopes.get(ctx)))
+                new VCAssertiveBlockBuilder(symtab,
+                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
                        // .assume(getAllParameterAssumptions(moduleParamSyms))
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
@@ -142,8 +141,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, symtab.scopes.get(ctx), symtab,
-                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx, tr)
+                new VCAssertiveBlockBuilder(symtab,
+                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
                     .assume(getModuleLevelAssertionsOfType(requires()));
                     //.assume(getAllParameterAssumptions(moduleParamSyms));
 
@@ -183,9 +182,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, s, symtab,
-                        "Proc_Decl_rule="+ctx.name.getText(), ctx, tr)
-                        .freeVars(getFreeVars(s))
+                new VCAssertiveBlockBuilder(symtab,
+                        "Proc_Decl_rule="+ctx.name.getText(), ctx)
                         //.assume(getAllParameterAssumptions(paramSyms))
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(getModuleLevelAssertionsOfType(constraint()))
@@ -226,9 +224,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     paramSyms, ctx, currentProcOpSym.getRequires());
 
             VCAssertiveBlockBuilder block =
-                    new VCAssertiveBlockBuilder(g, s, symtab,
-                            "Correct_Op_Hypo="+ctx.name.getText(), ctx, tr)
-                            .freeVars(getFreeVars(s))
+                    new VCAssertiveBlockBuilder(symtab,
+                            "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
                             .assume(getSequentsFromFormalParameters(s, this::extractAssumptionsFromParameter)) //we assume correspondence for reprs here automatically
@@ -294,13 +291,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
-
-    public List<Symbol> getFreeVars(Scope s) {
-        return s.getSymbolsOfType(Symbol.class).stream()
-                .filter(x -> x instanceof ProgParameterSymbol ||
-                        x instanceof ProgVariableSymbol)
-                .collect(Collectors.toList());
     }
 
     public static Predicate<Symbol> constraint() {
