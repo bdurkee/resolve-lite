@@ -86,7 +86,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(symtab,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
-                       // .assume(getAllParameterAssumptions(moduleParamSyms))
+                        .assume(getSequentsFromFormalParameters(moduleParamSyms,
+                                this::extractAntecedentsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
@@ -143,8 +144,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(symtab,
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
-                    .assume(getModuleLevelAssertionsOfType(requires()));
-                    //.assume(getAllParameterAssumptions(moduleParamSyms));
+                    .assume(getModuleLevelAssertionsOfType(requires()))
+                    .assume(getSequentsFromFormalParameters(moduleParamSyms,
+                            this::extractAntecedentsFromParameter));
 
         assertiveBlocks.push(block);
     }
@@ -203,7 +205,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(getSequentsFromFormalParameters(s, this::extractConsequentsFromParameter))
+                .confirm(getSequentsFromFormalParameters(
+                        paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
@@ -228,7 +231,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
-                            .assume(getSequentsFromFormalParameters(s, this::extractAssumptionsFromParameter)) //we assume correspondence for reprs here automatically
+                            .assume(getSequentsFromFormalParameters(paramSyms,
+                                    this::extractAntecedentsFromParameter)) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
             assertiveBlocks.push(block);
@@ -239,10 +243,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
-        Scope s = symtab.scopes.get(ctx);
+        Scope scope = symtab.scopes.get(ctx);
         List<ProgParameterSymbol> paramSyms =
-                s.getSymbolsOfType(ProgParameterSymbol.class);
+                scope.getSymbolsOfType(ProgParameterSymbol.class);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        List<ProgParameterSymbol> formalParameters = scope.query(
+                new SymbolTypeQuery<ProgParameterSymbol>(
+                        ProgParameterSymbol.class));
 
         List<PExp> corrFnExps = paramSyms.stream()
                 .filter(p -> p.getDeclaredType() instanceof PTRepresentation)
@@ -253,7 +260,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
 
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-            .confirm(getSequentsFromFormalParameters(s, this::extractConsequentsFromParameter)) //we assume correspondence for reprs here automatically
+            .confirm(getSequentsFromFormalParameters(formalParameters,
+                    this::extractConsequentsFromParameter)) //we assume correspondence for reprs here automatically
             .assume(corrFnExps)
             .finalConfirm(corrFnExpEnsures);
 
@@ -350,21 +358,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     //I don't like this method. I think it should take a list of formalParameter symbols instead of
     //a scope. The name of the method should somehow inform the sorts of params it takes..
-    private List<PExp> getSequentsFromFormalParameters(Scope scope,
-                           Function<ProgParameterSymbol, List<PExp>> extract) {
-        List<ProgParameterSymbol> formalParameters = scope.query(
-                new SymbolTypeQuery<ProgParameterSymbol>(
-                        ProgParameterSymbol.class));
-        formalParameters = formalParameters.stream()
-                .filter(p -> !p.isModuleParameter()).collect(Collectors.toList());
+    private List<PExp> getSequentsFromFormalParameters(
+            List<ProgParameterSymbol> parameters,
+            Function<ProgParameterSymbol, List<PExp>> extract) {
         List<PExp> result = new ArrayList<>();
-        for (ProgParameterSymbol p : formalParameters) {
+        for (ProgParameterSymbol p : parameters) {
             result.addAll(extract.apply(p));
         }
         return result;
     }
 
-    private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
+    private List<PExp> extractAntecedentsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
         if ( p.getDeclaredType() instanceof PTNamed) {
 
