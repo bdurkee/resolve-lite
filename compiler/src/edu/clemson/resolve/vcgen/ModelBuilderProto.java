@@ -186,7 +186,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(symtab,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
-                        //.assume(getAllParameterAssumptions(paramSyms))
+                        .assume(getSequentsFromFormalParameters(paramSyms, 
+                                this::extractAntecedentsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(requires()))
                         .assume(getModuleLevelAssertionsOfType(constraint()))
                         //.assume(corrFnExpsForParams)
