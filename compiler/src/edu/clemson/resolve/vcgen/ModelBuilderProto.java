@@ -44,8 +44,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
-    private final ParseTreeProperty<VCRuleBackedStat> stats =
-            new ParseTreeProperty<>();
+  //  private final ParseTreeProperty<VCRuleBackedStat> stats =
+   //         new ParseTreeProperty<>();
     private final VCOutputFile outputFile = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
 
@@ -55,6 +55,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             new LinkedList<>();
 
     private OperationSymbol currentProcOpSym = null;
+
+    private final List<VCRuleBackedStat> stats = new ArrayList<>();
 
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
@@ -71,7 +73,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
         moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
-    @Override public void enterTypeRepresentationDecl(
+    @Override public void enterFacilityDecl(Resolve.FacilityDeclContext ctx) {
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, moduleScope, symtab.mathPExps,
+                        "Facility_Inst=" + ctx.name.getText(), ctx);
+        assertiveBlocks.push(block);
+    }
+
+    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        block.stats(stats);
+        outputFile.addAssertiveBlock(block.build());
+        stats.clear();
+    }
+
+   /* @Override public void enterTypeRepresentationDecl(
             Resolve.TypeRepresentationDeclContext ctx) {
         currentTypeReprSym = null;
         try {
@@ -167,12 +183,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
         //newInitEnsures =
         //        betaReduce(newInitEnsures,
         //                correspondence);
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        block.stats(stats);
         block.confirm(convention);  //order here is imp.
         block.assume(correspondence);
         block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
-    }
+
+        stats.clear();
+    }*/
 
     @Override public void enterOperationProcedureDecl(
             Resolve.OperationProcedureDeclContext ctx) {
@@ -181,15 +199,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 s.getSymbolsOfType(ProgParameterSymbol.class);
 
         PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
-                ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
+              ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(symtab,
+                new VCAssertiveBlockBuilder(g, s, symtab.mathPExps,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
-                        .assume(getSequentsFromFormalParameters(paramSyms, 
-                                this::extractAntecedentsFromParameter))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
-                        .assume(getModuleLevelAssertionsOfType(constraint()))
+            //            .assume(getSequentsFromFormalParameters(paramSyms,
+            //                    this::extractAntecedentsFromParameter))
+            //            .assume(getModuleLevelAssertionsOfType(requires()))
+            //            .assume(getModuleLevelAssertionsOfType(constraint()))
                         //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
@@ -205,16 +223,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(getSequentsFromFormalParameters(
-                        paramSyms, this::extractConsequentsFromParameter))
+        block.stats(stats)
+       //         .confirm(getSequentsFromFormalParameters(
+       //                 paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
+        stats.clear();
     }
 
-    @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+ /*   @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         try {
             List<ProgParameterSymbol> paramSyms =
@@ -228,7 +247,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     paramSyms, ctx, currentProcOpSym.getRequires());
 
             VCAssertiveBlockBuilder block =
-                    new VCAssertiveBlockBuilder(symtab,
+                    new VCAssertiveBlockBuilder(g, s, symtab.mathPExps,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .assume(getModuleLevelAssertionsOfType(requires()))
                             .assume(getModuleLevelAssertionsOfType(constraint()))
@@ -260,7 +279,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
 
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
+        block.stats(stats)
             .confirm(getSequentsFromFormalParameters(formalParameters,
                     this::extractConsequentsFromParameter)) //we assume correspondence for reprs here automatically
             .assume(corrFnExps)
@@ -268,22 +287,38 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;
-    }
+        stats.clear();
+    }*/
 
     //-----------------------------------------------
     // S T A T S
     //-----------------------------------------------
 
-    @Override public void exitStmt(Resolve.StmtContext ctx) {
-        stats.put(ctx, stats.get(ctx.getChild(0)));
-    }
-
-    @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
+   // @Override public void enterProgInfixExp(Resolve.ProgInfixExpContext ctx) {
+    @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
-                        .progExp()));
-        stats.put(ctx, s);
+                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
+        s.reduce(); //these are exprs, not stmts, so apply inline.
+    }
+
+    @Override public void exitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
+        s.reduce(); //these are exprs, not stmts, so apply inline.
+    }
+
+    //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
+    //otherwise,
+    @Override public void exitProgParamExp(Resolve.ProgParamExpContext ctx) {
+        VCRuleBackedStat s =
+                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
+        if ( ctx.getParent() instanceof Resolve.CallStmtContext) {
+            
+        }
+        stats.add(s);
     }
 
     @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
@@ -291,7 +326,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
-        stats.put(ctx, s);
+        stats.add(s);
     }
 
     @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
@@ -299,7 +334,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
-        stats.put(ctx, s);
+        stats.add(s);
     }
 
     public static Predicate<Symbol> constraint() {
@@ -335,10 +370,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    /**
-     * Returns a mapping from formal -> actual args for facility,
-     * {@code facilityQualifier}.
-     */
     public static Map<PExp, PExp> getFacilitySpecializations(
             ParseTreeProperty<PExp> repo, Scope s,
             FacilitySymbol facility) {
@@ -473,7 +504,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
-    //PTRepresentation). This method won't do anything otherwise.
+    //PTRepresentation). This method won't do anything otherwise.*/
     private PExp perParameterCorrFnExpSubstitute(List<ProgParameterSymbol> params,
                                                  ParserRuleContext functionCtx,
                                                  ParserRuleContext reqOrEns) {

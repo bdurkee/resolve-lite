@@ -2,10 +2,10 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         uses Basic_Natural_Number_Theory, Standard_Integers;
 
     Facility Arr_Fac is Bdd_Ceramic_Array_Template
-                <Bdd_Spiral_Template :: T>(0, Max_Length - 1)
+                <Bdd_Spiral_Template :: T>(0, Max_Length - 1 + 1)
         externally implemented by Ceramic_Array_Impl;
 
-    Type Spiral_Pos = Record
+   /* Type Spiral_Pos = Record
             Labl : Arr_Fac :: Ceramic_Array;
             Length, Curr_Place : Std_Integer_Fac :: Integer;
         end;
@@ -21,7 +21,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         initialization
             P.Length := 0;
             P.Curr_Place := 0;
-        end;
+        end;*/
 
        /* Procedure Lengthen (alters e : T; updates P : Spiral_Pos);
             Arr_Fac :: Swap_Element(P.Labl, e, P.Length);

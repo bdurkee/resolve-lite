@@ -34,7 +34,7 @@ public class ExplicitCallApplicationStrategy
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
 
         Map<PExp, PExp> ensuresReplacements =
-                getEnsuresReplacementBindings(block, callExp);
+                getEnsuresReplacementBindings(op, block, callExp);
         FlexibleNameSubstitutingListener l =
                 new FlexibleNameSubstitutingListener(
                         finalConfirm, ensuresReplacements);
@@ -47,6 +47,14 @@ public class ExplicitCallApplicationStrategy
                 new BasicBetaReducingListener(ensuresReplacements, finalConfirm);
         finalConfirm.accept(b);
         finalConfirm = b.getBetaReducedExp();
+
+        //TODO: We're going to mutate the repo in this assertive builder block
+        //to refer to the ensures clause, not the actual call...
+        if (ensuresReplacements.containsKey(callExp.withArgumentsErased())) {
+            block.argInstantiations.put(stat.getStatComponents().get(0),
+                    ensuresReplacements.get(callExp.withArgumentsErased()));
+        }
+        //block.repo.put(stat.getDefiningContext(), )
         return block.finalConfirm(finalConfirm).snapshot();
     }
 
@@ -56,18 +64,26 @@ public class ExplicitCallApplicationStrategy
      * step: {@code Q[v ~> f[x ~> u]]}.
      */
     private Map<PExp, PExp> getEnsuresReplacementBindings(
-            VCAssertiveBlockBuilder block, PSymbol call) {
-        OperationSymbol op = getOperation(block.scope, call);
+            OperationSymbol op, VCAssertiveBlockBuilder block, PSymbol call) {
 
-        List<PExp> actuals = call.getArguments();
+        List<PExp> actuals = new ArrayList<>();
+        for (PExp arg : call.getArguments()) {
+            if (block.argInstantiations.containsKey(arg)) {
+                actuals.add(block.argInstantiations.get(arg));
+            }
+            else {
+                actuals.add(arg);
+            }
+        }
         List<PExp> formals = op.getParameters().stream()
                 .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
 
         PExp opRequires = block.getPExpFor(op.getRequires());
-        opRequires = opRequires.substitute(
+
+        /*opRequires = opRequires.substitute(
                 ModelBuilderProto.getFacilitySpecializations(
-                        block.symtab.mathPExps,
-                        block.scope, call.getQualifier()));
+                        block.repo,
+                        block.scope, call.getQualifier()));*/
         opRequires = opRequires.substitute(formals, actuals);
         block.confirm(opRequires);
 
@@ -89,6 +105,10 @@ public class ExplicitCallApplicationStrategy
                 ensuresEqualities.put(equals.getSubExpressions().get(0),
                         equals.getSubExpressions().get(1));
             }
+        }
+        if (ensuresEqualities.containsKey(call.withArgumentsErased())) {
+            intermediateBindings.put(call.withArgumentsErased(),
+                    ensuresEqualities.get(call.withArgumentsErased()));
         }
 
         while (formalParamIter.hasNext()) {
