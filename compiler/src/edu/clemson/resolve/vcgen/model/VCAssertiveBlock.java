@@ -25,7 +25,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
     public static class VCAssertiveBlockBuilder
             implements
                 Utils.Builder<VCAssertiveBlock> {
-        public Map<PExp, PExp> argInstantiations = new HashMap<>();
         public final TypeGraph g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
@@ -84,19 +83,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 confirm = g.getTrueExp();
             }
             stats.add(new VCConfirm(this, confirm));
-            return this;
-        }
-
-        public VCAssertiveBlockBuilder conjunctToFinalConfirm(PExp ... confirms) {
-            return conjunctToFinalConfirm(Arrays.asList(confirms));
-        }
-
-        public VCAssertiveBlockBuilder conjunctToFinalConfirm(Collection<PExp> confirms) {
-            PExp amendedFinalConfirm = finalConfirm.getConfirmExp();
-            for (PExp e : confirms) {
-               amendedFinalConfirm = g.formConjunct(amendedFinalConfirm, e);
-            }
-            this.finalConfirm = new VCConfirm(this, amendedFinalConfirm);
             return this;
         }
 

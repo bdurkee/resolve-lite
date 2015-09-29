@@ -22,9 +22,9 @@ public class PExpSomethingListener extends PExpListener {
     private final Scope s;
     private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
-    public PExpSomethingListener(VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                                 Scope s) {
-        this.s = s;
+    public PExpSomethingListener(
+            VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        this.s = block.scope;
         this.block = block;
     }
 
