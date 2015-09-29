@@ -1,17 +1,14 @@
 package edu.clemson.resolve.vcgen.application;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.FlexibleNameSubstitutingListener;
-import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
@@ -31,10 +28,15 @@ public class ExplicitCallApplicationStrategy
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
         PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
         OperationSymbol op = getOperation(block.scope, callExp);
+
+        PExpSomethingListener something =
+                new PExpSomethingListener(block, block.scope);
+        callExp.accept(something);
+
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
 
-        Map<PExp, PExp> ensuresReplacements =
-                getEnsuresReplacementBindings(op, block, callExp);
+        Map<PExp, PExp> ensuresReplacements = something.test;
+                //getEnsuresReplacementBindings(op, block, callExp);
         FlexibleNameSubstitutingListener l =
                 new FlexibleNameSubstitutingListener(
                         finalConfirm, ensuresReplacements);
@@ -48,12 +50,6 @@ public class ExplicitCallApplicationStrategy
         finalConfirm.accept(b);
         finalConfirm = b.getBetaReducedExp();
 
-        //TODO: We're going to mutate the repo in this assertive builder block
-        //to refer to the ensures clause, not the actual call...
-        if (ensuresReplacements.containsKey(callExp.withArgumentsErased())) {
-            block.argInstantiations.put(stat.getStatComponents().get(0),
-                    ensuresReplacements.get(callExp.withArgumentsErased()));
-        }
         //block.repo.put(stat.getDefiningContext(), )
         return block.finalConfirm(finalConfirm).snapshot();
     }
