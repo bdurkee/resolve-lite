@@ -32,6 +32,7 @@ public class PExpSomethingListener extends PExpListener {
         if (!e.isFunctionApplication()) return;
 
         PSymbol thisExp = (PSymbol)e.substitute(test);
+        test.clear(); //TODO: hmmmm..
         List<PExp> actuals = thisExp.getArguments();
 
         OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(s, e);

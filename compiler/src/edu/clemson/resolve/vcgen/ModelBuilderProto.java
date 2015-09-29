@@ -8,6 +8,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
@@ -21,6 +22,7 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
@@ -226,7 +228,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(stats)
                 .confirm(getSequentsFromFormalParameters(
-                    paramSyms, this::extractConsequentsFromParameter))
+                        paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
@@ -290,6 +292,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         currentProcOpSym = null;
         stats.clear();
     }*/
+
+    @Override public void exitVariableDeclGroup(
+            Resolve.VariableDeclGroupContext ctx) {
+        PTType type = tr.progTypeValues.get(ctx.type());
+        MTType mathType = tr.mathTypeValues.get(ctx.type());
+        if (type instanceof PTNamed) {
+            PExp init = ((PTNamed)type).getInitializationEnsures();
+            for (TerminalNode t : ctx.ID()) {
+                PSymbol v = new PSymbol.PSymbolBuilder(t.getText())
+                        .mathType(mathType).progType(type).build();
+                init = init.substitute(((PTNamed) type)
+                        .getExemplarAsPSymbol(), v);
+                assertiveBlocks.peek().assume(init);
+            }
+        } else { //generic
+
+        }
+    }
 
     //-----------------------------------------------
     // S T A T S

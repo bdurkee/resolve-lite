@@ -32,8 +32,8 @@ public class ExplicitCallApplicationStrategy
         callExp.accept(something);
 
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
-
-        FlexibleNameSubstitutingListener l =
+        finalConfirm = finalConfirm.substitute(something.test);
+     /*   FlexibleNameSubstitutingListener l =
                 new FlexibleNameSubstitutingListener(
                         finalConfirm, something.test);
         finalConfirm.accept(l);
@@ -41,7 +41,7 @@ public class ExplicitCallApplicationStrategy
         BasicBetaReducingListener b =
                 new BasicBetaReducingListener(something.test, finalConfirm);
         finalConfirm.accept(b);
-        finalConfirm = b.getBetaReducedExp();
+        finalConfirm = b.getBetaReducedExp();*/
         return block.finalConfirm(finalConfirm).snapshot();
     }
 
