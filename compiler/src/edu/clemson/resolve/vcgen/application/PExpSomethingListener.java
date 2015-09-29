@@ -13,9 +13,6 @@ import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Created by daniel on 9/28/15.
- */
 public class PExpSomethingListener extends PExpListener {
 
     public Map<PExp, PExp> test = new HashMap<>();
@@ -40,11 +37,10 @@ public class PExpSomethingListener extends PExpListener {
                 .map(ProgParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
 
-        PExp opRequires = block.getPExpFor(op.getRequires());
-        opRequires = opRequires.substitute(formals, actuals);
+        PExp opRequires = op.getRequires().substitute(formals, actuals);
         block.confirm(opRequires);
 
-        PExp opEnsures = block.getPExpFor(op.getEnsures());
+        PExp opEnsures = op.getEnsures();
         /*opEnsures = opEnsures.substitute(
                 ModelBuilderProto.getFacilitySpecializations(
                         block.symtab.mathPExps,

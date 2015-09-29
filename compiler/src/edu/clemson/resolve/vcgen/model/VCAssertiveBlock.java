@@ -30,20 +30,13 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final Scope scope;
         public VCConfirm finalConfirm;
 
-        public final ParseTreeProperty<PExp> repo;
         public final LinkedList<VCRuleBackedStat> stats =
                 new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
         public final String description;
 
-        public PExp getPExpFor(ParserRuleContext ctx) {
-            PExp result = repo.get(ctx);
-            return result != null ? result : g.getTrueExp();
-        }
-
         public VCAssertiveBlockBuilder(TypeGraph g, Scope s,
-                                       ParseTreeProperty<PExp> repo,
                                        String description,
                                        ParserRuleContext ctx) {
             this.g = g;
@@ -51,7 +44,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.finalConfirm = new VCConfirm(this, g.getTrueExp());
             this.scope = s;
             this.description = description;
-            this.repo = repo;
         }
 
         public VCAssertiveBlockBuilder assume(Collection<PExp> assumes) {

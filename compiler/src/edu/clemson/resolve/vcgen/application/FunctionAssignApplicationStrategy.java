@@ -49,10 +49,10 @@ public class FunctionAssignApplicationStrategy
                 ModelBuilderProto.getFacilitySpecializations(
                         block.repo,
                         block.scope, call.getQualifier()));*/
-        PExp opRequires = block.getPExpFor(op.getRequires());
+        PExp opRequires = op.getRequires();
         block.confirm(opRequires.substitute(formals, actuals));
 
-        PExp opEnsures = block.getPExpFor(op.getEnsures());
+        PExp opEnsures = op.getEnsures();
 
         if (opEnsures.isObviouslyTrue()) return block.snapshot();
 

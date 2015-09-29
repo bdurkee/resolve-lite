@@ -19,14 +19,11 @@ public class OperationSymbol
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
     private final boolean moduleParameter;
 
-    private final Resolve.RequiresClauseContext requires;
-    private final Resolve.EnsuresClauseContext ensures;
+    private final PExp requires, ensures;
 
     public OperationSymbol(String name, ParserRuleContext definingTree,
-                           Resolve.RequiresClauseContext requires,
-                           Resolve.EnsuresClauseContext ensures,
-                           PTType type, String moduleID,
-                           List<ProgParameterSymbol> params,
+                           PExp requires, PExp ensures, PTType type,
+                           String moduleID, List<ProgParameterSymbol> params,
                            boolean moduleParameter) {
         super(name, definingTree, moduleID);
         this.parameters.addAll(params);
@@ -36,11 +33,11 @@ public class OperationSymbol
         this.ensures = ensures;
     }
 
-    public Resolve.RequiresClauseContext getRequires() {
+    public PExp getRequires() {
         return requires;
     }
 
-    public Resolve.EnsuresClauseContext getEnsures() {
+    public PExp getEnsures() {
         return ensures;
     }
 
@@ -51,33 +48,6 @@ public class OperationSymbol
     public List<ProgParameterSymbol> getParameters() {
         return parameters;
     }
-
-     /*public ProgParameterSymbol.ParameterMode getModeFor(PExp parameterExp) {
-        if (parameterExp instanceof PSymbol) {
-            return getModeFor(((PSymbol) parameterExp).getName());
-        }
-        return null;
-    }
-
-   public ProgParameterSymbol.ParameterMode getModeFor(String parameterName) {
-        ProgParameterSymbol.ParameterMode result = null;
-        for (ProgParameterSymbol p : parameters) {
-            if (p.getName().equals(parameterName)) {
-                result = p.getMode();
-            }
-        }
-        return result;
-    }
-
-    public Map<String, ProgParameterSymbol.ParameterMode>
-            getFormalParameterModeMappings() {
-        LinkedHashMap<String, ProgParameterSymbol.ParameterMode> namesToModes =
-                new LinkedHashMap<>();
-        for (ProgParameterSymbol p : parameters) {
-            namesToModes.put(p.getName(), p.getMode());
-        }
-        return namesToModes;
-    }*/
 
     public PTType getReturnType() {
         return returnType;

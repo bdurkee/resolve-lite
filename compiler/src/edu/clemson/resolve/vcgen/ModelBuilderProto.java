@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
-    private final RESOLVECompiler compiler;
     private final TypeGraph g;
 
     public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
@@ -63,7 +62,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
-        this.compiler = gen.getCompiler();
         this.g = symtab.getTypeGraph();
     }
 
@@ -77,7 +75,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterFacilityDecl(Resolve.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, moduleScope, symtab.mathPExps,
+                new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
         assertiveBlocks.push(block);
     }
@@ -204,7 +202,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
               ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(g, s, symtab.mathPExps,
+                new VCAssertiveBlockBuilder(g, s,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
                         .assume(getSequentsFromFormalParameters(paramSyms,
                                 this::extractAntecedentsFromParameter))
@@ -412,8 +410,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof PTFamily ) {
                 PExp constraint = ((PTFamily) declaredType).getConstraint();
-                constraint = constraint.substitute(getFacilitySpecializations(
-                        symtab.mathPExps, moduleScope, p.getTypeQualifier()));
+               // constraint = constraint.substitute(getFacilitySpecializations(
+               //         symtab.mathPExps, moduleScope, p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
             }
@@ -498,8 +496,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         for (FacilitySymbol facility : facilities) {
             if (facility.getFacility().getSpecification().getName()
                     .equals(e.getModuleID())) {
-                return e.getEnclosedExp().substitute(getFacilitySpecializations(
-                        symtab.mathPExps, moduleScope, facility));
+                return e.getEnclosedExp();
+                        //.substitute(getFacilitySpecializations(
+                        //symtab.mathPExps, moduleScope, facility));
             }
         }
         return e.getEnclosedExp();

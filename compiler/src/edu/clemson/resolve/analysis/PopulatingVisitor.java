@@ -361,9 +361,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             else {
                 returnType = tr.progTypeValues.get(type);
             }
+
+            PExp requiresExp = getPExpFor(requires);
+            PExp ensuresExp = getPExpFor(ensures);
             symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, requires, ensures,
-                            returnType, getRootModuleID(), params,
+                    new OperationSymbol(name.getText(), ctx, requiresExp,
+                            ensuresExp, returnType, getRootModuleID(), params,
                             walkingModuleArgOrParamList));
         }
         catch (DuplicateSymbolException dse) {
@@ -1844,8 +1847,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if ( ctx == null ) {
             return g.getTrueExp();
         }
-        PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<>(symtab.mathPExps, tr);
+        PExpBuildingListener<PExp> builder = new PExpBuildingListener<>(tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }
