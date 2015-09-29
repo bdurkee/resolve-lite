@@ -87,6 +87,19 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
+        public VCAssertiveBlockBuilder conjunctToFinalConfirm(PExp ... confirms) {
+            return conjunctToFinalConfirm(Arrays.asList(confirms));
+        }
+
+        public VCAssertiveBlockBuilder conjunctToFinalConfirm(Collection<PExp> confirms) {
+            PExp amendedFinalConfirm = finalConfirm.getConfirmExp();
+            for (PExp e : confirms) {
+               amendedFinalConfirm = g.formConjunct(amendedFinalConfirm, e);
+            }
+            this.finalConfirm = new VCConfirm(this, amendedFinalConfirm);
+            return this;
+        }
+
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
             if ( confirm == null ) {
                 throw new IllegalArgumentException("finalconfirm==null");

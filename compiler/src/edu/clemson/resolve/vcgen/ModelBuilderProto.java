@@ -55,7 +55,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             new LinkedList<>();
 
     private OperationSymbol currentProcOpSym = null;
-
+    private boolean withinCallStmt = false;
     private final List<VCRuleBackedStat> stats = new ArrayList<>();
 
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
@@ -200,17 +200,30 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
               ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
+                ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s, symtab.mathPExps,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
-            //            .assume(getSequentsFromFormalParameters(paramSyms,
-            //                    this::extractAntecedentsFromParameter))
-            //            .assume(getModuleLevelAssertionsOfType(requires()))
-            //            .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(getSequentsFromFormalParameters(paramSyms,
+                                this::extractAntecedentsFromParameter))
+                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(constraint()))
                         //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
-                        .remember();
+                        .remember()
+
+                        // stats go here in the exit method...
+                        .finalConfirm(corrFnExpEnsures)
+                        .conjunctToFinalConfirm(getSequentsFromFormalParameters(
+                                paramSyms, this::extractConsequentsFromParameter));
+
+        ..block.stats(stats);
+        //         .confirm(getSequentsFromFormalParameters(
+        //                 paramSyms, this::extractConsequentsFromParameter))
+        //.assume(corrFnExps)
+        .finalConfirm(corrFnExpEnsures);
         assertiveBlocks.push(block);
     }
 
@@ -223,7 +236,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
-        block.stats(stats)
+        block.stats(stats);
        //         .confirm(getSequentsFromFormalParameters(
        //                 paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
@@ -299,14 +312,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
-        s.reduce(); //these are exprs, not stmts, so apply inline.
+        stats.add(s);
     }
 
     @Override public void exitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
-        s.reduce(); //these are exprs, not stmts, so apply inline.
+        stats.add(s);
     }
 
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
@@ -315,9 +328,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx));
-        if ( ctx.getParent() instanceof Resolve.CallStmtContext) {
-            
-        }
         stats.add(s);
     }
 
