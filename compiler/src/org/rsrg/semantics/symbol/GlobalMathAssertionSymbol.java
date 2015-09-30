@@ -16,20 +16,22 @@ import java.util.Map;
  * multimatch query and get all relevant entries -- from which we can do
  * further processing
  * (or even write a query that does such processing for us)..
- * 
- * 
  */
-//Todo: Maybe these should actually be added in a phase following compute types
-//so we can just put the already typed PExps in here AND have hte ability to
-//instantiate generics
 public class GlobalMathAssertionSymbol extends Symbol {
 
-    private PExp assertion;
+    public static enum ClauseType { REQUIRES, CONSTRAINT }
+    private final PExp assertion;
+    private final ClauseType clauseType;
 
-    public GlobalMathAssertionSymbol(String name, PExp assertion,
+    public GlobalMathAssertionSymbol(String name, PExp assertion, ClauseType t,
             ParserRuleContext definingTree, String moduleID) {
         super(name, definingTree, moduleID);
         this.assertion = assertion;
+        this.clauseType = t;
+    }
+
+    public ClauseType getClauseType() {
+        return clauseType;
     }
 
     public PExp getEnclosedExp() {

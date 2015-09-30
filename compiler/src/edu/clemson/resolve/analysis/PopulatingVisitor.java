@@ -848,7 +848,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if ( ctx.entailsClause() != null ) this.visit(ctx.entailsClause());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
-            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.REQUIRES,
+                    ctx.mathAssertionExp());
         }
         return null;
     }
@@ -869,7 +871,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent().getParent() instanceof Resolve.ModuleContext ) {
-            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
         }
         return null;
     }
@@ -1829,13 +1833,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
-                            Resolve.MathAssertionExpContext assertion) {
+                                       GlobalMathAssertionSymbol.ClauseType type,
+                                       Resolve.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         PExp assertionAsPExp = getPExpFor(assertion);
         try {
             symtab.getInnermostActiveScope().define(
-                    new GlobalMathAssertionSymbol(name, assertionAsPExp, ctx,
-                            getRootModuleID()));
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
+                            ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,

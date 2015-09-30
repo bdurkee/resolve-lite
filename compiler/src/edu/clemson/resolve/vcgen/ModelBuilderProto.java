@@ -27,6 +27,7 @@ import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
+import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -81,9 +82,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        block.stats(stats);
+        ModuleScopeBuilder spec = symtab.moduleScopes.get(ctx.spec.getText());
+        spec.getSymbolsOfType(GlobalMathAssertionSymbol.class).stream()
+                .filter(e -> e.getClauseType() == ClauseType.REQUIRES);
+        block.confirm()
         outputFile.addAssertiveBlock(block.build());
-        stats.clear();
     }
 
    /* @Override public void enterTypeRepresentationDecl(
@@ -223,14 +226,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
-        block.stats(Utils.collect(VCRuleBackedStat.class, ))
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .confirm(getSequentsFromFormalParameters(
                         paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
                 .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
-        stats.clear();
     }
 
  /*   @Override public void enterProcedureDecl(Resolve.ProcedureDeclContext ctx) {
@@ -312,11 +314,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
     // S T A T S
     //-----------------------------------------------
 
+    @Override public void exitStmt(Resolve.StmtContext ctx) {
+        stats.put(ctx, stats.get(ctx.getChild(0)));
+    }
+
     @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx.progExp()));
-        stats.add(s);
+        stats.put(ctx, s);
     }
 
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
@@ -326,7 +332,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
-        stats.add(s);
+        stats.put(ctx, s);
     }
 
     @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
@@ -334,7 +340,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
-        stats.add(s);
+        stats.put(ctx, s);
     }
 
     public static Predicate<Symbol> constraint() {
