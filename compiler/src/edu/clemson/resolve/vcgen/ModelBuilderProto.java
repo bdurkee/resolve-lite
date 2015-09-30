@@ -89,7 +89,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         spec.getSymbolsOfType(GlobalMathAssertionSymbol.class).stream()
                 .filter(e -> e.getClauseType() == ClauseType.REQUIRES);
-
+        List<PExp> formalArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
+                .stream().map(ProgParameterSymbol::asPSymbol)
+                .collect(Collectors.toList());
+        Map<PExp, PExp> x = zip(reducedArgs, formalArgs);
         if (ctx.externally == null) {
             spec.getSymbolsOfType(GlobalMathAssertionSymbol.class).stream()
                     .filter(e -> e.getClauseType() == ClauseType.REQUIRES);
@@ -102,6 +105,20 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
 
         outputFile.addAssertiveBlock(block.build());
+    }
+
+    public <T, R> Map<T, R> zip(List<T> l1, List<R> l2)
+            throws IllegalArgumentException {
+        if (l1.size() != l2.size()) {
+            throw new IllegalArgumentException(
+                    "can't zip differently sized lists");
+        }
+        Map<T, R> result = new LinkedHashMap<>();
+        Iterator<R> l2iter = l2.iterator();
+        for (T t : l1) {
+            result.put(t, l2iter.next());
+        }
+        return result;
     }
 
     /** Applies simple call rule to any arguments in {@code args} that need
@@ -129,7 +146,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         if (something.test.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
-                    "call rule to: " + exp.toString());
+                    "call rule to: " + exp.toString()+".. " +
+                    "could happen too if there's no spec for the op");
         }
         return something.test.get(exp);
     }
@@ -253,8 +271,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
                         .assume(getSequentsFromFormalParameters(paramSyms,
                                 this::extractAntecedentsFromParameter))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
-                        .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
@@ -522,13 +540,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    private Set<PExp> getModuleLevelAssertionsOfType(
-            Predicate<Symbol> assertionType) {
+    private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
         Set<PExp> result = new LinkedHashSet<>();
         List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
                         (GlobalMathAssertionSymbol.class)).stream()
-                        .filter(assertionType).collect(Collectors.toList());
+                        .filter(e -> e.getClauseType() == type)
+                        .collect(Collectors.toList());
 
         List<FacilitySymbol> facilities = moduleScope.query(
                 new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class));
