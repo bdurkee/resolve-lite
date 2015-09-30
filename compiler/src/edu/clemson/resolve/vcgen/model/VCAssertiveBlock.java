@@ -30,6 +30,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final Scope scope;
         public VCConfirm finalConfirm;
 
+        public final Map<String, Map<PExp, PExp>> facilitySpecializations =
+                new HashMap<>();
         public final LinkedList<VCRuleBackedStat> stats =
                 new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
@@ -39,11 +41,22 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public VCAssertiveBlockBuilder(TypeGraph g, Scope s,
                                        String description,
                                        ParserRuleContext ctx) {
+            if (s == null) {
+                throw new IllegalArgumentException(
+                        "passed null scope to vc assertive " +
+                                "block for: "+description);
+            }
             this.g = g;
             this.definingTree = ctx;
             this.finalConfirm = new VCConfirm(this, g.getTrueExp());
             this.scope = s;
             this.description = description;
+        }
+
+        public VCAssertiveBlockBuilder facilitySpecializations(
+                Map<String, Map<PExp, PExp>> mappings) {
+            facilitySpecializations.putAll(mappings);
+            return this;
         }
 
         public VCAssertiveBlockBuilder assume(Collection<PExp> assumes) {

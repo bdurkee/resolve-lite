@@ -43,9 +43,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -92,6 +90,20 @@ public class Utils {
             }
         }
         return builder.toString();
+    }
+
+    public static <T, R> Map<T, R> zip(List<T> l1, List<R> l2)
+            throws IllegalArgumentException {
+        if (l1.size() != l2.size()) {
+            throw new IllegalArgumentException("i won't zip differently " +
+                    "sized lists.. extend me if you want");
+        }
+        Map<T, R> result = new LinkedHashMap<>();
+        Iterator<R> l2iter = l2.iterator();
+        for (T t : l1) {
+            result.put(t, l2iter.next());
+        }
+        return result;
     }
 
     /**

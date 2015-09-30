@@ -22,8 +22,6 @@ public class AnnotatedTree {
     public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
-    //Yes, this also exists in SymbolTable.java, but we keep a pointer here for
-    //convenience too.
     public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
     public final Set<UsesRef> uses = new LinkedHashSet<>();
 
@@ -31,10 +29,9 @@ public class AnnotatedTree {
     //an external impl
     public final Map<String, UsesRef> externalUses = new HashMap<>();
 
-    /**
-     * Think of the {@code uses} set as refs useful for coming up with module
-     * orderings, etc. Think of these strings the refs the symboltable will see.
-     * We don't want implementations of facilities showing up in this set.
+    /** Think of the {@code uses} set as refs useful for coming up with module
+     *  orderings, etc. Think of these strings the refs the symboltable will see.
+     *  We don't want implementations of facilities showing up in this set.
      */
     public final Set<String> semanticallyVisibleUses = new LinkedHashSet<>();
 

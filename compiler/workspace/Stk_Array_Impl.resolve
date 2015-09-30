@@ -20,12 +20,12 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
             S.Top := 0;
         end;
 
-        Procedure Push (alters e : E; updates S : Stack);
+  /*      Procedure Push (alters e : E; updates S : Stack);
             S.Top++;
             Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
         end Push;
 
-       /*Procedure Pop (alters e : E; updates S : Stack);
+        Procedure Pop (alters e : E; updates S : Stack);
             Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
             S.Top := S.Top - 1;
         end Pop;
