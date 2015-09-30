@@ -2,7 +2,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         uses Basic_Natural_Number_Theory, Standard_Integers;
 
     Facility Arr_Fac is Bdd_Ceramic_Array_Template
-                <Bdd_Spiral_Template :: T>(1, Max_Length)
+                <Bdd_Spiral_Template :: T>(1, Max_Length-1+1)
         externally implemented by Ceramic_Array_Impl;
 
    /* Type Spiral_Pos = Record

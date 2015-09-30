@@ -7,13 +7,11 @@ import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.application.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
-import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.StatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.SwapApplicationStrategy;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -77,16 +75,63 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
+        block.assume(g.getTrueExp());
         assertiveBlocks.push(block);
     }
 
     @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+
         ModuleScopeBuilder spec = symtab.moduleScopes.get(ctx.spec.getText());
+        ModuleScopeBuilder impl = symtab.moduleScopes.get(ctx.impl.getText());
+        List<PExp> specArgs = ctx.specArgs.moduleArgument().stream()
+                .map(tr.mathPExps::get).collect(Collectors.toList());
+        List<PExp> reducedArgs = reduceArgs(specArgs);
+
         spec.getSymbolsOfType(GlobalMathAssertionSymbol.class).stream()
                 .filter(e -> e.getClauseType() == ClauseType.REQUIRES);
-        block.confirm()
+
+        if (ctx.externally == null) {
+            spec.getSymbolsOfType(GlobalMathAssertionSymbol.class).stream()
+                    .filter(e -> e.getClauseType() == ClauseType.REQUIRES);
+            //do (ImplRequires[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, R ~> IR]
+            //block.confirm()
+        }
+        else {
+            //SpecRequires[n ~> n_exp, R ~> IR]
+        }
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+
         outputFile.addAssertiveBlock(block.build());
+    }
+
+    /** Applies simple call rule to any arguments in {@code args} that need
+     *  it (e.g.: they're arithmetic expressions)
+     */
+    private List<PExp> reduceArgs(List<PExp> args) {
+        List<PExp> result = new ArrayList<>();
+        for (PExp arg : args) {
+            if (arg.isFunctionApplication()) {
+                PExp e = applyCallRuleToExp(assertiveBlocks.peek(), arg);
+                result.add(e);
+            }
+            else {
+                result.add(arg);
+            }
+        }
+        return result;
+    }
+
+    private PExp applyCallRuleToExp(VCAssertiveBlockBuilder block, PExp exp) {
+        PExpSomethingListener something = new PExpSomethingListener(block);
+        exp.accept(something);
+        PExp finalConfirm = block.finalConfirm.getConfirmExp();
+        block.finalConfirm(finalConfirm.substitute(something.test));
+        if (something.test.isEmpty()) {
+            throw new IllegalStateException("something's screwy: " +
+                    "shouldn't of tried applying " +
+                    "call rule to: " + exp.toString());
+        }
+        return something.test.get(exp);
     }
 
    /* @Override public void enterTypeRepresentationDecl(
