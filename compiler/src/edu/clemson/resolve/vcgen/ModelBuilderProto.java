@@ -45,8 +45,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
-  //  private final ParseTreeProperty<VCRuleBackedStat> stats =
-   //         new ParseTreeProperty<>();
+    private final ParseTreeProperty<VCRuleBackedStat> stats =
+            new ParseTreeProperty<>();
     private final VCOutputFile outputFile = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
 
@@ -57,7 +57,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private OperationSymbol currentProcOpSym = null;
     private boolean withinCallStmt = false;
-    private final List<VCRuleBackedStat> stats = new ArrayList<>();
 
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
@@ -224,7 +223,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
-        block.stats(stats)
+        block.stats(Utils.collect(VCRuleBackedStat.class, ))
                 .confirm(getSequentsFromFormalParameters(
                         paramSyms, this::extractConsequentsFromParameter))
                 //.assume(corrFnExps)
