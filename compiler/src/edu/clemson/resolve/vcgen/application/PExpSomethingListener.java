@@ -39,6 +39,8 @@ public class PExpSomethingListener extends PExpListener {
                 .collect(Collectors.toList());
 
         PExp opRequires = op.getRequires().substitute(formals, actuals);
+        opRequires = opRequires.substitute(
+                block.getSpecializationsForFacility(thisExp.getQualifier()));
         block.confirm(opRequires);
 
         PExp opEnsures = op.getEnsures();

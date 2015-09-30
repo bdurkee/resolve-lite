@@ -324,6 +324,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
+                            .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                             .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(getSequentsFromFormalParameters(paramSyms,

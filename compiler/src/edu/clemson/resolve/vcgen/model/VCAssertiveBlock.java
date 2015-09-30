@@ -38,6 +38,12 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 new ArrayList<>();
         public final String description;
 
+        public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
+            Map<PExp, PExp> result = facilitySpecializations.get(facility);
+            if (result == null) result = new HashMap<>();
+            return result;
+        }
+
         public VCAssertiveBlockBuilder(TypeGraph g, Scope s,
                                        String description,
                                        ParserRuleContext ctx) {
