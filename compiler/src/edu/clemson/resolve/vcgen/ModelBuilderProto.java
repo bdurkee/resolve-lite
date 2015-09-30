@@ -124,6 +124,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 result = g.formConjunct(RPC, result);
             }
         }
+        //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
         result = result.substitute(specFormalsToActuals);
         if (!result.isObviouslyTrue()) {
             assertiveBlocks.peek().finalConfirm(result);
