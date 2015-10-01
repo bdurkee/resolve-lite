@@ -283,7 +283,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                 this::extractAntecedentsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
 

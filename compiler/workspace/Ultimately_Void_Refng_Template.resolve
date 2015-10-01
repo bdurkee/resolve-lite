@@ -1,5 +1,9 @@
 Concept Ultimately_Void_Refng_Template<I>;
-    uses Terminal_Range_Op_Ext, Set_App_Op_Ext;
+    uses Terminal_Range_Op_Ext, Set_Op_App_Ext, Basic_Natural_Number_Theory,
+            Basic_Integer_Theory;
 
-
+    Defines Location : SSet;
+    Defines Void : Location;
+    Defines Total_Mem_Cap, Ocpn_Disp_Incr : N;
+        constraints ||Location|| > Total_Mem_Cap / Ocpn_Disp_Incr;
 end Ultimately_Void_Refng_Template;
