@@ -25,7 +25,7 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
             Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
         end Push;
 
-       /*Procedure Pop (alters e : E; updates S : Stack);
+        /*Procedure Pop (alters e : E; updates S : Stack);
             Ceramic_Arr_Fac :: Swap_Element(S.Contents, e, S.Top);
             S.Top := S.Top - 1;
         end Pop;

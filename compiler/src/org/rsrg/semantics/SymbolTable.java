@@ -4,7 +4,6 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.parser.Resolve;
-import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -138,8 +137,6 @@ public class SymbolTable {
     private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
     public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
 
-    public final ParseTreeProperty<PExp> mathPExps = //
-            new ParseTreeProperty<>();
     public final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
 

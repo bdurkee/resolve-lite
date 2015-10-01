@@ -272,6 +272,7 @@ public class PSymbol extends PExp {
 
             if ( arguments.size() > 0 && dispStyle.equals(DisplayStyle.PREFIX) ) {
                 PSymbol asVariable = new PSymbolBuilder(newName) //
+                        .qualifier(qualifier)
                         .incoming(incomingFlag).literal(literalFlag) //
                         .quantification(quantification) //
                         .mathType(getMathType()) //
@@ -305,6 +306,7 @@ public class PSymbol extends PExp {
                             leftPrint, rightPrint) : new PSymbolBuilder(newName);
 
             result = temp.mathType(getMathType()) //
+                    .qualifier(qualifier)
                     .mathTypeValue(getMathTypeValue()) //
                     .quantification(newQuantification) //
                     .arguments(newArgs).style(dispStyle) //

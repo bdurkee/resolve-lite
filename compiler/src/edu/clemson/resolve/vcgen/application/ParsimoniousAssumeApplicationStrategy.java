@@ -29,10 +29,10 @@ public class ParsimoniousAssumeApplicationStrategy
                 PExp left = assumeAsPSymbol.getArguments().get(0);
                 PExp right = assumeAsPSymbol.getArguments().get(1);
                 //we don't do replacements when the lhs and rhs are reg. vars.
-                if (left.isVariable() && right.isVariable()) {
+                if (right.isVariable() && left.isVariable()) {
                     //TODO: Do strange, dirty things with P_Val and Cum_Dur.
                 }
-                else if (left.isVariable()) {
+                if (left.isVariable()) {
                     equalsReplacements.put(left, right);
                 }
             }

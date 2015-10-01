@@ -59,11 +59,11 @@ VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<
 <finalConfirm>
 >>
 
-VCRemember(remember) ::= "remember;"
+VCRemember(remember) ::= "Remember;"
 
-VCAssume(assume) ::= "assume <assume.assumeExp>;"
+VCAssume(assume) ::= "Assume <assume.assumeExp>;"
 
-VCConfirm(confirm) ::= "confirm <confirm.confirmExp>;"
+VCConfirm(confirm) ::= "Confirm <confirm.confirmExp>;"
 
 VCRuleBackedStat(code) ::= "<code.text>"
 

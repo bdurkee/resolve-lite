@@ -26,24 +26,21 @@ import java.util.stream.Collectors;
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final ParseTreeProperty<MTType> types, typeValues;
-    private final ParseTreeProperty<PTType> progTypes, progTypeValues;
+    private final ParseTreeProperty<PTType> progTypes;
     private final ParseTreeProperty<PExp> repo;
 
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
     private final MTInvalid dummyType;
 
-    public PExpBuildingListener(ParseTreeProperty<PExp> repo,
-                                AnnotatedTree annotations) {
-        this(repo, annotations, null);
+    public PExpBuildingListener(AnnotatedTree annotations) {
+        this(annotations, null);
     }
 
-    public PExpBuildingListener(ParseTreeProperty<PExp> repo,
-                            AnnotatedTree annotations, MTInvalid dummyType) {
+    public PExpBuildingListener(AnnotatedTree annotations, MTInvalid dummyType) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
-        this.progTypeValues = annotations.progTypeValues;
-        this.repo = repo;
+        this.repo = annotations.mathPExps;
         this.dummyType = dummyType;
     }
 

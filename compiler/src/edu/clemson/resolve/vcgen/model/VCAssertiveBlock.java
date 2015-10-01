@@ -5,6 +5,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -24,32 +25,44 @@ public class VCAssertiveBlock extends AssertiveBlock {
     public static class VCAssertiveBlockBuilder
             implements
                 Utils.Builder<VCAssertiveBlock> {
-
         public final TypeGraph g;
-        public final SymbolTable symtab;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
 
+        public final Map<String, Map<PExp, PExp>> facilitySpecializations =
+                new HashMap<>();
         public final LinkedList<VCRuleBackedStat> stats =
                 new LinkedList<>();
         public final List<RuleApplicationStep> applicationSteps =
                 new ArrayList<>();
         public final String description;
 
-        public PExp getPExpFor(ParserRuleContext ctx) {
-            PExp result = symtab.mathPExps.get(ctx);
-            return result != null ? result : g.getTrueExp();
+        public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
+            Map<PExp, PExp> result = facilitySpecializations.get(facility);
+            if (result == null) result = new HashMap<>();
+            return result;
         }
 
-        public VCAssertiveBlockBuilder(SymbolTable symtab, String description,
+        public VCAssertiveBlockBuilder(TypeGraph g, Scope s,
+                                       String description,
                                        ParserRuleContext ctx) {
-            this.g = symtab.getTypeGraph();
-            this.symtab = symtab;
+            if (s == null) {
+                throw new IllegalArgumentException(
+                        "passed null scope to vc assertive " +
+                                "block for: "+description);
+            }
+            this.g = g;
             this.definingTree = ctx;
             this.finalConfirm = new VCConfirm(this, g.getTrueExp());
-            this.scope = symtab.scopes.get(ctx);
+            this.scope = s;
             this.description = description;
+        }
+
+        public VCAssertiveBlockBuilder facilitySpecializations(
+                Map<String, Map<PExp, PExp>> mappings) {
+            facilitySpecializations.putAll(mappings);
+            return this;
         }
 
         public VCAssertiveBlockBuilder assume(Collection<PExp> assumes) {

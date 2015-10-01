@@ -240,7 +240,7 @@ public enum ErrorKind {
             ErrorSeverity.ERROR),
 
     MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
-            "recursive call: <arg>. I.e.: arguments fail to match in either " +
+            "recursive call: <arg>. i.e.: arguments fail to match in either " +
             "number or type (or both) for recursive operation: <arg2>",
             ErrorSeverity.ERROR),
 

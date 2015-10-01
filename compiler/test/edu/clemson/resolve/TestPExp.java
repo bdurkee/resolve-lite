@@ -500,8 +500,7 @@ public class TestPExp extends BaseTest {
         ParseTree t = getTree(input);
         AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
         PExpBuildingListener<PExp> l =
-                new PExpBuildingListener<>(new ParseTreeProperty<>(), dummy,
-                        g.INVALID); //dummyType
+                new PExpBuildingListener<>(dummy, g.INVALID); //dummyType
         ParseTreeWalker.DEFAULT.walk(l, t);
         return l.getBuiltPExp(t);
     }

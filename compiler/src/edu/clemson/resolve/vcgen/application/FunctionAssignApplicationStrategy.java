@@ -45,14 +45,14 @@ public class FunctionAssignApplicationStrategy
          * {@code x} in op's requires clause with the actuals (more formally,
          * {@code pre[x ~> u]}).
          */
-        PExp opRequires = block.getPExpFor(op.getRequires()).substitute(
+   /*     PExp opRequires = block.getPExpFor(op.getRequires()).substitute(
                 ModelBuilderProto.getFacilitySpecializations(
-                        block.symtab.mathPExps,
-                        block.scope, call.getQualifier()));
-        opRequires = opRequires.substitute(formals, actuals);
+                        block.repo,
+                        block.scope, call.getQualifier()));*/
+        PExp opRequires = op.getRequires();
         block.confirm(opRequires.substitute(formals, actuals));
 
-        PExp opEnsures = block.getPExpFor(op.getEnsures());
+        PExp opEnsures = op.getEnsures();
 
         if (opEnsures.isObviouslyTrue()) return block.snapshot();
 

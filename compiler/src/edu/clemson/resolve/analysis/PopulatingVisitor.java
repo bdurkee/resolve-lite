@@ -361,9 +361,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             else {
                 returnType = tr.progTypeValues.get(type);
             }
+
+            PExp requiresExp = getPExpFor(requires);
+            PExp ensuresExp = getPExpFor(ensures);
             symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, requires, ensures,
-                            returnType, getRootModuleID(), params,
+                    new OperationSymbol(name.getText(), ctx, requiresExp,
+                            ensuresExp, returnType, getRootModuleID(), params,
                             walkingModuleArgOrParamList));
         }
         catch (DuplicateSymbolException dse) {
@@ -845,7 +848,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if ( ctx.entailsClause() != null ) this.visit(ctx.entailsClause());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent() instanceof Resolve.ModuleContext ) {
-            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.REQUIRES,
+                    ctx.mathAssertionExp());
         }
         return null;
     }
@@ -866,7 +871,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent().getParent() instanceof Resolve.ModuleContext ) {
-            insertGlobalAssertion(ctx, ctx.mathAssertionExp());
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
         }
         return null;
     }
@@ -1826,13 +1833,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
-                            Resolve.MathAssertionExpContext assertion) {
+                                       GlobalMathAssertionSymbol.ClauseType type,
+                                       Resolve.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         PExp assertionAsPExp = getPExpFor(assertion);
         try {
             symtab.getInnermostActiveScope().define(
-                    new GlobalMathAssertionSymbol(name, assertionAsPExp, ctx,
-                            getRootModuleID()));
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
+                            ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -1844,8 +1852,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if ( ctx == null ) {
             return g.getTrueExp();
         }
-        PExpBuildingListener<PExp> builder =
-                new PExpBuildingListener<>(symtab.mathPExps, tr);
+        PExpBuildingListener<PExp> builder = new PExpBuildingListener<>(tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

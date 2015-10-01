@@ -1,18 +1,15 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.application.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
-import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.FunctionAssignApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.StatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.SwapApplicationStrategy;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
@@ -21,10 +18,12 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
+import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
-    private final RESOLVECompiler compiler;
     private final TypeGraph g;
 
     public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
@@ -44,6 +42,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
             new SwapApplicationStrategy();
 
+    private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings =
+            new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats =
             new ParseTreeProperty<>();
     private final VCOutputFile outputFile = new VCOutputFile();
@@ -55,11 +55,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
             new LinkedList<>();
 
     private OperationSymbol currentProcOpSym = null;
+    private boolean withinCallStmt = false;
 
     public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
-        this.compiler = gen.getCompiler();
         this.g = symtab.getTypeGraph();
     }
 
@@ -71,24 +71,115 @@ public class ModelBuilderProto extends ResolveBaseListener {
         moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
+    @Override public void enterFacilityDecl(Resolve.FacilityDeclContext ctx) {
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, moduleScope,
+                        "Facility_Inst=" + ctx.name.getText(), ctx);
+        block.assume(g.getTrueExp());
+        assertiveBlocks.push(block);
+    }
+
+    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+
+        ModuleScopeBuilder spec = symtab.moduleScopes.get(ctx.spec.getText());
+        ModuleScopeBuilder impl = symtab.moduleScopes.get(ctx.impl.getText());
+        List<PExp> specArgs = ctx.specArgs.moduleArgument().stream()
+                .map(tr.mathPExps::get).collect(Collectors.toList());
+        List<PExp> reducedSpecArgs = reduceArgs(specArgs);
+
+        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
+                .stream().map(ProgParameterSymbol::asPSymbol)
+                .collect(Collectors.toList());
+
+        Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
+        facilitySpecFormalActualMappings.put(ctx.name.getText(), specFormalsToActuals);
+
+        Optional<PExp> specReq = spec.getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                .stream().filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
+
+        PExp result = g.getTrueExp();
+        if (specReq.isPresent()) {
+            result = specReq.get();
+        }
+        if (ctx.externally == null) {
+            Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                    .stream().filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                    .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
+
+            List<PExp> implArgs = ctx.implArgs.moduleArgument().stream()
+                    .map(tr.mathPExps::get).collect(Collectors.toList());
+            List<PExp> reducedImplArgs = reduceArgs(implArgs);
+
+            List<PExp> formalImplArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
+                    .stream().map(ProgParameterSymbol::asPSymbol)
+                    .collect(Collectors.toList());
+            Map<PExp, PExp> implFormalsToActuals = Utils.zip(formalImplArgs, reducedImplArgs);
+
+            if (implReq.isPresent()) {
+                //RPC[rn ~> rn_exp, RR ~> IRR]
+                PExp RPC = implReq.get().substitute(implFormalsToActuals);
+
+                //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
+                result = g.formConjunct(RPC, result);
+            }
+        }
+        //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
+        result = result.substitute(specFormalsToActuals);
+        if (!result.isObviouslyTrue()) {
+            assertiveBlocks.peek().finalConfirm(result);
+        }
+        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
+        outputFile.addAssertiveBlock(block.build());
+    }
+
+    /** Applies simple call rule to any arguments in {@code args} that need
+     *  it (e.g.: they're arithmetic expressions)
+     */
+    private List<PExp> reduceArgs(List<PExp> args) {
+        List<PExp> result = new ArrayList<>();
+        for (PExp arg : args) {
+            if (arg.isFunctionApplication()) {
+                PExp e = applyCallRuleToExp(assertiveBlocks.peek(), arg);
+                result.add(e);
+            } else {
+                result.add(arg);
+            }
+        }
+        return result;
+    }
+
+    private PExp applyCallRuleToExp(VCAssertiveBlockBuilder block, PExp exp) {
+        PExpSomethingListener something = new PExpSomethingListener(block);
+        exp.accept(something);
+        PExp finalConfirm = block.finalConfirm.getConfirmExp();
+        block.finalConfirm(finalConfirm.substitute(something.test));
+        if (something.test.isEmpty()) {
+            throw new IllegalStateException("something's screwy: " +
+                    "shouldn't of tried applying " +
+                    "call rule to: " + exp.toString()+".. " +
+                    "could happen too right now if there's no spec for the op");
+        }
+        return something.test.get(exp);
+    }
+
     @Override public void enterTypeRepresentationDecl(
             Resolve.TypeRepresentationDeclContext ctx) {
+        Scope s = symtab.scopes.get(ctx);
         currentTypeReprSym = null;
         try {
             currentTypeReprSym =
                     moduleScope.queryForOne(new UnqualifiedNameQuery(
                             ctx.name.getText())).toProgReprTypeSymbol();
         } catch (NoSuchSymbolException|DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
-                    ctx.name.getText());
         }
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(symtab,
+                new VCAssertiveBlockBuilder(g, s,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
                         .assume(getSequentsFromFormalParameters(moduleParamSyms,
                                 this::extractAntecedentsFromParameter))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
     }
@@ -136,15 +227,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void enterTypeImplInit(Resolve.TypeImplInitContext ctx) {
+        Scope s = symtab.scopes.get(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
         List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(symtab,
+                new VCAssertiveBlockBuilder(g, s,
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
-                    .assume(getModuleLevelAssertionsOfType(requires()))
+                    .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                     .assume(getSequentsFromFormalParameters(moduleParamSyms,
                             this::extractAntecedentsFromParameter));
 
@@ -181,18 +273,20 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 s.getSymbolsOfType(ProgParameterSymbol.class);
 
         PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
-                ctx, ctx.requiresClause()); //precondition[params 1..i <-- conc.X]
+              ctx, tr.getPExpFor(g, ctx.requiresClause())); //precondition[params 1..i <-- conc.X]
 
         VCAssertiveBlockBuilder block =
-                new VCAssertiveBlockBuilder(symtab,
+                new VCAssertiveBlockBuilder(g, s,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
-                        .assume(getSequentsFromFormalParameters(paramSyms, 
+                        .facilitySpecializations(facilitySpecFormalActualMappings)
+                        .assume(getSequentsFromFormalParameters(paramSyms,
                                 this::extractAntecedentsFromParameter))
-                        .assume(getModuleLevelAssertionsOfType(requires()))
-                        .assume(getModuleLevelAssertionsOfType(constraint()))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         //.assume(corrFnExpsForParams)
                         .assume(corrFnExpRequires)
                         .remember();
+
         assertiveBlocks.push(block);
     }
 
@@ -204,7 +298,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 s.getSymbolsOfType(ProgParameterSymbol.class);
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
-                ctx, ctx.ensuresClause()); //postcondition[params 1..i <-- corr_fn_exp]
+                ctx, tr.getPExpFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .confirm(getSequentsFromFormalParameters(
                         paramSyms, this::extractConsequentsFromParameter))
@@ -228,10 +322,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     paramSyms, ctx, currentProcOpSym.getRequires());
 
             VCAssertiveBlockBuilder block =
-                    new VCAssertiveBlockBuilder(symtab,
+                    new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
-                            .assume(getModuleLevelAssertionsOfType(requires()))
-                            .assume(getModuleLevelAssertionsOfType(constraint()))
+                            .facilitySpecializations(facilitySpecFormalActualMappings)
+                            .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                            .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(getSequentsFromFormalParameters(paramSyms,
                                     this::extractAntecedentsFromParameter)) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
@@ -270,6 +365,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         currentProcOpSym = null;
     }
 
+    @Override public void exitVariableDeclGroup(
+            Resolve.VariableDeclGroupContext ctx) {
+        PTType type = tr.progTypeValues.get(ctx.type());
+        MTType mathType = tr.mathTypeValues.get(ctx.type());
+        if (type instanceof PTNamed) {
+            PExp init = ((PTNamed)type).getInitializationEnsures();
+            for (TerminalNode t : ctx.ID()) {
+                PSymbol v = new PSymbol.PSymbolBuilder(t.getText())
+                        .mathType(mathType).progType(type).build();
+                init = init.substitute(((PTNamed) type)
+                        .getExemplarAsPSymbol(), v);
+                assertiveBlocks.peek().assume(init);
+            }
+        } else { //generic
+
+        }
+    }
+
     //-----------------------------------------------
     // S T A T S
     //-----------------------------------------------
@@ -281,11 +394,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        EXPLICIT_CALL_APPLICATION, tr.mathPExps.get(ctx
-                        .progExp()));
+                        EXPLICIT_CALL_APPLICATION,
+                        tr.mathPExps.get(ctx.progExp()));
         stats.put(ctx, s);
     }
 
+    //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
+    //otherwise,
     @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
@@ -298,18 +413,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
-                        tr.mathPExps.get(ctx.left), tr.mathPExps.get(ctx.right));
+                        tr.mathPExps.get(ctx.left),
+                        tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
-
-    public static Predicate<Symbol> constraint() {
-        return s -> s.getDefiningTree() instanceof
-                Resolve.ConstraintClauseContext;
-    }
-
-    public static Predicate<Symbol> requires() {
-        return s -> s.getDefiningTree() instanceof
-                Resolve.RequiresClauseContext;
     }
 
     public PExp betaReduce(PExp start, PExp correspondence) {
@@ -319,52 +425,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return v.getBetaReducedExp();
     }
 
-    public static Map<PExp, PExp> getFacilitySpecializations(
-            ParseTreeProperty<PExp> repo, Scope s,
-            String facilityQualifier) {
-        Map<PExp, PExp> result = new HashMap<>();
-        if (facilityQualifier == null) return result;
-        try {
-            FacilitySymbol facility = (FacilitySymbol) s.queryForOne(
-                    new UnqualifiedNameQuery(facilityQualifier));
-            result = getFacilitySpecializations(repo, s, facility);
-        }
-        catch (NoSuchSymbolException|DuplicateSymbolException e1) {
-            e1.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * Returns a mapping from formal -> actual args for facility,
-     * {@code facilityQualifier}.
-     */
-    public static Map<PExp, PExp> getFacilitySpecializations(
-            ParseTreeProperty<PExp> repo, Scope s,
-            FacilitySymbol facility) {
-        Map<PExp, PExp> result = new HashMap<>();
-        SpecImplementationPairing facilityPair = facility.getFacility();
-        Scope specScope = facilityPair.getSpecification().getScope(false);
-
-        List<ProgParameterSymbol> specModuleFormals =
-                specScope.getSymbolsOfType(ProgParameterSymbol.class);
-        Iterator<? extends ParserRuleContext> actualIter =
-                facilityPair.getSpecification().getArguments().iterator();
-
-        for (ProgParameterSymbol p : specModuleFormals) {
-            result.put(p.asPSymbol(), repo.get(actualIter.next()));
-        }
-        return result;
-    }
-
-    //I don't like this method. I think it should take a list of formalParameter symbols instead of
-    //a scope. The name of the method should somehow inform the sorts of params it takes..
     private List<PExp> getSequentsFromFormalParameters(
             List<ProgParameterSymbol> parameters,
-            Function<ProgParameterSymbol, List<PExp>> extract) {
+            Function<ProgParameterSymbol, List<PExp>> extractionFunction) {
         List<PExp> result = new ArrayList<>();
         for (ProgParameterSymbol p : parameters) {
-            result.addAll(extract.apply(p));
+            result.addAll(extractionFunction.apply(p));
         }
         return result;
     }
@@ -378,10 +444,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof PTFamily ) {
                 PExp constraint = ((PTFamily) declaredType).getConstraint();
-                constraint = constraint.substitute(getFacilitySpecializations(
-                        symtab.mathPExps, moduleScope, p.getTypeQualifier()));
+
+                constraint = constraint.substitute(
+                        getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
             }
             else if (declaredType instanceof PTRepresentation)  {
                 ProgReprTypeSymbol repr =
@@ -389,7 +456,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 PExp convention = repr.getConvention();
 
                 resultingAssumptions.add(convention.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- if we're conceptual)
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
             }
         }
@@ -440,23 +507,19 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    private Set<PExp> getModuleLevelAssertionsOfType(
-            Predicate<Symbol> assertionType) {
+    private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
         Set<PExp> result = new LinkedHashSet<>();
         List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
                         (GlobalMathAssertionSymbol.class)).stream()
-                        .filter(assertionType).collect(Collectors.toList());
+                        .filter(e -> e.getClauseType() == type)
+                        .collect(Collectors.toList());
 
         List<FacilitySymbol> facilities = moduleScope.query(
                 new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class));
-        for (GlobalMathAssertionSymbol assertion : assertions) {
-            result.add(substituteByFacilities(facilities, assertion));
-        }
-        //TODO: eventually if I get ambitious enough we could probably try to do these
-        //substitutions in the symboltable -- make them part of the result
-        //that comes back from a query..
-        return result;
+        return assertions.stream()
+                .map(assertion -> substituteByFacilities(facilities, assertion))
+                .collect(Collectors.toSet());
     }
 
     private PExp substituteByFacilities(List<FacilitySymbol> facilities,
@@ -464,21 +527,27 @@ public class ModelBuilderProto extends ResolveBaseListener {
         for (FacilitySymbol facility : facilities) {
             if (facility.getFacility().getSpecification().getName()
                     .equals(e.getModuleID())) {
-                return e.getEnclosedExp().substitute(getFacilitySpecializations(
-                        symtab.mathPExps, moduleScope, facility));
+                return e.getEnclosedExp().substitute(
+                        getSpecializationsForFacility(facility.getName()));
             }
         }
         return e.getEnclosedExp();
     }
 
+    private Map<PExp, PExp> getSpecializationsForFacility(String facility) {
+        Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
+        if (result == null) result = new HashMap<>();
+        return result;
+    }
+
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
-    //PTRepresentation). This method won't do anything otherwise.
+    //PTRepresentation). This method won't do anything otherwise.*/
     private PExp perParameterCorrFnExpSubstitute(List<ProgParameterSymbol> params,
                                                  ParserRuleContext functionCtx,
-                                                 ParserRuleContext reqOrEns) {
+                                                 PExp requiresOrEnsures) {
         List<PExp> result = new ArrayList<>();
-        PExp resultingClause = tr.getPExpFor(g, reqOrEns);
+        PExp resultingClause = requiresOrEnsures;
         for (ProgParameterSymbol p : params) {
             if (p.getDeclaredType() instanceof PTRepresentation) {
                 ProgReprTypeSymbol repr =

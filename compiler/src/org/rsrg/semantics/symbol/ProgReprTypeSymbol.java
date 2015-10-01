@@ -67,27 +67,6 @@ public class ProgReprTypeSymbol extends Symbol {
         return correspondence;
     }
 
-    /**
-     * Returns a map connecting conceptual elements to their definitions on
-     * the rhs of a correspondence equality function. This is as opposed to its
-     * original form consisting of conjuncted equals exprs.
-     *
-     * @return a mapping of conceptual labels to their definitions expressed
-     * in terms of concrete implementation-speciic variables.
-     */
-    public Map<PExp, PExp> getCorrespondenceAsExplicitMapping() {
-        Map<PExp, PExp> result = new HashMap<>();
-        if (correspondence == null) return result;
-        for (PExp e : correspondence.splitIntoConjuncts()) {
-            if (e.getSubExpressions().size() == 2 && e instanceof PSymbol &&
-                    ((PSymbol)e).getName().equals("=")) {
-                List<? extends PExp> subExps = e.getSubExpressions();
-                result.put(subExps.get(0), subExps.get(1));
-            }
-        }
-        return result;
-    }
-
     @Override public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), representation,
                 (definition == null) ? null : definition.modelType,
