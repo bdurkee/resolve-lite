@@ -448,7 +448,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 constraint = constraint.substitute(
                         getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- if we're conceptual)
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
             }
             else if (declaredType instanceof PTRepresentation)  {
                 ProgReprTypeSymbol repr =
@@ -456,7 +456,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 PExp convention = repr.getConvention();
 
                 resultingAssumptions.add(convention.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- if we're conceptual)
+                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
             }
         }

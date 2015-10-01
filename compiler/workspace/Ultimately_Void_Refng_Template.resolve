@@ -1,0 +1,5 @@
+Concept Ultimately_Void_Refng_Template<I>;
+    uses Terminal_Range_Op_Ext, Set_App_Op_Ext;
+
+
+end Ultimately_Void_Refng_Template;
