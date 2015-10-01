@@ -6,4 +6,6 @@ Concept Ultimately_Void_Refng_Template<I>;
     Defines Void : Location;
     Defines Total_Mem_Cap, Ocpn_Disp_Incr : N;
         constraints ||Location|| > Total_Mem_Cap / Ocpn_Disp_Incr;
+
+
 end Ultimately_Void_Refng_Template;

@@ -44,6 +44,7 @@ LINE_COMMENT
 
 // keywords
 
+AFFECTS			:	'affects'			;
 PRECIS			:   'Precis'			;
 BY				:	'by'				;
 CART_PROD		:	'Cart_Prod'			;
@@ -67,13 +68,14 @@ EXISTS			:	'Exists'			;
 EXTERNALLY		:	'externally'		;
 EXTENSION		:	'Extension'			;
 FACILITY		:	'Facility'			;
+FACILITY_INIT	:	'Facility_Initialization' ;
 FALSE			:	'false'				;
 FAMILY			:	'Family'			;
 FOR				:	'for'				;
 FORALL			:	'Forall'			;
 IF				:	('if'|'If')			;
 IMPLICIT		:	'Implicit'			;
-INITIALIZATION	:	'initialization'	;
+INIT			:	'initialization'	;
 IS 				:	'is'				;
 IMPLEMENTATION	:	'Implementation'	;
 IMPLEMENTED		:	'implemented'		;

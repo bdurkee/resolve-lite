@@ -59,8 +59,14 @@ conceptBlock
         | operationDecl
         | mathDefinitionDecl
         | mathDefinesDefinitionDecl
+        | mathStateVariableDeclGroup
+        | specModuleInit
         | constraintClause
         )*
+    ;
+
+mathStateVariableDeclGroup
+    :   VAR mathVariableDeclGroup SEMI
     ;
 
 // enhancement module
@@ -281,12 +287,17 @@ typeRepresentationDecl
 
 // type initialization rules
 
+specModuleInit
+    :   FACILITY_INIT
+        (affectsClause)? (requiresClause)? (ensuresClause)?
+    ;
+
 typeModelInit
-    :   INITIALIZATION (ensuresClause)?
+    :   INIT (ensuresClause)?
     ;
 
 typeImplInit
-    :   INITIALIZATION (ensuresClause)?
+    :   INIT (ensuresClause)?
         (variableDeclGroup)* (stmt)*
         END SEMI
     ;
@@ -399,6 +410,14 @@ procedureDecl
     ;
 
 // mathematical clauses
+
+affectsClause
+    :   AFFECTS parameterMode affectsItem (COMMA affectsItem)*
+    ;
+
+affectsItem
+    :   parameterMode (qualifier=ID COLONCOLON)? name=ID
+    ;
 
 requiresClause
     :   REQUIRES mathAssertionExp (entailsClause)? SEMI
