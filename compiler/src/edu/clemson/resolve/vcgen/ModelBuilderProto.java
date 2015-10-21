@@ -194,7 +194,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
             Resolve.ConceptImplModuleContext moduleCtxAsConceptImpl =
                     (Resolve.ConceptImplModuleContext)moduleCtx;
             modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
-        } //todo: enhancement impl module -- should be 'concept' and 'enhancement' for search
+        }
+        else if (moduleCtx instanceof Resolve.EnhancementImplModuleContext) {
+            Resolve.EnhancementImplModuleContext moduleCtxAsEnhImpl =
+                    (Resolve.EnhancementImplModuleContext)moduleCtx;
+            modulesToSearch.add(moduleCtxAsEnhImpl.concept.getText());
+            modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
+        }
         for (String moduleName : modulesToSearch) {
             result.addAll(symtab.moduleScopes.get(moduleName)
                             .getSymbolsOfType(ProgParameterSymbol.class));
