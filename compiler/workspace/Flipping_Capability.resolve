@@ -1,0 +1,5 @@
+Extension Flipping_Capability for Bdd_Stack_Template;
+        uses String_Theory;
+    Operation Flip (updates S : Stack);
+        ensures S = Reverse(@S);
+end Flipping_Capability;
