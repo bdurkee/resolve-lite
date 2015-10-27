@@ -47,7 +47,6 @@ module
 conceptModule
     :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
         (specModuleParameterList)? SEMI
-        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (conceptBlock)
@@ -74,7 +73,6 @@ mathStateVariableDeclGroup
 enhancementModule
     :   EXTENSION name=ID (specModuleParameterList)?
         FOR concept=ID SEMI
-        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (enhancementBlock)
@@ -92,7 +90,6 @@ enhancementBlock
 
 conceptImplModule
     :   IMPLEMENTATION name=ID (implModuleParameterList)?
-        (dependentTermOptions)?
         FOR concept=ID SEMI
         (usesList)?
         (requiresClause)?
@@ -102,7 +99,6 @@ conceptImplModule
 
 enhancementImplModule
    :   IMPLEMENTATION name=ID (implModuleParameterList)?
-       (dependentTermOptions)?
        FOR enhancement=ID OF concept=ID SEMI
        (usesList)?
        (requiresClause)?
@@ -122,7 +118,6 @@ implBlock
 
 facilityModule
     :   FACILITY name=ID SEMI
-        (dependentTermOptions)?
         (usesList)?
         (requiresClause)?
         (facilityBlock)
@@ -139,7 +134,6 @@ facilityBlock
 
 precisModule
     :   PRECIS name=ID SEMI
-        (dependentTermOptions)?
         (usesList)?
         precisBlock
         END closename=ID SEMI EOF
@@ -167,11 +161,6 @@ precisExtensionModule
 
 usesList
     :   USES ID (COMMA ID)* SEMI
-    ;
-
-// temp soln.
-dependentTermOptions
-    :   AT DEPENDENT LBRACE ID (COMMA ID)* RBRACE
     ;
 
 // parameter and parameter-list related rules
@@ -480,7 +469,6 @@ mathExp
 mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
-    |   mathFunctionRestrictionExp
     |   mathCrossTypeExp
     |   mathSegmentsExp
     |   mathOutfixExp
@@ -496,17 +484,8 @@ mathLiteralExp
     ;
 
 mathFunctionApplicationExp
-    :   (AT)? (qualifier=ID COLONCOLON)? name=ID (LPAREN mathExp (COMMA mathExp)* RPAREN)+ #mathFunctionExp
+    :   (AT)? (qualifier=ID COLONCOLON)? mathExp (LPAREN mathExp (COMMA mathExp)* RPAREN) #mathFunctionExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
-    ;
-
-mathFunctionRestrictionExp
-    :   restrictionFunctionExp LBRACKET mathExp RBRACKET
-    ;
-
-restrictionFunctionExp
-    :   mathFunctionApplicationExp
-    |   mathSegmentsExp
     ;
 
 mathCrossTypeExp
@@ -562,7 +541,7 @@ progExp
     |   progExp op=(LTE|GTE|LT|GT) progExp              #progInfixExp
     |   progExp op=(EQUALS|NEQUALS) progExp             #progInfixExp
     |   progExp op=AND progExp                          #progInfixExp
-    |   progExp op=OR progExp                          #progInfixExp
+    |   progExp op=OR progExp                           #progInfixExp
     ;
 
 progPrimary

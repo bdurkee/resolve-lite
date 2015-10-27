@@ -11,13 +11,12 @@ public abstract class PExp {
     public final int valueHash;
     private final MTType type, typeValue;
 
-    /**
-     * Since the removal of the Exp hierarchy, the role of PExps has expanded
-     * considerably.
-     * <p>
-     * In other words, if this {@code PExp} was born out of a
-     * programmatic expression (for vcgen), program type info should be
-     * present, if not, then these should/will be {@code null}.</p>
+    /** Since the removal of the Exp hierarchy, the role of PExps has expanded
+     *  considerably.
+     *  <p>
+     *  In other words, if this {@code PExp} was born out of a
+     *  programmatic expression (for vcgen), program type info should be
+     *  present, if not, then these should/will be {@code null}.</p>
      */
     private final PTType progType, progTypeValue;
 

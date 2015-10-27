@@ -106,12 +106,11 @@ public class ErrorManager extends BaseErrorListener {
         emit(etype, msg);
     }
 
-    /**
-     * Raise a predefined message with some number of paramters for the
-     * StringTemplate but for which there is no location information possible.
+    /** Raise a predefined message with some number of paramters for the
+     *  StringTemplate but for which there is no location information possible.
      *
-     * @param errorType The Message Descriptor
-     * @param args The arguments to pass to the StringTemplate
+     *  @param errorType The Message Descriptor
+     *  @param args The arguments to pass to the StringTemplate
      */
     public void toolError(ErrorKind errorType, Object... args) {
         toolError(errorType, null, args);
