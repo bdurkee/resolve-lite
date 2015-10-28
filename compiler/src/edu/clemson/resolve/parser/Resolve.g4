@@ -443,13 +443,13 @@ mathTypeExp
 mathAssertionExp
     :   mathExp
     |   mathQuantifiedExp
-    |   mathFunctionApplicationExp
+//    |   mathFunctionApplicationExp
     ;
 
-mathFunctionApplicationExp
+/*mathFunctionApplicationExp
     :   (AT)? (qualifier=ID COLONCOLON)? mathExp (LPAREN mathExp (COMMA mathExp)* RPAREN) #mathFunctionExp
     |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
-    ;
+    ;*/
 
 mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVariableDeclGroup COMMA mathAssertionExp
@@ -468,12 +468,14 @@ mathExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    |   mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #fxnApp
     |   mathLambdaExp                                   #mathLambdaExpr
     |   mathPrimaryExp                                  #mathPrimeExp
     ;
 
 mathPrimaryExp
     :   mathLiteralExp
+    |   mathSymbolExp
     /*|   mathFunctionApplicationExp
     |   mathCrossTypeExp
     |   mathSegmentsExp
@@ -484,12 +486,16 @@ mathPrimaryExp
     |   mathLambdaExp*/
     ;
 
+mathSymbolExp
+    :   (AT)? (qualifier=ID COLONCOLON)? name=ID
+    ;
+
 mathLiteralExp
     :   (qualifier=ID COLONCOLON)? (TRUE|FALSE)     #mathBooleanLiteralExp
     |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
     ;
 
-mathCrossTypeExp
+/*mathCrossTypeExp
     :   CART_PROD (mathVariableDeclGroup SEMI)+ END
     ;
 
@@ -504,7 +510,7 @@ mathSetExp
     :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE  #mathSetBuilderExp//Todo
     |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE         #mathSetCollectionExp
     ;
-
+*/
 mathLambdaExp
     :   LAMBDA LPAREN mathVariableDeclGroup
         (COMMA mathVariableDeclGroup)* RPAREN DOT LPAREN mathExp RPAREN
@@ -518,13 +524,13 @@ mathAlternativeItemExp
     :   result=mathExp (IF condition=mathExp SEMI | OTHERWISE SEMI)
     ;
 
-mathTupleExp
+/*mathTupleExp
     :   LPAREN mathExp (COMMA mathExp)+ RPAREN
     ;
 
 mathSegmentsExp
     :   (AT)? mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
-    ;
+    ;*/
 
 // program expressions
 
