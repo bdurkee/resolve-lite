@@ -28,23 +28,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-parser grammar Resolve;
-
-options {
-	tokenVocab=ResolveLexer;
-}
+grammar Resolve;
 
 module
     :   precisModule
-    |   precisExtensionModule
-    |   conceptModule
+/*    |   conceptModule
     |   conceptImplModule
     |   facilityModule
     |   enhancementImplModule
-    |   enhancementModule
+    |   enhancementModule*/
     ;
 
-conceptModule
+/*conceptModule
     :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
         (specModuleParameterList)? SEMI
         (usesList)?
@@ -130,13 +125,13 @@ facilityBlock
         | facilityDecl
         | typeRepresentationDecl
         )*
-    ;
+    ;*/
 
 precisModule
-    :   PRECIS name=ID SEMI
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
 
 precisBlock
@@ -147,34 +142,24 @@ precisBlock
         )*
     ;
 
-// precis extension
-
-precisExtensionModule
-    :   PRECIS EXTENSION name=ID FOR precis=ID
-        (EXTENDED BY (ID (COMMA ID)*))? SEMI
-        (usesList)?
-        precisBlock
-        END closename=ID SEMI
-    ;
-
 // uses, imports
 
 usesList
-    :   USES ID (COMMA ID)* SEMI
+    :   'uses' ID (',' ID)* ';'
     ;
 
 // parameter and parameter-list related rules
 
-operationParameterList
-    :   LPAREN (parameterDeclGroup (SEMI parameterDeclGroup)*)?  RPAREN
+/*operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
 specModuleParameterList
-    :   LPAREN specModuleParameterDecl (SEMI specModuleParameterDecl)* RPAREN
+    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
     ;
 
 implModuleParameterList
-    :   LPAREN implModuleParameterDecl (SEMI implModuleParameterDecl)* RPAREN
+    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
     ;
 
 specModuleParameterDecl
@@ -292,29 +277,29 @@ typeImplInit
         (variableDeclGroup)* (stmt)*
         END SEMI
     ;
+*/
 
 // math constructs
 
 mathTheoremDecl
-    :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
+    :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
 //in the context of an inductive defn
 mathDefinitionSig
-    :   name=mathSymbol (LPAREN
-            mathDefinitionParameter (COMMA mathDefinitionParameter)* RPAREN)?
-            COLON mathTypeExp
+    :   name=mathSymbol ('('
+            mathDefinitionParameter (',' mathDefinitionParameter)* ')')?
+            ':' mathTypeExp
     ;
 
 //Todo: Clean this up for god's sake.
 mathSymbol
     :   ID
-    |   (PLUS|MINUS|CUTMINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
-    |   BAR TRIPLEDOT BAR
-    |   LT TRIPLEDOT GT
-    |   DBL_BAR TRIPLEDOT DBL_BAR
-    |   LDIVIDE TRIPLEDOT DIVIDE
+    |   ('+'|'-'|'*'|'\\'|'...'|'|'|'||'|'<'|'<='|CAT|MULT|GTE|LTE|INT)
+    |   '|' '...' '|'
+    |   '<' '...' '>'
+    |   '||' '...' '||'
     ;
 
 mathDefinitionParameter
@@ -581,3 +566,15 @@ progLiteralExp
     |   CHAR            #progCharacterLiteralExp
     |   STRING          #progStringLiteralExp
     ;
+
+LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
+COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
+
+ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+INT : [0-9]+ ;
+
+CHAR: '\'' . '\'' ;
+STRING :  '"' (ESC | ~["\\])* '"' ;
+fragment ESC :   '\\' ["\bfnrt] ;
+
+WS : [ \t\n\r]+ -> channel(HIDDEN) ;
