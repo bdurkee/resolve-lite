@@ -8,11 +8,12 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import java.util.HashMap;
 import java.util.Map;
 
-/** A visitor that replaces conceptual variables with their correspondence
- *  defined mathematical counterparts.
- *  <p>
- *  Note: This listener assumes the starting expression ({@code start}) has
- *  already had all occurences of its conceptually-bound variables prefixed by 'conc'.</p>
+/**
+ * A visitor that replaces conceptual variables with their correspondence
+ * defined mathematical counterparts.
+ * <p>
+ * Note: This listener assumes the starting expression ({@code start}) has
+ * already had all occurences of its conceptually-bound variables prefixed by 'conc'.</p>
  */
 public class BasicBetaReducingListener extends PExpListener {
 

@@ -309,7 +309,7 @@ mathDefinitionSig
 
 //Todo: Clean this up for god's sake.
 mathSymbol
-    :   ID (PLUS|MINUS|CUTMINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE)?
+    :   ID
     |   (PLUS|MINUS|CUTMINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
     |   BAR TRIPLEDOT BAR
     |   LT TRIPLEDOT GT
@@ -443,6 +443,12 @@ mathTypeExp
 mathAssertionExp
     :   mathExp
     |   mathQuantifiedExp
+    |   mathFunctionApplicationExp
+    ;
+
+mathFunctionApplicationExp
+    :   (AT)? (qualifier=ID COLONCOLON)? mathExp (LPAREN mathExp (COMMA mathExp)* RPAREN) #mathFunctionExp
+    |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
     ;
 
 mathQuantifiedExp
@@ -457,35 +463,30 @@ mathExp
     |   mathExp op=(CAT|UNION|INTERSECT) mathExp        #mathInfixExp
     |   mathExp op=(IS_IN|IS_NOT_IN) mathExp            #mathInfixExp
     |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
-    |   mathExp mathSymbol mathExp                      #mathCustomInfixExp     //TODO: Be careful with this alt.!
     |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
     |   mathExp op=IMPLIES mathExp                      #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    |   mathLambdaExp                                   #mathLambdaExpr
     |   mathPrimaryExp                                  #mathPrimeExp
     ;
 
 mathPrimaryExp
     :   mathLiteralExp
-    |   mathFunctionApplicationExp
+    /*|   mathFunctionApplicationExp
     |   mathCrossTypeExp
     |   mathSegmentsExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
     |   mathAlternativeExp
-    |   mathLambdaExp
+    |   mathLambdaExp*/
     ;
 
 mathLiteralExp
     :   (qualifier=ID COLONCOLON)? (TRUE|FALSE)     #mathBooleanLiteralExp
     |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
-    ;
-
-mathFunctionApplicationExp
-    :   (AT)? (qualifier=ID COLONCOLON)? mathExp (LPAREN mathExp (COMMA mathExp)* RPAREN) #mathFunctionExp
-    |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
     ;
 
 mathCrossTypeExp

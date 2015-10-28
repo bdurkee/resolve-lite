@@ -29,9 +29,10 @@ public class AnnotatedTree {
     //an external impl
     public final Map<String, UsesRef> externalUses = new HashMap<>();
 
-    /** Think of the {@code uses} set as refs useful for coming up with module
-     *  orderings, etc. Think of these strings the refs the symboltable will see.
-     *  We don't want implementations of facilities showing up in this set.
+    /**
+     * Think of the {@code uses} set as refs useful for coming up with module
+     * orderings, etc. Think of these strings the refs the symboltable will see.
+     * We don't want implementations of facilities showing up in this set.
      */
     public final Set<String> semanticallyVisibleUses = new LinkedHashSet<>();
 

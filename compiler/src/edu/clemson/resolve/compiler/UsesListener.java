@@ -8,8 +8,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** Updates the containers tracking uses reference info by visiting the
- *  various {@link ParseTree} nodes that reference other modules.
+/**
+ * Updates the containers tracking uses reference info by visiting the
+ * various {@link ParseTree} nodes that reference other modules.
  */
 public class UsesListener extends ResolveBaseListener {
     private final AnnotatedTree tr;
