@@ -296,7 +296,7 @@ mathDefinitionSig
 //Todo: Clean this up for god's sake.
 mathSymbol
     :   ID
-    |   ('+'|'-'|'*'|'\\'|'...'|'|'|'||'|'<'|'<='|CAT|MULT|GTE|LTE|INT)
+    |   ('+'|'-'|'*'|'\\'|'...'|'..'|'|'|'||'|'<'|'<='|'o'|'*'|'>='|'<='|INT)
     |   '|' '...' '|'
     |   '<' '...' '>'
     |   '||' '...' '||'
@@ -308,38 +308,38 @@ mathDefinitionParameter
     ;
 
 mathCategoricalDefinitionDecl
-    :   CATEGORICAL DEFINITION FOR
-        mathDefinitionSig (COMMA mathDefinitionSig)+
-        IS mathAssertionExp SEMI
+    :   'Categorical' 'Definition' 'for'
+        mathDefinitionSig (',' mathDefinitionSig)+
+        'is' mathAssertionExp ';'
     ;
 
 mathDefinesDefinitionDecl
-    :   DEFINES ID (COMMA ID)* COLON mathTypeExp SEMI
+    :   'Defines' ID (',' ID)* ':' mathTypeExp ';'
     ;
 
 mathDefinitionDecl
-    :   (IMPLICIT)? DEFINITION mathDefinitionSig
-        (IS mathAssertionExp)? SEMI
+    :   ('Implicit')? 'Definition' mathDefinitionSig
+        ('is' mathAssertionExp)? ';'
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig IS
-        BASE_CASE mathAssertionExp SEMI
-        INDUCTIVE_CASE mathAssertionExp SEMI
+    :   'Inductive' 'Definition' 'on' mathVariableDecl 'of' mathDefinitionSig 'is'
+        '(i.)' mathAssertionExp ';'
+        '(ii.)' mathAssertionExp ';'
     ;
 
 mathVariableDeclGroup
-    :   ID (COMMA ID)* COLON mathTypeExp
+    :   ID (',' ID)* ':' mathTypeExp
     ;
 
 mathVariableDecl
-    :   ID COLON mathTypeExp
+    :   ID ':' mathTypeExp
     ;
 
 // facilitydecls, enhancements, etc
 
-facilityDecl
-    :   FACILITY name=ID IS spec=ID (LT type (COMMA type)* GT)?
+/*facilityDecl
+    :   'Facility' name=ID 'is' spec=ID ('<' type (COMMA type)* '>')?
         (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? IMPLEMENTED
         BY impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* SEMI
     ;
@@ -388,35 +388,35 @@ procedureDecl
 // mathematical clauses
 
 affectsClause
-    :   AFFECTS parameterMode affectsItem (COMMA affectsItem)*
+    :   'affects' parameterMode affectsItem (COMMA affectsItem)*
     ;
 
 affectsItem
     :   parameterMode (qualifier=ID COLONCOLON)? name=ID
     ;
-
+*/
 requiresClause
-    :   REQUIRES mathAssertionExp (entailsClause)? SEMI
+    :   'requires' mathAssertionExp (entailsClause)? ';'
     ;
 
 ensuresClause
-    :   ENSURES mathAssertionExp SEMI
+    :   'ensures' mathAssertionExp ';'
     ;
 
 constraintClause
-    :   CONSTRAINT mathAssertionExp SEMI
+    :   'constraint' mathAssertionExp ';'
     ;
 
 conventionClause
-    :   CONVENTION mathAssertionExp (entailsClause)? SEMI
+    :   'convention' mathAssertionExp (entailsClause)? ';'
     ;
 
 correspondenceClause
-    :   CORRESPONDENCE mathAssertionExp SEMI
+    :   'correspondence' mathAssertionExp ';'
     ;
 
 entailsClause
-    :   ENTAILS mathExp (COMMA mathExp)* COLON mathTypeExp
+    :   'which_entails' mathExp (',' mathExp)* ':' mathTypeExp
     ;
 
 // mathematical expressions
@@ -428,101 +428,89 @@ mathTypeExp
 mathAssertionExp
     :   mathExp
     |   mathQuantifiedExp
-//    |   mathFunctionApplicationExp
     ;
 
-/*mathFunctionApplicationExp
-    :   (AT)? (qualifier=ID COLONCOLON)? mathExp (LPAREN mathExp (COMMA mathExp)* RPAREN) #mathFunctionExp
-    |   (AT)? (qualifier=ID COLONCOLON)? name=ID #mathVariableExp
-    ;*/
-
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVariableDeclGroup COMMA mathAssertionExp
+    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
-    :   op=NOT mathExp                                  #mathUnaryExp
-    |   mathExp op=(MULT|DIVIDE|TILDE) mathExp          #mathInfixExp
-    |   mathExp op=(PLUS|MINUS|CUTMINUS) mathExp        #mathInfixExp
-    |   mathExp op=(RANGE|RARROW) mathExp               #mathInfixExp
-    |   mathExp op=(CAT|UNION|INTERSECT) mathExp        #mathInfixExp
-    |   mathExp op=(IS_IN|IS_NOT_IN) mathExp            #mathInfixExp
-    |   mathExp op=(LTE|GTE|GT|LT) mathExp              #mathInfixExp
-    |   mathExp op=(EQUALS|NEQUALS) mathExp             #mathInfixExp
-    |   mathExp op=IMPLIES mathExp                      #mathInfixExp
-    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
-    |   mathExp op=COLON mathTypeExp                    #mathTypeAssertionExp
-    |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
-    |   mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #fxnApp
-    |   mathLambdaExp                                   #mathLambdaExpr
+    :   op='not' mathExp                                #mathUnaryExp
+    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixExp
+    |   mathExp op=('+'|'-'|'.-') mathExp               #mathInfixExp
+    |   mathExp op=('..'|'->') mathExp                  #mathInfixExp
+    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixExp
+    |   mathExp op=('='|'/=') mathExp                   #mathInfixExp
+    |   mathExp op='implies' mathExp                    #mathInfixExp
+    |   mathExp op=('and'|'or') mathExp                 #mathInfixExp
+    |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
+    |   mathExp '(' mathExp (',' mathExp)* ')'          #mathApplyExp
+    |   mathExp ('.' mathExp)+                          #mathSegmentsExp
+    |   '@' mathExp                                     #mathIncomingExp
+    |   '(' mathAssertionExp ')'                        #mathNestedExp
     |   mathPrimaryExp                                  #mathPrimeExp
     ;
 
 mathPrimaryExp
     :   mathLiteralExp
     |   mathSymbolExp
-    /*|   mathFunctionApplicationExp
     |   mathCrossTypeExp
-    |   mathSegmentsExp
+    //|   mathSetExp
     |   mathOutfixExp
-    |   mathSetExp
     |   mathTupleExp
     |   mathAlternativeExp
-    |   mathLambdaExp*/
+    |   mathLambdaExp
     ;
 
 mathSymbolExp
-    :   (AT)? (qualifier=ID COLONCOLON)? name=ID
+    :   (qualifier=ID '::')? name=ID
     ;
 
 mathLiteralExp
-    :   (qualifier=ID COLONCOLON)? (TRUE|FALSE)     #mathBooleanLiteralExp
-    |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
+    :   (qualifier=ID '::')? ('true'|'false')       #mathBooleanLiteralExp
+    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
     ;
 
-/*mathCrossTypeExp
-    :   CART_PROD (mathVariableDeclGroup SEMI)+ END
+mathCrossTypeExp
+    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
     ;
 
 mathOutfixExp
-    :   lop=LT mathExp rop=GT
-    |   lop=BAR mathExp rop=BAR
-    |   lop=DBL_BAR mathExp rop=DBL_BAR
-    |   lop=LDIVIDE mathExp rop=DIVIDE
+    :   lop='<' mathExp rop='>'
+    |   lop='|' mathExp rop='|'
+    |   lop='||' mathExp rop='||'
     ;
 
-mathSetExp
+/*mathSetExp
     :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE  #mathSetBuilderExp//Todo
     |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE         #mathSetCollectionExp
     ;
 */
 mathLambdaExp
-    :   LAMBDA LPAREN mathVariableDeclGroup
-        (COMMA mathVariableDeclGroup)* RPAREN DOT LPAREN mathExp RPAREN
+    :   'lambda' '(' mathVariableDeclGroup
+        (',' mathVariableDeclGroup)* ')' '.'  mathExp
     ;
 
 mathAlternativeExp
-    :   DBL_LBRACE (mathAlternativeItemExp)+ DBL_RBRACE
+    :   '{{' (mathAlternativeItemExp)+ '}}'
     ;
 
 mathAlternativeItemExp
-    :   result=mathExp (IF condition=mathExp SEMI | OTHERWISE SEMI)
+    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-/*mathTupleExp
-    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
+mathTupleExp
+    :   '(' mathExp (',' mathExp)+ ')'
     ;
-
-mathSegmentsExp
-    :   (AT)? mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
-    ;*/
 
 // program expressions
 
 //Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
 //we could really use some unit tests to perhaps check precendence so that in the future when
 //someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
-progExp
+/*progExp
     :   progPrimary                                     #progPrimaryExp
     |   LPAREN progExp RPAREN                           #progNestedExp
     |   op=(MINUS|NOT) progExp                          #progUnaryExp
@@ -566,7 +554,7 @@ progLiteralExp
     |   CHAR            #progCharacterLiteralExp
     |   STRING          #progStringLiteralExp
     ;
-
+*/
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 

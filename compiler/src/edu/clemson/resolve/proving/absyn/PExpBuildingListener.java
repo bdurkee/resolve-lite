@@ -5,6 +5,7 @@ import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -219,7 +220,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathFunctionRestrictionExp(
-            Resolve.MathFunctionRestrictionExpContext ctx) {
+            ResolveParser.MathFunctionRestrictionExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder("App_Op")
                 .arguments(repo.get(ctx.restrictionFunctionExp()), repo.get(ctx.mathExp()))
                 //.quantification(quantifiedVars.get(ctx.name.getText()))
@@ -246,7 +247,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathSetCollectionExp(
-            Resolve.MathSetCollectionExpContext ctx) {
+            ResolveParser.MathSetCollectionExpContext ctx) {
         List<PExp> elements = ctx.mathExp().stream()
                 .map(repo::get)
                 .collect(Collectors.toList());
@@ -361,7 +362,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitProgCharacterLiteralExp(
-            Resolve.ProgCharacterLiteralExpContext ctx) {
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
         repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
                 typeValues.get(ctx), progTypes.get(ctx)));
     }
