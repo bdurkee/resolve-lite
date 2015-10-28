@@ -288,13 +288,13 @@ mathTheoremDecl
 //The '(COMMA ID)?' is reserved for the variable we're inducting over
 //in the context of an inductive defn
 mathDefinitionSig
-    :   name=mathSymbol ('('
+    :   name=mathSymbolName ('('
             mathDefinitionParameter (',' mathDefinitionParameter)* ')')?
             ':' mathTypeExp
     ;
 
 //Todo: Clean this up for god's sake.
-mathSymbol
+mathSymbolName
     :   ID
     |   ('+'|'-'|'*'|'\\'|'...'|'..'|'|'|'||'|'<'|'<='|'o'|'*'|'>='|'<='|INT)
     |   '|' '...' '|'
@@ -431,22 +431,22 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
-    :   op='not' mathExp                                #mathUnaryExp
-    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixExp
-    |   mathExp op=('+'|'-'|'.-') mathExp               #mathInfixExp
-    |   mathExp op=('..'|'->') mathExp                  #mathInfixExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixExp
-    |   mathExp op=('='|'/=') mathExp                   #mathInfixExp
-    |   mathExp op='implies' mathExp                    #mathInfixExp
-    |   mathExp op=('and'|'or') mathExp                 #mathInfixExp
+    :   op='not' mathExp                                #mathUnaryApplyExp
+    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixApplyExp
+    |   mathExp op=('+'|'-'|'.-') mathExp               #mathInfixApplyExp
+    |   mathExp op=('..'|'->') mathExp                  #mathInfixApplyExp
+    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixApplyExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixApplyExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixApplyExp
+    |   mathExp op=('='|'/=') mathExp                   #mathInfixApplyExp
+    |   mathExp op='implies' mathExp                    #mathInfixApplyExp
+    |   mathExp op=('and'|'or') mathExp                 #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
-    |   mathExp '(' mathExp (',' mathExp)* ')'          #mathApplyExp
+    |   mathExp '(' mathExp (',' mathExp)* ')'          #mathPrefixApplyExp
     |   mathExp ('.' mathExp)+                          #mathSegmentsExp
     |   '@' mathExp                                     #mathIncomingExp
     |   '(' mathAssertionExp ')'                        #mathNestedExp
@@ -458,7 +458,7 @@ mathPrimaryExp
     |   mathSymbolExp
     |   mathCrossTypeExp
     //|   mathSetExp
-    |   mathOutfixExp
+    |   mathOutfixApplyExp
     |   mathTupleExp
     |   mathAlternativeExp
     |   mathLambdaExp
@@ -477,7 +477,7 @@ mathCrossTypeExp
     :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
     ;
 
-mathOutfixExp
+mathOutfixApplyExp
     :   lop='<' mathExp rop='>'
     |   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
@@ -555,6 +555,10 @@ progLiteralExp
     |   STRING          #progStringLiteralExp
     ;
 */
+
+FORALL : 'Forall' ;
+EXISTS : 'Exists' ;
+
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 

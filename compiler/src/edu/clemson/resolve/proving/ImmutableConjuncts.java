@@ -13,13 +13,13 @@ import java.util.*;
 public class ImmutableConjuncts implements Iterable<PExp> {
 
     public static final ImmutableConjuncts EMPTY = new ImmutableConjuncts();
-    private final ImmutableList<PExp> myConjuncts;
+    private final ImmutableList<PExp> conjuncts;
 
-    private final int myConjunctsSize;
+    private final int conjunctsSize;
 
-    private Set<String> myCachedSymbolNames;
-    private Set<PSymbol> myCachedQuantifiedVariables;
-    private List<PExp> myCachedFunctionApplications;
+    private Set<String> cachedSymbolNames;
+    private Set<PSymbol> cachedQuantifiedVariableNames;
+    private List<PExp> cachedFunctionApplications;
 
     /**
      * Creates a new {@code ImmutableConjuncts} whose conjuncts are the
@@ -29,9 +29,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      */
     public ImmutableConjuncts(PExp e) {
         this(e.splitIntoConjuncts());
-        myCachedSymbolNames = e.getSymbolNames();
-        myCachedQuantifiedVariables = e.getQuantifiedVariables();
-        myCachedFunctionApplications = e.getFunctionApplications();
+        this.cachedSymbolNames = e.getSymbolNames();
+        this.cachedQuantifiedVariableNames = e.getQuantifiedVariables();
+        this.cachedFunctionApplications = e.getFunctionApplications();
     }
 
     /**
@@ -49,19 +49,19 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             //is immutable.
             ImmutableConjuncts expsAsImmutableConjuncts =
                     (ImmutableConjuncts) exps;
-            myConjuncts = expsAsImmutableConjuncts.myConjuncts;
-            myCachedSymbolNames = expsAsImmutableConjuncts.myCachedSymbolNames;
-            myCachedQuantifiedVariables =
-                    expsAsImmutableConjuncts.myCachedQuantifiedVariables;
-            myCachedFunctionApplications =
-                    expsAsImmutableConjuncts.myCachedFunctionApplications;
+            conjuncts = expsAsImmutableConjuncts.conjuncts;
+            cachedSymbolNames = expsAsImmutableConjuncts.cachedSymbolNames;
+            cachedQuantifiedVariableNames =
+                    expsAsImmutableConjuncts.cachedQuantifiedVariableNames;
+            cachedFunctionApplications =
+                    expsAsImmutableConjuncts.cachedFunctionApplications;
         }
         else {
             List<PExp> newExps = new ArrayList<>();
             exps.forEach(newExps::add);
-            myConjuncts = new ArrayBackedImmutableList<>(newExps);
+            conjuncts = new ArrayBackedImmutableList<>(newExps);
         }
-        myConjunctsSize = myConjuncts.size();
+        conjunctsSize = conjuncts.size();
     }
 
     /**
@@ -70,8 +70,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      */
     protected ImmutableConjuncts() {
         List<PExp> empty = Collections.emptyList();
-        myConjuncts = new ArrayBackedImmutableList<>(empty);
-        myConjunctsSize = 0;
+        conjuncts = new ArrayBackedImmutableList<>(empty);
+        conjunctsSize = 0;
     }
 
     /**
@@ -81,8 +81,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * defensiveCopy!  Just a little performance hack.
      */
     protected ImmutableConjuncts(ImmutableList<PExp> l) {
-        myConjuncts = l;
-        myConjunctsSize = myConjuncts.size();
+        conjuncts = l;
+        conjunctsSize = conjuncts.size();
     }
 
     /**
@@ -92,8 +92,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * defensiveCopy!  Just a little performance hack.</p>
      */
     protected ImmutableConjuncts(PExp[] exps, int length) {
-        myConjuncts = new ArrayBackedImmutableList<>(exps, length);
-        myConjunctsSize = length;
+        conjuncts = new ArrayBackedImmutableList<>(exps, length);
+        conjunctsSize = length;
     }
 
     /**
@@ -102,11 +102,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * value and equalities with the same thing on the left and right side.
      */
     public ImmutableConjuncts eliminateObviousConjuncts() {
-        PExp[] workingSpace = new PExp[myConjuncts.size()];
+        PExp[] workingSpace = new PExp[conjuncts.size()];
 
         int curIndex = 0;
         PExp curExp;
-        for (PExp myConjunct : myConjuncts) {
+        for (PExp myConjunct : conjuncts) {
             curExp = myConjunct;
 
             if (!curExp.isObviouslyTrue()) {
@@ -130,7 +130,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         ImmutableList<PExp> newConjuncts = new EmptyImmutableList<>();
 
         HashSet<PExp> hashedConjuncts = new HashSet<>();
-        Iterator<PExp> conjunctsIter = myConjuncts.iterator();
+        Iterator<PExp> conjunctsIter = conjuncts.iterator();
         PExp curConjunct;
         boolean unique;
         while (conjunctsIter.hasNext()) {
@@ -162,10 +162,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 retval = original;
                 break;
             case 1:
-                retval = original.appended(myConjuncts.get(startIndex));
+                retval = original.appended(conjuncts.get(startIndex));
                 break;
             default:
-                retval = original.appended(myConjuncts.subList(startIndex, length));
+                retval = original.appended(conjuncts.subList(startIndex, length));
         }
         return retval;
     }
@@ -185,7 +185,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         boolean retval = true;
 
-        Iterator<PExp> elements = myConjuncts.iterator();
+        Iterator<PExp> elements = conjuncts.iterator();
         Iterator<PExp> otherElements = otherConjuncts.iterator();
         while (retval && elements.hasNext() && otherElements.hasNext()) {
             retval = elements.next().equals(otherElements.next());
@@ -215,7 +215,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
     public List<PExp> getMutableCopy() {
         List<PExp> retval = new ArrayList<>();
-        Iterator<PExp> conjuncts = myConjuncts.iterator();
+        Iterator<PExp> conjuncts = this.conjuncts.iterator();
         PExp e;
         while (conjuncts.hasNext()) {
             e = conjuncts.next();
@@ -304,7 +304,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     @Override public Iterator<PExp> iterator() {
-        return myConjuncts.iterator();
+        return conjuncts.iterator();
     }
 
     /**
@@ -319,7 +319,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     public ImmutableConjuncts substitute(Map<PExp, PExp> mapping) {
 
         List<PExp> retvalConjuncts = new LinkedList<PExp>();
-        Iterator<PExp> conjuncts = myConjuncts.iterator();
+        Iterator<PExp> conjuncts = this.conjuncts.iterator();
         PExp c;
         while (conjuncts.hasNext()) {
             c = conjuncts.next();
@@ -329,11 +329,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     public ImmutableConjuncts overwritten(int index, PExp newConjunct) {
-        return new ImmutableConjuncts(myConjuncts.set(index, newConjunct));
+        return new ImmutableConjuncts(conjuncts.set(index, newConjunct));
     }
 
     public ImmutableConjuncts inserted(int index, ImmutableConjuncts c) {
-        return new ImmutableConjuncts(myConjuncts.insert(index, c.myConjuncts));
+        return new ImmutableConjuncts(conjuncts.insert(index, c.conjuncts));
     }
 
     /**
@@ -347,7 +347,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * conjuncts, and whose last conjunct is a copy of {@code e}.
      */
     public ImmutableConjuncts appended(PExp e) {
-        return new ImmutableConjuncts(myConjuncts.appended(e));
+        return new ImmutableConjuncts(conjuncts.appended(e));
     }
 
     /**
@@ -367,7 +367,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         //       ImmutableConjuncts to a list of lists
         if (i instanceof ImmutableConjuncts) {
             ImmutableList<PExp> iConjuncts =
-                    ((ImmutableConjuncts) i).myConjuncts;
+                    ((ImmutableConjuncts) i).conjuncts;
 
             if (iConjuncts.size() == 0) {
                 retval = this;
@@ -376,7 +376,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 //Performance hack: if i is an ImmutableConjuncts, we can safely
                 //just steal it's internal list of conjuncts--after all, that
                 //list is immutable.
-                ImmutableList<PExp> newExps = myConjuncts.appended(iConjuncts);
+                ImmutableList<PExp> newExps = conjuncts.appended(iConjuncts);
 
                 retval = new ImmutableConjuncts(newExps);
             }
@@ -406,7 +406,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * @throws IndexOutOfBoundsException If the provided index is out of bounds.
      */
     public ImmutableConjuncts removed(int indexToRemove) {
-        return new ImmutableConjuncts(myConjuncts.removed(indexToRemove));
+        return new ImmutableConjuncts(conjuncts.removed(indexToRemove));
     }
 
     /**
@@ -433,16 +433,16 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      */
     public ImmutableConjuncts subConjuncts(int start, int length) {
 
-        //myConjuncts.subList is less forgiving than we are, so adjust our
+        //conjuncts.subList is less forgiving than we are, so adjust our
         //parameters to get the desired results without an
         //IndexOutOfBoundsException
-        if (start > myConjunctsSize) {
-            start = myConjunctsSize;
+        if (start > conjunctsSize) {
+            start = conjunctsSize;
         }
-        if (start + length > myConjunctsSize) {
-            length = myConjunctsSize - start;
+        if (start + length > conjunctsSize) {
+            length = conjunctsSize - start;
         }
-        return new ImmutableConjuncts(myConjuncts.subList(start, length));
+        return new ImmutableConjuncts(conjuncts.subList(start, length));
     }
 
     /**
@@ -455,7 +455,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      *            or equal to or greater than {@code size()}.
      */
     public PExp get(int index) {
-        return myConjuncts.get(index);
+        return conjuncts.get(index);
     }
 
     /**
@@ -464,16 +464,16 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * @return The number of conjuncts.
      */
     public int size() {
-        return myConjuncts.size();
+        return conjuncts.size();
     }
 
     public ImmutableConjuncts flipQuantifiers() {
         ImmutableConjuncts retval;
 
-        PExp[] workingSpace = new PExp[myConjuncts.size()];
+        PExp[] workingSpace = new PExp[conjuncts.size()];
         boolean conjunctChanged = false;
         int curIndex = 0;
-        Iterator<PExp> conjunctIter = myConjuncts.iterator();
+        Iterator<PExp> conjunctIter = conjuncts.iterator();
         PExp curConjunct;
 
         while (conjunctIter.hasNext()) {
@@ -484,7 +484,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         }
 
         if (conjunctChanged) {
-            retval = new ImmutableConjuncts(workingSpace, myConjunctsSize);
+            retval = new ImmutableConjuncts(workingSpace, conjunctsSize);
         }
         else {
             retval = this;
@@ -500,38 +500,38 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     public Set<PSymbol> getQuantifiedVariables() {
-        if (myCachedQuantifiedVariables == null) {
-            myCachedQuantifiedVariables = new HashSet<>();
+        if (cachedQuantifiedVariableNames == null) {
+            cachedQuantifiedVariableNames = new HashSet<>();
 
-            for (PExp myConjunct : myConjuncts) {
-                myCachedQuantifiedVariables.addAll(myConjunct
+            for (PExp myConjunct : conjuncts) {
+                cachedQuantifiedVariableNames.addAll(myConjunct
                         .getQuantifiedVariables());
             }
         }
 
-        return myCachedQuantifiedVariables;
+        return cachedQuantifiedVariableNames;
     }
 
     public List<PExp> getFunctionApplications() {
-        if (myCachedFunctionApplications == null) {
-            myCachedFunctionApplications = new LinkedList<PExp>();
+        if (cachedFunctionApplications == null) {
+            cachedFunctionApplications = new LinkedList<PExp>();
 
-            for (PExp myConjunct : myConjuncts) {
-                myCachedFunctionApplications.addAll(myConjunct
+            for (PExp myConjunct : conjuncts) {
+                cachedFunctionApplications.addAll(myConjunct
                         .getFunctionApplications());
             }
         }
-        return myCachedFunctionApplications;
+        return cachedFunctionApplications;
     }
 
     public Set<String> getSymbolNames() {
-        if (myCachedSymbolNames == null) {
-            myCachedSymbolNames = new HashSet<>();
-            for (PExp myConjunct : myConjuncts) {
-                myCachedSymbolNames.addAll(myConjunct
+        if (cachedSymbolNames == null) {
+            cachedSymbolNames = new HashSet<>();
+            for (PExp myConjunct : conjuncts) {
+                cachedSymbolNames.addAll(myConjunct
                         .getSymbolNames());
             }
         }
-        return myCachedSymbolNames;
+        return cachedSymbolNames;
     }
 }

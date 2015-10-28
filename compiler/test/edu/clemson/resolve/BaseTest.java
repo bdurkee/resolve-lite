@@ -52,6 +52,7 @@ public abstract class BaseTest {
      * {@code true}, the test suite will attempt to load generated classes into
      * the test process for direct execution rather than invoking the JVM in a
      * new process for testing.
+     *
      * <p>
      * In-process testing results in a substantial performance improvement, but
      * some test environments created by IDEs do not support the mechanisms
