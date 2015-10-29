@@ -184,10 +184,8 @@ public class PSymbol extends PExp {
         v.beginPExp(this);
         v.beginPSymbol(this);
 
-        //dispStyle.beginAccept(v, this);
         v.beginChildren(this);
         v.endChildren(this);
-        //dispStyle.endAccept(v, this);
 
         v.endPSymbol(this);
         v.endPExp(this);

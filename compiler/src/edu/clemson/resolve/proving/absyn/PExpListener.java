@@ -8,13 +8,7 @@ public abstract class PExpListener {
 
     public void beginPSymbol(PSymbol p) {}
 
-    public void beginPrefixPSymbol(PSymbol p) {}
-
-    public void beginInfixPSymbol(PSymbol p) {}
-
-    public void beginOutfixPSymbol(PSymbol p) {}
-
-    public void beginPostfixPSymbol(PSymbol p) {}
+    public void beginPApply(PApply p) {}
 
     public void beginPAlternatives(PAlternatives p) {}
 
@@ -26,13 +20,7 @@ public abstract class PExpListener {
 
     public void fencepostPSymbol(PSymbol p) {}
 
-    public void fencepostPrefixPSymbol(PSymbol p) {}
-
-    public void fencepostInfixPSymbol(PSymbol p) {}
-
-    public void fencepostOutfixPSymbol(PSymbol p) {}
-
-    public void fencepostPostfixPSymbol(PSymbol p) {}
+    public void fencepostPApply(PApply p) {}
 
     public void fencepostPAlternatives(PAlternatives p) {}
 
@@ -40,15 +28,9 @@ public abstract class PExpListener {
 
     public void endPExp(PExp p) {}
 
+    public void endPApply(PApply p) {}
+
     public void endPSymbol(PSymbol p) {}
-
-    public void endPrefixPSymbol(PSymbol p) {}
-
-    public void endInfixPSymbol(PSymbol p) {}
-
-    public void endOutfixPSymbol(PSymbol p) {}
-
-    public void endPostfixPSymbol(PSymbol p) {}
 
     public void endPAlternatives(PAlternatives p) {}
 

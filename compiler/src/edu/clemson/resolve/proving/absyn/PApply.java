@@ -29,6 +29,30 @@ public class PApply extends PExp {
         }
     }
 
+    @Override protected String getCanonicalizedName() {
+        return functionPortion.getCanonicalizedName() +
+                "(" + Utils.join(arguments, ", ") + ")";
+    }
+
+    @Override public void accept(PExpListener v) {
+        v.beginPExp(this);
+        v.beginPApply(this);
+
+        v.beginChildren(this);
+        functionPortion.accept(v);
+        boolean first = true;
+        for (PExp arg : arguments) {
+            if (!first) {
+                v.fencepostPApply(this);
+            }
+            first = false;
+            arg.accept(v);
+        }
+        v.endChildren(this);
+        v.endPApply(this);
+        v.endPExp(this);
+    }
+
     protected static HashDuple calculateHashes(PExp functionPortion,
                                                Iterator<PExp> args) {
         int structureHash = 0;
