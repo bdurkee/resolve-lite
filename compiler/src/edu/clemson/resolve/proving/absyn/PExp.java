@@ -154,7 +154,11 @@ public abstract class PExp {
 
     public abstract boolean isVariable();
 
-    public abstract boolean isLiteral();
+    public abstract String getCanonicalizedName();
+
+    public boolean isLiteral() {
+        return false;
+    }
 
     public abstract boolean isFunctionApplication();
 

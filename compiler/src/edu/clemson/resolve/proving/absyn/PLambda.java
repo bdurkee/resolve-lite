@@ -93,6 +93,10 @@ public class PLambda extends PExp {
         return false;
     }
 
+    @Override public String getCanonicalizedName() {
+        return "\\lambda";
+    }
+
     @Override public boolean isLiteral() {
         return false;
     }

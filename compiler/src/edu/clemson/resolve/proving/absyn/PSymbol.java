@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -28,7 +29,8 @@ public class PSymbol extends PExp {
     private final String qualifier, leftPrint, rightPrint, name;
 
     private final boolean literalFlag, incomingFlag;
-    private Quantification quantification;
+
+    @NotNull private Quantification quantification;
     private final List<String> nameComponents = new ArrayList<>();
 
     private PSymbol(PSymbolBuilder builder) {
@@ -48,7 +50,7 @@ public class PSymbol extends PExp {
         int leftHashCode = left.hashCode();
         int valueHash = leftHashCode;
         valueHash *= 59;
-        if ( right == null ) {
+        if (right == null) {
             valueHash += leftHashCode;
         }
         else {
@@ -57,7 +59,7 @@ public class PSymbol extends PExp {
         return new HashDuple(0, valueHash);
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
@@ -73,12 +75,16 @@ public class PSymbol extends PExp {
         return qualifier;
     }
 
-    public Quantification getQuantification() {
+    @NotNull public Quantification getQuantification() {
         return quantification;
     }
 
     public boolean isIncoming() {
         return incomingFlag;
+    }
+
+    @Override public String getCanonicalizedName() {
+        return getName();
     }
 
     @Override public boolean isFunctionApplication() {
@@ -99,7 +105,7 @@ public class PSymbol extends PExp {
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
-        if ( result == null ) {
+        if (result == null) {
             String newName = substituteNamedComponents(substitutions);
             String newLeft = leftPrint, newRight = rightPrint;
             result = new PSymbolBuilder(this).build();
@@ -115,8 +121,8 @@ public class PSymbol extends PExp {
      * {@code conc.P.Length}.
      */
     private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
-        if ( !name.contains(".") ) return name;
-        if ( name.contains("...") ) return name;
+        if (!name.contains(".")) return name;
+        if (name.contains("...")) return name;
 
         List<String> components = Arrays.asList(name.split("\\."));
 
@@ -203,7 +209,7 @@ public class PSymbol extends PExp {
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
-        if ( incomingFlag ) {
+        if (incomingFlag) {
             result.add(this);
         }
         return result;
@@ -211,7 +217,7 @@ public class PSymbol extends PExp {
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new HashSet<>();
-        if ( quantification != Quantification.NONE ) {
+        if (quantification != Quantification.NONE) {
             result.add(this);
         }
         return result;
@@ -220,7 +226,7 @@ public class PSymbol extends PExp {
     @Override protected Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
-        if ( !isLiteral() ) {
+        if (!isLiteral()) {
             result.add(name);
         }
         return result;
@@ -242,12 +248,12 @@ public class PSymbol extends PExp {
      *
      * @param o The expression to compare this one to.
      * @return {@code true} <strong>iff</strong> {@code this} and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * expression are equivalent with respect to structure and all
+     * function and variable names.
      */
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
-        if ( result ) {
+        if (result) {
             PSymbol oAsPSymbol = (PSymbol) o;
 
             result =
@@ -262,7 +268,7 @@ public class PSymbol extends PExp {
 
     @Override public String toString() {
         String result = "";
-        if ( incomingFlag ) result += "@";
+        if (incomingFlag) result += "@";
         return result += name;
     }
 
@@ -296,15 +302,14 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder(String lprint, String rprint) {
-            if ( rprint == null ) {
-                if ( lprint == null ) {
+            if (rprint == null) {
+                if (lprint == null) {
                     throw new IllegalStateException("null name; all psymbols "
                             + "must be named.");
                 }
                 rprint = lprint;
                 this.name = lprint;
-            }
-            else {
+            } else {
                 this.name = lprint + "..." + rprint;
             }
             this.lprint = lprint;
@@ -351,7 +356,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder quantification(Quantification q) {
-            if ( q == null ) {
+            if (q == null) {
                 q = Quantification.NONE;
             }
             this.quantification = q;
@@ -364,7 +369,7 @@ public class PSymbol extends PExp {
         }
 
         @Override public PSymbol build() {
-            if ( this.mathType == null ) {
+            if (this.mathType == null) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
             }
