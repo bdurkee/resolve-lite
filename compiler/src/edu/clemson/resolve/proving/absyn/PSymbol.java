@@ -201,10 +201,6 @@ public class PSymbol extends PExp {
                 .build();
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
-    }
-
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         if (incomingFlag) {
@@ -366,7 +362,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        @Override public PSymbol build() {
+        @Override @NotNull public PSymbol build() {
             if (this.mathType == null) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");

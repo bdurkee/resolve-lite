@@ -218,9 +218,6 @@ public abstract class PExp {
 
     public abstract PExp withQuantifiersFlipped();
 
-    public abstract PExp withArgumentsErased();
-
-
     /**
      * Returns the set of '@'-prefixed symbols appearing in  {@code this}
      * expression. Note that when we say 'symbols' we mean both function
@@ -228,7 +225,7 @@ public abstract class PExp {
      *
      * @return The set of all incoming variable symbols
      */
-    public final Set<PSymbol> getIncomingSymbols() {
+    public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
                             getIncomingVariablesNoCache());

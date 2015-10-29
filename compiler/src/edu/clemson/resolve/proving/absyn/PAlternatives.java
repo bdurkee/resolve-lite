@@ -120,18 +120,14 @@ public class PAlternatives extends PExp {
                 + "been implemented.");
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
-    }
-
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getIncomingSymbols());
-            result.addAll(a.result.getIncomingSymbols());
+            result.addAll(a.condition.getIncomingVariables());
+            result.addAll(a.result.getIncomingVariables());
         }
-        result.addAll(otherwiseClauseResult.getIncomingSymbols());
+        result.addAll(otherwiseClauseResult.getIncomingVariables());
         return result;
     }
 
@@ -249,6 +245,10 @@ public class PAlternatives extends PExp {
 
     @Override public boolean isVariable() {
         return false;
+    }
+
+    @Override protected String getCanonicalizedName() {
+        return "{{ PAlternitives }}";
     }
 
     private static class UnboxResult implements Function<Alternative, PExp> {

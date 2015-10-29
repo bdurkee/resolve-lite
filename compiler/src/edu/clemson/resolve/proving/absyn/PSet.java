@@ -81,10 +81,6 @@ public class PSet extends PExp {
         return null;
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
-    }
-
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return new LinkedHashSet<>();
     }

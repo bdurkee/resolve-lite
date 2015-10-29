@@ -77,7 +77,7 @@ public class PExpSomethingListener extends PExpListener {
             //update our list of formal params to account for incoming-valued refs
             //to themselves in the ensures clause
             List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
-            for (PSymbol f : exp.getValue().getIncomingSymbols(true)) {
+            for (PSymbol f : exp.getValue().getIncomingVariables(true)) {
                 Collections.replaceAll(varsToReplaceInEnsures,
                         f.withIncomingSignsErased(), f);
             }*/

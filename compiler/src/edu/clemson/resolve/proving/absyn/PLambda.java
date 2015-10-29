@@ -117,10 +117,6 @@ public class PLambda extends PExp {
         return this;
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
-    }
-
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return body.getIncomingVariablesNoCache();
     }

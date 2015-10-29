@@ -79,10 +79,10 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     @Override public void exitRequiresClause(Resolve.RequiresClauseContext ctx) {
         PExp requires = tr.mathPExps.get(ctx);
-        if (requires != null && !requires.getIncomingSymbols().isEmpty()) {
+        if (requires != null && !requires.getIncomingVariables().isEmpty()) {
             compiler.errMgr.semanticError(
                     ErrorKind.ILLEGAL_INCOMING_REF_IN_REQUIRES, ctx.getStart(),
-                    requires.getIncomingSymbols(),
+                    requires.getIncomingVariables(),
                     ctx.mathAssertionExp().getText());
         }
     }*/

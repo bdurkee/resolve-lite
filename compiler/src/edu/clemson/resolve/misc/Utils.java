@@ -38,6 +38,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,16 +55,27 @@ import java.util.stream.Collectors;
  */
 public class Utils {
 
-    public static <T, R> List<R> apply(Collection<T> l, Function<T, R> f) {
+    public static <T, R> List<R> apply(@NotNull Collection<T> l,
+                                       @NotNull Function<T, R> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
-    public static <T> String join(Collection<T> data, String separator) {
+    public static <T, R> void apply(@NotNull Collection<T> input,
+                                    @NotNull Collection<R> accumulator,
+                                    @NotNull Function<T, Collection<R>> f) {
+        for (T t : input) {
+            accumulator.addAll(f.apply(t));
+        }
+    }
+
+    public static <T> String join(@NotNull Collection<T> data,
+                                  @NotNull String separator) {
         return join(data.iterator(), separator, "", "");
     }
 
-    public static <T> String join(Collection<T> data, String separator,
-                                  String left, String right) {
+    public static <T> String join(@NotNull Collection<T> data,
+                                  @NotNull String separator,
+                                  @NotNull String left, @NotNull String right) {
         return join(data.iterator(), separator, left, right);
     }
 
@@ -92,11 +104,11 @@ public class Utils {
         return builder.toString();
     }
 
-    public static <T, R> Map<T, R> zip(List<T> l1, List<R> l2)
+    public static <T, R> Map<T, R> zip(@NotNull List<T> l1, @NotNull List<R> l2)
             throws IllegalArgumentException {
         if (l1.size() != l2.size()) {
-            throw new IllegalArgumentException("i won't zip differently " +
-                    "sized lists.. extend me if you want");
+            throw new IllegalArgumentException("I don't zip differently " +
+                    "sized lists");
         }
         Map<T, R> result = new LinkedHashMap<>();
         Iterator<R> l2iter = l2.iterator();
@@ -122,13 +134,14 @@ public class Utils {
      * @return A list of {@code T}.
      */
     public static <E, T extends E> List<T> collect(
-            Class<T> expectedType, List<? extends ParseTree> nodes,
-            ParseTreeProperty<? extends E> annotations) {
+            @NotNull Class<T> expectedType,
+            @NotNull List<? extends ParseTree> nodes,
+            @NotNull ParseTreeProperty<? extends E> annotations) {
         return nodes.stream().map(x -> expectedType
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    public static String getModuleName(ParseTree ctx) {
+    public static String getModuleName(@NotNull ParseTree ctx) {
         if ( ctx instanceof ResolveParser.ModuleContext ) {
             ctx = ctx.getChild(0);
         }
@@ -164,7 +177,7 @@ public class Utils {
     }
 
     public interface Builder<T> {
-        T build();
+        @NotNull T build();
     }
 
     /**

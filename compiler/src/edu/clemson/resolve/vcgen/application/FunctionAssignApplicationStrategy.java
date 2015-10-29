@@ -63,7 +63,7 @@ public class FunctionAssignApplicationStrategy
 
         //update our list of formal params to account for incoming-valued refs
         //to themselves in the ensures clause
-        for (PSymbol f : ensuresRight.getIncomingSymbols()) {
+        for (PSymbol f : ensuresRight.getIncomingVariables()) {
             Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
         }*/
 
