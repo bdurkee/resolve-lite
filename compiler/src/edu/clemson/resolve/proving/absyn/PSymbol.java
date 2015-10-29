@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 /**
  * Represents a reference to a named element such as a variable, constant, or
  * function.
- *
  * <p>
  * Specifically, when this refers to a name for a funtion, this class therefore
  * represents a typed reference to the first class portion of the function,
@@ -100,25 +99,10 @@ public class PSymbol extends PExp {
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
-
         if ( result == null ) {
             String newName = substituteNamedComponents(substitutions);
             String newLeft = leftPrint, newRight = rightPrint;
-            Quantification newQuantification = quantification;
-
-            PSymbolBuilder temp =
-                    (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
-                            leftPrint, rightPrint) : new PSymbolBuilder(newName);
-
-            result = temp.mathType(getMathType())
-                    .qualifier(qualifier)
-                    .mathTypeValue(getMathTypeValue())
-                    .quantification(newQuantification)
-                    .incoming(incomingFlag)
-                    .literal(literalFlag)
-                    .progType(getProgType())
-                    .progTypeValue(getProgTypeValue())
-                    .build();
+            result = new PSymbolBuilder(this).build();
         }
         return result;
     }
@@ -187,7 +171,7 @@ public class PSymbol extends PExp {
     }
 
     @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
-        accumulator.add(this);
+        //accumulator.add(this); // Don't think you actually want to do this..
     }
 
     @Override public void accept(PExpListener v) {
@@ -204,32 +188,17 @@ public class PSymbol extends PExp {
     }
 
     @Override public PExp withIncomingSignsErased() {
-        PSymbolBuilder temp =
-                (dispStyle == DisplayStyle.OUTFIX) ? new PSymbolBuilder(
-                        leftPrint, rightPrint) : new PSymbolBuilder(name);
-        PSymbolBuilder result =
-                temp.mathType(getMathType()).mathTypeValue(getMathTypeValue())
-                        .style(dispStyle).quantification(quantification)
-                        .progType(getProgType()).progTypeValue(getProgTypeValue());
-        for (PExp arg : arguments) {
-            result.arguments(arg.withIncomingSignsErased());
-        }
-        return result.build();
+        return new PSymbolBuilder(this).incoming(false).build();
     }
 
     @Override public PExp withQuantifiersFlipped() {
-        List<PExp> flippedArgs = arguments.stream()
-                .map(PExp::withQuantifiersFlipped).collect(Collectors.toList());
-
-        return new PSymbolBuilder(name).literal(literalFlag)
-                .incoming(incomingFlag).style(dispStyle).arguments(flippedArgs)
-                .mathType(getMathType()).mathTypeValue(getMathTypeValue())
-                .progType(getProgType()).progTypeValue(getProgTypeValue())
-                .quantification(this.quantification.flipped()).build();
+        return new PSymbolBuilder(this)
+                .quantification(quantification.flipped())
+                .build();
     }
 
     @Override public PExp withArgumentsErased() {
-        return new PSymbolBuilder(this).clearArguments().build();
+        return this;
     }
 
     @Override public Set<PSymbol> getIncomingVariablesNoCache() {
@@ -306,7 +275,21 @@ public class PSymbol extends PExp {
         protected Quantification quantification = Quantification.NONE;
         protected MTType mathType, mathTypeValue;
         protected PTType progType, progTypeValue;
-        private final List<String> nameComponents = new ArrayList<>();
+
+        public PSymbolBuilder(PSymbol existingPSymbol) {
+            this.name = existingPSymbol.getName();
+            this.qualifier = existingPSymbol.getQualifier();
+            this.lprint = existingPSymbol.getLeftPrint();
+            this.rprint = existingPSymbol.getRightPrint();
+            this.literal = existingPSymbol.isLiteral();
+            this.incoming = existingPSymbol.isIncoming();
+            this.quantification = existingPSymbol.getQuantification();
+
+            this.mathType = existingPSymbol.getMathType();
+            this.mathTypeValue = existingPSymbol.getMathTypeValue();
+            this.progType = existingPSymbol.getProgType();
+            this.progTypeValue = existingPSymbol.getProgTypeValue();
+        }
 
         public PSymbolBuilder(String name) {
             this(name, null);

@@ -62,7 +62,7 @@ public class FlexibleNameSubstitutingListener extends PExpListener {
     }
 
     @Override public void beginPSymbol(PSymbol e) {
-        if ( e.isFunctionApplication() ) {
+        /*if ( e.isFunctionApplication() ) {
             PExp withoutArgs = e.withArgumentsErased();
             if (substitutions.containsKey(withoutArgs) &&
                     !(substitutions.get(withoutArgs) instanceof PLambda) &&
@@ -71,6 +71,6 @@ public class FlexibleNameSubstitutingListener extends PExpListener {
                 applicationSubstitutions.put(e, new PSymbolBuilder(replacement)
                         .arguments(e.getArguments()).build());
             }
-        }
+        }*/
     }
 }

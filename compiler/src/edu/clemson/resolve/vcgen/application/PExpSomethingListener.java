@@ -26,7 +26,7 @@ public class PExpSomethingListener extends PExpListener {
         this.block = block;
     }
 
-    @Override public void endPSymbol(PSymbol e) {
+    /*@Override public void endPSymbol(PSymbol e) {
         if (!e.isFunctionApplication()) return;
 
         PSymbol thisExp = (PSymbol)e.substitute(test);
@@ -44,10 +44,6 @@ public class PExpSomethingListener extends PExpListener {
         block.confirm(opRequires);
 
         PExp opEnsures = op.getEnsures();
-        /*opEnsures = opEnsures.substitute(
-                ModelBuilderProto.getFacilitySpecializations(
-                        block.symtab.mathPExps,
-                        block.scope, call.getQualifier()));*/ //Todo: Hmmm. not sure about this one
 
         Iterator<ProgParameterSymbol> formalParamIter =
                 op.getParameters().iterator();
@@ -84,14 +80,14 @@ public class PExpSomethingListener extends PExpListener {
             for (PSymbol f : exp.getValue().getIncomingSymbols(true)) {
                 Collections.replaceAll(varsToReplaceInEnsures,
                         f.withIncomingSignsErased(), f);
-            }
+            }*/
 
             /**
              * Now we substitute the formals for actuals in the rhs of the ensures
              * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
              * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
              */
-            PExp t = exp.getValue();
+           /* PExp t = exp.getValue();
             FlexibleNameSubstitutingListener l =
                     new FlexibleNameSubstitutingListener(
                             t, varsToReplaceInEnsures, actuals);
@@ -102,5 +98,5 @@ public class PExpSomethingListener extends PExpListener {
         }
         int i;
         i=0;
-    }
+    }*/
 }

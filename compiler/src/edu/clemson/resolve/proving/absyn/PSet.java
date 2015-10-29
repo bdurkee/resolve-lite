@@ -11,8 +11,9 @@ public class PSet extends PExp {
     //Todo: should this be a set?
     private final List<PExp> elements = new ArrayList<>();
 
+    //TODO: Give me a real HashDuple (one based on my actual elements!)
     public PSet(MTType type, MTType typeValue, List<PExp> elements) {
-        super(PSymbol.calculateHashes(elements), type, typeValue);
+        super(new HashDuple(0, 56), type, typeValue);
         this.elements.addAll(elements);
     }
 
@@ -84,7 +85,7 @@ public class PSet extends PExp {
         return this;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache(boolean convertApplications) {
+    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return new LinkedHashSet<>();
     }
 

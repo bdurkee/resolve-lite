@@ -6,7 +6,6 @@ import edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -41,7 +40,7 @@ public class ModelBuilder extends ResolveBaseListener {
         this.tr = g.getModule();
     }
 
-    @Override public void exitTypeModelDecl(Resolve.TypeModelDeclContext ctx) {
+  /*  @Override public void exitTypeModelDecl(Resolve.TypeModelDeclContext ctx) {
         built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
@@ -650,5 +649,5 @@ public class ModelBuilder extends ResolveBaseListener {
         catch (UnexpectedSymbolException use) {
             throw new RuntimeException(); //should've been caught looong ago.
         }
-    }
+    }*/
 }

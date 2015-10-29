@@ -2,7 +2,6 @@ package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.Resolve;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.DuplicateSymbolException;
@@ -68,9 +67,9 @@ public class HardCoded {
 
     //Todo: Should the following two methods *really* be in here?
     public static String getMetaFieldName(ParserRuleContext t) {
-        String result;
+        String result = "";
 
-        if ( t instanceof Resolve.MathFunctionExpContext ) {
+        /*if ( t instanceof Resolve.MathFunctionExpContext ) {
             result = ((Resolve.MathFunctionExpContext) t).name.getText();
         }
         else if ( t instanceof Resolve.MathVariableExpContext ) {
@@ -79,7 +78,7 @@ public class HardCoded {
         else {
             throw new RuntimeException("not a variable exp or function exp: "
                     + t.getText() + " (" + t.getClass() + ")");
-        }
+        }*/
         return result;
     }
 

@@ -1,6 +1,5 @@
 package edu.clemson.resolve.analysis;
 
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -14,13 +13,13 @@ public class RecursiveStatementCheckingVisitor
         extends
             ResolveBaseVisitor<Boolean> {
 
-    private final Token callName;
+   private final Token callName;
 
     public RecursiveStatementCheckingVisitor(Token callName) {
         this.callName = callName;
     }
 
-    @Override public Boolean visitTypeImplInit(
+    /* @Override public Boolean visitTypeImplInit(
             Resolve.TypeImplInitContext ctx) {
         return ctx.stmt().stream().anyMatch(this::visit);
     }
@@ -81,5 +80,5 @@ public class RecursiveStatementCheckingVisitor
 
     @Override public Boolean visitTerminal(TerminalNode t) {
         return false;
-    }
+    }*/
 }

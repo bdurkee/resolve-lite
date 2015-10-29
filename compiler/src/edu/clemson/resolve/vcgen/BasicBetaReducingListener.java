@@ -43,7 +43,7 @@ public class BasicBetaReducingListener extends PExpListener {
 
     @Override public void endPSymbol(PSymbol e) {
         //TODO: Second condition here should be: is e.getName contained in the keyset of our substitution map?
-        if (e.isFunctionApplication() &&
+       /* if (e.isFunctionApplication() &&
                 substitutions.containsKey(e.withArgumentsErased()) &&
                 substitutions.get(e.withArgumentsErased()) instanceof PLambda) {
             PLambda l = (PLambda) substitutions.get(e.withArgumentsErased());
@@ -51,6 +51,6 @@ public class BasicBetaReducingListener extends PExpListener {
                     e.getArguments());
             betaReducedExp = betaReducedExp.substitute(e, newBody);
 
-        }
+        }*/
     }
 }

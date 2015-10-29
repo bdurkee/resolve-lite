@@ -41,7 +41,7 @@ public class PExpTextRenderingListener extends PExpListener {
         }
     }
 
-    @Override public void beginPrefixPSymbol(PSymbol p) {
+   /* @Override public void beginPrefixPSymbol(PSymbol p) {
         try {
             output.append(p.getName());
 
@@ -52,7 +52,7 @@ public class PExpTextRenderingListener extends PExpListener {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override public void beginInfixPSymbol(PSymbol p) {
         try {
@@ -72,7 +72,7 @@ public class PExpTextRenderingListener extends PExpListener {
         }
     }
 
-    @Override public void beginPostfixPSymbol(PSymbol p) {
+  /*  @Override public void beginPostfixPSymbol(PSymbol p) {
         try {
             if (p.getArguments().size() > 0) {
                 output.append("(");
@@ -81,7 +81,7 @@ public class PExpTextRenderingListener extends PExpListener {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override public void beginPAlternatives(PAlternatives p) {
         try {
@@ -157,7 +157,7 @@ public class PExpTextRenderingListener extends PExpListener {
         }
     }
 
-    @Override public void endPrefixPSymbol(PSymbol p) {
+   /* @Override public void endPrefixPSymbol(PSymbol p) {
         try {
             if (p.getArguments().size() > 0) {
                 output.append(")");
@@ -166,7 +166,7 @@ public class PExpTextRenderingListener extends PExpListener {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override public void endInfixPSymbol(PSymbol p) {
         try {
@@ -186,7 +186,7 @@ public class PExpTextRenderingListener extends PExpListener {
         }
     }
 
-    @Override public void endPostfixPSymbol(PSymbol p) {
+    /*@Override public void endPostfixPSymbol(PSymbol p) {
         try {
             if (p.getArguments().size() > 0) {
                 output.append(")");
@@ -196,7 +196,7 @@ public class PExpTextRenderingListener extends PExpListener {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override public void endPAlternatives(PAlternatives p) {
         try {

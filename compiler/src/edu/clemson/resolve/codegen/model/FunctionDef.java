@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ public class FunctionDef extends OutputModelObject {
         hasReturn = true;
     }
 
-    public FunctionDef(Resolve.GenericTypeContext specGeneric) {
-        this("get" + specGeneric.ID().getText());
-        hasReturn = true;
-    }
+    //public FunctionDef(ResolveParser.GenericTypeContext specGeneric) {
+    //    this("get" + specGeneric.ID().getText());
+    //    hasReturn = true;
+    //}
 }

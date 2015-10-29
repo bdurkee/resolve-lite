@@ -124,16 +124,14 @@ public class PAlternatives extends PExp {
         return this;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache(
-            boolean convertApplications) {
+    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getIncomingSymbols(convertApplications));
-            result.addAll(a.result.getIncomingSymbols(convertApplications));
+            result.addAll(a.condition.getIncomingSymbols());
+            result.addAll(a.result.getIncomingSymbols());
         }
-        result.addAll(otherwiseClauseResult
-                .getIncomingSymbols(convertApplications));
+        result.addAll(otherwiseClauseResult.getIncomingSymbols());
         return result;
     }
 
