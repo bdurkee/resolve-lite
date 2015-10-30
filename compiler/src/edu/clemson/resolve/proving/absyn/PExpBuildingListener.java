@@ -1,13 +1,11 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -18,7 +16,6 @@ import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Converts parse tree math exprs to an equivalent abstract-syntax form,
@@ -30,6 +27,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final ParseTreeProperty<PTType> progTypes;
     private final ParseTreeProperty<PExp> repo;
 
+    private final Map<String, MTType> seenOperatorTypes = new HashMap<>();
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
     private final MTInvalid dummyType;
 
@@ -104,17 +102,24 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
-        PSymbol function = new PSymbolBuilder(ctx.op.getText())
-                .mathType(types.get(ctx)).mathTypeValue(typeValues.get(ctx))
-                .build();
-
-        PApplyBuilder result = new PApplyBuilder(function)
-                .applicationType(types.get(ctx))
-                .applicationTypeValue(typeValues.get(ctx))
+        PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx.op))
+                .applicationType(getMathType(ctx))
+                .applicationTypeValue(getMathTypeValue(ctx))
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
 
         repo.put(ctx, result.build());
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
+    }
+
+    private PSymbol buildOperatorPSymbol(Token operator) {
+        return buildOperatorPSymbol(operator.getText());
+    }
+
+    private PSymbol buildOperatorPSymbol(String operator) {
+        return new PSymbolBuilder(operator)
+                .mathType(getOperandFunctionType(operator))
+                .quantification(quantifiedVars.get(operator))
+                .build();
     }
 
     @Override public void exitMathOutfixApplyExp(
@@ -210,6 +215,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .progType(progType).mathTypeValue(typeValue)
                         .literal(true);
         return result.build();
+    }
+
+    //this should probably actually always return MTFunction...
+    private MTType getOperandFunctionType(String operator) {
+        return seenOperatorTypes.get(operator) == null ? dummyType :
+                seenOperatorTypes.get(operator);
     }
 
     private MTType getMathType(ParseTree t) {

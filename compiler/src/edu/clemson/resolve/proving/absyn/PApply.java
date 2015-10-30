@@ -19,7 +19,6 @@ public class PApply extends PExp {
 
     private final PExp functionPortion;
     private final List<PExp> arguments = new ArrayList<>();
-    private final Quantification quantification;
 
     private PApply(PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
@@ -27,7 +26,17 @@ public class PApply extends PExp {
                 builder.applicationTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
-        this.quantification = builder.q
+    }
+
+    @NotNull public Quantification getQuantification() {
+        Quantification result = Quantification.NONE;
+        if (functionPortion instanceof PSymbol) {
+            result = ((PSymbol) functionPortion).getQuantification();
+        }
+        else if (functionPortion instanceof PApply) {
+            result = ((PApply) functionPortion).getQuantification();
+        }
+        return result;
     }
 
     @Override public boolean containsName(String name) {
@@ -191,7 +200,6 @@ public class PApply extends PExp {
         @NotNull protected final PExp functionPortion;
         @NotNull protected final List<PExp> arguments = new ArrayList<>();
 
-        @NotNull protected Quantification quantification = Quantification.NONE;
         @Nullable protected MTType applicationType, applicationTypeValue;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
@@ -215,11 +223,6 @@ public class PApply extends PExp {
 
         public PApplyBuilder arguments(@NotNull Collection<PExp> args) {
             arguments.addAll(args);
-            return this;
-        }
-
-        public PApplyBuilder quantification(@Nullable Quantification q) {
-            this.quantification = q;
             return this;
         }
 

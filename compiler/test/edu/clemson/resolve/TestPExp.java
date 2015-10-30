@@ -38,7 +38,7 @@ public class TestPExp extends BaseTest {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "x + y");
         List<? extends PExp> subexprs = result.getSubExpressions();
-        Assert.assertEquals(0, subexprs.size());
+        Assert.assertEquals(3, subexprs.size());
         Iterator<? extends PExp> exps = subexprs.iterator();
 
     }
