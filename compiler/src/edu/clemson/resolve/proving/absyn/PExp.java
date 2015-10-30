@@ -1,5 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -70,7 +71,7 @@ public abstract class PExp {
         return typeValue;
     }
 
-    public PExp substitute(List<? extends PExp> currents, PExp repl) {
+    @NotNull public PExp substitute(List<? extends PExp> currents, PExp repl) {
         Map<PExp, PExp> substitutions = new HashMap<>();
         for (PExp current : currents) {
             substitutions.put(current, repl);
@@ -78,17 +79,18 @@ public abstract class PExp {
         return substitute(substitutions);
     }
 
-    public PExp substitute(List<? extends PExp> currents, PExp... repls) {
+    @NotNull public PExp substitute(@NotNull List<? extends PExp> currents,
+                                    @NotNull PExp... repls) {
         return substitute(currents, Arrays.asList(repls));
     }
 
-    public PExp substitute(List<? extends PExp> currents,
-            List<? extends PExp> replacements) {
-        if ( currents.size() != replacements.size() ) {
+    @NotNull public PExp substitute(@NotNull List<? extends PExp> currents,
+                                    @NotNull List<? extends PExp> repls) {
+        if (currents.size() != repls.size()) {
             throw new IllegalArgumentException("substitution lists must be"
                     + "the same length");
         }
-        Iterator<? extends PExp> replIter = replacements.iterator();
+        Iterator<? extends PExp> replIter = repls.iterator();
         Iterator<? extends PExp> currIter = currents.iterator();
         Map<PExp, PExp> result = new LinkedHashMap<>();
         while (replIter.hasNext()) {
@@ -99,8 +101,7 @@ public abstract class PExp {
 
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
         PExp thisSubstituted = substitute(substitutions);
-        boolean result = this.equals(thisSubstituted);
-        return result;
+        return this.equals(thisSubstituted);
     }
 
     public PExp substitute(PExp current, PExp replacement) {
@@ -259,15 +260,14 @@ public abstract class PExp {
 
     public final Set<String> getSymbolNames(boolean excludeApplications,
                                             boolean excludeLiterals) {
-        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
+        return getSymbolNamesNoCache();
     }
 
     public final Set<String> getSymbolNames() {
         return getSymbolNames(false, false);
     }
 
-    protected abstract Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals);
+    protected abstract Set<String> getSymbolNamesNoCache();
 
     public static class HashDuple {
         public int structureHash;

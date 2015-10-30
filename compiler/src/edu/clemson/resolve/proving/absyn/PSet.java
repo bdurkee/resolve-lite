@@ -62,6 +62,10 @@ public class PSet extends PExp {
         return false;
     }
 
+    @Override protected String getCanonicalizedName() {
+        return "{ PSet }";
+    }
+
     @Override public boolean isLiteral() {
         return false;
     }
@@ -93,7 +97,7 @@ public class PSet extends PExp {
         return new ArrayList<>();
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(boolean includeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getSymbolNamesNoCache() {
         return new HashSet<>();
     }
 

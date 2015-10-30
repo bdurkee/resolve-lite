@@ -34,6 +34,14 @@ public class TestPExp extends BaseTest {
     protected static final Quantification EXISTS = Quantification.EXISTENTIAL;
     protected static final Quantification NONE = Quantification.NONE;
 
+    @Test public void testGetSubExpressions() {
+        TypeGraph g = new TypeGraph();
+        PExp result = parseMathAssertionExp(g, "x + y");
+        List<? extends PExp> subexprs = result.getSubExpressions();
+        Assert.assertEquals(0, subexprs.size());
+        Iterator<? extends PExp> exps = subexprs.iterator();
+
+    }
   /*  @Test public void testQuantifierDistribution() {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");

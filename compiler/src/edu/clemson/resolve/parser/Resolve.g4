@@ -448,7 +448,7 @@ mathExp
     |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
     |   mathExp '(' mathExp (',' mathExp)* ')'          #mathPrefixApplyExp
     |   mathExp ('.' mathExp)+                          #mathSegmentsExp
-    |   '@' mathExp                                     #mathIncomingExp
+//    |   '@' mathExp                                     #mathIncomingExp
     |   '(' mathAssertionExp ')'                        #mathNestedExp
     |   mathPrimaryExp                                  #mathPrimeExp
     ;
@@ -465,7 +465,7 @@ mathPrimaryExp
     ;
 
 mathSymbolExp
-    :   (qualifier=ID '::')? name=ID
+    :   ('@')? (qualifier=ID '::')? name=ID
     ;
 
 mathLiteralExp

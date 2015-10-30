@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.misc.Utils.apply;
 
@@ -25,6 +25,30 @@ public class PApply extends PExp {
                 builder.mathTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
+    }
+
+    @Override public boolean containsName(String name) {
+        boolean result = functionPortion.containsName(name);
+        Iterator<PExp> argumentIterator = arguments.iterator();
+        while (!result && argumentIterator.hasNext()) {
+            result = argumentIterator.next().containsName(name);
+        }
+        return result;
+    }
+
+    @Override @NotNull public PExp substitute(Map<PExp, PExp> substitutions) {
+        PExp result;
+        if ( substitutions.containsKey(this) ) {
+            result = substitutions.get(this);
+        }
+        else {
+            List<PExp> args = arguments.stream()
+                    .map(e -> e.substitute(substitutions))
+                    .collect(Collectors.toList());
+            result = new PApplyBuilder(functionPortion
+                    .substitute(substitutions)).arguments(args).build();
+        }
+        return result;
     }
 
     @Override @NotNull public List<? extends PExp> getSubExpressions() {
@@ -101,9 +125,22 @@ public class PApply extends PExp {
     }
 
     @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
-     //   collectVariablesByFunction(new LinkedHashSet<PSymbol>(),
-      //          PExp::getQuantifiedVariables);
-        return null;
+        Set<PSymbol> result = new LinkedHashSet<>();
+        Utils.apply(getSubExpressions(), result, PExp::getQuantifiedVariables);
+        return result;
+    }
+
+    @Override public List<PExp> getFunctionApplicationsNoCache() {
+        List<PExp> result = new ArrayList<>();
+        result.add(this);
+        Utils.apply(getSubExpressions(), result, PExp::getFunctionApplications);
+        return result;
+    }
+
+    @Override protected Set<String> getSymbolNamesNoCache() {
+        Set<String> result = new LinkedHashSet<>();
+        Utils.apply(getSubExpressions(), result, PExp::getSymbolNames);
+        return result;
     }
 
     @Override public void accept(PExpListener v) {

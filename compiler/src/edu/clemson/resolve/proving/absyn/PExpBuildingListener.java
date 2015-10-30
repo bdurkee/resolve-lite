@@ -113,7 +113,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-
+        //PSymbol result = new PSymbolBuilder(ctx.name.getText()).
     }
 
     @Override public void exitMathLambdaExp(

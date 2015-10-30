@@ -43,6 +43,7 @@ public class PAlternatives extends PExp {
             if (!first) {
                 v.fencepostPAlternatives(this);
             }
+            first = false;
             alt.result.accept(v);
             alt.condition.accept(v);
         }
@@ -66,7 +67,8 @@ public class PAlternatives extends PExp {
     }
 
     private static int calculateStructureHash(List<PExp> conditions,
-                                              List<PExp> results, PExp otherwiseClauseResult) {
+                                              List<PExp> results,
+                                              PExp otherwiseClauseResult) {
         int hash = 0;
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = conditions.iterator();
@@ -196,15 +198,14 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override public Set<String> getSymbolNamesNoCache() {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getSymbolNames(excludeApplications, excludeLiterals));
-            result.addAll(a.result.getSymbolNames(excludeApplications, excludeLiterals));
+            result.addAll(a.condition.getSymbolNames());
+            result.addAll(a.result.getSymbolNames());
         }
-        result.addAll(otherwiseClauseResult.getSymbolNames(excludeApplications, excludeLiterals));
+        result.addAll(otherwiseClauseResult.getSymbolNames());
         return result;
     }
 

@@ -2,17 +2,12 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.rsrg.semantics.MTFunction;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Represents a reference to a named element such as a variable, constant, or
@@ -217,8 +212,7 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getSymbolNamesNoCache() {
         Set<String> result = new HashSet<>();
         if (!isLiteral()) {
             result.add(name);

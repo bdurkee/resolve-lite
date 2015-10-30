@@ -45,14 +45,14 @@ public class PLambda extends PExp {
     }
 
     @Override public PExp substitute(Map<PExp, PExp> substitutions) {
-        PExp retval;
+        PExp result;
         if ( substitutions.containsKey(this) ) {
-            retval = substitutions.get(this);
+            result = substitutions.get(this);
         }
         else {
-            retval = new PLambda(parameters, body.substitute(substitutions));
+            result = new PLambda(parameters, body.substitute(substitutions));
         }
-        return retval;
+        return result;
     }
 
     @Override public boolean containsName(String name) {
@@ -121,14 +121,10 @@ public class PLambda extends PExp {
         return body.getIncomingVariablesNoCache();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override public Set<String> getSymbolNamesNoCache() {
         Set<String> bodyNames =
-                new HashSet<>(body.getSymbolNames(
-                        excludeApplications, excludeLiterals));
-        if (!excludeApplications) {
+                new HashSet<>(body.getSymbolNames());
             bodyNames.add("lambda");
-        }
         return bodyNames;
     }
 

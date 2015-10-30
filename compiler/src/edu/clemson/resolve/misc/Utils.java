@@ -55,8 +55,8 @@ import java.util.stream.Collectors;
  */
 public class Utils {
 
-    public static <T, R> List<R> apply(@NotNull Collection<T> l,
-                                       @NotNull Function<T, R> f) {
+    @NotNull public static <T, R> List<R> apply(@NotNull Collection<T> l,
+                                                @NotNull Function<T, R> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
@@ -68,19 +68,21 @@ public class Utils {
         }
     }
 
-    public static <T> String join(@NotNull Collection<T> data,
-                                  @NotNull String separator) {
+    @NotNull public static <T> String join(@NotNull Collection<T> data,
+                                           @NotNull String separator) {
         return join(data.iterator(), separator, "", "");
     }
 
-    public static <T> String join(@NotNull Collection<T> data,
-                                  @NotNull String separator,
-                                  @NotNull String left, @NotNull String right) {
+    @NotNull public static <T> String join(@NotNull Collection<T> data,
+                                           @NotNull String separator,
+                                           @NotNull String left,
+                                           @NotNull String right) {
         return join(data.iterator(), separator, left, right);
     }
 
-    public static <T> String join(Iterator<T> iter, String separator,
-                                  String left, String right) {
+    @NotNull public static <T> String join(@NotNull Iterator<T> iter,
+                                           @NotNull String separator,
+                                           @NotNull String left, String right) {
         StringBuilder buf = new StringBuilder();
 
         while (iter.hasNext()) {
@@ -92,7 +94,8 @@ public class Utils {
         return left + buf.toString() + right;
     }
 
-    public static <T> String join(T[] array, String separator) {
+    public static <T> String join(@NotNull T[] array,
+                                  @NotNull String separator) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < array.length; ++i) {
@@ -104,10 +107,11 @@ public class Utils {
         return builder.toString();
     }
 
-    public static <T, R> Map<T, R> zip(@NotNull List<T> l1, @NotNull List<R> l2)
+    public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
+                                       @NotNull List<R> l2)
             throws IllegalArgumentException {
         if (l1.size() != l2.size()) {
-            throw new IllegalArgumentException("I don't zip differently " +
+            throw new IllegalArgumentException("attempt to zip differently " +
                     "sized lists");
         }
         Map<T, R> result = new LinkedHashMap<>();
@@ -142,11 +146,11 @@ public class Utils {
     }
 
     public static String getModuleName(@NotNull ParseTree ctx) {
-        if ( ctx instanceof ResolveParser.ModuleContext ) {
+        if (ctx instanceof ResolveParser.ModuleContext) {
             ctx = ctx.getChild(0);
         }
 
-        if ( ctx instanceof ResolveParser.PrecisModuleContext ) {
+        if (ctx instanceof ResolveParser.PrecisModuleContext ) {
             return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
         }
         /*else if ( ctx instanceof Resolve.ConceptModuleContext ) {
