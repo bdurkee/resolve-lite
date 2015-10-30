@@ -4,6 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.Quantification;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,13 +19,15 @@ public class PApply extends PExp {
 
     private final PExp functionPortion;
     private final List<PExp> arguments = new ArrayList<>();
+    private final Quantification quantification;
 
     private PApply(PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
-                        builder.arguments.iterator()), builder.mathType,
-                builder.mathTypeValue);
+                        builder.arguments.iterator()), builder.applicationType,
+                builder.applicationTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
+        this.quantification = builder.q
     }
 
     @Override public boolean containsName(String name) {
@@ -184,36 +187,47 @@ public class PApply extends PExp {
     }
 
     public static class PApplyBuilder implements Utils.Builder<PApply> {
+
         @NotNull protected final PExp functionPortion;
         @NotNull protected final List<PExp> arguments = new ArrayList<>();
 
-        @Nullable protected MTType mathType, mathTypeValue;
+        @NotNull protected Quantification quantification = Quantification.NONE;
+        @Nullable protected MTType applicationType, applicationTypeValue;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
             this.functionPortion = functionPortion;
         }
 
-        public PApplyBuilder mathType(MTType type) {
-            this.mathType = type;
+        public PApplyBuilder applicationType(@Nullable MTType type) {
+            this.applicationType = type;
             return this;
         }
 
-        public PApplyBuilder mathTypeValue(@Nullable MTType typeValue) {
-            this.mathTypeValue = typeValue;
+        public PApplyBuilder applicationTypeValue(@Nullable MTType typeValue) {
+            this.applicationTypeValue = typeValue;
             return this;
         }
 
-        public PApplyBuilder arguments(PExp ... args) {
+        public PApplyBuilder arguments(@NotNull PExp ... args) {
             arguments(Arrays.asList(args));
             return this;
         }
 
-        public PApplyBuilder arguments(Collection<PExp> args) {
+        public PApplyBuilder arguments(@NotNull Collection<PExp> args) {
             arguments.addAll(args);
             return this;
         }
 
+        public PApplyBuilder quantification(@Nullable Quantification q) {
+            this.quantification = q;
+            return this;
+        }
+
         @Override @NotNull public PApply build() {
+            if (applicationType == null) {
+                throw new IllegalStateException("can't build PApply " +
+                        "with mathApplicationType==null");
+            }
             return new PApply(this);
         }
     }

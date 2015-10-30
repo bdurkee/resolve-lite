@@ -446,7 +446,7 @@ mathExp
     |   mathExp op='implies' mathExp                    #mathInfixApplyExp
     |   mathExp op=('and'|'or') mathExp                 #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
-    |   mathExp '(' mathExp (',' mathExp)* ')'          #mathPrefixApplyExp
+    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'   #mathPrefixApplyExp
     |   mathExp ('.' mathExp)+                          #mathSegmentsExp
 //    |   '@' mathExp                                     #mathIncomingExp
     |   '(' mathAssertionExp ')'                        #mathNestedExp
@@ -465,7 +465,7 @@ mathPrimaryExp
     ;
 
 mathSymbolExp
-    :   ('@')? (qualifier=ID '::')? name=ID
+    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathLiteralExp

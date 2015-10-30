@@ -6,6 +6,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -103,7 +104,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
+        PSymbol function = new PSymbolBuilder(ctx.op.getText())
+                .mathType(types.get(ctx)).mathTypeValue(typeValues.get(ctx))
+                .build();
 
+        PApplyBuilder result = new PApplyBuilder(function)
+                .applicationType(types.get(ctx))
+                .applicationTypeValue(typeValues.get(ctx))
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
+
+        repo.put(ctx, result.build());
+        //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }
 
     @Override public void exitMathOutfixApplyExp(
@@ -113,7 +124,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        //PSymbol result = new PSymbolBuilder(ctx.name.getText()).
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
+                .qualifier(ctx.qualifier)
+                .incoming(ctx.incoming != null)
+                .quantification(quantifiedVars.get(ctx.name.getText()))
+                .mathTypeValue(getMathTypeValue(ctx))
+                .mathType(getMathType(ctx));
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitMathLambdaExp(
