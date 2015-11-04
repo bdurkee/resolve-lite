@@ -100,6 +100,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     }
 
+    @Override public void exitMathPrefixApplyExp(
+            ResolveParser.MathPrefixApplyExpContext ctx) {
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.functionExp))
+                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
+                .applicationType(getMathType(ctx))
+                .applicationTypeValue(getMathTypeValue(ctx));
+        repo.put(ctx, result.build());
+    }
+
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx.op))
@@ -189,10 +198,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         repo.put(ctx, result.build());
     }*/
-
-    @Override public void exitMathPrefixApplyExp(
-            ResolveParser.MathPrefixApplyExpContext ctx) {
-    }
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {

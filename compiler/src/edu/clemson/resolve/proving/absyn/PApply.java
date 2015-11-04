@@ -20,12 +20,16 @@ public class PApply extends PExp {
     private final PExp functionPortion;
     private final List<PExp> arguments = new ArrayList<>();
 
-    private PApply(PApplyBuilder builder) {
+    private PApply(@NotNull PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
                 builder.applicationTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
+    }
+
+    @NotNull public PExp getFunctionPortion() {
+        return functionPortion;
     }
 
     @NotNull public Quantification getQuantification() {
@@ -193,6 +197,11 @@ public class PApply extends PExp {
             }
         }
         return new HashDuple(structureHash, valueHash);
+    }
+
+    @Override public String toString() {
+        return functionPortion.toString() + "(" +
+                Utils.join(arguments, ", ") + ")";
     }
 
     public static class PApplyBuilder implements Utils.Builder<PApply> {

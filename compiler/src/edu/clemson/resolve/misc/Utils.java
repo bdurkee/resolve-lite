@@ -39,6 +39,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -198,7 +199,8 @@ public class Utils {
      * @param desiredText The text we want the resulting token to hold
      * @return a new token
      */
-    public static CommonToken createTokenFrom(Token t, String desiredText) {
+    public static CommonToken createTokenFrom(@NotNull Token t,
+                                              @NotNull String desiredText) {
         CommonToken result = new CommonToken(t);
         result.setText(desiredText);
         return result;
@@ -211,7 +213,8 @@ public class Utils {
      * @param ctx the rule context
      * @return the raw sourcecode represented within {@code ctx}
      */
-    public static String getRawText(ParserRuleContext ctx) {
+    public static String getRawText(@Nullable ParserRuleContext ctx) {
+        if (ctx == null) return "";
         Interval interval =
                 new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
         return ctx.start.getInputStream().getText(interval);

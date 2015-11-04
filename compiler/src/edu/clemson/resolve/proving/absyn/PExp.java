@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -26,23 +27,27 @@ public abstract class PExp {
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
-    public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MTType type,
+                @Nullable MTType typeValue) {
         this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
                 null);
     }
 
-    public PExp(PSymbol.HashDuple hashes, MTType type, MTType typeValue,
-                PTType progType, PTType progTypeValue) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MTType type,
+                @Nullable MTType typeValue, @Nullable PTType progType,
+                @Nullable PTType progTypeValue) {
         this(hashes.structureHash, hashes.valueHash, type, typeValue, progType,
                 progTypeValue);
     }
 
-    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
+    public PExp(int structureHash, int valueHash, @NotNull MTType type,
+                @Nullable MTType typeValue) {
         this(structureHash, valueHash, type, typeValue, null, null);
     }
 
-    public PExp(int structureHash, int valueHash, MTType type,
-                MTType typeValue, PTType progType, PTType progTypeValue) {
+    public PExp(int structureHash, int valueHash, @NotNull MTType type,
+                @Nullable MTType typeValue, @Nullable PTType progType,
+                @Nullable PTType progTypeValue) {
         this.type = type;
         this.typeValue = typeValue;
         this.progType = progType;
@@ -55,19 +60,19 @@ public abstract class PExp {
         return valueHash;
     }
 
-    public final PTType getProgType() {
+    @Nullable public final PTType getProgType() {
         return progType;
     }
 
-    public final PTType getProgTypeValue() {
+    @Nullable public final PTType getProgTypeValue() {
         return progTypeValue;
     }
 
-    public final MTType getMathType() {
+    @NotNull public final MTType getMathType() {
         return type;
     }
 
-    public final MTType getMathTypeValue() {
+    @Nullable public final MTType getMathTypeValue() {
         return typeValue;
     }
 
@@ -104,7 +109,7 @@ public abstract class PExp {
         return this.equals(thisSubstituted);
     }
 
-    public PExp substitute(PExp current, PExp replacement) {
+    @NotNull public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
         return substitute(e);
@@ -118,7 +123,7 @@ public abstract class PExp {
         //this.accept(renderer);
     }
 
-    public String getText() {
+    /*public String getText() {
         return getText(false);
     }
 
@@ -127,7 +132,7 @@ public abstract class PExp {
         PExpTextRenderingListener renderer = new PExpTextRenderingListener(sb);
         this.accept(renderer);
         return sb.toString().replace('\n', ' ');
-    }
+    }*/
 
     public boolean typeMatches(MTType other) {
         return other.isSubtypeOf(getMathType());

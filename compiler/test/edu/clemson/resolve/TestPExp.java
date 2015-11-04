@@ -40,6 +40,23 @@ public class TestPExp extends BaseTest {
         List<? extends PExp> subexprs = result.getSubExpressions();
         Assert.assertEquals(3, subexprs.size());
         Iterator<? extends PExp> exps = subexprs.iterator();
+        Assert.assertEquals("+(x, y)", result.toString());
+        Assert.assertEquals("+", exps.next().toString());
+        Assert.assertEquals("x", exps.next().toString());
+        Assert.assertEquals("y", exps.next().toString());
+
+        result = parseMathAssertionExp(g, "x(z + 1) + y");
+        Assert.assertEquals(3, result.getSubExpressions().size());
+
+        result = parseMathAssertionExp(g, "{{@x if true; @y if true and x; false otherwise;}}");
+        exps = result.getSubExpressions().iterator();
+        Assert.assertEquals(5, result.getSubExpressions().size());
+        Assert.assertEquals("@x", exps.next().toString());
+        Assert.assertEquals("true", exps.next().toString());
+        Assert.assertEquals("@y", exps.next().toString());
+        Assert.assertEquals("and(true, x)", exps.next().toString());
+        Assert.assertEquals("false", exps.next().toString());
+
 
     }
   /*  @Test public void testQuantifierDistribution() {
