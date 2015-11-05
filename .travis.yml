@@ -1,6 +1,6 @@
 sudo: true
 language: java
 script:
-  - mvn install
+  - mvn test
 jdk:
   - oraclejdk8
