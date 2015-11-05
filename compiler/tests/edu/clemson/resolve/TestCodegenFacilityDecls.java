@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class TestCodegenFacilityDecls extends BaseTest {
 
-    @Test public void testUnenhancedFacilityDecl() throws Exception {
+    /*@Test public void testUnenhancedFacilityDecl() throws Exception {
         String[] modules = new String[] {
                 "Concept T;\n Operation Test(); end T;",
                 "Implementation T_I for T; uses Standard_Char_Strings; Procedure Test(); " +
@@ -18,14 +18,14 @@ public class TestCodegenFacilityDecls extends BaseTest {
         writeModules(modules, "T", "T_I", "U");
         String found = execCode("U.resolve", modules[2], "U", false);
         Assert.assertEquals("runningTest\n", found);
-    }
+    }*/
 
     /**
      * This is really too big of a test I think, but then again, we DO need to
      * ensure ops can be passed correctly somewhere.. It just requires a lot of
      * machinery to do correctly.
      */
-    @Test public void testParameterizedUnenhancedFacilityDecl() throws Exception {
+    /*@Test public void testParameterizedUnenhancedFacilityDecl() throws Exception {
         String[] modules = new String[] {
                 "Concept T<U>(evaluates i,j,k : Std_Integer_Fac :: Integer; " +
                     "Definition Is_LEQ(i,j : U) : B;);" +
@@ -54,7 +54,7 @@ public class TestCodegenFacilityDecls extends BaseTest {
         writeModules(modules, "T", "T_I", "U");
         String found = execCode("U.resolve", modules[2], "U", false);
         Assert.assertEquals("P=true:P=true:P=false:\n", found);
-    }
+    }*/
 
     //Todo : write tests for one then two or more enhancements (w/simple params -- numbers and types)
 }

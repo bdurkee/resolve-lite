@@ -6,7 +6,7 @@ import org.stringtemplate.v4.ST;
 
 public class TestBuiltinOperators extends BaseTest {
 
-    @Test public void testAssignAndSwap() throws Exception {
+    /*@Test public void testAssignAndSwap() throws Exception {
         ST facilityST = new ST(
                 "Facility T; uses Standard_Integers, Standard_Char_Strings;" +
                         "Operation Main(); Procedure" +
@@ -89,5 +89,5 @@ public class TestBuiltinOperators extends BaseTest {
         String facility = facilityST.render();
         String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("32\n4\n88\n5\n88\n4\n32\n5\n", found);
-    }
+    }*/
 }

@@ -10,7 +10,7 @@ import org.stringtemplate.v4.ST;
  */
 public class TestStandardBooleanOperations extends BaseTest {
 
-    @Test public void testTrueAndFalse() throws Exception {
+    /*@Test public void testTrueAndFalse() throws Exception {
         ST facilityST = new ST(
                 "Facility T; uses Standard_Booleans;" +
                         "Operation Main(); " +
@@ -77,5 +77,5 @@ public class TestStandardBooleanOperations extends BaseTest {
         String facility = facilityST.render();
         String found = execCode("T.resolve", facility, "T", false);
         Assert.assertEquals("true\ntrue\nfalse\n", found);
-    }
+    }*/
 }
