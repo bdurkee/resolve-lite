@@ -97,14 +97,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathUnaryApplyExp(
             ResolveParser.MathUnaryApplyExpContext ctx) {
-
     }
 
     @Override public void exitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
+        List<? extends ParseTree> args = ctx.mathExp()
+                .subList(1, ctx.mathExp().size());
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.functionExp))
-                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
+                .arguments(Utils.collect(PExp.class, args, repo))
                 .applicationType(getMathType(ctx))
+                .style(PApply.DisplayStyle.PREFIX)
                 .applicationTypeValue(getMathTypeValue(ctx));
         repo.put(ctx, result.build());
     }
@@ -116,7 +118,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .applicationTypeValue(getMathTypeValue(ctx))
                 .style(PApply.DisplayStyle.INFIX)
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
-
         repo.put(ctx, result.build());
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }

@@ -41,7 +41,7 @@ public class PApply extends PExp {
 
             @Override protected String toString(PApply s) {
                 return "(" + Utils.join(s.arguments, " " +
-                        s.getCanonicalizedName() + " ") + ")";
+                        s.functionPortion.getCanonicalizedName() + " ") + ")";
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -64,7 +64,7 @@ public class PApply extends PExp {
                 if (s.arguments.size() > 1) {
                     retval = "(" + retval + ")";
                 }
-                return retval + s.getCanonicalizedName();
+                return retval + s.functionPortion.getCanonicalizedName();
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {

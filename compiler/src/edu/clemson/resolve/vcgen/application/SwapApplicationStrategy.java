@@ -17,7 +17,7 @@ public class SwapApplicationStrategy
     //TODO: Todo, maybe make vcswapStat, vcwh
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
             VCRuleBackedStat stat) {
-        PExp workingConfirm = block.finalConfirm.getConfirmExp();
+       /* PExp workingConfirm = block.finalConfirm.getConfirmExp();
         PExp swapLeft = stat.getStatComponents().get(0);
         PExp swapRight = stat.getStatComponents().get(1);
 
@@ -26,7 +26,7 @@ public class SwapApplicationStrategy
         workingConfirm = workingConfirm.substitute(swapRight, temp);
         workingConfirm = workingConfirm.substitute(swapLeft, swapRight);
         workingConfirm = workingConfirm.substitute(temp, swapLeft);
-        block.finalConfirm(workingConfirm);
+        block.finalConfirm(workingConfirm);*/
         return block.snapshot();
     }
 

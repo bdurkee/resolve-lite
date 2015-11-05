@@ -3,6 +3,7 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
@@ -21,15 +22,16 @@ import java.util.*;
  */
 public class PSymbol extends PExp {
 
-    private final String qualifier, leftPrint, rightPrint, name;
+    @NotNull private final Quantification quantification;
+    @NotNull private final List<String> nameComponents = new ArrayList<>();
+
+    @NotNull private final String name;
+    @Nullable private final String qualifier, leftPrint, rightPrint;
 
     private final boolean literalFlag, incomingFlag;
 
-    @NotNull private Quantification quantification;
-    private final List<String> nameComponents = new ArrayList<>();
-
     private PSymbol(PSymbolBuilder builder) {
-        super(calculateHashes(builder.lprint, builder.rprint), builder.mathType,
+        super(calculateHashes(builder.name), builder.mathType,
                 builder.mathTypeValue, builder.progType, builder.progTypeValue);
         this.qualifier = builder.qualifier;
         this.name = builder.name;
@@ -41,16 +43,9 @@ public class PSymbol extends PExp {
         this.quantification = builder.quantification;
     }
 
-    protected static HashDuple calculateHashes(String left, String right) {
-        int leftHashCode = left.hashCode();
-        int valueHash = leftHashCode;
+    protected static HashDuple calculateHashes(String name) {
+        int valueHash = name.hashCode();
         valueHash *= 59;
-        if (right == null) {
-            valueHash += leftHashCode;
-        }
-        else {
-            valueHash += right.hashCode();
-        }
         return new HashDuple(0, valueHash);
     }
 
@@ -58,15 +53,15 @@ public class PSymbol extends PExp {
         return name;
     }
 
-    public String getLeftPrint() {
+    @Nullable public String getLeftPrint() {
         return leftPrint;
     }
 
-    public String getRightPrint() {
+    @Nullable public String getRightPrint() {
         return rightPrint;
     }
 
-    public String getQualifier() {
+    @Nullable public String getQualifier() {
         return qualifier;
     }
 
@@ -289,27 +284,20 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder(String name) {
-            this(name, null);
+            this.name = name;
         }
 
         public PSymbolBuilder(String lprint, String rprint) {
-            if (rprint == null) {
+            if (rprint == null ) {
                 if (lprint == null) {
                     throw new IllegalStateException("null name; all psymbols "
                             + "must be named.");
                 }
                 rprint = lprint;
-                this.name = lprint;
-            } else {
-                this.name = lprint + "..." + rprint;
             }
+            this.name = lprint + "..." + rprint;
             this.lprint = lprint;
             this.rprint = rprint;
-        }
-
-        public PSymbolBuilder name(String name) {
-            this.name = name;
-            return this;
         }
 
         public PSymbolBuilder qualifier(Token q) {
