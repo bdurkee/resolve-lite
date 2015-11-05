@@ -45,7 +45,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("y", exps.next().toString());
 
         result = parseMathAssertionExp(g, "x(z + 1) + y");
-        System.out.println(result.toString());
         exps = result.getSubExpressions().iterator();
         Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals("+", exps.next().toString());
