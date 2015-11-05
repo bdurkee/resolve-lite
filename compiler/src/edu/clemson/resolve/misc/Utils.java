@@ -129,14 +129,14 @@ public class Utils {
      * of concrete syntax {@code nodes}, and a mapping from rule contexts to
      * some number of elements descending from {@code E}.
      *
-     * @param expectedType The class type to inhabit the returned list
-     * @param nodes A list of concrete syntax nodes, as obtained through
+     * @param expectedType the class type to inhabit the returned list
+     * @param nodes a list of concrete syntax nodes, as obtained through
      *        a visitor, listener, etc.
-     * @param annotations A map from rule context to the primary supertype
+     * @param annotations a map from rule context to the primary supertype
      *        of {@code expectedType} ({@code E}).
-     * @param <E> Super type of {@code expectedType}.
-     * @param <T> The expected type.
-     * @return A list of {@code T}.
+     * @param <E> super type of {@code expectedType}.
+     * @param <T> the expected type.
+     * @return a list of {@code T}.
      */
     @NotNull public static <E, T extends E> List<T> collect(
             @NotNull Class<T> expectedType,
@@ -190,14 +190,14 @@ public class Utils {
      * {@link Token} {@code t}. This is useful for when you want create a token
      * consisting of {@code desiredText} but with location information
      * 'filled-in' and accounted for -- taken from {@code t}.
-     * <p>
-     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
+     *
+     * <p><strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
      * the text for the resulting {@code CommonToken} will contain whatever
      * text existed in {@code t} starting out.</p>
      *
-     * @param t An existing token (preferablly near where {@code desiredText}
+     * @param t an existing token (preferably near where {@code desiredText}
      *          should appear)
-     * @param desiredText The text we want the resulting token to hold
+     * @param desiredText the text we want the resulting token to hold
      * @return a new token
      */
     public static CommonToken createTokenFrom(@NotNull Token t,
@@ -228,7 +228,7 @@ public class Utils {
      *      {@code Basic_Natural_Number_Theory.resolve}.
      *
      * @param name a file name with zero or more '/' delimited directories
-     * @return just the file name
+     * @return the extensionless filename
      */
     @Nullable public static String groomFileName(@NotNull String name) {
         int start = name.lastIndexOf("/");

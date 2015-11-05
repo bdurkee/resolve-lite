@@ -134,25 +134,24 @@ public abstract class PExp {
 
     /**
      * A predicate that returns {@code true} in any of the following cases:
-     * <li>
-     *     1. If we're an instance of {@code PSymbol} whose name is simply
-     *     {@code true}.
-     *     2. We're an expression whose top level is a binary
-     *     {@code =}-application whose arguments are themselves equal
-     *     (as determined by {@link equals()}
      *
-     * </li>
-     * @return
+     * <ul>
+     *     <li>If we're an instance of {@code PSymbol} whose name is simply
+     *     {@code true}.</li>
+     *     <li>If we're an expression whose top level is a binary application
+     *     of the {@code =}s operator whose left and right arguments are
+     *     themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
+     * </ul>
+     * @return whether or not we represent a trivially 'true' expression
      */
     public abstract boolean isObviouslyTrue();
 
     /**
      * Returns {@code true} if this {@code PExp} represents primitive
-     * application of {@code =} (equals) operator; {@code false} otherwise.
+     * application of the {@code =} (equals) operator; {@code false} otherwise.
      *
-     * @return yes if {@code this} represents an equals application at
-     *         the top level, no otherwise
-     *
+     * @return whether or not we have represent a top-level application of
+     *         equals
      */
     public boolean isEquality() {
         return false;
@@ -167,8 +166,7 @@ public abstract class PExp {
      * then this method simply returns it, independent of any parens or other
      * syntactic characteristics.
      *
-     * <p>
-     * If {@code this} is anonoymous, then we simply return a canned string
+     * <p>If {@code this} is anonoymous, then we simply return a canned string
      * such as {@code \:lambda}.</p>
      *
      * <p>
@@ -181,8 +179,6 @@ public abstract class PExp {
      *     SS(k)(Cen(k))</pre>
      * <p>
      *
-     * </p>
-     * </p>
      * @return
      */
     @NotNull protected abstract String getCanonicalName();
@@ -250,11 +246,11 @@ public abstract class PExp {
     @NotNull public abstract PExp withQuantifiersFlipped();
 
     /**
-     * Returns the set of '@'-prefixed symbols appearing in  {@code this}
+     * Returns the set of '@'-prefixed symbols appearing in this {@code PExp}
      * expression. Note that when we say 'symbols' we mean both function
      * applications and argument-less variables.
      *
-     * @return The set of all incoming variable symbols
+     * @return the set of all incoming variable symbols
      */
     @NotNull public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
@@ -297,7 +293,7 @@ public abstract class PExp {
         return getSymbolNames(false, false);
     }
 
-    //Force implementation of equals for every subclass.
+    //force implementation of equals for every subclass.
     @Override public abstract boolean equals(Object o);
 
     protected abstract Set<String> getSymbolNamesNoCache();

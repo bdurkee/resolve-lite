@@ -98,6 +98,10 @@ public class PSet extends PExp {
         return new ArrayList<>();
     }
 
+    @Override public boolean equals(Object o) {
+        return false;
+    }
+
     @Override protected Set<String> getSymbolNamesNoCache() {
         return new HashSet<>();
     }
