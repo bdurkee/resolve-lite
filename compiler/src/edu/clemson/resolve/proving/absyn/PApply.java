@@ -17,19 +17,120 @@ import static edu.clemson.resolve.misc.Utils.apply;
  */
 public class PApply extends PExp {
 
-    private final PExp functionPortion;
-    private final List<PExp> arguments = new ArrayList<>();
+    public static enum DisplayStyle {
+
+        PREFIX {
+            @Override protected String toString(PApply s) {
+                return s.functionPortion.toString() +
+                        "(" + Utils.join(s.arguments, ", ") + ")";
+            }
+
+            @Override protected void beginAccept(PExpListener v, PApply s) {
+                v.beginPrefixPApply(s);
+            }
+
+            @Override protected void fencepostAccept(PExpListener v, PApply s) {
+                v.fencepostPrefixPApply(s);
+            }
+
+            @Override protected void endAccept(PExpListener v, PApply s) {
+                v.endPrefixPApply(s);
+            }
+        },
+        INFIX {
+
+            @Override protected String toString(PApply s) {
+                return "(" + Utils.join(s.arguments, " " +
+                        s.getCanonicalizedName() + " ") + ")";
+            }
+
+            @Override protected void beginAccept(PExpListener v, PApply s) {
+                v.beginInfixPApply(s);
+            }
+
+            @Override protected void fencepostAccept(PExpListener v, PApply s) {
+                v.fencepostInfixPApply(s);
+            }
+
+            @Override protected void endAccept(PExpListener v, PApply s) {
+                v.endInfixPApply(s);
+            }
+        },
+        POSTFIX {
+
+            @Override protected String toString(PApply s) {
+                String retval = Utils.join(s.arguments, ", ");
+
+                if (s.arguments.size() > 1) {
+                    retval = "(" + retval + ")";
+                }
+                return retval + s.getCanonicalizedName();
+            }
+
+            @Override protected void beginAccept(PExpListener v, PApply s) {
+                v.beginPostfixPApply(s);
+            }
+
+            @Override protected void fencepostAccept(PExpListener v, PApply s) {
+                v.fencepostPostfixPApply(s);
+            }
+
+            @Override protected void endAccept(PExpListener v, PApply s) {
+                v.endPostfixPApply(s);
+            }
+        },
+        OUTFIX {
+
+            @Override protected String toString(PApply s) {
+                assert s.functionPortion instanceof PSymbol;
+                PSymbol f = (PSymbol)s.functionPortion;
+                return f.getLeftPrint() + Utils.join(s.arguments, ", ") +
+                        f.getRightPrint();
+            }
+
+            @Override protected void beginAccept(PExpListener v, PApply s) {
+                v.beginOutfixPApply(s);
+            }
+
+            @Override protected void fencepostAccept(PExpListener v, PApply s) {
+                v.fencepostOutfixPApply(s);
+            }
+
+            @Override protected void endAccept(PExpListener v, PApply s) {
+                v.endOutfixPApply(s);
+            }
+        };
+
+        protected abstract String toString(PApply s);
+
+        protected abstract void beginAccept(PExpListener v, PApply s);
+
+        protected abstract void fencepostAccept(PExpListener v, PApply s);
+
+        protected abstract void endAccept(PExpListener v, PApply s);
+    }
+
+
+    @NotNull private final PExp functionPortion;
+    @NotNull private final List<PExp> arguments = new ArrayList<>();
+    @NotNull private final DisplayStyle displayStyle;
 
     private PApply(@NotNull PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
+        //no builder.applicationType won't be null; this is checked in PApply:build()
                 builder.applicationTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
+        this.displayStyle = builder.displayStyle;
     }
 
     @NotNull public PExp getFunctionPortion() {
         return functionPortion;
+    }
+
+    @NotNull public DisplayStyle getDisplayStyle() {
+        return displayStyle;
     }
 
     @NotNull public Quantification getQuantification() {
@@ -52,7 +153,7 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override @NotNull public PExp substitute(Map<PExp, PExp> substitutions) {
+    @Override @NotNull public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result;
         if ( substitutions.containsKey(this) ) {
             result = substitutions.get(this);
@@ -93,7 +194,7 @@ public class PApply extends PExp {
         return false;
     }
 
-    @Override protected String getCanonicalizedName() {
+    @NotNull @Override protected String getCanonicalizedName() {
         return functionPortion.getCanonicalizedName() +
                 "(" + Utils.join(arguments, ", ") + ")";
     }
@@ -106,7 +207,7 @@ public class PApply extends PExp {
         return true;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         if (arguments.size() == 2 &&
                 functionPortion.getCanonicalizedName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);
@@ -117,13 +218,13 @@ public class PApply extends PExp {
         }
     }
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
                 .build();
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
                 .build();
@@ -134,19 +235,19 @@ public class PApply extends PExp {
     //set should actually be the application itself: @A(i), not just @A (which
     //is how it would be the way this is currently implemented..). Should also be
     //renamed getIncomingExps or something too.
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         Utils.apply(getSubExpressions(), result, PExp::getIncomingVariables);
         return result;
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         Utils.apply(getSubExpressions(), result, PExp::getQuantifiedVariables);
         return result;
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new ArrayList<>();
         result.add(this);
         Utils.apply(getSubExpressions(), result, PExp::getFunctionApplications);
@@ -200,8 +301,7 @@ public class PApply extends PExp {
     }
 
     @Override public String toString() {
-        return functionPortion.toString() + "(" +
-                Utils.join(arguments, ", ") + ")";
+        return displayStyle.toString();
     }
 
     public static class PApplyBuilder implements Utils.Builder<PApply> {
@@ -210,9 +310,15 @@ public class PApply extends PExp {
         @NotNull protected final List<PExp> arguments = new ArrayList<>();
 
         @Nullable protected MTType applicationType, applicationTypeValue;
+        @NotNull protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
             this.functionPortion = functionPortion;
+        }
+
+        public PApplyBuilder style(@NotNull DisplayStyle s) {
+            this.displayStyle = s;
+            return this;
         }
 
         public PApplyBuilder applicationType(@Nullable MTType type) {

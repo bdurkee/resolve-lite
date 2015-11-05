@@ -78,7 +78,7 @@ public class PSymbol extends PExp {
         return incomingFlag;
     }
 
-    @Override public String getCanonicalizedName() {
+    @NotNull @Override public String getCanonicalizedName() {
         return getName();
     }
 
@@ -98,7 +98,7 @@ public class PSymbol extends PExp {
         return literalFlag;
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
         if (result == null) {
             String newName = substituteNamedComponents(substitutions);
@@ -167,11 +167,11 @@ public class PSymbol extends PExp {
         return result;
     }*/
 
-    @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull @Override public List<? extends PExp> getSubExpressions() {
         return new ArrayList<>();
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         //accumulator.add(this); // Don't think you actually want to do this..
     }
 
@@ -186,17 +186,17 @@ public class PSymbol extends PExp {
         v.endPExp(this);
     }
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PSymbolBuilder(this).incoming(false).build();
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         return new PSymbolBuilder(this)
                 .quantification(quantification.flipped())
                 .build();
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         if (incomingFlag) {
             result.add(this);
@@ -204,7 +204,7 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new HashSet<>();
         if (quantification != Quantification.NONE) {
             result.add(this);
@@ -225,7 +225,7 @@ public class PSymbol extends PExp {
      * any sub-expressions; and hence are guaranteed to contain no
      * applications.
      */
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         return new LinkedList<>();
     }
 

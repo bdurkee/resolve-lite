@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTFunction;
 import org.rsrg.semantics.MTType;
 
@@ -44,7 +45,7 @@ public class PLambda extends PExp {
         v.endPExp(this);
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result;
         if ( substitutions.containsKey(this) ) {
             result = substitutions.get(this);
@@ -64,7 +65,7 @@ public class PLambda extends PExp {
         return result || body.containsName(name);
     }
 
-    @Override public List<PExp> getSubExpressions() {
+    @NotNull @Override public List<PExp> getSubExpressions() {
         return Collections.singletonList(body);
     }
 
@@ -93,7 +94,7 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @Override public String getCanonicalizedName() {
+    @NotNull @Override public String getCanonicalizedName() {
         return "\\lambda";
     }
 
@@ -105,19 +106,19 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PLambda(parameters, body.withIncomingSignsErased());
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         return this;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return body.getIncomingVariablesNoCache();
     }
 
@@ -128,11 +129,11 @@ public class PLambda extends PExp {
         return bodyNames;
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return body.getQuantifiedVariables();
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions =
                 new LinkedList<>(body.getFunctionApplications());
         bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(

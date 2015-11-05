@@ -114,6 +114,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx.op))
                 .applicationType(getMathType(ctx))
                 .applicationTypeValue(getMathTypeValue(ctx))
+                .style(PApply.DisplayStyle.INFIX)
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
 
         repo.put(ctx, result.build());

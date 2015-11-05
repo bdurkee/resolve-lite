@@ -1,5 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
@@ -81,7 +82,7 @@ public class PAlternatives extends PExp {
         return hash;
     }
 
-    @Override public List<PExp> getSubExpressions() {
+    @NotNull @Override public List<PExp> getSubExpressions() {
         List<PExp> exps = new LinkedList<>();
 
         for (Alternative a : alternatives) {
@@ -101,11 +102,12 @@ public class PAlternatives extends PExp {
         return result && otherwiseClauseResult.isObviouslyTrue();
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(
+            @NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
         for (Alternative alt : alternatives) {
@@ -117,12 +119,12 @@ public class PAlternatives extends PExp {
                 getMathTypeValue());
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         throw new UnsupportedOperationException("This method has not yet "
                 + "been implemented.");
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
@@ -133,7 +135,7 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp retval;
 
         if ( substitutions.containsKey(this) ) {
@@ -209,7 +211,7 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
@@ -220,7 +222,7 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new LinkedList<>();
 
         for (Alternative a : alternatives) {
@@ -248,7 +250,7 @@ public class PAlternatives extends PExp {
         return false;
     }
 
-    @Override protected String getCanonicalizedName() {
+    @NotNull @Override protected String getCanonicalizedName() {
         return "{{ PAlternitives }}";
     }
 

@@ -115,25 +115,6 @@ public abstract class PExp {
         return substitute(e);
     }
 
-    public void processStringRepresentation(PExpListener visitor, Appendable a) {
-        throw new UnsupportedOperationException("not yet supported");
-        //PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
-         //PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
-         //this.accept(finalVisitor);
-        //this.accept(renderer);
-    }
-
-    /*public String getText() {
-        return getText(false);
-    }
-
-    public String getText(boolean stripNewlines) {
-        StringBuilder sb = new StringBuilder();
-        PExpTextRenderingListener renderer = new PExpTextRenderingListener(sb);
-        this.accept(renderer);
-        return sb.toString().replace('\n', ' ');
-    }*/
-
     public boolean typeMatches(MTType other) {
         return other.isSubtypeOf(getMathType());
     }
@@ -144,11 +125,12 @@ public abstract class PExp {
 
     public abstract void accept(PExpListener v);
 
-    public abstract PExp substitute(Map<PExp, PExp> substitutions);
+    @NotNull public abstract PExp substitute(
+            @NotNull Map<PExp, PExp> substitutions);
 
     public abstract boolean containsName(String name);
 
-    public abstract List<? extends PExp> getSubExpressions();
+    @NotNull public abstract List<? extends PExp> getSubExpressions();
 
     public abstract boolean isObviouslyTrue();
 
@@ -160,7 +142,7 @@ public abstract class PExp {
 
     public abstract boolean isVariable();
 
-    protected abstract String getCanonicalizedName();
+    @NotNull protected abstract String getCanonicalizedName();
 
     public boolean isLiteral() {
         return false;
@@ -197,21 +179,21 @@ public abstract class PExp {
      *
      * @return a list of antecedent - consequent expressions
      */
-    public List<PExp> experimentalSplit() {
+    @NotNull public List<PExp> experimentalSplit() {
         return experimentalSplit(getMathType().getTypeGraph().getTrueExp());
     }
 
-    protected List<PExp> experimentalSplit(PExp assumtions) {
+    @NotNull protected List<PExp> experimentalSplit(PExp assumtions) {
         return new ArrayList<>();
     }
 
-    public final List<PExp> splitIntoConjuncts() {
+    @NotNull public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
         splitIntoConjuncts(conjuncts);
         return conjuncts;
     }
 
-    protected abstract void splitIntoConjuncts(List<PExp> accumulator);
+    protected abstract void splitIntoConjuncts(@NotNull List<PExp> accumulator);
 
     /**
      * Returns a copy of this {@code PExp} where all variables prefixed with
@@ -220,9 +202,9 @@ public abstract class PExp {
      * 
      * @return A '@-clean' version of this {@code PExp}.
      */
-    public abstract PExp withIncomingSignsErased();
+    @NotNull public abstract PExp withIncomingSignsErased();
 
-    public abstract PExp withQuantifiersFlipped();
+    @NotNull public abstract PExp withQuantifiersFlipped();
 
     /**
      * Returns the set of '@'-prefixed symbols appearing in  {@code this}
@@ -231,7 +213,7 @@ public abstract class PExp {
      *
      * @return The set of all incoming variable symbols
      */
-    public final Set<PSymbol> getIncomingVariables() {
+    @NotNull public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
                             getIncomingVariablesNoCache());
@@ -239,9 +221,9 @@ public abstract class PExp {
         return cachedIncomingVariables;
     }
 
-    public abstract Set<PSymbol> getIncomingVariablesNoCache();
+    @NotNull public abstract Set<PSymbol> getIncomingVariablesNoCache();
 
-    public final Set<PSymbol> getQuantifiedVariables() {
+    @NotNull public final Set<PSymbol> getQuantifiedVariables() {
         if ( cachedQuantifiedVariables == null ) {
             //We're immutable, so only do this once
             cachedQuantifiedVariables =
@@ -251,9 +233,9 @@ public abstract class PExp {
         return cachedQuantifiedVariables;
     }
 
-    public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
+    @NotNull public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
-    public final List<PExp> getFunctionApplications() {
+    @NotNull public final List<PExp> getFunctionApplications() {
         if ( cachedFunctionApplications == null ) {
             //We're immutable, so only do this once
             cachedFunctionApplications = getFunctionApplicationsNoCache();
@@ -261,14 +243,14 @@ public abstract class PExp {
         return cachedFunctionApplications;
     }
 
-    public abstract List<PExp> getFunctionApplicationsNoCache();
+    @NotNull public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    public final Set<String> getSymbolNames(boolean excludeApplications,
+    @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
                                             boolean excludeLiterals) {
         return getSymbolNamesNoCache();
     }
 
-    public final Set<String> getSymbolNames() {
+    @NotNull public final Set<String> getSymbolNames() {
         return getSymbolNames(false, false);
     }
 

@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class PSet extends PExp {
         v.endPExp(this);
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         return new PSet(getMathType(), getMathTypeValue(),
                 Utils.apply(elements, u -> u.substitute(substitutions)));
     }
@@ -46,7 +47,7 @@ public class PSet extends PExp {
                 .collect(Collectors.toList()).isEmpty();
     }
 
-    @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull @Override public List<? extends PExp> getSubExpressions() {
         return elements;
     }
 
@@ -62,7 +63,7 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected String getCanonicalizedName() {
+    @NotNull @Override protected String getCanonicalizedName() {
         return "{ PSet }";
     }
 
@@ -74,26 +75,26 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {}
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PSet(getMathType(), getMathTypeValue(),
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         return null;
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return new LinkedHashSet<>();
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return new HashSet<>();
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         return new ArrayList<>();
     }
 

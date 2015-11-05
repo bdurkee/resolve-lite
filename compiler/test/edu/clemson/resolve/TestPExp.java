@@ -40,13 +40,15 @@ public class TestPExp extends BaseTest {
         List<? extends PExp> subexprs = result.getSubExpressions();
         Assert.assertEquals(3, subexprs.size());
         Iterator<? extends PExp> exps = subexprs.iterator();
-        Assert.assertEquals("+(x, y)", result.toString());
         Assert.assertEquals("+", exps.next().toString());
         Assert.assertEquals("x", exps.next().toString());
         Assert.assertEquals("y", exps.next().toString());
 
         result = parseMathAssertionExp(g, "x(z + 1) + y");
         Assert.assertEquals(3, result.getSubExpressions().size());
+        Assert.assertEquals("+", exps.next().toString());
+        Assert.assertEquals("x(z + 1)", exps.next().toString());
+        Assert.assertEquals("y", exps.next().toString());
 
         result = parseMathAssertionExp(g, "{{@x if true; @y if true and x; false otherwise;}}");
         exps = result.getSubExpressions().iterator();
