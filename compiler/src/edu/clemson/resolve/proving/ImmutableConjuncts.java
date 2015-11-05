@@ -290,7 +290,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 if (!first) {
                     a.append(" and \n");
                 }
-                e.processStringRepresentation(visitor, a);
+                //e.processStringRepresentation(visitor, a);
                 first = false;
             }
             if (first) {

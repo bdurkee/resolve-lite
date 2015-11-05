@@ -301,7 +301,7 @@ public class PApply extends PExp {
     }
 
     @Override public String toString() {
-        return displayStyle.toString();
+        return displayStyle.toString(this);
     }
 
     public static class PApplyBuilder implements Utils.Builder<PApply> {

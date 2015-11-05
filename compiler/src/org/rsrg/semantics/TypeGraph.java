@@ -340,7 +340,7 @@ public class TypeGraph {
     }
 
     public final PSymbol formConcExp() {
-        return new PSymbol.PSymbolBuilder("conc").mathType(BOOLEAN).build();
+        return new PSymbolBuilder("conc").mathType(BOOLEAN).build();
     }
 
     public final PSymbol formInitializationPredicate(PTType argType,
