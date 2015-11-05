@@ -132,8 +132,28 @@ public abstract class PExp {
 
     @NotNull public abstract List<? extends PExp> getSubExpressions();
 
+    /**
+     * A predicate that returns {@code true} in any of the following cases:
+     * <li>
+     *     1. If we're an instance of {@code PSymbol} whose name is simply
+     *     {@code true}.
+     *     2. We're an expression whose top level is a binary
+     *     {@code =}-application whose arguments are themselves equal
+     *     (as determined by {@link equals()}
+     *
+     * </li>
+     * @return
+     */
     public abstract boolean isObviouslyTrue();
 
+    /**
+     * Returns {@code true} if this {@code PExp} represents primitive
+     * application of {@code =} (equals) operator; {@code false} otherwise.
+     *
+     * @return yes if {@code this} represents an equals application at
+     *         the top level, no otherwise
+     *
+     */
     public boolean isEquality() {
         return false;
     }
@@ -142,7 +162,30 @@ public abstract class PExp {
 
     public abstract boolean isVariable();
 
-    @NotNull protected abstract String getCanonicalizedName();
+    /**
+     * If this {@code PExp} is one with a sensible (e.g. extant) name,
+     * then this method simply returns it, independent of any parens or other
+     * syntactic characteristics.
+     *
+     * <p>
+     * If {@code this} is anonoymous, then we simply return a canned string
+     * such as {@code \:lambda}.</p>
+     *
+     * <p>
+     * However, if your dealing with an anonymous application, the way this
+     * method is currently implemented; it will recursively descend into the
+     * anonymous name portion and bring back the leaf name.
+     * For example, say we call this on the following {@code PExp}:
+     *
+     * <pre>
+     *     SS(k)(Cen(k))</pre>
+     * <p>
+     *
+     * </p>
+     * </p>
+     * @return
+     */
+    @NotNull protected abstract String getCanonicalName();
 
     public boolean isLiteral() {
         return false;
@@ -253,6 +296,9 @@ public abstract class PExp {
     @NotNull public final Set<String> getSymbolNames() {
         return getSymbolNames(false, false);
     }
+
+    //Force implementation of equals for every subclass.
+    @Override public abstract boolean equals(Object o);
 
     protected abstract Set<String> getSymbolNamesNoCache();
 

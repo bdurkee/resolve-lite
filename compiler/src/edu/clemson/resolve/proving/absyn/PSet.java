@@ -63,7 +63,7 @@ public class PSet extends PExp {
         return false;
     }
 
-    @NotNull @Override protected String getCanonicalizedName() {
+    @NotNull @Override protected String getCanonicalName() {
         return "{ PSet }";
     }
 

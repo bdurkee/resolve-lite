@@ -94,7 +94,7 @@ public class PLambda extends PExp {
         return false;
     }
 
-    @NotNull @Override public String getCanonicalizedName() {
+    @NotNull @Override public String getCanonicalName() {
         return "\\lambda";
     }
 

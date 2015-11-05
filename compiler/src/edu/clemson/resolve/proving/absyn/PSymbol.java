@@ -73,7 +73,7 @@ public class PSymbol extends PExp {
         return incomingFlag;
     }
 
-    @NotNull @Override public String getCanonicalizedName() {
+    @NotNull @Override public String getCanonicalName() {
         return getName();
     }
 
@@ -93,7 +93,8 @@ public class PSymbol extends PExp {
         return literalFlag;
     }
 
-    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(
+            @NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
         if (result == null) {
             String newName = substituteNamedComponents(substitutions);

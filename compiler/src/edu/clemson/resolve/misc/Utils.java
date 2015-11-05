@@ -95,8 +95,8 @@ public class Utils {
         return left + buf.toString() + right;
     }
 
-    public static <T> String join(@NotNull T[] array,
-                                  @NotNull String separator) {
+    @NotNull public static <T> String join(@NotNull T[] array,
+                                           @NotNull String separator) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < array.length; ++i) {
@@ -108,8 +108,8 @@ public class Utils {
         return builder.toString();
     }
 
-    public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
-                                       @NotNull List<R> l2)
+    @NotNull public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
+                                                @NotNull List<R> l2)
             throws IllegalArgumentException {
         if (l1.size() != l2.size()) {
             throw new IllegalArgumentException("attempt to zip differently " +
@@ -138,7 +138,7 @@ public class Utils {
      * @param <T> The expected type.
      * @return A list of {@code T}.
      */
-    public static <E, T extends E> List<T> collect(
+    @NotNull public static <E, T extends E> List<T> collect(
             @NotNull Class<T> expectedType,
             @NotNull List<? extends ParseTree> nodes,
             @NotNull ParseTreeProperty<? extends E> annotations) {
@@ -146,7 +146,7 @@ public class Utils {
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    public static String getModuleName(@NotNull ParseTree ctx) {
+    @NotNull public static String getModuleName(@NotNull ParseTree ctx) {
         if (ctx instanceof ResolveParser.ModuleContext) {
             ctx = ctx.getChild(0);
         }
@@ -181,7 +181,7 @@ public class Utils {
         }
     }
 
-    public interface Builder<T> {
+    @FunctionalInterface public interface Builder<T> {
         @NotNull T build();
     }
 
@@ -195,7 +195,8 @@ public class Utils {
      * the text for the resulting {@code CommonToken} will contain whatever
      * text existed in {@code t} starting out.</p>
      *
-     * @param t An existing token (preferablly near where {@code desiredText} should appear)
+     * @param t An existing token (preferablly near where {@code desiredText}
+     *          should appear)
      * @param desiredText The text we want the resulting token to hold
      * @return a new token
      */
@@ -213,7 +214,7 @@ public class Utils {
      * @param ctx the rule context
      * @return the raw sourcecode represented within {@code ctx}
      */
-    public static String getRawText(@Nullable ParserRuleContext ctx) {
+    @NotNull public static String getRawText(@Nullable ParserRuleContext ctx) {
         if (ctx == null) return "";
         Interval interval =
                 new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
@@ -229,7 +230,7 @@ public class Utils {
      * @param name a file name with zero or more '/' delimited directories
      * @return just the file name
      */
-    public static String groomFileName(String name) {
+    @Nullable public static String groomFileName(@NotNull String name) {
         int start = name.lastIndexOf("/");
         if ( start == -1 ) {
             return name;
@@ -237,7 +238,7 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
-    public static String stripFileExtension(String name) {
+    @Nullable public static String stripFileExtension(@Nullable String name) {
         if ( name == null ) return null;
         int lastDot = name.lastIndexOf('.');
         if ( lastDot < 0 ) return name;
@@ -245,7 +246,8 @@ public class Utils {
     }
 
     //TODO: Add charset parameter 'StandardCharset.' etc.
-    public static String readFile(String file) throws IOException {
+    @Nullable public static String readFile(@Nullable String file)
+            throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -257,7 +259,9 @@ public class Utils {
         return stringBuilder.toString();
     }
 
-    public static void writeFile(String dir, String fileName, String content) {
+    public static void writeFile(@Nullable String dir,
+                                 @Nullable String fileName,
+                                 @Nullable String content) {
         try {
             org.antlr.v4.runtime.misc.Utils.writeFile(dir + File.separator +
                     fileName, content, "UTF-8");

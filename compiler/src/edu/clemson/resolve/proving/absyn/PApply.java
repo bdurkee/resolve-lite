@@ -38,10 +38,9 @@ public class PApply extends PExp {
             }
         },
         INFIX {
-
             @Override protected String toString(PApply s) {
                 return Utils.join(s.arguments, " " +
-                        s.functionPortion.getCanonicalizedName() + " ");
+                        s.functionPortion.getCanonicalName() + " ");
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -64,7 +63,7 @@ public class PApply extends PExp {
                 if (s.arguments.size() > 1) {
                     retval = "(" + retval + ")";
                 }
-                return retval + s.functionPortion.getCanonicalizedName();
+                return retval + s.functionPortion.getCanonicalName();
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -110,7 +109,6 @@ public class PApply extends PExp {
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 
-
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();
     @NotNull private final DisplayStyle displayStyle;
@@ -118,7 +116,7 @@ public class PApply extends PExp {
     private PApply(@NotNull PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
-        //no builder.applicationType won't be null; this is checked in PApply:build()
+        //no; builder.applicationType won't be null; this is checked in PApply:build()
                 builder.applicationTypeValue);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
@@ -176,14 +174,18 @@ public class PApply extends PExp {
     }
 
     @Override public boolean isObviouslyTrue() {
-        return arguments.size() == 2 &&
-                functionPortion.getCanonicalizedName().equals("=") &&
-                arguments.get(0).equals(arguments.get(1));
+        boolean result = (functionPortion instanceof PSymbol);
+        if (result) {
+            result = functionPortion.getCanonicalName().equals("=") &&
+                arguments.size() == 2 &&
+                    arguments.get(0).equals(arguments.get(1));
+        }
+        return result;
     }
 
     @Override public boolean isEquality() {
         return arguments.size() == 2 &&
-                functionPortion.getCanonicalizedName().equals("=");
+                functionPortion.getCanonicalName().equals("=");
     }
 
     @Override public boolean isLiteralFalse() {
@@ -194,9 +196,8 @@ public class PApply extends PExp {
         return false;
     }
 
-    @NotNull @Override protected String getCanonicalizedName() {
-        return functionPortion.getCanonicalizedName() +
-                "(" + Utils.join(arguments, ", ") + ")";
+    @NotNull @Override protected String getCanonicalName() {
+        return functionPortion.getCanonicalName();
     }
 
     @Override public boolean isLiteral() {
@@ -209,7 +210,7 @@ public class PApply extends PExp {
 
     @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         if (arguments.size() == 2 &&
-                functionPortion.getCanonicalizedName().equals("and")) {
+                functionPortion.getCanonicalName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }
@@ -279,13 +280,11 @@ public class PApply extends PExp {
         v.endPExp(this);
     }
 
-    protected static HashDuple calculateHashes(PExp functionPortion,
-                                               Iterator<PExp> args) {
+    protected static HashDuple calculateHashes(@NotNull PExp functionPortion,
+                                               @NotNull Iterator<PExp> args) {
         int structureHash = 0;
-        int valueHash = 0;
-        if (functionPortion != null) {
-            valueHash = functionPortion.valueHash;
-        }
+        int valueHash = functionPortion.valueHash;
+
         if ( args.hasNext() ) {
             structureHash = 17;
             int argMod = 2;
@@ -298,6 +297,28 @@ public class PApply extends PExp {
             }
         }
         return new HashDuple(structureHash, valueHash);
+    }
+
+    @Override public boolean equals(Object o) {
+        boolean result = (o instanceof PApply);
+        if (result) {
+            PApply oAsPApply = (PApply)o;
+            result = (oAsPApply.valueHash == valueHash)
+                    && functionPortion.equals(oAsPApply.functionPortion);
+
+            if ( result ) {
+                Iterator<PExp> localArgs = arguments.iterator();
+                Iterator<PExp> oArgs = oAsPApply.arguments.iterator();
+
+                while (result && localArgs.hasNext() && oArgs.hasNext()) {
+                    result = localArgs.next().equals(oArgs.next());
+                }
+                if (result) {
+                    result = !(localArgs.hasNext() || oArgs.hasNext());
+                }
+            }
+        }
+        return result;
     }
 
     @Override public String toString() {

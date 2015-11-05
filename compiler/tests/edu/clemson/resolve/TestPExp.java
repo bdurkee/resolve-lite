@@ -6,6 +6,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -34,7 +35,7 @@ public class TestPExp extends BaseTest {
     protected static final Quantification EXISTS = Quantification.EXISTENTIAL;
     protected static final Quantification NONE = Quantification.NONE;
 
-    @Test public void testGetSubExpressions() {
+    @Test public void testGetSubExpressions() throws Exception {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "x + y");
         List<? extends PExp> subexprs = result.getSubExpressions();
@@ -61,7 +62,55 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("true and x", exps.next().toString());
         Assert.assertEquals("false", exps.next().toString());
     }
-  /*  @Test public void testQuantifierDistribution() {
+
+    @Test public void testPSymbolAndPApplyEquals() throws Exception {
+        TypeGraph g = new TypeGraph();
+        Assert.assertEquals(true, parseMathAssertionExp(g, "x")
+                .equals(parseMathAssertionExp(g, "x")));
+        Assert.assertEquals(true, parseMathAssertionExp(g, "1")
+                .equals(parseMathAssertionExp(g, "1")));
+        Assert.assertEquals(true, parseMathAssertionExp(g, "true")
+                .equals(parseMathAssertionExp(g, "true")));
+        Assert.assertEquals(true, parseMathAssertionExp(g, "1 + 2")
+                .equals(parseMathAssertionExp(g, "1 + 2")));
+
+        Assert.assertNotEquals(parseMathAssertionExp(g, "1 + 2"),
+                parseMathAssertionExp(g, "2 + 1"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "f(x, y)"),
+                parseMathAssertionExp(g, "f(x, 1)"));
+
+        Assert.assertEquals(parseMathAssertionExp(g, "x * (z + y)"),
+                parseMathAssertionExp(g, "x * (z + y)"));
+        Assert.assertEquals(parseMathAssertionExp(g, "x * (z + y)"),
+                parseMathAssertionExp(g, "x * (z + y)"));
+        Assert.assertEquals(parseMathAssertionExp(g, "+(x, y)"),
+                parseMathAssertionExp(g, "x + y"));
+        Assert.assertEquals(parseMathAssertionExp(g, "f(x)(p(x))"),
+                parseMathAssertionExp(g, "f(x)(p(x))"));
+    }
+
+    @Test public void testPAltAndPLambdaEquals() throws Exception {
+        //TODo
+    }
+
+    @Test public void testIsObviouslyTrue() throws Exception {
+        TypeGraph g = new TypeGraph();
+        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = y + x").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "true").isObviouslyTrue());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "false").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = x * 3 + 2").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = x + y").isObviouslyTrue());
+    }
+
+    @Test public void testIsEquality() throws Exception {
+        TypeGraph g = new TypeGraph();
+        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = y + x").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = y + x").isEquality());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and y + x").isEquality());
+
+    }
+
+    /*@Test public void testQuantifierDistribution() {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
@@ -520,7 +569,8 @@ public class TestPExp extends BaseTest {
      * @param input The input to parse.
      * @return The dummy-typed {@link PExp} representation of {@code input}.
      */
-    public static PExp parseMathAssertionExp(TypeGraph g, String input) {
+    @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
+                                                      @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedTree dummy = new AnnotatedTree(t, "test", null, false);
         PExpBuildingListener<PExp> l =
