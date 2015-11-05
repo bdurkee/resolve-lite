@@ -48,7 +48,7 @@
 
     <build>
         <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
+        <testSourceDirectory>tests</testSourceDirectory>
         <testResources>
             <testResource>
                 <directory>test</directory>

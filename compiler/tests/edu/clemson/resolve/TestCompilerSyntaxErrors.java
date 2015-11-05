@@ -20,7 +20,7 @@ public class TestCompilerSyntaxErrors extends BaseTest {
         super.testErrors(pair, "T");
     }
 
-    @Test public void testMissingSemi2() throws Exception {
+    /*@Test public void testMissingSemi2() throws Exception {
         String[] pair = new String[] {
                 "Precis T\n" +
                         "uses x,y,z\n" +
@@ -29,5 +29,5 @@ public class TestCompilerSyntaxErrors extends BaseTest {
                 "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:3:0: syntax error: extraneous input 'end' expecting {',', ';'}",
         };
         super.testErrors(pair, "T");
-    }
+    }*/
 }
