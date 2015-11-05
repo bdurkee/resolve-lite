@@ -40,8 +40,8 @@ public class PApply extends PExp {
         INFIX {
 
             @Override protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " +
-                        s.functionPortion.getCanonicalizedName() + " ") + ")";
+                return Utils.join(s.arguments, " " +
+                        s.functionPortion.getCanonicalizedName() + " ");
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
