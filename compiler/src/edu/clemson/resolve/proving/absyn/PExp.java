@@ -13,12 +13,13 @@ public abstract class PExp {
     public final int valueHash;
     private final MTType type, typeValue;
 
-    /** Since the removal of the Exp hierarchy, the role of PExps has expanded
-     *  considerably.
-     *  <p>
-     *  In other words, if this {@code PExp} was born out of a
-     *  programmatic expression (for vcgen), program type info should be
-     *  present, if not, then these should/will be {@code null}.</p>
+    /**
+     * Since the removal of the Exp hierarchy, the role of PExps has expanded
+     * considerably.
+     * <p>
+     * In other words, if this {@code PExp} was born out of a
+     * programmatic expression (for vcgen), program type info should be
+     * present, if not, then these should/will be {@code null}.</p>
      */
     private final PTType progType, progTypeValue;
 
@@ -136,12 +137,13 @@ public abstract class PExp {
      * A predicate that returns {@code true} in any of the following cases:
      *
      * <ul>
-     *     <li>If we're an instance of {@code PSymbol} whose name is simply
-     *     {@code true}.</li>
-     *     <li>If we're an expression whose top level is a binary application
-     *     of the {@code =}s operator whose left and right arguments are
-     *     themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
+     * <li>If we're an instance of {@code PSymbol} whose name is simply
+     * {@code true}.</li>
+     * <li>If we're an expression whose top level is a binary application
+     * of the {@code =}s operator whose left and right arguments are
+     * themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>
+     *
      * @return whether or not we represent a trivially 'true' expression
      */
     public boolean isObviouslyTrue() {
@@ -156,6 +158,10 @@ public abstract class PExp {
      *         equals
      */
     public boolean isEquality() {
+        return false;
+    }
+
+    public boolean isIncoming() {
         return false;
     }
 
@@ -193,7 +199,9 @@ public abstract class PExp {
         return false;
     }
 
-    public abstract boolean isFunctionApplication();
+    public boolean isFunctionApplication() {
+        return false;
+    }
 
     /**
      * Converts {@code this} expression, containing an arbitrary number of
@@ -252,11 +260,11 @@ public abstract class PExp {
     @NotNull public abstract PExp withQuantifiersFlipped();
 
     /**
-     * Returns the set of '@'-prefixed symbols appearing in this {@code PExp}
-     * expression. Note that when we say 'symbols' we mean both function
+     * Returns a set of '@'-prefixed symbols appearing in the subexpressions of
+     * this {@code PExp}. Note that when we say 'symbols' we mean both function
      * applications and argument-less variables.
      *
-     * @return the set of all incoming variable symbols
+     * @return the set of all incoming symbols
      */
     @NotNull public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {

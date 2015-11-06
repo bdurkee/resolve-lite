@@ -69,7 +69,7 @@ public class PSymbol extends PExp {
         return quantification;
     }
 
-    public boolean isIncoming() {
+    @Override public boolean isIncoming() {
         return incomingFlag;
     }
 

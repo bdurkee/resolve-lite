@@ -196,19 +196,22 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PExp last = repo.get(ctx.mathExp().get(ctx.mathExp().size() - 1));
         PExp first = repo.get(ctx.mathExp().get(0));
         List<PExp> args = new ArrayList<>();
+        String name = Utils.join(nameComponents, ".");
+
+        PExp result = null;
         if (last instanceof PApply) {
             args = ((PApply)last).getArguments();
+            PSymbolBuilder namePortion = new PSymbolBuilder(name)
+                    .mathType(last.getMathType());
+            result = new PApplyBuilder(namePortion.build())
+                    .arguments(args)
+                    .applicationType(last.getMathType()).build();
         }
-
-        //TODO: Handle incoming 
-        String name = Utils.join(nameComponents, ".");
-        PSymbolBuilder namePortion = new PSymbolBuilder(name)
-                .mathType(last.getMathType());
-        PApplyBuilder result = new PApplyBuilder(namePortion.build())
-                .arguments(args)
-                .applicationType(last.getMathType());
-
-        repo.put(ctx, result.build());
+        else {
+            result = new PSymbolBuilder(name)
+                    .mathType(last.getMathType()).build();
+        }
+        repo.put(ctx, result);
     }
 
     @Override public void exitMathBooleanLiteralExp(

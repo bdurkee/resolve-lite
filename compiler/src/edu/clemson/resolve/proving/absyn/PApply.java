@@ -192,24 +192,16 @@ public class PApply extends PExp {
                 functionPortion.getCanonicalName().equals("=");
     }
 
-    @Override public boolean isLiteralFalse() {
-        return false;
-    }
-
-    @Override public boolean isVariable() {
-        return false;
-    }
-
     @NotNull @Override protected String getCanonicalName() {
         return functionPortion.getCanonicalName();
     }
 
-    @Override public boolean isLiteral() {
-        return false;
-    }
-
     @Override public boolean isFunctionApplication() {
         return true;
+    }
+
+    @Override public boolean isIncoming() {
+        return functionPortion.isIncoming();
     }
 
     @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
