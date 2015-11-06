@@ -195,12 +195,9 @@ public class TestPExp extends BaseTest {
     }
 
     @Test public void testSplitIntoConjuncts() {
-        PExp result =
-                parseMathAssertionExp(g, "x and y = 2 and "
-                        + "P.Lab = lambda(q : Z).(true)");
-
-        PExp result2 = parseMathAssertionExp(g, "x and y(z)");
-        List<PExp> conjuncts = result2.splitIntoConjuncts();
+        PExp result = parseMathAssertionExp(g,
+                "x and y = 2 and P.Lab = lambda(q : Z).(true)");
+        List<PExp> conjuncts = result.splitIntoConjuncts();
         //Assert.assertEquals(2, conjuncts.size());
         Iterator<? extends PExp> exps = conjuncts.iterator();
        /* Assert.assertEquals(exps.next().toString(), "x");

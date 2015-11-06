@@ -435,22 +435,20 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   op='not' mathExp                                #mathUnaryApplyExp
-    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'   #mathPrefixApplyExp
-    |   mathExp ('.' mathExp)+                          #mathSegmentsExp
-    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixApplyExp
-    |   mathExp op=('+'|'-'|'.-') mathExp               #mathInfixApplyExp
-    |   mathExp op=('..'|'->') mathExp                  #mathInfixApplyExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixApplyExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixApplyExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixApplyExp
-    |   mathExp op=('='|'/=') mathExp                   #mathInfixApplyExp
-    |   mathExp op='implies' mathExp                    #mathInfixApplyExp
-    |   mathExp op=('and'|'or') mathExp                 #mathInfixApplyExp
-    |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
-//    |   '@' mathExp                                     #mathIncomingExp
-    |   '(' mathAssertionExp ')'                        #mathNestedExp
-    |   mathPrimaryExp                                  #mathPrimeExp
+    :   op='not' mathExp                                    #mathUnaryApplyExp
+    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'  #mathPrefixApplyExp
+    |   mathExp op=('*'|'/'|'~') mathExp                    #mathInfixApplyExp
+    |   mathExp op=('+'|'-'|'.-') mathExp                   #mathInfixApplyExp
+    |   mathExp op=('..'|'->') mathExp                      #mathInfixApplyExp
+    |   mathExp op=('o'|'union'|'intersect') mathExp        #mathInfixApplyExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp            #mathInfixApplyExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp              #mathInfixApplyExp
+    |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
+    |   mathExp op='implies' mathExp                        #mathInfixApplyExp
+    |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
+    |   mathExp op=':' mathTypeExp                          #mathTypeAssertionExp
+    |   '(' mathAssertionExp ')'                            #mathNestedExp
+    |   mathPrimaryExp                                      #mathPrimeExp
     ;
 
 mathPrimaryExp
@@ -461,7 +459,12 @@ mathPrimaryExp
     |   mathOutfixApplyExp
     |   mathTupleExp
     |   mathAlternativeExp
+    |   mathSegmentsExp
     |   mathLambdaExp
+    ;
+
+mathSegmentsExp
+    :   mathSymbolExp ('.' mathSymbolExp)+ ('(' mathExp (',' mathExp)* ')')?
     ;
 
 mathSymbolExp
