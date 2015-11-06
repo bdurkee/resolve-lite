@@ -89,6 +89,11 @@ public class TestPExp extends BaseTest {
 
         Assert.assertEquals(parseMathAssertionExp(g, "conc.s"),
                 parseMathAssertionExp(g, "conc.s"));
+
+        Assert.assertNotEquals(parseMathAssertionExp(g, "foo"),
+                parseMathAssertionExp(g, "bar :: foo"));
+        Assert.assertEquals(parseMathAssertionExp(g, "bar :: f.x"),
+                parseMathAssertionExp(g, "bar :: f.x"));
     }
 
     @Test public void testPAltAndPLambdaEquals() throws Exception {
@@ -128,33 +133,34 @@ public class TestPExp extends BaseTest {
                 "1 and y + x").isEquality());
     }
 
-    /*@Test public void testQuantifierDistribution() {
-        TypeGraph g = new TypeGraph();
+    @Test public void testQuantifierDistribution() {
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         Assert.assertEquals(1, result.getQuantifiedVariables().size());
         Assert.assertEquals(false, result.isLiteral());
-        Assert.assertEquals(2, result.getSubExpressions().size());
-        Assert.assertEquals(NONE, ((PSymbol) result).getQuantification());
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        Assert.assertEquals(3, result.getSubExpressions().size());
+        Assert.assertEquals(NONE, result.getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
+        Assert.assertEquals(FORALL, exps.next().getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
     }
 
     @Test public void testNestedQuantifierDistribution() {
-        TypeGraph g = new TypeGraph();
         PExp result =
                 parseMathAssertionExp(g, "Forall x, y : Z, Exists v : Z, "
                         + "Forall f : Entity * Entity -> B, f(x, v)");
-        Assert.assertEquals(2, result.getSubExpressions().size());
+        Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals(3, result.getQuantifiedVariables().size());
-        Assert.assertEquals(FORALL, ((PSymbol) result).getQuantification());
+        Assert.assertEquals(FORALL, result.getQuantification());
 
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification());
+        Assert.assertEquals(FORALL, exps.next().getQuantification());
+        Assert.assertEquals(FORALL, exps.next().getQuantification());
+        Assert.assertEquals(EXISTS, exps.next().getQuantification());
+
     }
 
-    @Test public void testContainsName() {
+   /* @Test public void testContainsName() {
         TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "f");
         assertEquals(true, result.containsName("f"));

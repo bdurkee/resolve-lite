@@ -131,15 +131,8 @@ public class PApply extends PExp {
         return displayStyle;
     }
 
-    @NotNull public Quantification getQuantification() {
-        Quantification result = Quantification.NONE;
-        if (functionPortion instanceof PSymbol) {
-            result = ((PSymbol) functionPortion).getQuantification();
-        }
-        else if (functionPortion instanceof PApply) {
-            result = ((PApply) functionPortion).getQuantification();
-        }
-        return result;
+    @NotNull @Override public Quantification getQuantification() {
+        return functionPortion.getQuantification();
     }
 
     @NotNull public List<PExp> getArguments() {
@@ -155,7 +148,12 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override @NotNull public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+    /**
+     * {@inheritDoc}
+     *
+     */
+    @NotNull @Override public PExp substitute(
+            @NotNull Map<PExp, PExp> substitutions) {
         PExp result;
         if ( substitutions.containsKey(this) ) {
             result = substitutions.get(this);
@@ -204,7 +202,8 @@ public class PApply extends PExp {
         return functionPortion.isIncoming();
     }
 
-    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(
+            @NotNull List<PExp> accumulator) {
         if (arguments.size() == 2 &&
                 functionPortion.getCanonicalName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);
@@ -227,11 +226,6 @@ public class PApply extends PExp {
                 .build();
     }
 
-    //TODO: Ok, here's the thing. I think the type of the set here had better
-    //be PExp. I think that if you have something like @A(i), the thing in the
-    //set should actually be the application itself: @A(i), not just @A (which
-    //is how it would be the way this is currently implemented..). Should also be
-    //renamed getIncomingExps or something too.
     @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         Utils.apply(getSubExpressions(), result, PExp::getIncomingVariables);

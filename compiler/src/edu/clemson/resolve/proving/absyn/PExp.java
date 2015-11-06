@@ -4,6 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -164,6 +165,15 @@ public abstract class PExp {
      * subtree
      */
     public abstract boolean containsName(String name);
+
+    /**
+     * Returns the {@link Quantification} for {@code this} expression.
+     *
+     * @return forall, exists, or none
+     */
+    public Quantification getQuantification() {
+        return Quantification.NONE;
+    }
 
     /**
      * Returns a list containing all immediate {@code PExp} children of
