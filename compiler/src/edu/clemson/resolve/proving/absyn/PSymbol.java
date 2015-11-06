@@ -105,10 +105,10 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * A helper method to be used alongside this class's {@link PExp PExp#substitute}
-     * impl that allows the name of a PSymbol to be segmented into
-     * {@code .}-delimited segments. This is useful for instance when we need
-     * to replace a {@code PSymbol} such as {@code P.Length} with
+     * A helper method to be used alongside this class's
+     * {@link PExp PExp#substitute} that allows the name of a PSymbol to be
+     * segmented into {@code .}-delimited segments. This is useful for instance
+     * when we need to replace a {@code PSymbol} such as {@code P.Length} with
      * {@code conc.P.Length}.
      */
     private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
