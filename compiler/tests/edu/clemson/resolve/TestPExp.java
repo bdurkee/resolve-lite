@@ -95,7 +95,7 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{a if b = (c and f); b otherwise;}}")
                     .equals(parseMathAssertionExp(g,
-                "{{a if b = (c and f); b otherwise;}}")));
+                            "{{a if b = (c and f); b otherwise;}}")));
 
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")
@@ -103,20 +103,29 @@ public class TestPExp extends BaseTest {
                             "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")));
     }
 
+    @Test public void testPSetEquals() throws Exception {
+    }
+
     @Test public void testIsObviouslyTrue() throws Exception {
-        TypeGraph g = new TypeGraph();
-        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = y + x").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "true").isObviouslyTrue());
-        Assert.assertEquals(false, parseMathAssertionExp(g, "false").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = x * 3 + 2").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = x + y").isObviouslyTrue());
+        Assert.assertEquals(false, parseMathAssertionExp(g,
+                "x + y = y + x").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "true").isObviouslyTrue());
+        Assert.assertEquals(false, parseMathAssertionExp(g,
+                "false").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "x * 3 + 2 = x * 3 + 2").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "+(x, y) = x + y").isObviouslyTrue());
     }
 
     @Test public void testIsEquality() throws Exception {
-        TypeGraph g = new TypeGraph();
-        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = y + x").isEquality());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = y + x").isEquality());
-        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and y + x").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "y + x = y + x").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "1 = y + x").isEquality());
+        Assert.assertEquals(false, parseMathAssertionExp(g,
+                "1 and y + x").isEquality());
     }
 
     /*@Test public void testQuantifierDistribution() {
