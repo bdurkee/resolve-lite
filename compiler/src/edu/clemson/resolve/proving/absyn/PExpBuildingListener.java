@@ -190,26 +190,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSegmentsExp(
             ResolveParser.MathSegmentsExpContext ctx) {
-        List<String> nameComponents = ctx.mathExp().stream()
+        List<String> nameComponents = ctx.mathSymbolExp().stream()
                 .map(app -> repo.get(app).getCanonicalName())
                 .collect(Collectors.toList());
-        PExp last = repo.get(ctx.mathExp().get(ctx.mathExp().size() - 1));
-        PExp first = repo.get(ctx.mathExp().get(0));
-        List<PExp> args = new ArrayList<>();
         String name = Utils.join(nameComponents, ".");
+        PExp last = repo.get(ctx.mathSymbolExp()
+                .get(ctx.mathSymbolExp().size() - 1));
 
-        PExp result = null;
-        if (last instanceof PApply) {
-            args = ((PApply)last).getArguments();
-            PSymbolBuilder namePortion = new PSymbolBuilder(name)
-                    .mathType(last.getMathType());
-            result = new PApplyBuilder(namePortion.build())
-                    .arguments(args)
+        PExp result = new PSymbolBuilder(name)
+                .mathType(last.getMathType()).build();
+        if (!ctx.mathExp().isEmpty()) {
+             result = new PApplyBuilder(result)
+                    .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
                     .applicationType(last.getMathType()).build();
-        }
-        else {
-            result = new PSymbolBuilder(name)
-                    .mathType(last.getMathType()).build();
         }
         repo.put(ctx, result);
     }

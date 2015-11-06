@@ -283,8 +283,8 @@ public abstract class PExp {
     protected abstract void splitIntoConjuncts(@NotNull List<PExp> accumulator);
 
     /**
-     * Returns a copy of this {@code PExp} where all occurences of the '@'
-     * marker are erased. Useful in applying the 'remember' vcgen rule.
+     * Returns a new version of this {@code PExp} where all occurences of the
+     * '@' marker are erased; useful in applying the 'remember' vcgen rule.
      * 
      * @return A '@-clean' version of this {@code PExp}.
      */
