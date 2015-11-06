@@ -34,9 +34,9 @@ public class TestPExp extends BaseTest {
     protected static final Quantification FORALL = Quantification.UNIVERSAL;
     protected static final Quantification EXISTS = Quantification.EXISTENTIAL;
     protected static final Quantification NONE = Quantification.NONE;
+    private final TypeGraph g = new TypeGraph();
 
     @Test public void testGetSubExpressions() throws Exception {
-        TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "x + y");
         List<? extends PExp> subexprs = result.getSubExpressions();
         Assert.assertEquals(3, subexprs.size());
@@ -64,7 +64,6 @@ public class TestPExp extends BaseTest {
     }
 
     @Test public void testPSymbolAndPApplyEquals() throws Exception {
-        TypeGraph g = new TypeGraph();
         Assert.assertEquals(true, parseMathAssertionExp(g, "x")
                 .equals(parseMathAssertionExp(g, "x")));
         Assert.assertEquals(true, parseMathAssertionExp(g, "1")
@@ -87,10 +86,21 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(g, "x + y"));
         Assert.assertEquals(parseMathAssertionExp(g, "f(x)(p(x))"),
                 parseMathAssertionExp(g, "f(x)(p(x))"));
+
+        Assert.assertEquals(parseMathAssertionExp(g, "conc.s"),
+                parseMathAssertionExp(g, "conc.s"));
     }
 
     @Test public void testPAltAndPLambdaEquals() throws Exception {
-        //TODo
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "{{a if b = (c and f); b otherwise;}}")
+                    .equals(parseMathAssertionExp(g,
+                "{{a if b = (c and f); b otherwise;}}")));
+
+        Assert.assertEquals(true, parseMathAssertionExp(g,
+                "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")
+                    .equals(parseMathAssertionExp(g,
+                            "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")));
     }
 
     @Test public void testIsObviouslyTrue() throws Exception {
@@ -107,7 +117,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = y + x").isEquality());
         Assert.assertEquals(true, parseMathAssertionExp(g, "1 = y + x").isEquality());
         Assert.assertEquals(false, parseMathAssertionExp(g, "1 and y + x").isEquality());
-
     }
 
     /*@Test public void testQuantifierDistribution() {

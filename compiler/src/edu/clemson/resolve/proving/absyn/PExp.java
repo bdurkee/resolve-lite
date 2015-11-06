@@ -144,10 +144,12 @@ public abstract class PExp {
      * </ul>
      * @return whether or not we represent a trivially 'true' expression
      */
-    public abstract boolean isObviouslyTrue();
+    public boolean isObviouslyTrue() {
+        return false;
+    }
 
     /**
-     * Returns {@code true} if this {@code PExp} represents primitive
+     * Returns {@code true} if this {@code PExp} represents a primitive
      * application of the {@code =} (equals) operator; {@code false} otherwise.
      *
      * @return whether or not we have represent a top-level application of
@@ -157,9 +159,13 @@ public abstract class PExp {
         return false;
     }
 
-    public abstract boolean isLiteralFalse();
+    public boolean isLiteralFalse() {
+        return false;
+    }
 
-    public abstract boolean isVariable();
+    public boolean isVariable() {
+        return false;
+    }
 
     /**
      * If this {@code PExp} is one with a sensible (e.g. extant) name,

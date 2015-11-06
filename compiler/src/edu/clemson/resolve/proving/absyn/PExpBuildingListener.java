@@ -10,12 +10,15 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTInvalid;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Converts parse tree math exprs to an equivalent abstract-syntax form,
@@ -29,13 +32,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final Map<String, MTType> seenOperatorTypes = new HashMap<>();
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
-    private final MTInvalid dummyType;
+    @Nullable private final MTInvalid dummyType;
 
-    public PExpBuildingListener(AnnotatedTree annotations) {
+    public PExpBuildingListener(@NotNull AnnotatedTree annotations) {
         this(annotations, null);
     }
 
-    public PExpBuildingListener(AnnotatedTree annotations, MTInvalid dummyType) {
+    public PExpBuildingListener(@NotNull AnnotatedTree annotations,
+                                @Nullable MTInvalid dummyType) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
@@ -184,33 +188,39 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result);
     }
 
-    /*@Override public void exitMathSegmentsExp(
-            Resolve.MathSegmentsExpContext ctx) {
-        //Todo: Type the individual segs of a seg exp.
-        List<String> nameComponents = ctx.mathFunctionApplicationExp().stream()
-                .map(app -> ((PSymbol) repo.get(app)).getName())
+    @Override public void exitMathSegmentsExp(
+            ResolveParser.MathSegmentsExpContext ctx) {
+        List<String> nameComponents = ctx.mathExp().stream()
+                .map(app -> repo.get(app).getCanonicalName())
                 .collect(Collectors.toList());
-        PSymbol last = (PSymbol)repo.get(ctx.mathFunctionApplicationExp()
-                .get(ctx.mathFunctionApplicationExp().size() - 1));
+        PExp last = repo.get(ctx.mathExp().get(ctx.mathExp().size() - 1));
+        PExp first = repo.get(ctx.mathExp().get(0));
+        List<PExp> args = new ArrayList<>();
+        if (last instanceof PApply) {
+            args = ((PApply)last).getArguments();
+        }
 
+        //TODO: Handle incoming 
         String name = Utils.join(nameComponents, ".");
-        PSymbolBuilder result = new PSymbolBuilder(name).arguments(
-                last.getArguments()).incoming(ctx.AT() != null)
+        PSymbolBuilder namePortion = new PSymbolBuilder(name)
                 .mathType(last.getMathType());
+        PApplyBuilder result = new PApplyBuilder(namePortion.build())
+                .arguments(args)
+                .applicationType(last.getMathType());
 
         repo.put(ctx, result.build());
-    }*/
+    }
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
-        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText())
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
     }
 
     @Override public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
-        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText()) //
+        PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText())
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
     }

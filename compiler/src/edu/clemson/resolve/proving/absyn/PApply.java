@@ -142,6 +142,10 @@ public class PApply extends PExp {
         return result;
     }
 
+    @NotNull public List<PExp> getArguments() {
+        return arguments;
+    }
+
     @Override public boolean containsName(String name) {
         boolean result = functionPortion.containsName(name);
         Iterator<PExp> argumentIterator = arguments.iterator();
