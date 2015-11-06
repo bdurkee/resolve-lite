@@ -139,9 +139,9 @@ public abstract class PExp {
      * <ul>
      * <li>If we're an instance of {@code PSymbol} whose name is simply
      * {@code true}.</li>
-     * <li>If we're an expression whose top level is a binary application
-     * of the {@code =}s operator whose left and right arguments are
-     * themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
+     * <li>If we're an expression with a top level application of
+     * of binary {@code =}s, whose left and right arguments are themselves
+     * equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>
      *
      * @return whether or not we represent a trivially 'true' expression
@@ -152,7 +152,7 @@ public abstract class PExp {
 
     /**
      * Returns {@code true} if this {@code PExp} represents a primitive
-     * application of the {@code =} (equals) operator; {@code false} otherwise.
+     * application of the {@code =} operator; {@code false} otherwise.
      *
      * @return whether or not we have represent a top-level application of
      *         equals
