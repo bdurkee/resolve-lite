@@ -2,9 +2,7 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
-import edu.clemson.resolve.proving.absyn.PLambda;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 
 import java.util.HashMap;
 import java.util.Iterator;

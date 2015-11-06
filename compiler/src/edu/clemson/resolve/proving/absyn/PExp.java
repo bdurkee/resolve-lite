@@ -1,5 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
+import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
@@ -7,21 +8,39 @@ import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
 
+/**
+ * This class represents the root of the prover abstract syntax tree (AST)
+ * hierarchy.
+ *
+ * <p>
+ * Unlike previous expression hiearchies used by the tool, {@code PExp}s are
+ * immutable and exist without the complications introduced by control
+ * structures. And while {@code PExp}s technically exist to represent
+ * <em>only</em> mathematical expressions, realize that many 'programmatic' ones
+ * such as calls are also converted into {@code PExp}s for vc generation
+ * purposes.</p>
+ */
 public abstract class PExp {
 
     public final int structureHash;
     public final int valueHash;
-    private final MTType type, typeValue;
 
     /**
-     * Since the removal of the Exp hierarchy, the role of PExps has expanded
-     * considerably.
+     * These are the backing fields for {@link #getMathType()} and
+     * {@link #getMathTypeValue()}, respectively.
+     */
+    @NotNull private final MTType type;
+    @Nullable private final MTType typeValue;
+
+    /**
+     * Since the removal of the Exp hierarchy, the role of {@code PExps} has
+     * expanded considerably.
      * <p>
-     * In other words, if this {@code PExp} was born out of a
+     * So in other words, if this {@code PExp} was born out of a
      * programmatic expression (for vcgen), program type info should be
      * present, if not, then these should/will be {@code null}.</p>
      */
-    private final PTType progType, progTypeValue;
+    @Nullable private final PTType progType, progTypeValue;
 
     private Set<String> cachedSymbolNames = null;
     private List<PExp> cachedFunctionApplications = null;
@@ -77,7 +96,7 @@ public abstract class PExp {
         return typeValue;
     }
 
-    @NotNull public PExp substitute(List<? extends PExp> currents, PExp repl) {
+    @NotNull public PExp substitute(List<PExp> currents, PExp repl) {
         Map<PExp, PExp> substitutions = new HashMap<>();
         for (PExp current : currents) {
             substitutions.put(current, repl);
@@ -85,24 +104,23 @@ public abstract class PExp {
         return substitute(substitutions);
     }
 
-    @NotNull public PExp substitute(@NotNull List<? extends PExp> currents,
-                                    @NotNull PExp... repls) {
-        return substitute(currents, Arrays.asList(repls));
-    }
-
-    @NotNull public PExp substitute(@NotNull List<? extends PExp> currents,
-                                    @NotNull List<? extends PExp> repls) {
+    /**
+     * Returns a new {@code PExp} whose subexpressions appearing in
+     * {@code currents} are substituted by those in {@code repls}. In order to
+     * call this, note that {@code currents.size() == repls.size()}.
+     *
+     * @param currents a list of sub-expressions to be substituted (replaced)
+     * @param repls a list of replacement {@code PExp}s.
+     *
+     * @return the {@code PExp} with substitutions made
+     */
+    @NotNull public PExp substitute(@NotNull List<PExp> currents,
+                                    @NotNull List<PExp> repls) {
         if (currents.size() != repls.size()) {
             throw new IllegalArgumentException("substitution lists must be"
                     + "the same length");
         }
-        Iterator<? extends PExp> replIter = repls.iterator();
-        Iterator<? extends PExp> currIter = currents.iterator();
-        Map<PExp, PExp> result = new LinkedHashMap<>();
-        while (replIter.hasNext()) {
-            result.put(currIter.next(), replIter.next());
-        }
-        return substitute(result);
+        return substitute(Utils.zip(currents, repls));
     }
 
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
@@ -126,21 +144,42 @@ public abstract class PExp {
 
     public abstract void accept(PExpListener v);
 
+    /**
+     * Substitutes all occurences of the subexpressions matching those defined
+     * in {@code substitutions.keyset()} with the corresponding {@code PExp}
+     * defined by the map, returning a new (substituted) {@code PExp}.
+     *
+     * @param substitutions map like {@code existing PExp -> replacement PExp}
+     * @return a, new, substituted expression
+     */
     @NotNull public abstract PExp substitute(
             @NotNull Map<PExp, PExp> substitutions);
 
+    /**
+     * Returns {@code true} iff {@code this} contains a subexpression whose
+     * 'name' field matches {@code name}; {@code false} otherwise.
+     *
+     * @param name some name
+     * @return whether or not the name appears anywhere in {@code this}'s
+     * subtree
+     */
     public abstract boolean containsName(String name);
 
+    /**
+     * Returns a list containing all immediate {@code PExp} children of
+     * {@code this}.
+     *
+     * @return a list of all subexpressions.
+     */
     @NotNull public abstract List<? extends PExp> getSubExpressions();
 
     /**
      * A predicate that returns {@code true} in any of the following cases:
-     *
      * <ul>
      * <li>If we're an instance of {@code PSymbol} whose name is simply
      * {@code true}.</li>
      * <li>If we're an expression with a top level application of
-     * of binary {@code =}s, whose left and right arguments are themselves
+     * of binary {@code =}s whose left and right arguments are themselves
      * equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>
      *
@@ -155,12 +194,18 @@ public abstract class PExp {
      * application of the {@code =} operator; {@code false} otherwise.
      *
      * @return whether or not we have represent a top-level application of
-     *         equals
+     * equals
      */
     public boolean isEquality() {
         return false;
     }
 
+    /**
+     * Returns {@code true} if this {@code PExp} is prefixed by the {@code @}
+     * marker (incoming marker); {@code false} otherwise.
+     *
+     * @return whether or not {@code this} is an incoming expression
+     */
     public boolean isIncoming() {
         return false;
     }
@@ -174,27 +219,29 @@ public abstract class PExp {
     }
 
     /**
-     * If this {@code PExp} is one with a sensible (e.g. extant) name,
+     * If this {@code PExp} is one with a sensible (meaning: extant) name,
      * then this method simply returns it, independent of any parens or other
      * syntactic characteristics.
      *
-     * <p>If {@code this} is anonoymous, then we simply return a canned string
-     * such as {@code \:lambda}.</p>
+     * <p>
+     * If {@code this} expression is anonoymous, then we simply return a canned
+     * string such as <code>\:PLamda</code> or <code>{ PSet }</code>.</p>
      *
      * <p>
-     * However, if your dealing with an anonymous application, the way this
-     * method is currently implemented; it will recursively descend into the
-     * anonymous name portion and bring back the leaf name.
-     * For example, say we call this on the following {@code PExp}:
+     * If your dealing with a curried style top-level application of
+     * the form <code>SS(k)(Cen(k))</code>, then the canonical name returned
+     * should simply be <code>SS</code>.</p>
      *
-     * <pre>
-     *     SS(k)(Cen(k))</pre>
-     * <p>
-     *
-     * @return
+     * @return the canonical name
      */
     @NotNull protected abstract String getCanonicalName();
 
+    /**
+     * Returns {@code true} iff this expression represents a primitive such as
+     * {@code 1..n} or some boolean value; {@code false} otherwise.
+     *
+     * @return whether or not this
+     */
     public boolean isLiteral() {
         return false;
     }
@@ -205,38 +252,15 @@ public abstract class PExp {
 
     /**
      * Converts {@code this} expression, containing an arbitrary number of
-     * conjuncts with possibly nested implications, into a list of ((n) antecedent
-     * -consequent) pairs. For example, if {@code this} expression is:
-     * <pre>
-     *     x and y implies z implies a
-     * </pre>
-     * this method will convert it to {@code x and y and z implies a} by the
-     * following rule:
-     * <pre>
-     *     Confirm (A /\ B) -> C
-     *     ------------------------
-     *     Confirm A -> B -> C
-     * </pre>
-     * Similarly, if the expression ends with multiple consequents conjuncted
-     * together (e.g.: {@code a and b implies x and y}), then we return a list
-     * of all antecedent-grouping and paired with each consequent. For example:
-     * <pre>
-     *     [a and b implies x,
-     *      a and b implies y]
-     * </pre>
+     * conjuncts with possibly nested implications, into a list of sequents.
      *
-     * The following simplification rule permits this:
-     * <pre>
-     *     Confirm (A and ...
-     * </pre>
-     *
-     * @return a list of antecedent - consequent expressions
+     * @return a list of sequents derived from {@code this}
      */
-    @NotNull public List<PExp> experimentalSplit() {
-        return experimentalSplit(getMathType().getTypeGraph().getTrueExp());
+    @NotNull public List<PExp> splitIntoSequents() {
+        return splitIntoSequents(getMathType().getTypeGraph().getTrueExp());
     }
 
-    @NotNull protected List<PExp> experimentalSplit(PExp assumtions) {
+    @NotNull protected List<PExp> splitIntoSequents(PExp assumtions) {
         return new ArrayList<>();
     }
 
@@ -249,9 +273,8 @@ public abstract class PExp {
     protected abstract void splitIntoConjuncts(@NotNull List<PExp> accumulator);
 
     /**
-     * Returns a copy of this {@code PExp} where all variables prefixed with
-     * an '@' are replaced by just the variable. This is essentially applying
-     * the 'remember' vcgen rule.
+     * Returns a copy of this {@code PExp} where all occurences of the '@'
+     * marker are erased. Useful in applying the 'remember' vcgen rule.
      * 
      * @return A '@-clean' version of this {@code PExp}.
      */

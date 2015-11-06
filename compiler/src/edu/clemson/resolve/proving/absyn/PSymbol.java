@@ -105,7 +105,7 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * A helper method to be used alongside this class's {@link #substitute}
+     * A helper method to be used alongside this class's {@link PExp PExp#substitute}
      * impl that allows the name of a PSymbol to be segmented into
      * {@code .}-delimited segments. This is useful for instance when we need
      * to replace a {@code PSymbol} such as {@code P.Length} with
@@ -140,22 +140,22 @@ public class PSymbol extends PExp {
         return this.name.equals(name);
     }
 
-    /*public List<PExp> experimentalSplit(PExp assumptions) {
+    /*public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         TypeGraph g = getMathType().getTypeGraph();
         if (name.equals("and")) {
-            arguments.forEach(a -> result.addAll(a.experimentalSplit(assumptions)));
+            arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
         }
         else if (name.equals("implies")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).experimentalSplit(assumptions);
+            //tempList = arguments.get(0).splitIntoSequents(assumptions);
             if (!assumptions.isObviouslyTrue()) {
                 tempLeft = g.formConjunct(assumptions, tempLeft);
             }
 
             tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).experimentalSplit(tempLeft);
+            return arguments.get(1).splitIntoSequents(tempLeft);
         }
         else {
             result.add(g.formImplies(assumptions, this));

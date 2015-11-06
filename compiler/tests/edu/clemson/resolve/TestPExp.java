@@ -491,43 +491,43 @@ public class TestPExp extends BaseTest {
         TypeGraph g = new TypeGraph();
 
         PExp e = parseMathAssertionExp(g, "(Post implies (Q and R))");
-        List<PExp> partitions = e.experimentalSplit();
+        List<PExp> partitions = e.splitIntoSequents();
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(Post implies Q)", partitions.get(0).toString());
         Assert.assertEquals("(Post implies R)", partitions.get(1).toString());
 
         e = parseMathAssertionExp(g, "(Pre and (Post implies (Q and R)))");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(3, partitions.size());
         Assert.assertEquals("(true implies Pre)", partitions.get(0).toString());
         Assert.assertEquals("(Post implies Q)", partitions.get(1).toString());
         Assert.assertEquals("(Post implies R)", partitions.get(2).toString());
 
         e = parseMathAssertionExp(g, "(P implies (Pre and (Post implies (Q and R))))");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(3, partitions.size());
         Assert.assertEquals("(P implies Pre)", partitions.get(0).toString());
         Assert.assertEquals("((P and Post) implies Q)", partitions.get(1).toString());
         Assert.assertEquals("((P and Post) implies R)", partitions.get(2).toString());
 
         e = parseMathAssertionExp(g, "(P implies Q)");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(P implies Q)", partitions.get(0).toString());
 
         e = parseMathAssertionExp(g, "P");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(true implies P)", partitions.get(0).toString());
 
         e = parseMathAssertionExp(g, "(A and (P implies Q))");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(true implies A)", partitions.get(0).toString());
         Assert.assertEquals("(P implies Q)", partitions.get(1).toString());
 
         e = parseMathAssertionExp(g, "(A implies (B implies (C implies (D and (E and (F and G))))))");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(4, partitions.size());
         Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
         Assert.assertEquals("(((A and B) and C) implies E)", partitions.get(1).toString());
@@ -536,14 +536,14 @@ public class TestPExp extends BaseTest {
 
         e = parseMathAssertionExp(g, "((A implies (B implies (C implies D))) and (E implies (F implies (G implies (H implies I)))))");
         //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
-        partitions = e.experimentalSplit();
+        partitions = e.splitIntoSequents();
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
         Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
 
         //e = parseMathAssertionExp(g, "(((0 <= 0) and  ((1 <= max_int) implies  ((min_int <= 0) implies  ((Max_Depth <= max_int) implies  ((min_int <= Max_Depth) implies  ((1 <= Max_Depth) implies  (0 <= Max_Depth))))))) and  (Array_Is_Initial_in_Range(S.Contents, Lower_Bound, Upper_Bound) implies      Reverse(Iterated_Concatenation(1, 0, lambda ( i : Z ).(<S.Contents(i)>))) = Empty_String))");
         //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
-        //partitions = e.experimentalSplit();
+        //partitions = e.splitIntoSequents();
         //Assert.assertEquals(2, partitions.size());
         //Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
         //Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
