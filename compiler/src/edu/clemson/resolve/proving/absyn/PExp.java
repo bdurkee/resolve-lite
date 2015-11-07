@@ -124,6 +124,11 @@ public abstract class PExp {
         return substitute(Utils.zip(currents, repls));
     }
 
+    /**
+     * Returns {@code true} if
+     * @param substitutions
+     * @return
+     */
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
         PExp thisSubstituted = substitute(substitutions);
         return this.equals(thisSubstituted);
@@ -135,10 +140,18 @@ public abstract class PExp {
         return substitute(e);
     }
 
+    /**
+     * Returns true if the {@link MTType} of this expression matches
+     * (or is a subtype) of {@code other}; {@code false} otherwise.
+     * @param other some {@code MTType}.
+     *
+     * @return whether or not the math types of this or {@code other} matches
+     */
     public boolean typeMatches(MTType other) {
         return other.isSubtypeOf(getMathType());
     }
 
+    /** @see PExp#typeMatches(MTType) */
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getMathType());
     }
@@ -176,8 +189,7 @@ public abstract class PExp {
     }
 
     /**
-     * Returns a list containing all immediate {@code PExp} children of
-     * {@code this}.
+     * Returns a list containing all immediate children of {@code this}.
      *
      * @return a list of subexpressions
      */
@@ -191,7 +203,7 @@ public abstract class PExp {
      * <li>If we're an expression with a top level application of
      * of binary {@code =}s whose left and right arguments are themselves
      * equal (as determined via a call to {@link PExp#equals(Object)}).</li>
-     * </ul>
+     * </ul>; {@code false} otherwise
      *
      * @return whether or not we represent a trivially 'true' expression
      */
@@ -232,22 +244,21 @@ public abstract class PExp {
      * If this {@code PExp} is one with a sensible (meaning: extant) name,
      * then this method simply returns it, independent of any parens or other
      * syntactic characteristics.
-     *
      * <p>
      * If {@code this} expression is anonoymous, then we simply return a canned
      * string such as <code>\:PLamda</code> or <code>{ PSet }</code>.</p>
-     *
      * <p>
      * If your dealing with a curried style top-level application of
-     * the form <code>SS(k)(Cen(k))</code>, then the canonical name returned
-     * should simply be <code>SS</code>.</p>
+     * the form {@code SS(k)(Cen(k))}, then the canonical name returned
+     * should simply be <tt>SS</tt>.</p>
      *
      * @return the canonical name
      */
     @NotNull protected abstract String getCanonicalName();
 
     /**
-     * Returns {@code true} iff this expression represents a primitive such as
+     * Returns {@code true} <strong>iff</strong> this expression represents a
+     * primitive such as
      * {@code 1..n} or some boolean value; {@code false} otherwise.
      *
      * @return whether or not this
@@ -270,6 +281,10 @@ public abstract class PExp {
         return splitIntoSequents(getMathType().getTypeGraph().getTrueExp());
     }
 
+    /**
+     * A protected refinement of {@link PExp#splitIntoSequents()} that adds an
+     * accumulator, {@code assumptions}, for developing our sequents.
+     */
     @NotNull protected List<PExp> splitIntoSequents(PExp assumtions) {
         return new ArrayList<>();
     }

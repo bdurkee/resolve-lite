@@ -12,13 +12,29 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.misc.Utils.apply;
 
 /**
- * Represents exclusively function applications meaning there is some nonzero
- * number of arguments involved.
+ * This class represents exclusively function applications, specifically those
+ * applications having some non-zero number of arguments.
  *
  * @since 0.0.1
  */
 public class PApply extends PExp {
 
+    /**
+     * An enumerated type that provides additional information about how to
+     * display an instance of {@link PApply}, specifically whether it should be
+     * displayed as an infix, outfix, prefix, or postfix style application.
+     *
+     * <p>
+     * Note that while this enum indeed stands-in for the four subclasses we'd
+     * otherwise need to represent the application styles mentioned, we still
+     * can get specific visitor methods for each style (even with an enum)
+     * courtesy of the following accept methods:
+     * <ul>
+     * <li>{@link #beginAccept(PExpListener, PApply)}</li>
+     * <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
+     * <li>{@link #endAccept(PExpListener, PApply)}</li>
+     * </ul></p>
+     */
     public static enum DisplayStyle {
 
         PREFIX {
@@ -111,6 +127,9 @@ public class PApply extends PExp {
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 
+    /**
+     *
+     */
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();
     @NotNull private final DisplayStyle displayStyle;
@@ -256,18 +275,22 @@ public class PApply extends PExp {
     @Override public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPApply(this);
+        displayStyle.beginAccept(v, this);
 
         v.beginChildren(this);
         functionPortion.accept(v);
         boolean first = true;
         for (PExp arg : arguments) {
             if (!first) {
+                displayStyle.fencepostAccept(v, this);
                 v.fencepostPApply(this);
             }
             first = false;
             arg.accept(v);
         }
         v.endChildren(this);
+
+        displayStyle.endAccept(v, this);
         v.endPApply(this);
         v.endPExp(this);
     }

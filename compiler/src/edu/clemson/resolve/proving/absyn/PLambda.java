@@ -3,6 +3,7 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTFunction;
+import org.rsrg.semantics.MTInvalid;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
@@ -167,7 +168,7 @@ public class PLambda extends PExp {
         }
 
         @Override public String toString() {
-            return name + ":" + type;
+            return name + ":" + (type instanceof MTInvalid ? "Inv" : type);
         }
     }
 
@@ -183,6 +184,6 @@ public class PLambda extends PExp {
     }
 
     @Override public String toString() {
-        return "lambda " + Utils.join(parameters, ", ") + ".(" + body + ")";
+        return "lambda(" + Utils.join(parameters, ", ") + ").(" + body + ")";
     }
 }
