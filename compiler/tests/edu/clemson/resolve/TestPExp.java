@@ -213,18 +213,20 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
     }
 
-   /* @Test public void testWithQuantifiersFlipped1() {
+    @Test public void testWithQuantifiersFlipped1() {
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
+        Assert.assertEquals(NONE, exps.next().getQuantification());
         Assert.assertEquals(UNIVERSAL, exps.next().getQuantification());
         Assert.assertEquals(NONE, exps.next().getQuantification());
 
         result = result.withQuantifiersFlipped();
         exps = result.getSubExpressions().iterator();
 
+        Assert.assertEquals(NONE, exps.next().getQuantification());
         Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification());
         Assert.assertEquals(NONE, exps.next().getQuantification());
-    }*/
+    }
 
     //nothing flipped.
     @Test public void testWithQuantifiersFlipped2() {
@@ -273,11 +275,15 @@ public class TestPExp extends BaseTest {
         PExp result = parseMathAssertionExp(g, "F(@I, J, @S.Top, @f(x)(y))");
         Assert.assertEquals(false, result.isIncoming());
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(false, exps.next().isIncoming());
-        Assert.assertEquals(true, exps.next().isIncoming());
-        Assert.assertEquals(false, exps.next().isIncoming());
-        Assert.assertEquals(true, exps.next().isIncoming());
-
+        boolean[] expected = {false, true, false, true, true};
+        for (int i = 0; i < expected.length; i++) {
+            Assert.assertEquals(expected[i], exps.next().isIncoming());
+        }
+        result = result.withIncomingSignsErased();
+        exps = result.getSubExpressions().iterator();
+        for (int i = 0; i < expected.length; i++) {
+            Assert.assertEquals(false, exps.next().isIncoming());
+        }
     }
 
     /*@Test public void testGetIncomingVariables() {
