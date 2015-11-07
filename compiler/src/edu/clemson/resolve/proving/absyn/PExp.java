@@ -205,7 +205,7 @@ public abstract class PExp {
      * <li>If we're an expression with a top level application of
      * of binary {@code =}s whose left and right arguments are themselves
      * equal (as determined via a call to {@link PExp#equals(Object)}).</li>
-     * </ul>; {@code false} otherwise
+     * </ul>;
      *
      * @return whether or not we represent a trivially 'true' expression
      */
@@ -259,8 +259,7 @@ public abstract class PExp {
     @NotNull protected abstract String getCanonicalName();
 
     /**
-     * Returns {@code true} <strong>iff</strong> this expression represents a
-     * primitive such as
+     * Returns {@code true} iff this expression represents a primitive such as
      * {@code 1..n} or some boolean value; {@code false} otherwise.
      *
      * @return whether or not this
@@ -358,7 +357,7 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} <strong>iff</code> this {@code PExp} and {@code o},
+     * Returns {@code true} iff this {@code PExp} and {@code o},
      * are equivalent with respect to structure and all function and variable
      * names; {@code false} otherwise.
      *
@@ -370,6 +369,7 @@ public abstract class PExp {
 
     protected abstract Set<String> getSymbolNamesNoCache();
 
+    /** A util container for storing node structural and value hashcodes.*/
     public static class HashDuple {
         public int structureHash;
         public int valueHash;

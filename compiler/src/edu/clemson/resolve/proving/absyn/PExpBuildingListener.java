@@ -217,8 +217,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .collect(Collectors.toList());
         PExp last = repo.get(ctx.mathSymbolExp()
                 .get(ctx.mathSymbolExp().size() - 1));
+        PExp first = repo.get(ctx.mathSymbolExp().get(0));
         PExp result = new PSymbolBuilder(Utils.join(nameComponents, "."))
-                .mathType(last.getMathType()).build();
+                .mathType(last.getMathType()).incoming(first.isIncoming())
+                .build();
 
         if (!ctx.mathExp().isEmpty()) {
              result = new PApplyBuilder(result)

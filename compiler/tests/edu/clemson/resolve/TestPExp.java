@@ -3,6 +3,7 @@ package edu.clemson.resolve;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -26,14 +27,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.rsrg.semantics.Quantification.*;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class TestPExp extends BaseTest {
 
-    protected static final Quantification FORALL = Quantification.UNIVERSAL;
-    protected static final Quantification EXISTS = Quantification.EXISTENTIAL;
-    protected static final Quantification NONE = Quantification.NONE;
     private final TypeGraph g = new TypeGraph();
 
     @Test public void testGetSubExpressions() throws Exception {
@@ -147,7 +146,7 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals(NONE, result.getQuantification());
         Assert.assertEquals(NONE, exps.next().getQuantification());
-        Assert.assertEquals(FORALL, exps.next().getQuantification());
+        Assert.assertEquals(UNIVERSAL, exps.next().getQuantification());
         Assert.assertEquals(NONE, exps.next().getQuantification());
     }
 
@@ -157,12 +156,12 @@ public class TestPExp extends BaseTest {
                         + "Forall f : Entity * Entity -> B, f(x, v)");
         Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals(3, result.getQuantifiedVariables().size());
-        Assert.assertEquals(FORALL, result.getQuantification());
+        Assert.assertEquals(UNIVERSAL, result.getQuantification());
 
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(FORALL, exps.next().getQuantification());
-        Assert.assertEquals(FORALL, exps.next().getQuantification());
-        Assert.assertEquals(EXISTS, exps.next().getQuantification());
+        Assert.assertEquals(UNIVERSAL, exps.next().getQuantification());
+        Assert.assertEquals(UNIVERSAL, exps.next().getQuantification());
+        Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification());
     }
 
     @Test public void testPSymbolAndPApplyContainsName() {
@@ -202,139 +201,86 @@ public class TestPExp extends BaseTest {
         Iterator<? extends PExp> exps = conjuncts.iterator();
         Assert.assertEquals(exps.next().toString(), "x");
         Assert.assertEquals(exps.next().toString(), "y = 2");
-        //Assert.assertEquals(exps.next().toString(), "P.Lab = lambda(q:Inv).(true)");
+        Assert.assertEquals(exps.next().toString(), "P.Lab = lambda(q:Inv).(true)");
 
-   /*     result = parseMathAssertionExp(g, "f(p and (q and z))");
+        result = parseMathAssertionExp(g, "f(p and (q and z))");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
         result = parseMathAssertionExp(g, "f(p and q, a and b)");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
         result = parseMathAssertionExp(g, "x or y");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
         result = parseMathAssertionExp(g, "x");
-        Assert.assertEquals(1, result.splitIntoConjuncts().size());*/
+        Assert.assertEquals(1, result.splitIntoConjuncts().size());
     }
 
    /* @Test public void testWithQuantifiersFlipped1() {
-        TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        Assert.assertEquals(UNIVERSAL, exps.next().getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
 
-        //now flip the quantifiers
         result = result.withQuantifiersFlipped();
         exps = result.getSubExpressions().iterator();
 
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
-    }
+        Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
+    }*/
 
     //nothing flipped.
     @Test public void testWithQuantifiersFlipped2() {
-        TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "Forall x, y, z : Z, a = c");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
 
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification()); //a = c
+        Assert.assertEquals(NONE, exps.next().getQuantification()); //a
+        Assert.assertEquals(NONE, exps.next().getQuantification()); //c
+
         result = result.withQuantifiersFlipped();
         exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
-        Assert.assertEquals(NONE, ((PSymbol) exps.next()).getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
+        Assert.assertEquals(NONE, exps.next().getQuantification());
     }
 
-    //alternating flips
     @Test public void testWithQuantifiersFlipped3() {
-        TypeGraph g = new TypeGraph();
-        PExp result =
-                parseMathAssertionExp(
-                        g,
-                        "Forall x, y, z : Z,"
-                                + "Exists u, v, w : N, Forall f : Entity * Entity -> B,"
-                                + "g(u, a(f(y)), z, w, f(u))");
-        Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //u
-
-        //a(f(y))
-        PSymbol aApp = (PSymbol) exps.next();
-        PSymbol aAppArg = ((PSymbol) aApp.getArguments().get(0));
-
-        Assert.assertEquals(NONE, (aApp).getQuantification());
-        Assert.assertEquals(FORALL, aAppArg.getQuantification());
-        Assert.assertEquals(FORALL,
-                ((PSymbol) aAppArg.getArguments().get(0)).getQuantification());
-
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //z
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //w
-
-        //f(u)
-        PSymbol fApp = (PSymbol) exps.next();
-        Assert.assertEquals(FORALL, fApp.getQuantification());
-        Assert.assertEquals(EXISTS,
-                ((PSymbol) fApp.getArguments().get(0)).getQuantification());
-
-        //Now flip em
-        result = result.withQuantifiersFlipped();
-        exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //u
-
-        //a(f(y))
-        aApp = (PSymbol) exps.next();
-        aAppArg = ((PSymbol) aApp.getArguments().get(0));
-
-        Assert.assertEquals(NONE, (aApp).getQuantification());
-        Assert.assertEquals(EXISTS, aAppArg.getQuantification());
-        Assert.assertEquals(EXISTS,
-                ((PSymbol) aAppArg.getArguments().get(0)).getQuantification());
-
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //z
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //w
-
-        //f(u)
-        fApp = (PSymbol) exps.next();
-        Assert.assertEquals(EXISTS, fApp.getQuantification());
-        Assert.assertEquals(FORALL,
-                ((PSymbol) fApp.getArguments().get(0)).getQuantification());
-    }
-
-    @Test public void testWithQuantifiersFlipped4() {
-        TypeGraph g = new TypeGraph();
         PExp result =
                 parseMathAssertionExp(g,
                         "Forall x, y : Z, x and (Exists x : N, x is_in S)");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(FORALL, ((PSymbol) exps.next()).getQuantification()); //x
-        PSymbol app = (PSymbol) exps.next();
-        Assert.assertEquals(NONE, app.getQuantification()); //x is_in S
-        Assert.assertEquals(EXISTS,
-                ((PSymbol) app.getArguments().get(0)).getQuantification()); //x
+        Assert.assertEquals(NONE, exps.next().getQuantification()); //x and (Exists x : N, x is_in S)
+        Assert.assertEquals(UNIVERSAL, exps.next().getQuantification()); //x
+        PApply is_in_application = (PApply)exps.next();
+        Assert.assertEquals(NONE, is_in_application.getQuantification()); //(Exists x : N, x is_in S)
+        Assert.assertEquals(EXISTENTIAL,
+                is_in_application.getArguments().get(0).getQuantification()); //x
         Assert.assertEquals(NONE,
-                ((PSymbol) app.getArguments().get(1)).getQuantification()); //S
+                is_in_application.getArguments().get(1).getQuantification()); //S
 
         result = result.withQuantifiersFlipped();
         exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(EXISTS, ((PSymbol) exps.next()).getQuantification()); //x
-        app = (PSymbol) exps.next();
-        Assert.assertEquals(NONE, app.getQuantification()); //x is_in S
-        Assert.assertEquals(FORALL,
-                ((PSymbol) app.getArguments().get(0)).getQuantification()); //x
+        Assert.assertEquals(NONE, exps.next().getQuantification()); //x and (Exists x : N, x is_in S)
+        Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification()); //x
+        is_in_application = (PApply)exps.next();
+        Assert.assertEquals(NONE, is_in_application.getQuantification()); //(Exists x : N, x is_in S)
+        Assert.assertEquals(UNIVERSAL,
+                is_in_application.getArguments().get(0).getQuantification()); //x
         Assert.assertEquals(NONE,
-                ((PSymbol) app.getArguments().get(1)).getQuantification()); //S
+                is_in_application.getArguments().get(1).getQuantification()); //S
     }
 
     @Test public void testWithIncomingSignsRemoved() {
-        TypeGraph g = new TypeGraph();
-        PExp result = parseMathAssertionExp(g, "F(@I, J, I, @S.Top)");
-        Assert.assertEquals(false, ((PSymbol) result).isIncoming());
+        PExp result = parseMathAssertionExp(g, "F(@I, J, @S.Top, @f(x)(y))");
+        Assert.assertEquals(false, result.isIncoming());
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        Assert.assertEquals(true, ((PSymbol) exps.next()).isIncoming());
-        Assert.assertEquals(false, ((PSymbol) exps.next()).isIncoming());
-        Assert.assertEquals(false, ((PSymbol) exps.next()).isIncoming());
+        Assert.assertEquals(false, exps.next().isIncoming());
+        Assert.assertEquals(true, exps.next().isIncoming());
+        Assert.assertEquals(false, exps.next().isIncoming());
+        Assert.assertEquals(true, exps.next().isIncoming());
+
     }
 
-    @Test public void testGetIncomingVariables() {
+    /*@Test public void testGetIncomingVariables() {
         TypeGraph g = new TypeGraph();
         PExp result =
                 parseMathAssertionExp( g,

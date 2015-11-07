@@ -264,12 +264,16 @@ public class PApply extends PExp {
     @NotNull @Override public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
+                .applicationType(getMathType())
+                .applicationTypeValue(getMathTypeValue())
                 .build();
     }
 
     @NotNull @Override public PExp withQuantifiersFlipped() {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
+                .applicationType(getMathType())
+                .applicationTypeValue(getMathTypeValue())
                 .build();
     }
 
