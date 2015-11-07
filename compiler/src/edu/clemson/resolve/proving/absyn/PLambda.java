@@ -9,12 +9,16 @@ import org.rsrg.semantics.MTType;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * An anonymous (lambda) function consisting of one or more typed bound
+ * variables and a body.
+ */
 public class PLambda extends PExp {
 
     private final List<Parameter> parameters = new ArrayList<>();
-    private final PExp body;
+    @NotNull private final PExp body;
 
-    public PLambda(List<Parameter> parameters, PExp body) {
+    public PLambda(@NotNull List<Parameter> parameters, @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
                 new MTFunction.MTFunctionBuilder(body.getMathType()
                         .getTypeGraph(), body.getMathType())
@@ -91,20 +95,8 @@ public class PLambda extends PExp {
         return body.isLiteralFalse();
     }
 
-    @Override public boolean isVariable() {
-        return false;
-    }
-
     @NotNull @Override public String getCanonicalName() {
         return "\\lambda";
-    }
-
-    @Override public boolean isLiteral() {
-        return false;
-    }
-
-    @Override public boolean isFunctionApplication() {
-        return false;
     }
 
     @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
@@ -116,7 +108,7 @@ public class PLambda extends PExp {
     }
 
     @NotNull @Override public PExp withQuantifiersFlipped() {
-        return this;
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {

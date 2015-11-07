@@ -357,7 +357,15 @@ public abstract class PExp {
         return getSymbolNames(false, false);
     }
 
-    //force implementation of equals for every subclass.
+    /**
+     * Returns {@code true} <strong>iff</code> this {@code PExp} and {@code o},
+     * are equivalent with respect to structure and all function and variable
+     * names; {@code false} otherwise.
+     *
+     * @param o the expression to compare with {@code this}
+     * @return whether {@code this} matches {@code o} with respect to structure
+     * and variable naming
+     */
     @Override public abstract boolean equals(Object o);
 
     protected abstract Set<String> getSymbolNamesNoCache();

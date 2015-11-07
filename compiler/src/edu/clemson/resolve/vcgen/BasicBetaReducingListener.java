@@ -4,6 +4,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PLambda;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class BasicBetaReducingListener extends PExpListener {
         return betaReducedExp;
     }
 
-    @Override public void endPSymbol(PSymbol e) {
+    @Override public void endPSymbol(@NotNull PSymbol e) {
         //TODO: Second condition here should be: is e.getName contained in the keyset of our substitution map?
        /* if (e.isFunctionApplication() &&
                 substitutions.containsKey(e.withArgumentsErased()) &&

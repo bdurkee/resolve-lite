@@ -26,18 +26,35 @@ import java.util.stream.Collectors;
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
-    private final ParseTreeProperty<MTType> types, typeValues;
-    private final ParseTreeProperty<PTType> progTypes;
-    private final ParseTreeProperty<PExp> repo;
+    @NotNull private final ParseTreeProperty<MTType> types, typeValues;
+    @NotNull private final ParseTreeProperty<PTType> progTypes;
+    @NotNull private final ParseTreeProperty<PExp> repo;
 
-    private final Map<String, MTType> seenOperatorTypes = new HashMap<>();
-    private final Map<String, Quantification> quantifiedVars = new HashMap<>();
+    @NotNull private final Map<String, MTType> seenOperatorTypes =
+            new HashMap<>();
+    @NotNull private final Map<String, Quantification> quantifiedVars =
+            new HashMap<>();
     @Nullable private final MTInvalid dummyType;
 
+    /**
+     * Constructs a new {@code PExpBuildingListener} given an
+     * {@link AnnotatedTree} with it's associated type and expression bindings.
+     *
+     * @param annotations annotations to be used for constructing expressions
+     */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations) {
         this(annotations, null);
     }
 
+    /**
+     * Constructs a new {@code PExpBuildingListener} given both an
+     * {@link AnnotatedTree} and a (possibly-null) dummy type to be used in the
+     * case where a 'real' math type is missing from {@code annotations}.
+     *
+     * @param annotations annotations to be used for constructing expressions
+     * @param dummyType an {@link MTInvalid} to be used in place of
+     * missing types
+     */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations,
                                 @Nullable MTInvalid dummyType) {
         this.types = annotations.mathTypes;
@@ -47,6 +64,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.dummyType = dummyType;
     }
 
+    /**
+     *
+     * @param t
+     * @return
+     */
     @SuppressWarnings("unchecked") public T getBuiltPExp(ParseTree t) {
         return (T) repo.get(t);
     }

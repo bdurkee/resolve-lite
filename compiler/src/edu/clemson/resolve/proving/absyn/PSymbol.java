@@ -14,11 +14,9 @@ import java.util.*;
  * Represents a reference to a named element such as a variable, constant, or
  * function.
  * <p>
- * Specifically, when this refers to a name for a funtion, this class therefore
- * represents a typed reference to the first class portion of the function,
+ * Specifically, when this refers to a name of a funtion, that particular
+ * instance represents a typed reference to the first class portion of the function,
  * independent of any supplied arguments.</p>
- *
- * @author dtwelch <dtw.welch@gmail.com>
  */
 public class PSymbol extends PExp {
 
@@ -225,16 +223,6 @@ public class PSymbol extends PExp {
         return new LinkedList<>();
     }
 
-    /**
-     * Returns {@code true} <strong>iff</code> this {@code PSymbol} and the
-     * provided expression, {@code e}, are equivalent with respect to structure
-     * and all function and variable names.
-     *
-     * @param o The expression to compare this one to.
-     * @return {@code true} <strong>iff</strong> {@code this} and the provided
-     * expression are equivalent with respect to structure and all
-     * function and variable names.
-     */
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
         if (result) {

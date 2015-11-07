@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.misc.Utils.apply;
 
 /**
- * This class represents exclusively function applications, specifically those
- * applications having some non-zero number of arguments.
+ * This class represents exclusively function applications, specifically
+ * applications with some non-zero number of arguments.
  *
- * @since 0.0.1
+ * @author dtwelch <dtw.welch@gmail.com>
  */
 public class PApply extends PExp {
 
@@ -146,7 +146,15 @@ public class PApply extends PExp {
     }
 
     /**
+     * This {@code PExp} represents the 'first class function' this application
+     * is referencing. Note that the type of {@code functionPortion} can be
+     * considered independent of the types of the actual arguments
+     * (which are rightly stored here).
      *
+     * <p>
+     * While this field in most cases will simply be an instance of
+     * {@link PSymbol}, realize that it could also be something more 'exotic'
+     * such as a {@code PLambda} or even another {@code PApply}.</p>
      */
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();
@@ -332,6 +340,7 @@ public class PApply extends PExp {
         return new HashDuple(structureHash, valueHash);
     }
 
+    /** {@inheritDoc} */
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof PApply);
         if (result) {
@@ -358,6 +367,13 @@ public class PApply extends PExp {
         return displayStyle.toString(this);
     }
 
+    /**
+     * A mutable, under-construction version of {@code PApply} capable of being
+     * incrementally built-up through chained calls to 'builder' methods.
+     * <p>
+     * When the building is complete, an immutable {@code PApply} instance can
+     * be obtained through a call to {@link PApplyBuilder#build()}.</p>
+     */
     public static class PApplyBuilder implements Utils.Builder<PApply> {
 
         @NotNull protected final PExp functionPortion;

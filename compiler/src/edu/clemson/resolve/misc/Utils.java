@@ -72,14 +72,6 @@ public class Utils {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
-    /**
-     *
-     * @param input
-     * @param accumulator
-     * @param f
-     * @param <T>
-     * @param <R>
-     */
     public static <T, R> void apply(@NotNull Collection<T> input,
                                     @NotNull Collection<R> accumulator,
                                     @NotNull Function<T, Collection<R>> f) {
@@ -200,19 +192,30 @@ public class Utils {
         }
     }
 
+    /**
+     * A general purpose builder for objects of type {@code T}. This interface
+     * should be implemented by classes that might benefit from incremental
+     * construction -- meaning through chained calls to a series of builder
+     * methods that methods that return back an instance of the specific
+     * {@code Builder} subclass.
+     *
+     * @param <T> the type of the object to be built
+     * @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder
+     */
     @FunctionalInterface public interface Builder<T> {
+
         @NotNull T build();
     }
 
     /**
-     * Returns a new {@link CommonToken} given some arbitrary, parser created
-     * {@link Token} {@code t}. This is useful for when you want create a token
-     * consisting of {@code desiredText} but with location information
+     * Returns a new {@link CommonToken} from some arbtrary existing
+     * {@code Token}. This is useful for when you want create a {@code Token}
+     * consisting of {@code desiredText}, but with location information
      * 'filled-in' and accounted for -- taken from {@code t}.
-     *
-     * <p><strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
-     * the text for the resulting {@code CommonToken} will contain whatever
-     * text existed in {@code t} starting out.</p>
+     * <p>
+     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
+     * the text for the resulting {@code Token} will contain whatever text was
+     * already in {@code t} starting out.</p>
      *
      * @param t an existing token (preferably near where {@code desiredText}
      *          should appear)
@@ -220,9 +223,11 @@ public class Utils {
      * @return a new token
      */
     public static CommonToken createTokenFrom(@NotNull Token t,
-                                              @NotNull String desiredText) {
+                                              @Nullable String desiredText) {
         CommonToken result = new CommonToken(t);
-        result.setText(desiredText);
+        if (desiredText != null) {
+            result.setText(desiredText);
+        }
         return result;
     }
 
@@ -235,8 +240,7 @@ public class Utils {
      */
     @NotNull public static String getRawText(@Nullable ParserRuleContext ctx) {
         if (ctx == null) return "";
-        Interval interval =
-                new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
         return ctx.start.getInputStream().getText(interval);
     }
 

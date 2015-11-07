@@ -3,6 +3,7 @@ package edu.clemson.resolve.vcgen;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ public class FlexibleNameSubstitutingListener extends PExpListener {
         return intermediateSubstitutedExp.substitute(substitutions);
     }
 
-    @Override public void beginPSymbol(PSymbol e) {
+    @Override public void beginPSymbol(@NotNull PSymbol e) {
         /*if ( e.isFunctionApplication() ) {
             PExp withoutArgs = e.withArgumentsErased();
             if (substitutions.containsKey(withoutArgs) &&

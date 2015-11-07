@@ -6,6 +6,10 @@ import org.rsrg.semantics.MTType;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * A container for a piecewise collection of conditional functions followed by
+ * a default, otherwise clause.
+ */
 public class PAlternatives extends PExp {
 
     private final List<Alternative> alternatives;
@@ -23,7 +27,7 @@ public class PAlternatives extends PExp {
 
         if ( conditions.size() != results.size() ) {
             throw new IllegalArgumentException("conditions.size() must equal "
-                    + "results.size().");
+                    + "results.size()");
         }
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = results.iterator();
@@ -234,24 +238,8 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public boolean isLiteralFalse() {
-        return false;
-    }
-
-    @Override public boolean isLiteral() {
-        return false;
-    }
-
-    @Override public boolean isFunctionApplication() {
-        return false;
-    }
-
-    @Override public boolean isVariable() {
-        return false;
-    }
-
     @NotNull @Override protected String getCanonicalName() {
-        return "{{ PAlternitives }}";
+        return "{{ PAlternatives }}";
     }
 
     private static class UnboxResult implements Function<Alternative, PExp> {
@@ -271,9 +259,7 @@ public class PAlternatives extends PExp {
     }
 
     private static class Alternative {
-
-        public final PExp condition;
-        public final PExp result;
+        public final PExp condition, result;
 
         public Alternative(PExp condition, PExp result) {
             this.condition = condition;
