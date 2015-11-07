@@ -14,11 +14,11 @@ import java.util.*;
  * hierarchy.
  *
  * <p>
- * Unlike previous expression hiearchies used by the tool, {@code PExp}s are
+ * Unlike previous expression hierarchies used by the tool, {@code PExp}s are
  * immutable and exist without the complications introduced by control
  * structures. And while {@code PExp}s technically exist to represent
- * <em>only</em> mathematical expressions, realize that many 'programmatic' ones
- * such as calls are also converted into {@code PExp}s for vc generation
+ * <em>only</em> mathematical expressions, realize that many 'programmatic'
+ * ones such as calls are also converted into {@code PExp}s for vc generation
  * purposes.</p>
  */
 public abstract class PExp {
@@ -179,7 +179,7 @@ public abstract class PExp {
      * Returns a list containing all immediate {@code PExp} children of
      * {@code this}.
      *
-     * @return a list of all subexpressions.
+     * @return a list of subexpressions
      */
     @NotNull public abstract List<? extends PExp> getSubExpressions();
 

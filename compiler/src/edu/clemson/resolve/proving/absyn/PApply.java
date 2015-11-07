@@ -14,6 +14,8 @@ import static edu.clemson.resolve.misc.Utils.apply;
 /**
  * Represents exclusively function applications meaning there is some nonzero
  * number of arguments involved.
+ *
+ * @since 0.0.1
  */
 public class PApply extends PExp {
 
@@ -204,6 +206,9 @@ public class PApply extends PExp {
 
     @Override protected void splitIntoConjuncts(
             @NotNull List<PExp> accumulator) {
+        System.out.println("Canonical name is: " + functionPortion.getCanonicalName());
+        System.out.println("arg ct is: " + arguments.size());
+
         if (arguments.size() == 2 &&
                 functionPortion.getCanonicalName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);

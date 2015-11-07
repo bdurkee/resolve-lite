@@ -168,7 +168,7 @@ public class PSymbol extends PExp {
     }
 
     @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
-        //accumulator.add(this); // Don't think you actually want to do this..
+        accumulator.add(this);
     }
 
     @Override public void accept(PExpListener v) {

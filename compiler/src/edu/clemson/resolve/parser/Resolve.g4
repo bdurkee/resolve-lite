@@ -436,6 +436,8 @@ mathQuantifiedExp
 
 mathExp
     :   op='not' mathExp                                #mathUnaryApplyExp
+    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'   #mathPrefixApplyExp
+    |   mathExp ('.' mathExp)+                          #mathSegmentsExp
     |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixApplyExp
     |   mathExp op=('+'|'-'|'.-') mathExp               #mathInfixApplyExp
     |   mathExp op=('..'|'->') mathExp                  #mathInfixApplyExp
@@ -446,8 +448,6 @@ mathExp
     |   mathExp op='implies' mathExp                    #mathInfixApplyExp
     |   mathExp op=('and'|'or') mathExp                 #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                      #mathTypeAssertionExp
-    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'   #mathPrefixApplyExp
-    |   mathExp ('.' mathExp)+                          #mathSegmentsExp
 //    |   '@' mathExp                                     #mathIncomingExp
     |   '(' mathAssertionExp ')'                        #mathNestedExp
     |   mathPrimaryExp                                  #mathPrimeExp
