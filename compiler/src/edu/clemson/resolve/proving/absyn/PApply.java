@@ -28,15 +28,16 @@ public class PApply extends PExp {
      * Note that while this enum indeed stands-in for the four subclasses we'd
      * otherwise need to represent the application styles mentioned, we still
      * can get specific visitor methods for each style (even with an enum)
-     * courtesy of the following accept methods:
+     * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
      * <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
      * <li>{@link #endAccept(PExpListener, PApply)}</li>
-     * </ul></p>
+     * </ul>
      */
     public static enum DisplayStyle {
 
+        /** Traditional prefix style applications of the form: {@code F(x)} */
         PREFIX {
             @Override protected String toString(PApply s) {
                 return s.functionPortion.toString() +
@@ -55,6 +56,9 @@ public class PApply extends PExp {
                 v.endPrefixPApply(s);
             }
         },
+        /** Binary infix style applications where the arguments are on either
+         *  side of the function: {@code x F y}
+         */
         INFIX {
             @Override protected String toString(PApply s) {
                 return Utils.join(s.arguments, " " +
@@ -73,6 +77,9 @@ public class PApply extends PExp {
                 v.endInfixPApply(s);
             }
         },
+        /** Postfix style applications where the operator proceeds its
+         *  argumemts: {@code x y F}
+         */
         POSTFIX {
 
             @Override protected String toString(PApply s) {
@@ -96,6 +103,9 @@ public class PApply extends PExp {
                 v.endPostfixPApply(s);
             }
         },
+        /** Outfix style applications where the (single) argument is
+         *  sandwitched between the left and rhs operator(s): {@code || F ||}
+         */
         OUTFIX {
 
             @Override protected String toString(PApply s) {
@@ -118,12 +128,20 @@ public class PApply extends PExp {
             }
         };
 
+        /** Returns a well formatted string representation of this application
+         *  style.
+         *  @param s some application
+         *  @return a string representation.
+         */
         protected abstract String toString(PApply s);
 
+        /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
 
+        /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
         protected abstract void fencepostAccept(PExpListener v, PApply s);
 
+        /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 

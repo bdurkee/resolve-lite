@@ -56,11 +56,30 @@ import java.util.stream.Collectors;
  */
 public class Utils {
 
+    /**
+     * Applies the provided function, {@code f} to all elements of {@code l},
+     * returning a new list of elements of type corresponding to the range of
+     * {@code f}.
+     *
+     * @param l a starting {@link Collection} of elements.
+     * @param f a function to be applied to the elements of {@code l}
+     * @param <T> type of the starting collection
+     * @param <R> type of resulting list
+     * @return a new list of type {@code R}.
+     */
     @NotNull public static <T, R> List<R> apply(@NotNull Collection<T> l,
                                                 @NotNull Function<T, R> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param input
+     * @param accumulator
+     * @param f
+     * @param <T>
+     * @param <R>
+     */
     public static <T, R> void apply(@NotNull Collection<T> input,
                                     @NotNull Collection<R> accumulator,
                                     @NotNull Function<T, Collection<R>> f) {

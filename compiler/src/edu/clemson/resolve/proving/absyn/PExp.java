@@ -12,7 +12,6 @@ import java.util.*;
 /**
  * This class represents the root of the prover abstract syntax tree (AST)
  * hierarchy.
- *
  * <p>
  * Unlike previous expression hierarchies used by the tool, {@code PExp}s are
  * immutable and exist without the complications introduced by control
@@ -108,7 +107,8 @@ public abstract class PExp {
     /**
      * Returns a new {@code PExp} whose subexpressions appearing in
      * {@code currents} are substituted by those in {@code repls}. In order to
-     * call this, note that {@code currents.size() == repls.size()}.
+     * call this, it must be the case that
+     * {@code currents.size() == repls.size()}.
      *
      * @param currents a list of sub-expressions to be substituted (replaced)
      * @param repls a list of replacement {@code PExp}s.
@@ -125,9 +125,11 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} if
-     * @param substitutions
-     * @return
+     * Returns {@code true} if the provided {@code substitutions} have no
+     * affect on {@code this} expression; {@code false} otherwise.
+     *
+     * @param substitutions substitutions to make
+     * @return whether or not the substitutions given changes the expr
      */
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
         PExp thisSubstituted = substitute(substitutions);
