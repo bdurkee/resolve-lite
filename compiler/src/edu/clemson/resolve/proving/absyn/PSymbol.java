@@ -14,7 +14,7 @@ import java.util.*;
  * Represents a reference to a named element such as a variable, constant, or
  * function.
  * <p>
- * Specifically, when this refers to a name of a funtion, that particular
+ * Specifically, if this refers to a <em>name</em> of a funtion, then that
  * instance represents a typed reference to the first class portion of the function,
  * independent of any supplied arguments.</p>
  */
@@ -28,6 +28,13 @@ public class PSymbol extends PExp {
 
     private final boolean literalFlag, incomingFlag;
 
+    /**
+     * Constructs a new {@code PSymbol}. Note that this is specifically made
+     * private; thus clients should instead go through {@link PSymbolBuilder} to
+     * construct new instances.
+     *
+     * @param builder a 'buildable' version of {@code PSymbol}
+     */
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.name), builder.mathType,
                 builder.mathTypeValue, builder.progType, builder.progTypeValue);
@@ -73,10 +80,6 @@ public class PSymbol extends PExp {
 
     @NotNull @Override public String getCanonicalName() {
         return getName();
-    }
-
-    @Override public boolean isFunctionApplication() {
-        return false;
     }
 
     @Override public boolean isLiteralFalse() {
@@ -247,6 +250,12 @@ public class PSymbol extends PExp {
         return result += name;
     }
 
+    /**
+     * A builder for {@code PSymbol}s.
+     * <p>
+     * As usual, a final, immutable instance of {@link PSymbol} can be obtained
+     * through a call to {@link PSymbolBuilder#build()}.</p>
+     */
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
         protected String name, lprint, rprint;
         protected String qualifier;

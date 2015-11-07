@@ -146,10 +146,10 @@ public class PApply extends PExp {
     }
 
     /**
-     * This {@code PExp} represents the 'first class function' this application
-     * is referencing. Note that the type of {@code functionPortion} can be
-     * considered independent of the types of the actual arguments
-     * (which are rightly stored here).
+     * Represents the 'first class function' this application is referencing.
+     * Note that the type of {@code functionPortion} can be considered
+     * independent of the types of the actuals
+     * (which are rightly embedded here in the argument {@code PExp}s).
      *
      * <p>
      * While this field in most cases will simply be an instance of
