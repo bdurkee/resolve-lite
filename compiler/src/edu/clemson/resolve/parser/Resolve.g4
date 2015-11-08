@@ -136,8 +136,6 @@ precisModule
 
 precisBlock
     :   ( mathDefinitionDecl
-        | mathCategoricalDefinitionDecl
-        | mathInductiveDefinitionDecl
         | mathTheoremDecl
         )*
     ;

@@ -1589,10 +1589,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTType argTypeValue;
             for (ParserRuleContext arg : args) {
                 argTypeValue = tr.mathTypeValues.get(arg);
-                if (moduleScope.getDependentTerms().contains(arg.getText())) {
-                    argTypeValue = new MTNamed(g, arg.getText());
-                }
-                else if ( argTypeValue == null ) {
+
+                if ( argTypeValue == null ) {
                     compiler.errMgr.semanticError(
                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                             arg.getText());
