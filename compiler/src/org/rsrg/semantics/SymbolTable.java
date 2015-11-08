@@ -165,18 +165,14 @@ public class SymbolTable {
         return compiler;
     }
 
-    public ModuleScopeBuilder startModuleScope(AnnotatedTree module) {
-
-        ParseTree moduleTree = module.getRoot();
+    public ModuleScopeBuilder startModuleScope(AnnotatedTree tree) {
+        ParseTree contextTree = tree.getRoot();
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }
-        if (moduleTree instanceof ResolveParser.ModuleContext) {
-            moduleTree = moduleTree.getChild(0);
-        }
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                module.getName(), (ParserRuleContext)moduleTree, parent, this);
+                tree.getName(), (ParserRuleContext)contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleID(), s);

@@ -25,26 +25,27 @@ public class TestASTStructure extends BaseTest {
     private static String getClassStr(PExp exp) {
         String className = exp.getClass().getSimpleName();
         if (!(exp instanceof PApply)) return className;
-        return (((PApply) exp).getDisplayStyle()).getStyleName()+className;
+        return className+":"+
+                (((PApply) exp).getDisplayStyle()).getStyleName()+className;
     }
 
     @Test public void testPSymbolStructure() {
         TypeGraph g = new TypeGraph();
         String[] expected = {
-            "<InfixPApply:begin>:x + 1 * y\n" +
+            "<PApply:InfixPApply:begin>:x + 1 * y\n" +
             "<PSymbol:begin>:+\n" +
             "<PSymbol:end>:+\n" +
             "<PSymbol:begin>:x\n" +
             "<PSymbol:end>:x\n" +
-            "<InfixPApply:begin>:1 * y\n" +
+            "<PApply:InfixPApply:begin>:1 * y\n" +
             "<PSymbol:begin>:*\n" +
             "<PSymbol:end>:*\n" +
             "<PSymbol:begin>:1\n" +
             "<PSymbol:end>:1\n" +
             "<PSymbol:begin>:y\n" +
             "<PSymbol:end>:y\n" +
-            "<InfixPApply:end>:1 * y\n" +
-            "<InfixPApply:end>:x + 1 * y\n"
+            "<PApply:InfixPApply:end>:1 * y\n" +
+            "<PApply:InfixPApply:end>:x + 1 * y\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g, "x + 1 * y");
         TestListener v = new TestListener();
@@ -58,20 +59,20 @@ public class TestASTStructure extends BaseTest {
             "<PAlternatives:begin>:{{@e if q = @P.Trmnl_Loc;@P.Lab(q) otherwise;}}\n" +
             "<PSymbol:begin>:@e\n" +
             "<PSymbol:end>:@e\n" +
-            "<InfixPApply:begin>:q = @P.Trmnl_Loc\n" +
+            "<PApply:InfixPApply:begin>:q = @P.Trmnl_Loc\n" +
             "<PSymbol:begin>:=\n" +
             "<PSymbol:end>:=\n" +
             "<PSymbol:begin>:q\n" +
             "<PSymbol:end>:q\n" +
             "<PSymbol:begin>:@P.Trmnl_Loc\n" +
             "<PSymbol:end>:@P.Trmnl_Loc\n" +
-            "<InfixPApply:end>:q = @P.Trmnl_Loc\n" +
-            "<PrefixPApply:begin>:@P.Lab(q)\n" +
+            "<PApply:InfixPApply:end>:q = @P.Trmnl_Loc\n" +
+            "<PApply:PrefixPApply:begin>:@P.Lab(q)\n" +
             "<PSymbol:begin>:@P.Lab\n" +
             "<PSymbol:end>:@P.Lab\n" +
             "<PSymbol:begin>:q\n" +
             "<PSymbol:end>:q\n" +
-            "<PrefixPApply:end>:@P.Lab(q)\n" +
+            "<PApply:PrefixPApply:end>:@P.Lab(q)\n" +
             "<PAlternatives:end>:{{@e if q = @P.Trmnl_Loc;@P.Lab(q) otherwise;}}\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g,
