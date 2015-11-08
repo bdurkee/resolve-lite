@@ -276,18 +276,17 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(false, result.isIncoming());
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         boolean[] expected = {false, true, false, true, true};
-        for (int i = 0; i < expected.length; i++) {
-            Assert.assertEquals(expected[i], exps.next().isIncoming());
+        for (boolean anExpected1 : expected) {
+            Assert.assertEquals(anExpected1, exps.next().isIncoming());
         }
         result = result.withIncomingSignsErased();
         exps = result.getSubExpressions().iterator();
-        for (int i = 0; i < expected.length; i++) {
+        for (boolean anExpected : expected) {
             Assert.assertEquals(false, exps.next().isIncoming());
         }
     }
 
-    /*@Test public void testGetIncomingVariables() {
-        TypeGraph g = new TypeGraph();
+    @Test public void testGetIncomingVariables() {
         PExp result =
                 parseMathAssertionExp( g,
                         "Forall x, y, z : Z, Exists u, v, w : N," +
@@ -303,7 +302,6 @@ public class TestPExp extends BaseTest {
     }
 
     @Test public void testGetQuantifiedVariables() {
-        TypeGraph g = new TypeGraph();
         PExp result =
                 parseMathAssertionExp(
                         g,
@@ -321,7 +319,6 @@ public class TestPExp extends BaseTest {
     @Test public void testGetFunctionApplications() {}
 
     @Test public void testGetSymbolNames() {
-       TypeGraph g = new TypeGraph();
         PExp result = parseMathAssertionExp(g, "x + y");
         Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
                 .collect(Collectors.toSet());
@@ -336,14 +333,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
-        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)"); //you actually have to do this again or else we'll retrieve a cached answer
-        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
-        expectedNames = Arrays.asList("y", "s", "z", "v").stream()
-                .collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
-        result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
+      /*  result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
         foundNames = result.getSymbolNames();
         expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
                 .collect(Collectors.toSet());
@@ -378,16 +369,15 @@ public class TestPExp extends BaseTest {
                         "P.Length", "T.Base_Point", "Max_Length")
                         .stream().collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));*/
     }
 
     @Test public void testSubstitute() {
-        TypeGraph g = new TypeGraph();
     }
 
     //Todo: These should be redone and retested after thinking more about
     //parenthesization and consulting sami & murali w/ several test cases.
-    @Test public void testPartition() {
+    /*@Test public void testPartition() {
         TypeGraph g = new TypeGraph();
 
         PExp e = parseMathAssertionExp(g, "(Post implies (Q and R))");

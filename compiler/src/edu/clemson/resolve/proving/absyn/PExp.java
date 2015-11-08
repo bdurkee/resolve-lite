@@ -347,14 +347,17 @@ public abstract class PExp {
 
     @NotNull public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
-                                            boolean excludeLiterals) {
-        return getSymbolNamesNoCache();
-    }
-
     @NotNull public final Set<String> getSymbolNames() {
         return getSymbolNames(false, false);
     }
+
+    @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
+                                                     boolean excludeLiterals) {
+        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
+    }
+
+    protected abstract Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals);
 
     /**
      * Returns {@code true} iff this {@code PExp} and {@code o},
@@ -366,8 +369,6 @@ public abstract class PExp {
      * and variable naming
      */
     @Override public abstract boolean equals(Object o);
-
-    protected abstract Set<String> getSymbolNamesNoCache();
 
     /** A util container for storing node structural and value hashcodes.*/
     public static class HashDuple {

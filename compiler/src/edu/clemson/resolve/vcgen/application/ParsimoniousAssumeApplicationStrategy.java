@@ -71,7 +71,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
     private boolean sharesNamesWithConfirm(PExp assume,
                                            Set<String> confirmSyms) {
-        Set<String> assumeNames = assume.getSymbolNames(true, true);
+        Set<String> assumeNames = assume.getSymbolNames();
         assumeNames.retainAll(confirmSyms);
         return !assumeNames.isEmpty();
     }

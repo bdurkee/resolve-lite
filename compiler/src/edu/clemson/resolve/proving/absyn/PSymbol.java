@@ -209,10 +209,13 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache() {
+    @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
-        if (!isLiteral()) {
-            result.add(name);
+        if (!(excludeApplications && isFunctionApplication()) &&
+            !(excludeLiterals && isLiteral()) &&
+                quantification == Quantification.NONE ) {
+            result.add(getCanonicalName());
         }
         return result;
     }
