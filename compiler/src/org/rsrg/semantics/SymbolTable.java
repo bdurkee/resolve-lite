@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
@@ -165,24 +166,18 @@ public class SymbolTable {
         return compiler;
     }
 
-    public ModuleScopeBuilder startModuleScope(
-            ParserRuleContext ctx, String name) {
+    public ModuleScopeBuilder startModuleScope(AnnotatedTree module) {
 
-        ParseTree moduleTree = null;
-        if ( curModuleScope != null ) {
+        ParseTree moduleTree = module.getRoot();
+        if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }
-        if ( ctx instanceof ResolveParser.ModuleContext ) {
-            moduleTree = ctx.getChild(0);
+        if (moduleTree instanceof ResolveParser.ModuleContext) {
+            moduleTree = moduleTree.getChild(0);
         }
-        else if ( !(ctx.getParent() instanceof ResolveParser.ModuleContext) ) {
-            throw new IllegalArgumentException("the rule context "
-                    + "isn't for a module");
-        }
-
         ScopeBuilder parent = lexicalScopeStack.peek();
-        ModuleScopeBuilder s =
-                new ModuleScopeBuilder(typeGraph, name, ctx, parent, this);
+        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
+                module.getName(), (ParserRuleContext)moduleTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleID(), s);

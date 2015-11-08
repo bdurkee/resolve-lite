@@ -14,16 +14,10 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -32,8 +26,8 @@ import static org.junit.Assert.assertTrue;
 public abstract class BaseTest {
     private static final Logger LOGGER = Logger.getLogger(BaseTest.class.getName());
 
-    public static final String newline = System.getProperty("line.separator");
-    public static final String pathSep = System.getProperty("path.separator");
+    public static final String NEWLINE = System.getProperty("line.separator");
+    public static final String PATHSEP = System.getProperty("path.separator");
 
     /**
      * The base test directory is the directory where generated files get placed
@@ -48,23 +42,6 @@ public abstract class BaseTest {
     public String tmpdir = null;
 
     /**
-     * When the {@code resolve.testinprocess} runtime property is set to
-     * {@code true}, the test suite will attempt to load generated classes into
-     * the test process for direct execution rather than invoking the JVM in a
-     * new process for testing.
-     *
-     * <p>
-     * In-process testing results in a substantial performance improvement, but
-     * some test environments created by IDEs do not support the mechanisms
-     * currently used by the tests to dynamically load compiled code. Therefore,
-     * the default behavior (used in all other cases) favors reliable
-     * cross-system test execution by executing generated test code in a
-     * separate process.</p>
-     */
-    public static final boolean TEST_IN_SAME_PROCESS =
-            Boolean.parseBoolean(System.getProperty("antlr.testinprocess"));
-
-    /**
      * If error during generated class execution, store stderr here; can't
      * return stdout and stderr. This doesn't trap errors from running resolve.
      */
@@ -75,7 +52,6 @@ public abstract class BaseTest {
     }
 
     @org.junit.Rule public final TestRule testWatcher = new TestWatcher() {
-
         @Override protected void succeeded(Description description) {
             eraseTempDir();
         }
@@ -119,7 +95,7 @@ public abstract class BaseTest {
             String expected = pairs[i + 1];
 
             String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
-            ErrorCollector errors = resolve(fileName, input, false,
+            ErrorQueue errors = resolve(fileName, input, false,
                     compilerOptions);
 
             String actual = errors.toString(true);
@@ -153,9 +129,9 @@ public abstract class BaseTest {
                                                 String moduleStr,
                                                 String moduleName,
                                                 boolean defaultListener) {
-        ErrorCollector errorCollector =
+        ErrorQueue errorQueue =
                 resolve(resolveFileName, moduleStr, defaultListener, "-genCode", "Java");
-        if (!errorCollector.errors.isEmpty()) return false;
+        if (!errorQueue.errors.isEmpty()) return false;
         List<String> files = new ArrayList<>();
         if (moduleName != null) {
             files.add(moduleName+".java");
@@ -163,14 +139,14 @@ public abstract class BaseTest {
         return compile(files.toArray(new String[files.size()]));
     }
 
-    protected ErrorCollector resolve(String moduleFileName, String moduleStr,
+    protected ErrorQueue resolve(String moduleFileName, String moduleStr,
                              boolean defaultListener, String ... extraOptions) {
         mkdir(tmpdir);
         writeFile(tmpdir, moduleFileName, moduleStr);
         return resolve(moduleFileName, defaultListener, extraOptions);
     }
 
-    protected ErrorCollector resolve(String moduleFileName,
+    protected ErrorQueue resolve(String moduleFileName,
                              boolean defaultListener, String ... extraOptions) {
         final List<String> options = new ArrayList<>();
         Collections.addAll(options, extraOptions);
@@ -186,7 +162,7 @@ public abstract class BaseTest {
         final String[] optionsA = new String[options.size()];
         options.toArray(optionsA);
         RESOLVECompiler resolve = new RESOLVECompiler(optionsA);
-        ErrorCollector equeue = new ErrorCollector(resolve);
+        ErrorQueue equeue = new ErrorQueue(resolve);
         resolve.addListener(equeue);
         if (defaultListener) {
             resolve.addListener(new DefaultCompilerListener(resolve));
@@ -232,7 +208,7 @@ public abstract class BaseTest {
         Iterable<? extends JavaFileObject> compilationUnits =
                 fileManager.getJavaFileObjectsFromFiles(files);
         Iterable<String> compileOptions =
-                Arrays.asList("-g", "-source", "1.6", "-target", "1.6", "-implicit:class", "-Xlint:-options", "-d", tmpdir, "-cp", tmpdir + pathSep + CLASSPATH);
+                Arrays.asList("-g", "-source", "1.6", "-target", "1.6", "-implicit:class", "-Xlint:-options", "-d", tmpdir, "-cp", tmpdir + PATHSEP + CLASSPATH);
 
         JavaCompiler.CompilationTask task =
                 compiler.getTask(null, fileManager, null, compileOptions, null,
@@ -249,58 +225,9 @@ public abstract class BaseTest {
     }
 
     public String execClass(String className) {
-        if (TEST_IN_SAME_PROCESS) {
-            try {
-                ClassLoader loader = new URLClassLoader(new URL[] {
-                        new File(tmpdir).toURI().toURL() },
-                        ClassLoader.getSystemClassLoader());
-                final Class<?> mainClass = (Class<?>)loader.loadClass(className);
-                final Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
-                PipedInputStream stdoutIn = new PipedInputStream();
-                PipedInputStream stderrIn = new PipedInputStream();
-                PipedOutputStream stdoutOut = new PipedOutputStream(stdoutIn);
-                PipedOutputStream stderrOut = new PipedOutputStream(stderrIn);
-                StreamVacuum stdoutVacuum = new StreamVacuum(stdoutIn);
-                StreamVacuum stderrVacuum = new StreamVacuum(stderrIn);
-
-                PrintStream originalOut = System.out;
-                System.setOut(new PrintStream(stdoutOut));
-                try {
-                    PrintStream originalErr = System.err;
-                    try {
-                        System.setErr(new PrintStream(stderrOut));
-                        stdoutVacuum.start();
-                        stderrVacuum.start();
-                        mainMethod.invoke(null, (Object)new String[] {
-                                new File(tmpdir, "input").getAbsolutePath()
-                        });
-                    }
-                    finally {
-                        System.setErr(originalErr);
-                    }
-                }
-                finally {
-                    System.setOut(originalOut);
-                }
-
-                stdoutOut.close();
-                stderrOut.close();
-                stdoutVacuum.join();
-                stderrVacuum.join();
-                String output = stdoutVacuum.toString();
-                if ( stderrVacuum.toString().length()>0 ) {
-                    this.stderrDuringGenClassExec = stderrVacuum.toString();
-                    System.err.println("exec stderrVacuum: "+ stderrVacuum);
-                }
-                return output;
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
-                throw new RuntimeException(ex);
-            }
-        }
         try {
             String[] args = new String[] {
-                    "java", "-classpath", tmpdir+pathSep+CLASSPATH,
+                    "java", "-classpath", tmpdir+ PATHSEP +CLASSPATH,
                     className, new File(tmpdir, "input").getAbsolutePath()
             };
 //			String cmdLine = Utils.join(args, " ");
@@ -339,8 +266,7 @@ public abstract class BaseTest {
             sucker = new Thread(this);
             sucker.start();
         }
-        @Override
-        public void run() {
+        @Override public void run() {
             try {
                 String line = in.readLine();
                 while (line!=null) {
@@ -357,8 +283,7 @@ public abstract class BaseTest {
         public void join() throws InterruptedException {
             sucker.join();
         }
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return buf.toString();
         }
     }

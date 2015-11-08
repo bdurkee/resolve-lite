@@ -9,7 +9,7 @@ import org.stringtemplate.v4.ST;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ErrorCollector implements RESOLVECompilerListener {
+public class ErrorQueue implements RESOLVECompilerListener {
 
     public final RESOLVECompiler compiler;
     public final List<String> infos = new ArrayList<>();
@@ -17,11 +17,11 @@ public class ErrorCollector implements RESOLVECompilerListener {
     public final List<RESOLVEMessage> warnings = new ArrayList<>();
     public final List<RESOLVEMessage> all = new ArrayList<>();
 
-    public ErrorCollector() {
+    public ErrorQueue() {
         this(null);
     }
 
-    public ErrorCollector(RESOLVECompiler rc) {
+    public ErrorQueue(RESOLVECompiler rc) {
         this.compiler = rc;
     }
 

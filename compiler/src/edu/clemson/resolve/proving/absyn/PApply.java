@@ -44,6 +44,10 @@ public class PApply extends PExp {
                         "(" + Utils.join(s.arguments, ", ") + ")";
             }
 
+            @Override public String getStyleName() {
+                return "Prefix";
+            }
+
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPrefixPApply(s);
             }
@@ -63,6 +67,10 @@ public class PApply extends PExp {
             @Override protected String toString(PApply s) {
                 return Utils.join(s.arguments, " " +
                         s.functionPortion.getCanonicalName() + " ");
+            }
+
+            @Override public String getStyleName() {
+                return "Infix";
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -91,6 +99,10 @@ public class PApply extends PExp {
                 return retval + s.functionPortion.getCanonicalName();
             }
 
+            @Override public String getStyleName() {
+                return "Postfix";
+            }
+
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPostfixPApply(s);
             }
@@ -115,6 +127,10 @@ public class PApply extends PExp {
                         f.getRightPrint();
             }
 
+            @Override public String getStyleName() {
+                return "Outfix";
+            }
+
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginOutfixPApply(s);
             }
@@ -134,6 +150,9 @@ public class PApply extends PExp {
          *  @return a string representation.
          */
         protected abstract String toString(PApply s);
+
+        /** Returns a well formatted name for the style */
+        public abstract String getStyleName();
 
         /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);

@@ -2,6 +2,8 @@ package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -15,6 +17,12 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Represents a collection of information to be associated with a top level
+ * {@link edu.clemson.resolve.parser.ResolveParser.ModuleContext}. We use this
+ * approach over {@code returns} clauses in the grammar to help us keep our
+ * grammar as general as possible.
+ */
 public class AnnotatedTree {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
@@ -36,38 +44,38 @@ public class AnnotatedTree {
      */
     public final Set<String> semanticallyVisibleUses = new LinkedHashSet<>();
 
-    private final String name, fileName;
-    private final ParseTree root;
+    @NotNull private final String name, fileName;
+    @NotNull private final ParseTree root;
     public boolean hasErrors;
 
-    public AnnotatedTree(ParseTree root, String name, String fileName,
-                         boolean hasErrors) {
+    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
+                         @NotNull String fileName, boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
-        if ( !hasErrors ) {
+        if (!hasErrors) {
             UsesListener l = new UsesListener(this);
             ParseTreeWalker.DEFAULT.walk(l, root);
         }
     }
 
-    public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
+    @Nullable public PExp getPExpFor(TypeGraph g, ParserRuleContext ctx) {
         PExp result = mathPExps.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    public String getFileName() {
+    @NotNull public String getFileName() {
         return fileName;
     }
 
-    public ParseTree getRoot() {
+    @NotNull public ParseTree getRoot() {
         return root;
     }
 
@@ -88,15 +96,14 @@ public class AnnotatedTree {
     }
 
     public static class UsesRef {
-        public Token location;
-        public String name;
-        public UsesRef(Token ref) {
-            this(ref, ref == null ? null : ref.getText());
+        @NotNull public Token location;
+        @NotNull public String name;
+
+        public UsesRef(@NotNull Token ref) {
+            this(ref, ref.getText());
         }
-        public UsesRef(Token location, String name) {
-            if (name == null) {
-                throw new IllegalArgumentException("null uses ref");
-            }
+
+        public UsesRef(@NotNull Token location, @NotNull String name) {
             this.location = location;
             this.name = name;
         }

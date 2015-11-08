@@ -39,6 +39,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -58,12 +59,12 @@ import java.util.stream.Collectors;
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static final boolean EMIT_DEBUG = false;
-  /*  private static final TypeComparison<PSymbol, MTFunction> EXACT_DOMAIN_MATCH =
+   /* private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
             new ExactParameterMatch();
 
-    private final TypeComparison<PSymbol, MTFunction> INEXACT_DOMAIN_MATCH =
+    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
             new InexactDomainMatch();
     private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
             new InexactParameterMatch();
@@ -71,13 +72,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingDefParams = false;
 
     /**
-     * Keeps track of the current operationProcedure (and procedure) we're visiting;
-     * {@code null} otherwise. We use this to check whether a recursive call is
-     * being made to an operation procedure decl that hasn't been marked
-     * 'Recursive'.
+     * Keeps track of the current operationProcedure (and procedure) we're
+     * visiting; {@code null} otherwise. We use this to check whether a
+     * recursive call is being made to an operation procedure decl that hasn't
+     * been marked 'Recursive'.
      */
-   // private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
-   // private Resolve.ProcedureDeclContext currentProcedureDecl = null;
+    //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
+    //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /**
      * Set to {@code true} when we're walking the arguments to a module
@@ -135,17 +136,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.g = symtab.getTypeGraph();
     }
 
-    /* @Override public Void visitModule(ResolveParser.ModuleContext ctx) {
+    @Override public Void visitModule(ResolveParser.ModuleContext ctx) {
          String moduleName = Utils.getModuleName(ctx);
-         moduleScope = symtab.startModuleScope(
-                 (ParserRuleContext)ctx.getChild(0), moduleName)
+         moduleScope = symtab.startModuleScope(tr)
                  .addImports(tr.semanticallyVisibleUses);
          super.visitChildren(ctx);
          symtab.endScope();
          return null; //java requires a return, even if its 'Void'
      }
 
-     @Override public Void visitConceptImplModule(
+     /*@Override public Void visitConceptImplModule(
              ResolveParser.ConceptImplModuleContext ctx) {
          moduleScope.addDependentTerms(symtab.moduleScopes.get(
                  ctx.concept.getText()).getDependentTerms());
