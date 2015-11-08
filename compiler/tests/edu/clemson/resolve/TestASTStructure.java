@@ -8,7 +8,7 @@ import org.rsrg.semantics.TypeGraph;
 
 public class TestASTStructure extends BaseTest {
 
-    private static class DemoListener extends PExpListener {
+    /*private static class DemoListener extends PExpListener {
         public String trace = "";
         @Override public void beginChildren(PExp e) {
             trace += "<"+e.getClass().getSimpleName()+":"+"begin>:"+e.getText(true)+"\n";
@@ -65,7 +65,7 @@ public class TestASTStructure extends BaseTest {
 
     @Test public void testPSetStructure() {
 
-    }
+    }*/
 
     //Todo: more tests with mixture of: PLambda, PAlts, & PSets.
 }

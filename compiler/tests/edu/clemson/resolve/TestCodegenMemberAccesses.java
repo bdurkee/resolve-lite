@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestCodegenMemberAccesses extends BaseTest {
-    @Test public void testNestedMemberAccess() throws Exception {
+    /*@Test public void testNestedMemberAccess() throws Exception {
         String[] modules = new String[]{
                 "Facility T; uses Standard_Integers, Standard_Booleans;" +
                 "Type Foo = Record x,y : Std_Integer_Fac :: Integer; end;" +
@@ -75,5 +75,5 @@ public class TestCodegenMemberAccesses extends BaseTest {
         writeModules(modules, "T");
         String found = execCode("T.resolve", modules[0], "T", false);
         Assert.assertEquals("true\n", found);
-    }
+    }*/
 }

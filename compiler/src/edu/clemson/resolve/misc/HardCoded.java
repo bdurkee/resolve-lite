@@ -2,7 +2,7 @@ package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.Resolve;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.DuplicateSymbolException;
@@ -13,8 +13,9 @@ import org.rsrg.semantics.ScopeBuilder;
 
 public class HardCoded {
 
-    public static void addBuiltInSymbols(TypeGraph g, RESOLVECompiler rc,
-            ScopeBuilder b) {
+    public static void addBuiltInSymbols(@NotNull TypeGraph g,
+                                         @NotNull RESOLVECompiler rc,
+                                         @NotNull ScopeBuilder b) {
         try {
             b.addBinding("El", null, g.MTYPE, g.ELEMENT);
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
@@ -67,10 +68,10 @@ public class HardCoded {
     }
 
     //Todo: Should the following two methods *really* be in here?
-    public static String getMetaFieldName(ParserRuleContext t) {
-        String result;
+    @NotNull public static String getMetaFieldName(@NotNull ParserRuleContext t) {
+        String result = "";
 
-        if ( t instanceof Resolve.MathFunctionExpContext ) {
+        /*if ( t instanceof Resolve.MathFunctionExpContext ) {
             result = ((Resolve.MathFunctionExpContext) t).name.getText();
         }
         else if ( t instanceof Resolve.MathVariableExpContext ) {
@@ -79,7 +80,7 @@ public class HardCoded {
         else {
             throw new RuntimeException("not a variable exp or function exp: "
                     + t.getText() + " (" + t.getClass() + ")");
-        }
+        }*/
         return result;
     }
 

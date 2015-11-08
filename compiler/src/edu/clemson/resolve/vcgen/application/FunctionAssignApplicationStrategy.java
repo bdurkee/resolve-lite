@@ -10,6 +10,7 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ public class FunctionAssignApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block,
             VCRuleBackedStat stat) {
-        PExp leftReplacee = stat.getStatComponents().get(0);
+     /*   PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
         if ( !(rightReplacer.isFunctionApplication()) ) {
@@ -35,9 +36,9 @@ public class FunctionAssignApplicationStrategy
         OperationSymbol op = ExplicitCallApplicationStrategy
                 .getOperation(block.scope, (PSymbol) rightReplacer);
 
-        List<PExp> actuals = call.getArguments();
+        List<PExp> actuals = new ArrayList<PExp>();//call.getArguments();
         List<PExp> formals = op.getParameters().stream()
-                .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());
+                .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());*/
         /**
          * So: {@pre Oper op (x: T): U; pre /_x_\; post op = f/_x_\} is in Ctx
          * and our statement reads as follows: {@code v := op(u);}. Informally
@@ -49,7 +50,7 @@ public class FunctionAssignApplicationStrategy
                 ModelBuilderProto.getFacilitySpecializations(
                         block.repo,
                         block.scope, call.getQualifier()));*/
-        PExp opRequires = op.getRequires();
+     /*   PExp opRequires = op.getRequires();
         block.confirm(opRequires.substitute(formals, actuals));
 
         PExp opEnsures = op.getEnsures();
@@ -62,19 +63,19 @@ public class FunctionAssignApplicationStrategy
 
         //update our list of formal params to account for incoming-valued refs
         //to themselves in the ensures clause
-        for (PSymbol f : ensuresRight.getIncomingSymbols()) {
+        for (PSymbol f : ensuresRight.getIncomingVariables()) {
             Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
-        }
+        }*/
 
         /**
          * Now we substitute the formals for actuals in the rhs of the ensures
          * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
          * with the modified {@code f} (formally, {@code Q[v ~> f[x ~> u]]}).
          */
-        ensuresRight = ensuresRight.substitute(formals, actuals);
+      /*  ensuresRight = ensuresRight.substitute(formals, actuals);
 
         block.finalConfirm(block.finalConfirm.getConfirmExp()
-                .substitute(leftReplacee, ensuresRight));
+                .substitute(leftReplacee, ensuresRight));*/
         return block.snapshot();
     }
 

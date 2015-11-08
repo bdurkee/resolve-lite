@@ -1,59 +1,81 @@
 package edu.clemson.resolve.proving.absyn;
 
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * This class provides a general, empty implementation of a listener for the
+ * {@link PExp} hierarchy. This class can be extended to create a listener
+ * which only needs to handle a subset of the available methods.
+ */
 public abstract class PExpListener {
 
-    public void beginPExp(PExp p) {}
+    // General
+    public void beginPExp(@NotNull PExp p) {}
 
-    public void beginPSet(PSet p) {}
+    public void endPExp(@NotNull PExp p) {}
 
-    public void beginPSymbol(PSymbol p) {}
+    public void beginChildren(@NotNull PExp p) {}
 
-    public void beginPrefixPSymbol(PSymbol p) {}
+    public void endChildren(@NotNull PExp p) {}
 
-    public void beginInfixPSymbol(PSymbol p) {}
+    // PApply
+    public void beginPApply(@NotNull PApply p) {}
 
-    public void beginOutfixPSymbol(PSymbol p) {}
+    public void fencepostPApply(@NotNull PApply p) {}
 
-    public void beginPostfixPSymbol(PSymbol p) {}
+    public void endPApply(@NotNull PApply p) {}
 
-    public void beginPAlternatives(PAlternatives p) {}
+    // PrefixPApply
+    public void beginPrefixPApply(@NotNull PApply p) {}
 
-    public void beginPLambda(PLambda p) {}
+    public void fencepostPrefixPApply(@NotNull PApply p) {}
 
-    public void beginChildren(PExp p) {}
+    public void endPrefixPApply(@NotNull PApply p) {}
 
-    public void fencepostPSet(PSet p) {}
+    // InfixPApply
+    public void beginInfixPApply(@NotNull PApply p) {}
 
-    public void fencepostPSymbol(PSymbol p) {}
+    public void fencepostInfixPApply(@NotNull PApply p) {}
 
-    public void fencepostPrefixPSymbol(PSymbol p) {}
+    public void endInfixPApply(@NotNull PApply p) {}
 
-    public void fencepostInfixPSymbol(PSymbol p) {}
+    // OutfixPApply
+    public void beginOutfixPApply(@NotNull PApply p) {}
 
-    public void fencepostOutfixPSymbol(PSymbol p) {}
+    public void fencepostOutfixPApply(@NotNull PApply p) {}
 
-    public void fencepostPostfixPSymbol(PSymbol p) {}
+    public void endOutfixPApply(@NotNull PApply p) {}
 
-    public void fencepostPAlternatives(PAlternatives p) {}
+    // PostfixPApply
+    public void beginPostfixPApply(@NotNull PApply p) {}
 
-    public void endChildren(PExp p) {}
+    public void fencepostPostfixPApply(@NotNull PApply p) {}
 
-    public void endPExp(PExp p) {}
+    public void endPostfixPApply(@NotNull PApply p) {}
 
-    public void endPSymbol(PSymbol p) {}
+    //PSymbol
+    public void beginPSymbol(@NotNull PSymbol p) {}
 
-    public void endPrefixPSymbol(PSymbol p) {}
+    public void fencepostPSymbol(@NotNull PSymbol p) {}
 
-    public void endInfixPSymbol(PSymbol p) {}
+    public void endPSymbol(@NotNull PSymbol p) {}
 
-    public void endOutfixPSymbol(PSymbol p) {}
+    //PAlternatives
+    public void beginPAlternatives(@NotNull PAlternatives p) {}
 
-    public void endPostfixPSymbol(PSymbol p) {}
+    public void fencepostPAlternatives(@NotNull PAlternatives p) {}
 
-    public void endPAlternatives(PAlternatives p) {}
+    public void endPAlternatives(@NotNull PAlternatives p) {}
 
-    public void endPSet(PSet p) {}
+    //PLambda
+    public void beginPLambda(@NotNull PLambda p) {}
 
-    public void endPLambda(PLambda p) {}
+    public void endPLambda(@NotNull PLambda p) {}
 
+    //PSet
+    public void beginPSet(@NotNull PSet p) {}
+
+    public void fencepostPSet(@NotNull PSet p) {}
+
+    public void endPSet(@NotNull PSet p) {}
 }

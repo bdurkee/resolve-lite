@@ -30,14 +30,16 @@
  */
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,21 +56,45 @@ import java.util.stream.Collectors;
  */
 public class Utils {
 
-    public static <T, R> List<R> apply(Collection<T> l, Function<T, R> f) {
+    /**
+     * Applies the provided function, {@code f} to all elements of {@code l},
+     * returning a new list of elements of type corresponding to the range of
+     * {@code f}.
+     *
+     * @param l a starting {@link Collection} of elements.
+     * @param f a function to be applied to the elements of {@code l}
+     * @param <T> type of the starting collection
+     * @param <R> type of resulting list
+     * @return a new list of type {@code R}.
+     */
+    @NotNull public static <T, R> List<R> apply(@NotNull Collection<T> l,
+                                                @NotNull Function<T, R> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
-    public static <T> String join(Collection<T> data, String separator) {
+    public static <T, R> void apply(@NotNull Collection<T> input,
+                                    @NotNull Collection<R> accumulator,
+                                    @NotNull Function<T, Collection<R>> f) {
+        for (T t : input) {
+            accumulator.addAll(f.apply(t));
+        }
+    }
+
+    @NotNull public static <T> String join(@NotNull Collection<T> data,
+                                           @NotNull String separator) {
         return join(data.iterator(), separator, "", "");
     }
 
-    public static <T> String join(Collection<T> data, String separator,
-                                  String left, String right) {
+    @NotNull public static <T> String join(@NotNull Collection<T> data,
+                                           @NotNull String separator,
+                                           @NotNull String left,
+                                           @NotNull String right) {
         return join(data.iterator(), separator, left, right);
     }
 
-    public static <T> String join(Iterator<T> iter, String separator,
-                                  String left, String right) {
+    @NotNull public static <T> String join(@NotNull Iterator<T> iter,
+                                           @NotNull String separator,
+                                           @NotNull String left, String right) {
         StringBuilder buf = new StringBuilder();
 
         while (iter.hasNext()) {
@@ -80,7 +106,8 @@ public class Utils {
         return left + buf.toString() + right;
     }
 
-    public static <T> String join(T[] array, String separator) {
+    @NotNull public static <T> String join(@NotNull T[] array,
+                                           @NotNull String separator) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < array.length; ++i) {
@@ -92,11 +119,12 @@ public class Utils {
         return builder.toString();
     }
 
-    public static <T, R> Map<T, R> zip(List<T> l1, List<R> l2)
+    @NotNull public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
+                                                @NotNull List<R> l2)
             throws IllegalArgumentException {
         if (l1.size() != l2.size()) {
-            throw new IllegalArgumentException("i won't zip differently " +
-                    "sized lists.. extend me if you want");
+            throw new IllegalArgumentException("attempt to zip differently " +
+                    "sized lists");
         }
         Map<T, R> result = new LinkedHashMap<>();
         Iterator<R> l2iter = l2.iterator();
@@ -112,31 +140,32 @@ public class Utils {
      * of concrete syntax {@code nodes}, and a mapping from rule contexts to
      * some number of elements descending from {@code E}.
      *
-     * @param expectedType The class type to inhabit the returned list
-     * @param nodes A list of concrete syntax nodes, as obtained through
+     * @param expectedType the class type to inhabit the returned list
+     * @param nodes a list of concrete syntax nodes, as obtained through
      *        a visitor, listener, etc.
-     * @param annotations A map from rule context to the primary supertype
+     * @param annotations a map from rule context to the primary supertype
      *        of {@code expectedType} ({@code E}).
-     * @param <E> Super type of {@code expectedType}.
-     * @param <T> The expected type.
-     * @return A list of {@code T}.
+     * @param <E> super type of {@code expectedType}.
+     * @param <T> the expected type.
+     * @return a list of {@code T}.
      */
-    public static <E, T extends E> List<T> collect(
-            Class<T> expectedType, List<? extends ParseTree> nodes,
-            ParseTreeProperty<? extends E> annotations) {
+    @NotNull public static <E, T extends E> List<T> collect(
+            @NotNull Class<T> expectedType,
+            @NotNull List<? extends ParseTree> nodes,
+            @NotNull ParseTreeProperty<? extends E> annotations) {
         return nodes.stream().map(x -> expectedType
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    public static String getModuleName(ParseTree ctx) {
-        if ( ctx instanceof Resolve.ModuleContext ) {
+    @NotNull public static String getModuleName(@NotNull ParseTree ctx) {
+        if (ctx instanceof ResolveParser.ModuleContext) {
             ctx = ctx.getChild(0);
         }
 
-        if ( ctx instanceof Resolve.PrecisModuleContext ) {
-            return ((Resolve.PrecisModuleContext) ctx).name.getText();
+        if (ctx instanceof ResolveParser.PrecisModuleContext ) {
+            return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof Resolve.ConceptModuleContext ) {
+        /*else if ( ctx instanceof Resolve.ConceptModuleContext ) {
             return ((Resolve.ConceptModuleContext) ctx).name.getText();
         }
         else if ( ctx instanceof Resolve.FacilityModuleContext ) {
@@ -157,33 +186,48 @@ public class Utils {
         else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
             return ((Resolve.PrecisExtensionModuleContext) ctx).name
                     .getText();
-        }
+        }*/
         else {
             throw new IllegalArgumentException("unrecognized module");
         }
     }
 
-    public interface Builder<T> {
-        T build();
+    /**
+     * A general purpose builder for objects of type {@code T}. This interface
+     * should be implemented by classes that might benefit from incremental
+     * construction -- meaning through chained calls to a series of builder
+     * methods that methods that return back an instance of the specific
+     * {@code Builder} subclass.
+     *
+     * @param <T> the type of the object to be built
+     * @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder
+     */
+    @FunctionalInterface public interface Builder<T> {
+
+        @NotNull T build();
     }
 
     /**
-     * Returns a new {@link CommonToken} given some arbitrary, parser created
-     * {@link Token} {@code t}. This is useful for when you want create a token
-     * consisting of {@code desiredText} but with location information
+     * Returns a new {@link CommonToken} from some arbtrary existing
+     * {@code Token}. This is useful for when you want create a {@code Token}
+     * consisting of {@code desiredText}, but with location information
      * 'filled-in' and accounted for -- taken from {@code t}.
      * <p>
      * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
-     * the text for the resulting {@code CommonToken} will contain whatever
-     * text existed in {@code t} starting out.</p>
+     * the text for the resulting {@code Token} will contain whatever text was
+     * already in {@code t} starting out.</p>
      *
-     * @param t An existing token (preferablly near where {@code desiredText} should appear)
-     * @param desiredText The text we want the resulting token to hold
+     * @param t an existing token (preferably near where {@code desiredText}
+     *          should appear)
+     * @param desiredText the text we want the resulting token to hold
      * @return a new token
      */
-    public static CommonToken createTokenFrom(Token t, String desiredText) {
+    public static CommonToken createTokenFrom(@NotNull Token t,
+                                              @Nullable String desiredText) {
         CommonToken result = new CommonToken(t);
-        result.setText(desiredText);
+        if (desiredText != null) {
+            result.setText(desiredText);
+        }
         return result;
     }
 
@@ -194,9 +238,9 @@ public class Utils {
      * @param ctx the rule context
      * @return the raw sourcecode represented within {@code ctx}
      */
-    public static String getRawText(ParserRuleContext ctx) {
-        Interval interval =
-                new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+    @NotNull public static String getRawText(@Nullable ParserRuleContext ctx) {
+        if (ctx == null) return "";
+        Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
         return ctx.start.getInputStream().getText(interval);
     }
 
@@ -207,9 +251,9 @@ public class Utils {
      *      {@code Basic_Natural_Number_Theory.resolve}.
      *
      * @param name a file name with zero or more '/' delimited directories
-     * @return just the file name
+     * @return the extensionless filename
      */
-    public static String groomFileName(String name) {
+    @Nullable public static String groomFileName(@NotNull String name) {
         int start = name.lastIndexOf("/");
         if ( start == -1 ) {
             return name;
@@ -217,7 +261,7 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
-    public static String stripFileExtension(String name) {
+    @Nullable public static String stripFileExtension(@Nullable String name) {
         if ( name == null ) return null;
         int lastDot = name.lastIndexOf('.');
         if ( lastDot < 0 ) return name;
@@ -225,7 +269,8 @@ public class Utils {
     }
 
     //TODO: Add charset parameter 'StandardCharset.' etc.
-    public static String readFile(String file) throws IOException {
+    @Nullable public static String readFile(@Nullable String file)
+            throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -237,7 +282,9 @@ public class Utils {
         return stringBuilder.toString();
     }
 
-    public static void writeFile(String dir, String fileName, String content) {
+    public static void writeFile(@Nullable String dir,
+                                 @Nullable String fileName,
+                                 @Nullable String content) {
         try {
             org.antlr.v4.runtime.misc.Utils.writeFile(dir + File.separator +
                     fileName, content, "UTF-8");

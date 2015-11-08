@@ -16,7 +16,9 @@ public class HardCodedProgOps {
     }
 
     public static BuiltInOpAttributes convert(Token op, List<PTType> args) {
-        if (args.isEmpty()) {
+        BuiltInOpAttributes result = new BuiltInOpAttributes(op);
+
+       /* if (args.isEmpty()) {
             return convertBooleanProgramOp(op); //only thing we could possibly match that has no arguments is true or false
         }
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
@@ -32,23 +34,23 @@ public class HardCodedProgOps {
         }
         else if ( firstArgType.getName().equals("Char_Str") ) {
             result = convertCharStrProgramOp(op);
-        }
+        }*/
         return result;
     }
 
     public static BuiltInOpAttributes convertCharStrProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        switch (op.getType()) {
+       /* switch (op.getType()) {
             case ResolveLexer.PLUSPLUS:
                 result = new BuiltInOpAttributes("Std_Char_Str_Fac", op, "Merger");
                 break;
-        }
+        }*/
         return result;
     }
 
     public static BuiltInOpAttributes convertIntegerProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        switch (op.getType()) {
+        /*switch (op.getType()) {
             case ResolveLexer.PLUS:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Sum");
                 break;
@@ -116,7 +118,7 @@ public class HardCodedProgOps {
             case ResolveLexer.OR:
                 result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Or");
                 break;
-        }
+        }*/
         return result;
     }
 

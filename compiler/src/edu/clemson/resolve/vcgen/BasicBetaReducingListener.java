@@ -4,15 +4,17 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PLambda;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/** A visitor that replaces conceptual variables with their correspondence
- *  defined mathematical counterparts.
- *  <p>
- *  Note: This listener assumes the starting expression ({@code start}) has
- *  already had all occurences of its conceptually-bound variables prefixed by 'conc'.</p>
+/**
+ * A visitor that replaces conceptual variables with their correspondence
+ * defined mathematical counterparts.
+ * <p>
+ * Note: This listener assumes the starting expression ({@code start}) has
+ * already had all occurences of its conceptually-bound variables prefixed by 'conc'.</p>
  */
 public class BasicBetaReducingListener extends PExpListener {
 
@@ -40,9 +42,9 @@ public class BasicBetaReducingListener extends PExpListener {
         return betaReducedExp;
     }
 
-    @Override public void endPSymbol(PSymbol e) {
+    @Override public void endPSymbol(@NotNull PSymbol e) {
         //TODO: Second condition here should be: is e.getName contained in the keyset of our substitution map?
-        if (e.isFunctionApplication() &&
+       /* if (e.isFunctionApplication() &&
                 substitutions.containsKey(e.withArgumentsErased()) &&
                 substitutions.get(e.withArgumentsErased()) instanceof PLambda) {
             PLambda l = (PLambda) substitutions.get(e.withArgumentsErased());
@@ -50,6 +52,6 @@ public class BasicBetaReducingListener extends PExpListener {
                     e.getArguments());
             betaReducedExp = betaReducedExp.substitute(e, newBody);
 
-        }
+        }*/
     }
 }

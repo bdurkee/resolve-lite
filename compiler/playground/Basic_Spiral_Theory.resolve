@@ -1,4 +1,4 @@
-Precis Basic_Spiral_Theory; @Dependent_Terms{k}
+Precis Basic_Spiral_Theory;
     uses Basic_Natural_Number_Theory, Basic_Integer_Theory;
 
     Definition N2 : Powerset(N) is {n : N | n >= 2};

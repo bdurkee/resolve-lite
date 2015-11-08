@@ -12,10 +12,9 @@ public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
 
     private final Function<T, R> myMapping;
 
-    /**
-     * Constructs a new immutable list based on {@code original} in which each
-     * entry in this new list will be the sister entry in that original list,
-     * filtered through {@code m}.
+    /** Constructs a new immutable list based on {@code original} in which each
+     *  entry in this new list will be the sister entry in that original list,
+     *  filtered through {@code m}.
      * <p>
      * {@code m} must represent a functional mapping--that is, if
      * {@code x.equals(y)}, then {@code m.apply(x).equals(m.apply(y)} in all

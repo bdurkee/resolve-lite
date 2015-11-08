@@ -3,7 +3,6 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
-import edu.clemson.resolve.proving.absyn.PSymbol.DisplayStyle;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -313,13 +312,15 @@ public class TypeGraph {
     }
 
     public PSymbol formConjunct(PExp p, PExp q) {
-        return new PSymbolBuilder("and").mathType(BOOLEAN).arguments(p, q)
-                .style(DisplayStyle.INFIX).build();
+        return null;
+        //return new PSymbolBuilder("and").mathType(BOOLEAN).arguments(p, q)
+        //        .style(DisplayStyle.INFIX).build();
     }
 
     public PSymbol formDisjunct(PExp p, PExp q) {
-        return new PSymbolBuilder("or").mathType(BOOLEAN).arguments(p, q)
-                .style(DisplayStyle.INFIX).build();
+        return null;
+        //return new PSymbolBuilder("or").mathType(BOOLEAN).arguments(p, q)
+        //        .style(DisplayStyle.INFIX).build();
     }
 
     public final PSymbol getTrueExp() {
@@ -333,20 +334,21 @@ public class TypeGraph {
     }
 
     public final PSymbol formImplies(PExp p, PExp q) {
-        return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
-                .style(DisplayStyle.INFIX).build();
+        return null;
+        //return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
+        //        .style(DisplayStyle.INFIX).build();
     }
 
     public final PSymbol formConcExp() {
-        return new PSymbol.PSymbolBuilder("conc").mathType(BOOLEAN).build();
+        return new PSymbolBuilder("conc").mathType(BOOLEAN).build();
     }
 
     public final PSymbol formInitializationPredicate(PTType argType,
             String argName) {
         PSymbol predicateArg =
                 new PSymbolBuilder(argName).mathType(argType.toMath()).build();
-
-        return new PSymbolBuilder(argType.toString() + ".Is_Initial")
-                .mathType(BOOLEAN).arguments(predicateArg).build();
+        return null;
+        //return new PSymbolBuilder(argType.toString() + ".Is_Initial")
+        //        .mathType(BOOLEAN).arguments(predicateArg).build();
     }
 }

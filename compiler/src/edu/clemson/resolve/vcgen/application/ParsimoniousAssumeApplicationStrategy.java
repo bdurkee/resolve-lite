@@ -17,7 +17,7 @@ public class ParsimoniousAssumeApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block, VCAssume stat) {
 
-        PExp assumeExp = stat.getStatComponents().get(0);
+      /*  PExp assumeExp = stat.getStatComponents().get(0);
         PExp finalConfirmExp = block.finalConfirm.getConfirmExp();
         Map<PExp, PExp> equalsReplacements = new HashMap<>();
 
@@ -65,13 +65,13 @@ public class ParsimoniousAssumeApplicationStrategy
                             block.g.formConjuncts(relevantUntouchedAssumptions),
                             finalConfirmExp);
             block.finalConfirm(newConfirm);
-        }
+        }*/
         return block.snapshot();
     }
 
     private boolean sharesNamesWithConfirm(PExp assume,
                                            Set<String> confirmSyms) {
-        Set<String> assumeNames = assume.getSymbolNames(true, true);
+        Set<String> assumeNames = assume.getSymbolNames();
         assumeNames.retainAll(confirmSyms);
         return !assumeNames.isEmpty();
     }

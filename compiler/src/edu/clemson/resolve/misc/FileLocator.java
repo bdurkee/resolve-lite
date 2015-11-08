@@ -85,7 +85,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *
      * @throws NoSuchFileException If a file matching {@code this.pattern} could
      *         not be found.
-     *
      * @return The matching file.
      */
     public File getFile() throws IOException {

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCompileOrder extends BaseTest {
 
-    @Test public void testBasicLinearOrdering() throws Exception {
+  /*  @Test public void testBasicLinearOrdering() throws Exception {
         String[] modules = new String[] {
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n uses V;\n end U;",
@@ -60,5 +60,5 @@ public class TestCompileOrder extends BaseTest {
     private void testOrdering(String expected, String root) {
         ErrorCollector e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
         assertEquals(expected, e.toInfoString());
-    }
+    }*/
 }

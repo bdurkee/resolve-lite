@@ -7,8 +7,8 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Archiver;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
@@ -42,7 +42,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 + File.separator + "external");
         for (AnnotatedTree unit : compilationUnits) {
             try {
-                if ( unit.getRoot().getChild(0) instanceof Resolve.PrecisModuleContext ) continue;
+                if ( unit.getRoot().getChild(0) instanceof
+                        ResolveParser.PrecisModuleContext ) continue;
 
                 CodeGenerator gen = new CodeGenerator(compiler, unit);
                 if ( compiler.genCode.equalsIgnoreCase("java") ) {
@@ -119,10 +120,10 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     }
 
     private boolean containsValidMain(ParseTree root) {
-        if (root instanceof Resolve.ModuleContext) {
+        if (root instanceof ResolveParser.ModuleContext) {
             root = root.getChild(0);
         }
-        if (!(root instanceof Resolve.FacilityModuleContext)) return false;
+        //if (!(root instanceof ResolveParser.FacilityModuleContext)) return false;
         MainFunctionListener l = new MainFunctionListener();
         ParseTreeWalker.DEFAULT.walk(l, root);
         return l.containsMain;
@@ -131,11 +132,11 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     protected class MainFunctionListener extends ResolveBaseListener {
         public boolean containsMain = false;
 
-        @Override public void enterOperationProcedureDecl(
-                Resolve.OperationProcedureDeclContext ctx) {
+        /*@Override public void enterOperationProcedureDecl(
+                ResolveParser.OperationProcedureDeclContext ctx) {
             if (ctx.name.getText().equals("Main") ||
                     ctx.name.getText().equals("main")) containsMain = true;
-        }
+        }*/
     }
 
     private void addAdditionalFiles(List<File> files,

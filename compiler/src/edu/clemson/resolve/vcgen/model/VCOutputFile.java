@@ -2,10 +2,7 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
-import edu.clemson.resolve.proving.Antecedent;
-import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.VC;
 
 import java.util.ArrayList;
@@ -55,7 +52,7 @@ public class VCOutputFile extends OutputModelObject {
     private void addVCsInContext(final AssertiveBlock batch,
                                  final int sectionNumber) {
         List<PExp> vcs = batch.getFinalConfirm().getConfirmExp()
-                .experimentalSplit();
+                .splitIntoSequents();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
         for (PExp vc : vcs) {

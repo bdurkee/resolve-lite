@@ -1,7 +1,7 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -19,20 +19,20 @@ public class UsesListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    @Override public void enterConceptImplModule(
-            Resolve.ConceptImplModuleContext ctx) {
+ /*   @Override public void enterConceptImplModule(
+            ResolveParser.ConceptImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementModule(
-            Resolve.EnhancementModuleContext ctx) {
+            ResolveParser.EnhancementModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
     @Override public void enterEnhancementImplModule(
-            Resolve.EnhancementImplModuleContext ctx) {
+            ResolveParser.EnhancementImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.enhancement));
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.enhancement.getText());
@@ -40,14 +40,14 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Override public void enterPrecisExtensionModule(
-            Resolve.PrecisExtensionModuleContext ctx) {
+            ResolveParser.PrecisExtensionModuleContext ctx) {
         for (TerminalNode t : ctx.ID()) { // this will automatically add <id> + 'for' <id> + extended by <id>s
             tr.uses.add(new AnnotatedTree.UsesRef(ctx.precis));
             tr.semanticallyVisibleUses.add(ctx.precis.getText());
         }
     }
 
-    @Override public void exitUsesList(Resolve.UsesListContext ctx) {
+    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         tr.uses.addAll(ctx.ID().stream()
                 .map(t -> new AnnotatedTree.UsesRef(t.getSymbol()))
                 .collect(Collectors.toList()));
@@ -55,7 +55,7 @@ public class UsesListener extends ResolveBaseListener {
                 .map(ParseTree::getText).collect(Collectors.toList()));
     }
 
-    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         //tr.semanticallyVisibleUses.add(ctx.spec.getText());
         if ( ctx.externally != null ) {
@@ -68,7 +68,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Override public void exitEnhancementPairDecl(
-            Resolve.EnhancementPairDeclContext ctx) {
+            ResolveParser.EnhancementPairDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),
@@ -77,5 +77,5 @@ public class UsesListener extends ResolveBaseListener {
         else {
             tr.uses.add(new AnnotatedTree.UsesRef(ctx.impl));
         }
-    }
+    }*/
 }

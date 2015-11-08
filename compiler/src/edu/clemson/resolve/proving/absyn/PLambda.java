@@ -1,18 +1,24 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTFunction;
+import org.rsrg.semantics.MTInvalid;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * An anonymous (lambda) function consisting of one or more typed bound
+ * variables and a body.
+ */
 public class PLambda extends PExp {
 
     private final List<Parameter> parameters = new ArrayList<>();
-    private final PExp body;
+    @NotNull private final PExp body;
 
-    public PLambda(List<Parameter> parameters, PExp body) {
+    public PLambda(@NotNull List<Parameter> parameters, @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
                 new MTFunction.MTFunctionBuilder(body.getMathType()
                         .getTypeGraph(), body.getMathType())
@@ -44,15 +50,15 @@ public class PLambda extends PExp {
         v.endPExp(this);
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
-        PExp retval;
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+        PExp result;
         if ( substitutions.containsKey(this) ) {
-            retval = substitutions.get(this);
+            result = substitutions.get(this);
         }
         else {
-            retval = new PLambda(parameters, body.substitute(substitutions));
+            result = new PLambda(parameters, body.substitute(substitutions));
         }
-        return retval;
+        return result;
     }
 
     @Override public boolean containsName(String name) {
@@ -64,7 +70,7 @@ public class PLambda extends PExp {
         return result || body.containsName(name);
     }
 
-    @Override public List<PExp> getSubExpressions() {
+    @NotNull @Override public List<PExp> getSubExpressions() {
         return Collections.singletonList(body);
     }
 
@@ -89,55 +95,38 @@ public class PLambda extends PExp {
         return body.isLiteralFalse();
     }
 
-    @Override public boolean isVariable() {
-        return false;
+    @NotNull @Override public String getCanonicalName() {
+        return "\\lambda";
     }
 
-    @Override public boolean isLiteral() {
-        return false;
-    }
-
-    @Override public boolean isFunctionApplication() {
-        return false;
-    }
-
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PLambda(parameters, body.withIncomingSignsErased());
     }
 
-    @Override public PExp withQuantifiersFlipped() {
-        return this;
+    @NotNull @Override public PExp withQuantifiersFlipped() {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+        return body.getIncomingVariablesNoCache();
     }
 
-    @Override public Set<PSymbol> getIncomingVariablesNoCache(
-            boolean convertApplications) {
-        return body.getIncomingVariablesNoCache(convertApplications);
-    }
-
-    @Override public Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override public Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> bodyNames =
-                new HashSet<>(body.getSymbolNames(
-                        excludeApplications, excludeLiterals));
-        if (!excludeApplications) {
+                new HashSet<>(body.getSymbolNames());
             bodyNames.add("lambda");
-        }
         return bodyNames;
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return body.getQuantifiedVariables();
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions =
                 new LinkedList<>(body.getFunctionApplications());
         bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(
@@ -171,7 +160,7 @@ public class PLambda extends PExp {
         }
 
         @Override public String toString() {
-            return name + ":" + type;
+            return name + ":" + (type instanceof MTInvalid ? "Inv" : type);
         }
     }
 
@@ -187,6 +176,6 @@ public class PLambda extends PExp {
     }
 
     @Override public String toString() {
-        return "lambda " + Utils.join(parameters, ", ") + ".(" + body + ")";
+        return "lambda(" + Utils.join(parameters, ", ") + ").(" + body + ")";
     }
 }

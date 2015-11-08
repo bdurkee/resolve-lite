@@ -3,7 +3,7 @@ package org.rsrg.semantics;
 /**
  * A general, reusable representation of mathematical quantification.
  * This enum should be used for anything that is capable of being quantified
- * (e.g. primarily Symbols and {@link PExp}s.
+ * (e.g. {@link edu.clemson.resolve.proving.absyn.PExp}s).
  */
 public enum Quantification {
 

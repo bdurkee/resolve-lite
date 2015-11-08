@@ -1,6 +1,7 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.GenericSymbol;
@@ -13,21 +14,21 @@ public class ModuleParameterization {
     private final SymbolTable scopeRepo;
     private final String moduleID;
 
-    private final List<Resolve.ModuleArgumentContext> arguments =
-            new ArrayList<>();
+    //private final List<ResolveParser.ModuleArgumentContext> arguments =
+    //        new ArrayList<>();
     private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     private final FacilitySymbol instantiatingFacility;
 
     public ModuleParameterization(String moduleID,
                                   List<ProgTypeSymbol> actualGenerics,
-                                  Resolve.ModuleArgumentListContext actualArgs,
+                                  ParserRuleContext TEMP,//Resolve.ModuleArgumentListContext actualArgs,
                                   FacilitySymbol instantiatingFacility, SymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
         this.actualGenerics.addAll(actualGenerics);
 
-        if ( actualArgs != null ) {
-            arguments.addAll(actualArgs.moduleArgument());
+        if ( TEMP != null ) {
+            //arguments.addAll(actualArgs.moduleArgument());
         }
         this.moduleID = moduleID;
     }
@@ -41,11 +42,11 @@ public class ModuleParameterization {
             if ( instantiated ) {
                 Map<String, PTType> genericInstantiations;
 
-                genericInstantiations =
-                        getGenericInstantiations(originalScope, arguments);
-                result =
-                        new InstantiatedScope(originalScope,
-                                genericInstantiations, instantiatingFacility);
+               // genericInstantiations =
+               //         getGenericInstantiations(originalScope, null);
+                //result =
+               //         new InstantiatedScope(originalScope,
+                //                genericInstantiations, instantiatingFacility);
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -55,7 +56,7 @@ public class ModuleParameterization {
         return result;
     }
 
-    private Map<String, PTType> getGenericInstantiations(
+    /*private Map<String, PTType> getGenericInstantiations(
             ModuleScopeBuilder moduleScope,
             List<Resolve.ModuleArgumentContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
@@ -74,7 +75,7 @@ public class ModuleParameterization {
                     .next().getProgramType());
         }
         return result;
-    }
+    }*/
 
     public String getName() {
         return moduleID;
@@ -84,7 +85,7 @@ public class ModuleParameterization {
         return moduleID;
     }
 
-    public List<Resolve.ModuleArgumentContext> getArguments() {
-        return arguments;
-    }
+   // public List<Resolve.ModuleArgumentContext> getArguments() {
+   //     return arguments;
+   // }
 }

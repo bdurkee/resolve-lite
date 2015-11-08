@@ -3,7 +3,7 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -172,10 +172,10 @@ public class SymbolTable {
         if ( curModuleScope != null ) {
             throw new IllegalStateException("module scope already open");
         }
-        if ( ctx instanceof Resolve.ModuleContext ) {
+        if ( ctx instanceof ResolveParser.ModuleContext ) {
             moduleTree = ctx.getChild(0);
         }
-        else if ( !(ctx.getParent() instanceof Resolve.ModuleContext) ) {
+        else if ( !(ctx.getParent() instanceof ResolveParser.ModuleContext) ) {
             throw new IllegalArgumentException("the rule context "
                     + "isn't for a module");
         }

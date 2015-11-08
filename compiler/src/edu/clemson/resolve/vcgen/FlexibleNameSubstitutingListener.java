@@ -2,9 +2,8 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
-import edu.clemson.resolve.proving.absyn.PLambda;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,8 +60,8 @@ public class FlexibleNameSubstitutingListener extends PExpListener {
         return intermediateSubstitutedExp.substitute(substitutions);
     }
 
-    @Override public void beginPSymbol(PSymbol e) {
-        if ( e.isFunctionApplication() ) {
+    @Override public void beginPSymbol(@NotNull PSymbol e) {
+        /*if ( e.isFunctionApplication() ) {
             PExp withoutArgs = e.withArgumentsErased();
             if (substitutions.containsKey(withoutArgs) &&
                     !(substitutions.get(withoutArgs) instanceof PLambda) &&
@@ -71,6 +70,6 @@ public class FlexibleNameSubstitutingListener extends PExpListener {
                 applicationSubstitutions.put(e, new PSymbolBuilder(replacement)
                         .arguments(e.getArguments()).build());
             }
-        }
+        }*/
     }
 }

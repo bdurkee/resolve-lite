@@ -2,6 +2,7 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.misc.Utils.Builder;
 import edu.clemson.resolve.proving.absyn.PExp;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -375,7 +376,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
             return paramTypes(Arrays.asList(types));
         }
 
-        @Override public MTFunction build() {
+        @NotNull @Override public MTFunction build() {
             return new MTFunction(this);
         }
     }

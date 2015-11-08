@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 
 import java.util.*;
@@ -11,8 +12,9 @@ public class PSet extends PExp {
     //Todo: should this be a set?
     private final List<PExp> elements = new ArrayList<>();
 
+    //TODO: Give me a real HashDuple (one based on my actual elements!)
     public PSet(MTType type, MTType typeValue, List<PExp> elements) {
-        super(PSymbol.calculateHashes(elements), type, typeValue);
+        super(new HashDuple(0, 56), type, typeValue);
         this.elements.addAll(elements);
     }
 
@@ -34,7 +36,7 @@ public class PSet extends PExp {
         v.endPExp(this);
     }
 
-    @Override public PExp substitute(Map<PExp, PExp> substitutions) {
+    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         return new PSet(getMathType(), getMathTypeValue(),
                 Utils.apply(elements, u -> u.substitute(substitutions)));
     }
@@ -45,7 +47,7 @@ public class PSet extends PExp {
                 .collect(Collectors.toList()).isEmpty();
     }
 
-    @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull @Override public List<? extends PExp> getSubExpressions() {
         return elements;
     }
 
@@ -61,6 +63,10 @@ public class PSet extends PExp {
         return false;
     }
 
+    @NotNull @Override protected String getCanonicalName() {
+        return "{ PSet }";
+    }
+
     @Override public boolean isLiteral() {
         return false;
     }
@@ -69,34 +75,34 @@ public class PSet extends PExp {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(List<PExp> accumulator) {}
+    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {}
 
-    @Override public PExp withIncomingSignsErased() {
+    @NotNull @Override public PExp withIncomingSignsErased() {
         return new PSet(getMathType(), getMathTypeValue(),
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
-    @Override public PExp withQuantifiersFlipped() {
+    @NotNull @Override public PExp withQuantifiersFlipped() {
         return null;
     }
 
-    @Override public PExp withArgumentsErased() {
-        return this;
-    }
-
-    @Override public Set<PSymbol> getIncomingVariablesNoCache(boolean convertApplications) {
+    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
         return new LinkedHashSet<>();
     }
 
-    @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return new HashSet<>();
     }
 
-    @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         return new ArrayList<>();
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(boolean includeApplications, boolean excludeLiterals) {
+    @Override public boolean equals(Object o) {
+        return false;
+    }
+
+    @Override protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         return new HashSet<>();
     }
 

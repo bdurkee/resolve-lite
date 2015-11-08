@@ -26,7 +26,7 @@ public class ExplicitCallApplicationStrategy
 
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
-        PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
+      /*  PSymbol callExp = (PSymbol) stat.getStatComponents().get(0);
 
         PExpSomethingListener something = new PExpSomethingListener(block);
         callExp.accept(something);
@@ -41,11 +41,12 @@ public class ExplicitCallApplicationStrategy
         BasicBetaReducingListener b =
                 new BasicBetaReducingListener(something.test, finalConfirm);
         finalConfirm.accept(b);
-        finalConfirm = b.getBetaReducedExp();
-        return block.finalConfirm(finalConfirm).snapshot();
+        finalConfirm = b.getBetaReducedExp();*/
+        //return block.finalConfirm(finalConfirm).snapshot();
+        return block.snapshot();
     }
 
-    protected static OperationSymbol getOperation(Scope s, PSymbol app) {
+   /* protected static OperationSymbol getOperation(Scope s, PSymbol app) {
         List<PTType> argTypes = app.getArguments().stream()
                 .map(PExp::getProgType).collect(Collectors.toList());
         try {
@@ -58,7 +59,7 @@ public class ExplicitCallApplicationStrategy
             //shouldn't happen. Well, depends on s.
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @Override public String getDescription() {
         return "explicit (simple) call rule application";

@@ -3,8 +3,8 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -27,7 +27,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    @Override public void exitConceptModule(Resolve.ConceptModuleContext ctx) {
+    /*@Override public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
@@ -49,13 +49,14 @@ public class SanityCheckingListener extends ResolveBaseListener {
     @Override public void exitEnhancementImplModule(
             Resolve.EnhancementImplModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
+    }*/
 
-    @Override public void exitPrecisModule(Resolve.PrecisModuleContext ctx) {
+    @Override public void exitPrecisModule(
+            ResolveParser.PrecisModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
-    @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+    /*@Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
     }
@@ -78,13 +79,13 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     @Override public void exitRequiresClause(Resolve.RequiresClauseContext ctx) {
         PExp requires = tr.mathPExps.get(ctx);
-        if (requires != null && !requires.getIncomingSymbols().isEmpty()) {
+        if (requires != null && !requires.getIncomingVariables().isEmpty()) {
             compiler.errMgr.semanticError(
                     ErrorKind.ILLEGAL_INCOMING_REF_IN_REQUIRES, ctx.getStart(),
-                    requires.getIncomingSymbols(),
+                    requires.getIncomingVariables(),
                     ctx.mathAssertionExp().getText());
         }
-    }
+    }*/
 
     private void sanityCheckProgOpTypes(ParserRuleContext ctx,
                                         PTType l, PTType r) {

@@ -3,7 +3,6 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
-import edu.clemson.resolve.parser.Resolve;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 

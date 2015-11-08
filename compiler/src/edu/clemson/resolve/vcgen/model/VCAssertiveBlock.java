@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -131,7 +132,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
          *  other words, a call to this will fully develop the final confirm
          *  for this particular block of assertive code.
          */
-        @Override public VCAssertiveBlock build() {
+        @NotNull @Override public VCAssertiveBlock build() {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();

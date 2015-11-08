@@ -2,7 +2,6 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -67,7 +66,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return outputFile;
     }
 
-    @Override public void enterModule(Resolve.ModuleContext ctx) {
+   /* @Override public void enterModule(Resolve.ModuleContext ctx) {
         moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
     }
 
@@ -133,9 +132,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
-    /** Applies simple call rule to any arguments in {@code args} that need
-     *  it (e.g.: they're arithmetic expressions)
-     */
+
     private List<PExp> reduceArgs(List<PExp> args) {
         List<PExp> result = new ArrayList<>();
         for (PExp arg : args) {
@@ -547,7 +544,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
-    //PTRepresentation). This method won't do anything otherwise.*/
+    //PTRepresentation). This method won't do anything otherwise.
     private PExp perParameterCorrFnExpSubstitute(List<ProgParameterSymbol> params,
                                                  ParserRuleContext functionCtx,
                                                  PExp requiresOrEnsures) {
@@ -573,5 +570,5 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
         return resultingClause;
-    }
+    }*/
 }
