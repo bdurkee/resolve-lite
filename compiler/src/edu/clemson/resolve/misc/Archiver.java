@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class Archiver {
     private static Logger LOGGER = Logger.getLogger("Archiver");
 
-    private final List<CodeGenPipeline.JavaUnit> rawJavaSrcs = new ArrayList<>();
+    /*private final List<CodeGenPipeline.JavaUnit> rawJavaSrcs = new ArrayList<>();
     private final String entryPointName, tmpdir;
     private final RESOLVECompiler resolveCompiler;
 
@@ -134,5 +134,5 @@ public class Archiver {
                         diagnostic.getMessage(Locale.ENGLISH));
             }
         }
-    }
+    }*/
 }

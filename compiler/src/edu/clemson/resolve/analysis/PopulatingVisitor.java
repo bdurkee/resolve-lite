@@ -31,30 +31,15 @@
 package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.misc.HardCoded;
-import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
-import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
-import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.rsrg.semantics.TypeGraph;
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.*;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.*;
-import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 

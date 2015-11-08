@@ -47,8 +47,9 @@ import java.util.*;
  * of the same name. An output model object can have nested objects.
  * We identify those nested objects by the list of arguments in the template
  * definition. For example, here is the definition of the parser template:
- * 
- * {@code Parser(parser, scopes, funcs) ::= <<...>>}
+ * <code>
+ *     Parser(parser, scopes, funcs) ::= <<...>>
+ * </code>
  * <p>
  * The first template argument is always the output model object from which this
  * walker will create the template. Any other arguments identify the field names

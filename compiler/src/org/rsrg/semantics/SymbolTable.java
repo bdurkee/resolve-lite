@@ -1,7 +1,6 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.parser.ResolveParser;

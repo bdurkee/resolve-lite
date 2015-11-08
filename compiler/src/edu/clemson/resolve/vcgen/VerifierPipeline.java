@@ -3,7 +3,6 @@ package edu.clemson.resolve.vcgen;
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;

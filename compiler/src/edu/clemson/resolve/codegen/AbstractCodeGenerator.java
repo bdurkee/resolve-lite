@@ -4,80 +4,64 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;
 
-import java.io.IOException;
-import java.io.Writer;
-
 public abstract class AbstractCodeGenerator {
 
-    public static final String TEMPLATE_ROOT = "edu/clemson/resolve/templates/codegen";
+    public static final String TEMPLATE_ROOT =
+            "edu/clemson/resolve/templates/codegen";
 
-    protected final String language;
-    protected final RESOLVECompiler compiler;
-    protected final AnnotatedTree module;
-    protected final STGroup templates;
+    @NotNull protected final RESOLVECompiler compiler;
+    @NotNull protected final AnnotatedTree module;
+    @NotNull private final STGroup templates;
+    @NotNull private final String language;
 
-    public final int lineWidth = 72;
-
-    public AbstractCodeGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget,
-                                 String language) {
+    public AbstractCodeGenerator(@NotNull RESOLVECompiler rc,
+                                 @NotNull AnnotatedTree module,
+                                 @NotNull String language) {
         this.compiler = rc;
-        this.module = rootTarget;
+        this.module = module;
         this.language = language;
         this.templates = loadTemplates();
     }
 
-    public AnnotatedTree getModule() {
+    @NotNull public AnnotatedTree getModule() {
         return module;
     }
 
-    public RESOLVECompiler getCompiler() {
+    @NotNull public RESOLVECompiler getCompiler() {
         return compiler;
     }
 
-    protected ST walk(OutputModelObject outputModel) {
+    @NotNull protected ST walk(@NotNull OutputModelObject outputModel) {
         ModelConverter walker = new ModelConverter(compiler, templates);
         return walker.walk(outputModel);
     }
 
-    public String getFileName() {
+    @NotNull public String getFileName() {
         ST extST = templates.getInstanceOf("fileExtension");
         String moduleName = module.getName();
         return moduleName + extST.render();
     }
 
     public void writeFile(ST outputFileST) {
-        write(outputFileST, getFileName());
-    }
-
-    public void write(ST code, String fileName) {
-        try {
-            Writer w = compiler.getOutputFileWriter(module, fileName);
-            STWriter wr = new AutoIndentWriter(w);
-            wr.setLineWidth(lineWidth);
-            code.write(wr);
-            w.close();
-        }
-        catch (IOException ioe) {
-            System.out.println(ioe.getMessage());
-            compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE, ioe,
-                    fileName);
-        }
+        Utils.writeFile(compiler.outputDirectory, getFileName(),
+                outputFileST.render());
     }
 
     public STGroup loadTemplates() {
-        String groupFileName =
-                TEMPLATE_ROOT + "/" + language
-                        + STGroup.GROUP_FILE_EXTENSION;
+        String groupFileName = TEMPLATE_ROOT + "/" + language +
+                STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);
         }
         catch (IllegalArgumentException iae) {
             compiler.errMgr.toolError(
-                    ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, language);
+                    ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, "Java");
         }
         if ( result == null ) {
             return null;

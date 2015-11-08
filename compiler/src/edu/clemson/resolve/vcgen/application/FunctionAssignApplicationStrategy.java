@@ -1,19 +1,8 @@
 package edu.clemson.resolve.vcgen.application;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
-import org.rsrg.semantics.symbol.OperationSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class FunctionAssignApplicationStrategy
         implements

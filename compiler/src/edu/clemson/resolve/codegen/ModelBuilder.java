@@ -1,39 +1,21 @@
 package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.*;
-import edu.clemson.resolve.codegen.model.Qualifier.NormalQualifier;
-import edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.misc.HardCodedProgOps;
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTGeneric;
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTType;
-import org.rsrg.semantics.query.NameQuery;
-import org.rsrg.semantics.query.SymbolTypeQuery;
-import org.rsrg.semantics.query.UnqualifiedNameQuery;
-import org.rsrg.semantics.symbol.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
 
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
     private final ModuleScopeBuilder moduleScope;
-    private final CodeGenerator gen;
+    private final JavaCodeGenerator gen;
     private final SymbolTable symtab;
     private final AnnotatedTree tr;
 
-    public ModelBuilder(CodeGenerator g, SymbolTable symtab) {
+    public ModelBuilder(JavaCodeGenerator g, SymbolTable symtab) {
         this.gen = g;
         this.moduleScope = symtab.moduleScopes.get(g.getModule().getName());
         this.symtab = symtab;

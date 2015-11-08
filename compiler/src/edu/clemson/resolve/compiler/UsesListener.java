@@ -1,12 +1,7 @@
 package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Updates the containers tracking uses reference info by visiting the

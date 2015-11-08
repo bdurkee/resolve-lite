@@ -1,33 +1,18 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.*;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTFamily;
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTRepresentation;
-import org.rsrg.semantics.programtype.PTType;
-import org.rsrg.semantics.query.OperationQuery;
-import org.rsrg.semantics.query.SymbolTypeQuery;
-import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
-import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;

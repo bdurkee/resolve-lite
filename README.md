@@ -1,6 +1,6 @@
 What is RESOLVE?
 ==============
-
+[![Build Status](https://travis-ci.org/Welchd1/resolve-lite.svg)](https://travis-ci.org/Welchd1/resolve-lite)
 <img align="right" src="compiler/resources/resolve_logo.png"/>
 
 RESOLVE (REusable SOftware Language with VErification) is a programming and

@@ -64,11 +64,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.dummyType = dummyType;
     }
 
-    /**
-     *
-     * @param t
-     * @return
-     */
+    /** Retrive the final built expr from concrete node {@code t}. */
     @SuppressWarnings("unchecked") public T getBuiltPExp(ParseTree t) {
         return (T) repo.get(t);
     }

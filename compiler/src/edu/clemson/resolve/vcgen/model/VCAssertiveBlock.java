@@ -1,20 +1,14 @@
 package edu.clemson.resolve.vcgen.model;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class VCAssertiveBlock extends AssertiveBlock {
 
