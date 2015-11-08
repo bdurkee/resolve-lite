@@ -58,7 +58,7 @@ public class TestCompileOrder extends BaseTest {
     //on the things they implicitly import.
 
     private void testOrdering(String expected, String root) {
-        ErrorCollector e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
+        ErrorQueue e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
         assertEquals(expected, e.toInfoString());
     }*/
 }
