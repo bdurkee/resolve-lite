@@ -32,37 +32,32 @@ grammar Resolve;
 
 module
     :   precisModule
-/*    |   conceptModule
-    |   conceptImplModule
+    |   conceptModule
+    /*|   conceptImplModule
     |   facilityModule
     |   enhancementImplModule
     |   enhancementModule*/
     ;
 
-/*conceptModule
-    :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
-        (specModuleParameterList)? SEMI
+conceptModule
+    :   'Concept' name=ID ('<' genericType (',' genericType)* '>')?
+        (specModuleParameterList)? ';'
         (usesList)?
         (requiresClause)?
         (conceptBlock)
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
 
 conceptBlock
     :   ( typeModelDecl
         | operationDecl
         | mathDefinitionDecl
-        | mathDefinesDefinitionDecl
-        | mathStateVariableDeclGroup
         | specModuleInit
         | constraintClause
         )*
     ;
 
-mathStateVariableDeclGroup
-    :   VAR mathVariableDeclGroup SEMI
-    ;
-
+/*
 // enhancement module
 
 enhancementModule
@@ -148,7 +143,7 @@ usesList
 
 // parameter and parameter-list related rules
 
-/*operationParameterList
+operationParameterList
     :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
@@ -171,23 +166,23 @@ implModuleParameterDecl
     ;
 
 parameterDeclGroup
-    :   parameterMode ID (COMMA ID)* COLON type
+    :   parameterMode ID (',' ID)* ':' type
     ;
 
 parameterMode
-    :   ( ALTERS
-        | UPDATES
-        | CLEARS
-        | RESTORES
-        | PRESERVES
-        | REPLACES
-        | EVALUATES )
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
     ;
 
 variableDeclGroup
-    :   VAR ID (COMMA ID)* COLON type SEMI
+    :   'Var' ID (',' ID)* ':' type ';'
     ;
-
+/*
 // statements
 
 stmt
@@ -226,11 +221,11 @@ ifStmt
 elsePart
     :   ELSE stmt*
     ;
-
+*/
 // type and record related rules
 
 type
-    :   (qualifier=ID COLONCOLON)? name=ID
+    :   (qualifier=ID '::')? name=ID
     ;
 
 genericType
@@ -238,19 +233,20 @@ genericType
     ;
 
 record
-    :   RECORD (recordVariableDeclGroup)+ END
+    :   'Record' (recordVariableDeclGroup)+ 'end'
     ;
 
 recordVariableDeclGroup
-    :   ID (COMMA ID)* COLON type SEMI
+    :   ID (',' ID)* ':' type ';'
     ;
 
 typeModelDecl
-    :   TYPE FAMILY name=ID IS MODELED BY mathTypeExp SEMI
-        EXEMPLAR exemplar=ID SEMI
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'
+        'exemplar' exemplar=ID ';'
         (constraintClause)?
         (typeModelInit)?
     ;
+/*
 
 typeRepresentationDecl
     :   TYPE name=ID EQUALS (type|record) SEMI
@@ -260,16 +256,16 @@ typeRepresentationDecl
     ;
 
 // type initialization rules
+*/
 
 specModuleInit
-    :   FACILITY_INIT
-        (affectsClause)? (requiresClause)? (ensuresClause)?
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
     ;
 
 typeModelInit
-    :   INIT (ensuresClause)?
+    :   'initialization' (ensuresClause)?
     ;
-
+/*
 typeImplInit
     :   INIT (ensuresClause)?
         (variableDeclGroup)* (stmt)*
@@ -346,15 +342,15 @@ moduleArgumentList
 moduleArgument
     :   progExp
     ;
-
+*/
 // functions
 
 operationDecl
-    :   OPERATION name=ID operationParameterList (COLON type)? SEMI
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
-operationProcedureDecl
+/*operationProcedureDecl
     :   OPERATION
         name=ID operationParameterList (COLON type)? SEMI
         (requiresClause)?
