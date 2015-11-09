@@ -305,16 +305,6 @@ mathDefinitionParameter
     |   ID
     ;
 
-mathCategoricalDefinitionDecl
-    :   'Categorical' 'Definition' 'for'
-        mathDefinitionSig (',' mathDefinitionSig)+
-        'is' mathAssertionExp ';'
-    ;
-
-mathDefinesDefinitionDecl
-    :   'Defines' ID (',' ID)* ':' mathTypeExp ';'
-    ;
-
 mathDefinitionDecl
     :   ('Implicit')? 'Definition' mathDefinitionSig
         ('is' mathAssertionExp)? ';'
