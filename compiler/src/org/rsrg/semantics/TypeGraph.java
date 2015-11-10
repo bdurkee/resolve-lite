@@ -23,7 +23,6 @@ public class TypeGraph {
     public final MTProper MTYPE = new MTProper(this, null, true, "MType");
     public final MTProper SSET = new MTProper(this, MTYPE, true, "SSet");
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
-    public final MTProper CARD = new MTProper(this, MTYPE, false, "Card");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
     public final MTProper Z = new MTProper(this, SSET, true, "Z");

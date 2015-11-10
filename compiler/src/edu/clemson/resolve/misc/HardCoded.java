@@ -53,17 +53,16 @@ public class HardCoded {
             b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
 
-            b.addBinding("Card", null, g.SSET, g.CARD);
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
-            b.addBinding("||...||", null, new MTFunctionBuilder(g, g.CARD)
+            b.addBinding("||...||", null, new MTFunctionBuilder(g, g.NAT)
                     .paramTypes(g.SSET).build());
             b.addBinding("is_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.SSET).build());
             b.addBinding("is_not_in", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.SSET).build());
-            b.addBinding("~", null, new MTFunctionBuilder(g, g.CARD)
+            b.addBinding("~", null, new MTFunctionBuilder(g, g.SSET)
                     .paramTypes(g.SSET, g.SSET).build());
         }
         catch (DuplicateSymbolException e) {

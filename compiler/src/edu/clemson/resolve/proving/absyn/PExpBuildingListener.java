@@ -139,6 +139,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
+        MTType type = types.get(ctx);
+        MTType typeValue = typeValues.get(ctx);
         PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.op))
                 .applicationType(getMathType(ctx))
                 .applicationTypeValue(getMathTypeValue(ctx))
@@ -156,7 +158,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private PSymbol buildOperatorPSymbol(ParserRuleContext app,
                                          String operator) {
         return new PSymbolBuilder(operator)
-                .mathType(getOperandFunctionType(app))
+                .mathType(types.get(app))
                 .quantification(quantifiedVars.get(operator))
                 .build();
     }

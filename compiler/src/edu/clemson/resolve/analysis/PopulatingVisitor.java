@@ -1435,9 +1435,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
+
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
-        MathSymbol x = getIntendedEntry(null, ctx.op.getText(), ctx);
-        tr.mathTypes.put(ctx, x.getType());
+        //MathSymbol x = getIntendedEntry(null, ctx.op.getText(), ctx);
+        //tr.mathTypes.put(ctx, x.getType());
         return null;
     }
 
