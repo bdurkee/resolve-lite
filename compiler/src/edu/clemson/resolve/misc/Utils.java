@@ -165,13 +165,13 @@ public class Utils {
         if (ctx instanceof ResolveParser.PrecisModuleContext ) {
             return ((ResolveParser.PrecisModuleContext) ctx).name.getText();
         }
-        /*else if ( ctx instanceof Resolve.ConceptModuleContext ) {
-            return ((Resolve.ConceptModuleContext) ctx).name.getText();
+        else if ( ctx instanceof ResolveParser.ConceptModuleContext ) {
+            return ((ResolveParser.ConceptModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof Resolve.FacilityModuleContext ) {
-            return ((Resolve.FacilityModuleContext) ctx).name.getText();
+        else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
+            return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof Resolve.ConceptImplModuleContext ) {
+        /*else if ( ctx instanceof Resolve.ConceptImplModuleContext ) {
             return ((Resolve.ConceptImplModuleContext) ctx).name
                     .getText();
         }
@@ -181,10 +181,6 @@ public class Utils {
         }
         else if ( ctx instanceof Resolve.EnhancementImplModuleContext ) {
             return ((Resolve.EnhancementImplModuleContext) ctx).name
-                    .getText();
-        }
-        else if ( ctx instanceof Resolve.PrecisExtensionModuleContext ) {
-            return ((Resolve.PrecisExtensionModuleContext) ctx).name
                     .getText();
         }*/
         else {

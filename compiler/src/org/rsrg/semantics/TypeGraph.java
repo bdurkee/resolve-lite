@@ -26,6 +26,8 @@ public class TypeGraph {
     public final MTProper CARD = new MTProper(this, MTYPE, false, "Card");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
+    public final MTProper Z = new MTProper(this, SSET, true, "Z");
+    public final MTProper NAT = new MTProper(this, SSET, true, "N");
 
     public final MTProper BASE_POINT = new MTProper(this, SSET, false,
             "Base_Point");
