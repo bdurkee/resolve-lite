@@ -31,29 +31,41 @@
 package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PApply;
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.*;
+import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = false;
-   /* private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
-            new ExactDomainMatch();
-    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
-            new ExactParameterMatch();
+    private static final boolean EMIT_DEBUG = true;
 
-    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
-            new InexactDomainMatch();
-    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
-            new InexactParameterMatch();
-*/
+    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH = new ExactDomainMatch();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH = new ExactParameterMatch();
+    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH = new InexactDomainMatch();
+    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH = new InexactParameterMatch();
+
     private boolean walkingDefParams = false;
 
     /**
@@ -62,8 +74,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * recursive call is being made to an operation procedure decl that hasn't
      * been marked 'Recursive'.
      */
-    //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-    //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
+    private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
+    private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /**
      * Set to {@code true} when we're walking the arguments to a module
@@ -88,6 +100,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private AnnotatedTree tr;
     private TypeGraph g;
 
+    boolean walkingFunctionReferenceInApplication = false;
     private int typeValueDepth = 0;
     private int globalSpecCount = 0;
 
@@ -130,25 +143,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null; //java requires a return, even if its 'Void'
      }
 
-     /*@Override public Void visitConceptImplModule(
-             ResolveParser.ConceptImplModuleContext ctx) {
-         moduleScope.addDependentTerms(symtab.moduleScopes.get(
-                 ctx.concept.getText()).getDependentTerms());
-         super.visitChildren(ctx);
-         return null;
-     }
-
-     @Override public Void visitEnhancementImplModule(
-             Resolve.EnhancementImplModuleContext ctx) {
-         moduleScope
-                 .addDependentTerms(symtab.moduleScopes.get(ctx.concept.getText()).getDependentTerms())
-                 .addDependentTerms(symtab.moduleScopes.get(ctx.enhancement.getText()).getDependentTerms());
-         super.visitChildren(ctx);
-         return null;
-     }
-
      @Override public Void visitImplModuleParameterList(
-             Resolve.ImplModuleParameterListContext ctx) {
+             ResolveParser.ImplModuleParameterListContext ctx) {
          walkingModuleArgOrParamList = true;
          this.visitChildren(ctx);
          walkingModuleArgOrParamList = false;
@@ -156,14 +152,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }
 
      @Override public Void visitSpecModuleParameterList(
-             Resolve.SpecModuleParameterListContext ctx) {
+             ResolveParser.SpecModuleParameterListContext ctx) {
          walkingModuleArgOrParamList = true;
          this.visitChildren(ctx);
          walkingModuleArgOrParamList = false;
          return null;
      }
 
-     @Override public Void visitGenericType(Resolve.GenericTypeContext ctx) {
+     @Override public Void visitGenericType(
+             ResolveParser.GenericTypeContext ctx) {
          try {
              symtab.getInnermostActiveScope().define(
                      new GenericSymbol(g, new PTElement(g), ctx.getText(),
@@ -176,7 +173,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitTypeModelDecl(Resolve.TypeModelDeclContext ctx) {
+     @Override public Void visitTypeModelDecl(
+             ResolveParser.TypeModelDeclContext ctx) {
          symtab.startScope(ctx);
          this.visit(ctx.mathTypeExp());
          MathSymbol exemplarSymbol = null;
@@ -218,7 +216,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+     @Override public Void visitProcedureDecl(
+             ResolveParser.ProcedureDeclContext ctx) {
          OperationSymbol correspondingOp = null;
          currentProcedureDecl = ctx;
          try {
@@ -267,7 +266,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitOperationDecl(Resolve.OperationDeclContext ctx) {
+     @Override public Void visitOperationDecl(
+             ResolveParser.OperationDeclContext ctx) {
          symtab.startScope(ctx);
          ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
          if (ctx.type() != null) {
@@ -292,7 +292,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }
 
      @Override public Void visitOperationProcedureDecl(
-             Resolve.OperationProcedureDeclContext ctx) {
+             ResolveParser.OperationProcedureDeclContext ctx) {
          symtab.startScope(ctx);
          currentOpProcedureDecl = ctx;
          ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
@@ -324,9 +324,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     private void insertFunction(Token name, Resolve.TypeContext type,
-             Resolve.RequiresClauseContext requires,
-             Resolve.EnsuresClauseContext ensures, ParserRuleContext ctx) {
+     private void insertFunction(Token name,
+                                 ResolveParser.TypeContext type,
+                                 ResolveParser.RequiresClauseContext requires,
+                                 ResolveParser.EnsuresClauseContext ensures,
+                                 ParserRuleContext ctx) {
          try {
              List<ProgParameterSymbol> params =
                      symtab.scopes.get(ctx).getSymbolsOfType(
@@ -353,7 +355,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }
 
      @Override public Void visitParameterDeclGroup(
-             Resolve.ParameterDeclGroupContext ctx) {
+             ResolveParser.ParameterDeclGroupContext ctx) {
          this.visit(ctx.type());
          String typeQualifier = ctx.type().qualifier != null ?
                  ctx.type().qualifier.getText() : null;
@@ -377,7 +379,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+     @Override public Void visitFacilityDecl(
+             ResolveParser.FacilityDeclContext ctx) {
          //Todo: visit the generic arg types too
          ctx.moduleArgumentList().forEach(this::visit);
          ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
@@ -388,7 +391,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                      getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
 
              //now do the same for each enhancement pair
-             for (Resolve.EnhancementPairDeclContext enh : ctx.enhancementPairDecl()) {
+             for (ResolveParser.EnhancementPairDeclContext enh :
+                     ctx.enhancementPairDecl()) {
                  //Todo: visit the generic arg types too
                  enh.moduleArgumentList().forEach(this::visit);
                  facOrEnhToGenericArgs.put(enh,
@@ -406,9 +410,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }
 
      private List<ProgTypeSymbol> getGenericArgumentSymsForFacilityOrEnh(
-             List<Resolve.TypeContext> actualTypes) {
+             List<ResolveParser.TypeContext> actualTypes) {
          List<ProgTypeSymbol> result = new ArrayList<>();
-         for (Resolve.TypeContext generic : actualTypes) {
+         for (ResolveParser.TypeContext generic : actualTypes) {
              try {
                  result.add(symtab.getInnermostActiveScope()
                          .queryForOne(new NameQuery(generic.qualifier,
@@ -427,7 +431,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return result;
      }
 
-     @Override public Void visitType(Resolve.TypeContext ctx) {
+     @Override public Void visitType(ResolveParser.TypeContext ctx) {
          try {
              ProgTypeSymbol type =
                      symtab.getInnermostActiveScope()
@@ -456,7 +460,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }
 
      @Override public Void visitTypeRepresentationDecl(
-             Resolve.TypeRepresentationDeclContext ctx) {
+             ResolveParser.TypeRepresentationDeclContext ctx) {
          symtab.startScope(ctx);
          ProgTypeModelSymbol typeDefnSym = null;
          ParseTree reprTypeNode = ctx.type() != null ? ctx.type() : ctx.record();
@@ -467,15 +471,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                              .queryForOne(new NameQuery(null, ctx.name,
                                              false)).toProgTypeModelSymbol();
          }
-         catch (NoSuchSymbolException nsse) {
+         catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
              //this is actually ok for now. Facility module bound type reprs
              //won't have a model.
-         }
-         catch (UnexpectedSymbolException use) {
-             //this is ok too, type representations appearing in facilities wont
-             //have a model
-         }
-         catch (DuplicateSymbolException e) {
+         } catch (DuplicateSymbolException e) {
              compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                      ctx.name, ctx.name.getText());
          }
@@ -516,7 +515,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitRecord(Resolve.RecordContext ctx) {
+    /* @Override public Void visitRecord(ResolveParser.RecordContext ctx) {
          Map<String, PTType> fields = new LinkedHashMap<>();
          for (Resolve.RecordVariableDeclGroupContext fieldGrp : ctx
                  .recordVariableDeclGroup()) {
@@ -624,27 +623,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
                      ctx.getStart(), expected, foundType);
          }
-     }
-
-     @Override public Void visitMathDefinesDefinitionDecl(
-             ResolveParser.MathDefinesDefinitionDeclContext ctx) {
-         this.visit(ctx.mathTypeExp());
-         MTType type = tr.mathTypes.get(ctx.mathTypeExp());
-         MTType typeValue = tr.mathTypeValues.get(ctx.mathTypeExp());
-         for (TerminalNode t : ctx.ID()) {
-             try {
-                 symtab.getInnermostActiveScope().define(
-                         new MathSymbol(g, t.getSymbol().getText(),
-                                 definitionSchematicTypes, type, typeValue,
-                                 ctx, getRootModuleID()));
-             }
-             catch (DuplicateSymbolException e) {
-                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                         t.getSymbol(), t.getText());
-             }
-         }
-         return null;
-     }
+     }*/
 
     @Override public Void visitMathDefinitionDecl(
             ResolveParser.MathDefinitionDeclContext ctx) {
@@ -673,7 +652,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         definitionSchematicTypes.clear();
         return null;
-    }*/
+    }
 
     /**
      * Since 'MathDefinitionSig' appears all over the place within our three
@@ -689,7 +668,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * sig to the active scope (so inductive and implicit definitions may
      * reference themselves).</p>
      */
-   /* @Override public Void visitMathDefinitionSig(
+    @Override public Void visitMathDefinitionSig(
             ResolveParser.MathDefinitionSigContext ctx) {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
@@ -816,7 +795,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         t.getSymbol(), t.getText());
             }
         }
-    }
+    }*/
 
     @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
@@ -877,28 +856,29 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitProgPrimaryExp(
-            Resolve.ProgPrimaryExpContext ctx) {
+            ResolveParser.ProgPrimaryExpContext ctx) {
         this.visit(ctx.progPrimary());
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.progPrimary()));
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progPrimary()));
         return null;
     }
 
-    @Override public Void visitProgPrimary(Resolve.ProgPrimaryContext ctx) {
+    @Override public Void visitProgPrimary(ResolveParser.ProgPrimaryContext ctx) {
         this.visit(ctx.getChild(0));
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
         return null;
     }
 
-    @Override public Void visitProgVarExp(Resolve.ProgVarExpContext ctx) {
+    @Override public Void visitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
         this.visit(ctx.getChild(0));
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
         return null;
     }
 
-    @Override public Void visitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
+    @Override public Void visitProgNamedExp(
+            ResolveParser.ProgNamedExpContext ctx) {
         try {
             ProgVariableSymbol variable =
                     symtab.getInnermostActiveScope().queryForOne(
@@ -943,7 +923,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModuleArgument(
-            Resolve.ModuleArgumentContext ctx) {
+            ResolveParser.ModuleArgumentContext ctx) {
         this.visit(ctx.progExp());
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
@@ -951,14 +931,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModuleArgumentList(
-            Resolve.ModuleArgumentListContext ctx) {
+            ResolveParser.ModuleArgumentListContext ctx) {
         walkingModuleArgOrParamList = true;
         this.visitChildren(ctx);
         walkingModuleArgOrParamList = false;
         return null;
     }
 
-    @Override public Void visitProgMemberExp(Resolve.ProgMemberExpContext ctx) {
+    @Override public Void visitProgMemberExp(
+            ResolveParser.ProgMemberExpContext ctx) {
         ParseTree firstRecordRef = ctx.getChild(0);
         this.visit(firstRecordRef);
         PTType first = tr.progTypes.get(firstRecordRef);
@@ -1001,8 +982,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgInfixExp(
-            Resolve.ProgInfixExpContext ctx) {
+    /*@Override public Void visitProgInfixExp(
+            ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<PTType> argTypes = ctx.progExp().stream()
                 .map(tr.progTypes::get).collect(Collectors.toList());
@@ -1041,25 +1022,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.progExp().forEach(this::visit);
         typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
         return null;
-    }
+    }*/
 
     @Override public Void visitProgBooleanLiteralExp(
-            Resolve.ProgBooleanLiteralExpContext ctx) {
+            ResolveParser.ProgBooleanLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Boolean_Fac", "Boolean");
     }
 
     @Override public Void visitProgIntegerLiteralExp(
-            Resolve.ProgIntegerLiteralExpContext ctx) {
+            ResolveParser.ProgIntegerLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Integer_Fac", "Integer");
     }
 
     @Override public Void visitProgCharacterLiteralExp(
-            Resolve.ProgCharacterLiteralExpContext ctx) {
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
     }
 
     @Override public Void visitProgStringLiteralExp(
-            Resolve.ProgStringLiteralExpContext ctx) {
+            ResolveParser.ProgStringLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
     }
 
@@ -1099,13 +1080,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     protected void typeOperationRefExp(ParserRuleContext ctx,
                                        Token qualifier, Token name,
-                                       Resolve.ProgExpContext... args) {
+                                       ResolveParser.ProgExpContext... args) {
         typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
     }
 
     protected void typeOperationRefExp(ParserRuleContext ctx,
                                        Token qualifier, Token name,
-                                       List<Resolve.ProgExpContext> args) {
+                                       List<ResolveParser.ProgExpContext> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
         //for recursive calls
@@ -1118,12 +1099,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     currentOpProcedureDecl.recursive != null :
                     currentProcedureDecl.recursive != null;
 
-            Resolve.OperationParameterListContext formalParamListNode =
+            ResolveParser.OperationParameterListContext formalParamListNode =
                     currentOpProcedureDecl != null ?
                             currentOpProcedureDecl.operationParameterList() :
                             currentProcedureDecl.operationParameterList();
 
-            Resolve.TypeContext declaredTypeCtx =
+            ResolveParser.TypeContext declaredTypeCtx =
                     currentOpProcedureDecl != null ?
                             currentOpProcedureDecl.type() :
                             currentProcedureDecl.type();
@@ -1159,7 +1140,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = args.stream()
-                    .map(Resolve.ProgExpContext::getText)
+                    .map(ResolveParser.ProgExpContext::getText)
                     .collect(Collectors.toList());
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
                     ctx.getStart(), name.getText(), argStrList, argTypes);
@@ -1212,13 +1193,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathNestedExp(
-            ResolveParser.MathNestedExpContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        chainMathTypes(ctx, ctx.mathAssertionExp());
-        return null;
-    }
-
     @Override public Void visitMathTypeAssertionExp(
             ResolveParser.MathTypeAssertionExpContext ctx) {
         if (typeValueDepth == 0) {
@@ -1257,43 +1231,85 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathSetCollectionExp(
-            ResolveParser.MathSetCollectionExpContext ctx) {
-        tr.mathTypes.put(ctx, g.SSET);
-        ctx.mathExp().forEach(this::visit);
-        if (ctx.mathExp().isEmpty()) {
-            tr.mathTypeValues.put(ctx, g.EMPTY_SET);
+    @Override public Void visitMathNestedExp(
+            ResolveParser.MathNestedExpContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitMathAssertionExp(
+            ResolveParser.MathAssertionExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
+        return null;
+    }
+
+    @Override public Void visitMathPrimeExp(
+            ResolveParser.MathPrimeExpContext ctx) {
+        this.visit(ctx.mathPrimaryExp());
+        chainMathTypes(ctx, ctx.mathPrimaryExp());
+        return null;
+    }
+
+    @Override public Void visitMathPrimaryExp(
+            ResolveParser.MathPrimaryExpContext ctx) {
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
+        return null;
+    }
+
+    /* @Override public Void visitMathLambdaExp(
+            ResolveParser.MathLambdaExpContext ctx) {
+        symtab.startScope(ctx);
+        emit("lambda exp: " + ctx.getText());
+
+        walkingDefParams = true;
+        activeQuantifications.push(Quantification.UNIVERSAL);
+        ctx.mathVariableDeclGroup().forEach(this::visit);
+        activeQuantifications.pop();
+        walkingDefParams = false;
+
+        this.visit(ctx.mathExp());
+        symtab.endScope();
+
+        List<MTType> parameterTypes = new LinkedList<>();
+        for (ResolveParser.MathVariableDeclGroupContext grp :
+                ctx.mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            parameterTypes.addAll(grp.ID().stream()
+                    .map(term -> grpType).collect(Collectors.toList()));
         }
-        else {
-            List<MTType> powersets = ctx.mathExp().stream()
-                    .map(e -> new MTPowersetApplication(g, tr.mathTypes.get(e)))
-                    .collect(Collectors.toList());
-            MTUnion u = new MTUnion(g, powersets);
-            tr.mathTypeValues.put(ctx, u);
+        tr.mathTypes.put(ctx, new MTFunction.MTFunctionBuilder(g, tr.mathTypes
+                .get(ctx.mathExp())).paramTypes(parameterTypes).build());
+        return null;
+    }
+
+    @Override public Void visitMathAlternativeExp(
+            ResolveParser.MathAlternativeExpContext ctx) {
+
+        MTType establishedType = null;
+        MTType establishedTypeValue = null;
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
+            this.visit(alt.result);
+            if (alt.condition != null) this.visit(alt.condition);
+            if ( establishedType == null ) {
+                establishedType = tr.mathTypes.get(alt.result);
+                establishedTypeValue = tr.mathTypeValues.get(alt.result);
+            }
+            else {
+                if ( alt.condition != null ) {
+                    // expectType(alt, establishedType);
+                }
+            }
         }
-        if (typeValueDepth > 0) {
+        tr.mathTypes.put(ctx, establishedType);
+        tr.mathTypeValues.put(ctx, establishedTypeValue);
+        return null;
+    }
 
-            // construct a union chain and see if all the component types
-            // are known to contain only sets.
-            List<MTType> elementTypes = ctx.mathExp().stream()
-                    .map(tr.mathTypes::get).collect(Collectors.toList());
-
-            MTUnion chainedTypes = new MTUnion(g, elementTypes);
-
-            /*if (!chainedTypes.isKnownToContainOnlyMTypes() ||
-                    ctx.mathExp().isEmpty()) {
-                compiler.errMgr
-                        .semanticError(ErrorKind.INVALID_MATH_TYPE,
-                                ctx.getStart(), ctx.getText());
-                tr.mathTypeValues.put(ctx, g.INVALID);
-                return null;
-            }*/
-       //     tr.mathTypeValues.put(ctx, chainedTypes);
-      //  }
-      //  return null;
-    //}
-    
-   /* @Override public Void visitMathSegmentsExp(
+    @Override public Void visitMathSegmentsExp(
             ResolveParser.MathSegmentsExpContext ctx) {
         Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =
                 ctx.mathFunctionApplicationExp().iterator();
@@ -1369,77 +1385,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathAssertionExp(
-            ResolveParser.MathAssertionExpContext ctx) {
-        this.visit(ctx.getChild(0));
-        chainMathTypes(ctx, ctx.getChild(0));
-        return null;
-    }
-
-    @Override public Void visitMathPrimeExp(
-            ResolveParser.MathPrimeExpContext ctx) {
-        this.visit(ctx.mathPrimaryExp());
-        chainMathTypes(ctx, ctx.mathPrimaryExp());
-        return null;
-    }
-
-    @Override public Void visitMathPrimaryExp(
-            ResolveParser.MathPrimaryExpContext ctx) {
-        this.visit(ctx.getChild(0));
-        chainMathTypes(ctx, ctx.getChild(0));
-        return null;
-    }
-
-    @Override public Void visitMathLambdaExp(
-            ResolveParser.MathLambdaExpContext ctx) {
-        symtab.startScope(ctx);
-        emit("lambda exp: " + ctx.getText());
-
-        walkingDefParams = true;
-        activeQuantifications.push(Quantification.UNIVERSAL);
-        ctx.mathVariableDeclGroup().forEach(this::visit);
-        activeQuantifications.pop();
-        walkingDefParams = false;
-
-        this.visit(ctx.mathExp());
-        symtab.endScope();
-
-        List<MTType> parameterTypes = new LinkedList<>();
-        for (ResolveParser.MathVariableDeclGroupContext grp :
-                ctx.mathVariableDeclGroup()) {
-            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
-            parameterTypes.addAll(grp.ID().stream()
-                    .map(term -> grpType).collect(Collectors.toList()));
-        }
-        tr.mathTypes.put(ctx, new MTFunction.MTFunctionBuilder(g, tr.mathTypes
-                .get(ctx.mathExp())).paramTypes(parameterTypes).build());
-        return null;
-    }
-
-    @Override public Void visitMathAlternativeExp(
-            ResolveParser.MathAlternativeExpContext ctx) {
-
-        MTType establishedType = null;
-        MTType establishedTypeValue = null;
-        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
-                .mathAlternativeItemExp()) {
-            this.visit(alt.result);
-            if (alt.condition != null) this.visit(alt.condition);
-            if ( establishedType == null ) {
-                establishedType = tr.mathTypes.get(alt.result);
-                establishedTypeValue = tr.mathTypeValues.get(alt.result);
-            }
-            else {
-                if ( alt.condition != null ) {
-                    // expectType(alt, establishedType);
-                }
-            }
-        }
-        tr.mathTypes.put(ctx, establishedType);
-        tr.mathTypeValues.put(ctx, establishedTypeValue);
-        return null;
-    }
-
     @Override public Void visitMathAlternativeItemExp(
             ResolveParser.MathAlternativeItemExpContext ctx) {
         if ( ctx.condition != null ) {
@@ -1485,31 +1430,40 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
-    }
+    }*/
 
-    @Override public Void visitMathInfixExp(
+    @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+        MathSymbol x = getIntendedEntry(null, ctx.op.getText(), ctx);
+        tr.mathTypes.put(ctx, x.getType());
         return null;
     }
 
-    @Override public Void visitMathOutfixExp(
+    /*@Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
                 ctx.lop.getText()+ "..."+ctx.rop.getText()), ctx.mathExp());
         return null;
-    }
+    }*/
 
-    @Override public Void visitMathApplyExp(
-            ResolveParser.MathApplyExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        //typeMathFunctionLikeThing(ctx, null, ctx.name, ctx.mathExp());
+    @Override public Void visitMathPrefixApplyExp(
+            ResolveParser.MathPrefixApplyExpContext ctx) {
+        this.visit(ctx.functionExp);
+        List<ResolveParser.MathExpContext> args =
+                ctx.mathExp().subList(1, ctx.mathExp().size());
+        for (ResolveParser.MathExpContext arg : args) {
+            this.visit(arg);
+
+        }
+        //TODO: really hacky with the functionExp.getStart() bit but in the interest of
+        //my focus at the moment, I'm not too concerned yet.
+        typeMathFunctionLikeThing(ctx, null, ctx.functionExp.getStart(), args);
         return null;
     }
 
-    @Override public Void visitMathBooleanLiteralExp(
+    /*@Override public Void visitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
@@ -1519,7 +1473,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
-    }
+    }*/
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
@@ -1530,6 +1484,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private MathSymbol exitMathSymbolExp(ParserRuleContext ctx,
                                          Token qualifier,
                                          String symbolName) {
+
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
         if ( intendedEntry == null ) {
             tr.mathTypes.put(ctx, g.INVALID);
@@ -1569,61 +1524,47 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         catch (SymbolNotOfKindTypeException snokte) {
             if ( typeValueDepth > 0 ) {
-                //I had better identify a type
-                if (!moduleScope.getDependentTerms().contains(symbolName)) {
-                    compiler.errMgr
-                            .semanticError(ErrorKind.INVALID_MATH_TYPE,
-                                    ctx.getStart(), symbolName);
-                }
                 tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
     }
 
     private void typeMathFunctionLikeThing(ParserRuleContext ctx,
-                               Token qualifier, Token name,
-                               ParserRuleContext ... args) {
+                                           Token qualifier, Token name,
+                                           ParserRuleContext ... args) {
         typeMathFunctionLikeThing(ctx, qualifier, name, Arrays.asList(args));
     }
 
     private void typeMathFunctionLikeThing(ParserRuleContext ctx,
-                               Token qualifier, Token name,
-                               List<? extends ParserRuleContext> args) {
+                                           Token qualifier, Token name,
+                                           List<? extends ParserRuleContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
         foundExpType =
-                PSymbol.getConservativePreApplicationType(g, args, tr.mathTypes);
-
+                PApply.getConservativePreApplicationType(g, args, tr.mathTypes);
         emit("expression: " + ctx.getText() + "("
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
                 + foundExpType.toString());
-
         MathSymbol intendedEntry =
                 getIntendedFunction(ctx, qualifier, name, args);
-
         if ( intendedEntry == null ) {
             tr.mathTypes.put(ctx, g.INVALID);
             return;
         }
         MTFunction expectedType = (MTFunction) intendedEntry.getType();
-
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());
         if ( typeValueDepth > 0 ) {
-
             //I had better identify a type
             MTFunction entryType = (MTFunction) intendedEntry.getType();
-
             List<MTType> arguments = new ArrayList<>();
             MTType argTypeValue;
             for (ParserRuleContext arg : args) {
                 argTypeValue = tr.mathTypeValues.get(arg);
-                if (moduleScope.getDependentTerms().contains(arg.getText())) {
-                    argTypeValue = new MTNamed(g, arg.getText());
-                }
-                else if ( argTypeValue == null ) {
+
+                if ( argTypeValue == null ) {
                     compiler.errMgr.semanticError(
                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                             arg.getText());
@@ -1638,24 +1579,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private MathSymbol getIntendedFunction(ParserRuleContext ctx,
-                               Token qualifier, Token name,
-                               List<? extends ParserRuleContext> args) {
-        tr.mathTypes.put(ctx, PSymbol.getConservativePreApplicationType(g,
+                                           Token qualifier, Token name,
+                                           List<? extends ParserRuleContext> args) {
+        tr.mathTypes.put(ctx, PApply.getConservativePreApplicationType(g,
                 args, tr.mathTypes));
-        PSymbol e = (PSymbol)getPExpFor(ctx);
-
+        PApply e = (PApply)getPExpFor(ctx);
         MTFunction eType = (MTFunction)e.getMathType();
-
         List<MathSymbol> sameNameFunctions =
                 symtab.getInnermostActiveScope() //
                         .query(new MathFunctionNamedQuery(qualifier, name))
                         .stream()
                         .filter(s -> s.getType() instanceof MTFunction)
                         .collect(Collectors.toList());
-
         List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
                 .map(MathSymbol::getType).collect(Collectors.toList());
-
         if (sameNameFunctions.isEmpty()) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
@@ -1676,30 +1613,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         if (intendedFunction == null) return null;
         MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
-
         emit("matching " + name.getText() + " : " + eType
                 + " to " + intendedFunction.getName() + " : " + intendedEntryType);
-
         return intendedFunction;
     }
-
-    private MathSymbol getExactDomainTypeMatch(PSymbol e,
-                   List<MathSymbol> candidates) throws NoSolutionException {
+    private MathSymbol getExactDomainTypeMatch(PApply e,
+                                               List<MathSymbol> candidates)
+            throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
     }
 
-    private MathSymbol getInexactDomainTypeMatch(PSymbol e,
-                     List<MathSymbol> candidates) throws NoSolutionException {
+    private MathSymbol getInexactDomainTypeMatch(PApply e,
+                                                 List<MathSymbol> candidates)
+            throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
-    private MathSymbol getDomainTypeMatch(PSymbol e,
-                              List<MathSymbol> candidates,
-                              TypeComparison<PSymbol, MTFunction> comparison)
+    private MathSymbol getDomainTypeMatch(PApply e,
+                                          List<MathSymbol> candidates,
+                                          TypeComparison<PApply, MTFunction> comparison)
             throws NoSolutionException {
         MTFunction eType = e.getConservativePreApplicationType(g);
         MathSymbol match = null;
-
         MTFunction candidateType;
         for (MathSymbol candidate : candidates) {
             try {
@@ -1711,10 +1646,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 candidateType = (MTFunction) candidate.getType();
                 emit(originalCandidateType + " deschematizes to "
                         + candidateType);
-
                 if ( comparison.compare(e, eType, candidateType) ) {
                     if ( match != null ) {
-
                         return match;
                     }
                     match = candidate;
@@ -1733,7 +1666,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private static class ExactParameterMatch implements Comparator<MTType> {
-
         @Override public int compare(MTType o1, MTType o2) {
             int result;
             if ( o1.equals(o2) ) {
@@ -1748,13 +1680,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static class ExactDomainMatch
             implements
-            TypeComparison<PSymbol, MTFunction> {
-        @Override public boolean compare(PSymbol foundValue,
-                             MTFunction foundType, MTFunction expectedType) {
+            TypeComparison<PApply, MTFunction> {
+        @Override public boolean compare(PApply foundValue,
+                                         MTFunction foundType, MTFunction expectedType) {
             return foundType.parameterTypesMatch(expectedType,
                     EXACT_PARAMETER_MATCH);
         }
-
         @Override public String description() {
             return "exact";
         }
@@ -1762,26 +1693,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private class InexactDomainMatch
             implements
-            TypeComparison<PSymbol, MTFunction> {
-
-        @Override public boolean compare(PSymbol foundValue,
-                             MTFunction foundType, MTFunction expectedType) {
+            TypeComparison<PApply, MTFunction> {
+        @Override public boolean compare(PApply foundValue,
+                                         MTFunction foundType, MTFunction expectedType) {
             return expectedType.parametersMatch(foundValue.getArguments(),
                     INEXACT_PARAMETER_MATCH);
         }
-
         @Override public String description() {
             return "inexact";
         }
     }
 
     private class InexactParameterMatch implements TypeComparison<PExp, MTType> {
-
         @Override public boolean compare(PExp foundValue, MTType foundType,
                                          MTType expectedType) {
             return true;
         }
-
         @Override public String description() {
             return "inexact";
         }
@@ -1824,7 +1751,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
-    }*/
+    }
 
     private void emit(String msg) {
         if (EMIT_DEBUG) {

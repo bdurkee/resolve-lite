@@ -32,37 +32,32 @@ grammar Resolve;
 
 module
     :   precisModule
-/*    |   conceptModule
-    |   conceptImplModule
+    |   conceptModule
+   // |   conceptImplModule
     |   facilityModule
-    |   enhancementImplModule
+   /* |   enhancementImplModule
     |   enhancementModule*/
     ;
 
-/*conceptModule
-    :   CONCEPT name=ID (LT genericType (COMMA genericType)* GT)?
-        (specModuleParameterList)? SEMI
+conceptModule
+    :   'Concept' name=ID ('<' genericType (',' genericType)* '>')?
+        (specModuleParameterList)? ';'
         (usesList)?
         (requiresClause)?
         (conceptBlock)
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
 
 conceptBlock
     :   ( typeModelDecl
         | operationDecl
         | mathDefinitionDecl
-        | mathDefinesDefinitionDecl
-        | mathStateVariableDeclGroup
         | specModuleInit
         | constraintClause
         )*
     ;
 
-mathStateVariableDeclGroup
-    :   VAR mathVariableDeclGroup SEMI
-    ;
-
+/*
 // enhancement module
 
 enhancementModule
@@ -108,15 +103,15 @@ implBlock
         | facilityDecl
         )*
     ;
-
+*/
 // facility modules
 
 facilityModule
-    :   FACILITY name=ID SEMI
+    :   'Facility' name=ID ';'
         (usesList)?
         (requiresClause)?
         (facilityBlock)
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
 
 facilityBlock
@@ -125,7 +120,7 @@ facilityBlock
         | facilityDecl
         | typeRepresentationDecl
         )*
-    ;*/
+    ;
 
 precisModule
     :   'Precis' name=ID ';'
@@ -136,8 +131,6 @@ precisModule
 
 precisBlock
     :   ( mathDefinitionDecl
-        | mathCategoricalDefinitionDecl
-        | mathInductiveDefinitionDecl
         | mathTheoremDecl
         )*
     ;
@@ -150,7 +143,7 @@ usesList
 
 // parameter and parameter-list related rules
 
-/*operationParameterList
+operationParameterList
     :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
@@ -173,21 +166,21 @@ implModuleParameterDecl
     ;
 
 parameterDeclGroup
-    :   parameterMode ID (COMMA ID)* COLON type
+    :   parameterMode ID (',' ID)* ':' type
     ;
 
 parameterMode
-    :   ( ALTERS
-        | UPDATES
-        | CLEARS
-        | RESTORES
-        | PRESERVES
-        | REPLACES
-        | EVALUATES )
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
     ;
 
 variableDeclGroup
-    :   VAR ID (COMMA ID)* COLON type SEMI
+    :   'Var' ID (',' ID)* ':' type ';'
     ;
 
 // statements
@@ -201,38 +194,38 @@ stmt
     ;
 
 assignStmt
-    :   left=progVarExp ASSIGN right=progExp SEMI
+    :   left=progVarExp ':=' right=progExp ';'
     ;
 
 swapStmt
-    :   left=progVarExp SWAP right=progVarExp SEMI
+    :   left=progVarExp ':=:' right=progVarExp ';'
     ;
 
 //semantically restrict things like 1++ (<literal>++/--, etc)
 callStmt
-    :   progExp SEMI
+    :   progExp ';'
     ;
 
 whileStmt
-    :   WHILE progExp
-        (MAINTAINING mathExp SEMI)?
-        (DECREASING mathExp SEMI)? DO
+    :   'While' progExp
+        ('maintaining' mathExp ';')?
+        ('decreasing' mathExp ';')? 'do'
         (stmt)*
-        END SEMI
+        'end' ';'
     ;
 
 ifStmt
-    :   IF progExp THEN stmt* (elsePart)? END SEMI
+    :   'If' progExp 'then' stmt* (elsePart)? 'end' ';'
     ;
 
 elsePart
-    :   ELSE stmt*
+    :   'else' stmt*
     ;
 
 // type and record related rules
 
 type
-    :   (qualifier=ID COLONCOLON)? name=ID
+    :   (qualifier=ID '::')? name=ID
     ;
 
 genericType
@@ -240,22 +233,23 @@ genericType
     ;
 
 record
-    :   RECORD (recordVariableDeclGroup)+ END
+    :   'Record' (recordVariableDeclGroup)+ 'end'
     ;
 
 recordVariableDeclGroup
-    :   ID (COMMA ID)* COLON type SEMI
+    :   ID (',' ID)* ':' type ';'
     ;
 
 typeModelDecl
-    :   TYPE FAMILY name=ID IS MODELED BY mathTypeExp SEMI
-        EXEMPLAR exemplar=ID SEMI
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'
+        'exemplar' exemplar=ID ';'
         (constraintClause)?
         (typeModelInit)?
     ;
 
+
 typeRepresentationDecl
-    :   TYPE name=ID EQUALS (type|record) SEMI
+    :   'Type' name=ID '=' (type|record) ';'
         (conventionClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -264,20 +258,18 @@ typeRepresentationDecl
 // type initialization rules
 
 specModuleInit
-    :   FACILITY_INIT
-        (affectsClause)? (requiresClause)? (ensuresClause)?
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
     ;
 
 typeModelInit
-    :   INIT (ensuresClause)?
+    :   'initialization' (ensuresClause)?
     ;
 
 typeImplInit
-    :   INIT (ensuresClause)?
+    :   'initialization' (ensuresClause)?
         (variableDeclGroup)* (stmt)*
-        END SEMI
+        'end' ';'
     ;
-*/
 
 // math constructs
 
@@ -307,16 +299,6 @@ mathDefinitionParameter
     |   ID
     ;
 
-mathCategoricalDefinitionDecl
-    :   'Categorical' 'Definition' 'for'
-        mathDefinitionSig (',' mathDefinitionSig)+
-        'is' mathAssertionExp ';'
-    ;
-
-mathDefinesDefinitionDecl
-    :   'Defines' ID (',' ID)* ':' mathTypeExp ';'
-    ;
-
 mathDefinitionDecl
     :   ('Implicit')? 'Definition' mathDefinitionSig
         ('is' mathAssertionExp)? ';'
@@ -338,21 +320,21 @@ mathVariableDecl
 
 // facilitydecls, enhancements, etc
 
-/*facilityDecl
-    :   'Facility' name=ID 'is' spec=ID ('<' type (COMMA type)* '>')?
-        (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? IMPLEMENTED
-        BY impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* SEMI
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID ('<' type (',' type)* '>')?
+        (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
+        'by' impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* ';'
     ;
 
 enhancementPairDecl
-    :   EXTENDED BY spec=ID (LT type (COMMA type)* GT)?
+    :   'extended' 'by' spec=ID ('<' type (',' type)* '>')?
         (specArgs=moduleArgumentList)?
-        (externally=EXTERNALLY)? IMPLEMENTED BY impl=ID
+        (externally='externally')? 'implemented' 'by' impl=ID
         (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList
-    :   LPAREN moduleArgument (COMMA moduleArgument)* RPAREN
+    :   '(' moduleArgument (',' moduleArgument)* ')'
     ;
 
 moduleArgument
@@ -362,39 +344,39 @@ moduleArgument
 // functions
 
 operationDecl
-    :   OPERATION name=ID operationParameterList (COLON type)? SEMI
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
 operationProcedureDecl
-    :   OPERATION
-        name=ID operationParameterList (COLON type)? SEMI
+    :   'Operation'
+        name=ID operationParameterList (':' type)? ';'
         (requiresClause)?
         (ensuresClause)?
-        (recursive=RECURSIVE)? PROCEDURE
+        (recursive='Recursive')? 'Procedure'
         (variableDeclGroup)*
         (stmt)*
-        END closename=ID SEMI
+        'end' closename=ID ';'
     ;
 
 procedureDecl
-    :   (recursive=RECURSIVE)? PROCEDURE name=ID operationParameterList
-        (COLON type)? SEMI
+    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
+        (':' type)? ';'
         (variableDeclGroup)*
         (stmt)*
-        END closename=ID SEMI
+        'end' closename=ID ';'
     ;
 
 // mathematical clauses
 
 affectsClause
-    :   'affects' parameterMode affectsItem (COMMA affectsItem)*
+    :   'affects' parameterMode affectsItem (',' affectsItem)*
     ;
 
 affectsItem
-    :   parameterMode (qualifier=ID COLONCOLON)? name=ID
+    :   parameterMode (qualifier=ID '::')? name=ID
     ;
-*/
+
 requiresClause
     :   'requires' mathAssertionExp (entailsClause)? ';'
     ;
@@ -513,18 +495,18 @@ mathTupleExp
 //Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
 //we could really use some unit tests to perhaps check precendence so that in the future when
 //someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
-/*progExp
+progExp
     :   progPrimary                                     #progPrimaryExp
-    |   LPAREN progExp RPAREN                           #progNestedExp
-    |   op=(MINUS|NOT) progExp                          #progUnaryExp
-    |   progExp op=(PLUSPLUS|MINUSMINUS)                #progPostfixExp
-    |   progExp op=MOD progExp                          #progInfixExp
-    |   progExp op=(MULT|DIVIDE|PLUSPLUS) progExp       #progInfixExp
-    |   progExp op=(PLUS|MINUS) progExp                 #progInfixExp
-    |   progExp op=(LTE|GTE|LT|GT) progExp              #progInfixExp
-    |   progExp op=(EQUALS|NEQUALS) progExp             #progInfixExp
-    |   progExp op=AND progExp                          #progInfixExp
-    |   progExp op=OR progExp                           #progInfixExp
+    |   '(' progExp ')'                           #progNestedExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op=('++'|'--')                #progPostfixExp
+    |   progExp op='%' progExp                          #progInfixExp
+    |   progExp op=('*'|'/'|'++') progExp       #progInfixExp
+    |   progExp op=('+'|'-') progExp                 #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp              #progInfixExp
+    |   progExp op=('='|'/=') progExp             #progInfixExp
+    |   progExp op='and' progExp                          #progInfixExp
+    |   progExp op='or' progExp                           #progInfixExp
     ;
 
 progPrimary
@@ -539,25 +521,24 @@ progVarExp
     ;
 
 progParamExp
-    :   (qualifier=ID COLONCOLON)? name=ID
-        LPAREN (progExp (COMMA progExp)*)? RPAREN
+    :   (qualifier=ID '::')? name=ID
+        '(' (progExp (',' progExp)*)? ')'
     ;
 
 progNamedExp
-    :   (qualifier=ID COLONCOLON)? name=ID
+    :   (qualifier=ID '::')? name=ID
     ;
 
 progMemberExp
-    :   (progParamExp|progNamedExp) (DOT ID)+
+    :   (progParamExp|progNamedExp) ('.' ID)+
     ;
 
 progLiteralExp
-    :   (TRUE|FALSE)    #progBooleanLiteralExp
-    |   INT             #progIntegerLiteralExp
-    |   CHAR            #progCharacterLiteralExp
-    |   STRING          #progStringLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
     ;
-*/
 
 FORALL : 'Forall' ;
 EXISTS : 'Exists' ;

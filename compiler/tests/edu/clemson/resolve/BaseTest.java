@@ -129,8 +129,8 @@ public abstract class BaseTest {
                                                 String moduleStr,
                                                 String moduleName,
                                                 boolean defaultListener) {
-        ErrorQueue errorQueue =
-                resolve(resolveFileName, moduleStr, defaultListener, "-genCode", "Java");
+        ErrorQueue errorQueue = resolve(resolveFileName, moduleStr,
+                defaultListener, "-genCode");
         if (!errorQueue.errors.isEmpty()) return false;
         List<String> files = new ArrayList<>();
         if (moduleName != null) {

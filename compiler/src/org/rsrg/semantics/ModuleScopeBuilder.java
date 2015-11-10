@@ -7,7 +7,6 @@ import java.util.*;
 public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final List<String> importedModules = new LinkedList<>();
-    private Set<String> dependentTerms = new HashSet<>();
 
     ModuleScopeBuilder(TypeGraph g, String name, ParserRuleContext definingTree,
                        Scope parent, SymbolTable symbolTable) {
@@ -25,15 +24,6 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     public boolean imports(String i) {
         return i.equals(getModuleID()) || importedModules.contains(i);
-    }
-
-    public ModuleScopeBuilder addDependentTerms(Collection<String> terms) {
-        dependentTerms.addAll(terms);
-        return this;
-    }
-
-    public Set<String> getDependentTerms() {
-        return dependentTerms;
     }
 
     public List<String> getImports() {

@@ -6,6 +6,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -30,8 +31,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull private final ParseTreeProperty<PTType> progTypes;
     @NotNull private final ParseTreeProperty<PExp> repo;
 
-    @NotNull private final Map<String, MTType> seenOperatorTypes =
-            new HashMap<>();
+    //TODO: Ok, here's an alternative idea that (I think) works better:
+    //let's simply store the application ctx and maybe that can map to another
+    //ctx for the function portion name
+    @NotNull private final ParseTreeProperty<MTType> seenOperatorTypes =
+            new ParseTreeProperty<>();
     @NotNull private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
     @Nullable private final MTInvalid dummyType;
@@ -135,7 +139,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
-        PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx.op))
+        PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.op))
                 .applicationType(getMathType(ctx))
                 .applicationTypeValue(getMathTypeValue(ctx))
                 .style(PApply.DisplayStyle.INFIX)
@@ -144,13 +148,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }
 
-    private PSymbol buildOperatorPSymbol(Token operator) {
-        return buildOperatorPSymbol(operator.getText());
+    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
+                                         Token operator) {
+        return buildOperatorPSymbol(app, operator.getText());
     }
 
-    private PSymbol buildOperatorPSymbol(String operator) {
+    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
+                                         String operator) {
         return new PSymbolBuilder(operator)
-                .mathType(getOperandFunctionType(operator))
+                .mathType(getOperandFunctionType(app))
                 .quantification(quantifiedVars.get(operator))
                 .build();
     }
@@ -250,9 +256,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     //this should probably actually always return MTFunction...
-    private MTType getOperandFunctionType(String operator) {
-        return seenOperatorTypes.get(operator) == null ? dummyType :
-                seenOperatorTypes.get(operator);
+    private MTType getOperandFunctionType(ParserRuleContext app) {
+        return seenOperatorTypes.get(app) == null ? dummyType :
+                seenOperatorTypes.get(app);
     }
 
     private MTType getMathType(ParseTree t) {

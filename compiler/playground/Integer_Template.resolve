@@ -1,0 +1,9 @@
+Concept Integer_Template;
+        //uses Basic_Integer_Theory, Standard_Booleans;
+
+    //Constraints min_int <= 0 and 1 <= max_int;
+
+    Type family Integer is modeled by Z;
+        exemplar I;
+
+end Integer_Template;

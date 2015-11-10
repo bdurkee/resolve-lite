@@ -1,10 +1,14 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.MTFunction;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
+import org.rsrg.semantics.TypeGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -203,6 +207,22 @@ public class PApply extends PExp {
 
     @NotNull public List<PExp> getArguments() {
         return arguments;
+    }
+
+    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+                .paramTypes(arguments.stream()
+                        .map(PExp::getMathType)
+                        .collect(Collectors.toList())).build();
+    }
+
+    public static MTFunction getConservativePreApplicationType(TypeGraph g,
+                                                               List<? extends ParseTree> arguments,
+                                                               ParseTreeProperty<MTType> types) {
+        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+                .paramTypes(arguments.stream()
+                        .map(types::get)
+                        .collect(Collectors.toList())).build();
     }
 
     @Override public boolean containsName(String name) {

@@ -22,6 +22,9 @@ public class HardCoded {
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
+            b.addBinding("N", null, g.SSET, g.NAT);
+            b.addBinding("Z", null, g.SSET, g.Z);
+
             b.addBinding("conc", null, g.SSET, g.BOOLEAN);
 
             b.addBinding("true", null, g.BOOLEAN);

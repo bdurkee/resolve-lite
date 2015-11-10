@@ -17,10 +17,10 @@ public class DefaultAssumeApplicationStrategy
                                               VCAssume stat) {
         PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
         PExp assumeExp = stat.getStatComponents().get(0);
-        if ( curFinalConfirmExp.isObviouslyTrue() ) {
+        if (curFinalConfirmExp.isObviouslyTrue()) {
             block.finalConfirm(assumeExp);
         }
-        else if ( !assumeExp.equals(block.g.getTrueExp()) ) {
+        else if (!assumeExp.equals(block.g.getTrueExp())) {
             block.finalConfirm(block.g.formImplies(assumeExp, curFinalConfirmExp));
         }
         return block.snapshot();

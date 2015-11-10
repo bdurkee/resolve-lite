@@ -18,6 +18,10 @@ public class BindingExpression {
         return expression.getMathType();
     }
 
+    public TypeGraph getTypeGraph() {
+        return typeGraph;
+    }
+
     public MTType getTypeValue() {
         return expression.getMathTypeValue();
     }
