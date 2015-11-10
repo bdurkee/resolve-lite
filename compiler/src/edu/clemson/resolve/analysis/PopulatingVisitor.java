@@ -1435,6 +1435,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         MathSymbol x = getIntendedEntry(null, ctx.op.getText(), ctx);
         tr.mathTypes.put(ctx, x.getType());
         return null;
@@ -1463,7 +1464,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathBooleanLiteralExp(
+    @Override public Void visitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
@@ -1473,7 +1474,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
-    }*/
+    }
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {

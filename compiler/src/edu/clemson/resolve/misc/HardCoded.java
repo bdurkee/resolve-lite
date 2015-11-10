@@ -50,7 +50,9 @@ public class HardCoded {
                              .build());*/
 
             //S E T   R E L A T E D
+            b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
+
             b.addBinding("Card", null, g.SSET, g.CARD);
             b.addBinding("union", null, g.UNION);
             b.addBinding("intersect", null, g.INTERSECT);
