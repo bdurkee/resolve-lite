@@ -31,9 +31,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull private final ParseTreeProperty<PTType> progTypes;
     @NotNull private final ParseTreeProperty<PExp> repo;
 
-    //TODO: Ok, here's an alternative idea that (I think) works better:
-    //let's simply store the application ctx and maybe that can map to another
-    //ctx for the function portion name
     @NotNull private final ParseTreeProperty<MTType> seenOperatorTypes =
             new ParseTreeProperty<>();
     @NotNull private final Map<String, Quantification> quantifiedVars =
@@ -148,6 +145,25 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }
 
+    @Override public void exitMathOutfixApplyExp(
+            ResolveParser.MathOutfixApplyExpContext ctx) {
+        PApplyBuilder result =
+                new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
+                    .applicationType(getMathType(ctx))
+                    .applicationTypeValue(getMathTypeValue(ctx))
+                    .style(PApply.DisplayStyle.OUTFIX)
+                    .arguments(repo.get(ctx.mathExp()));
+        PApply x = result.build();
+        repo.put(ctx, x);
+    }
+
+    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
+                                         Token lop, Token rop) {
+        return new PSymbolBuilder(lop.getText(), rop.getText())
+                .mathType(getMathType(app))
+                .build();
+    }
+
     private PSymbol buildOperatorPSymbol(ParserRuleContext app,
                                          Token operator) {
         return buildOperatorPSymbol(app, operator.getText());
@@ -156,14 +172,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private PSymbol buildOperatorPSymbol(ParserRuleContext app,
                                          String operator) {
         return new PSymbolBuilder(operator)
-                .mathType(getOperandFunctionType(app))
+                .mathType(getMathType(app))
                 .quantification(quantifiedVars.get(operator))
                 .build();
-    }
-
-    @Override public void exitMathOutfixApplyExp(
-            ResolveParser.MathOutfixApplyExpContext ctx) {
-
     }
 
     @Override public void exitMathSymbolExp(
@@ -212,6 +223,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result);
     }
 
+    @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
+        PSet result = new PSet(types.get(ctx), null,
+                Utils.collect(PExp.class, ctx.mathExp(), repo));
+        repo.put(ctx, result);
+    }
+
     @Override public void exitMathSegmentsExp(
             ResolveParser.MathSegmentsExpContext ctx) {
         List<String> nameComponents = ctx.mathSymbolExp().stream()
@@ -244,6 +261,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result = new PSymbol.PSymbolBuilder(ctx.getText())
                 .mathType(getMathType(ctx)).literal(true);
         repo.put(ctx, result.build());
+    }
+
+    @Override public void exitConstraintClause(
+            ResolveParser.ConstraintClauseContext ctx) {
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
     private PExp buildLiteral(String literalText, MTType type, MTType typeValue,

@@ -1,10 +1,10 @@
 Implementation Store_Do_Nothing_Impl for
-        Store_Do_Nothing_Capability of Bdd_Search_Store_Template;
+        Store_Do_Nothing_Capability of Search_Store_Template;
 
     Procedure Do_Nothing (restores S : Store);
-        Var e : T;
+        /*Var e : T;
         Add(e, S);
-        Remove(e, S);
+        Remove(e, S);*/
     end Do_Nothing;
 end Store_Do_Nothing_Impl;
 

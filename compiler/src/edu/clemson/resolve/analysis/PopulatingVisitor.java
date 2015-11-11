@@ -61,10 +61,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static final boolean EMIT_DEBUG = true;
 
-    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH = new ExactDomainMatch();
-    private static final Comparator<MTType> EXACT_PARAMETER_MATCH = new ExactParameterMatch();
-    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH = new InexactDomainMatch();
-    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH = new InexactParameterMatch();
+    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
+            new ExactDomainMatch();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
+            new ExactParameterMatch();
+    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
+            new InexactDomainMatch();
+    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
+            new InexactParameterMatch();
 
     private boolean walkingDefParams = false;
 
@@ -143,7 +147,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null; //java requires a return, even if its 'Void'
      }
 
-     @Override public Void visitImplModuleParameterList(
+    @Override public Void visitExtensionModule(
+            ResolveParser.ExtensionModuleContext ctx) {
+        List<String> implicitImports =
+                symtab.moduleScopes.get(ctx.concept.getText()).getImports();
+        moduleScope.addImports(implicitImports);
+        this.visitChildren(ctx);
+        return null;
+    }
+
+    @Override public Void visitExtensionImplModule(
+            ResolveParser.ExtensionImplModuleContext ctx) {
+        moduleScope.addImports(symtab.moduleScopes.get(
+                ctx.enhancement.getText()).getImports());
+        this.visitChildren(ctx);
+        return null;
+    }
+
+    @Override public Void visitImplModuleParameterList(
              ResolveParser.ImplModuleParameterListContext ctx) {
          walkingModuleArgOrParamList = true;
          this.visitChildren(ctx);
@@ -1259,6 +1280,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathSetExp(ResolveParser.MathSetExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        if (ctx.mathExp().isEmpty()) {
+            tr.mathTypes.put(ctx, g.EMPTY_SET);
+        }
+        else {
+            MTFunction setType =
+                    new MTFunction.MTFunctionBuilder(g, g.SSET)
+                            .paramTypes(tr.mathTypes.get(ctx.mathExp().get(0)))
+                            .build();
+            tr.mathTypes.put(ctx, setType);
+        }
+        return null;
+    }
+
     /* @Override public Void visitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
@@ -1435,18 +1471,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
-        MathSymbol x = getIntendedEntry(null, ctx.op.getText(), ctx);
-        tr.mathTypes.put(ctx, x.getType());
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
     }
 
-    /*@Override public Void visitMathOutfixApplyExp(
-            ResolveParser.MathOutfixExpContext ctx) {
+    @Override public Void visitMathOutfixApplyExp(
+            ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
-                ctx.lop.getText()+ "..."+ctx.rop.getText()), ctx.mathExp());
+                ctx.lop.getText() + "..."+ctx.rop.getText()), ctx.mathExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
@@ -1463,7 +1498,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathBooleanLiteralExp(
+    @Override public Void visitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
@@ -1473,7 +1508,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
-    }*/
+    }
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
