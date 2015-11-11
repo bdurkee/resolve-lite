@@ -41,11 +41,11 @@ module
 
 conceptModule
     :   'Concept' name=ID ('<' genericType (',' genericType)* '>')?
-        (specModuleParameterList)? ';'
+        (specModuleParameterList)? ';'?
         (usesList)?
         (requiresClause)?
         (conceptBlock)
-        'end' closename=ID ';' EOF
+        'end' closename=ID ';'? EOF
     ;
 
 conceptBlock
@@ -61,11 +61,11 @@ conceptBlock
 
 extensionModule
     :   'Extension' name=ID (specModuleParameterList)?
-        'for' concept=ID ';'
+        'for' concept=ID ';'?
         (usesList)?
         (requiresClause)?
         (extensionBlock)
-        'end' closename=ID ';' EOF
+        'end' closename=ID ';'? EOF
     ;
 
 extensionBlock
@@ -89,11 +89,11 @@ extensionBlock
 
 extensionImplModule
    :   'Implementation' name=ID (implModuleParameterList)?
-       'for' enhancement=ID 'of' concept=ID ';'
+       'for' enhancement=ID 'of' concept=ID ';'?
        (usesList)?
        (requiresClause)?
        (implBlock)
-       'end' closename=ID ';' EOF
+       'end' closename=ID ';'? EOF
    ;
 
 implBlock
@@ -107,11 +107,11 @@ implBlock
 // facility modules
 
 facilityModule
-    :   'Facility' name=ID ';'
+    :   'Facility' name=ID ';'?
         (usesList)?
         (requiresClause)?
         (facilityBlock)
-        'end' closename=ID ';' EOF
+        'end' closename=ID ';'? EOF
     ;
 
 facilityBlock
@@ -123,10 +123,10 @@ facilityBlock
     ;
 
 precisModule
-    :   'Precis' name=ID ';'
+    :   'Precis' name=ID ';'?
         (usesList)?
         precisBlock
-        'end' closename=ID ';' EOF
+        'end' closename=ID ';'? EOF
     ;
 
 precisBlock
@@ -138,7 +138,7 @@ precisBlock
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'
+    :   'uses' ID (',' ID)* ';'?
     ;
 
 // parameter and parameter-list related rules
@@ -180,7 +180,7 @@ parameterMode
     ;
 
 variableDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'
+    :   'Var' ID (',' ID)* ':' type ';'?
     ;
 
 // statements
@@ -194,27 +194,27 @@ stmt
     ;
 
 assignStmt
-    :   left=progVarExp ':=' right=progExp ';'
+    :   left=progVarExp ':=' right=progExp ';'?
     ;
 
 swapStmt
-    :   left=progVarExp ':=:' right=progVarExp ';'
+    :   left=progVarExp ':=:' right=progVarExp ';'?
     ;
 
 callStmt
-    :   progExp ';'
+    :   progExp ';'?
     ;
 
 whileStmt
     :   'While' progExp
-        ('maintaining' mathExp ';')?
-        ('decreasing' mathExp ';')? 'do'
+        ('maintaining' mathExp ';'?)?
+        ('decreasing' mathExp ';'?)? 'do'
         (stmt)*
-        'end' ';'
+        'end' ';'?
     ;
 
 ifStmt
-    :   'If' progExp 'then' stmt* (elsePart)? 'end' ';'
+    :   'If' progExp 'then' stmt* (elsePart)? 'end' ';'?
     ;
 
 elsePart
@@ -236,19 +236,19 @@ record
     ;
 
 recordVariableDeclGroup
-    :   ID (',' ID)* ':' type ';'
+    :   ID (',' ID)* ':' type ';'?
     ;
 
 typeModelDecl
-    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'
-        'exemplar' exemplar=ID ';'
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
+        'exemplar' exemplar=ID ';'?
         (constraintClause)?
         (typeModelInit)?
     ;
 
 
 typeRepresentationDecl
-    :   'Type' name=ID '=' (type|record) ';'
+    :   'Type' name=ID '=' (type|record) ';'?
         (conventionClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -267,7 +267,7 @@ typeModelInit
 typeImplInit
     :   'initialization' (ensuresClause)?
         (variableDeclGroup)* (stmt)*
-        'end' ';'
+        'end' ';'?
     ;
 
 // math constructs
@@ -293,7 +293,7 @@ mathSymbolName
     ;
 
 mathDefinitionDecl
-    :   'Definition' mathDefinitionSig ('is' mathAssertionExp)? ';'
+    :   'Definition' mathDefinitionSig ('is' mathAssertionExp)? ';'?
     ;
 
 mathVariableDeclGroup
@@ -309,7 +309,7 @@ mathVariableDecl
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID ('<' type (',' type)* '>')?
         (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
-        'by' impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* ';'
+        'by' impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* ';'?
     ;
 
 enhancementPairDecl
@@ -330,27 +330,27 @@ moduleArgument
 // functions
 
 operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'
+    :   'Operation' name=ID operationParameterList (':' type)? ';'?
         (requiresClause)? (ensuresClause)?
     ;
 
 operationProcedureDecl
     :   'Operation'
-        name=ID operationParameterList (':' type)? ';'
+        name=ID operationParameterList (':' type)? ';'?
         (requiresClause)?
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
         (variableDeclGroup)*
         (stmt)*
-        'end' closename=ID ';'
+        'end' closename=ID ';'?
     ;
 
 procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
-        (':' type)? ';'
+        (':' type)? ';'?
         (variableDeclGroup)*
         (stmt)*
-        'end' closename=ID ';'
+        'end' closename=ID ';'?
     ;
 
 // mathematical clauses
@@ -364,27 +364,27 @@ affectsItem
     ;
 
 requiresClause
-    :   'requires' mathAssertionExp (entailsClause)? ';'
+    :   'requires' mathAssertionExp (entailsClause)? ';'?
     ;
 
 ensuresClause
-    :   'ensures' mathAssertionExp ';'
+    :   'ensures' mathAssertionExp ';'?
     ;
 
 constraintClause
-    :   'constraint' mathAssertionExp ';'
+    :   'constraint' mathAssertionExp ';'?
     ;
 
 conventionClause
-    :   'convention' mathAssertionExp (entailsClause)? ';'
+    :   'convention' mathAssertionExp (entailsClause)? ';'?
     ;
 
 correspondenceClause
-    :   'correspondence' mathAssertionExp ';'
+    :   'correspondence' mathAssertionExp ';'?
     ;
 
 entailsClause
-    :   'which_entails' mathExp (',' mathExp)* ':' mathTypeExp
+    :   'which' 'entails' mathExp (',' mathExp)* ':' mathTypeExp
     ;
 
 // mathematical expressions

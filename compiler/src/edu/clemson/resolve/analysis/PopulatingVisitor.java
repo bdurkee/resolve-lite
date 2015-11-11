@@ -716,6 +716,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 builder.paramNames(t.getText());
             }
         }
+        if (!ctx.mathVariableDeclGroup().isEmpty()) {
+            defnType = builder.build();
+        }
 
         try {
             symtab.getInnermostActiveScope().define(
