@@ -318,7 +318,7 @@ public abstract class PExp {
     @NotNull public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
-                            getIncomingVariablesNoCache());
+                    getIncomingVariablesNoCache());
         }
         return cachedIncomingVariables;
     }
@@ -347,17 +347,15 @@ public abstract class PExp {
 
     @NotNull public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    @NotNull public final Set<String> getSymbolNames() {
-        return getSymbolNames(false, false);
+    @NotNull public final Set<String> getVariableNames() {
+        if ( cachedSymbolNames == null ) {
+            //We're immutable, so only do this once
+            cachedSymbolNames = getVariableNamesNoCache();
+        }
+        return cachedSymbolNames;
     }
 
-    @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
-                                                     boolean excludeLiterals) {
-        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
-    }
-
-    protected abstract Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals);
+    protected abstract Set<String> getVariableNamesNoCache();
 
     /**
      * Returns {@code true} iff this {@code PExp} and {@code o},

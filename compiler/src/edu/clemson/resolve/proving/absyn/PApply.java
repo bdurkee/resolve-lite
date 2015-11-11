@@ -356,16 +356,11 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getVariableNamesNoCache() {
         Set<String> result = new LinkedHashSet<>();
-        if (!excludeApplications) {
-            result.addAll(functionPortion
-                    .getSymbolNames(false, excludeLiterals));
-        }
+        result.addAll(functionPortion.getVariableNames());
         for (PExp argument : arguments) {
-            result.addAll(argument.getSymbolNames(excludeApplications,
-                    excludeLiterals));
+            result.addAll(argument.getVariableNames());
         }
         return result;
     }
