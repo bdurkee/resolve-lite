@@ -69,8 +69,8 @@ public class PApply extends PExp {
          */
         INFIX {
             @Override protected String toString(PApply s) {
-                return Utils.join(s.arguments, " " +
-                        s.functionPortion.getCanonicalName() + " ");
+                return "(" + Utils.join(s.arguments, " " +
+                        s.functionPortion.getCanonicalName() + " ") + ")";
             }
 
             @Override public String getStyleName() {
@@ -300,6 +300,25 @@ public class PApply extends PExp {
         else {
             accumulator.add(this);
         }
+    }
+
+    @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
+        List<PExp> result = new ArrayList<>();
+        TypeGraph g = getMathType().getTypeGraph();
+        if (getCanonicalName().equals("and")) {
+            arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
+        }
+        else if (getCanonicalName().equals("implies")) {
+            PExp tempLeft, tempRight;
+            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
+            //tempList = arguments.get(0).splitIntoSequents(assumptions);
+            if (!assumptions.isObviouslyTrue()) {
+                tempLeft = g.formConjunct(assumptions, tempLeft);
+            }
+            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
+            return arguments.get(1).splitIntoSequents(tempLeft);
+        }
+        return result;
     }
 
     @NotNull @Override public PExp withIncomingSignsErased() {
