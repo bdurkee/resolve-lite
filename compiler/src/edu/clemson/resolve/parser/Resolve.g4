@@ -201,7 +201,6 @@ swapStmt
     :   left=progVarExp ':=:' right=progVarExp ';'
     ;
 
-//semantically restrict things like 1++ (<literal>++/--, etc)
 callStmt
     :   progExp ';'
     ;
@@ -296,18 +295,11 @@ mathSymbolName
 
 mathDefinitionParameter
     :   mathVariableDeclGroup
-    |   ID
     ;
 
 mathDefinitionDecl
     :   ('Implicit')? 'Definition' mathDefinitionSig
         ('is' mathAssertionExp)? ';'
-    ;
-
-mathInductiveDefinitionDecl
-    :   'Inductive' 'Definition' 'on' mathVariableDecl 'of' mathDefinitionSig 'is'
-        '(i.)' mathAssertionExp ';'
-        '(ii.)' mathAssertionExp ';'
     ;
 
 mathVariableDeclGroup
@@ -501,16 +493,16 @@ mathTupleExp
 //someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
 progExp
     :   progPrimary                                     #progPrimaryExp
-    |   '(' progExp ')'                           #progNestedExp
+    |   '(' progExp ')'                                 #progNestedExp
     |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('++'|'--')                #progPostfixExp
+    |   progExp op=('++'|'--')                          #progPostfixExp
     |   progExp op='%' progExp                          #progInfixExp
-    |   progExp op=('*'|'/'|'++') progExp       #progInfixExp
-    |   progExp op=('+'|'-') progExp                 #progInfixExp
-    |   progExp op=('<='|'>='|'<'|'>') progExp              #progInfixExp
-    |   progExp op=('='|'/=') progExp             #progInfixExp
-    |   progExp op='and' progExp                          #progInfixExp
-    |   progExp op='or' progExp                           #progInfixExp
+    |   progExp op=('*'|'/'|'++') progExp               #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op='and' progExp                        #progInfixExp
+    |   progExp op='or' progExp                         #progInfixExp
     ;
 
 progPrimary

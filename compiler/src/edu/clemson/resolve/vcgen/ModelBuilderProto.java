@@ -569,9 +569,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         repr.conceptualExemplarAsPSymbol(true));
 
                 resultingClause = resultingClause.substitute(concReplMapping);
-                //resultingClause =
-                //        betaReduce(resultingClause,
-                //                corrFnExp);
             }
         }
         return resultingClause;

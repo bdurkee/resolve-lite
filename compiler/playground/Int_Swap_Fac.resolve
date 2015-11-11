@@ -1,8 +1,0 @@
-Facility Int_Swap_Fac;
-        uses Standard_Integers;
-    Operation Swap (updates i, j : Std_Integer_Fac :: Integer);
-            ensures i = @j and j = @i;
-        Procedure
-            i :=: j;
-    end Swap;
-end Int_Swap_Fac;
