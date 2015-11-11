@@ -268,6 +268,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
+    @Override public void exitRequiresClause(
+            ResolveParser.RequiresClauseContext ctx) {
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitEnsuresClause(
+            ResolveParser.EnsuresClauseContext ctx) {
+        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    }
+
     private PExp buildLiteral(String literalText, MTType type, MTType typeValue,
                               PTType progType) {
         PSymbol.PSymbolBuilder result =
