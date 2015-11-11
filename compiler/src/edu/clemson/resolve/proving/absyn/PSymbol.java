@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
+import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -141,28 +142,12 @@ public class PSymbol extends PExp {
         return this.name.equals(name);
     }
 
-    /*public List<PExp> splitIntoSequents(PExp assumptions) {
+    @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         TypeGraph g = getMathType().getTypeGraph();
-        if (name.equals("and")) {
-            arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
-        }
-        else if (name.equals("implies")) {
-            PExp tempLeft, tempRight;
-            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).splitIntoSequents(assumptions);
-            if (!assumptions.isObviouslyTrue()) {
-                tempLeft = g.formConjunct(assumptions, tempLeft);
-            }
-
-            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).splitIntoSequents(tempLeft);
-        }
-        else {
-            result.add(g.formImplies(assumptions, this));
-        }
+        result.add(g.formImplies(assumptions, this));
         return result;
-    }*/
+    }
 
     @NotNull @Override public List<? extends PExp> getSubExpressions() {
         return new ArrayList<>();
