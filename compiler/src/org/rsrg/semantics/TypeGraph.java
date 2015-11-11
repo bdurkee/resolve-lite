@@ -1,11 +1,17 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.proving.absyn.PApply;
+import edu.clemson.resolve.proving.absyn.PApply.DisplayStyle;
+import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
+
+import static org.rsrg.semantics.MTFunction.*;
 
 public class TypeGraph {
 
@@ -43,24 +49,35 @@ public class TypeGraph {
             new FunctionConstructorApplicationFactory();
     private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
             new CartesianProductApplicationFactory();
-    public final MTFunction FUNCTION = new MTFunction.MTFunctionBuilder(this,
+    public final MTFunction FUNCTION = new MTFunctionBuilder(this,
             FUNCTION_CONSTRUCTOR_APPLICATION, SSET).paramTypes(SSET, SSET)
             .build();
     public final MTFunction CROSS =
-            new MTFunction.MTFunctionBuilder(this,
+            new MTFunctionBuilder(this,
                     CARTESIAN_PRODUCT_APPLICATION, MTYPE)
                     .paramTypes(MTYPE, MTYPE).build();
 
-    public final MTFunction POWERSET = //
-            new MTFunction.MTFunctionBuilder(this, POWERSET_APPLICATION, SSET) //
-                    .paramTypes(SSET) //
+    public final MTFunction POWERSET =
+            new MTFunctionBuilder(this, POWERSET_APPLICATION, SSET)
+                    .paramTypes(SSET)
                     .elementsRestrict(true).build();
 
-    public final MTFunction UNION = new MTFunction.MTFunctionBuilder(this,
+    public final MTFunction RELATIONAL_FUNCTION =
+            new MTFunctionBuilder(this, BOOLEAN)
+                    .paramTypes(ENTITY, ENTITY)
+                    .build();
+
+    /** A function where the everything is boolean: B * B -> B */
+    public final MTFunction BOOLEAN_FUNCTION =
+            new MTFunctionBuilder(this, BOOLEAN)
+                    .paramTypes(BOOLEAN, BOOLEAN)
+                    .build();
+
+    public final MTFunction UNION = new MTFunctionBuilder(this,
             UNION_APPLICATION, SSET).paramTypes(SSET, SSET) //
             .build();
 
-    public final MTFunction INTERSECT = new MTFunction.MTFunctionBuilder(this,
+    public final MTFunction INTERSECT = new MTFunctionBuilder(this,
             INTERSECT_APPLICATION, SSET).paramTypes(SSET, SSET) //
             .build();
 
@@ -100,7 +117,7 @@ public class TypeGraph {
 
         @Override public MTType buildFunctionApplication(TypeGraph g,
                 MTFunction f, String calledAsName, List<MTType> arguments) {
-            return new MTFunction.MTFunctionBuilder(g, arguments.get(1))
+            return new MTFunctionBuilder(g, arguments.get(1))
                     .paramTypes(arguments.get(0)).build();
         }
     }
@@ -312,16 +329,22 @@ public class TypeGraph {
         return result;
     }
 
-    public PSymbol formConjunct(PExp p, PExp q) {
-        return null;
-        //return new PSymbolBuilder("and").mathType(BOOLEAN).arguments(p, q)
-        //        .style(DisplayStyle.INFIX).build();
+    @NotNull public PApply formConjunct(@NotNull PExp left, @NotNull PExp right) {
+        PExp functionPortion = new PSymbolBuilder("and")
+                .mathType(BOOLEAN_FUNCTION).build();
+        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+                .style(DisplayStyle.INFIX)
+                .arguments(left, right)
+                .build();
     }
 
-    public PSymbol formDisjunct(PExp p, PExp q) {
-        return null;
-        //return new PSymbolBuilder("or").mathType(BOOLEAN).arguments(p, q)
-        //        .style(DisplayStyle.INFIX).build();
+    @NotNull public PApply formDisjunct(PExp left, PExp right) {
+        PExp functionPortion = new PSymbolBuilder("or")
+                .mathType(BOOLEAN_FUNCTION).build();
+        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+                .style(DisplayStyle.INFIX)
+                .arguments(left, right)
+                .build();
     }
 
     public final PSymbol getTrueExp() {
@@ -334,22 +357,37 @@ public class TypeGraph {
                 .build();
     }
 
-    public final PSymbol formImplies(PExp p, PExp q) {
-        return null;
-        //return new PSymbolBuilder("implies").mathType(BOOLEAN).arguments(p, q)
-        //        .style(DisplayStyle.INFIX).build();
+    public final PApply formEquals(PExp left, PExp right) {
+        PExp functionPortion = new PSymbolBuilder("=")
+                .mathType(BOOLEAN_FUNCTION).build();
+        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+                .style(DisplayStyle.INFIX)
+                .arguments(left, right)
+                .build();
+    }
+
+    public final PApply formImplies(PExp left, PExp right) {
+        PExp functionPortion = new PSymbolBuilder("implies")
+                .mathType(RELATIONAL_FUNCTION).build();
+        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+                .style(DisplayStyle.INFIX)
+                .arguments(left, right)
+                .build();
     }
 
     public final PSymbol formConcExp() {
         return new PSymbolBuilder("conc").mathType(BOOLEAN).build();
     }
 
-    public final PSymbol formInitializationPredicate(PTType argType,
-            String argName) {
-        PSymbol predicateArg =
-                new PSymbolBuilder(argName).mathType(argType.toMath()).build();
-        return null;
-        //return new PSymbolBuilder(argType.toString() + ".Is_Initial")
-        //        .mathType(BOOLEAN).arguments(predicateArg).build();
+    public final PApply formInitializationPredicate(@NotNull PTType argType,
+                                                    @NotNull String argName) {
+        PSymbol predicateArg = new PSymbolBuilder(argName)
+                .mathType(argType.toMath()).build();
+        MTFunction initType = new MTFunctionBuilder(this, BOOLEAN)
+                .paramTypes(argType.toMath()).build();
+        PSymbol namePortion = new PSymbolBuilder(argType + ".Is_Initial")
+                .mathType(initType).build();
+        return new PApplyBuilder(namePortion).arguments(predicateArg)
+                .applicationType(BOOLEAN).build();
     }
 }

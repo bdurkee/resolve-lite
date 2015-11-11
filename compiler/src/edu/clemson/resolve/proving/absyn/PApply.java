@@ -248,8 +248,10 @@ public class PApply extends PExp {
             List<PExp> args = arguments.stream()
                     .map(e -> e.substitute(substitutions))
                     .collect(Collectors.toList());
-            result = new PApplyBuilder(functionPortion
-                    .substitute(substitutions)).arguments(args).build();
+            result = new PApplyBuilder(functionPortion.substitute(substitutions))
+                    .style(displayStyle)
+                    .applicationType(getMathType())
+                    .arguments(args).build();
         }
         return result;
     }
@@ -305,7 +307,7 @@ public class PApply extends PExp {
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
                 .applicationType(getMathType())
                 .applicationTypeValue(getMathTypeValue())
-                .build();
+                .style(displayStyle).build();
     }
 
     @NotNull @Override public PExp withQuantifiersFlipped() {
@@ -313,7 +315,7 @@ public class PApply extends PExp {
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
                 .applicationType(getMathType())
                 .applicationTypeValue(getMathTypeValue())
-                .build();
+                .style(displayStyle).build();
     }
 
     @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {

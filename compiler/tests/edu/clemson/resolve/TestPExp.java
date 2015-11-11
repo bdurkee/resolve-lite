@@ -91,6 +91,8 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(g, "bar :: foo"));
         Assert.assertEquals(parseMathAssertionExp(g, "bar :: f.x"),
                 parseMathAssertionExp(g, "bar :: f.x"));
+        Assert.assertEquals(parseMathAssertionExp(g, "||S||"),
+                parseMathAssertionExp(g, "||S||"));
     }
 
     @Test public void testPAltAndPLambdaEquals() throws Exception {

@@ -3,6 +3,19 @@ Concept Search_Store_Template<T>
             uses Standard_Integers, Basic_Integer_Theory;
     requires Max_Capacity > 0;
 
+    Type family Store is
+            modeled by Finite_Powerset(T);
+        exemplar S;
+        constraint ||S|| < Max_Capacity;
+        initialization
+            ensures S = { };
 
+    Operation Add (updates S : Store; restores e : T);
+        requires ||S|| < Max_Capacity and e is_not_in S;
+        ensures S = @S union {e};
+
+	Operation Remove (updates S : Store; restores e : T);
+		requires e is_in S;
+		ensures S = @S ~ {e};
 
 end Search_Store_Template;

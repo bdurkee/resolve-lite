@@ -21,29 +21,21 @@ public class UsesListener extends ResolveBaseListener {
             ResolveParser.ConceptImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
-    }
+    }   */
 
-    @Override public void enterEnhancementModule(
-            ResolveParser.EnhancementModuleContext ctx) {
+    @Override public void enterExtensionModule(
+            ResolveParser.ExtensionModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
 
-    @Override public void enterEnhancementImplModule(
-            ResolveParser.EnhancementImplModuleContext ctx) {
+    @Override public void enterExtensionImplModule(
+            ResolveParser.ExtensionImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.enhancement));
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyVisibleUses.add(ctx.enhancement.getText());
         tr.semanticallyVisibleUses.add(ctx.concept.getText());
     }
-
-    @Override public void enterPrecisExtensionModule(
-            ResolveParser.PrecisExtensionModuleContext ctx) {
-        for (TerminalNode t : ctx.ID()) { // this will automatically add <id> + 'for' <id> + extended by <id>s
-            tr.uses.add(new AnnotatedTree.UsesRef(ctx.precis));
-            tr.semanticallyVisibleUses.add(ctx.precis.getText());
-        }
-    }*/
 
     @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         tr.uses.addAll(ctx.ID().stream()

@@ -35,8 +35,8 @@ module
     |   conceptModule
    // |   conceptImplModule
     |   facilityModule
-   /* |   enhancementImplModule
-    |   enhancementModule*/
+    |   extensionImplModule
+    |   extensionModule
     ;
 
 conceptModule
@@ -57,19 +57,18 @@ conceptBlock
         )*
     ;
 
-/*
-// enhancement module
+// extension module
 
-enhancementModule
-    :   EXTENSION name=ID (specModuleParameterList)?
-        FOR concept=ID SEMI
+extensionModule
+    :   'Extension' name=ID (specModuleParameterList)?
+        'for' concept=ID ';'
         (usesList)?
         (requiresClause)?
-        (enhancementBlock)
-        END closename=ID SEMI EOF
+        (extensionBlock)
+        'end' closename=ID ';' EOF
     ;
 
-enhancementBlock
+extensionBlock
     :   ( operationDecl
         | typeModelDecl
         | mathDefinitionDecl
@@ -78,22 +77,23 @@ enhancementBlock
 
 // implementation modules
 
-conceptImplModule
-    :   IMPLEMENTATION name=ID (implModuleParameterList)?
-        FOR concept=ID SEMI
+/*conceptImplModule
+    :   'Implementation' name=ID (implModuleParameterList)?
+        'for' concept=ID ';'
         (usesList)?
         (requiresClause)?
         (implBlock)
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
+*/
 
-enhancementImplModule
-   :   IMPLEMENTATION name=ID (implModuleParameterList)?
-       FOR enhancement=ID OF concept=ID SEMI
+extensionImplModule
+   :   'Implementation' name=ID (implModuleParameterList)?
+       'for' enhancement=ID 'of' concept=ID ';'
        (usesList)?
        (requiresClause)?
        (implBlock)
-       END closename=ID SEMI EOF
+       'end' closename=ID ';' EOF
    ;
 
 implBlock
@@ -103,7 +103,7 @@ implBlock
         | facilityDecl
         )*
     ;
-*/
+
 // facility modules
 
 facilityModule
@@ -437,7 +437,8 @@ mathPrimaryExp
     :   mathLiteralExp
     |   mathSymbolExp
     |   mathCrossTypeExp
-    //|   mathSetExp
+    |   mathSetExp
+    |   mathSetRestrictionExp
     |   mathOutfixApplyExp
     |   mathTupleExp
     |   mathAlternativeExp
@@ -468,11 +469,14 @@ mathOutfixApplyExp
     |   lop='||' mathExp rop='||'
     ;
 
-/*mathSetExp
-    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE  #mathSetBuilderExp//Todo
-    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE         #mathSetCollectionExp
+mathSetRestrictionExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'
     ;
-*/
+
+mathSetExp
+    :   '{' (mathExp (',' mathExp)*)? '}'
+    ;
+
 mathLambdaExp
     :   'lambda' '(' mathVariableDeclGroup
         (',' mathVariableDeclGroup)* ')' '.'  mathExp
