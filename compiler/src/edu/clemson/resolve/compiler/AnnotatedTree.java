@@ -42,7 +42,7 @@ public class AnnotatedTree {
      * orderings, etc. Think of these strings the refs the symboltable will see.
      * We don't want implementations of facilities showing up in this set.
      */
-    public final Set<String> semanticallyVisibleUses = new LinkedHashSet<>();
+    public final Set<String> semanticallyRelevantUses = new LinkedHashSet<>();
 
     @NotNull private final String name, fileName;
     @NotNull private final ParseTree root;
