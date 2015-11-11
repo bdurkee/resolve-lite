@@ -380,17 +380,20 @@ public class ModelBuilderProto extends ResolveBaseListener {
             ResolveParser.VariableDeclGroupContext ctx) {
         PTType type = tr.progTypeValues.get(ctx.type());
         MTType mathType = tr.mathTypeValues.get(ctx.type());
-        if (type instanceof PTNamed) {
-            PExp init = ((PTNamed)type).getInitializationEnsures();
-            for (TerminalNode t : ctx.ID()) {
+        for (TerminalNode t : ctx.ID()) {
+
+            if (type instanceof PTNamed) {
+                PExp init = ((PTNamed)type).getInitializationEnsures();
                 PSymbol v = new PSymbol.PSymbolBuilder(t.getText())
                         .mathType(mathType).progType(type).build();
                 init = init.substitute(((PTNamed) type)
                         .getExemplarAsPSymbol(), v);
                 assertiveBlocks.peek().assume(init);
             }
-        } else { //generic
-
+            else { //generic case
+                assertiveBlocks.peek().assume(
+                        g.formInitializationPredicate(type, t.getText()));
+            }
         }
     }
 
@@ -427,13 +430,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
-
-    public PExp betaReduce(PExp start, PExp correspondence) {
-        BasicBetaReducingListener v =
-                new BasicBetaReducingListener(correspondence, start);
-        start.accept(v);
-        return v.getBetaReducedExp();
     }
 
     private List<PExp> getSequentsFromFormalParameters(

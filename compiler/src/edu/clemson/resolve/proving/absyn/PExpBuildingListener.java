@@ -13,9 +13,8 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTInvalid;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.Quantification;
+import org.rsrg.semantics.*;
+import org.rsrg.semantics.MTFunction.MTFunctionBuilder;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -276,6 +275,60 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitEnsuresClause(
             ResolveParser.EnsuresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+    }
+
+    @Override public void exitProgPrimaryExp(
+            ResolveParser.ProgPrimaryExpContext ctx) {
+        repo.put(ctx, repo.get(ctx.progPrimary()));
+    }
+
+    @Override public void exitProgPrimary(
+            ResolveParser.ProgPrimaryContext ctx) {
+        repo.put(ctx, repo.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitProgParamExp(
+            ResolveParser.ProgParamExpContext ctx) {
+        MTFunction mathType = fakeFunctionType(ctx.progExp(), types.get(ctx));
+        PSymbol namePortion = new PSymbolBuilder(ctx.name.getText())
+                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier)
+                .mathType(mathType)
+                .qualifier(ctx.qualifier)
+                .build();
+        PApplyBuilder result = new PApplyBuilder(namePortion)
+                .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+                .applicationType(types.get(ctx));
+        repo.put(ctx, result.build());
+    }
+
+    //TODO: Until I come up with a palatable way of passing this info (already
+    //formed) into this builder, I'll just reconstruct the MTFunction manually
+    //from the types of the arguments for now.
+    private MTFunction fakeFunctionType(@NotNull List<? extends ParseTree> args,
+                                        @NotNull MTType retType) {
+        List<MTType> argMathTypes = args.stream()
+                .map(t -> repo.get(t).getMathType())
+                .collect(Collectors.toList());
+        return new MTFunctionBuilder(retType.getTypeGraph(), retType)
+                .paramTypes(argMathTypes).build();
+    }
+
+    @Override public void exitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
+        repo.put(ctx, repo.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitProgNamedExp(
+            ResolveParser.ProgNamedExpContext ctx) {
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
+                .mathTypeValue(getMathTypeValue(ctx))
+                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier)
+                .mathType(getMathType(ctx));
+        repo.put(ctx, result.build());
+    }
+
+    @Override public void exitProgNestedExp(
+            ResolveParser.ProgNestedExpContext ctx) {
+        repo.put(ctx, repo.get(ctx.progExp()));
     }
 
     private PExp buildLiteral(String literalText, MTType type, MTType typeValue,

@@ -3,8 +3,6 @@ package edu.clemson.resolve.vcgen.application;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
-import edu.clemson.resolve.vcgen.FlexibleNameSubstitutingListener;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
