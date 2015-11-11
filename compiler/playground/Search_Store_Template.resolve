@@ -26,5 +26,4 @@ Concept Search_Store_Template<T>
 		requires e is_in S
 		ensures S =
 		    @S ~ {e}
-
 end Search_Store_Template

@@ -131,7 +131,7 @@ precisModule
 
 precisBlock
     :   ( mathDefinitionDecl
-        | mathTheoremDecl
+        | mathAssertionDecl
         )*
     ;
 
@@ -272,7 +272,7 @@ typeImplInit
 
 // math constructs
 
-mathTheoremDecl
+mathAssertionDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 

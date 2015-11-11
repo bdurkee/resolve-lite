@@ -47,6 +47,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.*;
@@ -550,17 +551,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          tr.mathTypes.put(ctx, g.MTYPE);
          tr.mathTypeValues.put(ctx, record.toMath());
          return null;
-     }
+     }*/
 
      @Override public Void visitVariableDeclGroup(
-             Resolve.VariableDeclGroupContext ctx) {
+             ResolveParser.VariableDeclGroupContext ctx) {
          this.visit(ctx.type());
          insertVariables(ctx, ctx.ID(), ctx.type());
          return null;
      }
 
-     @Override public Void visitMathTheoremDecl(
-             ResolveParser.MathTheoremDeclContext ctx) {
+     @Override public Void visitMathAssertionDecl(
+             ResolveParser.MathAssertionDeclContext ctx) {
          symtab.startScope(ctx);
          this.visit(ctx.mathAssertionExp());
          symtab.endScope();
@@ -578,72 +579,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-
-     @Override public Void visitMathCategoricalDefinitionDecl(
-             ResolveParser.MathCategoricalDefinitionDeclContext ctx) {
-         for (ResolveParser.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
-             symtab.startScope(sig);
-             this.visit(sig);
-             symtab.endScope();
-
-             try {
-                 symtab.getInnermostActiveScope().define(
-                         new MathSymbol(g, sig.name.getText(),
-                         tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
-             }
-             catch (DuplicateSymbolException e) {
-                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                         sig.name.getStart(), sig.name.getText());
-             }
-         }
-         //visit the rhs of our categorical defn
-         this.visit(ctx.mathAssertionExp());
-         return null;
-     }
-
-     @Override public Void visitMathInductiveDefinitionDecl(
-             ResolveParser.MathInductiveDefinitionDeclContext ctx) {
-         symtab.startScope(ctx);
-         ResolveParser.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
-         ParserRuleContext baseCase = ctx.mathAssertionExp(0);
-         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
-         currentInductionVar = ctx.mathVariableDecl();
-
-         activeQuantifications.push(Quantification.UNIVERSAL);
-         walkingDefParams = true;
-         this.visit(ctx.mathVariableDecl());
-         walkingDefParams = false;
-         activeQuantifications.pop();
-
-         this.visit(sig);
-         this.visit(baseCase);
-         this.visit(indHypo);
-
-         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-         checkMathTypes(baseCase, g.BOOLEAN);
-         checkMathTypes(indHypo, g.BOOLEAN);
-         symtab.endScope();
-         try {
-             symtab.getInnermostActiveScope().define(
-                     new MathSymbol(g, sig.name.getText(),
-                             defnType, null, ctx, getRootModuleID()));
-         }
-         catch (DuplicateSymbolException e) {
-             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                     sig.name.getStart(), sig.name.getText());
-         }
-         currentInductionVar = null;
-         definitionSchematicTypes.clear();
-         return null;
-     }
-
      private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
          MTType foundType = tr.mathTypes.get(ctx);
          if (!foundType.equals(expected)) {
              compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
                      ctx.getStart(), expected, foundType);
          }
-     }*/
+     }
 
     @Override public Void visitMathDefinitionDecl(
             ResolveParser.MathDefinitionDeclContext ctx) {
@@ -775,7 +717,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*private void insertVariables(ParserRuleContext ctx,
+    private void insertVariables(@NotNull ParserRuleContext ctx,
                                  List<TerminalNode> terminalGroup,
                                  ResolveParser.TypeContext type) {
         PTType progType = tr.progTypeValues.get(type);
@@ -791,7 +733,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         t.getSymbol(), t.getText());
             }
         }
-    }*/
+    }
 
     @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
@@ -1012,13 +954,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
-    }
+    }*/
 
-    @Override public Void visitProgParamExp(Resolve.ProgParamExpContext ctx) {
+    @Override public Void visitProgParamExp(
+            ResolveParser.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
@@ -1317,82 +1260,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         tr.mathTypes.put(ctx, establishedType);
         tr.mathTypeValues.put(ctx, establishedTypeValue);
-        return null;
-    }
-
-    @Override public Void visitMathSegmentsExp(
-            ResolveParser.MathSegmentsExpContext ctx) {
-        Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =
-                ctx.mathFunctionApplicationExp().iterator();
-        Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
-        nextSeg = segsIter.next();
-        MTType curType = null;
-        this.visit(nextSeg);
-        if (nextSeg.getText().equals("conc")) {
-            nextSeg = segsIter.next();
-            this.visit(nextSeg);    //type conc.
-            try {
-                ProgVariableSymbol programmaticExemplar =
-                        symtab.getInnermostActiveScope().queryForOne(
-                                new ProgVariableQuery(null, nextSeg.getStart(),
-                                        false));
-                PTRepresentation repr =
-                        ((PTRepresentation) programmaticExemplar
-                                .toProgVariableSymbol()
-                                .getProgramType());
-                try {
-                    curType = repr.getFamily().getModelType();
-                }
-                catch (NoneProvidedException e) {
-                    //if a model was not provided to us, then we're a locally defined
-                    //type representation and should not be referring to conceptual
-                    //variables (because there are none in this case).
-                    //Todo: give a better, more official error for this.
-                    e.printStackTrace();
-                }
-            }
-            catch (NoSuchSymbolException | DuplicateSymbolException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            curType = tr.mathTypes.get(nextSeg);
-        }
-
-        MTCartesian curTypeCartesian;
-        while (segsIter.hasNext()) {
-            lastSeg = nextSeg;
-            nextSeg = segsIter.next();
-            String segmentName = HardCoded.getMetaFieldName(nextSeg);
-            try {
-                curTypeCartesian = (MTCartesian) curType;
-                curType = curTypeCartesian.getFactor(segmentName);
-            }
-            catch (ClassCastException cce) {
-                curType = HardCoded.getMetaFieldType(g, segmentName);
-                if ( curType == null ) {
-                    compiler.errMgr.semanticError(
-                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
-                            segmentName);
-                    curType = g.INVALID;
-                }
-            }
-            catch (NoSuchElementException nsee) {
-                curType = HardCoded.getMetaFieldType(g, segmentName);
-                if ( curType == null ) {
-                    compiler.errMgr.semanticError(
-                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
-                            segmentName);
-                    curType = g.INVALID;
-                }
-            }
-            tr.mathTypes.put(nextSeg, curType);
-            if (nextSeg instanceof Resolve.MathFunctionExpContext) {
-                ((Resolve.MathFunctionExpContext)nextSeg).mathExp()
-                        .forEach(this::visit);
-            }
-        }
-        tr.mathTypes.put(ctx, curType);
         return null;
     }
 
