@@ -388,12 +388,13 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("((P and Post) implies Q)", partitions.get(1).toString());
         Assert.assertEquals("((P and Post) implies R)", partitions.get(2).toString());
 
-        /*e = parseMathAssertionExp(g, "(P implies Q)");
+        e = parseMathAssertionExp(g, "(P implies (Q implies (R implies (T and true))))");
         partitions = e.splitIntoSequents();
-        Assert.assertEquals(1, partitions.size());
-        Assert.assertEquals("(P implies Q)", partitions.get(0).toString());
+        Assert.assertEquals(2, partitions.size());
+        Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
+        Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
 
-        e = parseMathAssertionExp(g, "P");
+      /*  e = parseMathAssertionExp(g, "P");
         partitions = e.splitIntoSequents();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(true implies P)", partitions.get(0).toString());

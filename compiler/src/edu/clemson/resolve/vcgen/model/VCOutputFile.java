@@ -58,7 +58,7 @@ public class VCOutputFile extends OutputModelObject {
         for (PExp vc : vcs) {
             List<? extends PExp> args = vc.getSubExpressions();
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
-                    args.get(0), args.get(1));
+                    args.get(1), args.get(2));
 
             finalVcs.add(curVC);
             vcIndex++;

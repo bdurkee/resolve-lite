@@ -196,7 +196,9 @@ public class PSymbol extends PExp {
 
     @NotNull @Override protected Set<String> getVariableNamesNoCache() {
         Set<String> result = new HashSet<>();
-        result.add(getCanonicalName());
+        if (!isLiteral()) {
+            result.add(getCanonicalName());
+        }
         return result;
     }
 

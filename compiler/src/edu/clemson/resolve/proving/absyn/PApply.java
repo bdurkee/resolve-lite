@@ -318,6 +318,9 @@ public class PApply extends PExp {
             tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
             return arguments.get(1).splitIntoSequents(tempLeft);
         }
+        else {
+            result.add(g.formImplies(assumptions, this));
+        }
         return result;
     }
 
