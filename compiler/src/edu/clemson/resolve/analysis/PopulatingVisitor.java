@@ -693,7 +693,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
         walkingDefParams = true;
-        ctx.mathDefinitionParameter().forEach(this::visit);
+        ctx.mathVariableDeclGroup().forEach(this::visit);
         walkingDefParams = false;
         activeQuantifications.pop();
 
@@ -709,35 +709,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //if there ARE params, then our type needs to be an MTFunction.
         //this if check needs to be here or else, even if there were no params,
         //our type would end up MTFunction: Void -> T (which we don't want)
-        if ( !ctx.mathDefinitionParameter().isEmpty() ) {
-            for (ResolveParser.MathDefinitionParameterContext p :
-                    ctx.mathDefinitionParameter()) {
-                if (p.mathVariableDeclGroup() != null) {
-                    MTType grpType = tr.mathTypeValues.get(
-                            p.mathVariableDeclGroup().mathTypeExp());
-                    for (TerminalNode t : p.mathVariableDeclGroup().ID()) {
-                        builder.paramTypes(grpType);
-                        builder.paramNames(t.getText());
-                    }
-                }
-                if (p.ID() != null) {
-                        //Todo: Get rid of this global eventually and simply
-                        //query here for this guy (you need to add him to scope though).
-                        if (currentInductionVar == null) {
-                            throw new RuntimeException("induction variable missing!?");
-                        }
-                        MTType inductionVarType =
-                                tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
-                        builder.paramTypes(inductionVarType)
-                                .paramNames(currentInductionVar.ID().getText());
-                    //The induction var itself should've already been visited in
-                    //visitMathInductiveDefnDecl
-                    }
-                //if the definition has parameters then it's type should be an
-                //MTFunction (e.g. something like a * b ... -> ...)
-                defnType = builder.build();
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx.mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                builder.paramTypes(grpType);
+                builder.paramNames(t.getText());
             }
         }
+
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, ctx.name.getText(),
@@ -748,12 +727,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getStart(), ctx.name.getText());
         }
         tr.mathTypes.put(ctx, defnType);
-        return null;
-    }
-
-    @Override public Void visitMathDefinitionParameter(
-            ResolveParser.MathDefinitionParameterContext ctx) {
-        visitChildren(ctx);
         return null;
     }
 

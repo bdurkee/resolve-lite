@@ -280,11 +280,10 @@ mathTheoremDecl
 //in the context of an inductive defn
 mathDefinitionSig
     :   name=mathSymbolName ('('
-            mathDefinitionParameter (',' mathDefinitionParameter)* ')')?
+            mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
             ':' mathTypeExp
     ;
 
-//Todo: Clean this up for god's sake.
 mathSymbolName
     :   ID
     |   ('+'|'-'|'*'|'\\'|'...'|'..'|'|'|'||'|'<'|'>'|'<='|'>='|'o'|'*'|INT)
@@ -293,13 +292,8 @@ mathSymbolName
     |   '||' '...' '||'
     ;
 
-mathDefinitionParameter
-    :   mathVariableDeclGroup
-    ;
-
 mathDefinitionDecl
-    :   ('Implicit')? 'Definition' mathDefinitionSig
-        ('is' mathAssertionExp)? ';'
+    :   'Definition' mathDefinitionSig ('is' mathAssertionExp)? ';'
     ;
 
 mathVariableDeclGroup
