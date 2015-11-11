@@ -1,4 +1,8 @@
-Extension Store_Do_Nothing_Capability for Bdd_Search_Store_Template;
-    Operation Do_Nothing(restores S : Store);
-        requires 1 <= ||S||;
-end Store_Do_Nothing_Capability;
+Extension Store_Do_Nothing_Capability
+            for
+        Search_Store_Template
+
+    Operation Do_Nothing
+            (restores S : Store)
+        requires 1 <= ||S||
+end Store_Do_Nothing_Capability

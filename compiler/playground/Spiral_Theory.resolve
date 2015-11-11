@@ -1,5 +1,5 @@
-Precis Basic_Spiral_Theory;
-    uses Basic_Natural_Number_Theory, Basic_Integer_Theory;
+Precis Spiral_Theory;
+    uses Basic_Natural_Number_Theory, Integer_Theory;
 
     Definition N2 : Powerset(N) is {n : N | n >= 2};
 

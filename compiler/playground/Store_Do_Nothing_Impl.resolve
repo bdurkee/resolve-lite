@@ -1,12 +1,36 @@
-Implementation Store_Do_Nothing_Impl for
-        Store_Do_Nothing_Capability of Search_Store_Template;
+Implementation Store_Do_Nothing_Impl
+            for
+        Store_Do_Nothing_Capability
+            of Search_Store_Template
 
-    Procedure Do_Nothing (restores S : Store);
+    Procedure Do_Nothing
+            (restores S : Store)
         /*Var e : T;
         Add(e, S);
         Remove(e, S);*/
-    end Do_Nothing;
-end Store_Do_Nothing_Impl;
+    end Do_Nothing
+end Store_Do_Nothing_Impl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 apply procedure decl rule

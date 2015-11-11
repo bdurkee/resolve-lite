@@ -1,4 +1,4 @@
-Precis Basic_Integer_Theory;
+Precis Integer_Theory;
 
     Definition <=(m, n : Z) : B;
     Definition >=(m, n : Z) : B;
@@ -8,4 +8,4 @@ Precis Basic_Integer_Theory;
     Definition 0 : Z;
     Definition 1 : Z;
     Definition 2 : Z;
-end Basic_Integer_Theory;
+end Integer_Theory;
