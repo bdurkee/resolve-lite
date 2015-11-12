@@ -16,13 +16,11 @@ import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ExplicitCallApplicationStrategy
         implements
@@ -31,10 +29,11 @@ public class ExplicitCallApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
-        CallRuleApplyingListener applier = new CallRuleApplyingListener(block);
+        CallRuleApplyingVisitor applier =
+                new CallRuleApplyingVisitor(block);
         callExp.accept(applier);
 
-        return block.finalConfirm(block.finalConfirm.getConfirmExp())
+        return block.finalConfirm(applier.getCompletedExp())
                 .snapshot();
     }
 
@@ -56,15 +55,19 @@ public class ExplicitCallApplicationStrategy
         }
     }
 
-    protected static class CallRuleApplyingListener extends PExpListener {
+    protected static class CallRuleApplyingVisitor
+            extends
+                PExpListener {
         public Map<PExp, PExp> test = new HashMap<>();
-        private final Scope s;
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
-        public CallRuleApplyingListener(
+        public CallRuleApplyingVisitor(
                 VCAssertiveBlock.VCAssertiveBlockBuilder block) {
-            this.s = block.scope;
             this.block = block;
+        }
+
+        public PExp getCompletedExp() {
+            return block.finalConfirm.getConfirmExp().substitute(test);
         }
 
         @Override public void endPApply(@NotNull PApply e) {
@@ -73,7 +76,7 @@ public class ExplicitCallApplicationStrategy
             test.clear(); //TODO: hmmmm..
             List<PExp> actuals = thisExp.getArguments();
 
-            OperationSymbol op = getOperation(s, e);
+            OperationSymbol op = getOperation(block.scope, e);
 
             List<PExp> formals = Utils.apply(op.getParameters(),
                     ProgParameterSymbol::asPSymbol);
@@ -92,8 +95,8 @@ public class ExplicitCallApplicationStrategy
 
             for (PExp equals : opEnsures.splitIntoConjuncts()) {
                 if (equals.isEquality()) {
-                    ensuresEqualities.put(equals.getSubExpressions().get(0),
-                            equals.getSubExpressions().get(1));
+                    ensuresEqualities.put(equals.getSubExpressions().get(1),
+                            equals.getSubExpressions().get(2));
                 }
             }
             if (ensuresEqualities.containsKey(e.getFunctionPortion())) {
@@ -119,14 +122,15 @@ public class ExplicitCallApplicationStrategy
                     Collections.replaceAll(varsToReplaceInEnsures,
                             f.withIncomingSignsErased(), f);
                 }
+                /**
+                 * Now we substitute the formals for actuals in the rhs of the ensures
+                 * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
+                 * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
+                 */
+                PExp v = exp.getValue().substitute(
+                        varsToReplaceInEnsures, actuals);
+                test.put(exp.getKey(), v);
             }
-            /**
-             * Now we substitute the formals for actuals in the rhs of the ensures
-             * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
-             * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
-             */
-            PExp v = e.getValue().substitute(copyFormals, actuals);
-            test.put(exp.getKey(), substitutedExp);
         }
     }
 }

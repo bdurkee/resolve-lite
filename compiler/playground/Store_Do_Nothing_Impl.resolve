@@ -5,9 +5,9 @@ Implementation Store_Do_Nothing_Impl
 
     Procedure Do_Nothing
             (restores S : Store)
-        Var e : T;
-        Add(S, e);
-        //Remove(e, S);*/
+        Var x : T;
+        Add(S, x);
+        Remove(S, x);
     end Do_Nothing
 end Store_Do_Nothing_Impl
 
