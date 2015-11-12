@@ -4,5 +4,5 @@ Extension Store_Do_Nothing_Capability
 
     Operation Do_Nothing
             (restores S : Store)
-        requires 1 <= ||S||
+        requires ||S|| > 0;
 end Store_Do_Nothing_Capability

@@ -26,4 +26,12 @@ Concept Search_Store_Template<T>
 		requires e is_in S
 		ensures S =
 		    @S ~ {e}
+
+    Operation Remove_Any
+            (updates S : Store;
+             restores e : T);
+        requires ||S|| > 0;
+        ensures e is_in @S and
+            S = @S ~ {e};
+
 end Search_Store_Template
