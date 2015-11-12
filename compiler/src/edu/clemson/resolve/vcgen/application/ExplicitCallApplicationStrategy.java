@@ -31,23 +31,15 @@ public class ExplicitCallApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
+        CallRuleApplyingListener applier = new CallRuleApplyingListener(block);
+        callExp.accept(applier);
 
-        PExpSomethingListener something = new PExpSomethingListener(block);
-        callExp.accept(something);
+        return block.finalConfirm(block.finalConfirm.getConfirmExp())
+                .snapshot();
+    }
 
-       /* PExp finalConfirm = block.finalConfirm.getConfirmExp();
-        //finalConfirm = finalConfirm.substitute(something.test);
-        FlexibleNameSubstitutingListener l =
-                new FlexibleNameSubstitutingListener(
-                        finalConfirm, something.test);
-        finalConfirm.accept(l);
-        finalConfirm = l.getSubstitutedExp();
-        BasicBetaReducingListener b =
-                new BasicBetaReducingListener(something.test, finalConfirm);
-        finalConfirm.accept(b);
-        finalConfirm = b.getBetaReducedExp();*/
-        //return block.finalConfirm(finalConfirm).snapshot();
-        return block.snapshot();
+    @Override public String getDescription() {
+        return "explicit call rule application";
     }
 
     protected static OperationSymbol getOperation(Scope s, PApply app) {
@@ -76,8 +68,8 @@ public class ExplicitCallApplicationStrategy
         }
 
         @Override public void endPApply(@NotNull PApply e) {
-            PApply thisExp = (PApply)e.substitute(test);
-            PSymbol name = (PSymbol)e.getFunctionPortion();
+            PApply thisExp = (PApply) e.substitute(test);
+            PSymbol name = (PSymbol) e.getFunctionPortion();
             test.clear(); //TODO: hmmmm..
             List<PExp> actuals = thisExp.getArguments();
 
@@ -89,88 +81,52 @@ public class ExplicitCallApplicationStrategy
             opRequires = opRequires.substitute(
                     block.getSpecializationsForFacility(name.getQualifier()));
             block.confirm(opRequires);
-        }
-    }
 
-    @Override public String getDescription() {
-        return "explicit (simple) call rule application";
-    }
-}
+            PExp opEnsures = op.getEnsures();
+            Iterator<ProgParameterSymbol> formalParamIter =
+                    op.getParameters().iterator();
+            Iterator<PExp> actualParamIter = e.getArguments().iterator();
 
-     /*@Override public void endPSymbol(PSymbol e) {
-        if (!e.isFunctionApplication()) return;
+            Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
+            Map<PExp, PExp> ensuresEqualities = new HashMap<>();
 
-        PSymbol thisExp = (PSymbol)e.substitute(test);
-        test.clear(); //TODO: hmmmm..
-        List<PExp> actuals = thisExp.getArguments();
-
-        OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(s, e);
-        List<PExp> formals = op.getParameters().stream()
-                .map(ProgParameterSymbol::asPSymbol)
-                .collect(Collectors.toList());
-
-        PExp opRequires = op.getRequires().substitute(formals, actuals);
-        opRequires = opRequires.substitute(
-                block.getSpecializationsForFacility(thisExp.getQualifier()));
-        block.confirm(opRequires);
-
-        PExp opEnsures = op.getEnsures();
-
-        Iterator<ProgParameterSymbol> formalParamIter =
-                op.getParameters().iterator();
-        Iterator<PExp> actualParamIter = e.getArguments().iterator();
-
-        Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
-        Map<PExp, PExp> ensuresEqualities = new HashMap<>();
-
-        for (PExp equals : opEnsures.splitIntoConjuncts()) {
-            if (equals.isEquality()) {
-                ensuresEqualities.put(equals.getSubExpressions().get(0),
-                        equals.getSubExpressions().get(1));
-            }
-        }
-        if (ensuresEqualities.containsKey(e.withArgumentsErased())) {
-            intermediateBindings.put(e, ensuresEqualities.get(e.withArgumentsErased()));
-        }
-
-        while (formalParamIter.hasNext()) {
-            ProgParameterSymbol formal = formalParamIter.next();
-            PExp actual = actualParamIter.next();
-            if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
-                if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
-                    continue;
+            for (PExp equals : opEnsures.splitIntoConjuncts()) {
+                if (equals.isEquality()) {
+                    ensuresEqualities.put(equals.getSubExpressions().get(0),
+                            equals.getSubExpressions().get(1));
                 }
-                intermediateBindings.put(actual,
-                        ensuresEqualities.get(formal.asPSymbol()));
             }
-        }
-        for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {
-            //update our list of formal params to account for incoming-valued refs
-            //to themselves in the ensures clause
-            List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
-            for (PSymbol f : exp.getValue().getIncomingVariables(true)) {
-                Collections.replaceAll(varsToReplaceInEnsures,
-                        f.withIncomingSignsErased(), f);
-            }*/
-
-/**
- * Now we substitute the formals for actuals in the rhs of the ensures
- * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
- * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
- */
-           /* PExp t = exp.getValue();
-            FlexibleNameSubstitutingListener l =
-                    new FlexibleNameSubstitutingListener(
-                            t, varsToReplaceInEnsures, actuals);
-            t.accept(l);
-            // PExp v = e.getValue().substitute(copyFormals, actuals);
-            PExp substitutedExp = l.getSubstitutedExp();
+            if (ensuresEqualities.containsKey(e.getFunctionPortion())) {
+                intermediateBindings.put(e,
+                        ensuresEqualities.get(e.getFunctionPortion()));
+            }
+            while (formalParamIter.hasNext()) {
+                ProgParameterSymbol formal = formalParamIter.next();
+                PExp actual = actualParamIter.next();
+                if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
+                    if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
+                        continue;
+                    }
+                    intermediateBindings.put(actual,
+                            ensuresEqualities.get(formal.asPSymbol()));
+                }
+            }
+            for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {
+                //update our list of formal params to account for incoming-valued refs
+                //to themselves in the ensures clause
+                List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
+                for (PSymbol f : exp.getValue().getIncomingVariables()) {
+                    Collections.replaceAll(varsToReplaceInEnsures,
+                            f.withIncomingSignsErased(), f);
+                }
+            }
+            /**
+             * Now we substitute the formals for actuals in the rhs of the ensures
+             * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
+             * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
+             */
+            PExp v = e.getValue().substitute(copyFormals, actuals);
             test.put(exp.getKey(), substitutedExp);
         }
-        int i;
-        i=0;
-
-    @Override public String getDescription() {
-        return "explicit (simple) call rule application";
     }
 }
