@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
+
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;
     private final SymbolTable symtab;
@@ -426,23 +428,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PApply ensuresAsPApply = (PApply)ensures;
             List<PExp> args = ensuresAsPApply.getArguments();
             if (ensuresAsPApply.isEquality()) {
-                if (inSimpleForm(args.get(0), params)) {
-                    simple = true;
-                }
+                if (inSimpleForm(args.get(0), params)) simple = true;
             }
             else if (ensuresAsPApply.isConjunct()) {
                 if (inSimpleForm(args.get(0), params) &&
-                        inSimpleForm(args.get(1), params)) {
-                    simple = true;
-                }
+                        inSimpleForm(args.get(1), params)) simple = true;
             }
         }
         else if (ensures instanceof PSymbol) {
             for (ProgParameterSymbol p : params) {
                 if (p.getMode() == ParameterMode.UPDATES && p.getName()
-                        .equals(((PSymbol) ensures).getName())) {
-                    simple = true;
-                }
+                        .equals(((PSymbol) ensures).getName())) simple = true;
             }
         }
         return simple;
@@ -450,17 +446,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
-        //TODO: For now so I don't have to yet write a
-        if (ctx.progExp().getText().startsWith("Pop")) {
+        PApply callExp = (PApply)tr.mathPExps.get(ctx.progExp());
+        OperationSymbol op = getOperation(moduleScope, callExp);
+       /* if (inSimpleForm(op.getEnsures(), op.getParameters())) {
+            symtab.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                    GENERAL_CALL_APPLICATION,
-                    tr.mathPExps.get(ctx.progExp()));
+                    EXPLICIT_CALL_APPLICATION, callExp);
         }
-        else {
+        else {*/
+            symtab.getCompiler().info("APPLYING GENERAL CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                    EXPLICIT_CALL_APPLICATION,
-                    tr.mathPExps.get(ctx.progExp()));
-        }
+                    GENERAL_CALL_APPLICATION, callExp);
+        //}
         stats.put(ctx, s);
     }
 

@@ -41,7 +41,7 @@ public class ExplicitCallApplicationStrategy
         return "explicit call rule application";
     }
 
-    protected static OperationSymbol getOperation(Scope s, PApply app) {
+    public static OperationSymbol getOperation(Scope s, PApply app) {
         PSymbol name = (PSymbol)app.getFunctionPortion();
         Token qualifier = (name.getQualifier() != null) ?
                 new CommonToken(ResolveLexer.ID, name.getQualifier()) : null;
