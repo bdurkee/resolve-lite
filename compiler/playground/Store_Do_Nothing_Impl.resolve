@@ -6,8 +6,8 @@ Implementation Store_Do_Nothing_Impl
     Procedure Do_Nothing
             (restores S : Store)
         Var x : T
-        Remove_Any(S, x)
         Add(S, x)
+        Remove(S, x)
     end Do_Nothing
 end Store_Do_Nothing_Impl
 
