@@ -55,6 +55,7 @@ public class ExplicitCallApplicationStrategy
         }
     }
 
+    //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     public static class ExplicitCallRuleApplyingListener extends PExpListener {
         public Map<PExp, PExp> test = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;

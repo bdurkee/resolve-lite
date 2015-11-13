@@ -224,6 +224,10 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean isConjunct() {
+        return false;
+    }
+
     /**
      * Returns {@code true} if this {@code PExp} is prefixed by the {@code @}
      * marker (incoming marker); {@code false} otherwise.

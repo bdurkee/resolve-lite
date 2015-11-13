@@ -4,12 +4,14 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -25,6 +27,7 @@ import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
 import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
+import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
 import java.util.function.Function;
@@ -41,7 +44,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //a call.
     public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
-
+    public static final StatRuleApplicationStrategy<VCRuleBackedStat> GENERAL_CALL_APPLICATION =
+            new GeneralCallApplicationStrategy();
     //TODO:
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
     //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
@@ -414,11 +418,49 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
+    //TODO: TEST THIS
+    private boolean inSimpleForm(@NotNull PExp ensures,
+                                 @NotNull List<ProgParameterSymbol> params) {
+        boolean simple = false;
+        if (ensures instanceof PApply) {
+            PApply ensuresAsPApply = (PApply)ensures;
+            List<PExp> args = ensuresAsPApply.getArguments();
+            if (ensuresAsPApply.isEquality()) {
+                if (inSimpleForm(args.get(0), params)) {
+                    simple = true;
+                }
+            }
+            else if (ensuresAsPApply.isConjunct()) {
+                if (inSimpleForm(args.get(0), params) &&
+                        inSimpleForm(args.get(1), params)) {
+                    simple = true;
+                }
+            }
+        }
+        else if (ensures instanceof PSymbol) {
+            for (ProgParameterSymbol p : params) {
+                if (p.getMode() == ParameterMode.UPDATES && p.getName()
+                        .equals(((PSymbol) ensures).getName())) {
+                    simple = true;
+                }
+            }
+        }
+        return simple;
+    }
+
     @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
-        VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        EXPLICIT_CALL_APPLICATION,
-                        tr.mathPExps.get(ctx.progExp()));
+        VCRuleBackedStat s = null;
+        //TODO: For now so I don't have to yet write a
+        if (ctx.progExp().getText().startsWith("Pop")) {
+            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                    GENERAL_CALL_APPLICATION,
+                    tr.mathPExps.get(ctx.progExp()));
+        }
+        else {
+            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
+                    EXPLICIT_CALL_APPLICATION,
+                    tr.mathPExps.get(ctx.progExp()));
+        }
         stats.put(ctx, s);
     }
 
@@ -504,12 +546,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 PExp corrFnExp = repr.getCorrespondence();
                 result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp));
             }
-            if (p.getMode() == ProgParameterSymbol.ParameterMode.PRESERVES
-                    || p.getMode() == ProgParameterSymbol.ParameterMode.RESTORES) {
+            if (p.getMode() == ParameterMode.PRESERVES
+                    || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp);
                 result.add(equalsExp);
             }
-            else if (p.getMode() == ProgParameterSymbol.ParameterMode.CLEARS) {
+            else if (p.getMode() == ParameterMode.CLEARS) {
                 PExp init = ((PTNamed) p.getDeclaredType())
                         .getInitializationEnsures()
                         .substitute(exemplar, paramExp);

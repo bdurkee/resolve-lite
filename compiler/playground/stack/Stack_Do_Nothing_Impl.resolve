@@ -1,0 +1,11 @@
+Implementation Stack_Do_Nothing_Impl
+    for Stack_Do_Nothing_Capability
+    of Stack_Template
+
+    Procedure Do_Nothing
+            (restores S : Stack)
+        Var Next : T
+        //Pop(S, Next)
+        Push(S, Next)
+    end Do_Nothing
+end Stack_Do_Nothing_Impl

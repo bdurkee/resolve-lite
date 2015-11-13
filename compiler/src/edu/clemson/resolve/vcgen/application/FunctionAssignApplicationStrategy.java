@@ -9,6 +9,7 @@ public class FunctionAssignApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
+    //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                               VCRuleBackedStat stat) {
      /*   PExp leftReplacee = stat.getStatComponents().get(0);

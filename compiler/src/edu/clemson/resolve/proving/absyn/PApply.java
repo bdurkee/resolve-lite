@@ -260,6 +260,11 @@ public class PApply extends PExp {
                 functionPortion.getCanonicalName().equals("=");
     }
 
+    @Override public boolean isConjunct() {
+        return arguments.size() == 2 &&
+                functionPortion.getCanonicalName().equals("and");
+    }
+
     @NotNull @Override protected String getCanonicalName() {
         return functionPortion.getCanonicalName();
     }
