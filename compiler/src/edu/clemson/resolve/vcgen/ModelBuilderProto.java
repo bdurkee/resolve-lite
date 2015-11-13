@@ -4,11 +4,10 @@ import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
-import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.*;
+import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.rsrg.semantics.TypeGraph;
@@ -36,8 +35,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final SymbolTable symtab;
     private final TypeGraph g;
 
+    //TODO: in applyCallRule() in ModelBuilderProto, we should be going through
+    //one of these static fields to apply the rule, we should make a class that
+    //extends VCRuleBackedStat called VCCall which simply wraps a PExp representing
+    //a call.
     public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
+
+    //TODO:
+    //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
+    //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
+    //stats.getComponents().get(0), etc.
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
@@ -153,17 +161,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     private PExp applyCallRuleToExp(VCAssertiveBlockBuilder block, PExp exp) {
-        PExpSomethingListener something = new PExpSomethingListener(block);
-        exp.accept(something);
+        ExplicitCallRuleApplyingListener applier =
+                new ExplicitCallRuleApplyingListener(block);
+        exp.accept(applier);
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
-        block.finalConfirm(finalConfirm.substitute(something.test));
-        if (something.test.isEmpty()) {
+        block.finalConfirm(finalConfirm.substitute(applier.test));
+        if (applier.test.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
                     "call rule to: " + exp.toString()+".. " +
                     "could happen too right now if there's no spec for the op");
         }
-        return something.test.get(exp);
+        return applier.test.get(exp);
     }
 
     @Override public void enterTypeRepresentationDecl(

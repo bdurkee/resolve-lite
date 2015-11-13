@@ -21,6 +21,8 @@ public class HardCoded {
             b.addBinding("El", null, g.MTYPE, g.ELEMENT);
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
+            b.addBinding("SStr", null, g.SSET, g.SSTR);
+
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("N", null, g.SSET, g.NAT);
@@ -49,6 +51,15 @@ public class HardCoded {
             /* b.addBinding("Is_Initial", null,
                      new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
                              .build());*/
+
+            //S T R I N G   R E L A T E D
+            b.addBinding("Str", null, g.STR);
+            b.addBinding("Empty_String", null, g.SSTR, g.EMPTY_STRING);
+            b.addBinding("|...|", null, new MTFunctionBuilder(g, g.Z)
+                    .paramTypes(g.SSET).build());
+            b.addBinding("<...>", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.SSTR).build());
+            b.addBinding("o", null, g.STR_CAT);
 
             //S E T   R E L A T E D
             b.addBinding("Finite_Powerset", null, g.POWERSET);

@@ -29,8 +29,8 @@ public class ExplicitCallApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
-        CallRuleApplyingVisitor applier =
-                new CallRuleApplyingVisitor(block);
+        ExplicitCallRuleApplyingListener applier =
+                new ExplicitCallRuleApplyingListener(block);
         callExp.accept(applier);
 
         return block.finalConfirm(applier.getCompletedExp())
@@ -55,13 +55,11 @@ public class ExplicitCallApplicationStrategy
         }
     }
 
-    protected static class CallRuleApplyingVisitor
-            extends
-                PExpListener {
+    public static class ExplicitCallRuleApplyingListener extends PExpListener {
         public Map<PExp, PExp> test = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
-        public CallRuleApplyingVisitor(
+        public ExplicitCallRuleApplyingListener(
                 VCAssertiveBlock.VCAssertiveBlockBuilder block) {
             this.block = block;
         }

@@ -2,8 +2,6 @@ Facility Hello_World
         uses Standard_Characters
 
     Operation Hello()
-            requires true
-            ensures false
         Procedure
             Std_Chars :: Write("hello")
         end Hello
