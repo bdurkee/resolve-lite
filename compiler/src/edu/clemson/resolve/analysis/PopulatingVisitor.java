@@ -1234,7 +1234,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
-    }
+    }*/
 
     @Override public Void visitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
@@ -1266,7 +1266,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathUnaryExp(
+    /*@Override public Void visitMathUnaryExp(
             ResolveParser.MathUnaryExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
@@ -1392,6 +1392,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ctx.mathExp().forEach(this::visit);
             }
         }
+        compiler.info("expression: " + ctx.getText() + " of type " + curType);
         tr.mathTypes.put(ctx, curType);
         return null;
     }
