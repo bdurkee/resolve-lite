@@ -414,7 +414,6 @@ mathExp
     |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
     |   mathExp op='implies' mathExp                        #mathInfixApplyExp
     |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
-    |   mathExp op=':' mathTypeExp                          #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   mathPrimaryExp                                      #mathPrimeExp
     ;
@@ -530,8 +529,8 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-FORALL : 'Forall' ;
-EXISTS : 'Exists' ;
+FORALL : 'forall' ;
+EXISTS : 'exists' ;
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;

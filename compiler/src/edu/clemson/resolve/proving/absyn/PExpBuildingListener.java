@@ -178,6 +178,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
+        MTType t = getMathType(ctx);
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .qualifier(ctx.qualifier)
                 .incoming(ctx.incoming != null)

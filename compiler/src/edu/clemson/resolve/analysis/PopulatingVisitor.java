@@ -33,6 +33,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
@@ -1132,44 +1133,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathTypeAssertionExp(
-            ResolveParser.MathTypeAssertionExpContext ctx) {
-        if (typeValueDepth == 0) {
-            this.visit(ctx.mathExp());
-        }
-        this.visit(ctx.mathTypeExp());
-        if ( typeValueDepth > 0 ) {
-            try {
-                //Todo: Check to ensure mathExp is in fact a variableExp
-                MTType assertedType = tr.mathTypes.get(ctx.mathTypeExp());
-                symtab.getInnermostActiveScope().addBinding(
-                        ctx.mathExp().getText(), Quantification.UNIVERSAL,
-                        ctx.mathExp(), tr.mathTypes.get(ctx.mathTypeExp()));
-
-                tr.mathTypes.put(ctx, assertedType);
-                tr.mathTypeValues.put(ctx,
-                        new MTNamed(g, ctx.mathExp().getText()));
-
-                //Don't forget to set the type for the var on the lhs of ':'!
-                //Todo: Don't know a better way of getting the bottommost rulectx.
-                //maybe write a utils method for that? Or read more about the api.
-                ParseTree x =
-                        ctx.mathExp().getChild(0).getChild(0);
-                tr.mathTypes.put(x, assertedType);
-
-                definitionSchematicTypes.put(ctx.mathExp().getText(),
-                        tr.mathTypes.get(ctx.mathTypeExp()));
-                emit("Added schematic variable: "
-                        + ctx.mathExp().getText());
-            }
-            catch (DuplicateSymbolException dse) {
-                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                        ctx.mathExp().getStart(), ctx.mathExp().getText());
-            }
-        }
-        return null;
-    }
-
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
         this.visit(ctx.mathAssertionExp());
@@ -1355,6 +1318,81 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        return null;
+    }
+
+    @Override public Void visitMathSegmentsExp(
+            ResolveParser.MathSegmentsExpContext ctx) {
+        Iterator<ResolveParser.MathSymbolExpContext> segsIter =
+                ctx.mathSymbolExp().iterator();
+        ResolveParser.MathSymbolExpContext nextSeg, lastSeg = null;
+        nextSeg = segsIter.next();
+        MTType curType = null;
+        this.visit(nextSeg);
+        if (nextSeg.getText().equals("conc")) {
+            nextSeg = segsIter.next();
+            this.visit(nextSeg);    //type conc.
+            try {
+                ProgVariableSymbol programmaticExemplar =
+                        symtab.getInnermostActiveScope().queryForOne(
+                                new ProgVariableQuery(null, nextSeg.getStart(),
+                                        false));
+                PTRepresentation repr =
+                        ((PTRepresentation) programmaticExemplar
+                                .toProgVariableSymbol()
+                                .getProgramType());
+                try {
+                    curType = repr.getFamily().getModelType();
+                }
+                catch (NoneProvidedException e) {
+                    //if a model was not provided to us, then we're a locally defined
+                    //type representation and should not be referring to conceptual
+                    //variables (because there are none in this case).
+                    //Todo: give a better, more official error for this.
+                    e.printStackTrace();
+                }
+            }
+            catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            curType = tr.mathTypes.get(nextSeg);
+        }
+
+        MTCartesian curTypeCartesian;
+        while (segsIter.hasNext()) {
+            lastSeg = nextSeg;
+            nextSeg = segsIter.next();
+            String segmentName = HardCoded.getMetaFieldName(nextSeg);
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType = HardCoded.getMetaFieldType(g, segmentName);
+                if ( curType == null ) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
+                            segmentName);
+                    curType = g.INVALID;
+                }
+            }
+            tr.mathTypes.put(nextSeg, curType);
+            for (ResolveParser.MathExpContext arg : ctx.mathExp()) {
+                ctx.mathExp().forEach(this::visit);
+            }
+        }
+        tr.mathTypes.put(ctx, curType);
         return null;
     }
 
