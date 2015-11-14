@@ -529,8 +529,8 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-FORALL : 'forall' ;
-EXISTS : 'exists' ;
+FORALL : ('forall'|'Forall') ;
+EXISTS : ('exists'|'Exists') ;
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
