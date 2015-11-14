@@ -437,8 +437,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         else if (ensures instanceof PSymbol) {
             for (ProgParameterSymbol p : params) {
-                if (p.getMode() == ParameterMode.UPDATES && p.getName()
-                        .equals(((PSymbol) ensures).getName())) simple = true;
+                if (p.getMode() == ParameterMode.UPDATES &&
+                        p.asPSymbol().equals(ensures)) simple = true;
             }
         }
         return simple;

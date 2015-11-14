@@ -29,7 +29,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      */
     public ImmutableConjuncts(PExp e) {
         this(e.splitIntoConjuncts());
-        this.cachedSymbolNames = e.getVariableNames();
+        this.cachedSymbolNames = e.getSymbolNames();
         this.cachedQuantifiedVariableNames = e.getQuantifiedVariables();
         this.cachedFunctionApplications = e.getFunctionApplications();
     }
@@ -529,7 +529,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             cachedSymbolNames = new HashSet<>();
             for (PExp myConjunct : conjuncts) {
                 cachedSymbolNames.addAll(myConjunct
-                        .getVariableNames());
+                        .getSymbolNames());
             }
         }
         return cachedSymbolNames;

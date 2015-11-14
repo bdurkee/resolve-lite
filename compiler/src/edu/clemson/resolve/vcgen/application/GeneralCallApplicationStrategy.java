@@ -6,13 +6,10 @@ import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCConfirm;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.programtype.PTFamily;
-import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
@@ -52,72 +49,102 @@ public class GeneralCallApplicationStrategy
 
         @Override public void endPApply(@NotNull PApply e) {
             OperationSymbol op = getOperation(block.scope, e);
-            final Set<ParameterMode> CONSTRAINT_REQUIRING_MODES =
-                    new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS));
-            PExp curAssume = op.getEnsures();
+            final Set<ParameterMode> distinguishedModes =
+                    new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
+            PExp newAssume = op.getEnsures();
             for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
-                if (CONSTRAINT_REQUIRING_MODES.contains(p.getMode())) {
+                if (distinguishedModes.contains(p.getMode())) {
                     if (p.getDeclaredType() instanceof PTFamily) {
-                        curAssume = block.g.formConjunct(curAssume,
+                        newAssume = block.g.formConjunct(newAssume,
                                 ((PTFamily) p.getDeclaredType())
-                                        .getInitializationEnsures());
+                                        .getConstraint());
                     }
-                }
-                //T7.Is_Initial(NQV(RP, f));
-                if (p.getMode() == CLEARS) {
-                    
                 }
             }
             PExp RP = block.finalConfirm.getConfirmExp();
-            Map<PExp, PExp> assumeSubstitutions = new HashMap<>();
-            Iterator<ProgParameterSymbol> formalParamIter =
+            Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
+            Iterator<ProgParameterSymbol> formalIter =
                     op.getParameters().iterator();
             Iterator<PExp> argIter = e.getArguments().iterator();
 
-            while (formalParamIter.hasNext()) {
-                ProgParameterSymbol curFormal = formalParamIter.next();
+            while (formalIter.hasNext()) {
+                ProgParameterSymbol curFormal = formalIter.next();
                 PExp curActual = (PSymbol)argIter.next();
 
                 //t ~> NQV(RP, a), @t ~> a
                 if (curFormal.getMode() == UPDATES) {
-                    assumeSubstitutions.put(curFormal.asPSymbol(),
-                            createQuestionMarkVariable(RP, (PSymbol)curActual));
-                    assumeSubstitutions.put(new PSymbolBuilder(curFormal
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
+                            NQV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(new PSymbolBuilder(curFormal
                                     .asPSymbol()).incoming(true).build(),
-                            (PSymbol)curActual);
+                            (PSymbol) curActual);
                 }
                 //v ~> NQV(RP, b)
                 else if (curFormal.getMode() == REPLACES) {
-                    assumeSubstitutions.put(curFormal.asPSymbol(),
-                            createQuestionMarkVariable(RP, (PSymbol)curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
+                            NQV(RP, (PSymbol) curActual));
                 }
                 //@y ~> e, @z ~> f
                 else if (curFormal.getMode() == ALTERS ||
                         curFormal.getMode() == CLEARS) {
-                    assumeSubstitutions.put(curFormal.asPSymbol(),
-                            createQuestionMarkVariable(RP, (PSymbol)curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
+                            NQV(RP, (PSymbol) curActual));
                 }
-
+                else {
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
+                }
             }
+            //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
+            //Post [ t ~> NQV(RP, a), @t ~> a, u ~> Math(exp), v ~> NQV(RP, b),
+            //       w ~> c, x ~> d, @y ~> e, @z ~> f]
+            block.assume(newAssume.substitute(newAssumeSubtitutions));
+
+            //Ok, so this happens down here since the rule is laid out s.t.
+            //substitutions occur prior to conjuncting this -- consult the
+            //rule and see for yourself
+            for (ProgParameterSymbol p : op.getParameters()) {
+                //T7.Is_Initial(NQV(RP, f));
+                if (p.getMode() == CLEARS) {
+                    PExp initPred =
+                            block.g.formInitializationPredicate(
+                                    p.getDeclaredType(), p.getName());
+                    newAssume = block.g.formConjunct(newAssume, initPred);
+                }
+            }
+
+            //reset our iterators in preparation for building the substitution
+            //mapping for our confirm
+            formalIter = op.getParameters().iterator();
+            argIter = e.getArguments().iterator();
+            Map<PExp, PExp> confirmSubstitutions = new HashMap<>();
+            while (formalIter.hasNext()) {
+                PExp curActual = argIter.next();
+                ProgParameterSymbol curFormal = formalIter.next();
+                if (distinguishedModes.contains(curFormal.getMode())) {
+                    confirmSubstitutions.put(curActual,
+                            NQV(RP, curFormal.asPSymbol()));
+                }
+            }
+            block.finalConfirm.getConfirmExp()
+                    .substitute(confirmSubstitutions);
         }
     }
 
-
-
-    public static PSymbol createQuestionMarkVariable(PExp RP, PSymbol oldSym) {
+    /** "Next Question-mark Variable" */
+    public static PSymbol NQV(PExp RP, PSymbol oldSym) {
         // Add an extra question mark to the front of oldSym
         PSymbol newOldSym = new PSymbolBuilder(oldSym, "?"+oldSym.getName())
                 .build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
         if (RP.containsName(oldSym.getName())) {
-            return createQuestionMarkVariable(RP, newOldSym);
+            return NQV(RP, newOldSym);
         }
         // Don't need to apply the question mark here.
         else if (RP.containsName(newOldSym.getName())) {
-            return createQuestionMarkVariable(RP, newOldSym);
+            return NQV(RP, newOldSym);
         }
         else {
             // Return the new variable expression with the question mark

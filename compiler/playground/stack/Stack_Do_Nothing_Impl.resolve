@@ -5,7 +5,7 @@ Implementation Stack_Do_Nothing_Impl
     Procedure Do_Nothing
             (restores S : Stack)
         Var Next : T
-        //Pop(S, Next)
+        Pop(S, Next)
         Push(S, Next)
     end Do_Nothing
 end Stack_Do_Nothing_Impl

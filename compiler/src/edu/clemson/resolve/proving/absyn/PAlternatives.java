@@ -204,14 +204,14 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public Set<String> getVariableNamesNoCache() {
+    @Override public Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getVariableNames());
-            result.addAll(a.result.getVariableNames());
+            result.addAll(a.condition.getSymbolNames());
+            result.addAll(a.result.getSymbolNames());
         }
-        result.addAll(otherwiseClauseResult.getVariableNames());
+        result.addAll(otherwiseClauseResult.getSymbolNames());
         return result;
     }
 

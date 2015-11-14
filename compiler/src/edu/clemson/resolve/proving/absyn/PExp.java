@@ -351,15 +351,22 @@ public abstract class PExp {
 
     @NotNull public abstract List<PExp> getFunctionApplicationsNoCache();
 
-    @NotNull public final Set<String> getVariableNames() {
+    @NotNull public final Set<String> getSymbolNames() {
+        return getSymbolNames(false, false);
+    }
+
+    @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
+                                                     boolean excludeLiterals) {
         if ( cachedSymbolNames == null ) {
             //We're immutable, so only do this once
-            cachedSymbolNames = getVariableNamesNoCache();
+            cachedSymbolNames =
+                    getSymbolNamesNoCache(excludeApplications, excludeLiterals);
         }
         return cachedSymbolNames;
     }
 
-    protected abstract Set<String> getVariableNamesNoCache();
+    protected abstract Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals);
 
     /**
      * Returns {@code true} iff this {@code PExp} and {@code o},

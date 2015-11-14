@@ -322,26 +322,26 @@ public class TestPExp extends BaseTest {
         PExp result = parseMathAssertionExp(g, "x + y");
         Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
                 .collect(Collectors.toSet());
-        Set<String> foundNames = result.getVariableNames();
+        Set<String> foundNames = result.getSymbolNames();
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
       /*  result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
-        foundNames = result.getVariableNames();
+        foundNames = result.getSymbolNames();
         expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
                 .collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
-        foundNames = result.getVariableNames(false, true);
+        foundNames = result.getSymbolNames(false, true);
         expectedNames = Arrays.asList("v", "Reverse", "x", "z", "+", "-").stream()
                 .collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
-        foundNames = result.getVariableNames(false, false);
+        foundNames = result.getSymbolNames(false, false);
         expectedNames =
                 Arrays.asList("5", "1", "4", "v", "Reverse", "x", "z", "+", "-")
                         .stream().collect(Collectors.toSet());
@@ -349,13 +349,13 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         //This one's pretty good because it has PLambda's and PAlternatives
-        //inside. So it tests the implementation of getVariableNames() in those
+        //inside. So it tests the implementation of getSymbolNames() in those
         //classes..
         result = parseMathAssertionExp(g, "((((SCD(k, conc.P.Trmnl_Loc)) <= Max_Length) and " +
                 "(conc.P.Curr_Loc is_in (Inward_Loc(conc.P.Trmnl_Loc)))) and " +
                 "({{(P.Labl((SCD(k, conc.P.Trmnl_Loc)))) if (((SCD(k, conc.P.Trmnl_Loc)) + 1) <= P.Length);" +
                 "   T.Base_Point otherwise;}} = T.Base_Point))");
-        foundNames = result.getVariableNames(true, true);
+        foundNames = result.getSymbolNames(true, true);
         expectedNames =
                 Arrays.asList("k", "conc.P.Trmnl_Loc", "conc.P.Curr_Loc",
                         "P.Length", "T.Base_Point", "Max_Length")
