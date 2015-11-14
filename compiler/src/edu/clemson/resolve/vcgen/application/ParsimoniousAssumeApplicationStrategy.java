@@ -24,8 +24,8 @@ public class ParsimoniousAssumeApplicationStrategy
         for (PExp assume : assumeConjuncts) {
             if (assume.isEquality()) {
                 PApply assumeAsPSymbol = (PApply)assume;
-                PExp left = assumeAsPSymbol.getArguments().get(1);
-                PExp right = assumeAsPSymbol.getArguments().get(2);
+                PExp left = assumeAsPSymbol.getArguments().get(0);
+                PExp right = assumeAsPSymbol.getArguments().get(1);
                 //we don't do replacements when the lhs and rhs are reg. vars.
                 if (right.isVariable() && left.isVariable()) {
                     //TODO: Do strange, dirty things with P_Val and Cum_Dur.

@@ -3,6 +3,7 @@ package edu.clemson.resolve.vcgen.model;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.DefaultAssumeApplicationStrategy;
+import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -69,8 +70,10 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if ( assume == null ) {
                 return this;
             }
+            //stats.add(new VCAssume(this,
+            //        new DefaultAssumeApplicationStrategy(), assume));
             stats.add(new VCAssume(this,
-                    new DefaultAssumeApplicationStrategy(), assume));
+                    new ParsimoniousAssumeApplicationStrategy(), assume));
             return this;
         }
 

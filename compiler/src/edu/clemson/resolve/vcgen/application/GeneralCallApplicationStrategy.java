@@ -52,6 +52,7 @@ public class GeneralCallApplicationStrategy
             final Set<ParameterMode> distinguishedModes =
                     new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
             PExp newAssume = op.getEnsures();
+            block.confirm(op.getRequires());
             for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
@@ -127,8 +128,7 @@ public class GeneralCallApplicationStrategy
                             NQV(RP, curFormal.asPSymbol()));
                 }
             }
-            block.finalConfirm.getConfirmExp()
-                    .substitute(confirmSubstitutions);
+            block.finalConfirm(RP.substitute(confirmSubstitutions));
         }
     }
 
