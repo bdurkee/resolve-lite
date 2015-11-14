@@ -18,7 +18,7 @@ public class ParsimoniousAssumeApplicationStrategy
             VCAssertiveBlock.VCAssertiveBlockBuilder block, VCAssume stat) {
 
         PExp assumeExp = stat.getAssumeExp();
-        PExp finalConfirmExp = block.finalConfirm.getConfirmExp();
+        PExp RP = block.finalConfirm.getConfirmExp();
         Map<PExp, PExp> equalsReplacements = new HashMap<>();
         List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
         for (PExp assume : assumeConjuncts) {
@@ -36,7 +36,7 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         //assumeExp = assumeExp.substitute(equalsReplacements);
-        finalConfirmExp = finalConfirmExp.substitute(equalsReplacements);
+       /* finalConfirmExp = finalConfirmExp.substitute(equalsReplacements);
         //(true,true) excludes function applications and literals, respectively
         Set<String> confirmSymNames = finalConfirmExp.getSymbolNames(true, true);
         List<PExp> relevantUntouchedAssumptions = assumeConjuncts.stream()
@@ -60,7 +60,7 @@ public class ParsimoniousAssumeApplicationStrategy
                             block.g.formConjuncts(relevantUntouchedAssumptions),
                             finalConfirmExp);
             block.finalConfirm(newConfirm);
-        }
+        }*/
         return block.snapshot();
     }
 
