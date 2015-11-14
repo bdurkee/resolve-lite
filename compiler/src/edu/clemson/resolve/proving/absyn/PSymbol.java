@@ -266,6 +266,21 @@ public class PSymbol extends PExp {
             this.progTypeValue = existingPSymbol.getProgTypeValue();
         }
 
+        public PSymbolBuilder(PSymbol existingPSymbol, String newName) {
+            this.name = newName;
+            this.qualifier = existingPSymbol.getQualifier();
+            this.lprint = existingPSymbol.getLeftPrint();
+            this.rprint = existingPSymbol.getRightPrint();
+            this.literal = existingPSymbol.isLiteral();
+            this.incoming = existingPSymbol.isIncoming();
+            this.quantification = existingPSymbol.getQuantification();
+
+            this.mathType = existingPSymbol.getMathType();
+            this.mathTypeValue = existingPSymbol.getMathTypeValue();
+            this.progType = existingPSymbol.getProgType();
+            this.progTypeValue = existingPSymbol.getProgTypeValue();
+        }
+
         public PSymbolBuilder(String name) {
             this.name = name;
         }

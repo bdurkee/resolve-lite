@@ -61,10 +61,10 @@ public  class RESOLVECompiler {
 
     public static final String FILE_EXTENSION = ".resolve";
 
-    public static final List<String> NATIVE_EXTENSION = Collections
-            .unmodifiableList(Collections.singletonList(FILE_EXTENSION));
-    public static final List<String> NON_NATIVE_EXTENSION = Collections
-            .unmodifiableList(Collections.singletonList(".java"));
+    public static final List<String> NATIVE_EXTENSION =
+            Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
+    public static final List<String> NON_NATIVE_EXTENSION =
+            Collections.unmodifiableList(Collections.singletonList(".java"));
 
     public static enum OptionArgType { NONE, STRING } // NONE implies boolean
     public static class Option {
@@ -83,6 +83,19 @@ public  class RESOLVECompiler {
             this.description = description;
         }
     }
+
+    //fields set by option manager
+    public final String[] args;
+    protected boolean haveOutputDir = false;
+    public boolean jar = false;
+    public String workingDirectory;
+    public String outputDirectory;
+    public boolean helpFlag = false;
+    public boolean vcs = false;
+    public boolean longMessages = false;
+    public String genCode;
+    public String workspaceDir;
+    public boolean log = false;
 
     public static Option[] optionDefs = {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
@@ -103,18 +116,6 @@ public  class RESOLVECompiler {
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     public final SymbolTable symbolTable = new SymbolTable(this);
-
-    public final String[] args;
-    protected boolean haveOutputDir = false;
-    public boolean jar = false;
-    public String workingDirectory;
-    public String outputDirectory;
-    public boolean helpFlag = false;
-    public boolean vcs = false;
-    public boolean longMessages = false;
-    public String genCode;
-    public String workspaceDir;
-    public boolean log = false;
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
