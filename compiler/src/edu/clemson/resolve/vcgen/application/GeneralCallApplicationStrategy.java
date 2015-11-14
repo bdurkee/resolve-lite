@@ -51,12 +51,26 @@ public class GeneralCallApplicationStrategy
             OperationSymbol op = getOperation(block.scope, e);
             final Set<ParameterMode> CONSTRAINT_REQUIRING_MODES =
                     new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS));
-
+            PExp curAssume = op.getEnsures();
             for (ProgParameterSymbol p : op.getParameters()) {
                 if (CONSTRAINT_REQUIRING_MODES.contains(p.getMode())) {
                     if (p.getDeclaredType() instanceof PTFamily) {
-                        ((PTFamily) p.getDeclaredType()).getInitializationEnsures();
+                        curAssume = block.g.formConjunct(curAssume,
+                                ((PTFamily) p.getDeclaredType())
+                                        .getInitializationEnsures());
                     }
+                }
+            }
+            Map<PExp, PExp> assumeSubstitutions = new HashMap<>();
+            Iterator<ProgParameterSymbol> formalParamIter =
+                    op.getParameters().iterator();
+            Iterator<PExp> argIter = e.getArguments().iterator();
+
+            while (formalParamIter.hasNext()) {
+                ProgParameterSymbol curParam = formalParamIter.next();
+                PExp curActual = argIter.next();
+                if (curParam.getMode() == UPDATES) {
+
                 }
             }
         }
