@@ -90,8 +90,9 @@ public class GeneralCallApplicationStrategy
                 //@y ~> e, @z ~> f
                 else if (curFormal.getMode() == ALTERS ||
                         curFormal.getMode() == CLEARS) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
-                            NQV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(
+                            new PSymbolBuilder(curFormal.asPSymbol())
+                                    .incoming(true).build(), curActual);
                 }
                 else {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
@@ -115,17 +116,16 @@ public class GeneralCallApplicationStrategy
                 }
             }
 
-            //reset our iterators in preparation for building the substitution
-            //mapping for our confirm
+            //reset the formal param iter in preperation for building the
+            //substitution mapping for our confirm
             formalIter = op.getParameters().iterator();
             argIter = e.getArguments().iterator();
             Map<PExp, PExp> confirmSubstitutions = new HashMap<>();
-            while (formalIter.hasNext()) {
-                PExp curActual = argIter.next();
+            for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
-                    confirmSubstitutions.put(curActual,
-                            NQV(RP, curFormal.asPSymbol()));
+                    confirmSubstitutions.put(actualArg,
+                            NQV(RP, (PSymbol)actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));

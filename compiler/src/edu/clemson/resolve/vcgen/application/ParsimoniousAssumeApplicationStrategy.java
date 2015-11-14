@@ -17,7 +17,7 @@ public class ParsimoniousAssumeApplicationStrategy
     @Override public AssertiveBlock applyRule(
             VCAssertiveBlock.VCAssertiveBlockBuilder block, VCAssume stat) {
 
-        PExp assumeExp = stat.getStatComponents().get(0);
+        PExp assumeExp = stat.getAssumeExp();
         PExp finalConfirmExp = block.finalConfirm.getConfirmExp();
         Map<PExp, PExp> equalsReplacements = new HashMap<>();
         List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
