@@ -213,6 +213,10 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean isNotObviouslyTrue() {
+        return !isObviouslyTrue();
+    }
+
     /**
      * Returns {@code true} if this {@code PExp} represents a primitive
      * application of the {@code =} operator; {@code false} otherwise.
