@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
@@ -15,6 +16,7 @@ import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.*;
 import static org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
@@ -52,7 +54,9 @@ public class GeneralCallApplicationStrategy
             final Set<ParameterMode> distinguishedModes =
                     new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
             PExp newAssume = op.getEnsures();
-            block.confirm(op.getRequires());
+            List<PExp> formalExps = Utils.apply(op.getParameters(),
+                    ProgParameterSymbol::asPSymbol);
+            block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
             for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition

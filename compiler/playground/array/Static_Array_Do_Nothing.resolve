@@ -1,0 +1,6 @@
+Extension Static_Array_Do_Nothing
+    for Static_Array_Template
+
+    Operation Do_Nothing
+            (restores A : Static_Array)
+end Static_Array_Do_Nothing
