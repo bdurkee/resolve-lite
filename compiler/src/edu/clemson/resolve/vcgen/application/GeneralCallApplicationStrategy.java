@@ -60,14 +60,15 @@ public class GeneralCallApplicationStrategy
             for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
-                if (distinguishedModes.contains(p.getMode())) {
+                //TODO: Ask about these constraints!
+               /* if (distinguishedModes.contains(p.getMode())) {
                     //TODO: I think this is right... ask about this..
-                    /*if (p.getDeclaredType() instanceof PTFamily) {
+                    if (p.getDeclaredType() instanceof PTFamily) {
                         newAssume = block.g.formConjunct(newAssume,
                                 ((PTFamily) p.getDeclaredType())
                                         .getConstraint());
-                    }*/
-                }
+                    }
+                }*/
             }
             PExp RP = block.finalConfirm.getConfirmExp();
             Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
@@ -113,12 +114,13 @@ public class GeneralCallApplicationStrategy
             //rule and see for yourself
             for (ProgParameterSymbol p : op.getParameters()) {
                 //T7.Is_Initial(NQV(RP, f));
-                if (p.getMode() == CLEARS) {
+                //TODO: See todo above
+               /* if (p.getMode() == CLEARS) {
                     PExp initPred =
                             block.g.formInitializationPredicate(
                                     p.getDeclaredType(), p.getName());
                     newAssume = block.g.formConjunct(newAssume, initPred);
-                }
+                }*/
             }
 
             //reset the formal param iter in preperation for building the

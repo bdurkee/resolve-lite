@@ -191,12 +191,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             ctx.name.getText())).toProgReprTypeSymbol();
         } catch (NoSuchSymbolException|DuplicateSymbolException e) {
         }
-        List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
+
+        List<PExp> opParamAntecedents = new ArrayList<>();
+        Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
+                this::extractAntecedentsFromParameter);
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
-                        .assume(getSequentsFromFormalParameters(moduleParamSyms,
-                                this::extractAntecedentsFromParameter))
+                        .assume(opParamAntecedents)
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
@@ -262,7 +264,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, s,
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
                     .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                    .assume(getSequentsFromFormalParameters(moduleParamSyms,
+                    .assume(getAssertionsFromFormalParameters(moduleParamSyms,
                             this::extractAntecedentsFromParameter));
 
         assertiveBlocks.push(block);
@@ -298,14 +300,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 s.getSymbolsOfType(ProgParameterSymbol.class);
 
         PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
-              ctx, tr.getPExpFor(g, ctx.requiresClause())); //precondition[params 1..i <-- conc.X]
+                ctx, tr.getPExpFor(g, ctx.requiresClause())); //precondition[params 1..i <-- conc.X]
+
+        List<PExp> opParamAntecedents = new ArrayList<>();
+        Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
+                this::extractAntecedentsFromParameter);
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                         "Proc_Decl_rule="+ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
-                        .assume(getSequentsFromFormalParameters(paramSyms,
-                                this::extractAntecedentsFromParameter))
+                        .assume(opParamAntecedents)
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
@@ -323,11 +328,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, tr.getPExpFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
+        List<PExp> paramConsequents = new ArrayList<>();
+        Utils.apply(paramSyms, paramConsequents,
+                this::extractConsequentsFromParameter);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(getSequentsFromFormalParameters(
-                        paramSyms, this::extractConsequentsFromParameter))
-                //.assume(corrFnExps)
-                .finalConfirm(corrFnExpEnsures);
+                    .confirm(paramConsequents)
+                    .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
     }
@@ -345,6 +351,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                     .collect(Collectors.toList())));
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
                     paramSyms, ctx, currentProcOpSym.getRequires());
+            List<PExp> opParamAntecedents = new ArrayList<>();
+            Utils.apply(paramSyms, opParamAntecedents, this::extractAntecedentsFromParameter);
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
@@ -352,8 +360,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                             .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                            .assume(getSequentsFromFormalParameters(paramSyms,
-                                    this::extractAntecedentsFromParameter)) //we assume correspondence for reprs here automatically
+                            .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
             assertiveBlocks.push(block);
@@ -381,9 +388,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
 
+        List<PExp> paramConsequents = new ArrayList<>();
+        Utils.apply(formalParameters, paramConsequents,
+                this::extractConsequentsFromParameter);
+
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-            .confirm(getSequentsFromFormalParameters(formalParameters,
-                    this::extractConsequentsFromParameter)) //we assume correspondence for reprs here automatically
+            .confirm(paramConsequents) //assumes for correspondence reprs included here
             .assume(corrFnExps)
             .finalConfirm(corrFnExpEnsures);
 
@@ -478,16 +488,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
-
-    private List<PExp> getSequentsFromFormalParameters(
-            List<ProgParameterSymbol> parameters,
-            Function<ProgParameterSymbol, List<PExp>> extractionFunction) {
-        List<PExp> result = new ArrayList<>();
-        for (ProgParameterSymbol p : parameters) {
-            result.addAll(extractionFunction.apply(p));
-        }
-        return result;
     }
 
     private List<PExp> extractAntecedentsFromParameter(ProgParameterSymbol p) {
