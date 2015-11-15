@@ -136,6 +136,11 @@ public abstract class PExp {
         return this.equals(thisSubstituted);
     }
 
+    public boolean staysSameAfterSubstitution(PExp current, PExp repl) {
+        PExp thisSubstituted = substitute(current, repl);
+        return this.equals(thisSubstituted);
+    }
+
     @NotNull public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
@@ -213,10 +218,6 @@ public abstract class PExp {
         return false;
     }
 
-    public boolean isNotObviouslyTrue() {
-        return !isObviouslyTrue();
-    }
-
     /**
      * Returns {@code true} if this {@code PExp} represents a primitive
      * application of the {@code =} operator; {@code false} otherwise.
@@ -278,6 +279,17 @@ public abstract class PExp {
 
     public boolean isFunctionApplication() {
         return false;
+    }
+
+    public boolean hasSymbolNamesInCommonWith(final PExp other,
+                                              boolean excludeApplication,
+                                              boolean excludeLiterals) {
+        Set<String> myNames = this.getSymbolNames(excludeApplication,
+                excludeLiterals);
+        Set<String> othersNames = other.getSymbolNames(excludeApplication,
+                excludeLiterals);
+        myNames.retainAll(othersNames);
+        return !myNames.isEmpty();
     }
 
     /**

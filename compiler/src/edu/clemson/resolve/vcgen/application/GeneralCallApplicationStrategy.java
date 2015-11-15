@@ -57,11 +57,12 @@ public class GeneralCallApplicationStrategy
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
                 if (distinguishedModes.contains(p.getMode())) {
-                    if (p.getDeclaredType() instanceof PTFamily) {
+                    //TODO: I think this is right... ask about this..
+                    /*if (p.getDeclaredType() instanceof PTFamily) {
                         newAssume = block.g.formConjunct(newAssume,
                                 ((PTFamily) p.getDeclaredType())
                                         .getConstraint());
-                    }
+                    }*/
                 }
             }
             PExp RP = block.finalConfirm.getConfirmExp();
