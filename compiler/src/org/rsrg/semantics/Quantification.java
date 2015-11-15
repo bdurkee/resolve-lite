@@ -1,7 +1,7 @@
 package org.rsrg.semantics;
 
 /**
- * A general, reusable representation of mathematical quantification.
+ * A general representation of mathematical quantification.
  * This enum should be used for anything that is capable of being quantified
  * (e.g. {@link edu.clemson.resolve.proving.absyn.PExp}s).
  */

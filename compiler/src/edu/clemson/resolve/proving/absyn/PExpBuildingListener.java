@@ -77,6 +77,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathAssertionExp(
             ResolveParser.MathAssertionExpContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
+        System.out.println(repo.get(ctx.getChild(0)).toString());
     }
 
     @Override public void exitMathNestedExp(
