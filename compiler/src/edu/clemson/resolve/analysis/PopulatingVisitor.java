@@ -33,6 +33,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
@@ -47,6 +48,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.*;
@@ -550,17 +552,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          tr.mathTypes.put(ctx, g.MTYPE);
          tr.mathTypeValues.put(ctx, record.toMath());
          return null;
-     }
+     }*/
 
      @Override public Void visitVariableDeclGroup(
-             Resolve.VariableDeclGroupContext ctx) {
+             ResolveParser.VariableDeclGroupContext ctx) {
          this.visit(ctx.type());
          insertVariables(ctx, ctx.ID(), ctx.type());
          return null;
      }
 
-     @Override public Void visitMathTheoremDecl(
-             ResolveParser.MathTheoremDeclContext ctx) {
+     @Override public Void visitMathAssertionDecl(
+             ResolveParser.MathAssertionDeclContext ctx) {
          symtab.startScope(ctx);
          this.visit(ctx.mathAssertionExp());
          symtab.endScope();
@@ -578,72 +580,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-
-     @Override public Void visitMathCategoricalDefinitionDecl(
-             ResolveParser.MathCategoricalDefinitionDeclContext ctx) {
-         for (ResolveParser.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
-             symtab.startScope(sig);
-             this.visit(sig);
-             symtab.endScope();
-
-             try {
-                 symtab.getInnermostActiveScope().define(
-                         new MathSymbol(g, sig.name.getText(),
-                         tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
-             }
-             catch (DuplicateSymbolException e) {
-                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                         sig.name.getStart(), sig.name.getText());
-             }
-         }
-         //visit the rhs of our categorical defn
-         this.visit(ctx.mathAssertionExp());
-         return null;
-     }
-
-     @Override public Void visitMathInductiveDefinitionDecl(
-             ResolveParser.MathInductiveDefinitionDeclContext ctx) {
-         symtab.startScope(ctx);
-         ResolveParser.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
-         ParserRuleContext baseCase = ctx.mathAssertionExp(0);
-         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
-         currentInductionVar = ctx.mathVariableDecl();
-
-         activeQuantifications.push(Quantification.UNIVERSAL);
-         walkingDefParams = true;
-         this.visit(ctx.mathVariableDecl());
-         walkingDefParams = false;
-         activeQuantifications.pop();
-
-         this.visit(sig);
-         this.visit(baseCase);
-         this.visit(indHypo);
-
-         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-         checkMathTypes(baseCase, g.BOOLEAN);
-         checkMathTypes(indHypo, g.BOOLEAN);
-         symtab.endScope();
-         try {
-             symtab.getInnermostActiveScope().define(
-                     new MathSymbol(g, sig.name.getText(),
-                             defnType, null, ctx, getRootModuleID()));
-         }
-         catch (DuplicateSymbolException e) {
-             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                     sig.name.getStart(), sig.name.getText());
-         }
-         currentInductionVar = null;
-         definitionSchematicTypes.clear();
-         return null;
-     }
-
      private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
          MTType foundType = tr.mathTypes.get(ctx);
          if (!foundType.equals(expected)) {
              compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
                      ctx.getStart(), expected, foundType);
          }
-     }*/
+     }
 
     @Override public Void visitMathDefinitionDecl(
             ResolveParser.MathDefinitionDeclContext ctx) {
@@ -693,7 +636,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
         walkingDefParams = true;
-        ctx.mathDefinitionParameter().forEach(this::visit);
+        ctx.mathVariableDeclGroup().forEach(this::visit);
         walkingDefParams = false;
         activeQuantifications.pop();
 
@@ -709,35 +652,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //if there ARE params, then our type needs to be an MTFunction.
         //this if check needs to be here or else, even if there were no params,
         //our type would end up MTFunction: Void -> T (which we don't want)
-        if ( !ctx.mathDefinitionParameter().isEmpty() ) {
-            for (ResolveParser.MathDefinitionParameterContext p :
-                    ctx.mathDefinitionParameter()) {
-                if (p.mathVariableDeclGroup() != null) {
-                    MTType grpType = tr.mathTypeValues.get(
-                            p.mathVariableDeclGroup().mathTypeExp());
-                    for (TerminalNode t : p.mathVariableDeclGroup().ID()) {
-                        builder.paramTypes(grpType);
-                        builder.paramNames(t.getText());
-                    }
-                }
-                if (p.ID() != null) {
-                        //Todo: Get rid of this global eventually and simply
-                        //query here for this guy (you need to add him to scope though).
-                        if (currentInductionVar == null) {
-                            throw new RuntimeException("induction variable missing!?");
-                        }
-                        MTType inductionVarType =
-                                tr.mathTypeValues.get(currentInductionVar.mathTypeExp());
-                        builder.paramTypes(inductionVarType)
-                                .paramNames(currentInductionVar.ID().getText());
-                    //The induction var itself should've already been visited in
-                    //visitMathInductiveDefnDecl
-                    }
-                //if the definition has parameters then it's type should be an
-                //MTFunction (e.g. something like a * b ... -> ...)
-                defnType = builder.build();
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx.mathVariableDeclGroup()) {
+            MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                builder.paramTypes(grpType);
+                builder.paramNames(t.getText());
             }
         }
+        if (!ctx.mathVariableDeclGroup().isEmpty()) {
+            defnType = builder.build();
+        }
+
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, ctx.name.getText(),
@@ -748,12 +673,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.name.getStart(), ctx.name.getText());
         }
         tr.mathTypes.put(ctx, defnType);
-        return null;
-    }
-
-    @Override public Void visitMathDefinitionParameter(
-            ResolveParser.MathDefinitionParameterContext ctx) {
-        visitChildren(ctx);
         return null;
     }
 
@@ -799,7 +718,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*private void insertVariables(ParserRuleContext ctx,
+    private void insertVariables(@NotNull ParserRuleContext ctx,
                                  List<TerminalNode> terminalGroup,
                                  ResolveParser.TypeContext type) {
         PTType progType = tr.progTypeValues.get(type);
@@ -815,7 +734,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         t.getSymbol(), t.getText());
             }
         }
-    }*/
+    }
 
     @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
@@ -1036,13 +955,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
-    }
+    }*/
 
-    @Override public Void visitProgParamExp(Resolve.ProgParamExpContext ctx) {
+    @Override public Void visitProgParamExp(
+            ResolveParser.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
@@ -1213,44 +1133,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathTypeAssertionExp(
-            ResolveParser.MathTypeAssertionExpContext ctx) {
-        if (typeValueDepth == 0) {
-            this.visit(ctx.mathExp());
-        }
-        this.visit(ctx.mathTypeExp());
-        if ( typeValueDepth > 0 ) {
-            try {
-                //Todo: Check to ensure mathExp is in fact a variableExp
-                MTType assertedType = tr.mathTypes.get(ctx.mathTypeExp());
-                symtab.getInnermostActiveScope().addBinding(
-                        ctx.mathExp().getText(), Quantification.UNIVERSAL,
-                        ctx.mathExp(), tr.mathTypes.get(ctx.mathTypeExp()));
-
-                tr.mathTypes.put(ctx, assertedType);
-                tr.mathTypeValues.put(ctx,
-                        new MTNamed(g, ctx.mathExp().getText()));
-
-                //Don't forget to set the type for the var on the lhs of ':'!
-                //Todo: Don't know a better way of getting the bottommost rulectx.
-                //maybe write a utils method for that? Or read more about the api.
-                ParseTree x =
-                        ctx.mathExp().getChild(0).getChild(0);
-                tr.mathTypes.put(x, assertedType);
-
-                definitionSchematicTypes.put(ctx.mathExp().getText(),
-                        tr.mathTypes.get(ctx.mathTypeExp()));
-                emit("Added schematic variable: "
-                        + ctx.mathExp().getText());
-            }
-            catch (DuplicateSymbolException dse) {
-                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                        ctx.mathExp().getStart(), ctx.mathExp().getText());
-            }
-        }
-        return null;
-    }
-
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
         this.visit(ctx.mathAssertionExp());
@@ -1344,11 +1226,106 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathAlternativeItemExp(
+            ResolveParser.MathAlternativeItemExpContext ctx) {
+        if ( ctx.condition != null ) {
+            //expectType(ctx.condition, g.BOOLEAN);
+        }
+        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
+        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
+        return null;
+    }*/
+
+    @Override public Void visitMathQuantifiedExp(
+            ResolveParser.MathQuantifiedExpContext ctx) {
+        emit("entering mathQuantifiedExp...");
+        symtab.startScope(ctx);
+        Quantification quantification;
+
+        switch (ctx.q.getType()) {
+            case ResolveLexer.FORALL:
+                quantification = Quantification.UNIVERSAL;
+                break;
+            case ResolveLexer.EXISTS:
+                quantification = Quantification.EXISTENTIAL;
+                break;
+            default:
+                throw new RuntimeException("unrecognized quantification type: "
+                        + ctx.q.getText());
+        }
+        activeQuantifications.push(quantification);
+        this.visit(ctx.mathVariableDeclGroup());
+        activeQuantifications.pop();
+
+        activeQuantifications.push(Quantification.NONE);
+        this.visit(ctx.mathAssertionExp());
+        activeQuantifications.pop();
+        emit("exiting mathQuantifiedExp.");
+        symtab.endScope();
+        tr.mathTypes.put(ctx, g.BOOLEAN);
+        return null;
+    }
+
+    /*@Override public Void visitMathUnaryExp(
+            ResolveParser.MathUnaryExpContext ctx) {
+        this.visit(ctx.mathExp());
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+        return null;
+    }*/
+
+    @Override public Void visitMathInfixApplyExp(
+            ResolveParser.MathInfixApplyExpContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathOutfixApplyExp(
+            ResolveParser.MathOutfixApplyExpContext ctx) {
+        this.visit(ctx.mathExp());
+        typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
+                ctx.lop.getText() + "..."+ctx.rop.getText()), ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathPrefixApplyExp(
+            ResolveParser.MathPrefixApplyExpContext ctx) {
+        this.visit(ctx.functionExp);
+        List<ResolveParser.MathExpContext> args =
+                ctx.mathExp().subList(1, ctx.mathExp().size());
+        for (ResolveParser.MathExpContext arg : args) {
+            this.visit(arg);
+
+        }
+        //TODO: really hacky with the functionExp.getStart() bit but in the interest of
+        //my focus at the moment, I'm not too concerned yet.
+        typeMathFunctionLikeThing(ctx, null, ctx.functionExp.getStart(), args);
+        return null;
+    }
+
+    @Override public Void visitMathBooleanLiteralExp(
+            ResolveParser.MathBooleanLiteralExpContext ctx) {
+        exitMathSymbolExp(ctx, null, ctx.getText());
+        return null;
+    }
+
+    @Override public Void visitMathIntegerLiteralExp(
+            ResolveParser.MathIntegerLiteralExpContext ctx) {
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
+        return null;
+    }
+
+    @Override public Void visitMathSymbolExp(
+            ResolveParser.MathSymbolExpContext ctx) {
+        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        return null;
+    }
+
     @Override public Void visitMathSegmentsExp(
             ResolveParser.MathSegmentsExpContext ctx) {
-        Iterator<Resolve.MathFunctionApplicationExpContext> segsIter =
-                ctx.mathFunctionApplicationExp().iterator();
-        Resolve.MathFunctionApplicationExpContext nextSeg, lastSeg = null;
+        Iterator<ResolveParser.MathSymbolExpContext> segsIter =
+                ctx.mathSymbolExp().iterator();
+        ResolveParser.MathSymbolExpContext nextSeg, lastSeg = null;
         nextSeg = segsIter.next();
         MTType curType = null;
         this.visit(nextSeg);
@@ -1411,107 +1388,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
             tr.mathTypes.put(nextSeg, curType);
-            if (nextSeg instanceof Resolve.MathFunctionExpContext) {
-                ((Resolve.MathFunctionExpContext)nextSeg).mathExp()
-                        .forEach(this::visit);
+            for (ResolveParser.MathExpContext arg : ctx.mathExp()) {
+                ctx.mathExp().forEach(this::visit);
             }
         }
+        compiler.info("expression: " + ctx.getText() + " of type " + curType);
         tr.mathTypes.put(ctx, curType);
-        return null;
-    }
-
-    @Override public Void visitMathAlternativeItemExp(
-            ResolveParser.MathAlternativeItemExpContext ctx) {
-        if ( ctx.condition != null ) {
-            //expectType(ctx.condition, g.BOOLEAN);
-        }
-        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
-        tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
-        return null;
-    }
-
-    @Override public Void visitMathQuantifiedExp(
-            ResolveParser.MathQuantifiedExpContext ctx) {
-        emit("entering mathQuantifiedExp...");
-        symtab.startScope(ctx);
-        Quantification quantification;
-
-        switch (ctx.q.getType()) {
-            case ResolveLexer.FORALL:
-                quantification = Quantification.UNIVERSAL;
-                break;
-            case ResolveLexer.EXISTS:
-                quantification = Quantification.EXISTENTIAL;
-                break;
-            default:
-                throw new RuntimeException("unrecognized quantification type: "
-                        + ctx.q.getText());
-        }
-        activeQuantifications.push(quantification);
-        this.visit(ctx.mathVariableDeclGroup());
-        activeQuantifications.pop();
-
-        activeQuantifications.push(Quantification.NONE);
-        this.visit(ctx.mathAssertionExp());
-        activeQuantifications.pop();
-        emit("exiting mathQuantifiedExp.");
-        symtab.endScope();
-        tr.mathTypes.put(ctx, g.BOOLEAN);
-        return null;
-    }
-
-    @Override public Void visitMathUnaryExp(
-            ResolveParser.MathUnaryExpContext ctx) {
-        this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
-        return null;
-    }*/
-
-    @Override public Void visitMathInfixApplyExp(
-            ResolveParser.MathInfixApplyExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
-        return null;
-    }
-
-    @Override public Void visitMathOutfixApplyExp(
-            ResolveParser.MathOutfixApplyExpContext ctx) {
-        this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
-                ctx.lop.getText() + "..."+ctx.rop.getText()), ctx.mathExp());
-        return null;
-    }
-
-    @Override public Void visitMathPrefixApplyExp(
-            ResolveParser.MathPrefixApplyExpContext ctx) {
-        this.visit(ctx.functionExp);
-        List<ResolveParser.MathExpContext> args =
-                ctx.mathExp().subList(1, ctx.mathExp().size());
-        for (ResolveParser.MathExpContext arg : args) {
-            this.visit(arg);
-
-        }
-        //TODO: really hacky with the functionExp.getStart() bit but in the interest of
-        //my focus at the moment, I'm not too concerned yet.
-        typeMathFunctionLikeThing(ctx, null, ctx.functionExp.getStart(), args);
-        return null;
-    }
-
-    @Override public Void visitMathBooleanLiteralExp(
-            ResolveParser.MathBooleanLiteralExpContext ctx) {
-        exitMathSymbolExp(ctx, null, ctx.getText());
-        return null;
-    }
-
-    @Override public Void visitMathIntegerLiteralExp(
-            ResolveParser.MathIntegerLiteralExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
-        return null;
-    }
-
-    @Override public Void visitMathSymbolExp(
-            ResolveParser.MathSymbolExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         return null;
     }
 

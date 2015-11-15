@@ -1,0 +1,9 @@
+Facility Hello_World
+        uses Standard_Characters
+
+    Operation Hello()
+        Procedure
+            Std_Chars :: Write("hello")
+        end Hello
+
+end Hello_World

@@ -1,0 +1,10 @@
+Facility Integer_Do_Nothing
+    uses Standard_Integers
+    Operation Do_Nothing
+        (restores I :
+           Std_Integer_Fac :: Integer)
+       Procedure
+        Var i : Std_Integer_Fac :: Integer
+        Std_Integer_Fac :: Sum(1, 2)
+       end Do_Nothing
+end Integer_Do_Nothing

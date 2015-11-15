@@ -194,11 +194,12 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @NotNull @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications,
+            boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
         if (!(excludeApplications && isFunctionApplication()) &&
-            !(excludeLiterals && isLiteral()) &&
+                !(excludeLiterals && isLiteral()) &&
                 quantification == Quantification.NONE ) {
             result.add(getCanonicalName());
         }
@@ -256,6 +257,21 @@ public class PSymbol extends PExp {
 
         public PSymbolBuilder(PSymbol existingPSymbol) {
             this.name = existingPSymbol.getName();
+            this.qualifier = existingPSymbol.getQualifier();
+            this.lprint = existingPSymbol.getLeftPrint();
+            this.rprint = existingPSymbol.getRightPrint();
+            this.literal = existingPSymbol.isLiteral();
+            this.incoming = existingPSymbol.isIncoming();
+            this.quantification = existingPSymbol.getQuantification();
+
+            this.mathType = existingPSymbol.getMathType();
+            this.mathTypeValue = existingPSymbol.getMathTypeValue();
+            this.progType = existingPSymbol.getProgType();
+            this.progTypeValue = existingPSymbol.getProgTypeValue();
+        }
+
+        public PSymbolBuilder(PSymbol existingPSymbol, String newName) {
+            this.name = newName;
             this.qualifier = existingPSymbol.getQualifier();
             this.lprint = existingPSymbol.getLeftPrint();
             this.rprint = existingPSymbol.getRightPrint();

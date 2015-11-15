@@ -1,64 +1,7 @@
-/*
- * [The "BSD license"]
- * Copyright (c) 2015 Clemson University
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- *
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-Concept Boolean_Template;
+Concept Boolean_Template
 
-    Type Family Boolean is modeled by B;
-        exemplar b;
-        initialization ensures b = true;
+    Type family Boolean
+                is modeled by B
+        exemplar b
 
-    Operation True () : Boolean;
-        ensures True = true;
-
-    Operation False () : Boolean;
-        ensures False = false;
-
-    Operation And (evaluates b1, b2 : Boolean) : Boolean;
-        ensures And = (b1 and b2);
-
-    Operation Or (evaluates b1, b2 : Boolean) : Boolean;
-        ensures Or = (b1 or b2);
-
-    Operation Not (evaluates b : Boolean) : Boolean;
-        ensures Not = (not b);
-
-    Operation Are_Equal(evaluates b1, b2: Boolean): Boolean;
-        ensures Are_Equal = (b1 = b2);
-
-    Operation Are_Not_Equal(evaluates b1, b2: Boolean): Boolean;
-        ensures Are_Not_Equal = (b1 /= b2);
-
-    Operation Read (replaces b : Boolean);
-
-    Operation Write (evaluates b : Boolean);
-
-    Operation Write_Line (evaluates b : Boolean);
-
-end Boolean_Template;
+end Boolean_Template

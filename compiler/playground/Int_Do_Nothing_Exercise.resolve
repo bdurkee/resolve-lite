@@ -1,9 +1,0 @@
-Facility Int_Do_Nothing_Exercise;
-        uses Standard_Integers;
-    Operation Do_Nothing (restores I : Std_Integer_Fac :: Integer);
-        Procedure
-            //I++; I--;
-            Var Max_Length : Std_Integer_Fac :: Integer;
-            Max_Length - 1 + 1;
-    end Do_Nothing;
-end Int_Do_Nothing_Exercise;

@@ -326,14 +326,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
-        result = parseMathAssertionExp(g, "x + y"); //you actually have to do this again or else we'll retrieve a cached answer
-        foundNames = result.getSymbolNames(true, false); //now ignoring function applications..
-        expectedNames = Arrays.asList("x", "y").stream()
-                .collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
-
-
       /*  result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
         foundNames = result.getSymbolNames();
         expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
@@ -396,12 +388,13 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("((P and Post) implies Q)", partitions.get(1).toString());
         Assert.assertEquals("((P and Post) implies R)", partitions.get(2).toString());
 
-        /*e = parseMathAssertionExp(g, "(P implies Q)");
+        e = parseMathAssertionExp(g, "(P implies (Q implies (R implies (T and true))))");
         partitions = e.splitIntoSequents();
-        Assert.assertEquals(1, partitions.size());
-        Assert.assertEquals("(P implies Q)", partitions.get(0).toString());
+        Assert.assertEquals(2, partitions.size());
+        Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
+        Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
 
-        e = parseMathAssertionExp(g, "P");
+      /*  e = parseMathAssertionExp(g, "P");
         partitions = e.splitIntoSequents();
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals("(true implies P)", partitions.get(0).toString());

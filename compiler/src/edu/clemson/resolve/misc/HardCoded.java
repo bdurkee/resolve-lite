@@ -2,6 +2,7 @@ package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -20,6 +21,8 @@ public class HardCoded {
             b.addBinding("El", null, g.MTYPE, g.ELEMENT);
             b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
             b.addBinding("SSet", null, g.MTYPE, g.SSET);
+            b.addBinding("SStr", null, g.SSET, g.SSTR);
+
             b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
             b.addBinding("N", null, g.SSET, g.NAT);
@@ -49,6 +52,15 @@ public class HardCoded {
                      new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
                              .build());*/
 
+            //S T R I N G   R E L A T E D
+            b.addBinding("Str", null, g.STR);
+            b.addBinding("Empty_String", null, g.SSTR, g.EMPTY_STRING);
+            b.addBinding("|...|", null, new MTFunctionBuilder(g, g.Z)
+                    .paramTypes(g.SSET).build());
+            b.addBinding("<...>", null, new MTFunctionBuilder(g, g.SSTR)
+                    .paramTypes(g.SSTR).build());
+            b.addBinding("o", null, g.STR_CAT);
+
             //S E T   R E L A T E D
             b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
@@ -71,20 +83,15 @@ public class HardCoded {
         }
     }
 
-    //Todo: Should the following two methods *really* be in here?
     @NotNull public static String getMetaFieldName(@NotNull ParserRuleContext t) {
         String result = "";
-
-        /*if ( t instanceof Resolve.MathFunctionExpContext ) {
-            result = ((Resolve.MathFunctionExpContext) t).name.getText();
-        }
-        else if ( t instanceof Resolve.MathVariableExpContext ) {
-            result = ((Resolve.MathVariableExpContext) t).name.getText();
+        if ( t instanceof ResolveParser.MathSymbolExpContext ) {
+            result = ((ResolveParser.MathSymbolExpContext) t).name.getText();
         }
         else {
             throw new RuntimeException("not a variable exp or function exp: "
                     + t.getText() + " (" + t.getClass() + ")");
-        }*/
+        }
         return result;
     }
 

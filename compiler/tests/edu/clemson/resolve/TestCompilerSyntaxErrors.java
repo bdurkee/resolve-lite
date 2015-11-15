@@ -10,7 +10,7 @@ import org.junit.Test;
 //major revisions. But it's good to know anyways.
 public class TestCompilerSyntaxErrors extends BaseTest {
 
-    @Test public void testMissingSemi() throws Exception {
+    /*@Test public void testMissingSemi() throws Exception {
         String[] pair = new String[] {
                 "Precis T\n" +
                     "uses x,y,z;\n" +
@@ -20,7 +20,7 @@ public class TestCompilerSyntaxErrors extends BaseTest {
         super.testErrors(pair, "T");
     }
 
-    /*@Test public void testMissingSemi2() throws Exception {
+    @Test public void testMissingSemi2() throws Exception {
         String[] pair = new String[] {
                 "Precis T\n" +
                         "uses x,y,z\n" +

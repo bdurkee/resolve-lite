@@ -48,10 +48,6 @@ public class PApply extends PExp {
                         "(" + Utils.join(s.arguments, ", ") + ")";
             }
 
-            @Override public String getStyleName() {
-                return "Prefix";
-            }
-
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPrefixPApply(s);
             }
@@ -71,10 +67,6 @@ public class PApply extends PExp {
             @Override protected String toString(PApply s) {
                 return "(" + Utils.join(s.arguments, " " +
                         s.functionPortion.getCanonicalName() + " ") + ")";
-            }
-
-            @Override public String getStyleName() {
-                return "Infix";
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -103,10 +95,6 @@ public class PApply extends PExp {
                 return retval + s.functionPortion.getCanonicalName();
             }
 
-            @Override public String getStyleName() {
-                return "Postfix";
-            }
-
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPostfixPApply(s);
             }
@@ -131,10 +119,6 @@ public class PApply extends PExp {
                         f.getRightPrint();
             }
 
-            @Override public String getStyleName() {
-                return "Outfix";
-            }
-
             @Override protected void beginAccept(PExpListener v, PApply s) {
                 v.beginOutfixPApply(s);
             }
@@ -154,9 +138,6 @@ public class PApply extends PExp {
          *  @return a string representation.
          */
         protected abstract String toString(PApply s);
-
-        /** Returns a well formatted name for the style */
-        public abstract String getStyleName();
 
         /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
@@ -187,7 +168,8 @@ public class PApply extends PExp {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
         //no; builder.applicationType won't be null; this is checked in PApply:build()
-                builder.applicationTypeValue);
+                builder.applicationTypeValue,
+                builder.functionPortion.getProgType(), null);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
         this.displayStyle = builder.displayStyle;
@@ -278,6 +260,11 @@ public class PApply extends PExp {
                 functionPortion.getCanonicalName().equals("=");
     }
 
+    @Override public boolean isConjunct() {
+        return arguments.size() == 2 &&
+                functionPortion.getCanonicalName().equals("and");
+    }
+
     @NotNull @Override protected String getCanonicalName() {
         return functionPortion.getCanonicalName();
     }
@@ -318,6 +305,9 @@ public class PApply extends PExp {
             tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
             return arguments.get(1).splitIntoSequents(tempLeft);
         }
+        else {
+            result.add(g.formImplies(assumptions, this));
+        }
         return result;
     }
 
@@ -356,8 +346,7 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
         if (!excludeApplications) {
             result.addAll(functionPortion

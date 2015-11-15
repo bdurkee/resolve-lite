@@ -1,8 +1,0 @@
-Facility Queue_Exercises_Fac;
-    //this is an instructor version
-    uses String_Theory, Standard_Booleans, Standard_Integers,
-        Basic_Integer_Theory;
-
-
-
-end Queue_Exercises_Fac;

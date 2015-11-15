@@ -1,0 +1,26 @@
+Concept Stack_Template<T>
+        (evaluates Max_Depth :
+              Std_Integer_Fac :: Integer)
+    uses Standard_Integers,
+         Integer_Theory
+    requires Max_Depth > 0
+        which entails Max_Depth : N
+
+    Type family Stack is
+            modeled by Str(T)
+        exemplar S
+        constraint |S| < Max_Depth
+        initialization
+            ensures S = Empty_String
+
+    Operation Push (updates S : Stack;
+                    alters e : T)
+        requires |S| < Max_Depth
+        ensures S = <@e> o @S
+
+    Operation Pop (updates S : Stack;
+                   replaces e : T)
+        requires |S| > 0
+        ensures @S = <e> o S
+
+end Search_Store_Template

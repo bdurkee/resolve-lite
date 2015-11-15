@@ -1,9 +1,0 @@
-Precis Extension Terminal_Range_Op_Ext for Function_Theory;
-
-    Definition Is_Stable_wrt(U : SSet, FC : Powerset(U -> U),
-        S : Powerset(U)) : B;
-
-    Corollary troe1: Forall U : SSet, Forall FC : Powerset(U -> U),
-        Is_Stable_wrt(U, FC, Empty_Set);
-
-end Terminal_Range_Op_Ext;

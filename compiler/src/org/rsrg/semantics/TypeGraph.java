@@ -28,6 +28,10 @@ public class TypeGraph {
 
     public final MTProper MTYPE = new MTProper(this, null, true, "MType");
     public final MTProper SSET = new MTProper(this, MTYPE, true, "SSet");
+    public final MTProper SSTR = new MTProper(this, SSET, true, "SStr");
+    public final MTProper EMPTY_STRING = new MTProper(this, SSET, true,
+            "Empty_String");
+
     public final MTProper VOID = new MTProper(this, SSET, false, "Void");
 
     public final MTProper BOOLEAN = new MTProper(this, SSET, false, "B");
@@ -57,6 +61,14 @@ public class TypeGraph {
                     CARTESIAN_PRODUCT_APPLICATION, MTYPE)
                     .paramTypes(MTYPE, MTYPE).build();
 
+    public final MTFunction STR =
+            new MTFunctionBuilder(this, SSTR)
+                    .paramTypes(SSTR).build();
+
+    public final MTFunction STR_CAT =
+            new MTFunctionBuilder(this, SSTR)
+                    .paramTypes(SSTR, SSTR).build();
+    
     public final MTFunction POWERSET =
             new MTFunctionBuilder(this, POWERSET_APPLICATION, SSET)
                     .paramTypes(SSET)

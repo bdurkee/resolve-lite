@@ -1,0 +1,31 @@
+Precis Spiral_Theory;
+    uses Basic_Natural_Number_Theory, Integer_Theory;
+
+    Definition N2 : Powerset(N) is {n : N | n >= 2};
+
+    Definition Is_k_Spiral_Like(
+        sp_loc : N2 -> SSet,
+        cen : (k : N2) -> sp_loc(k),
+        ss : (k : N2) * N * sp_loc(k) -> sp_loc(k),
+        rs : (k : N2) * N * sp_loc(k) -> sp_loc(k)) : B;
+
+    Categorical Definition for Sp_Loc : N2 -> SSet,
+        SS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
+        RS : (k : N2) * N * Sp_Loc(k) -> Sp_Loc(k),
+        Cen : (k : N2) -> Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
+
+   Implicit Definition SCD(k : N2, p : Sp_Loc(k)) : N is
+        Forall u : Sp_Loc(k), SS(k)(SCD(k)(u), Cen(k)) = u;
+
+        Corollary C1: Forall k : N2, Forall p : Sp_Loc(k),
+            SS(k)(0, p) = SS(k)(SCD(k)(p) + 1, Cen(k));
+
+        Corollary C2: Forall k : N2, Forall n : N,
+            SCD(k)(SS(k)(n, Cen(k))) = n;
+
+        Corollary C3: Forall k : N2, Forall n : N,
+            SCD(k)(RS(k)(0, SS(k)(n, Cen(k)))) = k * n + 1;
+
+    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k));
+
+end Basic_Spiral_Theory;

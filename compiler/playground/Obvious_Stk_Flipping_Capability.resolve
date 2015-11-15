@@ -1,7 +1,0 @@
-Implementation Obvious_Stk_Flipping_Capability
-    for Flipping_Capability of Bdd_Stack_Template;
-            uses String_Theory, Standard_Integers;
-    Procedure Flip (updates S : Stack);
-
-    end Flip;
-end Obvious_Stk_Flipping_Capability;

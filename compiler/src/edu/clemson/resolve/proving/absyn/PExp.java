@@ -136,6 +136,11 @@ public abstract class PExp {
         return this.equals(thisSubstituted);
     }
 
+    public boolean staysSameAfterSubstitution(PExp current, PExp repl) {
+        PExp thisSubstituted = substitute(current, repl);
+        return this.equals(thisSubstituted);
+    }
+
     @NotNull public PExp substitute(PExp current, PExp replacement) {
         Map<PExp, PExp> e = new LinkedHashMap<>();
         e.put(current, replacement);
@@ -224,6 +229,10 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean isConjunct() {
+        return false;
+    }
+
     /**
      * Returns {@code true} if this {@code PExp} is prefixed by the {@code @}
      * marker (incoming marker); {@code false} otherwise.
@@ -272,6 +281,17 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean hasSymbolNamesInCommonWith(final PExp other,
+                                              boolean excludeApplication,
+                                              boolean excludeLiterals) {
+        Set<String> myNames = this.getSymbolNames(excludeApplication,
+                excludeLiterals);
+        Set<String> othersNames = other.getSymbolNames(excludeApplication,
+                excludeLiterals);
+        myNames.retainAll(othersNames);
+        return !myNames.isEmpty();
+    }
+
     /**
      * Converts {@code this} expression, containing an arbitrary number of
      * conjuncts with possibly nested implications, into a list of sequents.
@@ -318,7 +338,7 @@ public abstract class PExp {
     @NotNull public final Set<PSymbol> getIncomingVariables() {
         if ( cachedIncomingVariables == null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
-                            getIncomingVariablesNoCache());
+                    getIncomingVariablesNoCache());
         }
         return cachedIncomingVariables;
     }
@@ -353,7 +373,12 @@ public abstract class PExp {
 
     @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
                                                      boolean excludeLiterals) {
-        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
+        if ( cachedSymbolNames == null ) {
+            //We're immutable, so only do this once
+            cachedSymbolNames =
+                    getSymbolNamesNoCache(excludeApplications, excludeLiterals);
+        }
+        return cachedSymbolNames;
     }
 
     protected abstract Set<String> getSymbolNamesNoCache(

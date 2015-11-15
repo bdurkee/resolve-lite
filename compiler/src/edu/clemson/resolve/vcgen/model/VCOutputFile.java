@@ -2,6 +2,7 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
 
@@ -57,8 +58,11 @@ public class VCOutputFile extends OutputModelObject {
         int vcIndex = 1;
         for (PExp vc : vcs) {
             List<? extends PExp> args = vc.getSubExpressions();
+            if (!(vc instanceof PApply)) continue;
+            //args.get(0) would be the function name portion of the PApply;
+            //so we actually do args.get(1) to get the first arg (lhs)
             VC curVC = new VC(sectionNumber + "_" + vcIndex,
-                    args.get(0), args.get(1));
+                    args.get(1), args.get(2));
 
             finalVcs.add(curVC);
             vcIndex++;

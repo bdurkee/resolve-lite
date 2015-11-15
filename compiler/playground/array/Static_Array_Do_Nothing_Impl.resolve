@@ -1,0 +1,12 @@
+Implementation Static_Array_Do_Nothing_Impl
+    for Static_Array_Do_Nothing
+    of Static_Array_Template
+        uses Standard_Integers
+    Procedure Do_Nothing
+            (restores S : Static_Array)
+        Var i : Std_Integer_Fac :: Integer
+        i := Lower_Bound
+
+    end Do_Nothing
+
+end Static_Array_Do_Nothing_Impl
