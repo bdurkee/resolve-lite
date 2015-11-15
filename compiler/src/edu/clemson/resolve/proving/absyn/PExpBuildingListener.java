@@ -327,6 +327,30 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.progExp()));
     }
 
+    @Override public void exitProgBooleanLiteralExp(
+            ResolveParser.ProgBooleanLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    @Override public void exitProgIntegerLiteralExp(
+            ResolveParser.ProgIntegerLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    @Override public void exitProgCharacterLiteralExp(
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
+    @Override public void exitProgStringLiteralExp(
+            ResolveParser.ProgStringLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
+                typeValues.get(ctx), progTypes.get(ctx)));
+    }
+
     private PExp buildLiteral(String literalText, MTType type, MTType typeValue,
                               PTType progType) {
         PSymbol.PSymbolBuilder result =

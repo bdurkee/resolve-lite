@@ -1,0 +1,7 @@
+Concept Boolean_Template
+
+    Type family Boolean
+                is modeled by B
+        exemplar b
+
+end Boolean_Template

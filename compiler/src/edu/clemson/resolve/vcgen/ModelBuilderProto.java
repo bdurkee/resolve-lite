@@ -289,10 +289,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.assume(correspondence);
         block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
-    }
+    }*/
 
     @Override public void enterOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
+            ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
@@ -315,7 +315,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
+            ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.scopes.get(ctx);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms =
@@ -330,7 +330,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
-    }*/
+    }
 
     @Override public void enterProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {

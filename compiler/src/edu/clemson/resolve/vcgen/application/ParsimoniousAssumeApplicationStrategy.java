@@ -136,13 +136,6 @@ public class ParsimoniousAssumeApplicationStrategy
         return block.snapshot();
     }*/
 
-    private boolean sharesNamesWithConfirm(PExp assume,
-                                           Set<String> confirmSyms) {
-        Set<String> assumeNames = assume.getSymbolNames();
-        assumeNames.retainAll(confirmSyms);
-        return !assumeNames.isEmpty();
-    }
-
     @Override public String getDescription() {
         return "parsimonious assume application";
     }
