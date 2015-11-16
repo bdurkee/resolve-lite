@@ -218,7 +218,6 @@ public class PApply extends PExp {
 
     /**
      * {@inheritDoc}
-     *
      */
     @NotNull @Override public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
