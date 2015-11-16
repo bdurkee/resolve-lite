@@ -25,7 +25,8 @@ Concept Static_Array_Template<T>
              updates e : T;
              evaluates i :
                 Std_Integer_Fac :: Integer)
-        requires Lower_Bound <= i <= Upper_Bound
+        requires Lower_Bound <= i and
+            i <= Upper_Bound
         ensures e = @A(i) and
             (forall j : Z,
                 j = i or A(j) = @A(j))

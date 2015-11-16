@@ -70,10 +70,10 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if ( assume == null ) {
                 return this;
             }
-            //stats.add(new VCAssume(this,
-            //        new DefaultAssumeApplicationStrategy(), assume));
             stats.add(new VCAssume(this,
-                    new ParsimoniousAssumeApplicationStrategy(), assume));
+                    new DefaultAssumeApplicationStrategy(), assume));
+            //stats.add(new VCAssume(this,
+            //        new ParsimoniousAssumeApplicationStrategy(), assume));
             return this;
         }
 

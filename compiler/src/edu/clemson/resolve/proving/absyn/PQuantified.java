@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//This is really just purely a syntactic node to help us know where to print
+//This is really just a purely syntactic node to help us know where to print
 //quantifiers (at which level), and which vars, etc.
 public class PQuantified extends PExp {
 
