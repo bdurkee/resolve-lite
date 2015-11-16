@@ -424,27 +424,8 @@ public class PApply extends PExp {
         return result;
     }
 
-    public String toString(boolean dispQuantification) {
-        String result = "";
-        if (dispQuantification) {
-            Set<PSymbol> quantifiedSyms = getQuantifiedVariables();
-            for (PSymbol p : quantifiedSyms) {
-                if (p.getQuantification() == Quantification.UNIVERSAL) {
-                    result += "forall " + p.getName() + " : " +
-                            p.getMathType() + "\n";
-                }
-                else {
-                    result += "exists " + p.getName() + " : " +
-                            p.getMathType() + "\n";
-                }
-            }
-        }
-        result += displayStyle.toString(this);
-        return result;
-    }
-
     @Override public String toString() {
-        return toString(true);
+        return displayStyle.toString(this);
     }
 
     /**

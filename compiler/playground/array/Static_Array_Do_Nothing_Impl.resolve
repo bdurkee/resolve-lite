@@ -2,6 +2,16 @@ Implementation Static_Array_Do_Nothing_Impl
     for Static_Array_Do_Nothing
     of Static_Array_Template
         uses Standard_Integers
+
+        //TODO: we're going to want a PQuantified
+        //Here's my reasoning: we build the ast to reflect what the user types
+        //in, send, it to the vcgenerator and fuck around with their expressions
+        //and produce something else. Right now I flatten (embed) quantifiers in
+        //in the actual formulas in PExpBuildingListener. I think it might be
+        //better -- given that our next immediate target of the PExp hierarchy is
+        //the VCGenerator -- that we preserve the quantified nodes so they naturally
+        //get embedded in the VCs (if there are indeed quantifiers in the spec)
+        //THEN we flatten them, distributing quantifiers only if
     Procedure Do_Nothing
             (restores S : Static_Array)
         Var x : T
