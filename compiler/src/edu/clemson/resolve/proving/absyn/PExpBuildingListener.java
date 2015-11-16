@@ -100,17 +100,34 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (TerminalNode term : ctx.mathVariableDeclGroup().ID()) {
             String quantifier = ctx.q.getText();
             quantifiedVars.put(term.getText(),
-                    quantifier.equals("Forall") ? Quantification.UNIVERSAL
-                            : Quantification.EXISTENTIAL);
+                    getQuantificationMode(ctx.q));
         }
     }
 
+    public Quantification getQuantificationMode(@NotNull Token q) {
+        Quantification result = Quantification.NONE;
+        if (q.getText().equalsIgnoreCase("forall")) {
+            result = Quantification.UNIVERSAL;
+        }
+        else {
+            result = Quantification.EXISTENTIAL;
+        }
+        return result;
+    }
+
+
     @Override public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
+        List<PLambda.MathSymbolDeclaration> declaredVars =
+                new ArrayList<>();
         for (TerminalNode term : ctx.mathVariableDeclGroup().ID()) {
             quantifiedVars.remove(term.getText());
+            declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
+                    getMathTypeValue(ctx.mathVariableDeclGroup().mathTypeExp())));
         }
-        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+        PQuantified q = new PQuantified(repo.get(ctx.mathAssertionExp()),
+                getQuantificationMode(ctx.q), declaredVars);
+        repo.put(ctx, q);
     }
 
     @Override public void exitMathUnaryApplyExp(
@@ -186,11 +203,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
-        List<PLambda.Parameter> parameters = new ArrayList<>();
+        List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
             for (TerminalNode term : grp.ID()) {
-                parameters.add(new PLambda.Parameter(term.getText(),
+                parameters.add(new PLambda.MathSymbolDeclaration(term.getText(),
                         getMathTypeValue(grp.mathTypeExp())));
             }
         }

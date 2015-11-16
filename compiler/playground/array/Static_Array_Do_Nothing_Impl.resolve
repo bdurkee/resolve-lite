@@ -15,8 +15,8 @@ Implementation Static_Array_Do_Nothing_Impl
     Procedure Do_Nothing
             (restores S : Static_Array)
         Var x : T
-        //Swap_Element(S, x, 0)
-        //Swap_Element(S, x, 0)
+        Swap_Element(S, x, 0)
+        Swap_Element(S, x, 0)
     end Do_Nothing
 
 end Static_Array_Do_Nothing_Impl
