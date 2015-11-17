@@ -35,6 +35,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
     @Nullable private final MTInvalid dummyType;
+    private final boolean skipDummyQuantifierNodes;
 
     /**
      * Constructs a new {@code PExpBuildingListener} given an
@@ -44,6 +45,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations) {
         this(annotations, null);
+    }
+
+    public PExpBuildingListener(@NotNull AnnotatedTree annotations,
+                                @Nullable MTInvalid dummyType) {
+        this(annotations, dummyType, false);
     }
 
     /**
@@ -56,12 +62,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * missing types
      */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations,
-                                @Nullable MTInvalid dummyType) {
+                                @Nullable MTInvalid dummyType,
+                                boolean skipDummyQuantifiedNodes) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
         this.repo = annotations.mathPExps;
         this.dummyType = dummyType;
+        this.skipDummyQuantifierNodes = skipDummyQuantifiedNodes;
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
@@ -126,7 +134,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
         PQuantified q = new PQuantified(repo.get(ctx.mathAssertionExp()),
                 getQuantificationMode(ctx.q), declaredVars);
-        repo.put(ctx, q);
+        if (skipDummyQuantifierNodes) {
+            repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+        }
+        else {
+            repo.put(ctx, q);
+        }
     }
 
     @Override public void exitMathUnaryApplyExp(
