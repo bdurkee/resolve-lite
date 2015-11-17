@@ -3,4 +3,5 @@ Extension Static_Array_Do_Nothing
 
     Operation Do_Nothing
             (restores A : Static_Array)
+            
 end Static_Array_Do_Nothing

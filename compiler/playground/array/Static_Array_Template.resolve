@@ -12,7 +12,12 @@ Concept Static_Array_Template<T>
             forall i : Z,
              (start <= i and i <= stop)
                 implies T.Is_Initial(f(i))
-
+    /*
+    Lemma Array_Equality_Lem1:
+        (forall d1, d2 : Z -> T,
+            forall i : Z,
+                (d1(i) = d2(i)) implies (d1 = d2))
+    */
     Type family Static_Array is
                 modeled by Z -> T
         exemplar A
