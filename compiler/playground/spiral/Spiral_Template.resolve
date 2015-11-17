@@ -17,7 +17,6 @@ Concept Bdd_Spiral_Template<T>
         constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
             P.Curr_Loc is_in Inward_Loc(P.Trmnl_Loc) and
             P.Lab(P.Trmnl_Loc) = T.Base_Point
-            //and P.Lab[Sp_Loc(k) ~ Inward_Loc(P.Trmnl_Loc)] = {T.Base_Point};
         initialization
                 ensures P.Trmnl_Loc = Cen(k);
 

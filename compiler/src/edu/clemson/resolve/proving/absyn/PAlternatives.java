@@ -216,7 +216,7 @@ public class PAlternatives extends PExp {
     }
 
     @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
-        Set<PSymbol> result = new HashSet<>();
+        Set<PSymbol> result = new LinkedHashSet<>(); //i'd like to preserve first found order
 
         for (Alternative a : alternatives) {
             result.addAll(a.condition.getQuantifiedVariables());

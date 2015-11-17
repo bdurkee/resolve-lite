@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
  */
 public class PLambda extends PExp {
 
-    private final List<Parameter> parameters = new ArrayList<>();
+    private final List<MathSymbolDeclaration> parameters = new ArrayList<>();
     @NotNull private final PExp body;
 
-    public PLambda(@NotNull List<Parameter> parameters, @NotNull PExp body) {
+    public PLambda(@NotNull List<MathSymbolDeclaration> parameters, @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
                 new MTFunction.MTFunctionBuilder(body.getMathType()
                         .getTypeGraph(), body.getMathType())
@@ -29,9 +29,9 @@ public class PLambda extends PExp {
         this.body = body;
     }
 
-    private static int parameterHash(Iterable<Parameter> parameters) {
+    private static int parameterHash(Iterable<MathSymbolDeclaration> parameters) {
         int hash = 0;
-        for (Parameter p : parameters) {
+        for (MathSymbolDeclaration p : parameters) {
             hash += p.name.hashCode() * 27 + p.type.hashCode();
             hash *= 49;
         }
@@ -63,7 +63,7 @@ public class PLambda extends PExp {
 
     @Override public boolean containsName(String name) {
         boolean result = false;
-        Iterator<Parameter> parameterIter = parameters.iterator();
+        Iterator<MathSymbolDeclaration> parameterIter = parameters.iterator();
         while (!result && parameterIter.hasNext()) {
             result = parameterIter.next().name.equals(name);
         }
@@ -83,7 +83,7 @@ public class PLambda extends PExp {
                 .mathType(p.type).build()).collect(Collectors.toList());
     }
 
-    public List<Parameter> getParameters() {
+    public List<MathSymbolDeclaration> getParameters() {
         return parameters;
     }
 
@@ -134,11 +134,11 @@ public class PLambda extends PExp {
         return bodyFunctions;
     }
 
-    public static class Parameter {
+    public static class MathSymbolDeclaration {
         public final String name;
         public final MTType type;
 
-        public Parameter(String name, MTType type) {
+        public MathSymbolDeclaration(String name, MTType type) {
             //Todo: Again, I think this should probably be checked before now
             if ( name == null ) {
                 throw new IllegalArgumentException("name==null");
@@ -151,10 +151,10 @@ public class PLambda extends PExp {
         }
 
         @Override public boolean equals(Object o) {
-            boolean result = o instanceof Parameter;
+            boolean result = o instanceof MathSymbolDeclaration;
             if ( result ) {
-                result = this.name.equals(((Parameter)o).name) &&
-                        this.type.equals(((Parameter)o).type);
+                result = this.name.equals(((MathSymbolDeclaration)o).name) &&
+                        this.type.equals(((MathSymbolDeclaration)o).type);
             }
             return result;
         }

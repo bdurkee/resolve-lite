@@ -1284,7 +1284,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
-                ctx.lop.getText() + "..."+ctx.rop.getText()), ctx.mathExp());
+                ctx.lop.getText() + "..." + ctx.rop.getText()), ctx.mathExp());
         return null;
     }
 
@@ -1297,9 +1297,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             this.visit(arg);
 
         }
-        //TODO: really hacky with the functionExp.getStart() bit but in the interest of
-        //my focus at the moment, I'm not too concerned yet.
-        typeMathFunctionLikeThing(ctx, null, ctx.functionExp.getStart(), args);
+
+        ParseTree secondChild = ctx.functionExp.getChild(0).getChild(0);
+        Token name = null;
+        if (secondChild instanceof ResolveParser.MathSymbolExpContext) {
+            name = ((ResolveParser.MathSymbolExpContext) secondChild).mathSymbolName().getStart();
+        }
+        else {
+            throw new UnsupportedOperationException("anonymous function " +
+                    "applications are not yet handled: " + ctx.getText());
+        }
+
+        typeMathFunctionLikeThing(ctx, null, name, args);
         return null;
     }
 

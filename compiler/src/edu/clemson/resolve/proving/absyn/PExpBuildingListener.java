@@ -35,6 +35,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
     @Nullable private final MTInvalid dummyType;
+    private final boolean skipDummyQuantifierNodes;
 
     /**
      * Constructs a new {@code PExpBuildingListener} given an
@@ -44,6 +45,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations) {
         this(annotations, null);
+    }
+
+    public PExpBuildingListener(@NotNull AnnotatedTree annotations,
+                                @Nullable MTInvalid dummyType) {
+        this(annotations, dummyType, false);
     }
 
     /**
@@ -56,12 +62,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * missing types
      */
     public PExpBuildingListener(@NotNull AnnotatedTree annotations,
-                                @Nullable MTInvalid dummyType) {
+                                @Nullable MTInvalid dummyType,
+                                boolean skipDummyQuantifiedNodes) {
         this.types = annotations.mathTypes;
         this.typeValues = annotations.mathTypeValues;
         this.progTypes = annotations.progTypes;
         this.repo = annotations.mathPExps;
         this.dummyType = dummyType;
+        this.skipDummyQuantifierNodes = skipDummyQuantifiedNodes;
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
@@ -99,17 +107,39 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (TerminalNode term : ctx.mathVariableDeclGroup().ID()) {
             String quantifier = ctx.q.getText();
             quantifiedVars.put(term.getText(),
-                    quantifier.equals("Forall") ? Quantification.UNIVERSAL
-                            : Quantification.EXISTENTIAL);
+                    getQuantificationMode(ctx.q));
         }
     }
 
+    public Quantification getQuantificationMode(@NotNull Token q) {
+        Quantification result = Quantification.NONE;
+        if (q.getText().equalsIgnoreCase("forall")) {
+            result = Quantification.UNIVERSAL;
+        }
+        else {
+            result = Quantification.EXISTENTIAL;
+        }
+        return result;
+    }
+
+
     @Override public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
+        List<PLambda.MathSymbolDeclaration> declaredVars =
+                new ArrayList<>();
         for (TerminalNode term : ctx.mathVariableDeclGroup().ID()) {
             quantifiedVars.remove(term.getText());
+            declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
+                    getMathTypeValue(ctx.mathVariableDeclGroup().mathTypeExp())));
         }
-        repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+        PQuantified q = new PQuantified(repo.get(ctx.mathAssertionExp()),
+                getQuantificationMode(ctx.q), declaredVars);
+        if (skipDummyQuantifierNodes) {
+            repo.put(ctx, repo.get(ctx.mathAssertionExp()));
+        }
+        else {
+            repo.put(ctx, q);
+        }
     }
 
     @Override public void exitMathUnaryApplyExp(
@@ -185,11 +215,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
-        List<PLambda.Parameter> parameters = new ArrayList<>();
+        List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
             for (TerminalNode term : grp.ID()) {
-                parameters.add(new PLambda.Parameter(term.getText(),
+                parameters.add(new PLambda.MathSymbolDeclaration(term.getText(),
                         getMathTypeValue(grp.mathTypeExp())));
             }
         }

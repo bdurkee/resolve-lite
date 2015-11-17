@@ -187,7 +187,7 @@ public class PSymbol extends PExp {
     }
 
     @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
-        Set<PSymbol> result = new HashSet<>();
+        Set<PSymbol> result = new LinkedHashSet<>();
         if (quantification != Quantification.NONE) {
             result.add(this);
         }
