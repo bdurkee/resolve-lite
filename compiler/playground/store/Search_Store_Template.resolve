@@ -9,7 +9,7 @@ Concept Search_Store_Template<T>
 
     Type family Store is
             modeled by Finite_Powerset(T)
-        exemplar S;
+        exemplar S
         constraint ||S|| < Max_Capacity
         initialization
             ensures S = { }
