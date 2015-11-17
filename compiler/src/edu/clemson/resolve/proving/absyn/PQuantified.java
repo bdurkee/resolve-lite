@@ -108,7 +108,11 @@ public class PQuantified extends PExp {
     }
 
     @Override public boolean equals(Object o) {
-        return assertion.equals(o);
+        boolean result = (o instanceof PQuantified);
+        if (result) {
+            result = assertion.equals(o);
+        }
+        return result;
     }
 
 }

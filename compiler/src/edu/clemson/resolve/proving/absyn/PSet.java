@@ -42,9 +42,12 @@ public class PSet extends PExp {
     }
 
     @Override public boolean containsName(String name) {
-        return elements.stream()
-                .filter(u -> u.containsName(name))
-                .collect(Collectors.toList()).isEmpty();
+        for (PExp e : elements) {
+            if (e.containsName(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @NotNull @Override public List<? extends PExp> getSubExpressions() {
