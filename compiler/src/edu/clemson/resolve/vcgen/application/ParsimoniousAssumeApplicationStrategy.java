@@ -18,9 +18,29 @@ public class ParsimoniousAssumeApplicationStrategy
     @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
                                               VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
-        PExp RP = block.finalConfirm.getConfirmExp();
+        PExp confirmExp = block.finalConfirm.getConfirmExp();
 
-        Map<PExp, PExp> equalsReplacements = new HashMap<>();
+        Set<String> allAssumptionSymbolNames = assumeExp.getSymbolNames();
+        Map<PExp, Set<String>> assumesToSymbols = new HashMap<>();
+
+        for (PExp assume : assumeExp.splitIntoConjuncts()) {
+            assumesToSymbols.put(assume, assume.getSymbolNames());
+        }
+
+        for (PExp confirm : confirmExp.splitIntoConjuncts()) {
+            Set<String> curIntersection = new HashSet<>();
+            confirm.getSymbolNames().retainAll(allAssumptionSymbolNames);
+
+            if (curIntersection.isEmpty()) continue;
+            for (PExp assume : assumesToSymbols.keySet()) {
+                assumesToSymbols.get(assume).retainAll(curIntersection);
+                if (!curIntersection.isEmpty()) {
+                    
+                }
+            }
+        }
+
+    /*    Map<PExp, PExp> equalsReplacements = new HashMap<>();
         List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
 
         List<PExp> relevantAssumptions = new ArrayList<>();
@@ -50,7 +70,7 @@ public class ParsimoniousAssumeApplicationStrategy
         else {
             newAssume = block.g.formConjuncts(relevantAssumptions);
             block.finalConfirm(block.g.formImplies(newAssume, RP));
-        }
+        }*/
         return block.snapshot();
     }
 
