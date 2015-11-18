@@ -12,7 +12,7 @@ import java.util.List;
  * <p>
  * Note that {@code ScopeBuilder} has no public constructor. Instances of this
  * class can be acquired through calls to some of the methods of
- * {@link SymbolTable}.</p>
+ * {@link MathSymbolTableBuilder}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
@@ -24,7 +24,7 @@ public class ScopeBuilder extends SyntacticScope {
     //matter. It just does currently because of the way we grab lists of
     //formal parameters (from scope) for functions before we insert the
     //completed sym into the table.
-    ScopeBuilder(SymbolTable s, TypeGraph g, ParserRuleContext definingTree,
+    ScopeBuilder(MathSymbolTableBuilder s, TypeGraph g, ParserRuleContext definingTree,
                  Scope parent, String moduleID) {
         super(s, definingTree, parent, moduleID, new LinkedHashMap<>());
         this.typeGraph = g;

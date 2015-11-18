@@ -1,10 +1,8 @@
 package org.rsrg.semantics.query;
 
-import edu.clemson.resolve.parser.ResolveLexer;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
+import org.rsrg.semantics.MathSymbolTableBuilder;
 import org.rsrg.semantics.PossiblyQualifiedPath;
-import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.searchers.OperationSearcher;
 import org.rsrg.semantics.symbol.OperationSymbol;
@@ -20,8 +18,8 @@ import java.util.List;
 public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
 
     public OperationQuery(Token qualifier, Token name,
-                          List<PTType> argumentTypes, SymbolTable.FacilityStrategy facilityStrategy,
-                          SymbolTable.ImportStrategy importStrategy) {
+                          List<PTType> argumentTypes, MathSymbolTableBuilder.FacilityStrategy facilityStrategy,
+                          MathSymbolTableBuilder.ImportStrategy importStrategy) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
                 facilityStrategy, false), new OperationSearcher(name,
                 argumentTypes));
@@ -29,15 +27,15 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
 
     public OperationQuery(Token qualifier, Token name,
                           List<PTType> argumentTypes) {
-        super(new PossiblyQualifiedPath(qualifier, SymbolTable.ImportStrategy.IMPORT_NAMED,
-                SymbolTable.FacilityStrategy.FACILITY_IGNORE, false),
+        super(new PossiblyQualifiedPath(qualifier, MathSymbolTableBuilder.ImportStrategy.IMPORT_NAMED,
+                MathSymbolTableBuilder.FacilityStrategy.FACILITY_IGNORE, false),
                 new OperationSearcher(name, argumentTypes));
     }
 
     public OperationQuery(Token qualifier, String name,
                           List<PTType> argumentTypes) {
-        super(new PossiblyQualifiedPath(qualifier, SymbolTable.ImportStrategy.IMPORT_NAMED,
-                SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE, false),
+        super(new PossiblyQualifiedPath(qualifier, MathSymbolTableBuilder.ImportStrategy.IMPORT_NAMED,
+                MathSymbolTableBuilder.FacilityStrategy.FACILITY_INSTANTIATE, false),
                 new OperationSearcher(name, argumentTypes));
     }
 

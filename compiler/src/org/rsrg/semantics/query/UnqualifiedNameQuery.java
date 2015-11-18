@@ -1,7 +1,7 @@
 package org.rsrg.semantics.query;
 
-import org.rsrg.semantics.SymbolTable.FacilityStrategy;
-import org.rsrg.semantics.SymbolTable.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
 import org.rsrg.semantics.UnqualifiedPath;
 import org.rsrg.semantics.searchers.NameSearcher;
 import org.rsrg.semantics.symbol.Symbol;

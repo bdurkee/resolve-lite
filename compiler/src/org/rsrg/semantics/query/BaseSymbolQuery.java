@@ -1,9 +1,9 @@
 package org.rsrg.semantics.query;
 
 import org.rsrg.semantics.DuplicateSymbolException;
+import org.rsrg.semantics.MathSymbolTableBuilder;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.ScopeSearchPath;
-import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -24,7 +24,7 @@ public class BaseSymbolQuery<E extends Symbol> implements SymbolQuery<E> {
         this.searcher = searcher;
     }
 
-    @Override public List<E> searchFromContext(Scope source, SymbolTable repo)
+    @Override public List<E> searchFromContext(Scope source, MathSymbolTableBuilder repo)
             throws DuplicateSymbolException {
         return searchPath.searchFromContext(searcher, source, repo);
     }

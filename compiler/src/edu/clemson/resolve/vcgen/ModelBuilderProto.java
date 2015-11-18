@@ -30,14 +30,13 @@ import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;
-    private final SymbolTable symtab;
+    private final MathSymbolTableBuilder symtab;
     private final TypeGraph g;
 
     //TODO: in applyCallRule() in ModelBuilderProto, we should be going through
@@ -72,7 +71,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private OperationSymbol currentProcOpSym = null;
     private boolean withinCallStmt = false;
 
-    public ModelBuilderProto(VCGenerator gen, SymbolTable symtab) {
+    public ModelBuilderProto(VCGenerator gen, MathSymbolTableBuilder symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
         this.g = symtab.getTypeGraph();
@@ -464,7 +463,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     EXPLICIT_CALL_APPLICATION, callExp);
         }
         else {*/
-            symtab.getCompiler().info("APPLYING GENERAL CALL RULE");
+            System.out.println("Applying GENERAL call rule");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     GENERAL_CALL_APPLICATION, callExp);
         //}

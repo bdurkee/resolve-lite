@@ -9,7 +9,7 @@ public interface ScopeSearchPath {
 
     /**
      * Applies the given {@link TableSearcher} to the appropriate {@link Scope}
-     * s, given a source scope and a {@link SymbolTable} containing
+     * s, given a source scope and a {@link MathSymbolTableBuilder} containing
      * any imports, returning a list of matching {@link Symbol}s.
      * <p>
      * If there are no matches, returns an empty list. If more than one match is
@@ -24,7 +24,8 @@ public interface ScopeSearchPath {
      * @return A list of matches.
      */
     public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, SymbolTable repo)
+            TableSearcher<E> searcher, Scope source,
+            MathSymbolTableBuilder repo)
             throws DuplicateSymbolException,
                 UnexpectedSymbolException;
 }

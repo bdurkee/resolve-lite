@@ -2,8 +2,8 @@ package org.rsrg.semantics.query;
 
 import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.PossiblyQualifiedPath;
-import org.rsrg.semantics.SymbolTable.FacilityStrategy;
-import org.rsrg.semantics.SymbolTable.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
 import org.rsrg.semantics.searchers.NameSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 

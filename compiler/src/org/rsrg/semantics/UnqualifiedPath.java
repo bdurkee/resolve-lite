@@ -1,7 +1,7 @@
 package org.rsrg.semantics;
 
-import org.rsrg.semantics.SymbolTable.FacilityStrategy;
-import org.rsrg.semantics.SymbolTable.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.searchers.SymbolTypeSearcher;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -48,7 +48,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     }
 
     @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, SymbolTable repo)
+            TableSearcher<E> searcher, Scope source, MathSymbolTableBuilder repo)
             throws DuplicateSymbolException {
 
         List<E> result = new ArrayList<>();
@@ -62,7 +62,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     }
 
     private <E extends Symbol> boolean searchModule(TableSearcher<E> searcher,
-            Scope source, SymbolTable repo, List<E> results,
+            Scope source, MathSymbolTableBuilder repo, List<E> results,
             Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility,
@@ -121,7 +121,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     public <E extends Symbol> boolean searchFacilities(
             TableSearcher<E> searcher, List<E> result, Scope source,
             Map<String, PTType> genericInstantiations,
-            Set<Scope> searchedScopes, SymbolTable repo)
+            Set<Scope> searchedScopes, MathSymbolTableBuilder repo)
             throws DuplicateSymbolException {
 
         List<FacilitySymbol> facilities =

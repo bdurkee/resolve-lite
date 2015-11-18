@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class SymbolTable {
+public class MathSymbolTableBuilder {
 
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
@@ -142,27 +142,21 @@ public class SymbolTable {
 
     private ModuleScopeBuilder curModuleScope = null;
     private final TypeGraph typeGraph;
-    private final RESOLVECompiler compiler;
 
-    public SymbolTable(RESOLVECompiler rc) {
+    public MathSymbolTableBuilder() {
         this.typeGraph = new TypeGraph();
-        this.compiler = rc;
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
                 new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
                         "GLOBAL");
 
-        HardCoded.addBuiltInSymbols(typeGraph, rc, globalScope);
+        HardCoded.addBuiltInSymbols(typeGraph, globalScope);
         lexicalScopeStack.push(globalScope);
     }
 
     public TypeGraph getTypeGraph() {
         return typeGraph;
-    }
-
-    public RESOLVECompiler getCompiler() {
-        return compiler;
     }
 
     public ModuleScopeBuilder startModuleScope(AnnotatedTree tree) {

@@ -1,8 +1,8 @@
 package org.rsrg.semantics.query;
 
 import org.rsrg.semantics.DuplicateSymbolException;
+import org.rsrg.semantics.MathSymbolTableBuilder;
 import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public interface SymbolQuery<E extends Symbol> {
 
     /**
-     * Given a source {@link Scope Scope} and a {@link SymbolTable} containing
+     * Given a source {@link Scope Scope} and a {@link MathSymbolTableBuilder} containing
      * any imports, from which {@code source} draws, searches them
      * appropriately, returning a list of matching {@link Symbol}s
      * that are subtypes of {@code E}.
@@ -29,6 +29,6 @@ public interface SymbolQuery<E extends Symbol> {
      * 
      * @return A list of matches.
      */
-    public List<E> searchFromContext(Scope source, SymbolTable scopeRepo)
+    public List<E> searchFromContext(Scope source, MathSymbolTableBuilder scopeRepo)
             throws DuplicateSymbolException;
 }

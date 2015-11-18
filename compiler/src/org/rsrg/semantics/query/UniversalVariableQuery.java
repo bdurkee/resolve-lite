@@ -21,13 +21,13 @@ public class UniversalVariableQuery
     private UniversalVariableQuery() {
         myBaseQuery =
                 new BaseSymbolQuery<MathSymbol>(new UnqualifiedPath(
-                        SymbolTable.ImportStrategy.IMPORT_NONE,
-                        SymbolTable.FacilityStrategy.FACILITY_IGNORE, false),
+                        MathSymbolTableBuilder.ImportStrategy.IMPORT_NONE,
+                        MathSymbolTableBuilder.FacilityStrategy.FACILITY_IGNORE, false),
                         new UniversalVariableSearcher());
     }
 
     @Override public List<MathSymbol> searchFromContext(Scope source,
-            SymbolTable repo) {
+            MathSymbolTableBuilder repo) {
 
         List<MathSymbol> result;
         try {

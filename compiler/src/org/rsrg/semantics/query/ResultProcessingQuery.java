@@ -1,8 +1,8 @@
 package org.rsrg.semantics.query;
 
 import org.rsrg.semantics.DuplicateSymbolException;
+import org.rsrg.semantics.MathSymbolTableBuilder;
 import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.SymbolTable;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
         this.mapping = mapping;
     }
 
-    @Override public List<R> searchFromContext(Scope source, SymbolTable repo)
+    @Override public List<R> searchFromContext(Scope source, MathSymbolTableBuilder repo)
             throws DuplicateSymbolException {
         List<R> processedList = baseQuery.searchFromContext(source, repo).stream()
                 .map(mapping::apply)

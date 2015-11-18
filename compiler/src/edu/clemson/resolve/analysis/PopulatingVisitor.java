@@ -101,7 +101,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ProgTypeModelSymbol currentTypeModelSym = null;
 
     private RESOLVECompiler compiler;
-    private SymbolTable symtab;
+    private MathSymbolTableBuilder symtab;
     private AnnotatedTree tr;
     private TypeGraph g;
 
@@ -131,7 +131,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ModuleScopeBuilder moduleScope = null;
 
     public PopulatingVisitor(RESOLVECompiler rc,
-                     SymbolTable symtab, AnnotatedTree annotatedTree) {
+                     MathSymbolTableBuilder symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;
@@ -1072,8 +1072,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
-                            SymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                            SymbolTable.ImportStrategy.IMPORT_NAMED));
+                            MathSymbolTableBuilder.FacilityStrategy.FACILITY_INSTANTIATE,
+                            MathSymbolTableBuilder.ImportStrategy.IMPORT_NAMED));
 
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());

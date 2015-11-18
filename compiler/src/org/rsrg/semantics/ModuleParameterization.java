@@ -1,17 +1,15 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.GenericSymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
 
 import java.util.*;
 
 public class ModuleParameterization {
 
-    private final SymbolTable scopeRepo;
+    private final MathSymbolTableBuilder scopeRepo;
     private final String moduleID;
 
     //private final List<ResolveParser.ModuleArgumentContext> arguments =
@@ -22,7 +20,7 @@ public class ModuleParameterization {
     public ModuleParameterization(String moduleID,
                                   List<ProgTypeSymbol> actualGenerics,
                                   ParserRuleContext TEMP,//Resolve.ModuleArgumentListContext actualArgs,
-                                  FacilitySymbol instantiatingFacility, SymbolTable scopeRepo) {
+                                  FacilitySymbol instantiatingFacility, MathSymbolTableBuilder scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
         this.actualGenerics.addAll(actualGenerics);

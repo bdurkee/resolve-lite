@@ -12,10 +12,10 @@ public class ModelBuilder extends ResolveBaseListener {
             new ParseTreeProperty<>();
     private final ModuleScopeBuilder moduleScope;
     private final JavaCodeGenerator gen;
-    private final SymbolTable symtab;
+    private final MathSymbolTableBuilder symtab;
     private final AnnotatedTree tr;
 
-    public ModelBuilder(JavaCodeGenerator g, SymbolTable symtab) {
+    public ModelBuilder(JavaCodeGenerator g, MathSymbolTableBuilder symtab) {
         this.gen = g;
         this.moduleScope = symtab.moduleScopes.get(g.getModule().getName());
         this.symtab = symtab;

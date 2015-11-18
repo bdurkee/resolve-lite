@@ -15,7 +15,6 @@ import org.rsrg.semantics.ScopeBuilder;
 public class HardCoded {
 
     public static void addBuiltInSymbols(@NotNull TypeGraph g,
-                                         @NotNull RESOLVECompiler rc,
                                          @NotNull ScopeBuilder b) {
         try {
             b.addBinding("El", null, g.MTYPE, g.ELEMENT);
@@ -78,8 +77,8 @@ public class HardCoded {
                     .paramTypes(g.SSET, g.SSET).build());
         }
         catch (DuplicateSymbolException e) {
-            rc.errMgr.semanticError(ErrorKind.DUP_SYMBOL, null,
-                    e.getExistingSymbol());
+            throw new IllegalStateException("hardcoded symbol with a " +
+                    "duplicate name: " + e.getExistingSymbol().getName());
         }
     }
 

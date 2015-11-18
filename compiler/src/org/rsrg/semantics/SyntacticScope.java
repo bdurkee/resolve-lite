@@ -6,9 +6,7 @@ import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
-import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
@@ -17,13 +15,13 @@ import java.util.stream.Collectors;
 public abstract class SyntacticScope extends AbstractScope {
 
     protected final Map<String, Symbol> symbols;
-    private final SymbolTable symtab;
+    private final MathSymbolTableBuilder symtab;
 
     protected ParserRuleContext definingTree;
     protected Scope parent;
     protected final String moduleID;
 
-    SyntacticScope(SymbolTable scopeRepo, ParserRuleContext definingTree,
+    SyntacticScope(MathSymbolTableBuilder scopeRepo, ParserRuleContext definingTree,
                    Scope parent, String moduleID,
                    Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
@@ -45,13 +43,15 @@ public abstract class SyntacticScope extends AbstractScope {
         if ( symbols.containsKey(s.getName()) ) {
             throw new DuplicateSymbolException(symbols.get(s.getName()));
         }
-        if ( s.getName().equals(moduleID) ) {
+        //TODO: bubble me over to the populator so I can be nicely printed.
+        /*if ( s.getName().equals(moduleID) ) {
+
             symtab.getCompiler().errMgr.semanticError(
                     ErrorKind.SYMBOL_NAME_MATCHES_MODULE_NAME,
                     s.getDefiningTree().getStart(), s.toString(),
                     s.getSymbolDescription());
             return s;
-        }
+        }*/
         symbols.put(s.getName(), s);
         return s;
     }

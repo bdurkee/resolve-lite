@@ -2,7 +2,7 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.ErrorKind;
 import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.SymbolTable.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
@@ -24,7 +24,7 @@ public class QualifiedPath implements ScopeSearchPath {
     }
 
     @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, SymbolTable repo)
+            TableSearcher<E> searcher, Scope source, MathSymbolTableBuilder repo)
             throws DuplicateSymbolException {
         List<E> result = new ArrayList<>();
         try {
@@ -48,8 +48,8 @@ public class QualifiedPath implements ScopeSearchPath {
             ModuleScopeBuilder moduleScope = repo.moduleScopes.get(
                     qualifier.getText());
             if (moduleScope == null) {
-                repo.getCompiler().errMgr.semanticError(
-                        ErrorKind.NO_SUCH_MODULE, qualifier, qualifier.getText());
+                /*repo.getCompiler().errMgr.semanticError(
+                        ErrorKind.NO_SUCH_MODULE, qualifier, qualifier.getText());*/
                 return result;
             }
             result =
