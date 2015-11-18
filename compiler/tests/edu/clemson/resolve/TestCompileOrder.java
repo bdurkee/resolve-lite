@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCompileOrder extends BaseTest {
 
-  /*  @Test public void testBasicLinearOrdering() throws Exception {
+    @Test public void testBasicLinearOrdering() throws Exception {
         String[] modules = new String[] {
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n uses V;\n end U;",
@@ -56,9 +56,8 @@ public class TestCompileOrder extends BaseTest {
     //Todo: When facilities, enhancements, and other constructs are
     //are eventually added, we're going to want to test compilation ordering
     //on the things they implicitly import.
-
     private void testOrdering(String expected, String root) {
         ErrorQueue e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
         assertEquals(expected, e.toInfoString());
-    }*/
+    }
 }
