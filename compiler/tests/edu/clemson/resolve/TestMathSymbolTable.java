@@ -6,10 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Assert;
 import org.junit.Test;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.ModuleScopeBuilder;
-import org.rsrg.semantics.NoSuchModuleException;
-import org.rsrg.semantics.NoSuchSymbolException;
+import org.rsrg.semantics.*;
 
 public class TestMathSymbolTable extends BaseTest {
 
@@ -40,6 +37,44 @@ public class TestMathSymbolTable extends BaseTest {
 
         ModuleScopeBuilder s = b.getModuleScope("Foo");
         Assert.assertTrue(s.getDefiningTree() == m.getRoot());
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testScopeGetInnermostBinding1()
+            throws IllegalStateException {
+
+        MathSymbolTable b = new MathSymbolTable();
+
+        ParseTree dummyModuleCtx =
+                parseModuleFromString("Precis Foo;\n end Foo;");
+        AnnotatedTree m = new AnnotatedTree(dummyModuleCtx, "Foo");
+
+        b.startModuleScope(m);
+        b.endScope();
+
+        ModuleScopeBuilder s = b.getModuleScope("Foo");
+        b.getInnermostActiveScope();
+    }
+
+    @Test public void testScopeGetInnermostBinding2()
+            throws NoSuchSymbolException, DuplicateSymbolException,
+            NoSuchModuleException {
+
+        MathSymbolTable b = new MathSymbolTable();
+
+        MathModuleDec m = new MathModuleDec(myPosSymbol1, null, null, null);
+        ScopeBuilder s = b.startModuleScope(m);
+        s.addBinding("E", myConceptualElement1, myType1);
+        b.endScope();
+
+        MathSymbolTable t = b.seal();
+
+        ModuleScope ms = t.getModuleScope(new ModuleIdentifier("x"));
+        MathSymbolTableEntry e = ms.getInnermostBinding("E");
+
+        assertEquals(e.getDefiningElement(), myConceptualElement1);
+        assertEquals(e.getName(), "E");
+        assertEquals(e.getType(), myType1);
     }
 
 }
