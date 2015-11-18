@@ -1,7 +1,7 @@
 package org.rsrg.semantics;
 
-import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
-import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.searchers.SymbolTypeSearcher;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -48,7 +48,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     }
 
     @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTableBuilder repo)
+            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
             throws DuplicateSymbolException {
 
         List<E> result = new ArrayList<>();
@@ -62,7 +62,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     }
 
     private <E extends Symbol> boolean searchModule(TableSearcher<E> searcher,
-            Scope source, MathSymbolTableBuilder repo, List<E> results,
+            Scope source, MathSymbolTable repo, List<E> results,
             Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility,
@@ -93,26 +93,20 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 && importStrategy != ImportStrategy.IMPORT_NONE ) {
 
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;
-            try {
-                ModuleScopeBuilder module =
-                        repo.getModuleScope(sourceAsSyntacticScope
-                                .getModuleID());
-                List<String> imports = module.getImports();
+            ModuleScopeBuilder module =
+                    repo.getModuleScope(sourceAsSyntacticScope
+                            .getModuleID());
+            List<String> imports = module.getImports();
 
-                for (String s : module.getImports()) {
-                    finished =
-                            searchModule(searcher, repo.getModuleScope(s),
-                                    repo, results, searchedScopes,
-                                    genericInstantiations,
-                                    instantiatingFacility,
-                                    importStrategy.cascadingStrategy(),
-                                    depth + 1);
-                    if ( finished ) break;
-                }
-            }
-            catch (NoSuchSymbolException nsse) {
-                //This shouldn't be possible--we'd've caught it by now
-                throw new RuntimeException(nsse);
+            for (String s : module.getImports()) {
+                finished =
+                        searchModule(searcher, repo.getModuleScope(s),
+                                repo, results, searchedScopes,
+                                genericInstantiations,
+                                instantiatingFacility,
+                                importStrategy.cascadingStrategy(),
+                                depth + 1);
+                if ( finished ) break;
             }
         }
         return finished;
@@ -121,7 +115,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     public <E extends Symbol> boolean searchFacilities(
             TableSearcher<E> searcher, List<E> result, Scope source,
             Map<String, PTType> genericInstantiations,
-            Set<Scope> searchedScopes, MathSymbolTableBuilder repo)
+            Set<Scope> searchedScopes, MathSymbolTable repo)
             throws DuplicateSymbolException {
 
         List<FacilitySymbol> facilities =

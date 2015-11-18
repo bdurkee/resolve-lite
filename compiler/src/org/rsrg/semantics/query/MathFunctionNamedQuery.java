@@ -2,10 +2,10 @@ package org.rsrg.semantics.query;
 
 import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.MathSymbolTableBuilder;
+import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
-import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.symbol.MathSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -26,7 +26,7 @@ public class MathFunctionNamedQuery
     }
 
     @Override public List<MathSymbol> searchFromContext(Scope source,
-                                                   MathSymbolTableBuilder repo) {
+                                                   MathSymbolTable repo) {
         List<Symbol> intermediateList;
         try {
             intermediateList = nameQuery.searchFromContext(source, repo);

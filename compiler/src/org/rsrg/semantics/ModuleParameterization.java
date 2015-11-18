@@ -9,7 +9,7 @@ import java.util.*;
 
 public class ModuleParameterization {
 
-    private final MathSymbolTableBuilder scopeRepo;
+    private final MathSymbolTable scopeRepo;
     private final String moduleID;
 
     //private final List<ResolveParser.ModuleArgumentContext> arguments =
@@ -20,7 +20,7 @@ public class ModuleParameterization {
     public ModuleParameterization(String moduleID,
                                   List<ProgTypeSymbol> actualGenerics,
                                   ParserRuleContext TEMP,//Resolve.ModuleArgumentListContext actualArgs,
-                                  FacilitySymbol instantiatingFacility, MathSymbolTableBuilder scopeRepo) {
+                                  FacilitySymbol instantiatingFacility, MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
         this.actualGenerics.addAll(actualGenerics);
@@ -33,23 +33,17 @@ public class ModuleParameterization {
 
     public Scope getScope(boolean instantiated) {
         Scope result;
-        try {
-            ModuleScopeBuilder originalScope =
-                    scopeRepo.getModuleScope(moduleID);
-            result = originalScope;
-            if ( instantiated ) {
-                Map<String, PTType> genericInstantiations;
+        ModuleScopeBuilder originalScope =
+                scopeRepo.getModuleScope(moduleID);
+        result = originalScope;
+        if ( instantiated ) {
+            Map<String, PTType> genericInstantiations;
 
-               // genericInstantiations =
-               //         getGenericInstantiations(originalScope, null);
-                //result =
-               //         new InstantiatedScope(originalScope,
-                //                genericInstantiations, instantiatingFacility);
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Shouldn't be possible--we'd have caught it by now
-            throw new RuntimeException(nsse);
+           // genericInstantiations =
+           //         getGenericInstantiations(originalScope, null);
+            //result =
+           //         new InstantiatedScope(originalScope,
+            //                genericInstantiations, instantiatingFacility);
         }
         return result;
     }

@@ -3,17 +3,21 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.compiler.AnnotatedTree;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class MathSymbolTableBuilder {
+public class MathSymbolTable {
 
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
@@ -135,15 +139,15 @@ public class MathSymbolTableBuilder {
     }
 
     private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
-    public final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
+    private final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
 
-    public final ParseTreeProperty<ScopeBuilder> scopes =
+    private final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
 
     private ModuleScopeBuilder curModuleScope = null;
     private final TypeGraph typeGraph;
 
-    public MathSymbolTableBuilder() {
+    public MathSymbolTable() {
         this.typeGraph = new TypeGraph();
 
         //The only things in global scope are built-in things
@@ -224,9 +228,24 @@ public class MathSymbolTableBuilder {
         scopes.put(s.getDefiningTree(), s);
     }
 
-    public ModuleScopeBuilder getModuleScope(String name)
-            throws NoSuchSymbolException {
-        ModuleScopeBuilder module = moduleScopes.get(name);
+    public ScopeBuilder getScope(ParserRuleContext e) {
+        if (scopes.get(e) == null) {
+            throw new IllegalArgumentException("no such scope: " + e.getText());
+        }
+        return scopes.get(e);
+    }
+
+    public ModuleScopeBuilder getModuleScope(@NotNull String name)
+            throws NoSuchModuleException {
+        return getModuleScope(new CommonToken(ResolveLexer.ID, name));
+    }
+
+    public ModuleScopeBuilder getModuleScope(@NotNull Token name)
+            throws NoSuchModuleException {
+        ModuleScopeBuilder module = moduleScopes.get(name.getText());
+        if (module == null) {
+            throw new NoSuchModuleException(name);
+        }
         return module;
     }
 }

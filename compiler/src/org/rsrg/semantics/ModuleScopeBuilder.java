@@ -9,7 +9,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     private final List<String> importedModules = new LinkedList<>();
 
     ModuleScopeBuilder(TypeGraph g, String name, ParserRuleContext definingTree,
-                       Scope parent, MathSymbolTableBuilder symbolTable) {
+                       Scope parent, MathSymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, name);
     }
 

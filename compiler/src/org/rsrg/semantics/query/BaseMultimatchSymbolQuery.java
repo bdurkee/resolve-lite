@@ -1,9 +1,9 @@
 package org.rsrg.semantics.query;
 
 import org.rsrg.semantics.DuplicateSymbolException;
+import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.ScopeSearchPath;
-import org.rsrg.semantics.MathSymbolTableBuilder;
 import org.rsrg.semantics.searchers.MultimatchTableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -29,7 +29,7 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
      * will not throw a {@link DuplicateSymbolException}.
      * Otherwise, behaves identically.
      */
-    @Override public List<E> searchFromContext(Scope source, MathSymbolTableBuilder repo) {
+    @Override public List<E> searchFromContext(Scope source, MathSymbolTable repo) {
         List<E> result;
         try {
             result = super.searchFromContext(source, repo);

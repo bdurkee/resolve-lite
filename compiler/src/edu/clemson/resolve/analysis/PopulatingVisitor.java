@@ -101,7 +101,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ProgTypeModelSymbol currentTypeModelSym = null;
 
     private RESOLVECompiler compiler;
-    private MathSymbolTableBuilder symtab;
+    private MathSymbolTable symtab;
     private AnnotatedTree tr;
     private TypeGraph g;
 
@@ -131,7 +131,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ModuleScopeBuilder moduleScope = null;
 
     public PopulatingVisitor(RESOLVECompiler rc,
-                     MathSymbolTableBuilder symtab, AnnotatedTree annotatedTree) {
+                     MathSymbolTable symtab, AnnotatedTree annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;
@@ -150,17 +150,29 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitExtensionModule(
             ResolveParser.ExtensionModuleContext ctx) {
-        List<String> implicitImports =
-                symtab.moduleScopes.get(ctx.concept.getText()).getImports();
-        moduleScope.addImports(implicitImports);
+        try {
+            List<String> implicitImports =
+                    symtab.getModuleScope(ctx.concept).getImports();
+            moduleScope.addImports(implicitImports);
+        }
+        catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    ctx.concept);
+        }
         this.visitChildren(ctx);
         return null;
     }
 
     @Override public Void visitExtensionImplModule(
             ResolveParser.ExtensionImplModuleContext ctx) {
-        moduleScope.addImports(symtab.moduleScopes.get(
-                ctx.enhancement.getText()).getImports());
+        try {
+            moduleScope.addImports(symtab.getModuleScope(ctx.enhancement)
+                    .getImports());
+        }
+        catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    ctx.enhancement);
+        }
         this.visitChildren(ctx);
         return null;
     }
@@ -353,7 +365,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                  ParserRuleContext ctx) {
          try {
              List<ProgParameterSymbol> params =
-                     symtab.scopes.get(ctx).getSymbolsOfType(
+                     symtab.getScope(ctx).getSymbolsOfType(
                              ProgParameterSymbol.class);
              PTType returnType;
              if ( type == null ) {
@@ -1072,8 +1084,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
-                            MathSymbolTableBuilder.FacilityStrategy.FACILITY_INSTANTIATE,
-                            MathSymbolTableBuilder.ImportStrategy.IMPORT_NAMED));
+                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED));
 
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathTypes.put(ctx, opSym.getReturnType().toMath());

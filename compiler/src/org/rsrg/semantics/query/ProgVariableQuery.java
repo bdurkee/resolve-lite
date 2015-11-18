@@ -1,7 +1,7 @@
 package org.rsrg.semantics.query;
 
 import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.MathSymbolTableBuilder;
+import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.PossiblyQualifiedPath;
 import org.rsrg.semantics.searchers.NameSearcher;
 import org.rsrg.semantics.symbol.ProgVariableSymbol;
@@ -20,8 +20,8 @@ public class ProgVariableQuery
 
     public ProgVariableQuery(Token qualifier, String name) {
         super(new BaseSymbolQuery<Symbol>(new PossiblyQualifiedPath(
-                        qualifier, MathSymbolTableBuilder.ImportStrategy.IMPORT_NAMED,
-                        MathSymbolTableBuilder.FacilityStrategy.FACILITY_IGNORE, true),
+                        qualifier, MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true),
                         new NameSearcher(name, true)),
                 Symbol::toProgVariableSymbol);
     }

@@ -1,8 +1,8 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.MathSymbolTableBuilder.FacilityStrategy;
-import org.rsrg.semantics.MathSymbolTableBuilder.ImportStrategy;
+import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -26,7 +26,7 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     }
 
     @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTableBuilder repo)
+            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
             throws DuplicateSymbolException {
         return actualSearchPath.searchFromContext(searcher, source, repo);
     }

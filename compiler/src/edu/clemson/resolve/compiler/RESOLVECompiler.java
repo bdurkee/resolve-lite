@@ -46,7 +46,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.rsrg.semantics.MathSymbolTableBuilder;
+import org.rsrg.semantics.MathSymbolTable;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -115,8 +115,8 @@ public  class RESOLVECompiler {
      * instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
-    public final MathSymbolTableBuilder symbolTable =
-            new MathSymbolTableBuilder();
+    public final MathSymbolTable symbolTable =
+            new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();

@@ -3,7 +3,7 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.rsrg.semantics.MathSymbolTableBuilder;
+import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.ModuleParameterization;
 import org.rsrg.semantics.SpecImplementationPairing;
 import org.rsrg.semantics.programtype.PTType;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class FacilitySymbol extends Symbol {
 
     private  SpecImplementationPairing type;
-    private MathSymbolTableBuilder scopeRepo;
+    private MathSymbolTable scopeRepo;
 
     private  ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
 
@@ -31,7 +31,7 @@ public class FacilitySymbol extends Symbol {
     public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
             String moduleID,
             ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
-            MathSymbolTableBuilder scopeRepo) {
+            MathSymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleID);
         this.scopeRepo = scopeRepo;
         this.genericsPerFacility = actualGenerics;

@@ -1,6 +1,5 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.compiler.ErrorKind;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
@@ -15,13 +14,13 @@ import java.util.stream.Collectors;
 public abstract class SyntacticScope extends AbstractScope {
 
     protected final Map<String, Symbol> symbols;
-    private final MathSymbolTableBuilder symtab;
+    private final MathSymbolTable symtab;
 
     protected ParserRuleContext definingTree;
     protected Scope parent;
     protected final String moduleID;
 
-    SyntacticScope(MathSymbolTableBuilder scopeRepo, ParserRuleContext definingTree,
+    SyntacticScope(MathSymbolTable scopeRepo, ParserRuleContext definingTree,
                    Scope parent, String moduleID,
                    Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;

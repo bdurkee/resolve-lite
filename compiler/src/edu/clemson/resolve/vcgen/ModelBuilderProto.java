@@ -36,7 +36,7 @@ import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrat
 
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedTree tr;
-    private final MathSymbolTableBuilder symtab;
+    private final MathSymbolTable symtab;
     private final TypeGraph g;
 
     //TODO: in applyCallRule() in ModelBuilderProto, we should be going through
@@ -70,11 +70,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private OperationSymbol currentProcOpSym = null;
     private boolean withinCallStmt = false;
+    private final VCGenerator gen;
 
-    public ModelBuilderProto(VCGenerator gen, MathSymbolTableBuilder symtab) {
+    public ModelBuilderProto(VCGenerator gen, MathSymbolTable symtab) {
         this.symtab = symtab;
         this.tr = gen.getModule();
         this.g = symtab.getTypeGraph();
+        this.gen = gen;
     }
 
     public VCOutputFile getOutputFile() {
@@ -82,7 +84,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void enterModule(ResolveParser.ModuleContext ctx) {
-        moduleScope = symtab.moduleScopes.get(Utils.getModuleName(ctx));
+        try {
+            moduleScope = symtab.getModuleScope(tr.getName());
+        }
+        catch (NoSuchModuleException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override public void enterFacilityDecl(
@@ -96,9 +103,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-
-        ModuleScopeBuilder spec = symtab.moduleScopes.get(ctx.spec.getText());
-        ModuleScopeBuilder impl = symtab.moduleScopes.get(ctx.impl.getText());
+        ModuleScopeBuilder spec = null, impl = null;
+        try {
+            spec = symtab.getModuleScope(ctx.spec.getText());
+            impl = symtab.getModuleScope(ctx.impl.getText());
+        }
+        catch (NoSuchModuleException nsme) {
+            return; //shouldn't happen...
+        }
         List<PExp> specArgs = ctx.specArgs.moduleArgument().stream()
                 .map(tr.mathPExps::get).collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(specArgs);
@@ -182,7 +194,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
-        Scope s = symtab.scopes.get(ctx);
+        Scope s = symtab.getScope(ctx);
         currentTypeReprSym = null;
         try {
             currentTypeReprSym =
@@ -222,8 +234,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
             modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
         }
         for (String moduleName : modulesToSearch) {
-            result.addAll(symtab.moduleScopes.get(moduleName)
-                            .getSymbolsOfType(ProgParameterSymbol.class));
+            try {
+                result.addAll(symtab.getModuleScope(moduleName)
+                                .getSymbolsOfType(ProgParameterSymbol.class));
+            } catch (NoSuchModuleException e) {
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -294,7 +310,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
-        Scope s = symtab.scopes.get(ctx);
+        Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
 
@@ -320,7 +336,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
-        Scope s = symtab.scopes.get(ctx);
+        Scope s = symtab.getScope(ctx);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
@@ -339,15 +355,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
-        Scope s = symtab.scopes.get(ctx);
+        Scope s = symtab.getScope(ctx);
         try {
             List<ProgParameterSymbol> paramSyms =
                     s.getSymbolsOfType(ProgParameterSymbol.class);
+
             currentProcOpSym = s.queryForOne(
                     new OperationQuery(null, ctx.name,
                             paramSyms.stream()
                                     .map(ProgParameterSymbol::getDeclaredType)
                                     .collect(Collectors.toList())));
+
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
                     paramSyms, ctx, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
@@ -364,14 +382,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .remember();
             assertiveBlocks.push(block);
         }
-        catch (DuplicateSymbolException|NoSuchSymbolException e) {
-            e.printStackTrace();    //shouldn't happen, we wouldn't be in vcgen if it did
+        catch (DuplicateSymbolException|NoSuchSymbolException|
+                NoSuchModuleException e) {
+            e.printStackTrace();    //none of these should happen, we wouldn't
+            // be in vcgen if one or more did
         }
     }
 
     @Override public void exitProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
-        Scope scope = symtab.scopes.get(ctx);
+        Scope scope = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
                 scope.getSymbolsOfType(ProgParameterSymbol.class);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();

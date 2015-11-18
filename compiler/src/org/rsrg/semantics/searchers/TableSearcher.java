@@ -1,14 +1,14 @@
 package org.rsrg.semantics.searchers;
 
 import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.MathSymbolTableBuilder;
+import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * A {@code TableSearcher} is a strategy for searching a {@link MathSymbolTableBuilder},
+ * A {@code TableSearcher} is a strategy for searching a {@link MathSymbolTable},
  * adding any {@link Symbol}s that match the search to an accumulator.
  * 
  * @param <E> Permits concrete implementations of this interface to refine the
