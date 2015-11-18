@@ -35,7 +35,7 @@ public class ParsimoniousAssumeApplicationStrategy
             for (PExp assume : assumesToSymbols.keySet()) {
                 assumesToSymbols.get(assume).retainAll(curIntersection);
                 if (!curIntersection.isEmpty()) {
-                    
+
                 }
             }
         }
