@@ -19,7 +19,7 @@ public interface Scope {
 
     public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
             throws NoSuchSymbolException,
-            DuplicateSymbolException;
+            DuplicateSymbolException, NoSuchModuleException;
 
     public <E extends Symbol> boolean addMatches(TableSearcher<E> searcher,
                          List<E> matches, Set<Scope> searchedScopes,
