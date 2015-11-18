@@ -48,6 +48,15 @@ public class AnnotatedTree {
     @NotNull private final ParseTree root;
     public boolean hasErrors;
 
+    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name) {
+        this(root, name, "", false);
+    }
+
+    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
+                          @NotNull String fileName) {
+        this(root, name, fileName, false);
+    }
+
     public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
                          @NotNull String fileName, boolean hasErrors) {
         this.hasErrors = hasErrors;
