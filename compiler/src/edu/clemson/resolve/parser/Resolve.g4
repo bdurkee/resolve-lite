@@ -65,31 +65,33 @@ mathTheoremDecl
     :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
     ;
 
-//The '(COMMA ID)?' is reserved for the variable we're inducting over
-//in the context of an inductive defn
 mathDefinitionSig
+    :   mathPrefixDefinitionSig
+    |   mathInfixDefinitionSig
+    ;
+
+mathInfixDefinitionSig
+    :   LPAREN mathVariableDecl RPAREN mathSymbolExp
+        LPAREN mathVariableDecl RPAREN COLON mathTypeExp
+    ;
+
+mathPrefixDefinitionSig
     :   name=mathSymbolName (LPAREN
-            mathDefinitionParameter (COMMA mathDefinitionParameter)* RPAREN)?
-            COLON mathTypeExp
+                mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN)?
+                COLON mathTypeExp
     ;
 
 mathSymbolName
-    :   ID
-    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
+    :   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
     |   BAR TRIPLEDOT BAR
     |   LT TRIPLEDOT GT
     |   DBL_BAR TRIPLEDOT DBL_BAR
     |   LDIVIDE TRIPLEDOT DIVIDE
     ;
 
-mathDefinitionParameter
-    :   mathVariableDeclGroup
-    |   ID
-    ;
-
 mathCategoricalDefinitionDecl
     :   CATEGORICAL DEFINITION FOR
-        mathDefinitionSig (COMMA mathDefinitionSig)+
+        mathPrefixDefinitionSig (COMMA mathPrefixDefinitionSig)+
         IS mathAssertionExp SEMI
     ;
 
@@ -107,6 +109,8 @@ mathInductiveDefinitionDecl
         BASE_CASE mathAssertionExp SEMI
         INDUCTIVE_CASE mathAssertionExp SEMI
     ;
+
+
 
 mathVariableDeclGroup
     :   ID (COMMA ID)* COLON mathTypeExp
