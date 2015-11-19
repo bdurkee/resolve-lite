@@ -1,6 +1,6 @@
 package edu.clemson.resolve.analysis;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveBaseListener;
@@ -19,9 +19,9 @@ import org.rsrg.semantics.programtype.PTType;
 public class SanityCheckingListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
-    private final AnnotatedTree tr;
+    private final AnnotatedModule tr;
 
-    public SanityCheckingListener(RESOLVECompiler rc, AnnotatedTree tr) {
+    public SanityCheckingListener(RESOLVECompiler rc, AnnotatedModule tr) {
         this.compiler = rc;
         this.tr = tr;
     }

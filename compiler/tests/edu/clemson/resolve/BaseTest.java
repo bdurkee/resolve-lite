@@ -325,24 +325,6 @@ public abstract class BaseTest {
         }
     }
 
-    protected ParserRuleContext parseModuleFromString(String moduleString) {
-        try {
-            ANTLRInputStream in = new ANTLRInputStream(new StringReader(moduleString));
-            ResolveLexer lexer = new ResolveLexer(in);
-            TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
-
-            if ( parser.getNumberOfSyntaxErrors() > 0 ) {
-                throw new IllegalArgumentException("moduleString contains " +
-                        "syntax errors");
-            }
-            return parser.module();
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected void mkdir(String dir) {
         File f = new File(dir);
         f.mkdirs();

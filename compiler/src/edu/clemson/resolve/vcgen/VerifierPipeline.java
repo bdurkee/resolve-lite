@@ -1,7 +1,7 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.stringtemplate.v4.ST;
@@ -11,12 +11,12 @@ import java.util.List;
 public class VerifierPipeline extends AbstractCompilationPipeline {
 
     public VerifierPipeline(RESOLVECompiler rc,
-                            List<AnnotatedTree> compilationUnits) {
+                            List<AnnotatedModule> compilationUnits) {
         super(rc, compilationUnits);
     }
 
     @Override public void process() {
-        for (AnnotatedTree unit : compilationUnits) {
+        for (AnnotatedModule unit : compilationUnits) {
             if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
                 if (unit.getRoot().getChild(0) instanceof
                         ResolveParser.PrecisModuleContext) continue;

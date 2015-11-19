@@ -1,10 +1,8 @@
 package org.rsrg.semantics;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -163,8 +161,13 @@ public class MathSymbolTable {
         return typeGraph;
     }
 
-    public ModuleScopeBuilder startModuleScope(AnnotatedTree tree) {
+    public ModuleScopeBuilder startModuleScope(AnnotatedModule tree) {
+
+        if (tree == null) {
+            throw new IllegalArgumentException("tree may not be null");
+        }
         ParseTree contextTree = tree.getRoot();
+
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }

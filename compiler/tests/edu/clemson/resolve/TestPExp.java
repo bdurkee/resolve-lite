@@ -1,6 +1,6 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
@@ -469,7 +469,7 @@ public class TestPExp extends BaseTest {
     @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
-        AnnotatedTree dummy = new AnnotatedTree(t, "T", "T.resolve", false);
+        AnnotatedModule dummy = new AnnotatedModule(t, "T", "T.resolve", false);
         PExpBuildingListener<PExp> l =
                 new PExpBuildingListener<>(dummy, g.INVALID, true); //dummyType
         ParseTreeWalker.DEFAULT.walk(l, t);

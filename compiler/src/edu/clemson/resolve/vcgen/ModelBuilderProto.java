@@ -1,6 +1,6 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
-    private final AnnotatedTree tr;
+    private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
     private final TypeGraph g;
 

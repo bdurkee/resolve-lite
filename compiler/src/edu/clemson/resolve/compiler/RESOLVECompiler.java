@@ -242,7 +242,7 @@ public  class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
-        List<AnnotatedTree> targets = sortTargetModulesByUsesReferences();
+        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
@@ -256,10 +256,10 @@ public  class RESOLVECompiler {
         vcsPipe.process();
     }
 
-    public List<AnnotatedTree> sortTargetModulesByUsesReferences() {
-        Map<String, AnnotatedTree> roots = new HashMap<>();
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
+        Map<String, AnnotatedModule> roots = new HashMap<>();
         for (String fileName : targetFiles) {
-            AnnotatedTree t = parseModule(fileName);
+            AnnotatedModule t = parseModule(fileName);
             if ( t == null || t.hasErrors ) {
                 continue;
             }
@@ -268,13 +268,13 @@ public  class RESOLVECompiler {
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
 
-        for (AnnotatedTree t : Collections.unmodifiableCollection(roots.values())) {
+        for (AnnotatedModule t : Collections.unmodifiableCollection(roots.values())) {
             g.addVertex(t.getName());
             findDependencies(g, t, roots);
         }
-        List<AnnotatedTree> finalOrdering = new ArrayList<>();
+        List<AnnotatedModule> finalOrdering = new ArrayList<>();
         for (String s : getCompileOrder(g)) {
-            AnnotatedTree m = roots.get(s);
+            AnnotatedModule m = roots.get(s);
             if ( m.hasErrors ) {
                 finalOrdering.clear();
                 break;
@@ -285,10 +285,10 @@ public  class RESOLVECompiler {
     }
 
     private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
-                                  AnnotatedTree root,
-                                  Map<String, AnnotatedTree> roots) {
-        for (AnnotatedTree.UsesRef importRequest : root.uses) {
-            AnnotatedTree module = roots.get(importRequest.name);
+                                  AnnotatedModule root,
+                                  Map<String, AnnotatedModule> roots) {
+        for (AnnotatedModule.UsesRef importRequest : root.uses) {
+            AnnotatedModule module = roots.get(importRequest.name);
             try {
                 File file = findResolveFile(importRequest.name, NATIVE_EXTENSION);
                 if ( module == null ) {
@@ -366,7 +366,7 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    private AnnotatedTree parseModule(String fileName) {
+    private AnnotatedModule parseModule(String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
@@ -381,7 +381,7 @@ public  class RESOLVECompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.module();
-            return new AnnotatedTree(start, Utils.getModuleName(start),
+            return new AnnotatedModule(start, Utils.getModuleName(start),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);
         }

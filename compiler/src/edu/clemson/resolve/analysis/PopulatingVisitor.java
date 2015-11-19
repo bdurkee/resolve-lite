@@ -30,7 +30,7 @@
  */
 package edu.clemson.resolve.analysis;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
@@ -102,7 +102,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private RESOLVECompiler compiler;
     private MathSymbolTable symtab;
-    private AnnotatedTree tr;
+    private AnnotatedModule tr;
     private TypeGraph g;
 
     boolean walkingFunctionReferenceInApplication = false;
@@ -131,7 +131,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ModuleScopeBuilder moduleScope = null;
 
     public PopulatingVisitor(RESOLVECompiler rc,
-                     MathSymbolTable symtab, AnnotatedTree annotatedTree) {
+                     MathSymbolTable symtab, AnnotatedModule annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
         this.compiler = rc;
         this.symtab = symtab;

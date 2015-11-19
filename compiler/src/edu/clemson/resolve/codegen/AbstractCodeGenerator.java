@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.OutputModelObject;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
@@ -15,12 +15,12 @@ public abstract class AbstractCodeGenerator {
             "edu/clemson/resolve/templates/codegen";
 
     @NotNull protected final RESOLVECompiler compiler;
-    @NotNull protected final AnnotatedTree module;
+    @NotNull protected final AnnotatedModule module;
     @NotNull private final STGroup templates;
     @NotNull private final String language;
 
     public AbstractCodeGenerator(@NotNull RESOLVECompiler rc,
-                                 @NotNull AnnotatedTree module,
+                                 @NotNull AnnotatedModule module,
                                  @NotNull String language) {
         this.compiler = rc;
         this.module = module;
@@ -28,7 +28,7 @@ public abstract class AbstractCodeGenerator {
         this.templates = loadTemplates();
     }
 
-    @NotNull public AnnotatedTree getModule() {
+    @NotNull public AnnotatedModule getModule() {
         return module;
     }
 

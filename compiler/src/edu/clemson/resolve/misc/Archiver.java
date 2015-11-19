@@ -1,20 +1,5 @@
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.codegen.CodeGenPipeline;
-import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
-
-import javax.tools.*;
-import java.io.*;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
 public class Archiver {

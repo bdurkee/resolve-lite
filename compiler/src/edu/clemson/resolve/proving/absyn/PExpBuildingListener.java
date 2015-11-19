@@ -1,6 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -39,29 +39,29 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     /**
      * Constructs a new {@code PExpBuildingListener} given an
-     * {@link AnnotatedTree} with it's associated type and expression bindings.
+     * {@link AnnotatedModule} with it's associated type and expression bindings.
      *
      * @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull AnnotatedTree annotations) {
+    public PExpBuildingListener(@NotNull AnnotatedModule annotations) {
         this(annotations, null);
     }
 
-    public PExpBuildingListener(@NotNull AnnotatedTree annotations,
+    public PExpBuildingListener(@NotNull AnnotatedModule annotations,
                                 @Nullable MTInvalid dummyType) {
         this(annotations, dummyType, false);
     }
 
     /**
      * Constructs a new {@code PExpBuildingListener} given both an
-     * {@link AnnotatedTree} and a (possibly-null) dummy type to be used in the
+     * {@link AnnotatedModule} and a (possibly-null) dummy type to be used in the
      * case where a 'real' math type is missing from {@code annotations}.
      *
      * @param annotations annotations to be used for constructing expressions
      * @param dummyType an {@link MTInvalid} to be used in place of
      * missing types
      */
-    public PExpBuildingListener(@NotNull AnnotatedTree annotations,
+    public PExpBuildingListener(@NotNull AnnotatedModule annotations,
                                 @Nullable MTInvalid dummyType,
                                 boolean skipDummyQuantifiedNodes) {
         this.types = annotations.mathTypes;

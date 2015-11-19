@@ -19,11 +19,12 @@ import java.util.Set;
 
 /**
  * Represents a collection of information to be associated with a top level
- * {@link edu.clemson.resolve.parser.ResolveParser.ModuleContext}. We use this
- * approach over {@code returns} clauses in the grammar to help us keep our
- * grammar as general as possible.
+ * {@link edu.clemson.resolve.parser.ResolveParser.ModuleContext}.
+ *
+ * <p>We use this approach over {@code returns} clauses in the grammar to help
+ * us keep our grammar as general as possible.</p>
  */
-public class AnnotatedTree {
+public class AnnotatedModule {
 
     public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
@@ -48,17 +49,17 @@ public class AnnotatedTree {
     @NotNull private final ParseTree root;
     public boolean hasErrors;
 
-    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name) {
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull String name) {
         this(root, name, "", false);
     }
 
-    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-                          @NotNull String fileName) {
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull String name,
+                           @NotNull String fileName) {
         this(root, name, fileName, false);
     }
 
-    public AnnotatedTree(@NotNull ParseTree root, @NotNull String name,
-                         @NotNull String fileName, boolean hasErrors) {
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull String name,
+                           @NotNull String fileName, boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
@@ -93,9 +94,9 @@ public class AnnotatedTree {
     }
 
     @Override public boolean equals(Object o) {
-        boolean result = (o instanceof AnnotatedTree);
+        boolean result = (o instanceof AnnotatedModule);
         if ( result ) {
-            result = this.name.equals(((AnnotatedTree) o).name);
+            result = this.name.equals(((AnnotatedModule) o).name);
         }
         return result;
     }

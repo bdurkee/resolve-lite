@@ -1,7 +1,7 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.codegen.AbstractCodeGenerator;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -14,7 +14,7 @@ public class VCGenerator extends AbstractCodeGenerator {
 
     public static final String LANGUAGE = "vcs";
 
-    public VCGenerator(RESOLVECompiler rc, AnnotatedTree rootTarget) {
+    public VCGenerator(RESOLVECompiler rc, AnnotatedModule rootTarget) {
         super(rc, rootTarget, LANGUAGE);
     }
 
