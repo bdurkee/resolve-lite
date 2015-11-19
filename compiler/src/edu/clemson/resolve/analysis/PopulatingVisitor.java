@@ -62,14 +62,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static final boolean EMIT_DEBUG = true;
 
-  /*  private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
+    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
             new ExactParameterMatch();
     private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
             new InexactDomainMatch();
     private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
-            new InexactParameterMatch();*/
+            new InexactParameterMatch();
 
     private boolean walkingDefParams = false;
 
@@ -1345,16 +1345,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
-    }
+    }*/
 
     @Override public Void visitMathInfixApplyExp(
-            ResolveParser.MathInfixApplyExpContext ctx) {
+            Resolve.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
     }
 
-    @Override public Void visitMathOutfixApplyExp(
+    /*@Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
@@ -1528,7 +1528,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*private void typeMathFunctionLikeThing(ParserRuleContext ctx,
+    private void typeMathFunctionLikeThing(ParserRuleContext ctx,
                                            Token qualifier, Token name,
                                            ParserRuleContext ... args) {
         typeMathFunctionLikeThing(ctx, qualifier, name, Arrays.asList(args));
@@ -1679,12 +1679,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static class ExactDomainMatch
             implements
-            TypeComparison<PApply, MTFunction> {
+                TypeComparison<PApply, MTFunction> {
         @Override public boolean compare(PApply foundValue,
-                                         MTFunction foundType, MTFunction expectedType) {
+                                         MTFunction foundType,
+                                         MTFunction expectedType) {
             return foundType.parameterTypesMatch(expectedType,
                     EXACT_PARAMETER_MATCH);
         }
+
         @Override public String description() {
             return "exact";
         }
@@ -1692,12 +1694,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private class InexactDomainMatch
             implements
-            TypeComparison<PApply, MTFunction> {
+                TypeComparison<PApply, MTFunction> {
+
         @Override public boolean compare(PApply foundValue,
-                                         MTFunction foundType, MTFunction expectedType) {
+                                         MTFunction foundType,
+                                         MTFunction expectedType) {
             return expectedType.parametersMatch(foundValue.getArguments(),
                     INEXACT_PARAMETER_MATCH);
         }
+
         @Override public String description() {
             return "inexact";
         }
@@ -1708,6 +1713,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                          MTType expectedType) {
             return true;
         }
+
         @Override public String description() {
             return "inexact";
         }
@@ -1715,7 +1721,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
-                                       ResolveParser.MathAssertionExpContext assertion) {
+                                       Resolve.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         PExp assertionAsPExp = getPExpFor(assertion);
         try {
@@ -1727,7 +1733,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-    }*/
+    }
 
     protected final PExp getPExpFor(ParseTree ctx) {
         if ( ctx == null ) {

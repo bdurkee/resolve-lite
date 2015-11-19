@@ -77,7 +77,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
-/*    @Override public void exitMathTypeExp(Resolve.MathTypeExpContext ctx) {
+    @Override public void exitMathTypeExp(Resolve.MathTypeExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
@@ -138,9 +138,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitMathUnaryApplyExp(
+    /*@Override public void exitMathUnaryApplyExp(
             Resolve.MathUnaryApplyExpContext ctx) {
-    }
+    }*/
 
     @Override public void exitMathPrefixApplyExp(
             Resolve.MathPrefixApplyExpContext ctx) {
@@ -165,7 +165,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }
 
-    @Override public void exitMathOutfixApplyExp(
+    /*@Override public void exitMathOutfixApplyExp(
             Resolve.MathOutfixApplyExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
@@ -175,7 +175,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     .arguments(repo.get(ctx.mathExp()));
         PApply x = result.build();
         repo.put(ctx, x);
-    }
+    }*/
 
     private PSymbol buildOperatorPSymbol(ParserRuleContext app,
                                          Token lop, Token rop) {
@@ -299,7 +299,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitProgPrimaryExp(
+    /*@Override public void exitProgPrimaryExp(
             Resolve.ProgPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progPrimary()));
     }

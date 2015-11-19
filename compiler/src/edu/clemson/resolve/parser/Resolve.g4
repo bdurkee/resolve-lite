@@ -158,8 +158,8 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   op=NOT mathExp                                              #mathUnaryExp
-    |   functionExp=mathExp LPAREN mathExp (COMMA mathExp) RPAREN   #mathPrefixApplyExp
+    :   op=NOT mathExp                                              #mathUnaryApplyExp
+    |   functionExp=mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #mathPrefixApplyExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp                      #mathInfixApplyExp
     |   mathExp op=(PLUS|MINUS) mathExp                             #mathInfixApplyExp
     |   mathExp op=(RANGE|RARROW) mathExp                           #mathInfixApplyExp
