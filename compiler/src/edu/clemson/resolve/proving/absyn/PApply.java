@@ -5,10 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTFunction;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.*;
 
 import java.util.*;
 import java.util.stream.Collectors;

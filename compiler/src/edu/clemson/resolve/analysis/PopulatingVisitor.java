@@ -139,6 +139,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.g = symtab.getTypeGraph();
     }
 
+    public TypeGraph getTypeGraph() {
+        return g;
+    }
+
     @Override public Void visitModule(Resolve.ModuleContext ctx) {
          String moduleName = Utils.getModuleName(ctx);
          moduleScope = symtab.startModuleScope(tr)
@@ -599,6 +603,72 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                      ctx.getStart(), expected, foundType);
          }
      }*/
+
+    @Override public Void visitMathCategoricalDefinitionDecl(
+            Resolve.MathCategoricalDefinitionDeclContext ctx) {
+        for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
+            symtab.startScope(sig);
+            this.visit(sig);
+            symtab.endScope();
+
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, sig.name.getText(),
+                                tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
+            }
+            catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        sig.name.getStart(), sig.name.getText());
+            }
+        }
+        //visit the rhs of our categorical defn
+        this.visit(ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override public Void visitMathInductiveDefinitionDecl(
+            Resolve.MathInductiveDefinitionDeclContext ctx) {
+        symtab.startScope(ctx);
+        Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
+        ParserRuleContext baseCase = ctx.mathAssertionExp(0);
+        ParserRuleContext indHypo = ctx.mathAssertionExp(1);
+        currentInductionVar = ctx.mathVariableDecl();
+
+        activeQuantifications.push(Quantification.UNIVERSAL);
+        walkingDefParams = true;
+        this.visit(ctx.mathVariableDecl());
+        walkingDefParams = false;
+        activeQuantifications.pop();
+
+        this.visit(sig);
+        this.visit(baseCase);
+        this.visit(indHypo);
+
+        MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
+        checkMathTypes(baseCase, g.BOOLEAN);
+        checkMathTypes(indHypo, g.BOOLEAN);
+        symtab.endScope();
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, sig.name.getText(),
+                            defnType, null, ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    sig.name.getStart(), sig.name.getText());
+        }
+        currentInductionVar = null;
+        definitionSchematicTypes.clear();
+        return null;
+    }
+
+    private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
+        MTType foundType = tr.mathTypes.get(ctx);
+        if (!foundType.equals(expected)) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
+                    ctx.getStart(), expected, foundType);
+        }
+    }
 
     @Override public Void visitMathDefinitionDecl(
             Resolve.MathDefinitionDeclContext ctx) {
@@ -1739,7 +1809,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if ( ctx == null ) {
             return g.getTrueExp();
         }
-        PExpBuildingListener<PExp> builder = new PExpBuildingListener<>(tr);
+        PExpBuildingListener<PExp> builder = new PExpBuildingListener<>(g, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         return builder.getBuiltPExp(ctx);
     }

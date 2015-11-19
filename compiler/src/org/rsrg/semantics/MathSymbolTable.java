@@ -161,19 +161,19 @@ public class MathSymbolTable {
         return typeGraph;
     }
 
-    public ModuleScopeBuilder startModuleScope(AnnotatedModule tree) {
+    public ModuleScopeBuilder startModuleScope(AnnotatedModule module) {
 
-        if (tree == null) {
+        if (module == null) {
             throw new IllegalArgumentException("tree may not be null");
         }
-        ParseTree contextTree = tree.getRoot();
+        ParseTree contextTree = module.getRoot();
 
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                tree.getName(), (ParserRuleContext)contextTree, parent, this);
+                module.getName(), (ParserRuleContext)contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleID(), s);

@@ -469,9 +469,9 @@ public class TestPExp extends BaseTest {
     @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
-        AnnotatedModule dummy = new AnnotatedModule(t, "T", "T.resolve", false);
+        AnnotatedModule m = new AnnotatedModule(t, "T", "T.resolve", false);
         PExpBuildingListener<PExp> l =
-                new PExpBuildingListener<>(dummy, g.INVALID, true); //dummyType
+                new PExpBuildingListener<>(g, m); //dummyType
         ParseTreeWalker.DEFAULT.walk(l, t);
         return l.getBuiltPExp(t);
     }

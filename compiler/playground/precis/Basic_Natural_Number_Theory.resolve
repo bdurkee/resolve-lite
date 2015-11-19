@@ -1,5 +1,9 @@
 Precis Basic_Natural_Number_Theory;
-
+        uses Monogenerator_Theory;
     Categorical Definition for N : SSet, 0 : N, suc : N -> N
         is Is_Monogeneric_for(N, 0, suc);
+
+    Inductive Definition on n : N of +(m : N, n) : N is
+         (i.) m + 0 = m;
+        (ii.) m + suc(n) = suc(m + n);
 end Basic_Natural_Number_Theory;

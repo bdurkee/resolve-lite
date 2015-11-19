@@ -23,6 +23,9 @@ public class ParsimoniousAssumeApplicationStrategy
         Set<String> allAssumptionSymbolNames = assumeExp.getSymbolNames();
         Map<PExp, Set<String>> assumesToSymbols = new HashMap<>();
 
+        //Todo: We actually don't need to do this... results for each expr
+        //are cached internally (these nodes are immutable!) so we won't actually
+        //be redoing any work
         for (PExp assume : assumeExp.splitIntoConjuncts()) {
             assumesToSymbols.put(assume, assume.getSymbolNames());
         }

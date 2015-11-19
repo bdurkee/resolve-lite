@@ -26,50 +26,42 @@ import java.util.stream.Collectors;
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
-    @NotNull private final ParseTreeProperty<MTType> types, typeValues;
-    @NotNull private final ParseTreeProperty<PTType> progTypes;
+    @NotNull private final AnnotatedModule annotations;
     @NotNull private final ParseTreeProperty<PExp> repo;
 
-    @NotNull private final ParseTreeProperty<MTType> seenOperatorTypes =
-            new ParseTreeProperty<>();
     @NotNull private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
-    @Nullable private final MTInvalid dummyType;
     private final boolean skipDummyQuantifierNodes;
+    @NotNull private final TypeGraph g;
 
     /**
      * Constructs a new {@code PExpBuildingListener} given an
      * {@link AnnotatedModule} with it's associated type and expression bindings.
      *
+     * @param g a typegraph
      * @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull AnnotatedModule annotations) {
-        this(annotations, null);
-    }
-
-    public PExpBuildingListener(@NotNull AnnotatedModule annotations,
-                                @Nullable MTInvalid dummyType) {
-        this(annotations, dummyType, false);
+    public PExpBuildingListener(@NotNull TypeGraph g,
+                                @NotNull AnnotatedModule annotations) {
+        this(g, annotations, false);
     }
 
     /**
-     * Constructs a new {@code PExpBuildingListener} given both an
-     * {@link AnnotatedModule} and a (possibly-null) dummy type to be used in the
-     * case where a 'real' math type is missing from {@code annotations}.
+     * Constructs a new {@code PExpBuildingListener} given an instance of
+     * {@link TypeGraph}, some module {@code annotations} and a boolean flag
+     * indicating whether or not to construct special syntactic nodes that
+     * pair an arbitrary number of quantified bound variables with a
+     * {@code PExp}s.
      *
      * @param annotations annotations to be used for constructing expressions
-     * @param dummyType an {@link MTInvalid} to be used in place of
-     * missing types
      */
-    public PExpBuildingListener(@NotNull AnnotatedModule annotations,
-                                @Nullable MTInvalid dummyType,
+    public PExpBuildingListener(@NotNull TypeGraph g,
+                                @NotNull AnnotatedModule annotations,
                                 boolean skipDummyQuantifiedNodes) {
-        this.types = annotations.mathTypes;
-        this.typeValues = annotations.mathTypeValues;
-        this.progTypes = annotations.progTypes;
-        this.repo = annotations.mathPExps;
-        this.dummyType = dummyType;
+        this.g = g;
+        this.annotations = annotations;
         this.skipDummyQuantifierNodes = skipDummyQuantifiedNodes;
+        this.repo = annotations.mathPExps;
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
@@ -245,7 +237,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathSetExp(Resolve.MathSetExpContext ctx) {
-        PSet result = new PSet(types.get(ctx), null,
+        PSet result = new PSet(annotations.mathTypes.get(ctx), null,
                 Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result);
     }
@@ -388,15 +380,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     //this should probably actually always return MTFunction...
     private MTType getOperandFunctionType(ParserRuleContext app) {
-        return seenOperatorTypes.get(app) == null ? dummyType :
-                seenOperatorTypes.get(app);
+        //return seenOperatorTypes.get(app) == null ? MTInvalid.getInstance(g) :
+        //        seenOperatorTypes.get(app);
+        return null;
     }
 
     private MTType getMathType(ParseTree t) {
-        return types.get(t) == null ? dummyType : types.get(t);
+        return annotations.mathTypes.get(t) == null ? MTInvalid.getInstance(g) :
+                annotations.mathTypes.get(t);
     }
 
     private MTType getMathTypeValue(ParseTree t) {
-        return typeValues.get(t) == null ? dummyType : typeValues.get(t);
+        return annotations.mathTypeValues.get(t) == null ?
+                MTInvalid.getInstance(g) :
+                annotations.mathTypeValues.get(t);
     }
 }

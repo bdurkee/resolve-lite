@@ -26,7 +26,8 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                             unit);
             defSymsAndScopes.visit(unit.getRoot());
             PExpBuildingListener<PExp> pexpAnnotator =
-                    new PExpBuildingListener<>(unit);
+                    new PExpBuildingListener<>(
+                            defSymsAndScopes.getTypeGraph(), unit);
             SanityCheckingListener sanityChecker =
                     new SanityCheckingListener(compiler, unit);
             walker.walk(pexpAnnotator, unit.getRoot());
