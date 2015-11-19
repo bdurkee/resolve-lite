@@ -1,0 +1,5 @@
+Precis Basic_Natural_Number_Theory;
+
+    Categorical Definition for N : SSet, 0 : N, suc : N -> N
+        is Is_Monogeneric_for(N, 0, suc);
+end Basic_Natural_Number_Theory;

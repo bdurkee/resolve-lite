@@ -1,8 +1,0 @@
-Extension Store_Do_Nothing_Capability
-            for
-        Search_Store_Template
-
-    Operation Do_Nothing
-            (restores S : Store)
-        requires S = {};
-end Store_Do_Nothing_Capability

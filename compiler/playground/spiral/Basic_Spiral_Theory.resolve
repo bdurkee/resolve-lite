@@ -1,7 +1,7 @@
-Precis Spiral_Theory;
-    uses Basic_Natural_Number_Theory, Integer_Theory;
+Precis Basic_Spiral_Theory;
+    //uses Basic_Natural_Number_Theory, Integer_Theory;
 
-    Definition N2 : Powerset(N) is {n : N | n >= 2};
+    /*Definition N2 : Powerset(N) is {n : N | n >= 2};
 
     Definition Is_k_Spiral_Like(
         sp_loc : N2 -> SSet,
@@ -26,6 +26,6 @@ Precis Spiral_Theory;
         Corollary C3: Forall k : N2, Forall n : N,
             SCD(k)(RS(k)(0, SS(k)(n, Cen(k)))) = k * n + 1;
 
-    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k));
+    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k));*/
 
 end Basic_Spiral_Theory;

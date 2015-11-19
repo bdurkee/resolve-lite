@@ -177,13 +177,14 @@ mathExp
 mathPrimaryExp
     :   mathLiteralExp
     |   mathCrossTypeExp
-    |   mathSegmentsExp
+    |   mathSymbolExp
     |   mathOutfixExp
-    |   mathSetExp
     |   mathSetRestrictionExp
-    |   mathTupleExp
-    |   mathAlternativeExp
+    |   mathSetExp
     |   mathLambdaExp
+    |   mathAlternativeExp
+    |   mathTupleExp
+    |   mathSegmentsExp
     ;
 
 mathLiteralExp
@@ -191,12 +192,12 @@ mathLiteralExp
     |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
     ;
 
-mathSymbolExp
-    :   (incoming=AT)? (qualifier=ID COLONCOLON)? name=mathSymbolName
-    ;
-
 mathCrossTypeExp
     :   CART_PROD (mathVariableDeclGroup SEMI)+ END
+    ;
+
+mathSymbolExp
+    :   (incoming=AT)? (qualifier=ID COLONCOLON)? name=mathSymbolName
     ;
 
 mathOutfixExp
