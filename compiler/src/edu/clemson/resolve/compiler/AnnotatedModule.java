@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * Represents a collection of information to be associated with a top level
- * {@link edu.clemson.resolve.parser.ResolveParser.ModuleContext}.
+ * {@link edu.clemson.resolve.parser.Resolve.ModuleContext}.
  *
  * <p>We use this approach over {@code returns} clauses in the grammar to help
  * us keep our grammar as general as possible.</p>

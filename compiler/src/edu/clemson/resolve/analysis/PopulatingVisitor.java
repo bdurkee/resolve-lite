@@ -35,9 +35,9 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
@@ -62,14 +62,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static final boolean EMIT_DEBUG = true;
 
-    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
+  /*  private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
     private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
             new ExactParameterMatch();
     private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
             new InexactDomainMatch();
     private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
-            new InexactParameterMatch();
+            new InexactParameterMatch();*/
 
     private boolean walkingDefParams = false;
 
@@ -79,8 +79,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * recursive call is being made to an operation procedure decl that hasn't
      * been marked 'Recursive'.
      */
-    private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-    private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
+    //private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
+    //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /**
      * Set to {@code true} when we're walking the arguments to a module
@@ -94,7 +94,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * variable for access later in the (lower level) signature. This is
      * {@code null} if we're not visiting the children of an inductive defn.
      */
-    private ResolveParser.MathVariableDeclContext currentInductionVar = null;
+    private Resolve.MathVariableDeclContext currentInductionVar = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
@@ -111,7 +111,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /**
      * Any quantification-introducing syntactic context (e.g., an
-     * {@link edu.clemson.resolve.parser.ResolveParser.MathQuantifiedExpContext}),
+     * {@link edu.clemson.resolve.parser.Resolve.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
      * <p>
@@ -139,7 +139,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.g = symtab.getTypeGraph();
     }
 
-    @Override public Void visitModule(ResolveParser.ModuleContext ctx) {
+  /*  @Override public Void visitModule(ResolveParser.ModuleContext ctx) {
          String moduleName = Utils.getModuleName(ctx);
          moduleScope = symtab.startModuleScope(tr)
                  .addImports(tr.semanticallyRelevantUses);
@@ -565,7 +565,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          tr.mathTypeValues.put(ctx, record.toMath());
          return null;
      }*/
-
+/*
      @Override public Void visitVariableDeclGroup(
              ResolveParser.VariableDeclGroupContext ctx) {
          this.visit(ctx.type());
@@ -627,7 +627,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         definitionSchematicTypes.clear();
         return null;
-    }
+    }*/
 
     /**
      * Since 'MathDefinitionSig' appears all over the place within our three
@@ -643,7 +643,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * sig to the active scope (so inductive and implicit definitions may
      * reference themselves).</p>
      */
-    @Override public Void visitMathDefinitionSig(
+    /*@Override public Void visitMathDefinitionSig(
             ResolveParser.MathDefinitionSigContext ctx) {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
@@ -931,7 +931,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.progTypes.put(ctx, curFieldType);
         tr.mathTypes.put(ctx, curFieldType.toMath());
         return null;
-    }
+    }*/
 
     /*@Override public Void visitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
@@ -967,7 +967,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
@@ -1246,7 +1246,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
-    }*/
+    }
 
     @Override public Void visitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
@@ -1278,12 +1278,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathUnaryExp(
+    @Override public Void visitMathUnaryExp(
             ResolveParser.MathUnaryExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
@@ -1688,7 +1688,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private String getRootModuleID() {
         return symtab.getInnermostActiveScope().getModuleID();
-    }
+    }*/
 
     private void emit(String msg) {
         if (EMIT_DEBUG) {

@@ -3,7 +3,7 @@ package edu.clemson.resolve.vcgen;
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;
@@ -19,11 +19,11 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
         for (AnnotatedModule unit : compilationUnits) {
             if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
                 if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.PrecisModuleContext) continue;
+                        Resolve.PrecisModuleContext) continue;
+               /* else if (unit.getRoot().getChild(0) instanceof
+                        Resolve.ConceptModuleContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.ConceptModuleContext) continue;
-                else if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.ExtensionModuleContext) continue;
+                        Resolve.ExtensionModuleContext) continue;*/
                 VCGenerator gen = new VCGenerator(compiler, unit);
                 compiler.info("generating vcs for: " + unit.getName());
                 ST x = gen.generateAssertions();

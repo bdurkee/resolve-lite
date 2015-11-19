@@ -3,7 +3,7 @@ package edu.clemson.resolve.codegen;
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 
@@ -23,7 +23,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
                 + File.separator + "external");
         for (AnnotatedModule unit : compilationUnits) {
             if (unit.getRoot().getChild(0) instanceof
-                    ResolveParser.PrecisModuleContext) continue;
+                    Resolve.PrecisModuleContext) continue;
 
             JavaCodeGenerator gen =
                     new JavaCodeGenerator(compiler, unit);

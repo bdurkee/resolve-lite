@@ -3,8 +3,8 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.programtype.PTType;
@@ -50,8 +50,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }*/
 
-    @Override public void exitPrecisModule(
-            ResolveParser.PrecisModuleContext ctx) {
+    @Override public void exitPrecisModule(Resolve.PrecisModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 

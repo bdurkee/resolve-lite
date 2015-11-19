@@ -1,6 +1,6 @@
 package org.rsrg.semantics.symbol;
 
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.MathSymbolTable;
@@ -28,7 +28,7 @@ public class FacilitySymbol extends Symbol {
         super(name, definingTree, moduleID);
     }
 
-    public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
+    /*public FacilitySymbol(Resolve.FacilityDeclContext facility,
             String moduleID,
             ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             MathSymbolTable scopeRepo) {
@@ -49,7 +49,7 @@ public class FacilitySymbol extends Symbol {
                         new ArrayList<>(), facility.implArgs, this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);
-
+*/
         //These are realized by the concept realization
         /*for (EnhancementItem realizationEnhancement : facility
                 .getEnhancements()) {
@@ -65,7 +65,7 @@ public class FacilitySymbol extends Symbol {
         }*/
 
         //These are realized by individual enhancement realizations
-        for (ResolveParser.EnhancementPairDeclContext enhancement :
+        /*for (ResolveParser.EnhancementPairDeclContext enhancement :
                 facility.enhancementPairDecl()) {
 
             spec = new ModuleParameterization(enhancement.spec.getText(),
@@ -78,7 +78,7 @@ public class FacilitySymbol extends Symbol {
             enhancements.add(spec);
             enhancementImplementations.put(spec, impl);
         }
-    }
+    }*/
 
     public List<ModuleParameterization> getEnhancements() {
         return enhancements;

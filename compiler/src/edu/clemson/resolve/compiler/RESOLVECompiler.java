@@ -34,9 +34,9 @@ import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jgrapht.Graphs;
@@ -377,7 +377,7 @@ public  class RESOLVECompiler {
             ResolveLexer lexer = new ResolveLexer(input);
 
             TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
+            Resolve parser = new Resolve(tokens);
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.module();
