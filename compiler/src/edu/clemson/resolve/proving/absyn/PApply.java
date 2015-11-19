@@ -26,10 +26,9 @@ public class PApply extends PExp {
      * display an instance of {@link PApply}, specifically whether it should be
      * displayed as an infix, outfix, prefix, or postfix style application.
      *
-     * <p>
-     * Note that while this enum indeed stands-in for the four subclasses we'd
-     * otherwise need to represent the application styles mentioned, we still
-     * can get specific visitor methods for each style (even with an enum)
+     * <p>Note that while this enum indeed stands-in for the four subclasses
+     * we'd otherwise need to represent the application styles mentioned, we
+     * still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
@@ -153,8 +152,7 @@ public class PApply extends PExp {
      * independent of the types of the actuals
      * (which are rightly embedded here in the argument {@code PExp}s).
      *
-     * <p>
-     * While this field in most cases will simply be an instance of
+     * <p>While this field in most cases will simply be an instance of
      * {@link PSymbol}, realize that it could also be something more 'exotic'
      * such as a {@code PLambda} or even another {@code PApply}.</p>
      */
@@ -349,7 +347,8 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
         if (!excludeApplications) {
             result.addAll(functionPortion

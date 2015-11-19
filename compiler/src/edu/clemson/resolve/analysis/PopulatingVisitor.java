@@ -89,13 +89,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private boolean walkingModuleArgOrParamList = false;
 
-    /**
-     * Keeps track of an inductive defn's (top level declared) induction
-     * variable for access later in the (lower level) signature. This is
-     * {@code null} if we're not visiting the children of an inductive defn.
-     */
-    private Resolve.MathVariableDeclContext currentInductionVar = null;
-
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
     private ProgTypeModelSymbol currentTypeModelSym = null;
@@ -114,16 +107,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * {@link edu.clemson.resolve.parser.Resolve.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
-     * <p>
-     * Note that this may change as the children of the node are processed;
+     *
+     * <p>Note that this may change as the children of the node are processed;
      * for example, MathVariableDecls found in the declaration portion of a
      * quantified ctx should have quantification (universal or existential)
      * applied, while those found in the body of the quantified ctx QuantExp
      * no quantification (unless there is an embedded quantified ctx). In this
      * case, ctx should not remove its layer, but rather change it to
      * {@code Quantification.NONE}.</p>
-     * <p>
-     * This stack is never empty, but rather the bottom layer is always
+     *
+     * <p> This stack is never empty, but rather the bottom layer is always
      * {@code Quantification.NONE}.</p>
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
@@ -606,7 +599,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathCategoricalDefinitionDecl(
             Resolve.MathCategoricalDefinitionDeclContext ctx) {
-        for (Resolve.MathDefinitionSigContext sig : ctx.mathDefinitionSig()) {
+        for (Resolve.MathPrefixDefinitionSigContext sig :
+                ctx.mathPrefixDefinitionSig()) {
             symtab.startScope(sig);
             this.visit(sig);
             symtab.endScope();
@@ -614,7 +608,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, sig.name.getText(),
-                                tr.mathTypes.get(sig), null, ctx, getRootModuleID()));
+                                tr.mathTypes.get(sig), null, ctx,
+                                getRootModuleID()));
             }
             catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -632,13 +627,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         ParserRuleContext baseCase = ctx.mathAssertionExp(0);
         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
-        currentInductionVar = ctx.mathVariableDecl();
-
-        activeQuantifications.push(Quantification.UNIVERSAL);
-        walkingDefParams = true;
-        this.visit(ctx.mathVariableDecl());
-        walkingDefParams = false;
-        activeQuantifications.pop();
 
         this.visit(sig);
         this.visit(baseCase);
@@ -648,16 +636,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         checkMathTypes(baseCase, g.BOOLEAN);
         checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
+        Resolve.MathSymbolNameContext name = ctx.mathDefinitionSig()
+                .mathInfixDefinitionSig() != null ?
+                ctx.mathDefinitionSig().mathInfixDefinitionSig().mathSymbolName() :
+                ctx.mathDefinitionSig().mathPrefixDefinitionSig().mathSymbolName();
         try {
             symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, sig.name.getText(),
+                    new MathSymbol(g, name.getText(),
                             defnType, null, ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    sig.name.getStart(), sig.name.getText());
+                    name.getStart(), name.getText());
         }
-        currentInductionVar = null;
         definitionSchematicTypes.clear();
         return null;
     }
@@ -678,6 +669,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MTType defnType = tr.mathTypes.get(sig);
         MTType defnTypeValue = null;
+
+        Resolve.MathSymbolNameContext name = null;
+        if (ctx.mathDefinitionSig().mathPrefixDefinitionSig() != null) {
+            name = ctx.mathDefinitionSig().mathPrefixDefinitionSig().name;
+        }
+        else if (ctx.mathDefinitionSig().mathInfixDefinitionSig() != null){
+            name = ctx.mathDefinitionSig().mathInfixDefinitionSig().name;
+        }
+        else {
+            throw new UnsupportedOperationException("definition signature " +
+                    "style not yet handled: " +
+                    ctx.mathDefinitionSig().getText());
+        }
+       
         if (ctx.mathAssertionExp() != null) {
             //Note: We DO have to visit the rhs assertion explicitly here,
             //as it exists a level above the signature.
@@ -687,13 +692,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.endScope();
         try {
             symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, sig.name.getText(),
+                    new MathSymbol(g, name.getText(),
                             definitionSchematicTypes, defnType, defnTypeValue,
                             ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    sig.name.getStart(), sig.name.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name.getStart(),
+                    name.getText());
         }
         definitionSchematicTypes.clear();
         return null;
@@ -715,68 +720,85 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     @Override public Void visitMathDefinitionSig(
             Resolve.MathDefinitionSigContext ctx) {
-        //first visit the formal params
-        activeQuantifications.push(Quantification.UNIVERSAL);
-        walkingDefParams = true;
-        ctx.mathVariableDeclGroup().forEach(this::visit);
-        walkingDefParams = false;
-        activeQuantifications.pop();
-
-        //next, visit the definitions 'return type' to give it a type
-        this.visit(ctx.mathTypeExp());
-
-        //finally, build the full type of this definitions signature
-        //If there are no params, then it is just the sym after the ':'
-        MTType defnType = tr.mathTypeValues.get(ctx.mathTypeExp()) == null ?
-                MTInvalid.getInstance(g) :
-                tr.mathTypeValues.get(ctx.mathTypeExp());
-        MTFunction.MTFunctionBuilder builder =
-                new MTFunction.MTFunctionBuilder(g, defnType);
-
-        //if there ARE params, then our type needs to be an MTFunction.
-        //this if check needs to be here or else, even if there were no params,
-        //our type would end up MTFunction: Void -> T (which we don't want)
-        if ( !ctx.mathVariableDeclGroup().isEmpty() ) {
-            for (Resolve.MathVariableDeclGroupContext grp :
-                    ctx.mathVariableDeclGroup()) {
-                MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
-
-                for (TerminalNode t : grp.ID()) {
-                    builder.paramTypes(grpType);
-                    builder.paramNames(t.getText());
-                }
-                //if the definition has parameters then it's type should be an
-                //MTFunction (e.g. something like a * b ... -> ...)
-                defnType = builder.build();
-            }
-        }
-        try {
-            symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, ctx.name.getText(),
-                            defnType, null, ctx, getRootModuleID()));
-        }
-        catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.name.getStart(), ctx.name.getText());
-        }
-        tr.mathTypes.put(ctx, defnType);
+        this.visitChildren(ctx);
         return null;
     }
 
     @Override public Void visitMathPrefixDefinitionSig(
             Resolve.MathPrefixDefinitionSigContext ctx) {
-
+        typeMathDefinitionSignature(ctx, ctx.mathVariableDeclGroup(),
+                ctx.mathTypeExp(), ctx.name.getStart());
+        return null;
     }
 
-    private void typeMathDefinitionSignature(List<ParseTree> formals,
-                                             Resolve.MathTypeExpContext type,
-                                             Token name) {
+    @Override public Void visitMathInfixDefinitionSig(
+            Resolve.MathInfixDefinitionSigContext ctx) {
+        typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(),
+                ctx.mathTypeExp(), ctx.mathSymbolName().getStart());
+        return null;
+    }
+
+    private void typeMathDefinitionSignature(@NotNull ParserRuleContext ctx,
+                                             @NotNull List<? extends ParseTree> formals,
+                                             @NotNull Resolve.MathTypeExpContext type,
+                                             @NotNull Token name) {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
         walkingDefParams = true;
         formals.forEach(this::visit);
         walkingDefParams = false;
         activeQuantifications.pop();
+
+        //next, visit the definitions 'return type' to give it a type
+        this.visit(type);
+
+        //finally, build the full type of this definitions signature
+        //If there are no params, then it is just the sym after the ':'
+        MTType defnType = tr.mathTypeValues.get(type);
+        MTFunction.MTFunctionBuilder builder =
+                new MTFunction.MTFunctionBuilder(g, defnType);
+
+        //if there ARE params, then our type needs to be an MTFunction.
+        //this if check needs to be here or else, even if there were no params,
+        //our type would end up MTFunction: Void -> T (which we don't want)
+        if (!formals.isEmpty()) {
+
+            //It's either going to be a list of MathvariableDecl's or
+            //MathVariableDeclGroups
+            if (formals.get(0) instanceof Resolve.MathVariableDeclContext) {
+                for (ParseTree formal : formals) {
+                    Resolve.MathVariableDeclContext var =
+                            (Resolve.MathVariableDeclContext)formal;
+                    MTType varType = tr.mathTypeValues.get(var.mathTypeExp());
+                    builder.paramTypes(varType);
+                    builder.paramNames(var.ID().getText());
+                }
+            }
+            else {
+                for (ParseTree formal : formals) {
+                    Resolve.MathVariableDeclGroupContext grp =
+                            (Resolve.MathVariableDeclGroupContext)formal;
+                    MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
+                    for (TerminalNode t : grp.ID()) {
+                        builder.paramTypes(grpType);
+                        builder.paramNames(t.getText());
+                    }
+                    //if the definition has parameters then it's type should be an
+                    //MTFunction (e.g. something like a * b ... -> ...)
+                    defnType = builder.build();
+                }
+            }
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, name.getText(),
+                            defnType, null, ctx, getRootModuleID()));
+        }
+        catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
+        }
+        tr.mathTypes.put(ctx, defnType);
     }
 
     @Override public Void visitMathVariableDecl(

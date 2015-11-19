@@ -71,7 +71,7 @@ mathDefinitionSig
     ;
 
 mathInfixDefinitionSig
-    :   LPAREN mathVariableDecl RPAREN mathSymbolExp
+    :   LPAREN mathVariableDecl RPAREN name=mathSymbolName
         LPAREN mathVariableDecl RPAREN COLON mathTypeExp
     ;
 
@@ -82,7 +82,8 @@ mathPrefixDefinitionSig
     ;
 
 mathSymbolName
-    :   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
+    :   ID
+    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
     |   BAR TRIPLEDOT BAR
     |   LT TRIPLEDOT GT
     |   DBL_BAR TRIPLEDOT DBL_BAR
@@ -105,12 +106,10 @@ mathDefinitionDecl
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION ON mathVariableDecl OF mathDefinitionSig IS
+    :   INDUCTIVE DEFINITION mathDefinitionSig IS
         BASE_CASE mathAssertionExp SEMI
         INDUCTIVE_CASE mathAssertionExp SEMI
     ;
-
-
 
 mathVariableDeclGroup
     :   ID (COMMA ID)* COLON mathTypeExp
@@ -235,6 +234,8 @@ mathTupleExp
     :   LPAREN mathExp (COMMA mathExp)+ RPAREN
     ;
 
+//Segments can end in an application but (not that I'm aware of atleast) they
+//can't contain one in the middle .. hopefully :) ...
 mathSegmentsExp
     :   mathSymbolExp (DOT mathSymbolExp)+
         (LPAREN mathExp (COMMA mathExp)* RPAREN)?
