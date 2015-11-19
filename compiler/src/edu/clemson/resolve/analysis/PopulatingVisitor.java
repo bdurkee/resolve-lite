@@ -72,7 +72,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             new InexactParameterMatch();
 
     private boolean walkingDefParams = false;
-
+    private boolean walkingFunctionNameExpPortion = false;
     /**
      * Keeps track of the current operationProcedure (and procedure) we're
      * visiting; {@code null} otherwise. We use this to check whether a
@@ -727,7 +727,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         //finally, build the full type of this definitions signature
         //If there are no params, then it is just the sym after the ':'
-        MTType defnType = tr.mathTypeValues.get(ctx.mathTypeExp());
+        MTType defnType = tr.mathTypeValues.get(ctx.mathTypeExp()) == null ?
+                MTInvalid.getInstance(g) :
+                tr.mathTypeValues.get(ctx.mathTypeExp());
         MTFunction.MTFunctionBuilder builder =
                 new MTFunction.MTFunctionBuilder(g, defnType);
 
@@ -1304,6 +1306,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathSetComprehensionExp(
+            Resolve.MathSetComprehensionExpContext ctx) {
+        this.visit(ctx.mathVariableDecl());
+        this.visit(ctx.mathAssertionExp());
+        checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
+        MTType comprehensionType = new MTPowersetApplication(g,
+                tr.mathTypeValues.get(ctx.mathVariableDecl().mathTypeExp()));
+        tr.mathTypes.put(ctx, comprehensionType);
+        return null;
+    }
+
     @Override public Void visitMathSetExp(Resolve.MathSetExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
         if (ctx.mathExp().isEmpty()) {
@@ -1434,8 +1447,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathPrefixApplyExp(
             Resolve.MathPrefixApplyExpContext ctx) {
+        walkingFunctionNameExpPortion = true;
         this.visit(ctx.functionExp);
-
+        walkingFunctionNameExpPortion = false;
         //looks weird cause the 0th is now the expr representing the
         //'function's first class' name (and  type)
         List<Resolve.MathExpContext> args =
@@ -1452,7 +1466,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     "applications are not yet handled: " + ctx.getText());
         }
 
-       // typeMathFunctionLikeThing(ctx, null, name, args);
+        typeMathFunctionLikeThing(ctx, null, name, args);
         return null;
     }
 
@@ -1582,6 +1596,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
                                 MathSymbol intendedEntry) {
         try {
+            if (walkingFunctionNameExpPortion) return; //hmmm..
             if ( intendedEntry.getQuantification() == Quantification.NONE ) {
                 tr.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             }
@@ -1592,7 +1607,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
         catch (SymbolNotOfKindTypeException snokte) {
-            if ( typeValueDepth > 0 ) {
+            if (typeValueDepth > 0) {
                 tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
@@ -1609,8 +1624,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            List<? extends ParserRuleContext> args) {
         String foundExp = ctx.getText();
         MTFunction foundExpType;
-        foundExpType =
-                PApply.getConservativePreApplicationType(g, args, tr.mathTypes);
+        foundExpType = PApply.getConservativePreApplicationType(g, args, tr.mathTypes);
         emit("expression: " + ctx.getText() + "("
                 + ctx.getStart().getLine() + ","
                 + ctx.getStop().getCharPositionInLine() + ") of type "
@@ -1637,6 +1651,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     compiler.errMgr.semanticError(
                             ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                             arg.getText());
+                    argTypeValue = g.INVALID;
                 }
                 arguments.add(argTypeValue);
             }
@@ -1650,8 +1665,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private MathSymbol getIntendedFunction(ParserRuleContext ctx,
                                            Token qualifier, Token name,
                                            List<? extends ParserRuleContext> args) {
-        tr.mathTypes.put(ctx, PApply.getConservativePreApplicationType(g,
-                args, tr.mathTypes));
+        MTType preAppType = PApply.getConservativePreApplicationType(g,
+                args, tr.mathTypes);
+        tr.mathTypes.put(ctx, preAppType);
         PApply e = (PApply)getPExpFor(ctx);
         MTFunction eType = (MTFunction)e.getMathType();
         List<MathSymbol> sameNameFunctions =

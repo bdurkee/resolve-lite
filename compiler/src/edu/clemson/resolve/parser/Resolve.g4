@@ -179,7 +179,7 @@ mathPrimaryExp
     |   mathCrossTypeExp
     |   mathSymbolExp
     |   mathOutfixExp
-    |   mathSetRestrictionExp
+    |   mathSetComprehensionExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
@@ -206,7 +206,7 @@ mathOutfixExp
     |   lop=DBL_BAR mathExp rop=DBL_BAR
     ;
 
-mathSetRestrictionExp
+mathSetComprehensionExp
     :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE
     ;
 

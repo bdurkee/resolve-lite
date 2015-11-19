@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.MTFunction.MTFunctionBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -189,7 +190,7 @@ public class PApply extends PExp {
     }
 
     public MTFunction getConservativePreApplicationType(TypeGraph g) {
-        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+        return new MTFunctionBuilder(g, g.EMPTY_SET)
                 .paramTypes(arguments.stream()
                         .map(PExp::getMathType)
                         .collect(Collectors.toList())).build();
@@ -198,10 +199,16 @@ public class PApply extends PExp {
     public static MTFunction getConservativePreApplicationType(TypeGraph g,
                                                                List<? extends ParseTree> arguments,
                                                                ParseTreeProperty<MTType> types) {
-        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
-                .paramTypes(arguments.stream()
-                        .map(types::get)
-                        .collect(Collectors.toList())).build();
+        MTFunctionBuilder preApplicationType =
+                new MTFunctionBuilder(g, g.EMPTY_SET);
+        for (ParseTree arg : arguments) {
+            MTType argType = types.get(arg);
+            if (argType == null) {
+                argType = MTInvalid.getInstance(g);
+            }
+            preApplicationType.paramTypes(argType);
+        }
+        return preApplicationType.build();
     }
 
     @Override public boolean containsName(String name) {

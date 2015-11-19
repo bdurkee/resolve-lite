@@ -451,15 +451,13 @@ public class TestPExp extends BaseTest {
     /**
      * Constructs an (untyped) {@link PExp} from string {@code input}.
      *
-     * <p>
-     * Building even moderately sized {@link PExp}s is a pain; building one
+     * <p>Building even moderately sized {@link PExp}s is a pain; building one
      * with real type information is an even bigger pain. Thus, for test methods
      * where this function is used, know that we don't care about types so much
      * as we do about correct expression structure and quantifier
      * distribution.</p>
      *
-     * <p>
-     * In other words, if you want to test something math type related, just
+     * <p>In other words, if you want to test something math type related, just
      * construct smaller exprs manually using {@link PSymbol.PSymbolBuilder},
      * otherwise parse the actual larger expr using this method.</p>
      *
@@ -470,8 +468,7 @@ public class TestPExp extends BaseTest {
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule m = new AnnotatedModule(t, "T", "T.resolve", false);
-        PExpBuildingListener<PExp> l =
-                new PExpBuildingListener<>(g, m); //dummyType
+        PExpBuildingListener<PExp> l = new PExpBuildingListener<>(g, m, true);
         ParseTreeWalker.DEFAULT.walk(l, t);
         return l.getBuiltPExp(t);
     }
