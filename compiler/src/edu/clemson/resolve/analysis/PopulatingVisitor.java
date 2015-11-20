@@ -739,7 +739,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathInfixDefinitionSig(
             Resolve.MathInfixDefinitionSigContext ctx) {
-        typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(), 
+        typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(),
                 ctx.mathTypeExp(), ctx.name.getStart());
         return null;
     }
