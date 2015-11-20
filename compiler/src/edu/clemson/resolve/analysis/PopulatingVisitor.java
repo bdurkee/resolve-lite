@@ -1448,13 +1448,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathUnaryExp(
-            ResolveParser.MathUnaryExpContext ctx) {
-        this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
-        return null;
-    }*/
-
     @Override public Void visitMathInfixApplyExp(
             Resolve.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);

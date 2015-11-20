@@ -135,10 +135,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
     }
 
-    /*@Override public void exitMathUnaryApplyExp(
-            Resolve.MathUnaryApplyExpContext ctx) {
-    }*/
-
     @Override public void exitMathPrefixApplyExp(
             Resolve.MathPrefixApplyExpContext ctx) {
         List<? extends ParseTree> args = ctx.mathExp()
@@ -242,9 +238,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathSetExp(Resolve.MathSetExpContext ctx) {
-        PSet result = new PSet(annotations.mathTypes.get(ctx), null,
-                Utils.collect(PExp.class, ctx.mathExp(), repo));
-        repo.put(ctx, result);
+        repo.put(ctx, new PSet(annotations.mathTypes.get(ctx), null,
+                Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
     @Override public void exitMathSegmentsExp(
@@ -391,13 +386,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     private MTType getMathType(ParseTree t) {
-        return annotations.mathTypes.get(t) == null ? MTInvalid.getInstance(g) :
+        return annotations.mathTypes.get(t) == null ? g.INVALID :
                 annotations.mathTypes.get(t);
     }
 
     private MTType getMathTypeValue(ParseTree t) {
-        return annotations.mathTypeValues.get(t) == null ?
-                MTInvalid.getInstance(g) :
+        return annotations.mathTypeValues.get(t) == null ? g.INVALID :
                 annotations.mathTypeValues.get(t);
     }
 }

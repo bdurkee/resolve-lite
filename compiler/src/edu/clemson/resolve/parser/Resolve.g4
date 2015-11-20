@@ -83,7 +83,7 @@ mathPrefixDefinitionSig
 
 mathSymbolName
     :   ID
-    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT)
+    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT|NOT)
     |   BAR TRIPLEDOT BAR
     |   LT TRIPLEDOT GT
     |   DBL_BAR TRIPLEDOT DBL_BAR
@@ -161,8 +161,7 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   op=NOT mathExp                                              #mathUnaryApplyExp
-    |   functionExp=mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #mathPrefixApplyExp
+    :   functionExp=mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #mathPrefixApplyExp
     |   mathExp op=(MULT|DIVIDE|TILDE) mathExp                      #mathInfixApplyExp
     |   mathExp op=(PLUS|MINUS) mathExp                             #mathInfixApplyExp
     |   mathExp op=(RANGE|RARROW) mathExp                           #mathInfixApplyExp

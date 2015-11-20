@@ -12,11 +12,11 @@ Precis Basic_Binary_Relation_Properties;
     Definition Is_Antisymmetric(p : (D : SSet) * D -> B) : B is
         Forall x, y : D, p(x, y) and p(y, x) implies x = y;
 
-    /*Definition Is_Asymmetric(p : (D : SSet) * D -> B) : B is
-        Forall x, y : D, p(x, y) implies not p(y, x);
+    Definition Is_Asymmetric(p : (D : SSet) * D -> B) : B is
+        Forall x, y : D, p(x, y) implies not( p(y, x) );
 
     Definition Is_Irreflexive(p : (D : SSet) * D -> B) : B is
-        Forall x : D, not p(x, x);
+        Forall x : D, not( p(x, x) );
 
     //Todo: add 'iff' to grammar and support PExp transformation of it into the
     //canonical (longhand) form appearing below.
@@ -28,5 +28,4 @@ Precis Basic_Binary_Relation_Properties;
     Definition Is_Total(p : (D : SSet) * D -> B) : B is
         Forall x, y : D, p(x, y) or p(y, x) or x = y;
 
-   */
 end Basic_Binary_Relation_Properties;
