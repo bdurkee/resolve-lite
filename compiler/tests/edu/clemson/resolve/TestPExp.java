@@ -1,8 +1,8 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
@@ -433,7 +433,7 @@ public class TestPExp extends BaseTest {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
             ResolveLexer lexer = new ResolveLexer(in);
             TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
+            Resolve parser = new Resolve(tokens);
 
             //Todo: For some reason this never seems to be getting tripped atm,
             //even in the presence of errors.
@@ -451,15 +451,13 @@ public class TestPExp extends BaseTest {
     /**
      * Constructs an (untyped) {@link PExp} from string {@code input}.
      *
-     * <p>
-     * Building even moderately sized {@link PExp}s is a pain; building one
+     * <p>Building even moderately sized {@link PExp}s is a pain; building one
      * with real type information is an even bigger pain. Thus, for test methods
      * where this function is used, know that we don't care about types so much
      * as we do about correct expression structure and quantifier
      * distribution.</p>
      *
-     * <p>
-     * In other words, if you want to test something math type related, just
+     * <p>In other words, if you want to test something math type related, just
      * construct smaller exprs manually using {@link PSymbol.PSymbolBuilder},
      * otherwise parse the actual larger expr using this method.</p>
      *
@@ -469,9 +467,10 @@ public class TestPExp extends BaseTest {
     @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
-        AnnotatedTree dummy = new AnnotatedTree(t, "T", "T.resolve", false);
+        AnnotatedModule fakeModule =
+                new AnnotatedModule(t, "T", "T.resolve", false);
         PExpBuildingListener<PExp> l =
-                new PExpBuildingListener<>(dummy, g.INVALID, true); //dummyType
+                new PExpBuildingListener<>(g, fakeModule, true);
         ParseTreeWalker.DEFAULT.walk(l, t);
         return l.getBuiltPExp(t);
     }

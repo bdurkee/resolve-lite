@@ -28,363 +28,121 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-grammar Resolve;
+parser grammar Resolve;
+
+options {
+	tokenVocab=ResolveLexer;
+}
 
 module
     :   precisModule
-    |   conceptModule
-   // |   conceptImplModule
-    |   facilityModule
-    |   extensionImplModule
-    |   extensionModule
-    ;
-
-conceptModule
-    :   'Concept' name=ID ('<' genericType (',' genericType)* '>')?
-        (specModuleParameterList)? ';'?
-        (usesList)?
-        (requiresClause)?
-        (conceptBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-conceptBlock
-    :   ( typeModelDecl
-        | operationDecl
-        | mathDefinitionDecl
-        | specModuleInit
-        | constraintClause
-        )*
-    ;
-
-// extension module
-
-extensionModule
-    :   'Extension' name=ID (specModuleParameterList)?
-        'for' concept=ID ';'?
-        (usesList)?
-        (requiresClause)?
-        (extensionBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-extensionBlock
-    :   ( operationDecl
-        | typeModelDecl
-        | mathDefinitionDecl
-        )*
-    ;
-
-// implementation modules
-
-/*conceptImplModule
-    :   'Implementation' name=ID (implModuleParameterList)?
-        'for' concept=ID ';'
-        (usesList)?
-        (requiresClause)?
-        (implBlock)
-        'end' closename=ID ';' EOF
-    ;
-*/
-
-extensionImplModule
-   :   'Implementation' name=ID (implModuleParameterList)?
-       'for' enhancement=ID 'of' concept=ID ';'?
-       (usesList)?
-       (requiresClause)?
-       (implBlock)
-       'end' closename=ID ';'? EOF
-   ;
-
-implBlock
-    :   ( typeRepresentationDecl
-        | operationProcedureDecl
-        | procedureDecl
-        | facilityDecl
-        )*
-    ;
-
-// facility modules
-
-facilityModule
-    :   'Facility' name=ID ';'?
-        (usesList)?
-        (requiresClause)?
-        (facilityBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-facilityBlock
-    :   ( mathDefinitionDecl
-        | operationProcedureDecl
-        | facilityDecl
-        | typeRepresentationDecl
-        )*
     ;
 
 precisModule
-    :   'Precis' name=ID ';'?
+    :   PRECIS name=ID SEMI
         (usesList)?
         precisBlock
-        'end' closename=ID ';'? EOF
+        END closename=ID SEMI EOF
     ;
 
 precisBlock
     :   ( mathDefinitionDecl
-        | mathAssertionDecl
+        | mathCategoricalDefinitionDecl
+        | mathInductiveDefinitionDecl
+        | mathTheoremDecl
         )*
     ;
 
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'?
-    ;
-
-// parameter and parameter-list related rules
-
-operationParameterList
-    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
-    ;
-
-specModuleParameterList
-    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
-    ;
-
-implModuleParameterList
-    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
-    ;
-
-specModuleParameterDecl
-    :   parameterDeclGroup
-    |   mathDefinitionDecl
-    ;
-
-implModuleParameterDecl
-    :   parameterDeclGroup
-    |   operationDecl
-    ;
-
-parameterDeclGroup
-    :   parameterMode ID (',' ID)* ':' type
-    ;
-
-parameterMode
-    :   ( 'alters'
-        | 'updates'
-        | 'clears'
-        | 'restores'
-        | 'preserves'
-        | 'replaces'
-        | 'evaluates' )
-    ;
-
-variableDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'?
-    ;
-
-// statements
-
-stmt
-    :   assignStmt
-    |   swapStmt
-    |   callStmt
-    |   whileStmt
-    |   ifStmt
-    ;
-
-assignStmt
-    :   left=progVarExp ':=' right=progExp ';'?
-    ;
-
-swapStmt
-    :   left=progVarExp ':=:' right=progVarExp ';'?
-    ;
-
-callStmt
-    :   progExp ';'?
-    ;
-
-whileStmt
-    :   'While' progExp
-        ('maintaining' mathExp ';'?)?
-        ('decreasing' mathExp ';'?)? 'do'
-        (stmt)*
-        'end' ';'?
-    ;
-
-ifStmt
-    :   'If' progExp 'then' stmt* (elsePart)? 'end' ';'?
-    ;
-
-elsePart
-    :   'else' stmt*
-    ;
-
-// type and record related rules
-
-type
-    :   (qualifier=ID '::')? name=ID
-    ;
-
-genericType
-    :   ID
-    ;
-
-record
-    :   'Record' (recordVariableDeclGroup)+ 'end'
-    ;
-
-recordVariableDeclGroup
-    :   ID (',' ID)* ':' type ';'?
-    ;
-
-typeModelDecl
-    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
-        'exemplar' exemplar=ID ';'?
-        (constraintClause)?
-        (typeModelInit)?
-    ;
-
-
-typeRepresentationDecl
-    :   'Type' name=ID '=' (type|record) ';'?
-        (conventionClause)?
-        (correspondenceClause)?
-        (typeImplInit)?
-    ;
-
-// type initialization rules
-
-specModuleInit
-    :   'Facility_Init' (requiresClause)? (ensuresClause)?
-    ;
-
-typeModelInit
-    :   'initialization' (ensuresClause)?
-    ;
-
-typeImplInit
-    :   'initialization' (ensuresClause)?
-        (variableDeclGroup)* (stmt)*
-        'end' ';'?
+    :   USES ID (COMMA ID)* SEMI
     ;
 
 // math constructs
 
-mathAssertionDecl
-    :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
+mathTheoremDecl
+    :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
     ;
 
-//The '(COMMA ID)?' is reserved for the variable we're inducting over
-//in the context of an inductive defn
 mathDefinitionSig
-    :   name=mathSymbolName ('('
-            mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
-            ':' mathTypeExp
+    :   mathPrefixDefinitionSig
+    |   mathInfixDefinitionSig
+    ;
+
+mathInfixDefinitionSig
+    :   LPAREN mathVariableDecl RPAREN name=mathSymbolName
+        LPAREN mathVariableDecl RPAREN COLON mathTypeExp
+    ;
+
+mathPrefixDefinitionSig
+    :   name=mathSymbolName (LPAREN
+                mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN)?
+                COLON mathTypeExp
     ;
 
 mathSymbolName
     :   ID
-    |   ('+'|'-'|'*'|'\\'|'...'|'..'|'|'|'||'|'<'|'>'|'<='|'>='|'o'|'*'|INT)
-    |   '|' '...' '|'
-    |   '<' '...' '>'
-    |   '||' '...' '||'
+    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT|NOT)
+    |   BAR TRIPLEDOT BAR
+    |   LT TRIPLEDOT GT
+    |   DBL_BAR TRIPLEDOT DBL_BAR
+    |   LDIVIDE TRIPLEDOT DIVIDE
+    ;
+
+mathCategoricalDefinitionDecl
+    :   CATEGORICAL DEFINITION FOR
+        mathPrefixDefinitionSig (COMMA mathPrefixDefinitionSig)+
+        IS mathAssertionExp SEMI
+    ;
+
+mathDefinesDefinitionDecl
+    :   DEFINES ID (COMMA ID)* COLON mathTypeExp SEMI
     ;
 
 mathDefinitionDecl
-    :   'Definition' mathDefinitionSig ('is' mathAssertionExp)? ';'?
+    :   (IMPLICIT)? DEFINITION mathDefinitionSig
+        (IS mathAssertionExp)? SEMI
+    ;
+
+mathInductiveDefinitionDecl
+    :   INDUCTIVE DEFINITION mathDefinitionSig IS
+        BASE_CASE mathAssertionExp SEMI
+        INDUCTIVE_CASE mathAssertionExp SEMI
     ;
 
 mathVariableDeclGroup
-    :   ID (',' ID)* ':' mathTypeExp
+    :   ID (COMMA ID)* COLON mathTypeExp
     ;
 
 mathVariableDecl
-    :   ID ':' mathTypeExp
-    ;
-
-// facilitydecls, enhancements, etc
-
-facilityDecl
-    :   'Facility' name=ID 'is' spec=ID ('<' type (',' type)* '>')?
-        (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
-        'by' impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* ';'?
-    ;
-
-enhancementPairDecl
-    :   'extended' 'by' spec=ID ('<' type (',' type)* '>')?
-        (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)?
-    ;
-
-moduleArgumentList
-    :   '(' moduleArgument (',' moduleArgument)* ')'
-    ;
-
-moduleArgument
-    :   progExp
-    ;
-
-// functions
-
-operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'?
-        (requiresClause)? (ensuresClause)?
-    ;
-
-operationProcedureDecl
-    :   'Operation'
-        name=ID operationParameterList (':' type)? ';'?
-        (requiresClause)?
-        (ensuresClause)?
-        (recursive='Recursive')? 'Procedure'
-        (variableDeclGroup)*
-        (stmt)*
-        'end' closename=ID ';'?
-    ;
-
-procedureDecl
-    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
-        (':' type)? ';'?
-        (variableDeclGroup)*
-        (stmt)*
-        'end' closename=ID ';'?
+    :   ID COLON mathTypeExp
     ;
 
 // mathematical clauses
 
-affectsClause
-    :   'affects' parameterMode affectsItem (',' affectsItem)*
-    ;
-
-affectsItem
-    :   parameterMode (qualifier=ID '::')? name=ID
-    ;
-
 requiresClause
-    :   'requires' mathAssertionExp (entailsClause)? ';'?
+    :   REQUIRES mathAssertionExp (entailsClause)? SEMI
     ;
 
 ensuresClause
-    :   'ensures' mathAssertionExp ';'?
+    :   ENSURES mathAssertionExp SEMI
     ;
 
 constraintClause
-    :   'constraint' mathAssertionExp ';'?
+    :   CONSTRAINT mathAssertionExp SEMI
     ;
 
 conventionClause
-    :   'convention' mathAssertionExp (entailsClause)? ';'?
+    :   CONVENTION mathAssertionExp (entailsClause)? SEMI
     ;
 
 correspondenceClause
-    :   'correspondence' mathAssertionExp ';'?
+    :   CORRESPONDENCE mathAssertionExp SEMI
     ;
 
 entailsClause
-    :   'which' 'entails' mathExp (',' mathExp)* ':' mathTypeExp
+    :   ENTAILS mathExp (COMMA mathExp)* COLON mathTypeExp
     ;
 
 // mathematical expressions
@@ -399,147 +157,85 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVariableDeclGroup COMMA mathAssertionExp
     ;
 
 mathExp
-    :   op='not' mathExp                                    #mathUnaryApplyExp
-    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'  #mathPrefixApplyExp
-    |   mathExp op=('*'|'/'|'~') mathExp                    #mathInfixApplyExp
-    |   mathExp op=('+'|'-'|'.-') mathExp                   #mathInfixApplyExp
-    |   mathExp op=('..'|'->') mathExp                      #mathInfixApplyExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp        #mathInfixApplyExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp            #mathInfixApplyExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp              #mathInfixApplyExp
-    |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
-    |   mathExp op='implies' mathExp                        #mathInfixApplyExp
-    |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
-    |   '(' mathAssertionExp ')'                            #mathNestedExp
-    |   mathPrimaryExp                                      #mathPrimeExp
+    :   functionExp=mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #mathPrefixApplyExp
+    |   mathExp op=(MULT|DIVIDE|TILDE) mathExp                      #mathInfixApplyExp
+    |   mathExp op=(PLUS|MINUS) mathExp                             #mathInfixApplyExp
+    |   mathExp op=(RANGE|RARROW) mathExp                           #mathInfixApplyExp
+    |   mathExp op=(CAT|UNION|INTERSECT) mathExp                    #mathInfixApplyExp
+    |   mathExp op=(IS_IN|IS_NOT_IN) mathExp                        #mathInfixApplyExp
+    |   mathExp op=(LTE|GTE|GT|LT) mathExp                          #mathInfixApplyExp
+    |   mathExp op=(EQUALS|NEQUALS) mathExp                         #mathInfixApplyExp
+    |   mathExp op=IMPLIES mathExp                                  #mathInfixApplyExp
+    |   mathExp op=(AND|OR) mathExp                                 #mathInfixApplyExp
+    |   mathExp op=COLON mathTypeExp                                #mathTypeAssertionExp
+    |   LPAREN mathAssertionExp RPAREN                              #mathNestedExp
+    |   mathPrimaryExp                                              #mathPrimeExp
     ;
 
 mathPrimaryExp
     :   mathLiteralExp
-    |   mathSymbolExp
     |   mathCrossTypeExp
+    |   mathSymbolExp
+    |   mathOutfixExp
+    |   mathSetComprehensionExp
     |   mathSetExp
-    |   mathSetRestrictionExp
-    |   mathOutfixApplyExp
-    |   mathTupleExp
-    |   mathAlternativeExp
-    |   mathSegmentsExp
     |   mathLambdaExp
-    ;
-
-mathSegmentsExp
-    :   mathSymbolExp ('.' mathSymbolExp)+ ('(' mathExp (',' mathExp)* ')')?
-    ;
-
-mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
+    |   mathAlternativeExp
+    |   mathTupleExp
+    |   mathSegmentsExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID '::')? ('true'|'false')       #mathBooleanLiteralExp
-    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
+    :   (qualifier=ID COLONCOLON)? (TRUE|FALSE)     #mathBooleanLiteralExp
+    |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
     ;
 
 mathCrossTypeExp
-    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
+    :   CART_PROD (mathVariableDeclGroup SEMI)+ END
     ;
 
-mathOutfixApplyExp
-    :   lop='<' mathExp rop='>'
-    |   lop='|' mathExp rop='|'
-    |   lop='||' mathExp rop='||'
+mathSymbolExp
+    :   (incoming=AT)? (qualifier=ID COLONCOLON)? name=mathSymbolName
     ;
 
-mathSetRestrictionExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'
+mathOutfixExp
+    :   lop=LT mathExp rop=GT
+    |   lop=BAR mathExp rop=BAR
+    |   lop=DBL_BAR mathExp rop=DBL_BAR
+    ;
+
+mathSetComprehensionExp
+    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE
     ;
 
 mathSetExp
-    :   '{' (mathExp (',' mathExp)*)? '}'
+    :    LBRACE (mathExp (COMMA mathExp)*)? RBRACE
     ;
 
 mathLambdaExp
-    :   'lambda' '(' mathVariableDeclGroup
-        (',' mathVariableDeclGroup)* ')' '.'  mathExp
+    :   LAMBDA LPAREN mathVariableDeclGroup
+        (COMMA mathVariableDeclGroup)* RPAREN DOT LPAREN mathExp RPAREN
     ;
 
 mathAlternativeExp
-    :   '{{' (mathAlternativeItemExp)+ '}}'
+    :   DBL_LBRACE (mathAlternativeItemExp)+ DBL_RBRACE
     ;
 
 mathAlternativeItemExp
-    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
+    :   result=mathExp (IF condition=mathExp SEMI | OTHERWISE SEMI)
     ;
 
 mathTupleExp
-    :   '(' mathExp (',' mathExp)+ ')'
+    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
     ;
 
-// program expressions
-
-//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
-//we could really use some unit tests to perhaps check precendence so that in the future when
-//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
-progExp
-    :   progPrimary                                     #progPrimaryExp
-    |   '(' progExp ')'                                 #progNestedExp
-    |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('++'|'--')                          #progPostfixExp
-    |   progExp op='%' progExp                          #progInfixExp
-    |   progExp op=('*'|'/'|'++') progExp               #progInfixExp
-    |   progExp op=('+'|'-') progExp                    #progInfixExp
-    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
-    |   progExp op=('='|'/=') progExp                   #progInfixExp
-    |   progExp op='and' progExp                        #progInfixExp
-    |   progExp op='or' progExp                         #progInfixExp
+//Segments can end in an application but (not that I'm aware of atleast) they
+//can't contain one in the middle .. hopefully :) ...
+mathSegmentsExp
+    :   mathSymbolExp (DOT mathSymbolExp)+
+        (LPAREN mathExp (COMMA mathExp)* RPAREN)?
     ;
-
-progPrimary
-    :   progLiteralExp
-    |   progVarExp
-    |   progParamExp
-    ;
-
-progVarExp
-    :   progNamedExp
-    |   progMemberExp
-    ;
-
-progParamExp
-    :   (qualifier=ID '::')? name=ID
-        '(' (progExp (',' progExp)*)? ')'
-    ;
-
-progNamedExp
-    :   (qualifier=ID '::')? name=ID
-    ;
-
-progMemberExp
-    :   (progParamExp|progNamedExp) ('.' ID)+
-    ;
-
-progLiteralExp
-    :   ('true'|'false')    #progBooleanLiteralExp
-    |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
-    |   STRING              #progStringLiteralExp
-    ;
-
-FORALL : ('forall'|'Forall') ;
-EXISTS : ('exists'|'Exists') ;
-
-LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
-COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
-
-ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
-INT : [0-9]+ ;
-
-CHAR: '\'' . '\'' ;
-STRING :  '"' (ESC | ~["\\])* '"' ;
-fragment ESC :   '\\' ["\bfnrt] ;
-
-WS : [ \t\n\r]+ -> channel(HIDDEN) ;

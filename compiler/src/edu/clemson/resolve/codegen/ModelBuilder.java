@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.*;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
@@ -13,7 +13,7 @@ public class ModelBuilder extends ResolveBaseListener {
     private final ModuleScopeBuilder moduleScope;
     private final JavaCodeGenerator gen;
     private final MathSymbolTable symtab;
-    private final AnnotatedTree tr;
+    private final AnnotatedModule tr;
 
     public ModelBuilder(JavaCodeGenerator g, MathSymbolTable symtab) {
         this.gen = g;

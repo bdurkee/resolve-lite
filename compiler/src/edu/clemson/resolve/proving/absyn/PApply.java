@@ -5,10 +5,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTFunction;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.*;
+import org.rsrg.semantics.MTFunction.MTFunctionBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,10 +26,9 @@ public class PApply extends PExp {
      * display an instance of {@link PApply}, specifically whether it should be
      * displayed as an infix, outfix, prefix, or postfix style application.
      *
-     * <p>
-     * Note that while this enum indeed stands-in for the four subclasses we'd
-     * otherwise need to represent the application styles mentioned, we still
-     * can get specific visitor methods for each style (even with an enum)
+     * <p>Note that while this enum indeed stands-in for the four subclasses
+     * we'd otherwise need to represent the application styles mentioned, we
+     * still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
@@ -155,8 +152,7 @@ public class PApply extends PExp {
      * independent of the types of the actuals
      * (which are rightly embedded here in the argument {@code PExp}s).
      *
-     * <p>
-     * While this field in most cases will simply be an instance of
+     * <p>While this field in most cases will simply be an instance of
      * {@link PSymbol}, realize that it could also be something more 'exotic'
      * such as a {@code PLambda} or even another {@code PApply}.</p>
      */
@@ -192,7 +188,7 @@ public class PApply extends PExp {
     }
 
     public MTFunction getConservativePreApplicationType(TypeGraph g) {
-        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
+        return new MTFunctionBuilder(g, g.EMPTY_SET)
                 .paramTypes(arguments.stream()
                         .map(PExp::getMathType)
                         .collect(Collectors.toList())).build();
@@ -201,10 +197,16 @@ public class PApply extends PExp {
     public static MTFunction getConservativePreApplicationType(TypeGraph g,
                                                                List<? extends ParseTree> arguments,
                                                                ParseTreeProperty<MTType> types) {
-        return new MTFunction.MTFunctionBuilder(g, g.EMPTY_SET)
-                .paramTypes(arguments.stream()
-                        .map(types::get)
-                        .collect(Collectors.toList())).build();
+        MTFunctionBuilder preApplicationType =
+                new MTFunctionBuilder(g, g.EMPTY_SET);
+        for (ParseTree arg : arguments) {
+            MTType argType = types.get(arg);
+            if (argType == null) {
+                argType = MTInvalid.getInstance(g);
+            }
+            preApplicationType.paramTypes(argType);
+        }
+        return preApplicationType.build();
     }
 
     @Override public boolean containsName(String name) {
@@ -345,7 +347,8 @@ public class PApply extends PExp {
         return result;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
+    @Override protected Set<String> getSymbolNamesNoCache(
+            boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
         if (!excludeApplications) {
             result.addAll(functionPortion
@@ -386,7 +389,7 @@ public class PApply extends PExp {
         int structureHash = 0;
         int valueHash = functionPortion.valueHash;
 
-        if ( args.hasNext() ) {
+        if (args.hasNext()) {
             structureHash = 17;
             int argMod = 2;
             PExp arg;
@@ -408,7 +411,7 @@ public class PApply extends PExp {
             result = (oAsPApply.valueHash == valueHash)
                     && functionPortion.equals(oAsPApply.functionPortion);
 
-            if ( result ) {
+            if (result) {
                 Iterator<PExp> localArgs = arguments.iterator();
                 Iterator<PExp> oArgs = oAsPApply.arguments.iterator();
 

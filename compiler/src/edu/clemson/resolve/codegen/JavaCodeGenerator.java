@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.OutputModelObject;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -13,7 +13,7 @@ public class JavaCodeGenerator extends AbstractCodeGenerator {
     public static final String LANGUAGE = "Java";
 
     public JavaCodeGenerator(@NotNull RESOLVECompiler compiler,
-                             @NotNull AnnotatedTree module) {
+                             @NotNull AnnotatedModule module) {
         super(compiler, module, LANGUAGE);
     }
 

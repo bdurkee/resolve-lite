@@ -1,9 +1,9 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
-    private final AnnotatedTree tr;
+    private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
     private final TypeGraph g;
 
@@ -83,7 +83,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return outputFile;
     }
 
-    @Override public void enterModule(ResolveParser.ModuleContext ctx) {
+    @Override public void enterModule(Resolve.ModuleContext ctx) {
         try {
             moduleScope = symtab.getModuleScope(tr.getName());
         }
@@ -91,9 +91,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
             e.printStackTrace();
         }
     }
-
+/*
     @Override public void enterFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+            Resolve.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
@@ -213,7 +213,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
-    }
+    }*/
 
     public List<ProgParameterSymbol> getAllModuleParameterSyms() {
         ParserRuleContext moduleCtx = moduleScope.getDefiningTree();
@@ -227,12 +227,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
             modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
         }
         else */
-        if (moduleCtx instanceof ResolveParser.ExtensionImplModuleContext) {
+      /*  if (moduleCtx instanceof ResolveParser.ExtensionImplModuleContext) {
             ResolveParser.ExtensionImplModuleContext moduleCtxAsEnhImpl =
                     (ResolveParser.ExtensionImplModuleContext)moduleCtx;
             modulesToSearch.add(moduleCtxAsEnhImpl.concept.getText());
             modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
-        }
+        }*/
         for (String moduleName : modulesToSearch) {
             try {
                 result.addAll(symtab.getModuleScope(moduleName)
@@ -308,7 +308,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }*/
 
-    @Override public void enterOperationProcedureDecl(
+   /* @Override public void enterOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
@@ -439,13 +439,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         g.formInitializationPredicate(type, t.getText()));
             }
         }
-    }
+    }*/
 
     //-----------------------------------------------
     // S T A T S
     //-----------------------------------------------
 
-    @Override public void exitStmt(ResolveParser.StmtContext ctx) {
+   /* @Override public void exitStmt(ResolveParser.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
@@ -477,12 +477,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s = null;
         PApply callExp = (PApply)tr.mathPExps.get(ctx.progExp());
         OperationSymbol op = getOperation(moduleScope, callExp);
-       /* if (inSimpleForm(op.getEnsures(), op.getParameters())) {
+        if (inSimpleForm(op.getEnsures(), op.getParameters())) {
             symtab.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     EXPLICIT_CALL_APPLICATION, callExp);
         }
-        else {*/
+        else {
             System.out.println("Applying GENERAL call rule");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     GENERAL_CALL_APPLICATION, callExp);
@@ -635,5 +635,5 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
         return resultingClause;
-    }
+    }*/
 }

@@ -3,6 +3,11 @@ package edu.clemson.resolve;
 import edu.clemson.resolve.compiler.DefaultCompilerListener;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.compiler.RESOLVEMessage;
+import edu.clemson.resolve.parser.ResolveLexer;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.Utils;
 import org.junit.Before;
 import org.junit.rules.TestRule;
@@ -230,8 +235,6 @@ public abstract class BaseTest {
                     "java", "-classpath", tmpdir+ PATHSEP +CLASSPATH,
                     className, new File(tmpdir, "input").getAbsolutePath()
             };
-//			String cmdLine = Utils.join(args, " ");
-//			System.err.println("execParser: "+cmdLine);
             Process process =
                     Runtime.getRuntime().exec(args, null, new File(tmpdir));
             StreamVacuum stdoutVacuum = new StreamVacuum(process.getInputStream());
