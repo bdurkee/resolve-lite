@@ -604,7 +604,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             symtab.startScope(sig);
             this.visit(sig);
             symtab.endScope();
-
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, sig.name.getText(),
@@ -628,18 +627,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ParserRuleContext baseCase = ctx.mathAssertionExp(0);
         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
 
+        //note that 'sig' adds a binding for the name to the active scope
+        //so baseCase and indHypo will indeed be able to see the symbol we're
+        //introducing here.
         this.visit(sig);
         this.visit(baseCase);
         this.visit(indHypo);
 
-        MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
         checkMathTypes(baseCase, g.BOOLEAN);
         checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
-        Resolve.MathSymbolNameContext name = ctx.mathDefinitionSig()
-                .mathInfixDefinitionSig() != null ?
-                ctx.mathDefinitionSig().mathInfixDefinitionSig().mathSymbolName() :
-                ctx.mathDefinitionSig().mathPrefixDefinitionSig().mathSymbolName();
+        MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
+        Resolve.MathSymbolNameContext name =
+                getSignatureName(ctx.mathDefinitionSig());
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
@@ -670,19 +670,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTType defnType = tr.mathTypes.get(sig);
         MTType defnTypeValue = null;
 
-        Resolve.MathSymbolNameContext name = null;
-        if (ctx.mathDefinitionSig().mathPrefixDefinitionSig() != null) {
-            name = ctx.mathDefinitionSig().mathPrefixDefinitionSig().name;
-        }
-        else if (ctx.mathDefinitionSig().mathInfixDefinitionSig() != null){
-            name = ctx.mathDefinitionSig().mathInfixDefinitionSig().name;
-        }
-        else {
-            throw new UnsupportedOperationException("definition signature " +
-                    "style not yet handled: " +
-                    ctx.mathDefinitionSig().getText());
-        }
-       
+        Resolve.MathSymbolNameContext name =
+                getSignatureName(ctx.mathDefinitionSig());
+
         if (ctx.mathAssertionExp() != null) {
             //Note: We DO have to visit the rhs assertion explicitly here,
             //as it exists a level above the signature.
@@ -704,6 +694,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    private Resolve.MathSymbolNameContext getSignatureName(
+            @NotNull Resolve.MathDefinitionSigContext signature) {
+        Resolve.MathSymbolNameContext result = null;
+        if (signature.mathPrefixDefinitionSig() != null) {
+            result = signature.mathPrefixDefinitionSig().name;
+        }
+        else if (signature.mathInfixDefinitionSig() != null){
+            result = signature.mathInfixDefinitionSig().name;
+        }
+        else {
+            throw new UnsupportedOperationException("definition signature " +
+                    "style not yet handled: " + signature.getText());
+        }
+        return result;
+    }
     /**
      * Since 'MathDefinitionSig' appears all over the place within our three
      * styles of definitions (categorical, standard, and inductive), we simply
@@ -720,7 +725,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     @Override public Void visitMathDefinitionSig(
             Resolve.MathDefinitionSigContext ctx) {
-        this.visitChildren(ctx);
+        this.visit(ctx.getChild(0));
+        chainMathTypes(ctx, ctx.getChild(0));
         return null;
     }
 
@@ -733,8 +739,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathInfixDefinitionSig(
             Resolve.MathInfixDefinitionSigContext ctx) {
-        typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(),
-                ctx.mathTypeExp(), ctx.mathSymbolName().getStart());
+        typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(), 
+                ctx.mathTypeExp(), ctx.name.getStart());
         return null;
     }
 
@@ -749,10 +755,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         walkingDefParams = false;
         activeQuantifications.pop();
 
-        //next, visit the definitions 'return type' to give it a type
+        //next, visit the definition's 'return type' to give it a type
         this.visit(type);
 
-        //finally, build the full type of this definitions signature
+        //finally, build the full type of this definition's signature
         //If there are no params, then it is just the sym after the ':'
         MTType defnType = tr.mathTypeValues.get(type);
         MTFunction.MTFunctionBuilder builder =
@@ -783,13 +789,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         builder.paramTypes(grpType);
                         builder.paramNames(t.getText());
                     }
-                    //if the definition has parameters then it's type should be an
-                    //MTFunction (e.g. something like a * b ... -> ...)
-                    defnType = builder.build();
+
                 }
             }
+            //if the definition has parameters then it's type should be an
+            //MTFunction (e.g. something like a * b ... -> ...)
+            defnType = builder.build();
         }
         try {
+            String n = name.getText();
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
                             defnType, null, ctx, getRootModuleID()));
@@ -1586,7 +1594,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                          String symbolName) {
 
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
-        if ( intendedEntry == null ) {
+        if (intendedEntry == null) {
             tr.mathTypes.put(ctx, g.INVALID);
         }
         else {

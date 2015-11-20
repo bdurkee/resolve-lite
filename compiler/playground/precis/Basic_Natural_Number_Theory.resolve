@@ -4,7 +4,7 @@ Precis Basic_Natural_Number_Theory;
     Categorical Definition for N : SSet, 0 : N, suc : N -> N
         is Is_Monogeneric_for(N, 0, suc);
 
-    /*Inductive Definition (m : N) + (n : N) : N is
+    Inductive Definition (m : N) + (n : N) : N is
          (i.) true;
-        (ii.) m + suc(n) = suc(m + n);*/
+        (ii.) m + suc(n) = suc(m + n);
 end Basic_Natural_Number_Theory;

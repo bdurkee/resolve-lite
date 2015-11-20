@@ -389,7 +389,7 @@ public class PApply extends PExp {
         int structureHash = 0;
         int valueHash = functionPortion.valueHash;
 
-        if ( args.hasNext() ) {
+        if (args.hasNext()) {
             structureHash = 17;
             int argMod = 2;
             PExp arg;
@@ -411,7 +411,7 @@ public class PApply extends PExp {
             result = (oAsPApply.valueHash == valueHash)
                     && functionPortion.equals(oAsPApply.functionPortion);
 
-            if ( result ) {
+            if (result) {
                 Iterator<PExp> localArgs = arguments.iterator();
                 Iterator<PExp> oArgs = oAsPApply.arguments.iterator();
 
