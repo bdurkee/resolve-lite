@@ -1,6 +1,5 @@
 package org.rsrg.semantics.symbol;
 
-import edu.clemson.resolve.parser.Resolve;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.MathSymbolTable;
@@ -28,7 +27,7 @@ public class FacilitySymbol extends Symbol {
         super(name, definingTree, moduleID);
     }
 
-    /*public FacilitySymbol(Resolve.FacilityDeclContext facility,
+    /*public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
             String moduleID,
             ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             MathSymbolTable scopeRepo) {

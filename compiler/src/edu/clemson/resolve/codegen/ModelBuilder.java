@@ -22,15 +22,15 @@ public class ModelBuilder extends ResolveBaseListener {
         this.tr = g.getModule();
     }
 
-  /*  @Override public void exitTypeModelDecl(Resolve.TypeModelDeclContext ctx) {
+  /*  @Override public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
-    @Override public void exitOperationDecl(Resolve.OperationDeclContext ctx) {
+    @Override public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
         f.isStatic = withinFacilityModule();
-        for (Resolve.ParameterDeclGroupContext grp : ctx
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
                 .operationParameterList().parameterDeclGroup()) {
             for (TerminalNode id : grp.ID()) {
                 f.params.add((ParameterDef) built.get(id));
@@ -40,7 +40,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
+            ResolveParser.OperationProcedureDeclContext ctx) {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
@@ -49,7 +49,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+    @Override public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
@@ -60,22 +60,22 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected FunctionImpl buildFunctionImpl(String name,
-                                             Resolve.TypeContext type,
-                                             List<Resolve.ParameterDeclGroupContext> paramGroupings,
-                                             List<Resolve.VariableDeclGroupContext> variableGroupings,
-                                             List<Resolve.StmtContext> stats) {
+                                             ResolveParser.TypeContext type,
+                                             List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
+                                             List<ResolveParser.VariableDeclGroupContext> variableGroupings,
+                                             List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
-        for (Resolve.ParameterDeclGroupContext grp : paramGroupings) {
+        for (ResolveParser.ParameterDeclGroupContext grp : paramGroupings) {
             f.params.addAll(Utils.collect(ParameterDef.class, grp.ID(), built));
         }
-        for (Resolve.VariableDeclGroupContext grp : variableGroupings) {
+        for (ResolveParser.VariableDeclGroupContext grp : variableGroupings) {
             f.vars.addAll(Utils.collect(VariableDef.class, grp.ID(), built));
         }
-        for (Resolve.StmtContext s : stats) {
+        for (ResolveParser.StmtContext s : stats) {
             f.stats.add((Stat) built.get(s));
-            //Resolve returns are buried in an assignment
+            //ResolveParser returns are buried in an assignment
             //(specifically those assignments whose lhs == funcname)
             if ( s.assignStmt() != null
                     && s.assignStmt().left.getText().equals(name)
@@ -88,7 +88,7 @@ public class ModelBuilder extends ResolveBaseListener {
         return f;
     }
 
-    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+    @Override public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         FacilityDef f = new FacilityDef(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 new DecoratedFacilityInstantiation(ctx.spec.getText(),
                         ctx.impl.getText());
         basePtr.isProxied = false;
-        for (Resolve.TypeContext t : ctx.type()) {
+        for (ResolveParser.TypeContext t : ctx.type()) {
             try {
                 Symbol s =
                         moduleScope.queryForOne(new NameQuery(t.qualifier,
@@ -122,7 +122,7 @@ public class ModelBuilder extends ResolveBaseListener {
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
-        for (Resolve.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
+        for (ResolveParser.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
@@ -150,7 +150,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitVariableDeclGroup(
-            Resolve.VariableDeclGroupContext ctx) {
+            ResolveParser.VariableDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -159,7 +159,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitRecordVariableDeclGroup(
-            Resolve.RecordVariableDeclGroupContext ctx) {
+            ResolveParser.RecordVariableDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -167,13 +167,13 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitType(Resolve.TypeContext ctx) {
+    @Override public void exitType(ResolveParser.TypeContext ctx) {
         built.put(ctx, new TypeInit(buildQualifier(
                 ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
 
     @Override public void exitTypeRepresentationDecl(
-            Resolve.TypeRepresentationDeclContext ctx) {
+            ResolveParser.TypeRepresentationDeclContext ctx) {
         MemberClassDef representationClass =
                 new MemberClassDef(ctx.name.getText());
         String exemplarName = "";
@@ -192,7 +192,7 @@ public class ModelBuilder extends ResolveBaseListener {
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
         if ( ctx.record() != null ) {
-            for (Resolve.RecordVariableDeclGroupContext grp : ctx
+            for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
                     .record().recordVariableDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.ID(), built));
@@ -209,18 +209,18 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitParameterDeclGroup(
-            Resolve.ParameterDeclGroupContext ctx) {
+            ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.ID()) {
             built.put(t, new ParameterDef(t.getText()));
         }
     }
 
-    @Override public void exitModule(Resolve.ModuleContext ctx) {
+    @Override public void exitModule(ResolveParser.ModuleContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
     @Override public void exitModuleArgument(
-            Resolve.ModuleArgumentContext ctx) {
+            ResolveParser.ModuleArgumentContext ctx) {
         Expr e = (Expr) built.get(ctx.progExp());
         if ( e instanceof VarNameRef ) {
             //If this is true, then we're likely dealing with a math definition
@@ -232,8 +232,8 @@ public class ModelBuilder extends ResolveBaseListener {
             //Todo: I think it's ok to do getChild(0) here; we know we're
             //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
             //Todo2: this line below is pretty fugly. Change me eventually.
-            Resolve.ProgNamedExpContext argAsNamedExp =
-                    (Resolve.ProgNamedExpContext) ctx.progExp()
+            ResolveParser.ProgNamedExpContext argAsNamedExp =
+                    (ResolveParser.ProgNamedExpContext) ctx.progExp()
                             .getChild(0).getChild(0).getChild(0);
             try {
                 OperationSymbol s =
@@ -264,29 +264,29 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitStmt(Resolve.StmtContext ctx) {
+    @Override public void exitStmt(ResolveParser.StmtContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
+    @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         built.put(ctx, buildPrimitiveInfixStat("assign", ctx.left, ctx.right));
     }
 
-    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
+    @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
         built.put(ctx, buildPrimitiveInfixStat("swap", ctx.left, ctx.right));
     }
 
-    @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
+    @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         built.put(ctx, new CallStat((Expr) built.get(ctx.progExp())));
     }
 
-    @Override public void exitWhileStmt(Resolve.WhileStmtContext ctx) {
+    @Override public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
         WhileStat w = new WhileStat((Expr) built.get(ctx.progExp()));
         w.stats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
         built.put(ctx, w);
     }
 
-    @Override public void exitIfStmt(Resolve.IfStmtContext ctx) {
+    @Override public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
         IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
         i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
         if ( ctx.elsePart() != null ) {
@@ -296,19 +296,19 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, i);
     }
 
-    @Override public void exitProgNestedExp(Resolve.ProgNestedExpContext ctx) {
+    @Override public void exitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
         built.put(ctx, built.get(ctx.progExp()));
     }
 
-    @Override public void exitProgPrimaryExp(Resolve.ProgPrimaryExpContext ctx) {
+    @Override public void exitProgPrimaryExp(ResolveParser.ProgPrimaryExpContext ctx) {
         built.put(ctx, built.get(ctx.progPrimary()));
     }
 
-    @Override public void exitProgPrimary(Resolve.ProgPrimaryContext ctx) {
+    @Override public void exitProgPrimary(ResolveParser.ProgPrimaryContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitProgParamExp(Resolve.ProgParamExpContext ctx) {
+    @Override public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
         if ( referencesOperationParameter(ctx.name.getText()) ) {
             built.put(ctx, new MethodCall.OperationParameterMethodCall(
@@ -328,7 +328,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 .isEmpty();
     }
 
-    @Override public void exitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
+    @Override public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         if (ctx.NOT() != null) {
             built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
         }
@@ -342,11 +342,11 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitProgPostfixExp(
-            Resolve.ProgPostfixExpContext ctx) {
+            ResolveParser.ProgPostfixExpContext ctx) {
         built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
     }
 
-    @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
+    @Override public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
     }
 
@@ -365,16 +365,16 @@ public class ModelBuilder extends ResolveBaseListener {
                 o.name.getText(), Utils.collect(Expr.class, args, built));
     }
 
-    @Override public void exitProgVarExp(Resolve.ProgVarExpContext ctx) {
+    @Override public void exitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
+    @Override public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
         built.put(ctx, new VarNameRef(new NormalQualifier("this"),
                 ctx.name.getText()));
     }
 
-    @Override public void exitProgMemberExp(Resolve.ProgMemberExpContext ctx) {
+    @Override public void exitProgMemberExp(ResolveParser.ProgMemberExpContext ctx) {
         List<MemberRef> refs = ctx.ID()
                 .stream()
                 .map(t -> new MemberRef(t.getText(), tr.progTypes.get(t)))
@@ -395,31 +395,31 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitProgBooleanLiteralExp(
-            Resolve.ProgBooleanLiteralExpContext ctx) {
+            ResolveParser.ProgBooleanLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Boolean_Template",
                 "Std_Boolean_Fac"), "Boolean", ctx.getText()));
     }
 
     @Override public void exitProgIntegerLiteralExp(
-            Resolve.ProgIntegerLiteralExpContext ctx) {
+            ResolveParser.ProgIntegerLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
                 "Std_Integer_Fac"), "Integer", ctx.getText()));
     }
 
     @Override public void exitProgCharacterLiteralExp(
-            Resolve.ProgCharacterLiteralExpContext ctx) {
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Character_Template",
                 "Std_Character_Fac"), "Character", ctx.getText()));
     }
 
     @Override public void exitProgStringLiteralExp(
-            Resolve.ProgStringLiteralExpContext ctx) {
+            ResolveParser.ProgStringLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
                 "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
     }
 
     @Override public void exitConceptImplModule(
-            Resolve.ConceptImplModuleContext ctx) {
+            ResolveParser.ConceptImplModuleContext ctx) {
         ModuleFile file = buildFile();
         ConceptImplModule impl =
                 new ConceptImplModule(ctx.name.getText(),
@@ -446,7 +446,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, file);
     }
 
-    @Override public void exitFacilityModule(Resolve.FacilityModuleContext ctx) {
+    @Override public void exitFacilityModule(ResolveParser.FacilityModuleContext ctx) {
         ModuleFile file = buildFile();
         FacilityImplModule impl =
                 new FacilityImplModule(ctx.name.getText(), file);
@@ -463,7 +463,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, file);
     }
 
-    @Override public void exitConceptModule(Resolve.ConceptModuleContext ctx) {
+    @Override public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
         ModuleFile file = buildFile();
         SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
 
@@ -481,7 +481,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitEnhancementModule(
-            Resolve.EnhancementModuleContext ctx) {
+            ResolveParser.EnhancementModuleContext ctx) {
         ModuleFile file = buildFile();
         SpecModule spec = new SpecModule.EnhancementModule(ctx.name.getText(),
                 ctx.concept.getText(), file);
@@ -502,7 +502,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitEnhancementImplModule(
-            Resolve.EnhancementImplModuleContext ctx) {
+            ResolveParser.EnhancementImplModuleContext ctx) {
         ModuleFile file = buildFile();
         EnhancementImplModule impl =
                 new EnhancementImplModule(ctx.name.getText(),
@@ -537,7 +537,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean withinFacilityModule() {
         ParseTree t = gen.getModule().getRoot();
-        return t.getChild(0) instanceof Resolve.FacilityModuleContext;
+        return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
     }
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
@@ -555,17 +555,17 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else { //was s defined in our parent concept or enhancement?
             ParseTree thisTree = moduleScope.getDefiningTree();
-            if (thisTree instanceof Resolve.ModuleContext) {
+            if (thisTree instanceof ResolveParser.ModuleContext) {
                 thisTree = thisTree.getChild(0);
             }
-            if ( thisTree instanceof Resolve.ConceptImplModuleContext ) {
-                Resolve.ConceptImplModuleContext asConceptImpl =
-                        (Resolve.ConceptImplModuleContext) thisTree;
+            if ( thisTree instanceof ResolveParser.ConceptImplModuleContext ) {
+                ResolveParser.ConceptImplModuleContext asConceptImpl =
+                        (ResolveParser.ConceptImplModuleContext) thisTree;
                 return symbolModuleID.equals(asConceptImpl.concept.getText());
             }
-            else if ( thisTree instanceof Resolve.EnhancementImplModuleContext ) {
-                Resolve.EnhancementImplModuleContext asEnhancementImpl =
-                        (Resolve.EnhancementImplModuleContext) thisTree;
+            else if ( thisTree instanceof ResolveParser.EnhancementImplModuleContext ) {
+                ResolveParser.EnhancementImplModuleContext asEnhancementImpl =
+                        (ResolveParser.EnhancementImplModuleContext) thisTree;
                 return symbolModuleID.equals(asEnhancementImpl.concept.getText());
             }
         }

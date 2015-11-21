@@ -1,38 +1,20 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.application.*;
-import edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTFamily;
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTRepresentation;
-import org.rsrg.semantics.programtype.PTType;
-import org.rsrg.semantics.query.OperationQuery;
-import org.rsrg.semantics.query.SymbolTypeQuery;
-import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
-import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
-import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedModule tr;
@@ -83,7 +65,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return outputFile;
     }
 
-    @Override public void enterModule(Resolve.ModuleContext ctx) {
+    @Override public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
             moduleScope = symtab.getModuleScope(tr.getName());
         }
@@ -93,7 +75,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 /*
     @Override public void enterFacilityDecl(
-            Resolve.FacilityDeclContext ctx) {
+            ResolveParser.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
@@ -222,8 +204,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         modulesToSearch.add(moduleScope.getModuleID());
        /* if (moduleCtx instanceof ResolveParser.ConceptImplModuleContext) {
-            Resolve.ConceptImplModuleContext moduleCtxAsConceptImpl =
-                    (Resolve.ConceptImplModuleContext)moduleCtx;
+            ResolveParser.ConceptImplModuleContext moduleCtxAsConceptImpl =
+                    (ResolveParser.ConceptImplModuleContext)moduleCtx;
             modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
         }
         else */
@@ -245,7 +227,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
    /* @Override public void exitTypeRepresentationDecl(
-            Resolve.TypeRepresentationDeclContext ctx) {
+            ResolveParser.TypeRepresentationDeclContext ctx) {
         PExp constraint = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
         if (currentTypeReprSym == null) return;
@@ -268,7 +250,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
-    @Override public void enterTypeImplInit(Resolve.TypeImplInitContext ctx) {
+    @Override public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
         Scope s = symtab.scopes.get(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -285,7 +267,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         assertiveBlocks.push(block);
     }
 
-    @Override public void exitTypeImplInit(Resolve.TypeImplInitContext ctx) {
+    @Override public void exitTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();

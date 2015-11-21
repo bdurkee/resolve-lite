@@ -28,21 +28,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-parser grammar Resolve;
-
-options {
-	tokenVocab=ResolveLexer;
-}
+grammar Resolve;
 
 moduleDecl
     :   precisModuleDecl
     ;
 
 precisModuleDecl
-    :   PRECIS name=ID SEMI
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
-        END closename=ID SEMI EOF
+        'end' closename=ID ';' EOF
     ;
 
 precisBlock
@@ -56,13 +52,13 @@ precisBlock
 // uses, imports
 
 usesList
-    :   USES ID (COMMA ID)* SEMI
+    :   'uses' ID (',' ID)* ';'
     ;
 
 // math constructs
 
 mathTheoremDecl
-    :   (COROLLARY|THEOREM) name=ID COLON mathAssertionExp SEMI
+    :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
 mathDefinitionSig
@@ -71,78 +67,78 @@ mathDefinitionSig
     ;
 
 mathInfixDefinitionSig
-    :   LPAREN mathVariableDecl RPAREN name=mathSymbolName
-        LPAREN mathVariableDecl RPAREN COLON mathTypeExp
+    :   '(' mathVariableDecl ')' name=mathSymbolName
+        '(' mathVariableDecl ')' ':' mathTypeExp
     ;
 
 mathPrefixDefinitionSig
-    :   name=mathSymbolName (LPAREN
-                mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN)?
-                COLON mathTypeExp
+    :   name=mathSymbolName ('('
+                mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
+                ':' mathTypeExp
     ;
 
 mathSymbolName
     :   ID
-    |   (PLUS|MINUS|TRIPLEDOT|DIVIDE|LDIVIDE|BAR|DBL_BAR|LT|GT|CAT|MULT|GTE|LTE|INT|NOT)
-    |   BAR TRIPLEDOT BAR
-    |   LT TRIPLEDOT GT
-    |   DBL_BAR TRIPLEDOT DBL_BAR
-    |   LDIVIDE TRIPLEDOT DIVIDE
+    |   ('+'|'-'|'...'|'/'|'\\'|'|'|'||'|'<'|'>'|'o'|'*'|'>='|'<='|INT|'not')
+    |   '|' '...' '|'
+    |   '<' '...' '>'
+    |   '||' '...' '||'
+    |   '\\' '...' '//'
     ;
 
 mathCategoricalDefinitionDecl
-    :   CATEGORICAL DEFINITION FOR
-        mathPrefixDefinitionSig (COMMA mathPrefixDefinitionSig)+
-        IS mathAssertionExp SEMI
+    :   'Categorical' 'Definition' 'for'
+        mathPrefixDefinitionSig (',' mathPrefixDefinitionSig)+
+        'is' mathAssertionExp ';'
     ;
 
 mathDefinesDefinitionDecl
-    :   DEFINES ID (COMMA ID)* COLON mathTypeExp SEMI
+    :   'Defines' ID (',' ID)* ':' mathTypeExp ';'
     ;
 
 mathDefinitionDecl
-    :   (IMPLICIT)? DEFINITION mathDefinitionSig
-        (IS mathAssertionExp)? SEMI
+    :   ('Implicit')? 'Definition' mathDefinitionSig
+        ('is' mathAssertionExp)? ';'
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION mathDefinitionSig IS
-        BASE_CASE mathAssertionExp SEMI
-        INDUCTIVE_CASE mathAssertionExp SEMI
+    :   'Inductive' 'Definition' mathDefinitionSig 'is'
+        '(i.)' mathAssertionExp ';'
+        '(ii.)' mathAssertionExp ';'
     ;
 
 mathVariableDeclGroup
-    :   ID (COMMA ID)* COLON mathTypeExp
+    :   ID (',' ID)* ':' mathTypeExp
     ;
 
 mathVariableDecl
-    :   ID COLON mathTypeExp
+    :   ID ':' mathTypeExp
     ;
 
 // mathematical clauses
 
 requiresClause
-    :   REQUIRES mathAssertionExp (entailsClause)? SEMI
+    :   'requires' mathAssertionExp (entailsClause)? ';'
     ;
 
 ensuresClause
-    :   ENSURES mathAssertionExp SEMI
+    :   'ensures' mathAssertionExp ';'
     ;
 
 constraintClause
-    :   CONSTRAINT mathAssertionExp SEMI
+    :   'constraint' mathAssertionExp ';'
     ;
 
 conventionClause
-    :   CONVENTION mathAssertionExp (entailsClause)? SEMI
+    :   'convention' mathAssertionExp (entailsClause)? ';'
     ;
 
 correspondenceClause
-    :   CORRESPONDENCE mathAssertionExp SEMI
+    :   'correspondence' mathAssertionExp ';'
     ;
 
 entailsClause
-    :   ENTAILS mathExp (COMMA mathExp)* COLON mathTypeExp
+    :   'which_entails' mathExp (',' mathExp)* ':' mathTypeExp
     ;
 
 // mathematical expressions
@@ -157,23 +153,23 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVariableDeclGroup COMMA mathAssertionExp
+    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
-    :   functionExp=mathExp LPAREN mathExp (COMMA mathExp)* RPAREN  #mathPrefixApplyExp
-    |   mathExp op=(MULT|DIVIDE|TILDE) mathExp                      #mathInfixApplyExp
-    |   mathExp op=(PLUS|MINUS) mathExp                             #mathInfixApplyExp
-    |   mathExp op=(RANGE|RARROW) mathExp                           #mathInfixApplyExp
-    |   mathExp op=(CAT|UNION|INTERSECT) mathExp                    #mathInfixApplyExp
-    |   mathExp op=(IS_IN|IS_NOT_IN) mathExp                        #mathInfixApplyExp
-    |   mathExp op=(LTE|GTE|GT|LT) mathExp                          #mathInfixApplyExp
-    |   mathExp op=(EQUALS|NEQUALS) mathExp                         #mathInfixApplyExp
-    |   mathExp op=IMPLIES mathExp                                  #mathInfixApplyExp
-    |   mathExp op=(AND|OR) mathExp                                 #mathInfixApplyExp
-    |   mathExp op=COLON mathTypeExp                                #mathTypeAssertionExp
-    |   LPAREN mathAssertionExp RPAREN                              #mathNestedExp
-    |   mathPrimaryExp                                              #mathPrimeExp
+    :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'  #mathPrefixApplyExp
+    |   mathExp op=('*'|'/'|'~') mathExp                    #mathInfixApplyExp
+    |   mathExp op=('+'|'-') mathExp                        #mathInfixApplyExp
+    |   mathExp op=('..'|'->') mathExp                      #mathInfixApplyExp
+    |   mathExp op=('o'|'union'|'intersect') mathExp        #mathInfixApplyExp
+    |   mathExp op=('is_in'|'is_not_in') mathExp            #mathInfixApplyExp
+    |   mathExp op=('<='|'>='|'>'|'<') mathExp              #mathInfixApplyExp
+    |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
+    |   mathExp op='implies' mathExp                        #mathInfixApplyExp
+    |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
+    |   mathExp op=':' mathTypeExp                          #mathTypeAssertionExp
+    |   '(' mathAssertionExp ')'                            #mathNestedExp
+    |   mathPrimaryExp                                      #mathPrimeExp
     ;
 
 mathPrimaryExp
@@ -190,52 +186,65 @@ mathPrimaryExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID COLONCOLON)? (TRUE|FALSE)     #mathBooleanLiteralExp
-    |   (qualifier=ID COLONCOLON)? num=INT          #mathIntegerLiteralExp
+    :   (qualifier=ID '::')? ('true'|'false')       #mathBooleanLiteralExp
+    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
     ;
 
 mathCrossTypeExp
-    :   CART_PROD (mathVariableDeclGroup SEMI)+ END
+    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
     ;
 
 mathSymbolExp
-    :   (incoming=AT)? (qualifier=ID COLONCOLON)? name=mathSymbolName
+    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathOutfixExp
-    :   lop=LT mathExp rop=GT
-    |   lop=BAR mathExp rop=BAR
-    |   lop=DBL_BAR mathExp rop=DBL_BAR
+    :   lop='<' mathExp rop='>'
+    |   lop='|' mathExp rop='|'
+    |   lop='||' mathExp rop='||'
     ;
 
 mathSetComprehensionExp
-    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp
-    :    LBRACE (mathExp (COMMA mathExp)*)? RBRACE
+    :    '{' (mathExp (',' mathExp)*)? '}'
     ;
 
 mathLambdaExp
-    :   LAMBDA LPAREN mathVariableDeclGroup
-        (COMMA mathVariableDeclGroup)* RPAREN DOT LPAREN mathExp RPAREN
+    :   'lambda' '(' mathVariableDeclGroup
+        (',' mathVariableDeclGroup)* ')' '.' '(' mathExp ')'
     ;
 
 mathAlternativeExp
-    :   DBL_LBRACE (mathAlternativeItemExp)+ DBL_RBRACE
+    :   '{{' (mathAlternativeItemExp)+ '}}'
     ;
 
 mathAlternativeItemExp
-    :   result=mathExp (IF condition=mathExp SEMI | OTHERWISE SEMI)
+    :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
 mathTupleExp
-    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
+    :   '(' mathExp (',' mathExp)+ ')'
     ;
 
-//Segments can end in an application but (not that I'm aware of atleast) they
-//can't contain one in the middle .. hopefully :) ...
+//Segments can end in an application but they can't contain one in the middle ..
+//hopefully :) ...
 mathSegmentsExp
-    :   mathSymbolExp (DOT mathSymbolExp)+
-        (LPAREN mathExp (COMMA mathExp)* RPAREN)?
+    :   mathSymbolExp ('.' mathSymbolExp)+ ('(' mathExp (',' mathExp)* ')')?
     ;
+
+FORALL : ('forall'|'Forall') ;
+EXISTS : ('exists'|'Exists') ;
+
+LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
+COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
+
+ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+INT : [0-9]+ ;
+
+CHAR: '\'' . '\'' ;
+STRING :  '"' (ESC | ~["\\])* '"' ;
+fragment ESC :   '\\' ["\bfnrt] ;
+WS : [ \t\n\r]+ -> channel(HIDDEN) ;

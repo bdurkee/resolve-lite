@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,7 @@ import java.util.Set;
 
 /**
  * Represents a collection of information to be associated with a top level
- * {@link edu.clemson.resolve.parser.Resolve.ModuleContext}.
+ * {@link ResolveParser.ModuleContext}.
  *
  * <p>We use this approach over {@code returns} clauses in the grammar to help
  * us keep our grammar as general as possible.</p>

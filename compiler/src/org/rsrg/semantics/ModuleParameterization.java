@@ -19,7 +19,7 @@ public class ModuleParameterization {
 
     public ModuleParameterization(String moduleID,
                                   List<ProgTypeSymbol> actualGenerics,
-                                  ParserRuleContext TEMP,//Resolve.ModuleArgumentListContext actualArgs,
+                                  ParserRuleContext TEMP,//ResolveParser.ModuleArgumentListContext actualArgs,
                                   FacilitySymbol instantiatingFacility, MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
@@ -50,7 +50,7 @@ public class ModuleParameterization {
 
     /*private Map<String, PTType> getGenericInstantiations(
             ModuleScopeBuilder moduleScope,
-            List<Resolve.ModuleArgumentContext> actualArguments) {
+            List<ResolveParser.ModuleArgumentContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
         List<GenericSymbol> formalGenerics =
@@ -77,7 +77,7 @@ public class ModuleParameterization {
         return moduleID;
     }
 
-   // public List<Resolve.ModuleArgumentContext> getArguments() {
+   // public List<ResolveParser.ModuleArgumentContext> getArguments() {
    //     return arguments;
    // }
 }

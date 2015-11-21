@@ -33,25 +33,21 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
@@ -79,7 +75,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * recursive call is being made to an operation procedure decl that hasn't
      * been marked 'Recursive'.
      */
-    //private Resolve.OperationProcedureDeclContext currentOpProcedureDecl = null;
+    //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
     //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /**
@@ -104,7 +100,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /**
      * Any quantification-introducing syntactic context (e.g., an
-     * {@link edu.clemson.resolve.parser.Resolve.MathQuantifiedExpContext}),
+     * {@link ResolveParser.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
      *
@@ -136,7 +132,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return g;
     }
 
-    @Override public Void visitModule(Resolve.ModuleContext ctx) {
+    @Override public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
          String moduleName = Utils.getModuleName(ctx);
          moduleScope = symtab.startModuleScope(tr)
                  .addImports(tr.semanticallyRelevantUses);
@@ -548,7 +544,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /* @Override public Void visitRecord(ResolveParser.RecordContext ctx) {
          Map<String, PTType> fields = new LinkedHashMap<>();
-         for (Resolve.RecordVariableDeclGroupContext fieldGrp : ctx
+         for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
                  .recordVariableDeclGroup()) {
              this.visit(fieldGrp);
              PTType grpType = tr.progTypeValues.get(fieldGrp.type());
@@ -598,8 +594,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      }*/
 
     @Override public Void visitMathCategoricalDefinitionDecl(
-            Resolve.MathCategoricalDefinitionDeclContext ctx) {
-        for (Resolve.MathPrefixDefinitionSigContext sig :
+            ResolveParser.MathCategoricalDefinitionDeclContext ctx) {
+        for (ResolveParser.MathPrefixDefinitionSigContext sig :
                 ctx.mathPrefixDefinitionSig()) {
             symtab.startScope(sig);
             this.visit(sig);
@@ -621,9 +617,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathInductiveDefinitionDecl(
-            Resolve.MathInductiveDefinitionDeclContext ctx) {
+            ResolveParser.MathInductiveDefinitionDeclContext ctx) {
         symtab.startScope(ctx);
-        Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
+        ResolveParser.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         ParserRuleContext baseCase = ctx.mathAssertionExp(0);
         ParserRuleContext indHypo = ctx.mathAssertionExp(1);
 
@@ -638,7 +634,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-        Resolve.MathSymbolNameContext name =
+        ResolveParser.MathSymbolNameContext name =
                 getSignatureName(ctx.mathDefinitionSig());
         try {
             symtab.getInnermostActiveScope().define(
@@ -662,15 +658,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathDefinitionDecl(
-            Resolve.MathDefinitionDeclContext ctx) {
-        Resolve.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
+            ResolveParser.MathDefinitionDeclContext ctx) {
+        ResolveParser.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         symtab.startScope(ctx);
         this.visit(sig);
 
         MTType defnType = tr.mathTypes.get(sig);
         MTType defnTypeValue = null;
 
-        Resolve.MathSymbolNameContext name =
+        ResolveParser.MathSymbolNameContext name =
                 getSignatureName(ctx.mathDefinitionSig());
 
         if (ctx.mathAssertionExp() != null) {
@@ -694,9 +690,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    private Resolve.MathSymbolNameContext getSignatureName(
-            @NotNull Resolve.MathDefinitionSigContext signature) {
-        Resolve.MathSymbolNameContext result = null;
+    private ResolveParser.MathSymbolNameContext getSignatureName(
+            @NotNull ResolveParser.MathDefinitionSigContext signature) {
+        ResolveParser.MathSymbolNameContext result = null;
         if (signature.mathPrefixDefinitionSig() != null) {
             result = signature.mathPrefixDefinitionSig().name;
         }
@@ -724,21 +720,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * reference themselves).</p>
      */
     @Override public Void visitMathDefinitionSig(
-            Resolve.MathDefinitionSigContext ctx) {
+            ResolveParser.MathDefinitionSigContext ctx) {
         this.visit(ctx.getChild(0));
         chainMathTypes(ctx, ctx.getChild(0));
         return null;
     }
 
     @Override public Void visitMathPrefixDefinitionSig(
-            Resolve.MathPrefixDefinitionSigContext ctx) {
+            ResolveParser.MathPrefixDefinitionSigContext ctx) {
         typeMathDefinitionSignature(ctx, ctx.mathVariableDeclGroup(),
                 ctx.mathTypeExp(), ctx.name.getStart());
         return null;
     }
 
     @Override public Void visitMathInfixDefinitionSig(
-            Resolve.MathInfixDefinitionSigContext ctx) {
+            ResolveParser.MathInfixDefinitionSigContext ctx) {
         typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(),
                 ctx.mathTypeExp(), ctx.name.getStart());
         return null;
@@ -746,7 +742,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void typeMathDefinitionSignature(@NotNull ParserRuleContext ctx,
                                              @NotNull List<? extends ParseTree> formals,
-                                             @NotNull Resolve.MathTypeExpContext type,
+                                             @NotNull ResolveParser.MathTypeExpContext type,
                                              @NotNull Token name) {
         //first visit the formal params
         activeQuantifications.push(Quantification.UNIVERSAL);
@@ -771,10 +767,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             //It's either going to be a list of MathvariableDecl's or
             //MathVariableDeclGroups
-            if (formals.get(0) instanceof Resolve.MathVariableDeclContext) {
+            if (formals.get(0) instanceof ResolveParser.MathVariableDeclContext) {
                 for (ParseTree formal : formals) {
-                    Resolve.MathVariableDeclContext var =
-                            (Resolve.MathVariableDeclContext)formal;
+                    ResolveParser.MathVariableDeclContext var =
+                            (ResolveParser.MathVariableDeclContext)formal;
                     MTType varType = tr.mathTypeValues.get(var.mathTypeExp());
                     builder.paramTypes(varType);
                     builder.paramNames(var.ID().getText());
@@ -782,8 +778,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             else {
                 for (ParseTree formal : formals) {
-                    Resolve.MathVariableDeclGroupContext grp =
-                            (Resolve.MathVariableDeclGroupContext)formal;
+                    ResolveParser.MathVariableDeclGroupContext grp =
+                            (ResolveParser.MathVariableDeclGroupContext)formal;
                     MTType grpType = tr.mathTypeValues.get(grp.mathTypeExp());
                     for (TerminalNode t : grp.ID()) {
                         builder.paramTypes(grpType);
@@ -810,26 +806,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathVariableDecl(
-            Resolve.MathVariableDeclContext ctx) {
+            ResolveParser.MathVariableDeclContext ctx) {
         insertMathVariables(ctx, ctx.mathTypeExp(), ctx.ID());
         return null;
     }
 
     @Override public Void visitMathVariableDeclGroup(
-            Resolve.MathVariableDeclGroupContext ctx) {
+            ResolveParser.MathVariableDeclGroupContext ctx) {
         insertMathVariables(ctx, ctx.ID(), ctx.mathTypeExp());
         return null;
     }
 
     private void insertMathVariables(ParserRuleContext ctx,
-                                     Resolve.MathTypeExpContext type,
+                                     ResolveParser.MathTypeExpContext type,
                                      TerminalNode ... terms) {
         insertMathVariables(ctx, Arrays.asList(terms), type);
     }
 
     private void insertMathVariables(ParserRuleContext ctx,
                                      List<TerminalNode> terms,
-                                     Resolve.MathTypeExpContext type) {
+                                     ResolveParser.MathTypeExpContext type) {
         this.visit(type);
         MTType mathTypeValue = tr.mathTypeValues.get(type);
         for (TerminalNode term : terms) {
@@ -853,7 +849,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /*private void insertVariables(@NotNull ParserRuleContext ctx,
                                  List<TerminalNode> terminalGroup,
-                                 Resolve.TypeContext type) {
+                                 ResolveParser.TypeContext type) {
         PTType progType = tr.progTypeValues.get(type);
         for (TerminalNode t : terminalGroup) {
             try {
@@ -1065,7 +1061,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
+    @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());
         if (ctx.NOT() != null) {
             HardCodedProgOps.BuiltInOpAttributes attr =
@@ -1082,7 +1078,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgPostfixExp(Resolve.ProgPostfixExpContext ctx) {
+    @Override public Void visitProgPostfixExp(ResolveParser.ProgPostfixExpContext ctx) {
         this.visit(ctx.progExp());
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
@@ -1230,7 +1226,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     //  M A T H   E X P   T Y P I N G
     //---------------------------------------------------
 */
-    @Override public Void visitMathTypeExp(Resolve.MathTypeExpContext ctx) {
+    @Override public Void visitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
         typeValueDepth++;
         this.visit(ctx.mathExp());
         typeValueDepth--;
@@ -1267,7 +1263,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }*/
 
     @Override public Void visitMathTypeAssertionExp(
-            Resolve.MathTypeAssertionExpContext ctx) {
+            ResolveParser.MathTypeAssertionExpContext ctx) {
         if (typeValueDepth == 0) {
             this.visit(ctx.mathExp());
         }
@@ -1305,34 +1301,34 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathNestedExp(
-            Resolve.MathNestedExpContext ctx) {
+            ResolveParser.MathNestedExpContext ctx) {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         return null;
     }
 
     @Override public Void visitMathAssertionExp(
-            Resolve.MathAssertionExpContext ctx) {
+            ResolveParser.MathAssertionExpContext ctx) {
         this.visit(ctx.getChild(0));
         chainMathTypes(ctx, ctx.getChild(0));
         return null;
     }
 
-    @Override public Void visitMathPrimeExp(Resolve.MathPrimeExpContext ctx) {
+    @Override public Void visitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
         this.visit(ctx.mathPrimaryExp());
         chainMathTypes(ctx, ctx.mathPrimaryExp());
         return null;
     }
 
     @Override public Void visitMathPrimaryExp(
-            Resolve.MathPrimaryExpContext ctx) {
+            ResolveParser.MathPrimaryExpContext ctx) {
         this.visit(ctx.getChild(0));
         chainMathTypes(ctx, ctx.getChild(0));
         return null;
     }
 
     @Override public Void visitMathSetComprehensionExp(
-            Resolve.MathSetComprehensionExpContext ctx) {
+            ResolveParser.MathSetComprehensionExpContext ctx) {
         this.visit(ctx.mathVariableDecl());
         this.visit(ctx.mathAssertionExp());
         checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
@@ -1342,7 +1338,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathSetExp(Resolve.MathSetExpContext ctx) {
+    @Override public Void visitMathSetExp(ResolveParser.MathSetExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
         if (ctx.mathExp().isEmpty()) {
             tr.mathTypes.put(ctx, g.EMPTY_SET);
@@ -1419,7 +1415,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }*/
 
     @Override public Void visitMathQuantifiedExp(
-            Resolve.MathQuantifiedExpContext ctx) {
+            ResolveParser.MathQuantifiedExpContext ctx) {
         emit("entering mathQuantifiedExp...");
         symtab.startScope(ctx);
         Quantification quantification;
@@ -1449,7 +1445,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathInfixApplyExp(
-            Resolve.MathInfixApplyExpContext ctx) {
+            ResolveParser.MathInfixApplyExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
         typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
         return null;
@@ -1464,20 +1460,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }*/
 
     @Override public Void visitMathPrefixApplyExp(
-            Resolve.MathPrefixApplyExpContext ctx) {
+            ResolveParser.MathPrefixApplyExpContext ctx) {
         walkingFunctionNameExpPortion = true;
         this.visit(ctx.functionExp);
         walkingFunctionNameExpPortion = false;
         //looks weird cause the 0th is now the expr representing the
         //'function's first class' name (and  type)
-        List<Resolve.MathExpContext> args =
+        List<ResolveParser.MathExpContext> args =
                 ctx.mathExp().subList(1, ctx.mathExp().size());
         args.forEach(this::visit);
 
         ParseTree secondChild = ctx.functionExp.getChild(0).getChild(0);
         Token name = null;
-        if (secondChild instanceof Resolve.MathSymbolExpContext) {
-            name = ((Resolve.MathSymbolExpContext) secondChild).mathSymbolName().getStart();
+        if (secondChild instanceof ResolveParser.MathSymbolExpContext) {
+            name = ((ResolveParser.MathSymbolExpContext) secondChild).mathSymbolName().getStart();
         }
         else {
             throw new UnsupportedOperationException("anonymous function " +
@@ -1489,19 +1485,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitMathBooleanLiteralExp(
-            Resolve.MathBooleanLiteralExpContext ctx) {
+            ResolveParser.MathBooleanLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, null, ctx.getText());
         return null;
     }
 
     @Override public Void visitMathIntegerLiteralExp(
-            Resolve.MathIntegerLiteralExpContext ctx) {
+            ResolveParser.MathIntegerLiteralExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
     }
 
     @Override public Void visitMathSymbolExp(
-            Resolve.MathSymbolExpContext ctx) {
+            ResolveParser.MathSymbolExpContext ctx) {
         exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         return null;
     }
@@ -1825,7 +1821,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
-                                       Resolve.MathAssertionExpContext assertion) {
+                                       ResolveParser.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
         PExp assertionAsPExp = getPExpFor(assertion);
         try {

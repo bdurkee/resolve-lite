@@ -1,6 +1,6 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -37,7 +37,7 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(ctx.concept.getText());
     }*/
 
-    @Override public void exitUsesList(Resolve.UsesListContext ctx) {
+    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         tr.uses.addAll(ctx.ID().stream()
                 .map(t -> new AnnotatedModule.UsesRef(t.getSymbol()))
                 .collect(Collectors.toList()));
