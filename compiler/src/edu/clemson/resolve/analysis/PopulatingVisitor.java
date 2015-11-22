@@ -1688,7 +1688,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         MTFunction expectedType = (MTFunction) intendedEntry.getType();
-
+        List<MTType> formalParameterTypes =
+                MathSymbol.getParameterTypes(expectedType);
+        if (args.size() != formalParameterTypes.size()) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
+                    ctx.getStart(), expectedType.toString());
+        }
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
         tr.mathTypes.put(ctx, expectedType.getRange());

@@ -142,7 +142,7 @@ public class MathSymbol extends Symbol implements ModuleParameterizableSymbol {
                 getModuleID());
     }
 
-    private static List<MTType> getParameterTypes(MTFunction source) {
+    public static List<MTType> getParameterTypes(MTFunction source) {
         return expandAsNeeded(source.getDomain());
     }
 
