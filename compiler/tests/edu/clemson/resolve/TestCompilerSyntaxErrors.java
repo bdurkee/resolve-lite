@@ -26,7 +26,7 @@ public class TestCompilerSyntaxErrors extends BaseTest {
                         "uses x,y,z\n" +
                         "end T;",
                 "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:2:0: syntax error: missing ';' at 'uses'\n"+
-                "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:3:0: syntax error: extraneous input 'end' expecting {',', ';'}",
+                "error(" + ErrorKind.SYNTAX_ERROR.code + "): T.resolve:3:0: syntax error: extraneous input 'end' expecting {';', ','}",
         };
         super.testErrors(pair, "T");
     }
