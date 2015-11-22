@@ -1,0 +1,26 @@
+Precis General_String_Theory;
+    uses Basic_Natural_Number_Theory;
+
+    Definition Is_String_Former(SStr : Cls, Empty_String : SStr,
+            ext : SStr * El -> (SStr ~ {Empty_String})) : B;
+
+    Categorical Definition for SStr : Cls, Empty_String : SStr,
+            ext : (SStr * El) -> (SStr ~ {Empty_String}) is
+        Is_String_Former(SStr, Empty_String, ext);
+
+    Implicit Definition Indcd_Fn(T, U : Cls, b : T -> U,
+            s : T * U * SStr * El -> (SStr ~ {Empty_String})) : T * SStr -> U is
+        Is_String_Former(SStr, Empty_String, ext);
+
+    Inductive Definition (alpha : SStr) o (beta : SStr) : SStr is
+        (i.) alpha o Empty_String = alpha;
+        (ii.) alpha o ext(beta, _ ) = ext(alpha o beta, _ );
+
+    Inductive Definition |(alpha : SStr)| : N is
+        (i.)  |Empty_String| = 0;
+        (ii.) |ext(alpha, _ )| = suc(|alpha|);
+
+    Corollary Cor_Length1:
+        Forall alpha : SStr, |alpha| = 0 iff alpha = Empty_String;
+
+end General_String_Theory;

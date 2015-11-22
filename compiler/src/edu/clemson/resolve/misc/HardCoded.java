@@ -15,12 +15,14 @@ public class HardCoded {
     public static void addBuiltInSymbols(@NotNull TypeGraph g,
                                          @NotNull ScopeBuilder b) {
         try {
-            b.addBinding("El", null, g.MTYPE, g.ELEMENT);
-            b.addBinding("Cls", null, g.MTYPE, g.MTYPE);
-            b.addBinding("SSet", null, g.MTYPE, g.SSET);
+            b.addBinding("El", null, g.CLS, g.ELEMENT);
+            b.addBinding("Cls", null, g.CLS, g.CLS);
+            b.addBinding("SSet", null, g.CLS, g.SSET);
             b.addBinding("SStr", null, g.SSET, g.SSTR);
 
-            b.addBinding("Entity", null, g.MTYPE, g.ENTITY);
+            b.addBinding("_", null, g.ELEMENT, null);
+            b.addBinding("Entity", null, g.CLS, g.ENTITY);
+
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
 
             b.addBinding("conc", null, g.SSET, g.BOOLEAN);
@@ -41,6 +43,8 @@ public class HardCoded {
             b.addBinding("/=", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.ENTITY, g.ENTITY).build());
             b.addBinding("implies", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
+            b.addBinding("iff", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
 
             /* b.addBinding("Is_Initial", null,

@@ -1,3 +1,5 @@
 Precis General_Tree_Theory;
+    uses General_String_Theory;
+
 
 end General_Tree_Theory;

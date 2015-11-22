@@ -82,7 +82,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
         if ( quantifiedVariables == null ) {
             for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                myTypeGraph.MTYPE.accept(v);
+                myTypeGraph.CLS.accept(v);
             }
         }
         else {
@@ -108,7 +108,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
                         new ArrayList<MTType>(uniqueQuantifiedVariableCount);
 
                 for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                    myComponents.add(myTypeGraph.MTYPE);
+                    myComponents.add(myTypeGraph.CLS);
                 }
             }
             else {
@@ -181,7 +181,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
             quantifiedVariables = new TreeMap<String, MTType>();
 
             for (int i = 0; i < uniqueQuantifiedVariableCount; i++) {
-                quantifiedVariables.put("*" + i, myTypeGraph.MTYPE);
+                quantifiedVariables.put("*" + i, myTypeGraph.CLS);
             }
         }
     }

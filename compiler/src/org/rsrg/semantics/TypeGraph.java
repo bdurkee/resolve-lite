@@ -26,8 +26,8 @@ public class TypeGraph {
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTProper ENTITY = new MTProper(this, "Entity");
 
-    public final MTProper MTYPE = new MTProper(this, null, true, "MType");
-    public final MTProper SSET = new MTProper(this, MTYPE, true, "SSet");
+    public final MTProper CLS = new MTProper(this, null, true, "Cls");
+    public final MTProper SSET = new MTProper(this, CLS, true, "SSet");
     public final MTProper SSTR = new MTProper(this, SSET, true, "SStr");
     public final MTProper EMPTY_STRING = new MTProper(this, SSET, true,
             "Empty_String");
@@ -58,8 +58,8 @@ public class TypeGraph {
             .build();
     public final MTFunction CROSS =
             new MTFunctionBuilder(this,
-                    CARTESIAN_PRODUCT_APPLICATION, MTYPE)
-                    .paramTypes(MTYPE, MTYPE).build();
+                    CARTESIAN_PRODUCT_APPLICATION, CLS)
+                    .paramTypes(CLS, CLS).build();
 
     public final MTFunction STR =
             new MTFunctionBuilder(this, SSTR)
@@ -155,7 +155,7 @@ public class TypeGraph {
         boolean result;
 
         result =
-                (value != MTYPE) && (value != ENTITY)
+                (value != CLS) && (value != ENTITY)
                         && isSubtype(value.getType(), expected)
                         || value.equals(expected);
         return result;

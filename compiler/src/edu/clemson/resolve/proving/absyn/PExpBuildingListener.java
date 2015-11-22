@@ -145,6 +145,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
+    //TODO: Convert biconditional ('iff') into longhand implication
     @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.op))
@@ -156,7 +157,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
     }
 
-    /*@Override public void exitMathOutfixApplyExp(
+    @Override public void exitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
@@ -166,7 +167,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     .arguments(repo.get(ctx.mathExp()));
         PApply x = result.build();
         repo.put(ctx, x);
-    }*/
+    }
 
     private PSymbol buildOperatorPSymbol(ParserRuleContext app,
                                          Token lop, Token rop) {

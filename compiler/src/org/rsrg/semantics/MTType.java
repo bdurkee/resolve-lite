@@ -179,7 +179,7 @@ public abstract class MTType {
         //       of type Set someplace.  That's not currently available, so for
         //       the moment we say that all types are of type MType, the parent
         //       type of all types.
-        return myTypeGraph.MTYPE;
+        return myTypeGraph.CLS;
     }
 
     /**

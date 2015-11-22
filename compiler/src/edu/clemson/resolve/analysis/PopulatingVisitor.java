@@ -40,6 +40,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -470,7 +471,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                      new NameQuery(ctx.qualifier, ctx.name, true))
                              .toProgTypeSymbol();
              tr.progTypeValues.put(ctx, type.getProgramType());
-             tr.mathTypes.put(ctx, g.MTYPE);
+             tr.mathTypes.put(ctx, g.CLS);
              tr.mathTypeValues.put(ctx, type.getModelType());
              return null;
          }
@@ -558,7 +559,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          }
          PTRecord record = new PTRecord(g, fields);
          tr.progTypeValues.put(ctx, record);
-         tr.mathTypes.put(ctx, g.MTYPE);
+         tr.mathTypes.put(ctx, g.CLS);
          tr.mathTypeValues.put(ctx, record.toMath());
          return null;
      }*/
@@ -638,16 +639,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         checkMathTypes(indHypo, g.BOOLEAN);
         symtab.endScope();
         MTType defnType = tr.mathTypes.get(ctx.mathDefinitionSig());
-        ResolveParser.MathSymbolNameContext name =
-                getSignatureName(ctx.mathDefinitionSig());
+        Token name = getSignatureName(ctx.mathDefinitionSig());
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
                             defnType, null, ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    name.getStart(), name.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
         }
         definitionSchematicTypes.clear();
         return null;
@@ -661,8 +661,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override public Void visitMathDefinitionDecl(
-            ResolveParser.MathDefinitionDeclContext ctx) {
+    @Override public Void visitMathStandardDefinitionDecl(
+            ResolveParser.MathStandardDefinitionDeclContext ctx) {
         ResolveParser.MathDefinitionSigContext sig = ctx.mathDefinitionSig();
         symtab.startScope(ctx);
         this.visit(sig);
@@ -670,8 +670,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTType defnType = tr.mathTypes.get(sig);
         MTType defnTypeValue = null;
 
-        ResolveParser.MathSymbolNameContext name =
-                getSignatureName(ctx.mathDefinitionSig());
+        Token name = getSignatureName(ctx.mathDefinitionSig());
 
         if (ctx.mathAssertionExp() != null) {
             //Note: We DO have to visit the rhs assertion explicitly here,
@@ -687,25 +686,35 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             ctx, getRootModuleID()));
         }
         catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name.getStart(),
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
                     name.getText());
         }
         definitionSchematicTypes.clear();
         return null;
     }
 
-    private ResolveParser.MathSymbolNameContext getSignatureName(
+    private Token getSignatureName(
             @NotNull ResolveParser.MathDefinitionSigContext signature) {
-        ResolveParser.MathSymbolNameContext result = null;
+        CommonToken result = null;
         if (signature.mathPrefixDefinitionSig() != null) {
-            result = signature.mathPrefixDefinitionSig().name;
+            result = new CommonToken(signature
+                    .mathPrefixDefinitionSig().name.getStart());
+            result.setText(signature.mathPrefixDefinitionSig().name.getText());
         }
-        else if (signature.mathInfixDefinitionSig() != null){
-            result = signature.mathInfixDefinitionSig().name;
+        else if (signature.mathInfixDefinitionSig() != null) {
+            result = new CommonToken(signature
+                    .mathInfixDefinitionSig().name.getStart());
+            result.setText(signature.mathInfixDefinitionSig().name.getText());
+        }
+        else if (signature.mathOutfixDefinitionSig() != null) {
+            ResolveParser.MathOutfixDefinitionSigContext o =
+                    signature.mathOutfixDefinitionSig();
+            result = new CommonToken(o.leftSym.getStart());
+            result.setText(o.leftSym.getText() + "..." + o.rightSym.getText());
         }
         else {
-            throw new UnsupportedOperationException("definition signature " +
-                    "style not yet handled: " + signature.getText());
+            throw new UnsupportedOperationException("odd looking definition " +
+                    "signature..: " + signature.getText());
         }
         return result;
     }
@@ -741,6 +750,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathInfixDefinitionSigContext ctx) {
         typeMathDefinitionSignature(ctx, ctx.mathVariableDecl(),
                 ctx.mathTypeExp(), ctx.name.getStart());
+        return null;
+    }
+
+    @Override public Void visitMathOutfixDefinitionSig(
+            ResolveParser.MathOutfixDefinitionSigContext ctx) {
+        List<ResolveParser.MathVariableDeclContext> formals = new ArrayList<>();
+        formals.add(ctx.mathVariableDecl());
+        typeMathDefinitionSignature(ctx, formals,
+                ctx.mathTypeExp(), getSignatureName(
+                        (ResolveParser.MathDefinitionSigContext)ctx.getParent()));
         return null;
     }
 
@@ -1260,7 +1279,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 fieldTypes.add(new MTCartesian.Element(t.getText(), grpType));
             }
         }
-        tr.mathTypes.put(ctx, g.MTYPE);
+        tr.mathTypes.put(ctx, g.CLS);
         tr.mathTypeValues.put(ctx, new MTCartesian(g, fieldTypes));
         typeValueDepth--;
         return null;
@@ -1353,7 +1372,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new MTFunction.MTFunctionBuilder(g, g.SSET)
                             .paramTypes(tr.mathTypes.get(ctx.mathExp().get(0)))
                             .build();
-            tr.mathTypes.put(ctx, setType);
+            tr.mathTypes.put(ctx, g.SSET);
+            tr.mathTypeValues.put(ctx, setType);
         }
         return null;
     }
@@ -1455,13 +1475,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathOutfixApplyExp(
+    @Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
                 ctx.lop.getText() + "..." + ctx.rop.getText()), ctx.mathExp());
         return null;
-    }*/
+    }
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {

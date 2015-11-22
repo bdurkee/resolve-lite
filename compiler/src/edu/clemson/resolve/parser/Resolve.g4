@@ -42,7 +42,7 @@ precisModuleDecl
     ;
 
 precisBlock
-    :   ( mathDefinitionDecl
+    :   ( mathStandardDefinitionDecl
         | mathCategoricalDefinitionDecl
         | mathInductiveDefinitionDecl
         | mathTheoremDecl
@@ -64,6 +64,13 @@ mathTheoremDecl
 mathDefinitionSig
     :   mathPrefixDefinitionSig
     |   mathInfixDefinitionSig
+    |   mathOutfixDefinitionSig
+    ;
+
+mathPrefixDefinitionSig
+    :   name=mathSymbolName ('('
+                mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
+                ':' mathTypeExp
     ;
 
 mathInfixDefinitionSig
@@ -71,10 +78,9 @@ mathInfixDefinitionSig
         '(' mathVariableDecl ')' ':' mathTypeExp
     ;
 
-mathPrefixDefinitionSig
-    :   name=mathSymbolName ('('
-                mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
-                ':' mathTypeExp
+mathOutfixDefinitionSig
+    :   leftSym=mathSymbolName '(' mathVariableDecl ')'
+        rightSym=mathSymbolName ':' mathTypeExp
     ;
 
 mathSymbolName
@@ -96,7 +102,7 @@ mathDefinesDefinitionDecl
     :   'Defines' ID (',' ID)* ':' mathTypeExp ';'
     ;
 
-mathDefinitionDecl
+mathStandardDefinitionDecl
     :   ('Implicit')? 'Definition' mathDefinitionSig
         ('is' mathAssertionExp)? ';'
     ;
@@ -165,7 +171,7 @@ mathExp
     |   mathExp op=('is_in'|'is_not_in') mathExp            #mathInfixApplyExp
     |   mathExp op=('<='|'>='|'>'|'<') mathExp              #mathInfixApplyExp
     |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
-    |   mathExp op='implies' mathExp                        #mathInfixApplyExp
+    |   mathExp op=('implies'|'iff') mathExp                #mathInfixApplyExp
     |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                          #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
@@ -176,7 +182,7 @@ mathPrimaryExp
     :   mathLiteralExp
     |   mathCrossTypeExp
     |   mathSymbolExp
-    |   mathOutfixExp
+    |   mathOutfixApplyExp
     |   mathSetComprehensionExp
     |   mathSetExp
     |   mathLambdaExp
@@ -198,7 +204,7 @@ mathSymbolExp
     :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
     ;
 
-mathOutfixExp
+mathOutfixApplyExp
     :   lop='<' mathExp rop='>'
     |   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
