@@ -137,6 +137,10 @@ public  class RESOLVECompiler {
             String arg = args[i];
             i++;
             if (arg.charAt(0) != '-') { // file name
+                if (!arg.endsWith(FILE_EXTENSION)) {
+                    errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, arg);
+                    continue;
+                }
                 if (!targetFiles.contains(arg)) {
                     targetFiles.add(arg);
                     String name = Utils.groomFileName(arg);
