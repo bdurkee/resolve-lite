@@ -153,7 +153,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
@@ -235,8 +235,8 @@ mathSegmentsExp
     :   mathSymbolExp ('.' mathSymbolExp)+ ('(' mathExp (',' mathExp)* ')')?
     ;
 
-FORALL : ('forall'|'Forall') ;
-EXISTS : ('exists'|'Exists') ;
+FORALL : ('Forall') ;
+EXISTS : ('Exists') ;
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
