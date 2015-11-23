@@ -34,7 +34,7 @@ import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
@@ -137,6 +137,10 @@ public  class RESOLVECompiler {
             String arg = args[i];
             i++;
             if (arg.charAt(0) != '-') { // file name
+                if (!arg.endsWith(FILE_EXTENSION)) {
+                    errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, arg);
+                    continue;
+                }
                 if (!targetFiles.contains(arg)) {
                     targetFiles.add(arg);
                     String name = Utils.groomFileName(arg);
@@ -377,7 +381,7 @@ public  class RESOLVECompiler {
             ResolveLexer lexer = new ResolveLexer(input);
 
             TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
+            Resolve parser = new Resolve(tokens);
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.moduleDecl();

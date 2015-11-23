@@ -1,7 +1,7 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.*;
@@ -65,7 +65,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return outputFile;
     }
 
-    @Override public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
+    @Override public void enterModuleDecl(Resolve.ModuleDeclContext ctx) {
         try {
             moduleScope = symtab.getModuleScope(tr.getName());
         }
@@ -75,7 +75,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 /*
     @Override public void enterFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+            Resolve.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
@@ -84,7 +84,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+            Resolve.FacilityDeclContext ctx) {
         ModuleScopeBuilder spec = null, impl = null;
         try {
             spec = symtab.getModuleScope(ctx.spec.getText());
@@ -175,7 +175,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void enterTypeRepresentationDecl(
-            ResolveParser.TypeRepresentationDeclContext ctx) {
+            Resolve.TypeRepresentationDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         currentTypeReprSym = null;
         try {
@@ -203,15 +203,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<String> modulesToSearch = new ArrayList<>();
 
         modulesToSearch.add(moduleScope.getModuleID());
-       /* if (moduleCtx instanceof ResolveParser.ConceptImplModuleContext) {
-            ResolveParser.ConceptImplModuleContext moduleCtxAsConceptImpl =
-                    (ResolveParser.ConceptImplModuleContext)moduleCtx;
+       /* if (moduleCtx instanceof Resolve.ConceptImplModuleContext) {
+            Resolve.ConceptImplModuleContext moduleCtxAsConceptImpl =
+                    (Resolve.ConceptImplModuleContext)moduleCtx;
             modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
         }
         else */
-      /*  if (moduleCtx instanceof ResolveParser.ExtensionImplModuleContext) {
-            ResolveParser.ExtensionImplModuleContext moduleCtxAsEnhImpl =
-                    (ResolveParser.ExtensionImplModuleContext)moduleCtx;
+      /*  if (moduleCtx instanceof Resolve.ExtensionImplModuleContext) {
+            Resolve.ExtensionImplModuleContext moduleCtxAsEnhImpl =
+                    (Resolve.ExtensionImplModuleContext)moduleCtx;
             modulesToSearch.add(moduleCtxAsEnhImpl.concept.getText());
             modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
         }*/
@@ -227,7 +227,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
    /* @Override public void exitTypeRepresentationDecl(
-            ResolveParser.TypeRepresentationDeclContext ctx) {
+            Resolve.TypeRepresentationDeclContext ctx) {
         PExp constraint = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
         if (currentTypeReprSym == null) return;
@@ -250,7 +250,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
-    @Override public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
+    @Override public void enterTypeImplInit(Resolve.TypeImplInitContext ctx) {
         Scope s = symtab.scopes.get(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -267,7 +267,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         assertiveBlocks.push(block);
     }
 
-    @Override public void exitTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
+    @Override public void exitTypeImplInit(Resolve.TypeImplInitContext ctx) {
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -291,7 +291,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }*/
 
    /* @Override public void enterOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {
+            Resolve.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
                 s.getSymbolsOfType(ProgParameterSymbol.class);
@@ -317,7 +317,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {
+            Resolve.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms =
@@ -336,7 +336,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void enterProcedureDecl(
-            ResolveParser.ProcedureDeclContext ctx) {
+            Resolve.ProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         try {
             List<ProgParameterSymbol> paramSyms =
@@ -372,7 +372,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitProcedureDecl(
-            ResolveParser.ProcedureDeclContext ctx) {
+            Resolve.ProcedureDeclContext ctx) {
         Scope scope = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
                 scope.getSymbolsOfType(ProgParameterSymbol.class);
@@ -403,7 +403,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override public void exitVariableDeclGroup(
-            ResolveParser.VariableDeclGroupContext ctx) {
+            Resolve.VariableDeclGroupContext ctx) {
         PTType type = tr.progTypeValues.get(ctx.type());
         MTType mathType = tr.mathTypeValues.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
@@ -427,7 +427,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     // S T A T S
     //-----------------------------------------------
 
-   /* @Override public void exitStmt(ResolveParser.StmtContext ctx) {
+   /* @Override public void exitStmt(Resolve.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
@@ -455,7 +455,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return simple;
     }
 
-    @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
+    @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
         PApply callExp = (PApply)tr.mathPExps.get(ctx.progExp());
         OperationSymbol op = getOperation(moduleScope, callExp);
@@ -474,7 +474,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
     //otherwise,
-    @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
+    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
@@ -482,7 +482,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-    @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
+    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,

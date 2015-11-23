@@ -1,7 +1,7 @@
 Precis Basic_Spiral_Theory;
     uses Basic_Natural_Number_Theory;
 
-    Definition N2 : Powerset(N) is {n : N | true};
+    Definition N2 : Powerset(N) is {n : N | n >= 2};
 
     Definition Is_k_Spiral_Like
             (Sp_Loc : (k : N2) -> SSet,

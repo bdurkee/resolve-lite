@@ -20,7 +20,7 @@ public class FunctionDef extends OutputModelObject {
         hasReturn = true;
     }
 
-    //public FunctionDef(ResolveParser.GenericTypeContext specGeneric) {
+    //public FunctionDef(Resolve.GenericTypeContext specGeneric) {
     //    this("get" + specGeneric.ID().getText());
     //    hasReturn = true;
     //}

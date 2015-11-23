@@ -12,14 +12,14 @@ public class ModuleParameterization {
     private final MathSymbolTable scopeRepo;
     private final String moduleID;
 
-    //private final List<ResolveParser.ModuleArgumentContext> arguments =
+    //private final List<Resolve.ModuleArgumentContext> arguments =
     //        new ArrayList<>();
     private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     private final FacilitySymbol instantiatingFacility;
 
     public ModuleParameterization(String moduleID,
                                   List<ProgTypeSymbol> actualGenerics,
-                                  ParserRuleContext TEMP,//ResolveParser.ModuleArgumentListContext actualArgs,
+                                  ParserRuleContext TEMP,//Resolve.ModuleArgumentListContext actualArgs,
                                   FacilitySymbol instantiatingFacility, MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
@@ -50,7 +50,7 @@ public class ModuleParameterization {
 
     /*private Map<String, PTType> getGenericInstantiations(
             ModuleScopeBuilder moduleScope,
-            List<ResolveParser.ModuleArgumentContext> actualArguments) {
+            List<Resolve.ModuleArgumentContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
         List<GenericSymbol> formalGenerics =
@@ -77,7 +77,7 @@ public class ModuleParameterization {
         return moduleID;
     }
 
-   // public List<ResolveParser.ModuleArgumentContext> getArguments() {
+   // public List<Resolve.ModuleArgumentContext> getArguments() {
    //     return arguments;
    // }
 }
