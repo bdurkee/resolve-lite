@@ -3,7 +3,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -26,56 +26,56 @@ public class SanityCheckingListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    /*@Override public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
+    /*@Override public void exitConceptModule(Resolve.ConceptModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override public void exitEnhancementModule(
-            ResolveParser.EnhancementModuleContext ctx) {
+            Resolve.EnhancementModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override public void exitFacilityModule(
-            ResolveParser.FacilityModuleContext ctx) {
+            Resolve.FacilityModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override public void exitConceptImplModule(
-            ResolveParser.ConceptImplModuleContext ctx) {
+            Resolve.ConceptImplModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override public void exitEnhancementImplModule(
-            ResolveParser.EnhancementImplModuleContext ctx) {
+            Resolve.EnhancementImplModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }*/
 
-    @Override public void exitPrecisModuleDecl(ResolveParser.PrecisModuleDeclContext ctx) {
+    @Override public void exitPrecisModuleDecl(Resolve.PrecisModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
-    /*@Override public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
+    /*@Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
     }
 
     @Override public void exitOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {
+            Resolve.OperationProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
     }
 
-    @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
+    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
         sanityCheckProgOpTypes(ctx, tr.progTypes.get(ctx.left),
                 tr.progTypes.get(ctx.right));
     }
 
-    @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
+    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
         sanityCheckProgOpTypes(ctx,tr.progTypes.get(ctx.left),
                 tr.progTypes.get(ctx.right));
     }
 
-    @Override public void exitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
+    @Override public void exitRequiresClause(Resolve.RequiresClauseContext ctx) {
         PExp requires = tr.mathPExps.get(ctx);
         if (requires != null && !requires.getIncomingVariables().isEmpty()) {
             compiler.errMgr.semanticError(

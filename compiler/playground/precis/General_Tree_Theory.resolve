@@ -1,5 +1,15 @@
 Precis General_Tree_Theory;
-    uses General_String_Theory;
+    uses General_String_Theory with (Str_Relativization_Ext);
 
+    Definition Is_Tree_Former(Tr : Cls, omega : Tr,
+            Jn : Str(Tr) * El -> (Tr ~ {omega})) : B;
+
+    Categorical Definition for Tr : Cls, omega : Tr,
+            Jn : Str(Tr) * El -> (Tr ~ {omega}) is
+        Is_Tree_Former(Tr, omega, Jn);
+
+
+   // Definition Powerset_Fin(T : Cls) : Powerset(SSet) is
+   //         {S : SSet | S subset_of T and ||S|| < Aleph_0}
 
 end General_Tree_Theory;

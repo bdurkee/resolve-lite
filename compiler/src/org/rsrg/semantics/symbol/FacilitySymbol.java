@@ -27,7 +27,7 @@ public class FacilitySymbol extends Symbol {
         super(name, definingTree, moduleID);
     }
 
-    /*public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
+    /*public FacilitySymbol(Resolve.FacilityDeclContext facility,
             String moduleID,
             ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             MathSymbolTable scopeRepo) {
@@ -41,7 +41,7 @@ public class FacilitySymbol extends Symbol {
 
         ModuleParameterization impl = null;
 
-        List<ResolveParser.ModuleArgumentContext> actualArgs =
+        List<Resolve.ModuleArgumentContext> actualArgs =
                 facility.implArgs != null ? facility.implArgs
                         .moduleArgument() : new ArrayList<>();
         impl = new ModuleParameterization(facility.impl.getText(),
@@ -64,7 +64,7 @@ public class FacilitySymbol extends Symbol {
         }*/
 
         //These are realized by individual enhancement realizations
-        /*for (ResolveParser.EnhancementPairDeclContext enhancement :
+        /*for (Resolve.EnhancementPairDeclContext enhancement :
                 facility.enhancementPairDecl()) {
 
             spec = new ModuleParameterization(enhancement.spec.getText(),

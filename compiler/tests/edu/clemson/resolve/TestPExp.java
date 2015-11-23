@@ -1,7 +1,7 @@
 package edu.clemson.resolve;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.parser.Resolve;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -433,7 +433,7 @@ public class TestPExp extends BaseTest {
             ANTLRInputStream in = new ANTLRInputStream(new StringReader(input));
             ResolveLexer lexer = new ResolveLexer(in);
             TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
+            Resolve parser = new Resolve(tokens);
 
             //Todo: For some reason this never seems to be getting tripped atm,
             //even in the presence of errors.
