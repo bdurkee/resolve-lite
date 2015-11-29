@@ -28,6 +28,10 @@ public class UsesListener extends ResolveBaseListener {
             Resolve.PrecisExtensionModuleDeclContext ctx) {
         tr.uses.add(new UsesRef(ctx.precis));
         tr.semanticallyRelevantUses.add(ctx.precis.getText());
+        if (ctx.precisExt != null) {
+            tr.uses.add(new UsesRef(ctx.precisExt));
+            tr.semanticallyRelevantUses.add(ctx.precisExt.getText());
+        }
     }
 
     /*@Override public void enterExtensionImplModule(

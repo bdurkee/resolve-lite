@@ -47,7 +47,8 @@ precisModuleDecl
     ;
 
 precisExtensionModuleDecl
-    :   EXTENSION name=ID FOR precis=ID SEMI
+    :   EXTENSION name=ID FOR precis=ID
+        (EXTENDED_BY precisExt=ID)? SEMI
         precisBlock
         END closename=ID SEMI
     ;
