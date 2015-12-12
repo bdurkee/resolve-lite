@@ -16,7 +16,7 @@ Precis General_String_Theory;
         (i.) alpha o Empty_String = alpha;
         (ii.) alpha o ext(beta, _ ) = ext(alpha o beta, _ );
 
-    Inductive Definition |(alpha : SStr)| : N is
+    Inductive Definition |alpha : SStr| : N is
         (i.)  |Empty_String| = 0;
         (ii.) |ext(alpha, _ )| = suc(|alpha|);
 

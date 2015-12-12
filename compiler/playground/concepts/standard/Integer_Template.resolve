@@ -1,0 +1,10 @@
+Concept Integer_Template;
+
+    Type family Integer is modeled by Z;
+        exemplar i;
+        initialization
+                ensures i = 0;
+
+    Operation Sum (updates a, b : Integer);
+
+end Integer_Template;

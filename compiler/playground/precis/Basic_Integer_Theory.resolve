@@ -1,9 +1,6 @@
 Precis Integer_Theory;
 
-    Definition <=(m, n : Z) : B;
-    Definition >=(m, n : Z) : B;
-    Definition <(m, n : Z) : B;
-    Definition >(m, n : Z) : B;
+
 
     Definition +(m, n : Z) : Z;
 
