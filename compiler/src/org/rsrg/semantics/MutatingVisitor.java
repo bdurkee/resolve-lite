@@ -20,7 +20,6 @@ public class MutatingVisitor extends BoundVariableVisitor {
     }
 
     @Override public final void beginMTType(MTType t) {
-
         if ( myRoot == null ) {
             myRoot = t;
             myFinalExpression = myRoot;
@@ -28,7 +27,6 @@ public class MutatingVisitor extends BoundVariableVisitor {
 
         myIndices.push(0); //We start at the zeroth child
         myChangesAtLevel.push(new HashMap<Integer, MTType>());
-
         mutateBeginMTType(t);
     }
 

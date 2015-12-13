@@ -108,40 +108,6 @@ public class MathSymbol extends Symbol implements ModuleParameterizableSymbol {
         return "a math symbol";
     }
 
-    public MathSymbol deschematize(List<PExp> arguments,
-        Map<String, MTType> definitionSchematicTypes,
-        Scope callingContext)
-            throws NoSolutionException {
-        if (!(type instanceof MTFunction)) throw NoSolutionException.INSTANCE;
-
-        List<MTType> formalParameterTypes =
-                getParameterTypes(((MTFunction) type));
-
-        List<MTType> actualArgumentTypes = arguments.stream()
-                .map(PExp::getMathType)
-                .collect(Collectors.toList());
-
-        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
-            throw NoSolutionException.INSTANCE;
-        }
-
-        List<ProgTypeSymbol> callingContextProgramGenerics =
-                callingContext.query(GenericQuery.INSTANCE);
-        Map<String, MTType> callingContextMathGenerics =
-                new HashMap<>(definitionSchematicTypes);
-        Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
-
-        MTType newTypeValue = null;
-        MTType newType =
-                ((MTFunction) type
-                        .getCopyWithVariablesSubstituted(bindingsSoFar))
-                        .deschematize(arguments);
-
-        return new MathSymbol(type.getTypeGraph(), getName(),
-                getQuantification(), newType, newTypeValue, getDefiningTree(),
-                getModuleID());
-    }
-
     public static List<MTType> getParameterTypes(MTFunction source) {
         return expandAsNeeded(source.getDomain());
     }

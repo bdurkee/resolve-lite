@@ -61,15 +61,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private static final boolean EMIT_DEBUG = true;
 
-    private static final TypeComparison<PApply, MTFunction> EXACT_DOMAIN_MATCH =
-            new ExactDomainMatch();
-    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
-            new ExactParameterMatch();
-    private final TypeComparison<PApply, MTFunction> INEXACT_DOMAIN_MATCH =
-            new InexactDomainMatch();
-    private final TypeComparison<PExp, MTType> INEXACT_PARAMETER_MATCH =
-            new InexactParameterMatch();
-
     private boolean walkingDefParams = false;
 
     /**
@@ -103,6 +94,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private int typeValueDepth = 0;
     private int globalSpecCount = 0;
     private int anonymousApplicationDepth = 0;
+
     /**
      * Any quantification-introducing syntactic context (e.g., an
      * {@link ResolveParser.MathQuantifiedExpContext}),
@@ -124,16 +116,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private ModuleScopeBuilder moduleScope = null;
 
-    public PopulatingVisitor(RESOLVECompiler rc,
-                     MathSymbolTable symtab, AnnotatedModule annotatedTree) {
+    public PopulatingVisitor(@NotNull RESOLVECompiler rc,
+                             @NotNull MathSymbolTable symtab,
+                             @NotNull AnnotatedModule annotatedTree) {
         this.activeQuantifications.push(Quantification.NONE);
+
         this.compiler = rc;
         this.symtab = symtab;
         this.tr = annotatedTree;
         this.g = symtab.getTypeGraph();
     }
 
-    public TypeGraph getTypeGraph() {
+    @NotNull public TypeGraph getTypeGraph() {
         return g;
     }
 
@@ -146,8 +140,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null; //java requires a return, even if its 'Void'
      }
 
-    /*@Override public Void visitExtensionModule(
-            ResolveParser.ExtensionModuleContext ctx) {
+    /*@Override public Void visitConceptExtensionModuleDecl(
+            ResolveParser.ConceptExtensionModuleDeclContext ctx) {
         try {
             List<String> implicitImports =
                     symtab.getModuleScope(ctx.concept).getImports();
@@ -1749,8 +1743,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTType preAppType = PApply.getConservativePreApplicationType(g,
                 args, tr.mathTypes);
         tr.mathTypes.put(ctx, preAppType);
-        PApply e = (PApply)getPExpFor(ctx);
-        MTFunction eType = (MTFunction)e.getMathType();
+        /*PApply e = (PApply)getPExpFor(ctx);
+        MTFunction eType = (MTFunction)e.getMathType();*/
+        //TODO: Doesn't this work?
+        MTFunction eType = (MTFunction)tr.mathTypes.get(ctx);
+
         List<MathSymbol> sameNameFunctions =
                 symtab.getInnermostActiveScope() //
                         .query(new MathFunctionNamedQuery(qualifier, name))
@@ -1763,8 +1760,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
         }
-        MathSymbol intendedFunction = null;
-        try {
+        MathSymbol intendedFunction = sameNameFunctions.get(0);
+        /*try {
             intendedFunction = getExactDomainTypeMatch(e, sameNameFunctions);
         }
         catch (NoSolutionException nsee) {
@@ -1776,34 +1773,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ctx.getStart(), eType.getDomain(), sameNameFunctions,
                         sameNameFunctionTypes);
             }
-        }
+        }*/
         if (intendedFunction == null) return null;
         MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
         emit("matching " + name.getText() + " : " + eType
                 + " to " + intendedFunction.getName() + " : " + intendedEntryType);
         return intendedFunction;
     }
-    private MathSymbol getExactDomainTypeMatch(PApply e,
-                                               List<MathSymbol> candidates)
-            throws NoSolutionException {
-        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
-    }
-
-    private MathSymbol getInexactDomainTypeMatch(PApply e,
-                                                 List<MathSymbol> candidates)
-            throws NoSolutionException {
-        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
-    }
 
     private MathSymbol getDomainTypeMatch(PApply e,
                                           List<MathSymbol> candidates,
-                                          TypeComparison<PApply, MTFunction> comparison)
-            throws NoSolutionException {
+                                          TypeComparison<PApply, MTFunction> comparison) {
         MTFunction eType = e.getConservativePreApplicationType(g);
         MathSymbol match = null;
         MTFunction candidateType;
         for (MathSymbol candidate : candidates) {
-            try {
+           /* try {
                 String originalCandidateType = candidate.getType().toString();
                 candidate =
                         candidate.deschematize(e.getArguments(),
@@ -1823,67 +1808,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //couldn't deschematize--try the next one
                 emit(candidate.getType() + " doesn't deschematize "
                         + "against " + e.getArguments());
-            }
+            }*/
         }
-        if ( match == null ) {
-            throw NoSolutionException.INSTANCE;
-        }
+      //  if ( match == null ) {
+      //      throw NoSolutionException.INSTANCE;
+      //  }
         return match;
-    }
-
-    private static class ExactParameterMatch implements Comparator<MTType> {
-        @Override public int compare(MTType o1, MTType o2) {
-            int result;
-            if ( o1.equals(o2) ) {
-                result = 0;
-            }
-            else {
-                result = 1;
-            }
-            return result;
-        }
-    }
-
-    private static class ExactDomainMatch
-            implements
-                TypeComparison<PApply, MTFunction> {
-        @Override public boolean compare(PApply foundValue,
-                                         MTFunction foundType,
-                                         MTFunction expectedType) {
-            return foundType.parameterTypesMatch(expectedType,
-                    EXACT_PARAMETER_MATCH);
-        }
-
-        @Override public String description() {
-            return "exact";
-        }
-    }
-
-    private class InexactDomainMatch
-            implements
-                TypeComparison<PApply, MTFunction> {
-
-        @Override public boolean compare(PApply foundValue,
-                                         MTFunction foundType,
-                                         MTFunction expectedType) {
-            return expectedType.parametersMatch(foundValue.getArguments(),
-                    INEXACT_PARAMETER_MATCH);
-        }
-
-        @Override public String description() {
-            return "inexact";
-        }
-    }
-
-    private class InexactParameterMatch implements TypeComparison<PExp, MTType> {
-        @Override public boolean compare(PExp foundValue, MTType foundType,
-                                         MTType expectedType) {
-            return true;
-        }
-
-        @Override public String description() {
-            return "inexact";
-        }
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,

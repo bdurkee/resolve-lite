@@ -9,11 +9,14 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.MultimatchSymbolQuery;
+import org.rsrg.semantics.query.SymbolQuery;
+import org.rsrg.semantics.searchers.TableSearcher;
+import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.Symbol;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class MathSymbolTable {
 
@@ -250,5 +253,37 @@ public class MathSymbolTable {
             throw new NoSuchModuleException(name);
         }
         return module;
+    }
+
+    protected static class DummyIdentifierResolver extends AbstractScope {
+        @Override public <E extends Symbol> List<E> query(
+                MultimatchSymbolQuery<E> query) {
+            return new LinkedList<E>();
+        }
+        @Override public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
+                throws NoSuchSymbolException, DuplicateSymbolException {
+            throw new NoSuchSymbolException();
+        }
+        @Override public <E extends Symbol> boolean addMatches(
+                TableSearcher<E> searcher,
+                List<E> matches,
+                Set<Scope> searchedScopes,
+                Map<String, PTType> genericInstantiations,
+                FacilitySymbol instantiatingFacility,
+                TableSearcher.SearchContext l)
+                    throws DuplicateSymbolException {
+            return false;
+        }
+        @Override public Symbol define(Symbol s)
+                throws DuplicateSymbolException {
+            return s;
+        }
+        @Override public <T extends Symbol> List<T> getSymbolsOfType(
+                Class<T> type) {
+            return new ArrayList<>();
+        }
+        @Override public List<Symbol> getSymbolsOfType(Class<?>... type) {
+            return new ArrayList<>();
+        }
     }
 }

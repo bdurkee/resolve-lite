@@ -55,8 +55,10 @@ public class HardCoded {
             b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
 
-            b.addBinding("union", null, g.UNION);
-            b.addBinding("intersect", null, g.INTERSECT);
+            b.addBinding("union", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.SSET, g.SSET).build());
+            b.addBinding("intersect", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.SSET, g.SSET).build());
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.NAT)
                     .paramTypes(g.SSET).build());

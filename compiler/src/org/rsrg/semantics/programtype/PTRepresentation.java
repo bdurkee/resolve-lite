@@ -1,13 +1,13 @@
 package org.rsrg.semantics.programtype;
 
 import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.NoneProvidedException;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
 import org.rsrg.semantics.symbol.ProgTypeModelSymbol;
 import org.rsrg.semantics.TypeGraph;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * A {@code PTRepresentation} wraps an existing {@link PTType PTType} with
@@ -48,9 +48,10 @@ public class PTRepresentation extends PTNamed {
         return baseType;
     }
 
-    public ProgTypeModelSymbol getFamily() throws NoneProvidedException {
+    public ProgTypeModelSymbol getFamily() throws NoSuchElementException {
         if ( family == null ) {
-            throw new NoneProvidedException();
+            throw new NoSuchElementException("no family found for this " +
+                    "representation: " + toString());
         }
         return family;
     }

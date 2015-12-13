@@ -19,7 +19,6 @@ public class MTPowersetApplication extends MTFunctionApplication {
 
     @Override public void accept(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTAbstract(this);
         v.beginMTFunctionApplication(this);
         v.beginMTPowersetApplication(this);
 
@@ -34,7 +33,6 @@ public class MTPowersetApplication extends MTFunctionApplication {
 
         v.endMTPowersetApplication(this);
         v.endMTFunctionApplication(this);
-        v.endMTAbstract(this);
         v.endMTType(this);
     }
 

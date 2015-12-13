@@ -20,9 +20,9 @@ import java.util.Set;
 
 /**
  * Represents a collection of information to be associated with a top level
- * {@link ResolveParser.ModuleContext}.
- *
- * <p>We use this approach over {@code returns} clauses in the grammar to help
+ * {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
+ * <p>
+ * We use this approach over {@code returns} clauses in the grammar to help
  * us keep our grammar as general as possible.</p>
  */
 public class AnnotatedModule {

@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.ModuleParameterization;
-import org.rsrg.semantics.SpecImplementationPairing;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.ArrayList;
@@ -109,4 +108,31 @@ public class FacilitySymbol extends Symbol {
         //       how?
         return this;
     }
+
+    public static class SpecImplementationPairing {
+
+        private final ModuleParameterization spec, implementation;
+        public SpecImplementationPairing(ModuleParameterization spec) {
+            this(spec, null);
+        }
+
+        public SpecImplementationPairing(ModuleParameterization spec,
+                                         ModuleParameterization impl) {
+            if ( spec == null ) throw new IllegalArgumentException("null spec");
+            this.spec = spec;
+            this.implementation = impl;
+        }
+
+        public ModuleParameterization getSpecification() {
+            return spec;
+        }
+
+        public ModuleParameterization getImplementation() {
+            //if (myRealization == null) {
+            //    throw new NoneProvidedException();
+            // }
+            return implementation;
+        }
+    }
+
 }

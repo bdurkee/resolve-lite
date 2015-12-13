@@ -15,11 +15,11 @@ public class ModelBuilder extends ResolveBaseListener {
     private final MathSymbolTable symtab;
     private final AnnotatedModule tr;
 
-    public ModelBuilder(JavaCodeGenerator g, MathSymbolTable symtab) {
-        this.gen = g;
-        this.moduleScope = symtab.getModuleScope(g.getModule().getName());
+    public ModelBuilder(JavaCodeGenerator gen, MathSymbolTable symtab) {
+        this.gen = gen;
+        this.moduleScope = symtab.getModuleScope(gen.getModule().getName());
         this.symtab = symtab;
-        this.tr = g.getModule();
+        this.tr = gen.getModule();
     }
 
   /*  @Override public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
