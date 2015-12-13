@@ -391,7 +391,7 @@ More information on RESOLVEs current approach to symbol table construction and e
 
 In order to generate code from the representation shown above, we once again walk the parse tree. But, instead of printing or buffering text output directly, we instead create model objects because it is a much more flexible mechanism. The order we create these objects and hook them together is irrelevant. We don't generate output until the entire model has been created. Consequently, we can follow the order of the input by walking the input parse tree to construct the model. The model objects I create represent the important elements of our desired Java output: namely definitions (defs), statements (stats), and exprs (expressions):
 
-![output model objects](https://github.com/Welchd1/resolve-notes/blob/master/notes/images/translation_models.png)
+![output model objects](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/models.png)
 
 In the [`Java.stg`](https://github.com/Welchd1/resolve-lite/blob/master/compiler/resources/edu/clemson/resolve/templates/codegen/Java.stg) template group file, you will see templates that correspond by name with the model objects:
 
@@ -444,7 +444,7 @@ The first object, however it's named within the template, is always set to the m
 
 Let's work though an example involving usage of the `ModuleFile` template. Below is a image of the template definition exactly as it appears in the compiler's `Java.stg` file, complete with line numbers:
 
-![output model objects](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/models.png)
+![output model objects]()
 
 1. Template `ModuleFile` (line 32) takes two parameters, the first of which (`file`) refers to the model object itself. This is injected by the `ModelConverter`. The second parameter `module`, is automatically injected by the model converter as well. It is a template created for the corresponding field in the `ModuleFile` Java class:
 
