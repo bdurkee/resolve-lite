@@ -381,7 +381,7 @@ The remaining sections delve into more detail as to how this all working. In fac
 
 The `Cartesian_Grid_Fac` facility -- which appears above in the 'Types' section of this document -- when run through ANTLR produces the following parse tree:
 
-![translation input](https://github.com/Welchd1/resolve-notes/blob/master/notes/images/translation_input.png)
+![translation input](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/translationinput.png)
 
 You'll notice this representation of the tree has been overlaid with information about `PTType`s (program types) and scopes for clarity. It's the phase of compilation preceding codegen that is responsible for building the scopes delineated above, filling them, and annotating all expression nodes and references within the tree with appropriate `PTType` (program-type) information.
 
@@ -444,7 +444,7 @@ The first object, however it's named within the template, is always set to the m
 
 Let's work though an example involving usage of the `ModuleFile` template. Below is a image of the template definition exactly as it appears in the compiler's `Java.stg` file, complete with line numbers:
 
-![output model objects](https://github.com/Welchd1/resolve-notes/blob/master/notes/images/translation_template.png)
+![output model objects](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/models.png)
 
 1. Template `ModuleFile` (line 32) takes two parameters, the first of which (`file`) refers to the model object itself. This is injected by the `ModelConverter`. The second parameter `module`, is automatically injected by the model converter as well. It is a template created for the corresponding field in the `ModuleFile` Java class:
 
