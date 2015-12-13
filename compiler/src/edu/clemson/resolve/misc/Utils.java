@@ -30,7 +30,7 @@
  */
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -157,29 +157,29 @@ public class Utils {
     }
 
     @NotNull public static String getModuleName(@NotNull ParseTree ctx) {
-        if (ctx instanceof Resolve.ModuleDeclContext) {
+        if (ctx instanceof ResolveParser.ModuleDeclContext) {
             ctx = ctx.getChild(0);
         }
 
-        if (ctx instanceof Resolve.PrecisModuleDeclContext ) {
-            return ((Resolve.PrecisModuleDeclContext) ctx).name.getText();
+        if (ctx instanceof ResolveParser.PrecisModuleDeclContext ) {
+            return ((ResolveParser.PrecisModuleDeclContext) ctx).name.getText();
         }
-        else if (ctx instanceof Resolve.PrecisExtensionModuleDeclContext ) {
-            return ((Resolve.PrecisExtensionModuleDeclContext) ctx).name.getText();
+        else if (ctx instanceof ResolveParser.PrecisExtensionModuleDeclContext ) {
+            return ((ResolveParser.PrecisExtensionModuleDeclContext) ctx).name.getText();
         }
-        /*else if ( ctx instanceof Resolve.FacilityModuleContext ) {
-            return ((Resolve.FacilityModuleContext) ctx).name.getText();
+        /*else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
+            return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
         }
-        else if ( ctx instanceof Resolve.ConceptImplModuleContext ) {
-            return ((Resolve.ConceptImplModuleContext) ctx).name
+        else if ( ctx instanceof ResolveParser.ConceptImplModuleContext ) {
+            return ((ResolveParser.ConceptImplModuleContext) ctx).name
                     .getText();
         }
-        else if ( ctx instanceof Resolve.ExtensionModuleContext ) {
-            return ((Resolve.ExtensionModuleContext) ctx).name
+        else if ( ctx instanceof ResolveParser.ExtensionModuleContext ) {
+            return ((ResolveParser.ExtensionModuleContext) ctx).name
                     .getText();
         }
-        else if ( ctx instanceof Resolve.ExtensionImplModuleContext ) {
-            return ((Resolve.ExtensionImplModuleContext) ctx).name
+        else if ( ctx instanceof ResolveParser.ExtensionImplModuleContext ) {
+            return ((ResolveParser.ExtensionImplModuleContext) ctx).name
                     .getText();
         }*/
         else {

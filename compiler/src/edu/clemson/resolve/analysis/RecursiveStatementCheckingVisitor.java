@@ -20,21 +20,21 @@ public class RecursiveStatementCheckingVisitor
     }
 
     /* @Override public Boolean visitTypeImplInit(
-            Resolve.TypeImplInitContext ctx) {
+            ResolveParser.TypeImplInitContext ctx) {
         return ctx.stmt().stream().anyMatch(this::visit);
     }
 
     @Override public Boolean visitOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
+            ResolveParser.OperationProcedureDeclContext ctx) {
         return ctx.stmt().stream().anyMatch(this::visit);
     }
 
     @Override public Boolean visitProcedureDecl(
-            Resolve.ProcedureDeclContext ctx) {
+            ResolveParser.ProcedureDeclContext ctx) {
         return ctx.stmt().stream().anyMatch(this::visit);
     }
 
-    @Override public Boolean visitIfStmt(Resolve.IfStmtContext ctx) {
+    @Override public Boolean visitIfStmt(ResolveParser.IfStmtContext ctx) {
         boolean result = false;
         result = visit(ctx.progExp());
         if (!result) result = ctx.stmt().stream().anyMatch(this::visit);
@@ -43,36 +43,36 @@ public class RecursiveStatementCheckingVisitor
         }
         return result;
     }
-    @Override public Boolean visitWhileStmt(Resolve.WhileStmtContext ctx) {
+    @Override public Boolean visitWhileStmt(ResolveParser.WhileStmtContext ctx) {
         boolean result = false;
         result = visit(ctx.progExp());
         if (!result) result = ctx.stmt().stream().anyMatch(this::visit);
         return result;
     }
 
-    @Override public Boolean visitStmt(Resolve.StmtContext ctx) {
+    @Override public Boolean visitStmt(ResolveParser.StmtContext ctx) {
         return visit(ctx.getChild(0));
     }
 
-    @Override public Boolean visitAssignStmt(Resolve.AssignStmtContext ctx) {
+    @Override public Boolean visitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         return visit(ctx.progExp()); //visit rhs only (left hand side is just vars)
     }
 
-    @Override public Boolean visitCallStmt(Resolve.CallStmtContext ctx) {
+    @Override public Boolean visitCallStmt(ResolveParser.CallStmtContext ctx) {
         return visit(ctx.progExp());
     }
 
-    @Override public Boolean visitProgPrimary(Resolve.ProgPrimaryContext ctx) {
+    @Override public Boolean visitProgPrimary(ResolveParser.ProgPrimaryContext ctx) {
         return visit(ctx.getChild(0));
     }
 
     @Override public Boolean visitProgPrimaryExp(
-            Resolve.ProgPrimaryExpContext ctx) {
+            ResolveParser.ProgPrimaryExpContext ctx) {
         return visit(ctx.progPrimary());
     }
 
     @Override public Boolean visitProgParamExp(
-            Resolve.ProgParamExpContext paramExp) {
+            ResolveParser.ProgParamExpContext paramExp) {
         return paramExp.name.getText().equals(callName.getText()) &&
                 (paramExp.qualifier == null);
         //recursive calls are must be to a local operation (disregarding mutual rec.)

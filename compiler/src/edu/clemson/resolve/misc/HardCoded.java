@@ -1,6 +1,6 @@
 package edu.clemson.resolve.misc;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -75,8 +75,8 @@ public class HardCoded {
 
     @NotNull public static String getMetaFieldName(@NotNull ParserRuleContext t) {
         String result = "";
-        if ( t instanceof Resolve.MathSymbolExpContext ) {
-            result = ((Resolve.MathSymbolExpContext) t).name.getText();
+        if ( t instanceof ResolveParser.MathSymbolExpContext ) {
+            result = ((ResolveParser.MathSymbolExpContext) t).name.getText();
         }
         else {
             throw new RuntimeException("not a variable exp or function exp: "

@@ -12,13 +12,13 @@ Concept Stack_Template(type Entry;
         exemplar S;
 
     Operation Push (alters e : Entry;
-             updates S : Stack);
+                    updates S : Stack);
         requires 1 + |S| < Max_Depth;
         ensures
             S = <@e> o @S;
 
     Operation Pop (replaces e : Entry;
-             updates S : Stack);
+                   updates S : Stack);
         requires 1 <= |S|;
         ensures
             @S = <e> o S;

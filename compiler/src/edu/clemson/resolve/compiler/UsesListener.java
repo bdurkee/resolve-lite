@@ -1,6 +1,6 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.parser.Resolve;
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -19,13 +19,13 @@ public class UsesListener extends ResolveBaseListener {
     }
 
  /*   @Override public void enterConceptImplModule(
-            Resolve.ConceptImplModuleContext ctx) {
+            ResolveParser.ConceptImplModuleContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
         tr.semanticallyRelevantUses.add(ctx.concept.getText());
     }*/
 
     @Override public void enterPrecisExtensionModuleDecl(
-            Resolve.PrecisExtensionModuleDeclContext ctx) {
+            ResolveParser.PrecisExtensionModuleDeclContext ctx) {
         tr.uses.add(new UsesRef(ctx.precis));
         tr.semanticallyRelevantUses.add(ctx.precis.getText());
         if (ctx.precisExt != null) {
@@ -35,14 +35,14 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     /*@Override public void enterExtensionImplModule(
-            Resolve.ExtensionImplModuleContext ctx) {
+            ResolveParser.ExtensionImplModuleContext ctx) {
         tr.uses.add(new AnnotatedModule.UsesRef(ctx.enhancement));
         tr.uses.add(new AnnotatedModule.UsesRef(ctx.concept));
         tr.semanticallyRelevantUses.add(ctx.enhancement.getText());
         tr.semanticallyRelevantUses.add(ctx.concept.getText());
     }*/
 
-    @Override public void exitUsesItem(Resolve.UsesItemContext ctx) {
+    @Override public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
         tr.uses.add(new UsesRef(ctx.ID().getSymbol()));
         tr.semanticallyRelevantUses.add(ctx.ID().getText());
 
@@ -55,7 +55,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
   /*  @Override public void exitFacilityDecl(
-            Resolve.FacilityDeclContext ctx) {
+            ResolveParser.FacilityDeclContext ctx) {
         tr.uses.add(new AnnotatedModule.UsesRef(ctx.spec));
         //tr.semanticallyRelevantUses.add(ctx.spec.getText());
         if ( ctx.externally != null ) {
@@ -68,7 +68,7 @@ public class UsesListener extends ResolveBaseListener {
     }*/
 
     /*@Override public void exitEnhancementPairDecl(
-            Resolve.EnhancementPairDeclContext ctx) {
+            ResolveParser.EnhancementPairDeclContext ctx) {
         tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),

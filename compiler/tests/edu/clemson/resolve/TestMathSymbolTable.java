@@ -27,7 +27,7 @@ public class TestMathSymbolTable extends BaseTest {
             throws IllegalArgumentException {
         MathSymbolTable b = new MathSymbolTable();
         ParserRuleContext someFakeContext =
-                new Resolve.OperationDeclContext(null, 0);
+                new ResolveParser.OperationDeclContext(null, 0);
         b.getScope(someFakeContext);
     }
 
@@ -95,7 +95,7 @@ public class TestMathSymbolTable extends BaseTest {
                     new StringReader(moduleString));
             ResolveLexer lexer = new ResolveLexer(in);
             TokenStream tokens = new CommonTokenStream(lexer);
-            Resolve parser = new Resolve(tokens);
+            ResolveParser parser = new ResolveParser(tokens);
 
             if ( parser.getNumberOfSyntaxErrors() > 0 ) {
                 throw new IllegalArgumentException("moduleString contains " +
