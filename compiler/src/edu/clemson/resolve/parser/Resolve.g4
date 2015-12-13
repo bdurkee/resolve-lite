@@ -163,11 +163,12 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=('Forall'|'Exists') mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVariableDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
+    |   mathExp op='.' mathExp                                  #mathSelectorExp
     |   mathExp op=('*'|'/'|'~') mathExp                        #mathInfixApplyExp
     |   mathExp op=('+'|'-') mathExp                            #mathInfixApplyExp
     |   mathExp op=('..'|'->') mathExp                          #mathInfixApplyExp
@@ -178,7 +179,6 @@ mathExp
     |   mathExp op=('implies'|'iff') mathExp                    #mathInfixApplyExp
     |   mathExp op=('and'|'or') mathExp                         #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                              #mathTypeAssertionExp
-    |   mathExp op='.' mathExp                                  #mathSelectorExp
     |   '(' mathAssertionExp ')'                                #mathNestedExp
     |   mathPrimaryExp                                          #mathPrimeExp
     ;
@@ -234,6 +234,8 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
+FORALL : ('Forall'|'forall');
+EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 

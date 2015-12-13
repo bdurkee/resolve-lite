@@ -42,15 +42,10 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(ctx.concept.getText());
     }*/
 
-    @Override public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
-        tr.uses.add(new UsesRef(ctx.ID().getSymbol()));
-        tr.semanticallyRelevantUses.add(ctx.ID().getText());
-
-        if (ctx.withExtensions() != null) {
-            for (TerminalNode t : ctx.withExtensions().ID()) {
-                tr.uses.add(new UsesRef(t.getSymbol()));
-                tr.semanticallyRelevantUses.add(t.getText());
-            }
+    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
+        for (TerminalNode t : ctx.ID()) {
+            tr.uses.add(new UsesRef(t.getSymbol()));
+            tr.semanticallyRelevantUses.add(t.getText());
         }
     }
 

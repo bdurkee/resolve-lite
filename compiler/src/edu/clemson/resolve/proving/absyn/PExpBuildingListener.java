@@ -241,9 +241,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
-    @Override public void exitMathSegmentsExp(
-            ResolveParser.MathSegmentsExpContext ctx) {
-        List<String> nameComponents = ctx.mathSymbolExp().stream()
+    @Override public void exitMathSelectorExp(
+            ResolveParser.MathSelectorExpContext ctx) {
+        /*List<String> nameComponents = ctx.mathSymbolExp().stream()
                 .map(app -> repo.get(app).getCanonicalName())
                 .collect(Collectors.toList());
         PExp last = repo.get(ctx.mathSymbolExp()
@@ -258,7 +258,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
                     .applicationType(last.getMathType()).build();
         }
-        repo.put(ctx, result);
+        repo.put(ctx, result);*/
     }
 
     @Override public void exitMathBooleanLiteralExp(

@@ -101,7 +101,7 @@ public  class RESOLVECompiler {
             new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of custom, working source files"),
+            new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode",           "-genCode", "generate code"),
             new Option("jar",               "-jar", "generate an executable jar"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
