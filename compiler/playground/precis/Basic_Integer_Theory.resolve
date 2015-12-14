@@ -1,6 +1,7 @@
 Precis Integer_Theory;
 
-
+    Categorical Definition for Z : SSet, z0 : Z, NB : Z -> Z is
+        Is_Monogeneric_for(Z, z0, NB);
 
     Definition +(m, n : Z) : Z;
 

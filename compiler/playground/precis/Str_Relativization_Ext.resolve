@@ -8,4 +8,5 @@ Precis Extension Str_Relativization_Ext for General_String_Theory;
         (i.)  Ag(Empty_String, f, I) = I;
         (ii.) Ag(ext(a, _ )) = f(Ag(a, f, I), I);
 
+
 end Str_Relativization_Ext;

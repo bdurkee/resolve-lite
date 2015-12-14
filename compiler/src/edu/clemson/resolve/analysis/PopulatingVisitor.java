@@ -860,6 +860,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
             }
+            emit("  new math var: " + term.getText() + " of type "
+                    + mathTypeValue.toString() + " with quantification " +
+            activeQuantifications.peek());
             tr.mathTypes.put(ctx, mathTypeValue);
         }
     }
@@ -1479,7 +1482,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
-        System.out.println("HERE: " + ctx.getText());
+        //System.out.println("mth prefix apply ctx text= "+ctx.getText());
         anonymousApplicationDepth++;
         this.visit(ctx.functionExp);
         anonymousApplicationDepth--;
