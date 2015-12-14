@@ -100,11 +100,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * {@link ResolveParser.MathQuantifiedExpContext}),
      * introduces a level to this stack to reflect the quantification that
      * should be applied to named variables as they are encountered.
-     *
-     * <p>Note that this may change as the children of the node are processed;
+     * <p>
+     * Note that this may change as the children of the node are processed;
      * for example, MathVariableDecls found in the declaration portion of a
      * quantified ctx should have quantification (universal or existential)
-     * applied, while those found in the body of the quantified ctx QuantExp
+     * applied, while those found in the body of the quantified ctx should have
      * no quantification (unless there is an embedded quantified ctx). In this
      * case, ctx should not remove its layer, but rather change it to
      * {@code Quantification.NONE}.</p>
@@ -1354,7 +1354,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         checkMathTypes(ctx.mathAssertionExp(), g.BOOLEAN);
         MTType comprehensionType = new MTPowersetApplication(g,
                 tr.mathTypeValues.get(ctx.mathVariableDecl().mathTypeExp()));
-        tr.mathTypes.put(ctx, comprehensionType);
+        tr.mathTypes.put(ctx, g.SSET);
+        tr.mathTypeValues.put(ctx, comprehensionType);
+        emit("expression: " + ctx.getText() + " of type: " + comprehensionType);
         return null;
     }
 
@@ -1746,9 +1748,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MTType preAppType = PApply.getConservativePreApplicationType(g,
                 args, tr.mathTypes);
         tr.mathTypes.put(ctx, preAppType);
-        /*PApply e = (PApply)getPExpFor(ctx);
-        MTFunction eType = (MTFunction)e.getMathType();*/
-        //TODO: Doesn't this work?
         MTFunction eType = (MTFunction)tr.mathTypes.get(ctx);
 
         List<MathSymbol> sameNameFunctions =

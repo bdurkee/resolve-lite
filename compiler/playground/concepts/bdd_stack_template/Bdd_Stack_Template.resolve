@@ -2,7 +2,7 @@ Concept Stack_Template(type Entry;
         evaluates Max_Depth :
                 Std_Ints :: Integer);
     uses General_String_Theory,
-         String_Relativization_Ext,
+         Str_Relativization_Ext,
          Standard_Integers;
     requires Max_Depth > 0
             which_entails Max_Depth : N;

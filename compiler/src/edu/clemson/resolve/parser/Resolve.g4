@@ -87,7 +87,7 @@ mathInfixDefinitionSig
     ;
 
 mathOutfixDefinitionSig
-    :   leftSym=mathSymbolName '(' mathVariableDecl ')'
+    :   leftSym=mathSymbolName mathVariableDecl
         rightSym=mathSymbolName ':' mathTypeExp
     ;
 

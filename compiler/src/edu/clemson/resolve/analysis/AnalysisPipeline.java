@@ -6,13 +6,14 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class AnalysisPipeline extends AbstractCompilationPipeline {
 
-    public AnalysisPipeline(RESOLVECompiler rc,
-                            List<AnnotatedModule> compilationUnits) {
+    public AnalysisPipeline(@NotNull RESOLVECompiler rc,
+                            @NotNull List<AnnotatedModule> compilationUnits) {
         super(rc, compilationUnits);
     }
 

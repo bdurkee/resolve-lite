@@ -6,7 +6,7 @@ Precis Extension Str_Relativization_Ext for General_String_Theory;
 
     Inductive Definition Ag(a : Str(T : Cls), f : T * T -> T, I : T) : T is
         (i.)  Ag(Empty_String, f, I) = I;
-        (ii.) Ag(ext(a, _ )) = f(Ag(a, f, I), I);
+        (ii.) true;
 
 
 end Str_Relativization_Ext;
