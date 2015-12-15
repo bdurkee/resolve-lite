@@ -45,7 +45,8 @@ public class AnnotatedModule {
      * orderings, etc. Think of these strings the refs the symboltable will see.
      * We don't want implementations of facilities showing up in this set.
      */
-    public final Set<String> semanticallyRelevantUses = new LinkedHashSet<>();
+    public final Set<ModuleIdentifier> semanticallyRelevantUses =
+            new LinkedHashSet<>();
 
     @NotNull private final String fileName;
     @NotNull private final Token name;

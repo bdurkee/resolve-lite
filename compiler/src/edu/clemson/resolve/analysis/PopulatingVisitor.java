@@ -192,7 +192,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new ModuleParameterSymbol(new ProgParameterSymbol(g,
                             ctx.name.getText(),
                             ProgParameterSymbol.ParameterMode.TYPE,
-                            new PTElement(g), ctx, getRootModuleID()));
+                            new PTElement(g), ctx, getRootModuleIdentifier()));
             symtab.getInnermostActiveScope().define(moduleParam);
         }
         catch (DuplicateSymbolException dse) {
@@ -234,8 +234,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                              ctx.name.getText(), modelType,
                                  new PTFamily(modelType, ctx.name.getText(),
                                      ctx.exemplar.getText(), constraint,
-                                     initEnsures, getRootModuleID()),
-                             exemplarSymbol, ctx, getRootModuleID());
+                                     initEnsures, getRootModuleIdentifier()),
+                             exemplarSymbol, ctx, getRootModuleIdentifier());
              symtab.getInnermostActiveScope().define(progType);
          }
          catch (DuplicateSymbolException e) {
@@ -270,7 +270,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              try {
                  symtab.getInnermostActiveScope().define(
                          new ProgVariableSymbol(ctx.name.getText(), ctx,
-                                 returnType, getRootModuleID()));
+                                 returnType, getRootModuleIdentifier()));
              }
              catch (DuplicateSymbolException dse) {
                  compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -286,7 +286,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          try {
              symtab.getInnermostActiveScope().define(
                      new ProcedureSymbol(ctx.name.getText(), ctx,
-                             getRootModuleID(), correspondingOp));
+                             getRootModuleIdentifier(), correspondingOp));
          } catch (DuplicateSymbolException dse) {
              compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                      ctx.getStart(), ctx.name.getText());
@@ -331,7 +331,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                  symtab.getInnermostActiveScope().define(
                          new ProgVariableSymbol(ctx.name.getText(), ctx,
                                  tr.progTypeValues.get(ctx.type()),
-                                 getRootModuleID()));
+                                 getRootModuleIdentifier()));
              } catch (DuplicateSymbolException e) {
                  //This shouldn't be possible--the operation declaration has a
                  //scope all its own and we're the first ones to get to
@@ -374,7 +374,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              PExp ensuresExp = getPExpFor(ensures);
              symtab.getInnermostActiveScope().define(
                      new OperationSymbol(name.getText(), ctx, requiresExp,
-                             ensuresExp, returnType, getRootModuleID(), params,
+                             ensuresExp, returnType, getRootModuleIdentifier(), params,
                              walkingModuleArgOrParamList));
          }
          catch (DuplicateSymbolException dse) {
@@ -395,7 +395,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                  symtab.getInnermostActiveScope().define(
                          new ProgParameterSymbol(symtab.getTypeGraph(), term
                                  .getText(), mode, groupType,
-                                 ctx, getRootModuleID()));
+                                 ctx, getRootModuleIdentifier()));
              }
              catch (DuplicateSymbolException dse) {
                  compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -427,7 +427,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                          getGenericArgumentSymsForFacilityOrEnh(enh.type()));
              }*/
                     symtab.getInnermostActiveScope().define(
-                            new FacilitySymbol(ctx, getRootModuleID(),
+                            new FacilitySymbol(ctx, getRootModuleIdentifier(),
                                     facOrEnhToGenericArgs, symtab));
          }
          catch (DuplicateSymbolException e) {
@@ -531,13 +531,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
          PTRepresentation reprType =
                  new PTRepresentation(g, tr.progTypeValues.get(reprTypeNode),
-                         ctx.name.getText(), typeDefnSym, getRootModuleID());
+                         ctx.name.getText(), typeDefnSym, getRootModuleIdentifier());
          try {
              String exemplarName = typeDefnSym != null ?
                      typeDefnSym.getExemplar().getName() : ctx.name.getText()
                      .substring(0, 1).toUpperCase();
              symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
-                     exemplarName, ctx, reprType, getRootModuleID()));
+                     exemplarName, ctx, reprType, getRootModuleIdentifier()));
          }
          catch (DuplicateSymbolException dse) {
              //This shouldn't be possible--the type declaration has a
@@ -553,7 +553,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          PExp correspondence = getPExpFor(ctx.correspondenceClause());
          try {
              ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
-                     ctx.name.getText(), ctx, getRootModuleID(),
+                     ctx.name.getText(), ctx, getRootModuleIdentifier(),
                      typeDefnSym, reprType, convention, correspondence);
              reprType.setReprTypeSymbol(rep);
              symtab.getInnermostActiveScope().define(rep);
@@ -582,7 +582,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              PExp assertion = getPExpFor(ctx.mathAssertionExp());
              symtab.getInnermostActiveScope().define(
                      new TheoremSymbol(g, ctx.name.getText(), assertion,
-                             ctx, getRootModuleID()));
+                             ctx, getRootModuleIdentifier()));
          } catch (DuplicateSymbolException dse) {
              compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                      ctx.name, ctx.name.getText());
@@ -610,7 +610,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, sig.name.getText(),
                                 tr.mathTypes.get(sig), null, ctx,
-                                getRootModuleID()));
+                                getRootModuleIdentifier()));
             }
             catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -644,7 +644,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
-                            defnType, null, ctx, getRootModuleID()));
+                            defnType, null, ctx, getRootModuleIdentifier()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -684,7 +684,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
                             definitionSchematicTypes, defnType, defnTypeValue,
-                            ctx, getRootModuleID()));
+                            ctx, getRootModuleIdentifier()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -820,7 +820,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             String n = name.getText();
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
-                            defnType, null, ctx, getRootModuleID()));
+                            defnType, null, ctx, getRootModuleIdentifier()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
@@ -861,7 +861,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, term.getText(), activeQuantifications
                                 .peek(), mathTypeValue, null, ctx,
-                                getRootModuleID()));
+                                getRootModuleIdentifier()));
             }
             catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -882,7 +882,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             try {
                 ProgVariableSymbol vs =
                         new ProgVariableSymbol(t.getText(), ctx, progType,
-                                getRootModuleID());
+                                getRootModuleIdentifier());
                 symtab.getInnermostActiveScope().define(vs);
             }
             catch (DuplicateSymbolException dse) {
@@ -1624,6 +1624,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
                     symbolName);
         }
+        catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(nsme.getErrorKind(),
+                    nsme.getRequestedModule(),
+                    nsme.getRequestedModule().getText());
+        }
         return null;
     }
 
@@ -1757,16 +1762,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 args, tr.mathTypes);
         tr.mathTypes.put(ctx, preAppType);
         MTFunction eType = (MTFunction)tr.mathTypes.get(ctx);
+        MathSymbol intendedFunction = null;
 
-        List<MathSymbol> sameNameFunctions =
-                symtab.getInnermostActiveScope() //
-                        .query(new MathFunctionNamedQuery(qualifier, name))
-                        .stream()
-                        .filter(s -> s.getType() instanceof MTFunction)
-                        .collect(Collectors.toList());
+        List<MathSymbol> sameNameFunctions = new ArrayList<>();
+
+        try {
+            sameNameFunctions.addAll(
+                    symtab.getInnermostActiveScope() //
+                            .query(new MathFunctionNamedQuery(qualifier, name))
+                            .stream()
+                            .filter(s -> s.getType() instanceof MTFunction)
+                            .collect(Collectors.toList()));
+        } catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    nsme.getRequestedModule(),
+                    nsme.getRequestedModule().getText());
+        }
         List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
                 .map(MathSymbol::getType).collect(Collectors.toList());
-        MathSymbol intendedFunction = null;
         if (sameNameFunctions.isEmpty()) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
@@ -1790,7 +1803,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             symtab.getInnermostActiveScope().define(
                     new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
-                            ctx, getRootModuleID()));
+                            ctx, getRootModuleIdentifier()));
         }
         catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -1817,7 +1830,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.progTypeValues.put(current, tr.progTypeValues.get(child));
     }
 
-    private String getRootModuleID() {
+    private ModuleIdentifier getRootModuleIdentifier() {
         return symtab.getInnermostActiveScope().getModuleIdentifier();
     }
 

@@ -4,6 +4,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.rsrg.semantics.ModuleIdentifier;
 
 import static edu.clemson.resolve.compiler.AnnotatedModule.*;
 
@@ -26,11 +27,13 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override public void enterPrecisExtensionModuleDecl(
             ResolveParser.PrecisExtensionModuleDeclContext ctx) {
-        tr.uses.add(new UsesRef(ctx.precis));
-        tr.semanticallyRelevantUses.add(ctx.precis.getText());
+        ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
+        tr.uses.add(precisRef);
+        tr.semanticallyRelevantUses.add(precisRef);
         if (ctx.precisExt != null) {
-            tr.uses.add(new UsesRef(ctx.precisExt));
-            tr.semanticallyRelevantUses.add(ctx.precisExt.getText());
+            ModuleIdentifier precisExtRef = new ModuleIdentifier(ctx.precisExt);
+            tr.uses.add(precisExtRef);
+            tr.semanticallyRelevantUses.add(precisExtRef);
         }
     }
 
@@ -44,8 +47,9 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         for (TerminalNode t : ctx.ID()) {
-            tr.uses.add(new UsesRef(t.getSymbol()));
-            tr.semanticallyRelevantUses.add(t.getText());
+            tr.uses.add(new ModuleIdentifier(t.getSymbol()));
+            tr.semanticallyRelevantUses.add(
+                    new ModuleIdentifier(t.getSymbol()));
         }
     }
 

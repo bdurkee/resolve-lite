@@ -39,6 +39,8 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -47,6 +49,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.rsrg.semantics.MathSymbolTable;
+import org.rsrg.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -119,14 +122,13 @@ public  class RESOLVECompiler {
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    public final ErrorManager errMgr;
-    public LogManager logMgr = new LogManager();
+    @NotNull public final ErrorManager errMgr;
+    @NotNull public LogManager logMgr = new LogManager();
 
     public RESOLVECompiler() { this(null); }
 
-    public RESOLVECompiler(String[] args) {
+    public RESOLVECompiler(@Nullable String[] args) {
         this.errMgr = new ErrorManager(this);
-        this.symbolTable.setErrorManager(errMgr);
         this.args = args;
         handleArgs();
     }
@@ -260,20 +262,20 @@ public  class RESOLVECompiler {
         vcsPipe.process();
     }
 
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
+    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (String fileName : targetFiles) {
             AnnotatedModule t = parseModule(fileName);
             if ( t == null || t.hasErrors ) {
                 continue;
             }
-            roots.put(t.getName(), t);
+            roots.put(t.getName().getText(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(roots.values())) {
-            g.addVertex(t.getName());
+            g.addVertex(t.getName().getText());
             findDependencies(g, t, roots);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
@@ -288,35 +290,42 @@ public  class RESOLVECompiler {
         return finalOrdering;
     }
 
-    private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
-                                  AnnotatedModule root,
-                                  Map<String, AnnotatedModule> roots) {
-        for (AnnotatedModule.UsesRef importRequest : root.uses) {
-            AnnotatedModule module = roots.get(importRequest.name);
+    private void findDependencies(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                                  @NotNull AnnotatedModule root,
+                                  @NotNull Map<String, AnnotatedModule> roots) {
+        for (ModuleIdentifier importRequest : root.uses) {
+            AnnotatedModule module =
+                    roots.get(importRequest.getNameToken().getText());
             try {
-                File file = findResolveFile(importRequest.name, NATIVE_EXTENSION);
+                File file = findResolveFile(importRequest
+                        .getNameToken().getText());
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
-                    roots.put(module.getName(), module);
+                    if (module != null) {
+                        roots.put(module.getName().getText(), module);
+                    }
                 }
             }
             catch (IOException ioe) {
                 errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.location, root.getName(),
-                        importRequest.name);
+                        importRequest.getNameToken(), root.getName(),
+                        importRequest.getNameToken().getText());
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
-
-            if ( pathExists(g, module.getName(), root.getName()) ) {
-                errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
-                        importRequest.location,
-                        importRequest.name, root.getName());
-                break;
+            if (module != null) {
+                if (pathExists(g, module.getName().getText(),
+                        root.getName().getText())) {
+                    errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
+                            importRequest.getNameToken(), root.getName(),
+                            importRequest.getNameToken().getText());
+                    break;
+                }
+                Graphs.addEdgeWithVertices(g, root.getName().getText(),
+                        module.getName().getText());
+                findDependencies(g, module, roots);
             }
-            Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
-            findDependencies(g, module, roots);
         }
     }
 
@@ -335,11 +344,11 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    protected boolean pathExists(DefaultDirectedGraph<String, DefaultEdge> g,
-                                 String src, String dest) {
+    protected boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                                 @NotNull String src,  @NotNull String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if ( !g.containsVertex(src) ) {
+        if (!g.containsVertex(src)) {
             return false;
         }
         GraphIterator<String, DefaultEdge> iterator =
@@ -347,16 +356,16 @@ public  class RESOLVECompiler {
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if ( next.equals(dest) ) {
+            if (next.equals(dest)) {
                 return true;
             }
         }
         return false;
     }
 
-    private File findResolveFile(String fileName,
-                                 List<String> extensions) throws IOException {
-        FileLocator l = new FileLocator(fileName, extensions);
+    @NotNull private File findResolveFile(@NotNull String fileName)
+            throws IOException {
+        FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
             Files.walkFileTree(new File(workingDirectory).toPath(), l);
@@ -370,7 +379,7 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    private AnnotatedModule parseModule(String fileName) {
+    @Nullable private AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
@@ -385,7 +394,7 @@ public  class RESOLVECompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.moduleDecl();
-            return new AnnotatedModule(start, Utils.getModuleName(start).getText(),
+            return new AnnotatedModule(start, Utils.getModuleName(start),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);
         }
@@ -395,7 +404,7 @@ public  class RESOLVECompiler {
         return null;
     }
 
-    public static String getCoreLibraryDirectory() {
+    @NotNull public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
         if (rootDir == null) {
             return ".";
@@ -403,23 +412,23 @@ public  class RESOLVECompiler {
         return rootDir + File.separator + getCoreLibraryName();
     }
 
-    public static String getCoreLibraryName() {
+    @NotNull public static String getCoreLibraryName() {
         return "src";
     }
 
-    public void log(String component, String msg) {
+    public void log(@Nullable String component, @NotNull String msg) {
         logMgr.log(component, msg);
     }
 
-    public void log(String msg) {
+    public void log(@NotNull String msg) {
         log(null, msg);
     }
 
-    public void addListener(RESOLVECompilerListener cl) {
+    public void addListener(@Nullable RESOLVECompilerListener cl) {
         if ( cl!=null ) listeners.add(cl);
     }
 
-    public void removeListener(RESOLVECompilerListener tl) {
+    public void removeListener(@Nullable RESOLVECompilerListener tl) {
         listeners.remove(tl);
     }
 
@@ -427,7 +436,7 @@ public  class RESOLVECompiler {
         listeners.clear();
     }
 
-    public List<RESOLVECompilerListener> getListeners() {
+    @NotNull public List<RESOLVECompilerListener> getListeners() {
         return listeners;
     }
 
@@ -445,24 +454,24 @@ public  class RESOLVECompiler {
         }
     }
 
-    public void info(String msg) {
-        if ( listeners.isEmpty() ) {
+    public void info(@NotNull String msg) {
+        if (listeners.isEmpty()) {
             defaultListener.info(msg);
             return;
         }
         for (RESOLVECompilerListener l : listeners) l.info(msg);
     }
 
-    public void error(RESOLVEMessage msg) {
-        if ( listeners.isEmpty() ) {
+    public void error(@NotNull RESOLVEMessage msg) {
+        if (listeners.isEmpty()) {
             defaultListener.error(msg);
             return;
         }
         for (RESOLVECompilerListener l : listeners) l.error(msg);
     }
 
-    public void warning(RESOLVEMessage msg) {
-        if ( listeners.isEmpty() ) {
+    public void warning(@NotNull RESOLVEMessage msg) {
+        if (listeners.isEmpty()) {
             defaultListener.warning(msg);
         }
         else {

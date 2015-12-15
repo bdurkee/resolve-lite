@@ -61,7 +61,8 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @NotNull @Override public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query) {
+            @NotNull MultimatchSymbolQuery<E> query)
+            throws NoSuchModuleException {
         return query.searchFromContext(this, symtab);
     }
 

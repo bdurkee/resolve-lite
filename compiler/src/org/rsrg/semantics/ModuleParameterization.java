@@ -14,14 +14,14 @@ import java.util.*;
 public class ModuleParameterization {
 
     @NotNull private final MathSymbolTable scopeRepo;
-    @NotNull private final Token moduleName;
+    @NotNull private final ModuleIdentifier moduleIdentifier;
 
     @NotNull private final List<ResolveParser.ModuleArgumentContext> arguments =
             new ArrayList<>();
     @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     @NotNull private final FacilitySymbol instantiatingFacility;
 
-    public ModuleParameterization(@NotNull Token moduleName,
+    public ModuleParameterization(@NotNull ModuleIdentifier moduleIdentifier,
                                   @NotNull List<ProgTypeSymbol> actualGenerics,
                                   @Nullable ResolveParser.ModuleArgumentListContext actualArgListNode,
                                   @NotNull FacilitySymbol instantiatingFacility,
@@ -33,13 +33,13 @@ public class ModuleParameterization {
         if ( actualArgListNode != null ) {
             arguments.addAll(actualArgListNode.moduleArgument());
         }
-        this.moduleName = moduleName;
+        this.moduleIdentifier = moduleIdentifier;
     }
 
     @NotNull public Scope getScope(boolean instantiated)
             throws NoSuchModuleException {
         Scope result;
-        result = scopeRepo.getModuleScope(moduleName.getText());
+        result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
             Map<String, PTType> genericInstantiations;
            // genericInstantiations =
@@ -72,12 +72,8 @@ public class ModuleParameterization {
         return result;
     }*/
 
-    @NotNull public Token getName() {
-        return moduleName;
-    }
-
-    @NotNull public String getModuleID() {
-        return moduleName.getText();
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
     @NotNull public List<ResolveParser.ModuleArgumentContext> getArguments() {

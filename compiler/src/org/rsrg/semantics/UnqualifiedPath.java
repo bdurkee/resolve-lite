@@ -92,9 +92,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
         }
 
         //Finally, if requested, we search imports
-        if ( (results.isEmpty() || !localPriority)
+        if ((results.isEmpty() || !localPriority)
                 && source instanceof SyntacticScope
-                && importStrategy != ImportStrategy.IMPORT_NONE ) {
+                && importStrategy != ImportStrategy.IMPORT_NONE) {
 
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;
             ModuleScopeBuilder module =
@@ -108,16 +108,17 @@ public class UnqualifiedPath implements ScopeSearchPath {
                                 instantiatingFacility,
                                 importStrategy.cascadingStrategy(),
                                 depth + 1);
-                if ( finished ) break;
+                if (finished) break;
             }
         }
         return finished;
     }
 
     public <E extends Symbol> boolean searchFacilities(
-            TableSearcher<E> searcher, List<E> result, Scope source,
-            Map<String, PTType> genericInstantiations,
-            Set<Scope> searchedScopes, MathSymbolTable repo)
+            @NotNull TableSearcher<E> searcher, @NotNull List<E> result,
+            @NotNull Scope source,
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Set<Scope> searchedScopes, MathSymbolTable repo)
             throws DuplicateSymbolException, NoSuchModuleException {
 
         List<FacilitySymbol> facilities =

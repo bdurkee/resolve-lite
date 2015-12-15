@@ -1,6 +1,5 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.GenericSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -33,12 +32,12 @@ public abstract class SpecModule extends Module {
     @Override public void addGettersAndMembersForModuleParameterizableSyms(
             List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof ProgParameterSymbol ) {
+            if (s instanceof ProgParameterSymbol) {
                 funcs.add(buildGetterSignature(s.getName()));
             }
-            else if ( s instanceof GenericSymbol ) {
+            /*else if ( s instanceof GenericSymbol ) {
                 funcs.add(buildGetterSignature(s.getName()));
-            }
+            }*/
         }
     }
 

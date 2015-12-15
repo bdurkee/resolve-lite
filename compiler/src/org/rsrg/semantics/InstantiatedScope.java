@@ -35,13 +35,15 @@ public class InstantiatedScope extends AbstractScope {
     }
 
     @NotNull @Override public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query) {
+            @NotNull MultimatchSymbolQuery<E> query)
+            throws NoSuchModuleException {
         return myBaseScope.query(query);
     }
 
-    @NotNull @Override public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query)
+    @NotNull @Override public <E extends Symbol> E queryForOne(
+            @NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
-                DuplicateSymbolException {
+                DuplicateSymbolException, NoSuchModuleException {
         return myBaseScope.queryForOne(query);
     }
 

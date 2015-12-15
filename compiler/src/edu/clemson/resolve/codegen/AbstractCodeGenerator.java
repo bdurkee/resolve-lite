@@ -43,7 +43,7 @@ public abstract class AbstractCodeGenerator {
 
     @NotNull public String getFileName() {
         ST extST = templates.getInstanceOf("fileExtension");
-        String moduleName = module.getName();
+        String moduleName = module.getName().getText();
         return moduleName + extST.render();
     }
 

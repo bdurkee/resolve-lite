@@ -1,15 +1,17 @@
 package org.rsrg.semantics;
 
+import org.jetbrains.annotations.NotNull;
+
 public class UnexpectedSymbolException extends RuntimeException {
 
-    private final String actualSymbolDescription;
+    @NotNull private final String actualSymbolDescription;
 
-    public UnexpectedSymbolException(String actualSymbolDescription) {
+    public UnexpectedSymbolException(@NotNull String actualSymbolDescription) {
         super();
         this.actualSymbolDescription = actualSymbolDescription;
     }
 
-    public String getActualSymbolDescription() {
+    @NotNull public String getActualSymbolDescription() {
         return actualSymbolDescription;
     }
 }

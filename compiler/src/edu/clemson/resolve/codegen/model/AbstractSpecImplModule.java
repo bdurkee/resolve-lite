@@ -1,6 +1,5 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.GenericSymbol;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -34,7 +33,7 @@ public abstract class AbstractSpecImplModule extends Module {
                 //for this class (which is a separate model object)
                 memberVars.add(new VariableDef(s.getName(), null));
             }
-            else if ( s instanceof GenericSymbol) {
+            /*else if ( s instanceof GenericSymbol) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 funcImpls.add(buildInitMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));
@@ -44,7 +43,7 @@ public abstract class AbstractSpecImplModule extends Module {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 funcImpls.add(buildInitMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));
-            }
+            }*/
         }
     }
 

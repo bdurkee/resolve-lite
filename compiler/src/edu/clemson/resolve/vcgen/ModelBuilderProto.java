@@ -69,7 +69,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
-            moduleScope = symtab.getModuleScope(tr.getName());
+            moduleScope = symtab.getModuleScope(
+                    new ModuleIdentifier(tr.getName()));
         }
         catch (NoSuchModuleException e) {
             gen.getCompiler().errMgr
@@ -206,7 +207,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> result = new ArrayList<>();
         List<String> modulesToSearch = new ArrayList<>();
 
-        modulesToSearch.add(moduleScope.getModuleIdentifier());
+      //  modulesToSearch.add(moduleScope.getModuleIdentifier());
        /* if (moduleCtx instanceof ResolveParser.ConceptImplModuleContext) {
             ResolveParser.ConceptImplModuleContext moduleCtxAsConceptImpl =
                     (ResolveParser.ConceptImplModuleContext)moduleCtx;
