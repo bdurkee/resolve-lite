@@ -61,7 +61,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull @Override public ProgTypeSymbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         Map<String, MTType> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);

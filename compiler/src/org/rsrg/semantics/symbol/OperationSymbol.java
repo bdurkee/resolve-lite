@@ -70,7 +70,7 @@ public class OperationSymbol extends Symbol {
 
     @NotNull @Override public OperationSymbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         InstantiationFunction f =
                 new InstantiationFunction(genericInstantiations,

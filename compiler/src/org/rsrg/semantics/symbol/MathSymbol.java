@@ -143,7 +143,7 @@ public class MathSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         //Any type that appears in our list of schematic types shadows any
         //possible reference to a generic type

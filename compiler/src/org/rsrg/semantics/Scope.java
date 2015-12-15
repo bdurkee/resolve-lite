@@ -18,7 +18,8 @@ import java.util.Set;
 public interface Scope {
 
     @NotNull public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query);
+            @NotNull MultimatchSymbolQuery<E> query)
+            throws NoSuchModuleException;
 
     @NotNull public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query) throws NoSuchSymbolException,

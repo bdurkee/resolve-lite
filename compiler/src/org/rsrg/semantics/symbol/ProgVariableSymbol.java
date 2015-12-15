@@ -39,7 +39,7 @@ public class ProgVariableSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         Symbol result;
         PTType instantiatedType =

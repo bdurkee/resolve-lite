@@ -50,7 +50,7 @@ public class TheoremSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

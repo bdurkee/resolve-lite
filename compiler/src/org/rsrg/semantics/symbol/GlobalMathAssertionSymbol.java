@@ -50,7 +50,7 @@ public class GlobalMathAssertionSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
         //Todo: Eventually we'll use the PExp hierarchy to perform generic
         //instantiations on field 'assertion'
         return this;

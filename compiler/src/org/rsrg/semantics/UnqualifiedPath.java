@@ -1,6 +1,7 @@
 package org.rsrg.semantics;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.programtype.PTType;
@@ -37,21 +38,22 @@ import java.util.*;
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
-    private final ImportStrategy importStrategy;
-    private final FacilityStrategy facilityStrategy;
+    @NotNull private final ImportStrategy importStrategy;
+    @NotNull private final FacilityStrategy facilityStrategy;
     private final boolean localPriority;
 
-    public UnqualifiedPath(ImportStrategy imports, FacilityStrategy facilities,
-            boolean localPriority) {
+    public UnqualifiedPath(@NotNull ImportStrategy imports,
+                           @NotNull FacilityStrategy facilities,
+                           boolean localPriority) {
         this.importStrategy = imports;
         this.facilityStrategy = facilities;
         this.localPriority = localPriority;
     }
 
     @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
-            @NotNull TableSearcher<E> searcher, @NotNull Scope source, @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException {
-
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
+            @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
         Map<String, PTType> genericInstantiations = new HashMap<>();
@@ -62,13 +64,14 @@ public class UnqualifiedPath implements ScopeSearchPath {
         return result;
     }
 
-    private <E extends Symbol> boolean searchModule(TableSearcher<E> searcher,
-            Scope source, MathSymbolTable repo, List<E> results,
-            Set<Scope> searchedScopes,
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility,
-            ImportStrategy importStrategy, int depth)
-            throws DuplicateSymbolException {
+    private <E extends Symbol> boolean searchModule(
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
+            @NotNull MathSymbolTable repo,  @NotNull List<E> results,
+            @NotNull Set<Scope> searchedScopes,
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility,
+            @NotNull ImportStrategy importStrategy, int depth)
+            throws DuplicateSymbolException, NoSuchModuleException {
 
         //First we search locally
         boolean finished =
@@ -81,8 +84,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
         //
         // TODO: ^^ Ideally we wouldn't change anything in here, but instead just fix the queries themselves with a facility ignore
         //so we wouldn't even have to touch this class. This way we could just keep symbolTypeQuery w/ Facility_Instantiate, or Facility_Generic.
-        if ( searcher instanceof SymbolTypeSearcher && !finished &&
-                facilityStrategy != FacilityStrategy.FACILITY_IGNORE ) {
+        if (searcher instanceof SymbolTypeSearcher && !finished &&
+                facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
             finished =
                     searchFacilities(searcher, results, source,
                             genericInstantiations, searchedScopes, repo);
@@ -97,11 +100,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
             ModuleScopeBuilder module =
                     repo.getModuleScope(sourceAsSyntacticScope
                             .getModuleIdentifier());
-            List<String> imports = module.getImports();
-
-            for (String s : module.getImports()) {
+            for (ModuleIdentifier i : module.getImports()) {
                 finished =
-                        searchModule(searcher, repo.getModuleScope(s),
+                        searchModule(searcher, repo.getModuleScope(i),
                                 repo, results, searchedScopes,
                                 genericInstantiations,
                                 instantiatingFacility,
@@ -117,7 +118,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             TableSearcher<E> searcher, List<E> result, Scope source,
             Map<String, PTType> genericInstantiations,
             Set<Scope> searchedScopes, MathSymbolTable repo)
-            throws DuplicateSymbolException {
+            throws DuplicateSymbolException, NoSuchModuleException {
 
         List<FacilitySymbol> facilities =
                 source.getMatches(SymbolTypeSearcher.FACILITY_SEARCHER,

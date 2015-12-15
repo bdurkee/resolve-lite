@@ -105,7 +105,7 @@ public abstract class Symbol {
 
     @NotNull public abstract Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility);
+            @Nullable FacilitySymbol instantiatingFacility);
 
     @NotNull public static Map<String, MTType> buildMathTypeGenerics(
             @NotNull Map<String, PTType> genericInstantiations) {

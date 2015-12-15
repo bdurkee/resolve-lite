@@ -101,7 +101,7 @@ public class ProgReprTypeSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         //type representations are an internal implementation detail of
         //some realization and shouldn't be accessible through a facility

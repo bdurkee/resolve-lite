@@ -22,7 +22,7 @@ public class MathFunctionNamedQuery
         implements
             MultimatchSymbolQuery<MathSymbol> {
 
-    private final SymbolQuery<Symbol> nameQuery;
+   @NotNull private final SymbolQuery<Symbol> nameQuery;
 
     public MathFunctionNamedQuery(@Nullable Token qualifier,
                                   @NotNull Token name) {

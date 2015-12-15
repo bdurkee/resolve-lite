@@ -31,7 +31,7 @@ public class ProcedureSymbol extends Symbol {
 
     @NotNull @Override public ProcedureSymbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProcedureSymbol(getName(), getDefiningTree(), getModuleIdentifier(),
                 correspondingOperation.instantiateGenerics(

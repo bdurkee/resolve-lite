@@ -3,6 +3,7 @@ package org.rsrg.semantics.query;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.MathSymbolTable;
+import org.rsrg.semantics.NoSuchModuleException;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -22,20 +23,20 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
         implements
             SymbolQuery<R> {
 
-    private final SymbolQuery<T> baseQuery;
-    private final Function<T, R> mapping;
+    @NotNull private final SymbolQuery<T> baseQuery;
+    @NotNull private final Function<T, R> mapping;
 
-    public ResultProcessingQuery(SymbolQuery<T> baseQuery,
-                                 Function<T, R> mapping) {
+    public ResultProcessingQuery(@NotNull SymbolQuery<T> baseQuery,
+                                 @NotNull Function<T, R> mapping) {
         this.baseQuery = baseQuery;
         this.mapping = mapping;
     }
 
-    @Override public List<R> searchFromContext(@NotNull Scope source, @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException {
-        List<R> processedList = baseQuery.searchFromContext(source, repo).stream()
+    @Override public List<R> searchFromContext(@NotNull Scope source,
+                                               @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException {
+        return baseQuery.searchFromContext(source, repo).stream()
                 .map(mapping::apply)
                 .collect(Collectors.toList());
-        return processedList ;
     }
 }

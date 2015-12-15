@@ -2,6 +2,7 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTGeneric;
@@ -153,7 +154,7 @@ public class ProgParameterSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,

@@ -2,6 +2,7 @@ package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -33,7 +34,7 @@ public class ModuleParameterSymbol extends Symbol {
 
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, PTType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+            @Nullable FacilitySymbol instantiatingFacility) {
         return wrappedParamSymbol.instantiateGenerics(
                 genericInstantiations, instantiatingFacility);
     }
