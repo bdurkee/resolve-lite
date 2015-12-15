@@ -35,7 +35,7 @@ public class PTFamily extends PTNamed {
         return exemplarName;
     }
 
-    public PExp getConstraint() {
+    @NotNull public PExp getConstraint() {
         return constraint;
     }
 

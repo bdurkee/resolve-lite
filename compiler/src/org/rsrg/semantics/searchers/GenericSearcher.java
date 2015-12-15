@@ -13,8 +13,7 @@ public class GenericSearcher
         implements
             MultimatchTableSearcher<ProgTypeSymbol> {
 
-    @NotNull public static final GenericSearcher INSTANCE =
-            new GenericSearcher();
+    public static final GenericSearcher INSTANCE = new GenericSearcher();
     private GenericSearcher() {}
 
     @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,

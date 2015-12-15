@@ -23,6 +23,6 @@ public class MathSymbolQuery extends ResultProcessingQuery<Symbol, MathSymbol> {
                            @NotNull Token l) {
         super(new BaseSymbolQuery<Symbol>(new PossiblyQualifiedPath(qualifier,
                 IMPORT_NAMED, FACILITY_IGNORE, true),
-                new NameSearcher(name, true)), Symbol::toMathSymbol);
+                    new NameSearcher(name, true)), Symbol::toMathSymbol);
     }
 }

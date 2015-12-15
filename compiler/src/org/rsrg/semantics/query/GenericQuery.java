@@ -1,5 +1,6 @@
 package org.rsrg.semantics.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.UnqualifiedPath;
 import org.rsrg.semantics.searchers.GenericSearcher;
@@ -9,7 +10,7 @@ public class GenericQuery extends BaseMultimatchSymbolQuery<ProgTypeSymbol>
         implements
             MultimatchSymbolQuery<ProgTypeSymbol> {
 
-    public static final GenericQuery INSTANCE = new GenericQuery();
+    @NotNull public static final GenericQuery INSTANCE = new GenericQuery();
 
     private GenericQuery() {
         super(new UnqualifiedPath(MathSymbolTable.ImportStrategy.IMPORT_NAMED,

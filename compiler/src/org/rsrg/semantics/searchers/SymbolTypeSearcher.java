@@ -15,14 +15,15 @@ public class SymbolTypeSearcher<E extends Symbol>
     public static final SymbolTypeSearcher<FacilitySymbol> FACILITY_SEARCHER =
             new SymbolTypeSearcher<>(FacilitySymbol.class);
 
-    private final Class<E> targetClass;
+    @NotNull private final Class<E> targetClass;
 
-    public SymbolTypeSearcher(Class<E> targetClass) {
+    public SymbolTypeSearcher(@NotNull Class<E> targetClass) {
         this.targetClass = targetClass;
     }
 
     @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
-                            @NotNull List<E> matches, @NotNull SearchContext l) {
+                                        @NotNull List<E> matches,
+                                        @NotNull SearchContext l) {
         matches.addAll(entries.values().stream().filter(targetClass::isInstance)
                 .map(targetClass::cast)
                 .collect(Collectors.toList()));
