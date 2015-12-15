@@ -1,6 +1,8 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.symbol.MathSymbol;
 
 import java.util.ArrayList;
@@ -24,12 +26,15 @@ public class ScopeBuilder extends SyntacticScope {
     //matter. It just does currently because of the way we grab lists of
     //formal parameters (from scope) for functions before we insert the
     //completed sym into the table.
-    ScopeBuilder(MathSymbolTable s, TypeGraph g, ParserRuleContext definingTree,
-                 Scope parent, String moduleID) {
+    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull TypeGraph g,
+                 @Nullable ParserRuleContext definingTree,
+                 @NotNull Scope parent,
+                 @NotNull ModuleIdentifier moduleID) {
         super(s, definingTree, parent, moduleID, new LinkedHashMap<>());
         this.typeGraph = g;
     }
 
+    //TODO: I think these parent and child methods can go eventually
     void setParent(Scope parent) {
         this.parent = parent;
     }

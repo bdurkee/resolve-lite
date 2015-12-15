@@ -1,6 +1,8 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -8,35 +10,47 @@ import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
 
+/**
+ * Like the name suggests, represents an implementation {@link ScopeSearchPath}
+ * that might (or might not be) qualified.
+ * <p>
+ * The implementation of
+ * {@link #searchFromContext(TableSearcher, Scope, MathSymbolTable)} here
+ * abstracts which of the two are selected based on the parameters passed to
+ * {@code this}.</p>
+ */
 public class PossiblyQualifiedPath implements ScopeSearchPath {
 
-    private final ScopeSearchPath actualSearchPath;
+    @NotNull private final ScopeSearchPath actualSearchPath;
 
-    public PossiblyQualifiedPath(Token qualifier,
-            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
-            boolean localPriority) {
+    public PossiblyQualifiedPath(@Nullable Token qualifier,
+                                 @NotNull ImportStrategy importStrategy,
+                                 @NotNull FacilityStrategy facilityStrategy,
+                                 boolean localPriority) {
         this.actualSearchPath =
                 getAppropriatePath(qualifier, importStrategy, facilityStrategy,
                         localPriority);
     }
 
-    public PossiblyQualifiedPath(Token qualifier) {
+    public PossiblyQualifiedPath(@Nullable Token qualifier) {
         this(qualifier, ImportStrategy.IMPORT_NONE,
                 FacilityStrategy.FACILITY_IGNORE, false);
     }
 
-    @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
-            throws DuplicateSymbolException {
+    @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
+            @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException {
         return actualSearchPath.searchFromContext(searcher, source, repo);
     }
 
-    private static ScopeSearchPath getAppropriatePath(Token qualifier,
-            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+    @NotNull private static ScopeSearchPath getAppropriatePath(
+            @Nullable Token qualifier,
+            @NotNull ImportStrategy importStrategy,
+            @NotNull FacilityStrategy facilityStrategy,
             boolean localPriority) {
         ScopeSearchPath result;
-
-        if ( qualifier == null ) {
+        if (qualifier == null) {
             result =
                     new UnqualifiedPath(importStrategy, facilityStrategy,
                             localPriority);

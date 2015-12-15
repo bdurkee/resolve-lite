@@ -7,8 +7,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTRepresentation;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ProgReprTypeSymbol extends Symbol {
@@ -70,7 +68,7 @@ public class ProgReprTypeSymbol extends Symbol {
     @Override public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), representation,
                 (definition == null) ? null : definition.modelType,
-                getDefiningTree(), getModuleID());
+                getDefiningTree(), getModuleIdentifier());
     }
 
     @Override public ProgReprTypeSymbol toProgReprTypeSymbol() {

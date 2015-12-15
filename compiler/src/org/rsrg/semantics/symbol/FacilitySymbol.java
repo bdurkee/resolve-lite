@@ -35,7 +35,7 @@ public class FacilitySymbol extends Symbol {
         this.scopeRepo = scopeRepo;
         this.genericsPerFacility = actualGenerics;
         ModuleParameterization spec =
-                new ModuleParameterization(facility.spec.getText(),
+                new ModuleParameterization(facility.spec,
                         genericsPerFacility.get(facility), facility.specArgs,
                         this, scopeRepo);
 
@@ -44,7 +44,7 @@ public class FacilitySymbol extends Symbol {
         List<ResolveParser.ModuleArgumentContext> actualArgs =
                 facility.implArgs != null ? facility.implArgs
                         .moduleArgument() : new ArrayList<>();
-        impl = new ModuleParameterization(facility.impl.getText(),
+        impl = new ModuleParameterization(facility.impl,
                         new ArrayList<>(), facility.implArgs, this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);

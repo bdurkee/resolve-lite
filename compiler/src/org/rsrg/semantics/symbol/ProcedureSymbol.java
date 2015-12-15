@@ -1,7 +1,6 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
@@ -29,7 +28,7 @@ public class ProcedureSymbol extends Symbol {
             Map<String, PTType> genericInstantiations,
             FacilitySymbol instantiatingFacility) {
 
-        return new ProcedureSymbol(getName(), getDefiningTree(), getModuleID(),
+        return new ProcedureSymbol(getName(), getDefiningTree(), getModuleIdentifier(),
                 correspondingOperation.instantiateGenerics(
                         genericInstantiations, instantiatingFacility));
     }

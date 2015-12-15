@@ -1,6 +1,6 @@
 package org.rsrg.semantics.searchers;
 
-import org.rsrg.semantics.symbol.GenericSymbol;
+import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -16,10 +16,14 @@ public class GenericSearcher implements MultimatchTableSearcher<ProgTypeSymbol> 
 
     @Override public boolean addMatches(Map<String, Symbol> entries,
                               List<ProgTypeSymbol> matches, SearchContext l) {
-        matches.addAll(entries.values().stream()
-                .filter(s -> s instanceof GenericSymbol)
-                .map(Symbol::toProgTypeSymbol)
-                .collect(Collectors.toList()));
+        for (Symbol s : entries.values()) {
+            if (s instanceof ProgParameterSymbol) {
+                if (((ProgParameterSymbol) s).getMode() ==
+                        ProgParameterSymbol.ParameterMode.TYPE) {
+                    matches.add(s.toProgTypeSymbol());
+                }
+            }
+        }
         return false;
     }
 }

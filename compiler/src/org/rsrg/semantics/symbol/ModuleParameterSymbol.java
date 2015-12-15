@@ -6,10 +6,9 @@ import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-/**
- * A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
- * {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
- * functioning as a module formal parameter when it is declared.
+/** A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
+ *  {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
+ *  functioning as a module formal parameter when declared.
  */
 public class ModuleParameterSymbol extends Symbol {
 
@@ -23,7 +22,7 @@ public class ModuleParameterSymbol extends Symbol {
     }
 
     public ModuleParameterSymbol(ProgParameterSymbol p) {
-        this(p, p.getName(), p.definingTree, p.getModuleID());
+        this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
     @Override public String getSymbolDescription() {

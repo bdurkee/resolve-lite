@@ -143,13 +143,9 @@ variableDeclGroup
 
 // type and record related rules
 
-//TODO: ideally in future, record would be an alternative here
 type
-    :   (qualifier=ID '::')? name=ID
-    ;
-
-record
-    :   'Record' (recordVariableDeclGroup)* 'end'
+    :   (qualifier=ID '::')? name=ID                #namedType
+    |    'Record' (recordVariableDeclGroup)* 'end'  #recordType
     ;
 
 recordVariableDeclGroup
@@ -164,7 +160,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID '=' (type|record) ';'?
+    :   'Type' name=ID '=' type ';'?
         (conventionClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -429,11 +425,6 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;
-FLOAT
-	:   '-'? INT '.' INT EXP?   // 1.35, 1.35E-9, 0.3, -4.5
-	|   '-'? INT EXP            // 1e10 -3e4
-	;
-fragment EXP :   [Ee] [+\-]? INT ;
 
 CHAR: '\'' . '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;

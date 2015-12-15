@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
@@ -33,23 +34,23 @@ public class InstantiatedScope extends AbstractScope {
         myInstantiatingFacility = instantiatingFacility;
     }
 
-    @Override public <E extends Symbol> List<E> query(
-            MultimatchSymbolQuery<E> query) {
+    @NotNull @Override public <E extends Symbol> List<E> query(
+            @NotNull MultimatchSymbolQuery<E> query) {
         return myBaseScope.query(query);
     }
 
-    @Override public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
+    @NotNull @Override public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
                 DuplicateSymbolException {
         return myBaseScope.queryForOne(query);
     }
 
     @Override public <E extends Symbol> boolean
-            addMatches(TableSearcher<E> searcher, List<E> matches,
-                    Set<Scope> searchedScopes,
-                    Map<String, PTType> genericInstantiations,
+            addMatches(@NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
+                    @NotNull Set<Scope> searchedScopes,
+                    @NotNull Map<String, PTType> genericInstantiations,
                     FacilitySymbol facilityInstantiation,
-                    TableSearcher.SearchContext l)
+                    @NotNull TableSearcher.SearchContext l)
                     throws DuplicateSymbolException {
 
         if ( facilityInstantiation != null ) {
@@ -63,15 +64,15 @@ public class InstantiatedScope extends AbstractScope {
                 myAdditionalGenericInstantiations, myInstantiatingFacility, l);
     }
 
-    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+    @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type) {
         return myBaseScope.getSymbolsOfType(type);
     }
 
-    @Override public List<Symbol> getSymbolsOfType(Class<?>... type) {
+    @NotNull @Override public List<Symbol> getSymbolsOfType(@NotNull Class<?>... type) {
         return myBaseScope.getSymbolsOfType(type);
     }
 
-    @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
+    @NotNull @Override public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException {
         return myBaseScope.define(s);
     }
 

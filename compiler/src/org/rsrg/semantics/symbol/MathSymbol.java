@@ -1,14 +1,11 @@
 package org.rsrg.semantics.symbol;
 
-import edu.clemson.resolve.proving.absyn.PExp;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
-import org.rsrg.semantics.query.GenericQuery;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MathSymbol extends Symbol {
 
@@ -125,7 +122,7 @@ public class MathSymbol extends Symbol {
     }
 
     @Override public String toString() {
-        return getModuleID() + "::" + getName() + "\t\t" + quantification
+        return getModuleIdentifier() + "::" + getName() + "\t\t" + quantification
                 + "\t\tof type: " + type + "\t\t defines type: " + typeValue;
     }
 
@@ -164,7 +161,7 @@ public class MathSymbol extends Symbol {
 
         return new MathSymbol(type.getTypeGraph(), getName(),
                 getQuantification(), typeSubstitutor.getFinalExpression(),
-                instantiatedTypeValue, getDefiningTree(), getModuleID());
+                instantiatedTypeValue, getDefiningTree(), getModuleIdentifier());
     }
 
 }

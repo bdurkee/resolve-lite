@@ -1,6 +1,7 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -13,7 +14,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         super(symbolTable, g, definingTree, parent, name);
     }
 
-    public String getModuleID() {
+    @NotNull public ModuleIdentifier getModuleID() {
         return moduleID;
     }
 

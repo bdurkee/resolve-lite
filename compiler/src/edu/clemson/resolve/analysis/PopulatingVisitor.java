@@ -51,9 +51,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTElement;
-import org.rsrg.semantics.programtype.PTFamily;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
@@ -135,7 +133,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-         String moduleName = Utils.getModuleName(ctx);
          moduleScope = symtab.startModuleScope(tr)
                  .addImports(tr.semanticallyRelevantUses);
          super.visitChildren(ctx);
@@ -390,8 +387,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      @Override public Void visitParameterDeclGroup(
              ResolveParser.ParameterDeclGroupContext ctx) {
          this.visit(ctx.type());
-         String typeQualifier = ctx.type().qualifier != null ?
-                 ctx.type().qualifier.getText() : null;
          PTType groupType = tr.progTypeValues.get(ctx.type());
          for (TerminalNode term : ctx.ID()) {
              try {
@@ -416,15 +411,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitFacilityDecl(
              ResolveParser.FacilityDeclContext ctx) {
          //Todo: visit the generic arg types too
-         //ctx.moduleArgumentList().forEach(this::visit);
+         ctx.moduleArgumentList().forEach(this::visit);
          ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
                  new ParseTreeProperty<>();
          try {
              //map the base facility to any generic symbols parameterizing it
-          //   facOrEnhToGenericArgs.put(ctx,
-          //           getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
+            facOrEnhToGenericArgs.put(ctx, new ArrayList<>());
+                    //getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
 
-             //now do the same for each enhancement pair
+                    //now do the same for each enhancement pair
             /* for (ResolveParser.EnhancementPairDeclContext enh :
                      ctx.enhancementPairDecl()) {
                  //Todo: visit the generic arg types too
@@ -432,9 +427,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                  facOrEnhToGenericArgs.put(enh,
                          getGenericArgumentSymsForFacilityOrEnh(enh.type()));
              }*/
-             symtab.getInnermostActiveScope().define(
-                     new FacilitySymbol(ctx, getRootModuleID(),
-                             facOrEnhToGenericArgs, symtab));
+                    symtab.getInnermostActiveScope().define(
+                            new FacilitySymbol(ctx, getRootModuleID(),
+                                    facOrEnhToGenericArgs, symtab));
          }
          catch (DuplicateSymbolException e) {
              compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
@@ -463,37 +458,55 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              }
          }
          return result;
-     }
+     }*/
 
-     @Override public Void visitType(ResolveParser.TypeContext ctx) {
-         try {
-             ProgTypeSymbol type =
-                     symtab.getInnermostActiveScope()
-                             .queryForOne(
-                                     new NameQuery(ctx.qualifier, ctx.name, true))
-                             .toProgTypeSymbol();
-             tr.progTypeValues.put(ctx, type.getProgramType());
-             tr.mathTypes.put(ctx, g.CLS);
-             tr.mathTypeValues.put(ctx, type.getModelType());
-             return null;
+    @Override public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
+        try {
+            Token qualifier = ctx.qualifier;
+            ProgTypeSymbol type =
+                symtab.getInnermostActiveScope()
+                    .queryForOne(
+                            new NameQuery(qualifier, ctx.name, true))
+                    .toProgTypeSymbol();
+
+                tr.progTypeValues.put(ctx, type.getProgramType());
+                tr.mathTypes.put(ctx, g.CLS);
+                tr.mathTypeValues.put(ctx, type.getModelType());
+                return null;
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a type", ctx.name.getText(),
+            use.getActualSymbolDescription());
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+        tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
+        return null;
+    }
+
+    @Override public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
+         Map<String, PTType> fields = new LinkedHashMap<>();
+         for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
+                 .recordVariableDeclGroup()) {
+             this.visit(fieldGrp);
+             PTType grpType = tr.progTypeValues.get(fieldGrp.type());
+             for (TerminalNode t : fieldGrp.ID()) {
+                 fields.put(t.getText(), grpType);
+             }
          }
-         catch (NoSuchSymbolException | DuplicateSymbolException e) {
-             compiler.errMgr.semanticError(e.getErrorKind(),
-                     ctx.getStart(), ctx.name.getText());
-         }
-         catch (UnexpectedSymbolException use) {
-             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                     ctx.getStart(), "a type", ctx.name.getText(),
-                     use.getActualSymbolDescription());
-         }
-         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-         tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
-         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-         tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
+         PTRecord record = new PTRecord(g, fields);
+         tr.progTypeValues.put(ctx, record);
+         tr.mathTypes.put(ctx, g.CLS);
+         tr.mathTypeValues.put(ctx, record.toMath());
          return null;
-     }
+    }
 
-     @Override public Void visitTypeRepresentationDecl(
+    /* @Override public Void visitTypeRepresentationDecl(
              ResolveParser.TypeRepresentationDeclContext ctx) {
          symtab.startScope(ctx);
          ProgTypeModelSymbol typeDefnSym = null;
@@ -548,23 +561,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
          return null;
      }
-
-    /* @Override public Void visitRecord(ResolveParser.RecordContext ctx) {
-         Map<String, PTType> fields = new LinkedHashMap<>();
-         for (ResolveParser.RecordVariableDeclGroupContext fieldGrp : ctx
-                 .recordVariableDeclGroup()) {
-             this.visit(fieldGrp);
-             PTType grpType = tr.progTypeValues.get(fieldGrp.type());
-             for (TerminalNode t : fieldGrp.ID()) {
-                 fields.put(t.getText(), grpType);
-             }
-         }
-         PTRecord record = new PTRecord(g, fields);
-         tr.progTypeValues.put(ctx, record);
-         tr.mathTypes.put(ctx, g.CLS);
-         tr.mathTypeValues.put(ctx, record.toMath());
-         return null;
-     }*/
 /*
      @Override public Void visitVariableDeclGroup(
              ResolveParser.VariableDeclGroupContext ctx) {

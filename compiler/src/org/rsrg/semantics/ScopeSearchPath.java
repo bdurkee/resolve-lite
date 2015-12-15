@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -20,11 +21,15 @@ public interface ScopeSearchPath {
      *        the search path.
      * @param source The current scope from which the search was spawned.
      * @param repo A symbol table containing any referenced modules.
-     * 
-     * @return A list of matches.
+     *
+     * @throws DuplicateSymbolException if two or more symbols are matched
+     * @throws NoSuchModuleException if, in the process of searching, a non
+     * extant module is referenced
+     *
+     * @return A list of matches
      */
-    public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
-            throws DuplicateSymbolException,
-                UnexpectedSymbolException;
+    @NotNull public <E extends Symbol> List<E> searchFromContext(
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
+            @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException;
 }

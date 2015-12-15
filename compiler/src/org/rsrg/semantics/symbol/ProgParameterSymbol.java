@@ -2,7 +2,6 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -116,7 +115,7 @@ public class ProgParameterSymbol extends Symbol {
 
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
-                        declaredType, getModuleID());
+                        declaredType, getModuleIdentifier());
     }
 
     public PTType getDeclaredType() {
@@ -142,7 +141,7 @@ public class ProgParameterSymbol extends Symbol {
     @Override public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
                 typeGraph, getName()), new MTNamed(typeGraph, getName()),
-                getDefiningTree(), getModuleID());
+                getDefiningTree(), getModuleIdentifier());
     }
 
     public PSymbol asPSymbol() {
@@ -162,7 +161,7 @@ public class ProgParameterSymbol extends Symbol {
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(),
-                getModuleID());
+                getModuleIdentifier());
     }
 
     @Override public String toString() {

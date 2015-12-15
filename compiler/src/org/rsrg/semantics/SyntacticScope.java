@@ -1,6 +1,8 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
@@ -13,16 +15,17 @@ import java.util.stream.Collectors;
 
 public abstract class SyntacticScope extends AbstractScope {
 
-    protected final Map<String, Symbol> symbols;
-    private final MathSymbolTable symtab;
+    @NotNull protected final Map<String, Symbol> symbols;
+    @NotNull private final MathSymbolTable symtab;
 
-    protected ParserRuleContext definingTree;
-    protected Scope parent;
-    protected final String moduleID;
+    @NotNull protected Scope parent;
+    @NotNull protected final ModuleIdentifier moduleID;
+    @Nullable protected ParserRuleContext definingTree;
 
-    SyntacticScope(MathSymbolTable scopeRepo, ParserRuleContext definingTree,
-                   Scope parent, String moduleID,
-                   Map<String, Symbol> bindingSyms) {
+    SyntacticScope(@NotNull MathSymbolTable scopeRepo,
+                   @Nullable ParserRuleContext definingTree,
+                   @NotNull Scope parent, @NotNull ModuleIdentifier moduleID,
+                   @NotNull Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;
         this.parent = parent;
@@ -30,20 +33,21 @@ public abstract class SyntacticScope extends AbstractScope {
         this.definingTree = definingTree;
     }
 
-    public ParserRuleContext getDefiningTree() {
+    @Nullable public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
 
-    public String getModuleID() {
+    @NotNull public ModuleIdentifier getModuleID() {
         return moduleID;
     }
 
-    @Override public Symbol define(Symbol s) throws DuplicateSymbolException {
-        if ( symbols.containsKey(s.getName()) ) {
+    @NotNull @Override public Symbol define(@NotNull Symbol s)
+            throws DuplicateSymbolException {
+        if (symbols.containsKey(s.getName())) {
             throw new DuplicateSymbolException(symbols.get(s.getName()));
         }
         //TODO: bubble me over to the populator so I can be nicely printed.
-        /*if ( s.getName().equals(moduleID) ) {
+        /*if ( s.getName().equals(moduleIdentifier) ) {
 
             symtab.getCompiler().errMgr.semanticError(
                     ErrorKind.SYMBOL_NAME_MATCHES_MODULE_NAME,
@@ -55,41 +59,43 @@ public abstract class SyntacticScope extends AbstractScope {
         return s;
     }
 
-    @Override public <E extends Symbol> List<E> query(
-            MultimatchSymbolQuery<E> query) {
+    @NotNull @Override public <E extends Symbol> List<E> query(
+            @NotNull MultimatchSymbolQuery<E> query) {
         return query.searchFromContext(this, symtab);
     }
 
-    @Override public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
+    @NotNull @Override public <E extends Symbol> E queryForOne(
+            @NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
-                DuplicateSymbolException {
+                DuplicateSymbolException, NoSuchModuleException {
         List<E> results = query.searchFromContext(this, symtab);
-        if ( results.isEmpty() )
-            throw new NoSuchSymbolException();
-        else if ( results.size() > 1 ) throw new DuplicateSymbolException();
+        if (results.isEmpty()) throw new NoSuchSymbolException();
+        else if (results.size() > 1) throw new DuplicateSymbolException();
         return results.get(0);
     }
 
     @Override public String toString() {
         String s = "";
-        if ( definingTree != null )
-            s += definingTree.getClass().getSimpleName();
+        if (definingTree != null) {
+            s = definingTree.getClass().getSimpleName();
+        }
         return s + symbols.keySet() + "";
     }
 
     @Override public <E extends Symbol> boolean addMatches(
-            TableSearcher<E> searcher, List<E> matches,
-            Set<Scope> searchedScopes,
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility, TableSearcher.SearchContext l)
+            @NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
+            @NotNull Set<Scope> searchedScopes,
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility,
+            @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException {
         boolean finished = false;
 
-        if ( !searchedScopes.contains(this) ) {
+        if (!searchedScopes.contains(this)) {
             searchedScopes.add(this);
 
             Map<String, Symbol> symbolTableView = symbols;
-            if ( instantiatingFacility != null ) {
+            if (instantiatingFacility != null) {
 
                 symbolTableView =
                         updateSymbols(symbols, genericInstantiations,
@@ -98,7 +104,7 @@ public abstract class SyntacticScope extends AbstractScope {
             }
             finished = searcher.addMatches(symbolTableView, matches, l);
 
-            if ( !finished ) {
+            if (!finished) {
                 finished =
                         parent.addMatches(searcher, matches, searchedScopes,
                                 genericInstantiations, instantiatingFacility, l);
@@ -109,14 +115,15 @@ public abstract class SyntacticScope extends AbstractScope {
 
 
 
-    @Override public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type) {
+    @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(
+            @NotNull Class<T> type) {
         return symbols.values().stream()
                 .filter(type::isInstance)
                 .map(type::cast)
                 .collect(Collectors.toList());
     }
 
-    public List<Symbol> getSymbolsOfType(Class<?> ... types) {
+    @NotNull public List<Symbol> getSymbolsOfType(@NotNull Class<?> ... types) {
         List<Symbol> result = new ArrayList<>();
         for (Symbol s : symbols.values()) {
             for (Class<?> t : types) {

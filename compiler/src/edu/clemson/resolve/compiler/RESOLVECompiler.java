@@ -115,8 +115,7 @@ public  class RESOLVECompiler {
      * instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
-    public final MathSymbolTable symbolTable =
-            new MathSymbolTable();
+    public final MathSymbolTable symbolTable = new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
@@ -127,6 +126,7 @@ public  class RESOLVECompiler {
 
     public RESOLVECompiler(String[] args) {
         this.errMgr = new ErrorManager(this);
+        this.symbolTable.setErrorManager(errMgr);
         this.args = args;
         handleArgs();
     }
@@ -385,7 +385,7 @@ public  class RESOLVECompiler {
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.moduleDecl();
-            return new AnnotatedModule(start, Utils.getModuleName(start),
+            return new AnnotatedModule(start, Utils.getModuleName(start).getText(),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);
         }

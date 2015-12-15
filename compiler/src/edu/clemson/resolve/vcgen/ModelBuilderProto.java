@@ -1,6 +1,8 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -70,7 +72,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
             moduleScope = symtab.getModuleScope(tr.getName());
         }
         catch (NoSuchModuleException e) {
-            e.printStackTrace();
+            gen.getCompiler().errMgr
+                    .semanticError(ErrorKind.NO_SUCH_MODULE,
+                            Utils.getModuleName(ctx));
         }
     }
 /*
@@ -215,14 +219,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
             modulesToSearch.add(moduleCtxAsEnhImpl.concept.getText());
             modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
         }*/
-        for (String moduleName : modulesToSearch) {
+      /*  for (String moduleName : modulesToSearch) {
             try {
                 result.addAll(symtab.getModuleScope(moduleName)
                                 .getSymbolsOfType(ProgParameterSymbol.class));
             } catch (NoSuchModuleException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         return result;
     }
 
@@ -578,7 +582,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                                         GlobalMathAssertionSymbol e) {
         for (FacilitySymbol facility : facilities) {
             if (facility.getFacility().getSpecification().getName()
-                    .equals(e.getModuleID())) {
+                    .equals(e.getModuleIdentifier())) {
                 return e.getEnclosedExp().substitute(
                         getSpecializationsForFacility(facility.getName()));
             }

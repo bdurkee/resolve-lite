@@ -70,6 +70,6 @@ public class ProgTypeSymbol extends Symbol {
 
         return new ProgTypeSymbol(modelType.getTypeGraph(), getName(),
                 getProgramType(), typeSubstitutor.getFinalExpression(),
-                getDefiningTree(), getModuleID());
+                getDefiningTree(), getModuleIdentifier());
     }
 }

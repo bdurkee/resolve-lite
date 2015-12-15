@@ -1,9 +1,7 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -55,7 +53,7 @@ public class OperationSymbol extends Symbol {
     }
 
     @Override public ProgVariableSymbol toProgVariableSymbol() {
-        return new ProgVariableSymbol(name, definingTree, returnType, moduleID);
+        return new ProgVariableSymbol(name, definingTree, returnType, moduleIdentifier);
     }
 
     @Override public String getSymbolDescription() {
@@ -77,7 +75,7 @@ public class OperationSymbol extends Symbol {
                 .map(f::apply).collect(Collectors.toList());
         return new OperationSymbol(getName(), getDefiningTree(), requires,
                 ensures, returnType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), getModuleID(), newParams,
+                        instantiatingFacility), getModuleIdentifier(), newParams,
                 moduleParameter);
     }
 

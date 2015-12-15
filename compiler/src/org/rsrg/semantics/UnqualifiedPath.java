@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.programtype.PTType;
@@ -47,8 +48,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
         this.localPriority = localPriority;
     }
 
-    @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
+    @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source, @NotNull MathSymbolTable repo)
             throws DuplicateSymbolException {
 
         List<E> result = new ArrayList<>();

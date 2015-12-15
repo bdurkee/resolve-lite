@@ -1,8 +1,11 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.ModuleIdentifier;
+import org.rsrg.semantics.SyntacticScope;
 import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -11,28 +14,36 @@ import java.util.Map;
 
 public abstract class Symbol {
 
-    protected final String name, moduleID;
-    protected final ParserRuleContext definingTree;
+    @NotNull protected final String name;
 
-    public Symbol(String name, ParserRuleContext definingTree,
-                  String moduleID) {
+    /** Identifies the particular module in which this {@code Symbol} lives. */
+    @NotNull protected final ModuleIdentifier moduleIdentifier;
+
+    /**
+     * A {@code definingTree} may be {@code null} in the case of a typical
+     * symbol (eg: something extending {@code Symbol}). However, the defining
+     * tree for ctx that <em>define</em> scopes shouldn't be {@code null},
+     * hence the choice of annotation for those. See
+     * {@link SyntacticScope#getDefiningTree()}
+     */
+    @Nullable protected final ParserRuleContext definingTree;
+
+    public Symbol(@NotNull String name, @Nullable ParserRuleContext definingTree,
+                  @NotNull ModuleIdentifier moduleIdentifier) {
         this.name = name;
         this.definingTree = definingTree;
-        this.moduleID = moduleID;
+        this.moduleIdentifier = moduleIdentifier;
     }
 
-    public String getModuleID() {
-        return moduleID;
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    //Todo: This should really be changed across the board to return
-    //"ParserRuleContext" instead, as that gives start and stop info easier
-    //(without needing casts)
-    public ParserRuleContext getDefiningTree() {
+    @Nullable public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
 
@@ -60,9 +71,9 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
+    //public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
+    //    throw new UnexpectedSymbolException(this.getSymbolDescription());
+    //}
 
     public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());

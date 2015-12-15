@@ -156,22 +156,22 @@ public class Utils {
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
-    @NotNull public static String getModuleName(@NotNull ParseTree ctx) {
+    @NotNull public static Token getModuleName(@NotNull ParseTree ctx) {
         if (ctx instanceof ResolveParser.ModuleDeclContext) {
             ctx = ctx.getChild(0);
         }
 
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext ) {
-            return ((ResolveParser.PrecisModuleDeclContext) ctx).name.getText();
+            return ((ResolveParser.PrecisModuleDeclContext) ctx).name;
         }
         else if (ctx instanceof ResolveParser.PrecisExtensionModuleDeclContext ) {
-            return ((ResolveParser.PrecisExtensionModuleDeclContext) ctx).name.getText();
+            return ((ResolveParser.PrecisExtensionModuleDeclContext) ctx).name;
         }
         else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
-            return ((ResolveParser.FacilityModuleDeclContext) ctx).name.getText();
+            return ((ResolveParser.FacilityModuleDeclContext) ctx).name;
         }
         else if ( ctx instanceof ResolveParser.ConceptModuleDeclContext ) {
-            return ((ResolveParser.ConceptModuleDeclContext) ctx).name.getText();
+            return ((ResolveParser.ConceptModuleDeclContext) ctx).name;
         }
         /*else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
             return ((ResolveParser.ConceptImplModuleContext) ctx).name
