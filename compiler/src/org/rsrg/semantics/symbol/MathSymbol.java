@@ -10,7 +10,7 @@ import org.rsrg.semantics.query.GenericQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MathSymbol extends Symbol implements ModuleParameterizableSymbol {
+public class MathSymbol extends Symbol {
 
     private MTType type, typeValue;
     private final Quantification quantification;
@@ -76,15 +76,6 @@ public class MathSymbol extends Symbol implements ModuleParameterizableSymbol {
 
     public MTType getType() {
         return type;
-    }
-
-    @Override public MTType getMathType() {
-        return getType();
-    }
-
-    //to make moduleArgSym happy
-    @Override public PTType getProgramType() {
-        return null;
     }
 
     public Quantification getQuantification() {

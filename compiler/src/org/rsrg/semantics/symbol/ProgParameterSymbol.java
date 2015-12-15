@@ -1,6 +1,9 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.MTNamed;
@@ -48,7 +51,12 @@ public class ProgParameterSymbol extends Symbol {
         },
         EVALUATES {
             @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { EVALUATES };
+                return new ParameterMode[]{EVALUATES};
+            }
+        },
+        TYPE {
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { TYPE };
             }
         };
         public boolean canBeImplementedWith(ParameterMode o) {
@@ -81,32 +89,34 @@ public class ProgParameterSymbol extends Symbol {
     private final ParameterMode mode;
     private final PTType declaredType;
     private final TypeGraph typeGraph;
-    private final boolean moduleParameterFlag;
-    private final MathSymbol mathSymbolAlterEgo;
 
-    private final String typeQualifier;
+    private final MathSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
 
-    public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
-                               String typeQualifier,
-            PTType type, ParserRuleContext definingTree, boolean moduleParameter,
-                               String moduleID) {
+    public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
+                               @NotNull ParameterMode mode,
+                               @NotNull PTType type,
+                               @NotNull ParserRuleContext definingTree,
+                               @NotNull String moduleID) {
         super(name, definingTree, moduleID);
         this.typeGraph = g;
-        this.mode = mode;
-        this.typeQualifier = typeQualifier;
         this.declaredType = type;
-        this.moduleParameterFlag = moduleParameter;
+        this.mode = mode;
+
+        MTType typeValue = null;
+        if (mode == ParameterMode.TYPE) {
+            typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
+        }
+
+        //TODO: Probably need to recajigger this to correctly account for any
+        //      generics in the defining context
         this.mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
-                        null, definingTree, moduleID);
+                        typeValue, definingTree, moduleID);
+
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleID());
-    }
-
-    public String getTypeQualifier() {
-        return typeQualifier;
     }
 
     public PTType getDeclaredType() {
@@ -115,10 +125,6 @@ public class ProgParameterSymbol extends Symbol {
 
     public ParameterMode getMode() {
         return mode;
-    }
-
-    public boolean isModuleParameter() {
-        return moduleParameterFlag;
     }
 
     @Override public MathSymbol toMathSymbol() {
@@ -154,10 +160,9 @@ public class ProgParameterSymbol extends Symbol {
             FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
-                typeQualifier,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(),
-                moduleParameterFlag, getModuleID());
+                getModuleID());
     }
 
     @Override public String toString() {

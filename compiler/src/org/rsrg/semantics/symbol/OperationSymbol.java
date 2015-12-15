@@ -10,9 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OperationSymbol
-        extends
-            Symbol implements ModuleParameterizableSymbol {
+public class OperationSymbol extends Symbol {
 
     private final PTType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
@@ -81,14 +79,6 @@ public class OperationSymbol
                 ensures, returnType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getModuleID(), newParams,
                 moduleParameter);
-    }
-
-    @Override public MTType getMathType() {
-        return getProgramType().toMath();
-    }
-
-    @Override public PTType getProgramType() {
-        return getReturnType();
     }
 
     private static class InstantiationFunction

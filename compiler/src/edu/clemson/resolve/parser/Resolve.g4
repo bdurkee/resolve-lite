@@ -33,6 +33,8 @@ grammar Resolve;
 moduleDecl
     :   precisModuleDecl
     |   precisExtensionModuleDecl
+    |   facilityModuleDecl
+    |   conceptModuleDecl
     ;
 
 precisModuleDecl
@@ -57,10 +59,131 @@ precisBlock
         )*
     ;
 
+conceptModuleDecl
+    :   'Concept' name=ID (specModuleParameterList)? ';'
+            (usesList)?
+            (requiresClause)?
+            conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptBlock
+    :   ( mathStandardDefinitionDecl
+        | typeModelDecl
+        )*
+    ;
+
+facilityModuleDecl
+    :   'Facility' name=ID ';'
+         (usesList)?
+         (requiresClause)?
+         facilityBlock
+        'end' closename=ID ';'
+    ;
+
+facilityBlock
+    :   ( facilityDecl )*
+    ;
+
 // uses, imports
 
 usesList
     :   'uses' ID (',' ID)* ';'
+    ;
+
+// parameter and parameter-list related rules
+
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    ;
+
+specModuleParameterList
+    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
+    ;
+
+implModuleParameterList
+    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+    ;
+
+specModuleParameterDecl
+    :   parameterDeclGroup
+    |   mathStandardDefinitionDecl
+    |   genericTypeParameterDecl
+    ;
+
+implModuleParameterDecl
+    :   parameterDeclGroup
+   // |   operationDecl
+    ;
+
+parameterDeclGroup
+    :   parameterMode ID (',' ID)* ':' type
+    ;
+
+genericTypeParameterDecl
+    :   'type' name=ID
+    ;
+
+parameterMode
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
+    ;
+
+variableDeclGroup
+    :   'Var' ID (',' ID)* ':' type ';'?
+    ;
+
+// statements
+
+
+// type and record related rules
+
+//TODO: ideally in future, record would be an alternative here
+type
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+record
+    :   'Record' (recordVariableDeclGroup)* 'end'
+    ;
+
+recordVariableDeclGroup
+    :   ID (',' ID)* ':' type ';'?
+    ;
+
+typeModelDecl
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
+        'exemplar' exemplar=ID ';'?
+        (constraintClause)?
+        (typeModelInit)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=ID '=' (type|record) ';'?
+        (conventionClause)?
+        (correspondenceClause)?
+        (typeImplInit)?
+    ;
+
+// type initialization rules
+
+specModuleInit
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
+    ;
+
+typeModelInit
+    :   'initialization' (ensuresClause)?
+    ;
+
+typeImplInit
+    :   'initialization' (ensuresClause)?
+        (variableDeclGroup)* //(stmt)*
+        'end' ';'?
     ;
 
 // math constructs
@@ -123,6 +246,22 @@ mathVariableDeclGroup
 
 mathVariableDecl
     :   ID ':' mathTypeExp
+    ;
+
+// facilitydecls, enhancements, etc
+
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? /*(enhancementPairDecl)*/ ';'?
+    ;
+
+moduleArgumentList
+    :   '(' moduleArgument (',' moduleArgument)* ')'
+    ;
+
+moduleArgument
+    :   progExp
     ;
 
 // mathematical clauses
@@ -234,6 +373,55 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
+// program expressions
+
+//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
+//we could really use some unit tests to perhaps check precendence so that in the future when
+//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
+progExp
+    :   progPrimary                                     #progPrimaryExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op=('++'|'--')                          #progPostfixExp
+    |   progExp op='%' progExp                          #progInfixExp
+    |   progExp op=('*'|'/'|'++') progExp               #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op=('and'|'or') progExp                 #progInfixExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progVarExp
+    |   progParamExp
+    ;
+
+progVarExp
+    :   progNamedExp
+    |   progMemberExp
+    ;
+
+progParamExp
+    :   (qualifier=ID '::')? name=ID
+        '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNamedExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progMemberExp
+    :   (progParamExp|progNamedExp) ('.' ID)+
+    ;
+
+progLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
+    ;
+
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
@@ -247,6 +435,7 @@ FLOAT
 	;
 fragment EXP :   [Ee] [+\-]? INT ;
 
+CHAR: '\'' . '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;
 fragment ESC :   '\\' ["\bfnrt] ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

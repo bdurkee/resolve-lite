@@ -51,6 +51,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTElement;
+import org.rsrg.semantics.programtype.PTFamily;
+import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
@@ -109,7 +112,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * case, ctx should not remove its layer, but rather change it to
      * {@code Quantification.NONE}.</p>
      *
-     * <p> This stack is never empty, but rather the bottom layer is always
+     * <p>This stack is never empty, but rather the bottom layer is always
      * {@code Quantification.NONE}.</p>
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
@@ -184,22 +187,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          walkingModuleArgOrParamList = false;
          return null;
      }
+*/
+    @Override public Void visitGenericTypeParameterDecl(
+            ResolveParser.GenericTypeParameterDeclContext ctx) {
+        try {
+            //all generic params are module params (grammar says so)
+            ModuleParameterSymbol moduleParam =
+                    new ModuleParameterSymbol(new ProgParameterSymbol(g,
+                            ctx.name.getText(),
+                            ProgParameterSymbol.ParameterMode.TYPE,
+                            new PTElement(g), ctx, getRootModuleID()));
+            symtab.getInnermostActiveScope().define(moduleParam);
+        }
+        catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.ID().getText());
+        }
+        return null;
+    }
 
-     @Override public Void visitGenericType(
-             ResolveParser.GenericTypeContext ctx) {
-         try {
-             symtab.getInnermostActiveScope().define(
-                     new GenericSymbol(g, new PTElement(g), ctx.getText(),
-                             ctx, getRootModuleID()));
-         }
-         catch (DuplicateSymbolException dse) {
-             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                     ctx.getStart(), ctx.ID().getText());
-         }
-         return null;
-     }
-
-     @Override public Void visitTypeModelDecl(
+    @Override public Void visitTypeModelDecl(
              ResolveParser.TypeModelDeclContext ctx) {
          symtab.startScope(ctx);
          this.visit(ctx.mathTypeExp());
@@ -242,7 +249,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitProcedureDecl(
+    /* @Override public Void visitProcedureDecl(
              ResolveParser.ProcedureDeclContext ctx) {
          OperationSymbol correspondingOp = null;
          currentProcedureDecl = ctx;
@@ -378,7 +385,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
                      name.getText());
          }
-     }
+     }*/
 
      @Override public Void visitParameterDeclGroup(
              ResolveParser.ParameterDeclGroupContext ctx) {
@@ -393,9 +400,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                  ctx.parameterMode().getText());
                  symtab.getInnermostActiveScope().define(
                          new ProgParameterSymbol(symtab.getTypeGraph(), term
-                                 .getText(), mode, typeQualifier, groupType,
-                                 ctx, walkingModuleArgOrParamList,
-                                 getRootModuleID()));
+                                 .getText(), mode, groupType,
+                                 ctx, getRootModuleID()));
              }
              catch (DuplicateSymbolException dse) {
                  compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -405,25 +411,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitFacilityDecl(
+
+
+    @Override public Void visitFacilityDecl(
              ResolveParser.FacilityDeclContext ctx) {
          //Todo: visit the generic arg types too
-         ctx.moduleArgumentList().forEach(this::visit);
+         //ctx.moduleArgumentList().forEach(this::visit);
          ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
                  new ParseTreeProperty<>();
          try {
              //map the base facility to any generic symbols parameterizing it
-             facOrEnhToGenericArgs.put(ctx,
-                     getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
+          //   facOrEnhToGenericArgs.put(ctx,
+          //           getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
 
              //now do the same for each enhancement pair
-             for (ResolveParser.EnhancementPairDeclContext enh :
+            /* for (ResolveParser.EnhancementPairDeclContext enh :
                      ctx.enhancementPairDecl()) {
                  //Todo: visit the generic arg types too
                  enh.moduleArgumentList().forEach(this::visit);
                  facOrEnhToGenericArgs.put(enh,
                          getGenericArgumentSymsForFacilityOrEnh(enh.type()));
-             }
+             }*/
              symtab.getInnermostActiveScope().define(
                      new FacilitySymbol(ctx, getRootModuleID(),
                              facOrEnhToGenericArgs, symtab));
@@ -434,7 +442,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          }
          return null;
      }
-
+/*
      private List<ProgTypeSymbol> getGenericArgumentSymsForFacilityOrEnh(
              List<ResolveParser.TypeContext> actualTypes) {
          List<ProgTypeSymbol> result = new ArrayList<>();
@@ -1742,9 +1750,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return expectedType.getApplicationType(functionName, arguments);
     }
 
-    private MathSymbol getIntendedFunction(ParserRuleContext ctx,
-                                           Token qualifier, Token name,
-                                           List<? extends ParserRuleContext> args) {
+    @Nullable private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
+                                                     @Nullable Token qualifier,
+                                                     @NotNull Token name,
+                                                     @NotNull List<? extends ParserRuleContext> args) {
         MTType preAppType = PApply.getConservativePreApplicationType(g,
                 args, tr.mathTypes);
         tr.mathTypes.put(ctx, preAppType);
@@ -1758,64 +1767,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         .collect(Collectors.toList());
         List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
                 .map(MathSymbol::getType).collect(Collectors.toList());
+        MathSymbol intendedFunction = null;
         if (sameNameFunctions.isEmpty()) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
         }
-        MathSymbol intendedFunction = sameNameFunctions.get(0);
-        /*try {
-            intendedFunction = getExactDomainTypeMatch(e, sameNameFunctions);
+        else {
+            //TODO: For now, we can at least check arg counts, etc for now.
+            intendedFunction = sameNameFunctions.get(0);
         }
-        catch (NoSolutionException nsee) {
-            try {
-                intendedFunction = getInexactDomainTypeMatch(e, sameNameFunctions);
-            }
-            catch (NoSolutionException nsee2) {
-                compiler.errMgr.semanticError(ErrorKind.NO_MATH_FUNC_FOR_DOMAIN,
-                        ctx.getStart(), eType.getDomain(), sameNameFunctions,
-                        sameNameFunctionTypes);
-            }
-        }*/
         if (intendedFunction == null) return null;
         MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
         emit("matching " + name.getText() + " : " + eType
                 + " to " + intendedFunction.getName() + " : " + intendedEntryType);
         return intendedFunction;
-    }
-
-    private MathSymbol getDomainTypeMatch(PApply e,
-                                          List<MathSymbol> candidates,
-                                          TypeComparison<PApply, MTFunction> comparison) {
-        MTFunction eType = e.getConservativePreApplicationType(g);
-        MathSymbol match = null;
-        MTFunction candidateType;
-        for (MathSymbol candidate : candidates) {
-           /* try {
-                String originalCandidateType = candidate.getType().toString();
-                candidate =
-                        candidate.deschematize(e.getArguments(),
-                                definitionSchematicTypes,
-                                symtab.getInnermostActiveScope());
-                candidateType = (MTFunction) candidate.getType();
-                emit(originalCandidateType + " deschematizes to "
-                        + candidateType);
-                if ( comparison.compare(e, eType, candidateType) ) {
-                    if ( match != null ) {
-                        return match;
-                    }
-                    match = candidate;
-                }
-            }
-            catch (NoSolutionException nse) {
-                //couldn't deschematize--try the next one
-                emit(candidate.getType() + " doesn't deschematize "
-                        + "against " + e.getArguments());
-            }*/
-        }
-      //  if ( match == null ) {
-      //      throw NoSolutionException.INSTANCE;
-      //  }
-        return match;
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,

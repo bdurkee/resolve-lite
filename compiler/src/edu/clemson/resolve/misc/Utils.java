@@ -167,10 +167,13 @@ public class Utils {
         else if (ctx instanceof ResolveParser.PrecisExtensionModuleDeclContext ) {
             return ((ResolveParser.PrecisExtensionModuleDeclContext) ctx).name.getText();
         }
-        /*else if ( ctx instanceof ResolveParser.FacilityModuleContext ) {
-            return ((ResolveParser.FacilityModuleContext) ctx).name.getText();
+        else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
+            return ((ResolveParser.FacilityModuleDeclContext) ctx).name.getText();
         }
-        else if ( ctx instanceof ResolveParser.ConceptImplModuleContext ) {
+        else if ( ctx instanceof ResolveParser.ConceptModuleDeclContext ) {
+            return ((ResolveParser.ConceptModuleDeclContext) ctx).name.getText();
+        }
+        /*else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
             return ((ResolveParser.ConceptImplModuleContext) ctx).name
                     .getText();
         }
