@@ -9,13 +9,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * calls. The visit chain returns {@code true} if a recursive call was found;
  * {@code false} otherwise.
  */
-public class RecursiveStatementCheckingVisitor
+public class RecursiveCallCheckingVisitor
         extends
             ResolveBaseVisitor<Boolean> {
 
    private final Token callName;
 
-    public RecursiveStatementCheckingVisitor(Token callName) {
+    public RecursiveCallCheckingVisitor(Token callName) {
         this.callName = callName;
     }
 

@@ -18,13 +18,9 @@ public class HardCoded {
             b.addBinding("El", null, g.CLS, g.ELEMENT);
             b.addBinding("Cls", null, g.CLS, g.CLS);
             b.addBinding("SSet", null, g.CLS, g.SSET);
-            b.addBinding("SStr", null, g.SSET, g.SSTR);
 
-            b.addBinding("_", null, g.ELEMENT, null);
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
-
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
-
             b.addBinding("conc", null, g.SSET, g.BOOLEAN);
 
             b.addBinding("true", null, g.BOOLEAN);

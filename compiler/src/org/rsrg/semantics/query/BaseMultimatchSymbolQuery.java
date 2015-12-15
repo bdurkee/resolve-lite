@@ -1,9 +1,7 @@
 package org.rsrg.semantics.query;
 
-import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.ScopeSearchPath;
+import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.*;
 import org.rsrg.semantics.searchers.MultimatchTableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -19,8 +17,8 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
         extends
             BaseSymbolQuery<E> {
 
-    public BaseMultimatchSymbolQuery(ScopeSearchPath path,
-                                     MultimatchTableSearcher<E> searcher) {
+    public BaseMultimatchSymbolQuery(@NotNull ScopeSearchPath path,
+                                     @NotNull MultimatchTableSearcher<E> searcher) {
         super(path, searcher);
     }
 
@@ -29,7 +27,9 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
      * will not throw a {@link DuplicateSymbolException}.
      * Otherwise, behaves identically.
      */
-    @Override public List<E> searchFromContext(Scope source, MathSymbolTable repo) {
+    @Override public List<E> searchFromContext(@NotNull Scope source,
+                                               @NotNull MathSymbolTable repo)
+            throws NoSuchModuleException {
         List<E> result;
         try {
             result = super.searchFromContext(source, repo);
@@ -39,7 +39,6 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
             //MultimatchTableSearch
             throw new RuntimeException(dse);
         }
-
         return result;
     }
 }

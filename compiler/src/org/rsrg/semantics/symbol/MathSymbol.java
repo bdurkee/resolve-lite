@@ -1,5 +1,7 @@
 package org.rsrg.semantics.symbol;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.*;
@@ -9,10 +11,15 @@ import java.util.*;
 
 public class MathSymbol extends Symbol {
 
-    private MTType type, typeValue;
-    private final Quantification quantification;
+    /**
+     * Backing fields for {@link MTType}s representing the type and type value
+     * of this math symbol, respectively.
+     */
+    @NotNull private final MTType type;
+    @Nullable private final MTType typeValue;
+    @NotNull private final Quantification quantification;
 
-    private final Map<String, MTType> genericsInDefiningContext =
+    @NotNull private final Map<String, MTType> genericsInDefiningContext =
             new HashMap<>();
 
     /**
@@ -24,13 +31,15 @@ public class MathSymbol extends Symbol {
      * named type within the definition's type) and the value giving the type
      * bounds of the parameter.
      */
-    private final Map<String, MTType> schematicTypes = new HashMap<>();
+    @NotNull private final Map<String, MTType> schematicTypes = new HashMap<>();
 
-    public MathSymbol(TypeGraph g, String name, Quantification q,
-                      Map<String, MTType> schematicTypes, MTType type,
-                      MTType typeValue, ParserRuleContext definingTree,
-                      String moduleID) {
-        super(name, definingTree, moduleID);
+    public MathSymbol(@NotNull TypeGraph g, @NotNull String name,
+                      @NotNull Quantification q,
+                      @Nullable Map<String, MTType> schematicTypes,
+                      @NotNull MTType type, @Nullable MTType typeValue,
+                      @Nullable ParserRuleContext definingTree,
+                      @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
 
         this.type = type;
         this.quantification = q;
@@ -50,57 +59,63 @@ public class MathSymbol extends Symbol {
         }
     }
 
-    public MathSymbol(TypeGraph g, String name, MTType type, MTType typeValue,
-                      ParserRuleContext definingTree, String moduleID) {
+    public MathSymbol(@NotNull TypeGraph g, @NotNull String name,
+                      @NotNull MTType type, @Nullable MTType typeValue,
+                      @Nullable ParserRuleContext definingTree,
+                      @NotNull ModuleIdentifier moduleIdentifier) {
         this(g, name, Quantification.NONE, new HashMap<String, MTType>(),
-                type, typeValue, definingTree, moduleID);
+                type, typeValue, definingTree, moduleIdentifier);
     }
 
-    public MathSymbol(TypeGraph g, String name, Quantification q,
-                      MTType type, MTType typeValue,
-                      ParserRuleContext definingTree, String moduleID) {
+    public MathSymbol(@NotNull TypeGraph g, @NotNull String name,
+                      @NotNull Quantification q, @NotNull MTType type,
+                      @Nullable MTType typeValue,
+                      @Nullable ParserRuleContext definingTree,
+                      @NotNull ModuleIdentifier moduleIdentifier) {
         this(g, name, q, new HashMap<String, MTType>(),
-                type, typeValue, definingTree, moduleID);
+                type, typeValue, definingTree, moduleIdentifier);
     }
 
-    public MathSymbol(TypeGraph g, String name,
-                      Map<String, MTType> schematicTypes,
-                      MTType type, MTType typeValue,
-                      ParserRuleContext definingTree, String moduleID) {
+    public MathSymbol(@NotNull TypeGraph g, @NotNull String name,
+                      @NotNull Map<String, MTType> schematicTypes,
+                      @NotNull MTType type, @Nullable MTType typeValue,
+                      @Nullable ParserRuleContext definingTree,
+                      @NotNull ModuleIdentifier moduleIdentifier) {
         this(g, name, Quantification.NONE, schematicTypes, type, typeValue,
-                definingTree, moduleID);
+                definingTree, moduleIdentifier);
     }
 
-    public MTType getType() {
+    @NotNull public MTType getType() {
         return type;
     }
 
-    public Quantification getQuantification() {
-        return quantification;
-    }
-
-    public MTType getTypeValue() throws SymbolNotOfKindTypeException {
+    /**
+     * Returns the type value of this {@code MathSymbol}. We say {@code NotNull}
+     * since this throws a catchable exception otherwise; so if this returns
+     * it will indeed be not null.
+     *
+     * @return the type value
+     * @throws SymbolNotOfKindTypeException if the type value is {@code null}
+     */
+    @NotNull public MTType getTypeValue() throws SymbolNotOfKindTypeException {
         if ( typeValue == null ) throw new SymbolNotOfKindTypeException();
         return typeValue;
     }
 
-    public void setMathType(MTType t) {
-        this.type = t;
+    @NotNull public Quantification getQuantification() {
+        return quantification;
     }
 
-    public void setMathTypeValue(MTType t) {
-        this.typeValue = t;
-    }
-
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a math symbol";
     }
 
-    public static List<MTType> getParameterTypes(MTFunction source) {
+    @NotNull public static List<MTType> getParameterTypes(
+            @NotNull MTFunction source) {
         return expandAsNeeded(source.getDomain());
     }
 
-    private static List<MTType> expandAsNeeded(MTType t) {
+    @NotNull private static List<MTType> expandAsNeeded(@NotNull MTType t) {
         List<MTType> result = new ArrayList<>();
         if ( t instanceof MTCartesian ) {
             MTCartesian domainAsMTCartesian = (MTCartesian) t;
@@ -117,18 +132,18 @@ public class MathSymbol extends Symbol {
         return result;
     }
 
-    @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathSymbol toMathSymbol() {
         return this;
     }
 
-    @Override public String toString() {
+    @NotNull @Override public String toString() {
         return getModuleIdentifier() + "::" + getName() + "\t\t" + quantification
                 + "\t\tof type: " + type + "\t\t defines type: " + typeValue;
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         //Any type that appears in our list of schematic types shadows any
         //possible reference to a generic type

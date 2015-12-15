@@ -1,5 +1,6 @@
 package org.rsrg.semantics.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.searchers.MultimatchTableSearcher;
 import org.rsrg.semantics.symbol.MathSymbol;
@@ -26,8 +27,8 @@ public class UniversalVariableQuery
                         new UniversalVariableSearcher());
     }
 
-    @Override public List<MathSymbol> searchFromContext(Scope source,
-            MathSymbolTable repo) {
+    @Override public List<MathSymbol> searchFromContext(@NotNull Scope source,
+            @NotNull MathSymbolTable repo) {
 
         List<MathSymbol> result;
         try {
@@ -45,8 +46,8 @@ public class UniversalVariableQuery
             implements
             MultimatchTableSearcher<MathSymbol> {
 
-        @Override public boolean addMatches(Map<String, Symbol> entries,
-                                  List<MathSymbol> matches, SearchContext l) {
+        @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                                  @NotNull List<MathSymbol> matches, @NotNull SearchContext l) {
 
             List<MathSymbol> mathSymbols = entries.values().stream()
                     .filter(s -> s instanceof MathSymbol)

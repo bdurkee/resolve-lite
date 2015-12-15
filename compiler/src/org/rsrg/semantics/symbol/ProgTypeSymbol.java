@@ -1,74 +1,77 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import org.rsrg.semantics.TypeGraph;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.VariableReplacingVisitor;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
 public class ProgTypeSymbol extends Symbol {
 
-    protected final MTType modelType;
-    protected final PTType type;
-    protected final MathSymbol mathTypeAlterEgo;
-    protected final TypeGraph g;
+    @Nullable protected final MTType modelType;
+    @NotNull protected final PTType type;
+    @NotNull protected final MathSymbol mathTypeAlterEgo;
+    @NotNull protected final TypeGraph g;
 
-    public ProgTypeSymbol(TypeGraph g, String name, PTType progType,
-            MTType modelType, ParserRuleContext definingTree, String moduleID) {
-        super(name, definingTree, moduleID);
+    public ProgTypeSymbol(@NotNull TypeGraph g, @NotNull String name,
+                          @NotNull PTType progType,
+                          @Nullable MTType modelType,
+                          @Nullable ParserRuleContext definingTree,
+                          @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.type = progType;
         this.g = g;
         this.modelType = modelType;
         this.mathTypeAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, g.SSET, modelType,
-                        definingTree, moduleID);
+                        definingTree, moduleIdentifier);
     }
 
-    public PTType getProgramType() {
+    @NotNull public PTType getProgramType() {
         return type;
     }
 
-    public MTType getModelType() {
+    @Nullable public MTType getModelType() {
         return modelType;
     }
 
-    @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathSymbol toMathSymbol() {
         return mathTypeAlterEgo;
     }
 
-    @Override public String toString() {
+    @NotNull @Override public String toString() {
         return getName();
     }
 
-    public PSymbol asPSymbol() {
+    @NotNull public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName()).mathType(getModelType())
                 .build();
     }
 
-    @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
         return this;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a program type";
     }
 
-    @Override public ProgTypeSymbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public ProgTypeSymbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         Map<String, MTType> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
         VariableReplacingVisitor typeSubstitutor =
                 new VariableReplacingVisitor(genericMathematicalInstantiations);
-        modelType.accept(typeSubstitutor);
-
-        return new ProgTypeSymbol(modelType.getTypeGraph(), getName(),
+        if (modelType != null) {
+            modelType.accept(typeSubstitutor);
+        }
+        return new ProgTypeSymbol(type.getTypeGraph(), getName(),
                 getProgramType(), typeSubstitutor.getFinalExpression(),
                 getDefiningTree(), getModuleIdentifier());
     }

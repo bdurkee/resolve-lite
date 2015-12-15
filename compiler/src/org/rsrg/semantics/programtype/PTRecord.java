@@ -1,5 +1,6 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTCartesian;
 import org.rsrg.semantics.MTCartesian.Element;
 import org.rsrg.semantics.MTType;
@@ -11,10 +12,11 @@ import java.util.Map;
 
 public class PTRecord extends PTType {
 
-    private final Map<String, PTType> fields = new HashMap<>();
-    private MTType mathTypeAlterEgo;
+    @NotNull private final Map<String, PTType> fields = new HashMap<>();
+    @NotNull private MTType mathTypeAlterEgo;
 
-    public PTRecord(TypeGraph g, Map<String, PTType> types) {
+    public PTRecord(@NotNull TypeGraph g,
+                    @NotNull Map<String, PTType> types) {
         super(g);
         this.fields.putAll(types);
 
@@ -28,7 +30,7 @@ public class PTRecord extends PTType {
         this.mathTypeAlterEgo = new MTCartesian(g, elements);
     }
 
-    public PTType getFieldType(String name) {
+    @NotNull public PTType getFieldType(@NotNull String name) {
         return fields.get(name);
     }
 
@@ -36,7 +38,7 @@ public class PTRecord extends PTType {
         return true;
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return mathTypeAlterEgo;
     }
 
@@ -44,9 +46,9 @@ public class PTRecord extends PTType {
         return "record " + fields;
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         Map<String, PTType> newFields = new HashMap<>();
         for (Map.Entry<String, PTType> type : fields.entrySet()) {
@@ -55,7 +57,6 @@ public class PTRecord extends PTType {
                     type.getValue().instantiateGenerics(genericInstantiations,
                             instantiatingFacility));
         }
-
         return new PTRecord(getTypeGraph(), newFields);
     }
 }

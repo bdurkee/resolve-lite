@@ -3,7 +3,10 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.ModuleParameterization;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -14,24 +17,21 @@ import java.util.Map;
 
 public class FacilitySymbol extends Symbol {
 
-    private  SpecImplementationPairing type;
-    private MathSymbolTable scopeRepo;
+    @NotNull private  SpecImplementationPairing type;
+    @NotNull private MathSymbolTable scopeRepo;
+    @NotNull private ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
 
-    private  ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
-
-    private final Map<ModuleParameterization, ModuleParameterization>
+    @NotNull private final Map<ModuleParameterization, ModuleParameterization>
             enhancementImplementations = new HashMap<>();
-    private final List<ModuleParameterization> enhancements = new ArrayList<>();
+    @NotNull private final List<ModuleParameterization> enhancements =
+            new ArrayList<>();
 
-    public FacilitySymbol(String name, ParserRuleContext definingTree, String moduleID) {
-        super(name, definingTree, moduleID);
-    }
-
-    public FacilitySymbol(ResolveParser.FacilityDeclContext facility,
-            String moduleID,
-            ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
-            MathSymbolTable scopeRepo) {
-        super(facility.name.getText(), facility, moduleID);
+    public FacilitySymbol(
+            @NotNull ResolveParser.FacilityDeclContext facility,
+            @NotNull ModuleIdentifier moduleIdentifier,
+            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
+            @NotNull MathSymbolTable scopeRepo) {
+        super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
         this.genericsPerFacility = actualGenerics;
         ModuleParameterization spec =
@@ -79,30 +79,29 @@ public class FacilitySymbol extends Symbol {
         }*/
     }
 
-    public List<ModuleParameterization> getEnhancements() {
+    @NotNull public List<ModuleParameterization> getEnhancements() {
         return enhancements;
     }
 
-    public SpecImplementationPairing getFacility() {
+    @NotNull public SpecImplementationPairing getFacility() {
         return type;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a facility";
     }
 
-    @Override public String toString() {
+    @NotNull @Override public String toString() {
         return getName();
     }
 
-    @Override public FacilitySymbol toFacilitySymbol() {
+    @NotNull @Override public FacilitySymbol toFacilitySymbol() {
         return this;
     }
 
-    @Override public FacilitySymbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
-
+    @NotNull @Override public FacilitySymbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         //TODO : This is probably wrong.  One of the parameters to a module
         //       used in the facility could be a generic, in which case it
         //       should be replaced with the corresponding concrete type--but
@@ -112,26 +111,24 @@ public class FacilitySymbol extends Symbol {
 
     public static class SpecImplementationPairing {
 
-        private final ModuleParameterization spec, implementation;
-        public SpecImplementationPairing(ModuleParameterization spec) {
+        @NotNull private final ModuleParameterization specification;
+        @Nullable private final ModuleParameterization implementation;
+
+        public SpecImplementationPairing(@NotNull ModuleParameterization spec) {
             this(spec, null);
         }
 
-        public SpecImplementationPairing(ModuleParameterization spec,
-                                         ModuleParameterization impl) {
-            if ( spec == null ) throw new IllegalArgumentException("null spec");
-            this.spec = spec;
+        public SpecImplementationPairing(@NotNull ModuleParameterization spec,
+                                         @Nullable ModuleParameterization impl) {
+            this.specification = spec;
             this.implementation = impl;
         }
 
-        public ModuleParameterization getSpecification() {
-            return spec;
+        @NotNull public ModuleParameterization getSpecification() {
+            return specification;
         }
 
-        public ModuleParameterization getImplementation() {
-            //if (myRealization == null) {
-            //    throw new NoneProvidedException();
-            // }
+        @Nullable public ModuleParameterization getImplementation() {
             return implementation;
         }
     }

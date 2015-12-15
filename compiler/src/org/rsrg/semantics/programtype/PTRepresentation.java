@@ -1,9 +1,12 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
-import org.rsrg.semantics.symbol.ProgTypeModelSymbol;
+import org.rsrg.semantics.symbol.TypeModelSymbol;
 import org.rsrg.semantics.TypeGraph;
 
 import java.util.Map;
@@ -18,37 +21,39 @@ import java.util.NoSuchElementException;
  */
 public class PTRepresentation extends PTNamed {
 
-    private final PTType baseType;
-    private final String name;
+    @NotNull private final PTType baseType;
+    @NotNull private final String name;
 
     /**
      * This will be {@code null} for standalone representations (i.e. those that
      * would appear in the context of a facility module.
      */
-    private final ProgTypeModelSymbol family;
-    private ProgReprTypeSymbol repr;
+    @Nullable private final TypeModelSymbol family;
+    @Nullable private ProgReprTypeSymbol repr;
 
-    public PTRepresentation(TypeGraph g, PTType baseType, String name,
-            ProgTypeModelSymbol family, String enclosingModuleID) {
-        super(g, name, g.getTrueExp(), enclosingModuleID);
+    public PTRepresentation(@NotNull TypeGraph g, @NotNull PTType baseType,
+                            @NotNull String name,
+                            @Nullable TypeModelSymbol family,
+                            @NotNull ModuleIdentifier moduleIdentifier) {
+        super(g, name, g.getTrueExp(), moduleIdentifier);
         this.name = name;
         this.baseType = baseType;
         this.family = family;
     }
     
-    public void setReprTypeSymbol(ProgReprTypeSymbol t) {
+    public void setReprTypeSymbol(@Nullable ProgReprTypeSymbol t) {
         this.repr = t;
     }
 
-    public ProgReprTypeSymbol getReprTypeSymbol() {
+    @Nullable public ProgReprTypeSymbol getReprTypeSymbol() {
         return repr;
     }
 
-    public PTType getBaseType() {
+    @NotNull public PTType getBaseType() {
         return baseType;
     }
 
-    public ProgTypeModelSymbol getFamily() throws NoSuchElementException {
+    @Nullable public TypeModelSymbol getFamily() throws NoSuchElementException {
         if ( family == null ) {
             throw new NoSuchElementException("no family found for this " +
                     "representation: " + toString());
@@ -56,14 +61,14 @@ public class PTRepresentation extends PTNamed {
         return family;
     }
 
-    public String getExemplarName() {
+    @NotNull public String getExemplarName() {
         if ( family != null ) {
             return family.getExemplar().getName();
         }
         return name.substring(0, 1);
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return baseType.toMath();
     }
 
@@ -71,7 +76,7 @@ public class PTRepresentation extends PTNamed {
         return baseType.isAggregateType();
     }
 
-    @Override public boolean acceptableFor(PTType t) {
+    @Override public boolean acceptableFor(@NotNull PTType t) {
         boolean result = super.acceptableFor(t);
         if ( !result && family != null ) {
             result = family.getProgramType().acceptableFor(t);
@@ -79,9 +84,9 @@ public class PTRepresentation extends PTNamed {
         return result;
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         throw new UnsupportedOperationException(this.getClass() + " cannot "
                 + "be instantiated.");
     }

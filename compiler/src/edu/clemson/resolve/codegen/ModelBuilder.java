@@ -510,7 +510,7 @@ public class ModelBuilder extends ResolveBaseListener {
         Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
         impl.addDelegateMethods(
                 conceptScope.getSymbolsOfType(OperationSymbol.class,
-                        ProgTypeModelSymbol.class));
+                        TypeModelSymbol.class));
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));

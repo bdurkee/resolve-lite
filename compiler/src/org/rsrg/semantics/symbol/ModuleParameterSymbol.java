@@ -2,22 +2,24 @@ package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-/** A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
- *  {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
- *  functioning as a module formal parameter when declared.
+/**
+ * A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
+ * {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
+ * functioning as a module formal parameter when declared.
  */
 public class ModuleParameterSymbol extends Symbol {
 
     @NotNull private final Symbol wrappedParamSymbol;
 
-    public ModuleParameterSymbol(Symbol symbol, String name,
+    public ModuleParameterSymbol(@NotNull Symbol symbol, String name,
                                  ParserRuleContext definingTree,
-                                 String moduleID) {
-        super(name, definingTree, moduleID);
+                                 ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.wrappedParamSymbol = symbol;
     }
 
@@ -25,13 +27,14 @@ public class ModuleParameterSymbol extends Symbol {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a module parameter symbol";
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
-        return null;
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
+        return wrappedParamSymbol.instantiateGenerics(
+                genericInstantiations, instantiatingFacility);
     }
 }

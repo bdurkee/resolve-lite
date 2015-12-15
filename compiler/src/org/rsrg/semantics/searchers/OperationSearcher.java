@@ -1,6 +1,7 @@
 package org.rsrg.semantics.searchers;
 
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.programtype.PTType;
@@ -27,8 +28,8 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
 
-    @Override public boolean addMatches(Map<String, Symbol> entries,
-            List<OperationSymbol> matches, SearchContext l)
+    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+            @NotNull List<OperationSymbol> matches, @NotNull SearchContext l)
             throws DuplicateSymbolException {
 
         if ( entries.containsKey(queryName) ) {

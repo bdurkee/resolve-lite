@@ -2,6 +2,9 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -10,17 +13,21 @@ import java.util.stream.Collectors;
 
 public class OperationSymbol extends Symbol {
 
-    private final PTType returnType;
-    private final List<ProgParameterSymbol> parameters = new ArrayList<>();
+    @NotNull private final PTType returnType;
+    @NotNull private final List<ProgParameterSymbol> parameters =
+            new ArrayList<>();
+
+    @NotNull private final PExp requires, ensures;
     private final boolean moduleParameter;
 
-    private final PExp requires, ensures;
-
-    public OperationSymbol(String name, ParserRuleContext definingTree,
-                           PExp requires, PExp ensures, PTType type,
-                           String moduleID, List<ProgParameterSymbol> params,
+    public OperationSymbol(@NotNull String name,
+                           @Nullable ParserRuleContext definingTree,
+                           @NotNull PExp requires, @NotNull PExp ensures,
+                           @NotNull PTType type,
+                           @NotNull ModuleIdentifier moduleIdentifier,
+                           @NotNull List<ProgParameterSymbol> params,
                            boolean moduleParameter) {
-        super(name, definingTree, moduleID);
+        super(name, definingTree, moduleIdentifier);
         this.parameters.addAll(params);
         this.returnType = type;
         this.moduleParameter = moduleParameter;
@@ -28,45 +35,42 @@ public class OperationSymbol extends Symbol {
         this.ensures = ensures;
     }
 
-    public PExp getRequires() {
+    @NotNull public PExp getRequires() {
         return requires;
     }
 
-    public PExp getEnsures() {
+    @NotNull public PExp getEnsures() {
         return ensures;
     }
 
-    public boolean isModuleParameter() {
-        return moduleParameter;
-    }
-
-    public List<ProgParameterSymbol> getParameters() {
+    @NotNull public List<ProgParameterSymbol> getParameters() {
         return parameters;
     }
 
-    public PTType getReturnType() {
+    @NotNull public PTType getReturnType() {
         return returnType;
     }
 
-    @Override public OperationSymbol toOperationSymbol() {
+    @NotNull @Override public OperationSymbol toOperationSymbol() {
         return this;
     }
 
-    @Override public ProgVariableSymbol toProgVariableSymbol() {
-        return new ProgVariableSymbol(name, definingTree, returnType, moduleIdentifier);
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+        return new ProgVariableSymbol(name, definingTree, returnType,
+                moduleIdentifier);
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "an operation";
     }
 
-    @Override public String toString() {
+    @NotNull @Override public String toString() {
         return getName() + ":" + parameters;
     }
 
-    @Override public OperationSymbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public OperationSymbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         InstantiationFunction f =
                 new InstantiationFunction(genericInstantiations,
@@ -83,17 +87,19 @@ public class OperationSymbol extends Symbol {
             implements
                 Function<ProgParameterSymbol, ProgParameterSymbol> {
 
-        private final Map<String, PTType> genericInstantiations;
-        private final FacilitySymbol instantiatingFacility;
+        @NotNull private final Map<String, PTType> genericInstantiations;
+        @NotNull private final FacilitySymbol instantiatingFacility;
 
-        public InstantiationFunction(Map<String, PTType> instantiations,
-                FacilitySymbol instantiatingFacility) {
+        public InstantiationFunction(
+                @NotNull Map<String, PTType> instantiations,
+                @NotNull FacilitySymbol instantiatingFacility) {
             this.genericInstantiations =
                     new HashMap<String, PTType>(instantiations);
             this.instantiatingFacility = instantiatingFacility;
         }
 
-        @Override public ProgParameterSymbol apply(ProgParameterSymbol input) {
+        @Override public ProgParameterSymbol apply(
+                @NotNull ProgParameterSymbol input) {
             return (ProgParameterSymbol) input.instantiateGenerics(
                     genericInstantiations, instantiatingFacility);
         }

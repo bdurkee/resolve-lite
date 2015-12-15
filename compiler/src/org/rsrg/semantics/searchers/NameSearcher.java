@@ -1,5 +1,6 @@
 package org.rsrg.semantics.searchers;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -20,8 +21,8 @@ public class NameSearcher implements MultimatchTableSearcher<Symbol> {
         this(searchString, true);
     }
 
-    @Override public boolean addMatches(Map<String, Symbol> entries,
-            List<Symbol> matches, SearchContext l) {
+    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+            @NotNull List<Symbol> matches, @NotNull SearchContext l) {
 
         boolean result = entries.containsKey(searchString);
         if ( result ) {

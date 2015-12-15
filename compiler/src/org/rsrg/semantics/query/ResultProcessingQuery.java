@@ -1,5 +1,6 @@
 package org.rsrg.semantics.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.Scope;
@@ -30,7 +31,7 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
         this.mapping = mapping;
     }
 
-    @Override public List<R> searchFromContext(Scope source, MathSymbolTable repo)
+    @Override public List<R> searchFromContext(@NotNull Scope source, @NotNull MathSymbolTable repo)
             throws DuplicateSymbolException {
         List<R> processedList = baseQuery.searchFromContext(source, repo).stream()
                 .map(mapping::apply)

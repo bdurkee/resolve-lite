@@ -20,15 +20,16 @@ public abstract class Symbol {
     @NotNull protected final ModuleIdentifier moduleIdentifier;
 
     /**
-     * A {@code definingTree} may be {@code null} in the case of a typical
-     * symbol (eg: something extending {@code Symbol}). However, the defining
-     * tree for ctx that <em>define</em> scopes shouldn't be {@code null},
-     * hence the choice of annotation for those. See
-     * {@link SyntacticScope#getDefiningTree()}
+     * The parse tree context this symbol was derived from. Note that it can
+     * be {@code null}. Note that contexts that <em>define</em> scopes keep
+     * track of this as well.
+     *
+     * @see {@link SyntacticScope#getDefiningTree()}
      */
     @Nullable protected final ParserRuleContext definingTree;
 
-    public Symbol(@NotNull String name, @Nullable ParserRuleContext definingTree,
+    public Symbol(@NotNull String name,
+                  @Nullable ParserRuleContext definingTree,
                   @NotNull ModuleIdentifier moduleIdentifier) {
         this.name = name;
         this.definingTree = definingTree;
@@ -47,70 +48,69 @@ public abstract class Symbol {
         return definingTree;
     }
 
-    public abstract String getSymbolDescription();
+    @NotNull public abstract String getSymbolDescription();
 
-    public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgTypeModelSymbol toProgTypeModelSymbol()
+    @NotNull public MathSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProgParameterSymbol toProgParameterSymbol()
+    @NotNull public ProgTypeSymbol toProgTypeSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    //public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
-    //    throw new UnexpectedSymbolException(this.getSymbolDescription());
-    //}
-
-    public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgReprTypeSymbol toProgReprTypeSymbol()
+    @NotNull public TypeModelSymbol toProgTypeModelSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProgVariableSymbol toProgVariableSymbol()
+    @NotNull public ProgParameterSymbol toProgParameterSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+    @NotNull public OperationSymbol toOperationSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProcedureSymbol toProcedureSymbol() {
+    @NotNull public FacilitySymbol toFacilitySymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public TheoremSymbol toTheoremSymbol() {
+    @NotNull public ProgReprTypeSymbol toProgReprTypeSymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public abstract Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility);
+    @NotNull public ProgVariableSymbol toProgVariableSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
 
-    public static Map<String, MTType> buildMathTypeGenerics(
-            Map<String, PTType> genericInstantiations) {
+    @NotNull public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
 
-        Map<String, MTType> genericMathematicalInstantiations =
-                new HashMap<String, MTType>();
+    @NotNull public ProcedureSymbol toProcedureSymbol() {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
+    @NotNull public TheoremSymbol toTheoremSymbol() {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
+    @NotNull public abstract Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility);
+
+    @NotNull public static Map<String, MTType> buildMathTypeGenerics(
+            @NotNull Map<String, PTType> genericInstantiations) {
+
+        Map<String, MTType> genericMathematicalInstantiations = new HashMap<>();
 
         for (Map.Entry<String, PTType> instantiation : genericInstantiations
                 .entrySet()) {

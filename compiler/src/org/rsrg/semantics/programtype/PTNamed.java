@@ -2,6 +2,8 @@ package org.rsrg.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.TypeGraph;
 
 /**
@@ -10,38 +12,39 @@ import org.rsrg.semantics.TypeGraph;
  */
 public abstract class PTNamed extends PTType {
 
-    private final String name;
-    protected final PExp initEnsures;
+    @NotNull private final String name;
+    @NotNull protected final PExp initEnsures;
 
     /**
      * Which module does this {@code PTType}s reference appear in?
      */
-    private final String enclosingModuleID;
+    @NotNull private final ModuleIdentifier moduleIdentifier;
 
-    public PTNamed(TypeGraph g, String name, PExp initEnsures,
-            String enclosingModuleID) {
+    public PTNamed(@NotNull TypeGraph g, @NotNull String name,
+                   @NotNull PExp initEnsures,
+                   @NotNull ModuleIdentifier moduleIdentifier) {
         super(g);
         this.name = name;
         this.initEnsures = initEnsures;
-        this.enclosingModuleID = enclosingModuleID;
+        this.moduleIdentifier = moduleIdentifier;
     }
 
-    public String getEnclosingModuleID() {
-        return enclosingModuleID;
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    public abstract String getExemplarName();
+    @NotNull public abstract String getExemplarName();
 
-    public PSymbol getExemplarAsPSymbol() {
+    @NotNull public PSymbol getExemplarAsPSymbol() {
         return new PSymbol.PSymbolBuilder(getExemplarName())
                 .mathType(toMath()).build();
     }
 
-    public PExp getInitializationEnsures() {
+    @NotNull public PExp getInitializationEnsures() {
         return initEnsures;
     }
 

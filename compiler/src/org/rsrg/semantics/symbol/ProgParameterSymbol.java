@@ -2,11 +2,8 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTNamed;
-import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTGeneric;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -85,19 +82,19 @@ public class ProgParameterSymbol extends Symbol {
         return Collections.unmodifiableMap(result);
     }
 
-    private final ParameterMode mode;
-    private final PTType declaredType;
-    private final TypeGraph typeGraph;
+    @NotNull private final ParameterMode mode;
+    @NotNull private final PTType declaredType;
+    @NotNull private final TypeGraph typeGraph;
 
-    private final MathSymbol mathSymbolAlterEgo;
-    private final ProgVariableSymbol progVariableAlterEgo;
+    @NotNull private final MathSymbol mathSymbolAlterEgo;
+    @NotNull private final ProgVariableSymbol progVariableAlterEgo;
 
     public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
                                @NotNull ParameterMode mode,
                                @NotNull PTType type,
                                @NotNull ParserRuleContext definingTree,
-                               @NotNull String moduleID) {
-        super(name, definingTree, moduleID);
+                               @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.typeGraph = g;
         this.declaredType = type;
         this.mode = mode;
@@ -111,52 +108,52 @@ public class ProgParameterSymbol extends Symbol {
         //      generics in the defining context
         this.mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
-                        typeValue, definingTree, moduleID);
+                        typeValue, definingTree, moduleIdentifier);
 
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleIdentifier());
     }
 
-    public PTType getDeclaredType() {
+    @NotNull public PTType getDeclaredType() {
         return declaredType;
     }
 
-    public ParameterMode getMode() {
+    @NotNull public ParameterMode getMode() {
         return mode;
     }
 
-    @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
         return progVariableAlterEgo;
     }
 
-    @Override public ProgParameterSymbol toProgParameterSymbol() {
+    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol() {
         return this;
     }
 
-    @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
                 typeGraph, getName()), new MTNamed(typeGraph, getName()),
                 getDefiningTree(), getModuleIdentifier());
     }
 
-    public PSymbol asPSymbol() {
+    @NotNull public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
                 .mathType(declaredType.toMath()).build();
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a parameter";
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,

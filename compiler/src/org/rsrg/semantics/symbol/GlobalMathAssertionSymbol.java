@@ -3,6 +3,9 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
@@ -20,31 +23,34 @@ import java.util.Map;
 public class GlobalMathAssertionSymbol extends Symbol {
 
     public static enum ClauseType { REQUIRES, CONSTRAINT }
-    private final PExp assertion;
-    private final ClauseType clauseType;
+    @NotNull private final PExp assertion;
+    @NotNull private final ClauseType clauseType;
 
-    public GlobalMathAssertionSymbol(String name, PExp assertion, ClauseType t,
-            ParserRuleContext definingTree, String moduleID) {
-        super(name, definingTree, moduleID);
+    public GlobalMathAssertionSymbol(@NotNull String name,
+                                     @NotNull PExp assertion,
+                                     @NotNull ClauseType t,
+                                     @Nullable ParserRuleContext definingTree,
+                                     @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.assertion = assertion;
         this.clauseType = t;
     }
 
-    public ClauseType getClauseType() {
+    @NotNull public ClauseType getClauseType() {
         return clauseType;
     }
 
-    public PExp getEnclosedExp() {
+    @NotNull public PExp getEnclosedExp() {
         return assertion;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a module level specification";
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         //Todo: Eventually we'll use the PExp hierarchy to perform generic
         //instantiations on field 'assertion'
         return this;

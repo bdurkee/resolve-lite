@@ -118,8 +118,8 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     private boolean hasRecursiveReferenceInStmts(
             ParserRuleContext ctx, Token name) {
-        RecursiveStatementCheckingVisitor checker =
-                new RecursiveStatementCheckingVisitor(name);
+        RecursiveCallCheckingVisitor checker =
+                new RecursiveCallCheckingVisitor(name);
         return checker.visit(ctx);
     }
 

@@ -1,5 +1,6 @@
 package org.rsrg.semantics.searchers;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -19,6 +20,7 @@ public interface MultimatchTableSearcher<E extends Symbol>
      * throw a {@link DuplicateSymbolException}. Otherwise, behaves
      * identically.
      */
-    @Override public boolean addMatches(Map<String, Symbol> entries,
-                                List<E> matches, SearchContext l);
+    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                                        @NotNull List<E> matches,
+                                        @NotNull SearchContext l);
 }

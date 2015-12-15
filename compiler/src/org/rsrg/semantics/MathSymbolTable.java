@@ -1,13 +1,8 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.ErrorManager;
 import edu.clemson.resolve.misc.HardCoded;
-import edu.clemson.resolve.parser.ResolveLexer;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
@@ -157,7 +152,7 @@ public class MathSymbolTable {
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
                 new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
-                        "GLOBAL");
+                        ModuleIdentifier.GLOBAL);
 
         HardCoded.addBuiltInSymbols(typeGraph, globalScope);
         lexicalScopeStack.push(globalScope);
@@ -179,7 +174,7 @@ public class MathSymbolTable {
                 module.getName(), (ParserRuleContext)contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
-        moduleScopes.put(s.getModuleID(), s);
+        moduleScopes.put(s.getModuleIdentifier(), s);
         return s;
     }
 
@@ -191,7 +186,7 @@ public class MathSymbolTable {
         ScopeBuilder parent = lexicalScopeStack.peek();
         ScopeBuilder s =
                 new ScopeBuilder(this, typeGraph, definingTree, parent,
-                        curModuleScope.getModuleID());
+                        curModuleScope.getModuleIdentifier());
 
         addScope(s, parent);
         return s;
@@ -248,21 +243,24 @@ public class MathSymbolTable {
             throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
         if (module == null) {
-            throw new NoSuchModuleException();
+            throw new NoSuchModuleException(identifier);
         }
         return module;
     }
 
     protected static class DummyIdentifierResolver extends AbstractScope {
+
         @Override @NotNull public <E extends Symbol> List<E> query(
                 @NotNull MultimatchSymbolQuery<E> query) {
             return new ArrayList<>();
         }
+
         @Override @NotNull public <E extends Symbol> E queryForOne(
                 @NotNull SymbolQuery<E> query)
                 throws NoSuchSymbolException, DuplicateSymbolException {
             throw new NoSuchSymbolException();
         }
+
         @Override public <E extends Symbol> boolean addMatches(
                 @NotNull TableSearcher<E> searcher,
                 @NotNull List<E> matches,
@@ -273,14 +271,17 @@ public class MathSymbolTable {
                 throws DuplicateSymbolException {
             return false;
         }
+
         @Override @NotNull public Symbol define(@NotNull Symbol s)
                 throws DuplicateSymbolException {
             return s;
         }
+
         @Override @NotNull public <T extends Symbol> List<T> getSymbolsOfType(
                 @NotNull Class<T> type) {
             return new ArrayList<>();
         }
+
         @Override @NotNull public List<Symbol> getSymbolsOfType(
                 @NotNull Class<?>... type) {
             return new ArrayList<>();

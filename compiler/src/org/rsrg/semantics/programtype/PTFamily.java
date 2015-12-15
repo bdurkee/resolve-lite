@@ -1,34 +1,37 @@
 package org.rsrg.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTNamed;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.ProgTypeModelSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.Map;
 
 public class PTFamily extends PTNamed {
 
-    private final MTType model;
-    private final String name, exemplarName;
-    private final PExp constraint;
+    @NotNull private final MTType model;
+    @NotNull private final String name, exemplarName;
+    @NotNull private final PExp constraint;
 
-    public PTFamily(MTType model, String name, String exemplarName,
-                         PExp constraint, PExp initEnsures, String enclosingModuleID) {
-        super(model.getTypeGraph(), name, initEnsures, enclosingModuleID);
+    public PTFamily(@NotNull MTType model, @NotNull String name,
+                    @NotNull String exemplarName, @NotNull PExp constraint,
+                    @NotNull PExp initEnsures,
+                    @NotNull ModuleIdentifier moduleIdentifier) {
+        super(model.getTypeGraph(), name, initEnsures, moduleIdentifier);
         this.model = model;
         this.name = name;
         this.exemplarName = exemplarName;
         this.constraint = constraint;
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    public String getExemplarName() {
+    @NotNull public String getExemplarName() {
         return exemplarName;
     }
 
@@ -36,7 +39,7 @@ public class PTFamily extends PTNamed {
         return constraint;
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return model;
     }
 
@@ -44,9 +47,9 @@ public class PTFamily extends PTNamed {
         return name;
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         Map<String, MTType> stringToMathType =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
@@ -67,7 +70,7 @@ public class PTFamily extends PTNamed {
                         .withTypesSubstituted(mathTypeToMathType);*/
 
         return new PTFamily(model, name, exemplarName, constraint, initEnsures,
-                getEnclosingModuleID());
+                getModuleIdentifier());
     }
 
     @Override public boolean equals(Object o) {

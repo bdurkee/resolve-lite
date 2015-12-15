@@ -48,7 +48,7 @@ public class QualifiedPath implements ScopeSearchPath {
         catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
             ModuleScopeBuilder moduleScope =
-                    repo.getModuleScope(qualifier.getText());
+                    repo.getModuleScope(new ModuleIdentifier(qualifier));
             result =
                     moduleScope.getMatches(searcher,
                             TableSearcher.SearchContext.IMPORT);

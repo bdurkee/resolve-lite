@@ -19,17 +19,18 @@ public abstract class SyntacticScope extends AbstractScope {
     @NotNull private final MathSymbolTable symtab;
 
     @NotNull protected Scope parent;
-    @NotNull protected final ModuleIdentifier moduleID;
+    @NotNull protected final ModuleIdentifier moduleIdentifier;
     @Nullable protected ParserRuleContext definingTree;
 
     SyntacticScope(@NotNull MathSymbolTable scopeRepo,
                    @Nullable ParserRuleContext definingTree,
-                   @NotNull Scope parent, @NotNull ModuleIdentifier moduleID,
+                   @NotNull Scope parent,
+                   @NotNull ModuleIdentifier moduleIdentifier,
                    @NotNull Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;
         this.parent = parent;
-        this.moduleID = moduleID;
+        this.moduleIdentifier = moduleIdentifier;
         this.definingTree = definingTree;
     }
 
@@ -37,8 +38,8 @@ public abstract class SyntacticScope extends AbstractScope {
         return definingTree;
     }
 
-    @NotNull public ModuleIdentifier getModuleID() {
-        return moduleID;
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
     @NotNull @Override public Symbol define(@NotNull Symbol s)
@@ -74,7 +75,7 @@ public abstract class SyntacticScope extends AbstractScope {
         return results.get(0);
     }
 
-    @Override public String toString() {
+    @NotNull @Override public String toString() {
         String s = "";
         if (definingTree != null) {
             s = definingTree.getClass().getSimpleName();
@@ -113,8 +114,6 @@ public abstract class SyntacticScope extends AbstractScope {
         return finished;
     }
 
-
-
     @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(
             @NotNull Class<T> type) {
         return symbols.values().stream()
@@ -133,11 +132,12 @@ public abstract class SyntacticScope extends AbstractScope {
         return result;
     }
 
-    private Map<String, Symbol> updateSymbols(
-            Map<String, Symbol> currentBindings,
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull private Map<String, Symbol> updateSymbols(
+            @NotNull Map<String, Symbol> currentBindings,
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
+
         for (Symbol s : currentBindings.values()) {
             instantiatedBindings.put(s.getName(), s.instantiateGenerics(
                     genericInstantiations, instantiatingFacility));

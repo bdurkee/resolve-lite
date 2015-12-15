@@ -206,7 +206,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> result = new ArrayList<>();
         List<String> modulesToSearch = new ArrayList<>();
 
-        modulesToSearch.add(moduleScope.getModuleID());
+        modulesToSearch.add(moduleScope.getModuleIdentifier());
        /* if (moduleCtx instanceof ResolveParser.ConceptImplModuleContext) {
             ResolveParser.ConceptImplModuleContext moduleCtxAsConceptImpl =
                     (ResolveParser.ConceptImplModuleContext)moduleCtx;

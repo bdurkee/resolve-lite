@@ -29,7 +29,7 @@ public class EnhancementImplModule extends AbstractSpecImplModule {
                 delegateMethods.add(
                         new ConceptDelegateMethod("get"+s.getName(), true));
             }
-            else if ( s instanceof ProgTypeModelSymbol ) {
+            else if ( s instanceof TypeModelSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod("init"+s.getName(), true));
             }

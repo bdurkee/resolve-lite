@@ -33,7 +33,6 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
@@ -84,7 +83,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private final ParseTreeProperty<MTType> anonymousFunctionExpectedRangeTypes =
             new ParseTreeProperty<>();
-    private ProgTypeModelSymbol currentTypeModelSym = null;
+    private TypeModelSymbol currentTypeModelSym = null;
 
     private RESOLVECompiler compiler;
     private MathSymbolTable symtab;
@@ -231,7 +230,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              MTType modelType = tr.mathTypeValues.get(ctx.mathTypeExp());
 
              ProgTypeSymbol progType =
-                     new ProgTypeModelSymbol(symtab.getTypeGraph(),
+                     new TypeModelSymbol(symtab.getTypeGraph(),
                              ctx.name.getText(), modelType,
                                  new PTFamily(modelType, ctx.name.getText(),
                                      ctx.exemplar.getText(), constraint,
@@ -481,6 +480,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a type", ctx.name.getText(),
             use.getActualSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    nsme.getRequestedModule(),
+                    nsme.getRequestedModule().getText());
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
@@ -509,7 +512,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /* @Override public Void visitTypeRepresentationDecl(
              ResolveParser.TypeRepresentationDeclContext ctx) {
          symtab.startScope(ctx);
-         ProgTypeModelSymbol typeDefnSym = null;
+         TypeModelSymbol typeDefnSym = null;
          ParseTree reprTypeNode = ctx.type() != null ? ctx.type() : ctx.record();
          this.visit(reprTypeNode);
 
@@ -1815,7 +1818,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private String getRootModuleID() {
-        return symtab.getInnermostActiveScope().getModuleID();
+        return symtab.getInnermostActiveScope().getModuleIdentifier();
     }
 
     private void emit(String msg) {

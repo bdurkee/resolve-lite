@@ -1,5 +1,6 @@
 package org.rsrg.semantics.searchers;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -8,14 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GenericSearcher implements MultimatchTableSearcher<ProgTypeSymbol> {
+public class GenericSearcher
+        implements
+            MultimatchTableSearcher<ProgTypeSymbol> {
 
-    public static final GenericSearcher INSTANCE = new GenericSearcher();
-
+    @NotNull public static final GenericSearcher INSTANCE =
+            new GenericSearcher();
     private GenericSearcher() {}
 
-    @Override public boolean addMatches(Map<String, Symbol> entries,
-                              List<ProgTypeSymbol> matches, SearchContext l) {
+    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                                        @NotNull List<ProgTypeSymbol> matches,
+                                        @NotNull SearchContext l) {
         for (Symbol s : entries.values()) {
             if (s instanceof ProgParameterSymbol) {
                 if (((ProgParameterSymbol) s).getMode() ==

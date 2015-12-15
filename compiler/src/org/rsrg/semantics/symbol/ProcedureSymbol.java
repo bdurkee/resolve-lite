@@ -1,39 +1,44 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
 public class ProcedureSymbol extends Symbol {
 
-    private final OperationSymbol correspondingOperation;
+    @NotNull private final OperationSymbol correspondingOperation;
 
-    public ProcedureSymbol(String name, ParserRuleContext definingTree,
-            String moduleID, OperationSymbol correspondingOperation) {
-        super(name, definingTree, moduleID);
+    public ProcedureSymbol(@NotNull String name,
+                           @Nullable ParserRuleContext definingTree,
+                           @NotNull ModuleIdentifier moduleIdentifier,
+                           @NotNull OperationSymbol correspondingOperation) {
+        super(name, definingTree, moduleIdentifier);
 
         this.correspondingOperation = correspondingOperation;
     }
 
-    public OperationSymbol getCorrespondingOperation() {
+    @NotNull public OperationSymbol getCorrespondingOperation() {
         return correspondingOperation;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a procedure";
     }
 
-    @Override public ProcedureSymbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public ProcedureSymbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
 
         return new ProcedureSymbol(getName(), getDefiningTree(), getModuleIdentifier(),
                 correspondingOperation.instantiateGenerics(
                         genericInstantiations, instantiatingFacility));
     }
 
-    @Override public ProcedureSymbol toProcedureSymbol() {
+    @NotNull @Override public ProcedureSymbol toProcedureSymbol() {
         return this;
     }
 }

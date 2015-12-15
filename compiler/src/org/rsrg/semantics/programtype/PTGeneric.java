@@ -1,5 +1,7 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTNamed;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
@@ -9,24 +11,24 @@ import java.util.Map;
 
 public class PTGeneric extends PTType {
 
-    private final String name;
+    @NotNull private final String name;
 
-    public PTGeneric(TypeGraph g, String name) {
+    public PTGeneric(@NotNull TypeGraph g, @NotNull String name) {
         super(g);
         this.name = name;
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return new MTNamed(getTypeGraph(), name);
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         PTType result = this;
         if ( genericInstantiations.containsKey(name) ) {
             result = genericInstantiations.get(name);
@@ -34,7 +36,7 @@ public class PTGeneric extends PTType {
         return result;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof PTGeneric);
 
         if ( result ) {

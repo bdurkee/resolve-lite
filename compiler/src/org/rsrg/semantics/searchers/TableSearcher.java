@@ -1,5 +1,6 @@
 package org.rsrg.semantics.searchers;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.symbol.Symbol;
@@ -50,6 +51,8 @@ public interface TableSearcher<E extends Symbol> {
      * @throws DuplicateSymbolException If more than one match is found in
      *         {@code entries} where no more than one was expected.
      */
-    public boolean addMatches(Map<String, Symbol> entries, List<E> matches,
-                              SearchContext l) throws DuplicateSymbolException;
+    public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                              @NotNull List<E> matches,
+                              @NotNull SearchContext l)
+            throws DuplicateSymbolException;
 }

@@ -1,5 +1,6 @@
 package org.rsrg.semantics.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.NoSuchModuleException;
@@ -12,6 +13,8 @@ import java.util.List;
  * A {@code SymbolQuery} defines a strategy for returning a list of
  * {@link Symbol}s that meet a certain set of search criteria starting from
  * some <em>source scope</em>.
+ *
+ * @since 0.0.1
  */
 public interface SymbolQuery<E extends Symbol> {
 
@@ -27,9 +30,10 @@ public interface SymbolQuery<E extends Symbol> {
      * 
      * @param source The source scope from which the search was spawned.
      * @param scopeRepo A repository of any referenced modules.
-     * 
+     *
      * @return A list of matches.
      */
-    public List<E> searchFromContext(Scope source, MathSymbolTable scopeRepo)
+    public List<E> searchFromContext(@NotNull Scope source,
+                                     @NotNull MathSymbolTable scopeRepo)
             throws DuplicateSymbolException, NoSuchModuleException;
 }
