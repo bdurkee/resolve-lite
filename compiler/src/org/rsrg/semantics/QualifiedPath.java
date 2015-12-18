@@ -27,7 +27,8 @@ public class QualifiedPath implements ScopeSearchPath {
     @Override @NotNull public <E extends Symbol> List<E> searchFromContext(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException {
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         try {
             FacilitySymbol facility =

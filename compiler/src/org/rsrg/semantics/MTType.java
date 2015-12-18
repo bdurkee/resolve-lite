@@ -2,9 +2,7 @@ package org.rsrg.semantics;
 
 import java.util.*;
 
-/**
- * The parent class of all mathematical types.
- */
+/** The parent class of all mathematical types. */
 public abstract class MTType {
 
     protected final TypeGraph myTypeGraph;
@@ -13,9 +11,7 @@ public abstract class MTType {
     private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
             new HashMap<>();
 
-    /**
-     * Allows us to detect if we're getting into an equals-loop.
-     */
+    /** Allows us to detect if we're getting into an equals-loop. */
     private int myEqualsDepth = 0;
 
     public MTType(TypeGraph typeGraph) {

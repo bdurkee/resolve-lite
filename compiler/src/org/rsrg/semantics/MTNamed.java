@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents a type that is simply a named reference to some bound variable.
- * For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
- * named type.
+/** Represents a type that is simply a named reference to some bound variable.
+ *  For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
+ *  named type.
  */
 public class MTNamed extends MTType {
 

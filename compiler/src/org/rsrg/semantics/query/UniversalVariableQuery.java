@@ -33,7 +33,7 @@ public class UniversalVariableQuery
 
     @Override public List<MathSymbol> searchFromContext(@NotNull Scope source,
                                                         @NotNull MathSymbolTable repo)
-            throws NoSuchModuleException {
+            throws NoSuchModuleException, UnexpectedSymbolException {
         List<MathSymbol> result;
         try {
             result = baseQuery.searchFromContext(source, repo);
@@ -52,15 +52,15 @@ public class UniversalVariableQuery
         @Override public boolean addMatches(
                 @NotNull Map<String, Symbol> entries,
                 @NotNull List<MathSymbol> matches,
-                @NotNull SearchContext l) {
+                @NotNull SearchContext l) throws UnexpectedSymbolException {
 
-            List<MathSymbol> mathSymbols = entries.values().stream()
-                    .filter(s -> s instanceof MathSymbol)
-                    .map(Symbol::toMathSymbol).collect(Collectors.toList());
-
-            matches.addAll(mathSymbols.stream()
-                    .filter(s -> s.getQuantification() == Quantification.UNIVERSAL)
-                    .collect(Collectors.toList()));
+            for (Symbol symbol : entries.values()) {
+                if (symbol instanceof MathSymbol &&
+                        ((MathSymbol) symbol).getQuantification() ==
+                                Quantification.UNIVERSAL) {
+                    matches.add(symbol.toMathSymbol());
+                }
+            }
             return false;
         }
     }

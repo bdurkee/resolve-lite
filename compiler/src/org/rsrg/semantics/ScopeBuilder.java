@@ -9,12 +9,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/**
- * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
- * <p>
- * Note that {@code ScopeBuilder} has no public constructor. Instances of this
- * class can be acquired through calls to some of the methods of
- * {@link MathSymbolTable}.</p>
+/** A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
+ *  <p>
+ *  Note that {@code ScopeBuilder} has no public constructor. Instances of this
+ *  class can be acquired through calls to some of the methods of
+ *  {@link MathSymbolTable}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 

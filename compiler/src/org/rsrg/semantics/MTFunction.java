@@ -13,14 +13,13 @@ public class MTFunction extends MTType {
     private static final FunctionApplicationFactory DEFAULT_FACTORY =
             new VanillaFunctionApplicationFactory();
 
-    /**
-     * In cases where myDomain is an instance of MTCartesian, the names of
-     * the original parameters are stored in the tags of that cartesian product.
-     * However, when myDomain is another type, we represent a function with
-     * a SINGLE PARAMETER and we have no way to embed the name of our parameter.
-     * In the latter case, this field will reflect the parameter name (or be
-     * null if we represent a function with un-named parameters). In the former
-     * case, the value of this field is undefined.
+    /** In cases where myDomain is an instance of MTCartesian, the names of
+     *  the original parameters are stored in the tags of that cartesian product.
+     *  However, when myDomain is another type, we represent a function with
+     *  a SINGLE PARAMETER and we have no way to embed the name of our parameter.
+     *  In the latter case, this field will reflect the parameter name (or be
+     *  null if we represent a function with un-named parameters). In the former
+     *  case, the value of this field is undefined.
      */
     private final String singleParameterName;
 

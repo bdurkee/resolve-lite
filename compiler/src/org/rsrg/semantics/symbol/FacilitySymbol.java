@@ -21,9 +21,9 @@ public class FacilitySymbol extends Symbol {
     @NotNull private MathSymbolTable scopeRepo;
     @NotNull private ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
 
-    @NotNull private final Map<ModuleParameterization, ModuleParameterization>
+    private final Map<ModuleParameterization, ModuleParameterization>
             enhancementImplementations = new HashMap<>();
-    @NotNull private final List<ModuleParameterization> enhancements =
+    private final List<ModuleParameterization> enhancements =
             new ArrayList<>();
 
     public FacilitySymbol(

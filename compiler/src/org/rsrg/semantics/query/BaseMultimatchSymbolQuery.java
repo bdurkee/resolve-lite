@@ -7,11 +7,10 @@ import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
 
-/**
- * Refines {@link BaseSymbolQuery} by guaranteeing that the associated searcher
- * is a {@link MultimatchTableSearcher},
- * and thus the search methods of this class are guaranteed not to throw a
- * {@link DuplicateSymbolException DuplicateSymbolException}.</p>
+/** Refines {@link BaseSymbolQuery} by guaranteeing that the associated searcher
+ *  is a {@link MultimatchTableSearcher},
+ *  and thus the search methods of this class are guaranteed not to throw a
+ *  {@link DuplicateSymbolException DuplicateSymbolException}.</p>
  */
 public class BaseMultimatchSymbolQuery<E extends Symbol>
         extends
@@ -22,14 +21,13 @@ public class BaseMultimatchSymbolQuery<E extends Symbol>
         super(path, searcher);
     }
 
-    /**
-     * Refines {@link BaseSymbolQuery#searchFromContext} to guarantee that it
-     * will not throw a {@link DuplicateSymbolException}.
-     * Otherwise, behaves identically.
+    /** Refines {@link BaseSymbolQuery#searchFromContext} to guarantee that it
+     *  will not throw a {@link DuplicateSymbolException}.
+     *  Otherwise, behaves identically.
      */
     @Override public List<E> searchFromContext(@NotNull Scope source,
                                                @NotNull MathSymbolTable repo)
-            throws NoSuchModuleException {
+            throws NoSuchModuleException, UnexpectedSymbolException {
         List<E> result;
         try {
             result = super.searchFromContext(source, repo);

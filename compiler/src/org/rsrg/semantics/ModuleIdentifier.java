@@ -6,21 +6,18 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Identifies a particular module unambiguously.
- * <p>
- * <strong>Note:</strong> Currently, we only permit one level of namespace.
- * But ultimately that will probably change (because, for example, at this
- * moment if there were two "Stack_Templates", we couldn't deal with that. A
- * java class-path-like solution seems inevitable.  For the moment however, this
- * is just a wrapper around the token based name of the module to facilitate
- * changing how we deal with modules later.</p>
- * <p>
- * We use {@link Token}s internally here so we have position information
- * for the module we're identifying is readily available
- * (mostly for error rendering purposes).</p>
- *
- * @since 0.0.1
+/** Identifies a particular module unambiguously.
+ *  <p>
+ *  <strong>Note:</strong> Currently, we only permit one level of namespace.
+ *  But ultimately that will probably change (because, for example, at this
+ *  moment if there were two "Stack_Templates", we couldn't deal with that. A
+ *  java class-path-like solution seems inevitable.  For the moment however, this
+ *  is just a wrapper around the token based name of the module to facilitate
+ *  changing how we deal with modules later.</p>
+ *  <p>
+ *  We use {@link Token}s internally here so we have position information
+ *  for the module we're identifying is readily available
+ *  (mostly for error rendering purposes).</p>
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 

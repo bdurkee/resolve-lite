@@ -20,16 +20,15 @@ public class MathSymbolTable {
 
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
-    /**
-     * When starting a search from a particular scope, specifies how any
-     * available facilities should be searched.
+    /** When starting a search from a particular scope, specifies how any
+     *  available facilities should be searched.
      * 
-     * Available facilities are those facilities defined in a module searched by
-     * the search's {@link ImportStrategy} (which necessarily always includes
-     * the source module).
+     *  Available facilities are those facilities defined in a module searched by
+     *  the search's {@link ImportStrategy} (which necessarily always includes
+     *  the source module).
      * 
-     * Note that facilities cannot be recursively searched. Imports and
-     * facilities appearing in available facilities will not be searched.
+     *  Note that facilities cannot be recursively searched. Imports and
+     *  facilities appearing in available facilities will not be searched.
      */
     public static enum FacilityStrategy {
 

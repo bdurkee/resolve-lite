@@ -450,7 +450,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              catch (UnexpectedSymbolException use) {
                  compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                          generic.getStart(), "a program type", generic.getText(),
-                         use.getActualSymbolDescription());
+                         use.getTheUnexpectedSymbolsDescription());
              }
          }
          return result;
@@ -476,7 +476,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a type", ctx.name.getText(),
-            use.getActualSymbolDescription());
+            use.getTheUnexpectedSymbolsDescription());
         } catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     nsme.getRequestedModule(),
@@ -1005,7 +1005,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //and type the thing as invalid.
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.name, "a variable reference", ctx.name.getText(),
-                    use.getActualSymbolDescription());
+                    use.getTheUnexpectedSymbolsDescription());
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
@@ -1613,7 +1613,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             return symtab.getInnermostActiveScope()
                     .queryForOne(new MathSymbolQuery(qualifier,
-                            symbolName, ctx.getStart())).toMathSymbol();
+                            symbolName, ctx.getStart()));
         }
         catch (NoSuchSymbolException|DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
@@ -1623,6 +1623,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(nsme.getErrorKind(),
                     nsme.getRequestedModule(),
                     nsme.getRequestedModule().getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a math symbol", symbolName,
+                    use.getTheUnexpectedSymbolsDescription());
         }
         return null;
     }
@@ -1762,15 +1766,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         try {
             sameNameFunctions.addAll(
-                    symtab.getInnermostActiveScope() //
+                    symtab.getInnermostActiveScope()
                             .query(new MathFunctionNamedQuery(qualifier, name))
-                            .stream()
-                            .filter(s -> s.getType() instanceof MTFunction)
+                            .stream().filter(s -> s.getType() instanceof MTFunction)
                             .collect(Collectors.toList()));
         } catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     nsme.getRequestedModule(),
                     nsme.getRequestedModule().getText());
+        } catch (UnexpectedSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    name, "a math symbol", name.getText(),
+                    e.getTheUnexpectedSymbolsDescription());
         }
 
         if (sameNameFunctions.isEmpty()) {

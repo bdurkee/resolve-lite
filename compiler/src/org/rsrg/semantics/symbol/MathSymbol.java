@@ -11,9 +11,8 @@ import java.util.*;
 
 public class MathSymbol extends Symbol {
 
-    /**
-     * Backing fields for {@link MTType}s representing the type and type value
-     * of this math symbol, respectively.
+    /** Backing fields for {@link MTType}s representing the type and type value
+     *  of this math symbol, respectively.
      */
     @NotNull private final MTType type;
     @Nullable private final MTType typeValue;
@@ -22,14 +21,13 @@ public class MathSymbol extends Symbol {
     @NotNull private final Map<String, MTType> genericsInDefiningContext =
             new HashMap<>();
 
-    /**
-     * Math symbols that represent definitions can take parameters, which may
-     * contain implicit type parameters that cause the definition's true type
-     * to change based on the type of arguments that end up actually passed.
-     * These parameters are represented in this map, with the key giving the
-     * name of the type parameter (which will then behave as a normal, bound,
-     * named type within the definition's type) and the value giving the type
-     * bounds of the parameter.
+    /** Math symbols that represent definitions can take parameters, which may
+     *  contain implicit type parameters that cause the definition's true type
+     *  to change based on the type of arguments that end up actually passed.
+     *  These parameters are represented in this map, with the key giving the
+     *  name of the type parameter (which will then behave as a normal, bound,
+     *  named type within the definition's type) and the value giving the type
+     *  bounds of the parameter.
      */
     @NotNull private final Map<String, MTType> schematicTypes = new HashMap<>();
 

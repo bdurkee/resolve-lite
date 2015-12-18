@@ -19,11 +19,11 @@ public interface Scope {
 
     @NotNull public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
-            throws NoSuchModuleException;
+            throws NoSuchModuleException, UnexpectedSymbolException;
 
     @NotNull public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query) throws NoSuchSymbolException,
-            DuplicateSymbolException, NoSuchModuleException;
+            DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException;
 
     public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher,
@@ -31,11 +31,11 @@ public interface Scope {
             @NotNull Map<String, PTType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull SearchContext l)
-            throws DuplicateSymbolException;
+            throws DuplicateSymbolException, UnexpectedSymbolException;
 
     @NotNull public <E extends Symbol> List<E> getMatches(
             @NotNull TableSearcher<E> searcher, @NotNull SearchContext l)
-            throws DuplicateSymbolException;
+            throws DuplicateSymbolException, UnexpectedSymbolException;
 
     @NotNull public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException;

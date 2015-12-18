@@ -17,7 +17,6 @@ public class ProcedureSymbol extends Symbol {
                            @NotNull ModuleIdentifier moduleIdentifier,
                            @NotNull OperationSymbol correspondingOperation) {
         super(name, definingTree, moduleIdentifier);
-
         this.correspondingOperation = correspondingOperation;
     }
 

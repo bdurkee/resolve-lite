@@ -1,12 +1,10 @@
 package org.rsrg.semantics.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.NoSuchModuleException;
-import org.rsrg.semantics.Scope;
+import org.rsrg.semantics.*;
 import org.rsrg.semantics.symbol.Symbol;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,19 +22,47 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
             SymbolQuery<R> {
 
     @NotNull private final SymbolQuery<T> baseQuery;
-    @NotNull private final Function<T, R> mapping;
+    @NotNull private final SymbolTransformerFunction<T, R> mapping;
 
     public ResultProcessingQuery(@NotNull SymbolQuery<T> baseQuery,
-                                 @NotNull Function<T, R> mapping) {
+                                 @NotNull SymbolTransformerFunction<T, R> mapping) {
         this.baseQuery = baseQuery;
         this.mapping = mapping;
     }
 
     @Override public List<R> searchFromContext(@NotNull Scope source,
                                                @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException {
-        return baseQuery.searchFromContext(source, repo).stream()
-                .map(mapping::apply)
-                .collect(Collectors.toList());
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
+        List<R> result = new ArrayList<>();
+        try {
+            result.addAll(baseQuery.searchFromContext(source, repo).stream()
+                    .map(mapping::apply)
+                    .collect(Collectors.toList()));
+        }
+        catch (RuntimeException re) {
+            if (re.getCause() instanceof UnexpectedSymbolException) {
+              String symDesc = ((UnexpectedSymbolException) re.getCause())
+                      .getTheUnexpectedSymbolsDescription();
+                throw new UnexpectedSymbolException(symDesc);
+            }
+        }
+        return result;
+    }
+
+    //TODO: Unfuckingbelievable. "Google checked exception java 8 method ref" and have fun. Thanks oracle.
+    @FunctionalInterface public interface SymbolTransformerFunction<V extends Symbol, U extends Symbol>
+            extends
+                Function<V, U> {
+
+        @Override default U apply(V t) {
+            try{
+                return applyThrows(t);
+            }catch (UnexpectedSymbolException e){
+                throw new RuntimeException(e);
+            }
+        }
+
+        U applyThrows(V t) throws UnexpectedSymbolException;
     }
 }

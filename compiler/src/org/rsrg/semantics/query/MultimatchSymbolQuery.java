@@ -10,9 +10,8 @@ public interface MultimatchSymbolQuery<E extends Symbol>
         extends
             SymbolQuery<E> {
 
-    /**
-     * Behaves just as {@link SymbolQuery#searchFromContext}, except that it
-     * cannot throw a {@link DuplicateSymbolException}.
+    /** Behaves just as {@link SymbolQuery#searchFromContext(Scope, MathSymbolTable)},
+     *  except that it cannot throw a {@link DuplicateSymbolException}.
      */
     @Override public List<E> searchFromContext(@NotNull Scope source,
                                                @NotNull MathSymbolTable repo)

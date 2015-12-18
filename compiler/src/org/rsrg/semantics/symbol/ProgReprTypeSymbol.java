@@ -14,16 +14,14 @@ import java.util.Map;
 
 public class ProgReprTypeSymbol extends Symbol {
 
-    /**
-     * A backing field for our (type model) {@code definition} parameter. This
-     * might be {@code null} in the case where we represent a facility bound
-     * type representation.
+    /** A backing field for our (type model) {@code definition} parameter. This
+     *  might be {@code null} in the case where we represent a facility bound
+     *  type representation.
      */
     @Nullable protected final TypeModelSymbol definition;
 
-    /**
-     * These annotation exprs should never be {@code null}; use just
-     * {@code true} instead.
+    /** These annotation exprs should never be {@code null}; use just
+     *  {@code true} instead.
      */
     @NotNull protected final PExp convention, correspondence;
 

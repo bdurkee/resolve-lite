@@ -19,10 +19,9 @@ public abstract class Symbol {
     /** Identifies the particular module in which this {@code Symbol} lives. */
     @NotNull protected final ModuleIdentifier moduleIdentifier;
 
-    /**
-     * The parse tree context this symbol was derived from. Note that it can
-     * be {@code null}. Note that contexts that <em>define</em> scopes keep
-     * track of this as well.
+    /** The parse tree context this symbol was derived from. Note that it can
+     *  be {@code null}. Note that contexts that <em>define</em> scopes keep
+     *  track of this as well.
      *
      * @see {@link SyntacticScope#getDefiningTree()}
      */

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.PossiblyQualifiedPath;
+import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.searchers.NameSearcher;
 import org.rsrg.semantics.symbol.ProgVariableSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -17,7 +18,7 @@ public class ProgVariableQuery
             ResultProcessingQuery<Symbol, ProgVariableSymbol> {
 
     public ProgVariableQuery(@Nullable Token qualifier, @NotNull Token name,
-                             boolean b) {
+                             boolean b) throws UnexpectedSymbolException {
         this(qualifier, name.getText());
     }
 

@@ -13,28 +13,27 @@ import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
 
-/**
- * Defines the search path used when a symbol is referenced in an
- * unqualified way, along with some parameters for tweaking how the search is
- * accomplished. In general, the path is as follows:
- * <ol>
- * <li>Search the local scope.</li>
- * <li>Search any facilities declared in the local scope.</li>
- * <li>Search any imports in a depth-first manner, skipping any already-searched
- * scopes.</li>
- * <ul>
- * <li>For each searched import, search any facilities declared inside.</li>
- * </ul>
- * </ol>
- * <p>
- * Instances of this class can be parameterized to search only direct imports or
- * to exclude all imports, as well as to exclude searching facilities, or change
- * how generics are handled when searching facilities.</p>
- * <p>
- * Additionally, by setting the {@code localPriority} flag, the search can be
- * made to stop without considering imports (regardless of the import strategy)
- * if at least one local match is found. Note that any local facilities will
- * still be searched if the facility strategy requires it.</p>
+/** Defines the search path used when a symbol is referenced in an
+ *  unqualified way, along with some parameters for tweaking how the search is
+ *  accomplished. In general, the path is as follows:
+ *  <ol>
+ *  <li>Search the local scope.</li>
+ *  <li>Search any facilities declared in the local scope.</li>
+ *  <li>Search any imports in a depth-first manner, skipping any already-searched
+ *  scopes.</li>
+ *  <ul>
+ *  <li>For each searched import, search any facilities declared inside.</li>
+ *  </ul>
+ *  </ol>
+ *  <p>
+ *  Instances of this class can be parameterized to search only direct imports or
+ *  to exclude all imports, as well as to exclude searching facilities, or change
+ *  how generics are handled when searching facilities.</p>
+ *  <p>
+ *  Additionally, by setting the {@code localPriority} flag, the search can be
+ *  made to stop without considering imports (regardless of the import strategy)
+ *  if at least one local match is found. Note that any local facilities will
+ *  still be searched if the facility strategy requires it.</p>
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
@@ -53,7 +52,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
     @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException {
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
         Map<String, PTType> genericInstantiations = new HashMap<>();
@@ -71,7 +71,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
             @NotNull Map<String, PTType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull ImportStrategy importStrategy, int depth)
-            throws DuplicateSymbolException, NoSuchModuleException {
+            throws DuplicateSymbolException,
+            NoSuchModuleException,
+            UnexpectedSymbolException {
 
         //First we search locally
         boolean finished =
@@ -119,7 +121,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
             @NotNull Scope source,
             @NotNull Map<String, PTType> genericInstantiations,
             @NotNull Set<Scope> searchedScopes, MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException {
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
 
         List<FacilitySymbol> facilities =
                 source.getMatches(SymbolTypeSearcher.FACILITY_SEARCHER,

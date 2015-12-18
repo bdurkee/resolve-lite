@@ -4,14 +4,14 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
+import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-/**
- * A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
- * {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
- * functioning as a module formal parameter when declared.
+/** A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
+ *  {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
+ *  functioning as a module formal parameter when declared.
  */
 public class ModuleParameterSymbol extends Symbol {
 
@@ -33,11 +33,13 @@ public class ModuleParameterSymbol extends Symbol {
      */
 
 
-    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol()
+            throws UnexpectedSymbolException {
         return wrappedParamSymbol.toProgVariableSymbol();
     }
 
-    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol() {
+    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol()
+            throws UnexpectedSymbolException {
         return wrappedParamSymbol.toProgParameterSymbol();
     }
 

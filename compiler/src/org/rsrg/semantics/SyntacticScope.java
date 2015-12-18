@@ -62,14 +62,16 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull @Override public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
-            throws NoSuchModuleException {
+            throws NoSuchModuleException, UnexpectedSymbolException {
         return query.searchFromContext(this, symtab);
     }
 
     @NotNull @Override public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
-                DuplicateSymbolException, NoSuchModuleException {
+            DuplicateSymbolException,
+            NoSuchModuleException,
+            UnexpectedSymbolException {
         List<E> results = query.searchFromContext(this, symtab);
         if (results.isEmpty()) throw new NoSuchSymbolException();
         else if (results.size() > 1) throw new DuplicateSymbolException();
@@ -90,7 +92,8 @@ public abstract class SyntacticScope extends AbstractScope {
             @NotNull Map<String, PTType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull TableSearcher.SearchContext l)
-            throws DuplicateSymbolException {
+            throws DuplicateSymbolException,
+            UnexpectedSymbolException {
         boolean finished = false;
 
         if (!searchedScopes.contains(this)) {

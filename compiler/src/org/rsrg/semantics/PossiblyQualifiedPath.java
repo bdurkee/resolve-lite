@@ -10,14 +10,13 @@ import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
 
-/**
- * Like the name suggests, represents an implementation {@link ScopeSearchPath}
- * that might (or might not be) qualified.
- * <p>
- * The implementation of
- * {@link #searchFromContext(TableSearcher, Scope, MathSymbolTable)} here
- * abstracts which of the two are selected based on the parameters passed to
- * {@code this}.</p>
+/** Like the name suggests, represents an implementation {@link ScopeSearchPath}
+ *  that might (or might not be) qualified.
+ *  <p>
+ *  The implementation of
+ *  {@link #searchFromContext(TableSearcher, Scope, MathSymbolTable)} here
+ *  abstracts which of the two are selected based on the parameters passed to
+ *  {@code this}.</p>
  */
 public class PossiblyQualifiedPath implements ScopeSearchPath {
 
@@ -40,7 +39,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException {
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
         return actualSearchPath.searchFromContext(searcher, source, repo);
     }
 

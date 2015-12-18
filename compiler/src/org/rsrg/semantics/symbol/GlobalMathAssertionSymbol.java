@@ -10,15 +10,14 @@ import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-/**
- * Currently there's no easy way to obtain global (module level) specifications.
- * Consider the VC generator (who needs to grab things like global constraints
- * for all accessible modules) naeeds to manually wrangle with the maps
- * provided by MathSymbolTable and search the defining elements manually. However,
- * by wrapping these expressions in this symbol, we'll be able to do a
- * multimatch query and get all relevant entries -- from which we can do
- * further processing
- * (or even write a query that does such processing for us)..
+/** Currently there's no easy way to obtain global (module level) specifications.
+ *  Consider the VC generator (who needs to grab things like global constraints
+ *  for all accessible modules) naeeds to manually wrangle with the maps
+ *  provided by MathSymbolTable and search the defining elements manually. However,
+ *  by wrapping these expressions in this symbol, we'll be able to do a
+ *  multimatch query and get all relevant entries -- from which we can do
+ *  further processing
+ *  (or even write a query that does such processing for us)..
  */
 public class GlobalMathAssertionSymbol extends Symbol {
 

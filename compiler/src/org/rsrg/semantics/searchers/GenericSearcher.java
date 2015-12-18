@@ -1,6 +1,7 @@
 package org.rsrg.semantics.searchers;
 
 import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -18,7 +19,8 @@ public class GenericSearcher
 
     @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
                                         @NotNull List<ProgTypeSymbol> matches,
-                                        @NotNull SearchContext l) {
+                                        @NotNull SearchContext l)
+            throws UnexpectedSymbolException {
         for (Symbol s : entries.values()) {
             if (s instanceof ProgParameterSymbol) {
                 if (((ProgParameterSymbol) s).getMode() ==

@@ -3,9 +3,8 @@ package org.rsrg.semantics;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * A proper type. Any type that does not depend on other types. I.e., it
- * is atomic.
+/** A proper type. Any type that does not depend on other types. I.e., it
+ *  is atomic.
  */
 public class MTProper extends MTType {
 

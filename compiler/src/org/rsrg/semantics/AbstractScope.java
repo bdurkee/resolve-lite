@@ -12,7 +12,7 @@ public abstract class AbstractScope implements Scope {
     @NotNull @Override public final <E extends Symbol> List<E> getMatches(
             @NotNull TableSearcher<E> searcher,
             @NotNull TableSearcher.SearchContext l)
-                throws DuplicateSymbolException {
+            throws DuplicateSymbolException, UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
         Map<String, PTType> genericInstantiations = new HashMap<>();

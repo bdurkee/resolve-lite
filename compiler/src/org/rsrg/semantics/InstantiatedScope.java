@@ -13,11 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * An {@code InstantiatedScope} decorates an existing {@link Scope Scope} such
- * that calls to {@link Scope#addMatches addMatches()}, the search method to
- * which all others defer, are augmented with an additional set of generic
- * instantiations and an instantiating facility.
+/** An {@code InstantiatedScope} decorates an existing {@link Scope Scope} such
+ *  that calls to {@link Scope#addMatches addMatches()}, the search method to
+ *  which all others defer, are augmented with an additional set of generic
+ *  instantiations and an instantiating facility.
  */
 public class InstantiatedScope extends AbstractScope {
 
@@ -36,14 +35,15 @@ public class InstantiatedScope extends AbstractScope {
 
     @NotNull @Override public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
-            throws NoSuchModuleException {
+            throws NoSuchModuleException, UnexpectedSymbolException {
         return myBaseScope.query(query);
     }
 
     @NotNull @Override public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
-                DuplicateSymbolException, NoSuchModuleException {
+            DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
         return myBaseScope.queryForOne(query);
     }
 
@@ -53,7 +53,7 @@ public class InstantiatedScope extends AbstractScope {
                     @NotNull Map<String, PTType> genericInstantiations,
                     FacilitySymbol facilityInstantiation,
                     @NotNull TableSearcher.SearchContext l)
-                    throws DuplicateSymbolException {
+            throws DuplicateSymbolException, UnexpectedSymbolException {
 
         if ( facilityInstantiation != null ) {
             //It's unclear how this could happen or what it would mean, so we

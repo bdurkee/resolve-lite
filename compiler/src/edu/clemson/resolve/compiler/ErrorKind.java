@@ -79,8 +79,8 @@ public enum ErrorKind {
     DUP_SYMBOL(12, "duplicate symbol: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 13: expecting <em>entrytype</em>: found
-     * <em>foundentrytype</em>.
+     * Compiler Error 13: expecting <em>expectedSymbolType</em>: found
+     * <em>actualSymbolType</em>.
      */
     UNEXPECTED_SYMBOL(13, "expecting <arg> on '<arg2>', found <arg3> instead",
             ErrorSeverity.ERROR),
