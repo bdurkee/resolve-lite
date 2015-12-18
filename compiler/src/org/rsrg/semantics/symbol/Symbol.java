@@ -95,11 +95,13 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProcedureSymbol toProcedureSymbol() {
+    @NotNull public ProcedureSymbol toProcedureSymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public TheoremSymbol toTheoremSymbol() {
+    @NotNull public TheoremSymbol toTheoremSymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 

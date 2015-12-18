@@ -1,10 +1,7 @@
 package org.rsrg.semantics.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.NoSuchModuleException;
-import org.rsrg.semantics.Scope;
+import org.rsrg.semantics.*;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -35,5 +32,5 @@ public interface SymbolQuery<E extends Symbol> {
      */
     public List<E> searchFromContext(@NotNull Scope source,
                                      @NotNull MathSymbolTable scopeRepo)
-            throws DuplicateSymbolException, NoSuchModuleException;
+            throws DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException;
 }

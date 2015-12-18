@@ -28,6 +28,19 @@ public class ModuleParameterSymbol extends Symbol {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
+    /** Handle this toXXXX methods strategically, meaning only the ones that
+     *  a conceivably module parameterizable {@link Symbol} might need.
+     */
+
+
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+        return wrappedParamSymbol.toProgVariableSymbol();
+    }
+
+    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol() {
+        return wrappedParamSymbol.toProgParameterSymbol();
+    }
+
     @NotNull @Override public String getSymbolDescription() {
         return "a module parameter symbol";
     }

@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = true;
+    private static final boolean EMIT_DEBUG = false;
 
     private boolean walkingDefParams = false;
 
@@ -105,8 +105,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  no quantification (unless there is an embedded quantified ctx). In this
      *  case, ctx should not remove its layer, but rather change it to
      *  {@code Quantification.NONE}.</p>
-     *
-     *  <p>This stack is never empty, but rather the bottom layer is always
+     *  <p>
+     *  This stack is never empty, but rather the bottom layer is always
      *  {@code Quantification.NONE}.</p>
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
@@ -813,7 +813,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             defnType = builder.build();
         }
         try {
-            String n = name.getText();
             symtab.getInnermostActiveScope().define(
                     new MathSymbol(g, name.getText(),
                             defnType, null, ctx, getRootModuleIdentifier()));
@@ -1266,7 +1265,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathCrossTypeExp(
+    @Override public Void visitMathCrossTypeExp(
             ResolveParser.MathCrossTypeExpContext ctx) {
         typeValueDepth++;
         ctx.mathVariableDeclGroup().forEach(this::visit);
@@ -1283,7 +1282,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypeValues.put(ctx, new MTCartesian(g, fieldTypes));
         typeValueDepth--;
         return null;
-    }*/
+    }
 
     @Override public Void visitMathTypeAssertionExp(
             ResolveParser.MathTypeAssertionExpContext ctx) {
@@ -1773,8 +1772,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     nsme.getRequestedModule(),
                     nsme.getRequestedModule().getText());
         }
-        List<MTType> sameNameFunctionTypes = sameNameFunctions.stream()
-                .map(MathSymbol::getType).collect(Collectors.toList());
+
         if (sameNameFunctions.isEmpty()) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
                     ctx.getStart(), name.getText());
