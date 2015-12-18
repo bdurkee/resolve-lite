@@ -395,6 +395,7 @@ public class PApply extends PExp {
             PExp arg;
             while (args.hasNext()) {
                 arg = args.next();
+                if (arg == null) continue;
                 structureHash += arg.structureHash * argMod;
                 valueHash += arg.valueHash * argMod;
                 argMod++;

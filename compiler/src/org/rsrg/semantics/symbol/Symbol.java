@@ -59,7 +59,7 @@ public abstract class Symbol {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public TypeModelSymbol toProgTypeModelSymbol()
+    @NotNull public TypeModelSymbol toTypeModelSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }

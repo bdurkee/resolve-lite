@@ -1,5 +1,6 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.ErrorManager;
 import edu.clemson.resolve.misc.Utils;
 
@@ -203,5 +204,12 @@ public class MTCartesian extends MTType {
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTCartesian(this);
         v.endMTType(this);
+    }
+
+    public class UnexpectedCartesianSizeException extends SymbolTableException {
+
+        public UnexpectedCartesianSizeException(ErrorKind kind) {
+            super(kind);
+        }
     }
 }

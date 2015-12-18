@@ -2,10 +2,19 @@ Concept Integer_Template;
         uses Basic_Integer_Theory;
 
     Type family Integer is modeled by Z;
-        exemplar i;
+        exemplar I;
         initialization
-                ensures i = 0;
+                ensures I = 0;
 
-   // Operation Sum (updates a, b : Integer);
+    Operation Sum
+            (updates a, b : Integer)
+                : Integer;
+        ensures Sum = (a + b);
+
+    Operation Difference
+            (updates a, b : Integer)
+                : Integer;
+        ensures true;
+
 
 end Integer_Template;

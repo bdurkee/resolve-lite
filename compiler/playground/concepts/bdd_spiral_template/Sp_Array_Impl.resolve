@@ -1,0 +1,8 @@
+Implementation Sp_Array_Impl for Bdd_Spiral_Template;
+
+    Type Spiral_Pos = Record
+            Length,
+            Curr_Place : Std_Ints :: Integer;
+        end;
+        convention S.Length = 0;
+end Sp_Array_Impl;

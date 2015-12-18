@@ -72,15 +72,7 @@ public class HardCoded {
     }
 
     @NotNull public static String getMetaFieldName(@NotNull ParserRuleContext t) {
-        String result = "";
-        if ( t instanceof ResolveParser.MathSymbolExpContext ) {
-            result = ((ResolveParser.MathSymbolExpContext) t).name.getText();
-        }
-        else {
-            throw new RuntimeException("not a variable exp or function exp: "
-                    + t.getText() + " (" + t.getClass() + ")");
-        }
-        return result;
+        return t.getText();
     }
 
     public static MTType getMetaFieldType(TypeGraph g, String metaSegment) {

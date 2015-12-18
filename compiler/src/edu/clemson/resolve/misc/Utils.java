@@ -48,23 +48,18 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Some generally useful methods and interfaces.
- *
- * @since 0.0.1
- */
+/** Some generally useful methods and interfaces. */
 public class Utils {
 
-    /**
-     * Applies the provided function, {@code f} to all elements of {@code l},
-     * returning a new list of elements of type corresponding to the range of
-     * {@code f}.
+    /** Applies the provided function, {@code f} to all elements of {@code l},
+     *  returning a new list of elements of type corresponding to the range of
+     *  {@code f}.
      *
-     * @param l a starting {@link Collection} of elements
-     * @param f a function to be applied to the elements of {@code l}
-     * @param <T> type of the starting collection
-     * @param <R> type of resulting list
-     * @return a new list of type {@code R}
+     *  @param l a starting {@link Collection} of elements
+     *  @param f a function to be applied to the elements of {@code l}
+     *  @param <T> type of the starting collection
+     *  @param <R> type of resulting list
+     *  @return a new list of type {@code R}
      */
     @NotNull public static <T, R> List<R> apply(@NotNull Collection<T> l,
                                                 @NotNull Function<T, R> f) {
@@ -133,20 +128,19 @@ public class Utils {
         return result;
     }
 
-    /**
-     * Returns a list of {@code E} given: an expected type {@code T}, some
-     * number
-     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
-     * some number of elements descending from {@code E}.
+    /** Returns a list of {@code E} given: an expected type {@code T}, some
+     *  number
+     *  of concrete syntax {@code nodes}, and a mapping from rule contexts to
+     *  some number of elements descending from {@code E}.
      *
-     * @param expectedType the class type to inhabit the returned list
-     * @param nodes a list of concrete syntax nodes, as obtained through
-     *        a visitor, listener, etc.
-     * @param annotations a map from rule context to the primary supertype
-     *        of {@code expectedType} ({@code E}).
-     * @param <E> super type of {@code expectedType}.
-     * @param <T> the expected type.
-     * @return a list of {@code T}.
+     *  @param expectedType the class type to inhabit the returned list
+     *  @param nodes a list of concrete syntax nodes, as obtained through
+     *         a visitor, listener, etc.
+     *  @param annotations a map from rule context to the primary supertype
+     *         of {@code expectedType} ({@code E}).
+     *  @param <E> super type of {@code expectedType}.
+     *  @param <T> the expected type.
+     *  @return a list of {@code T}.
      */
     @NotNull public static <E, T extends E> List<T> collect(
             @NotNull Class<T> expectedType,
@@ -173,11 +167,10 @@ public class Utils {
         else if ( ctx instanceof ResolveParser.ConceptModuleDeclContext ) {
             return ((ResolveParser.ConceptModuleDeclContext) ctx).name;
         }
-        /*else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
-            return ((ResolveParser.ConceptImplModuleContext) ctx).name
-                    .getText();
+        else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
+            return ((ResolveParser.ConceptImplModuleDeclContext) ctx).name;
         }
-        else if ( ctx instanceof ResolveParser.ExtensionModuleContext ) {
+        /*else if ( ctx instanceof ResolveParser.ExtensionModuleContext ) {
             return ((ResolveParser.ExtensionModuleContext) ctx).name
                     .getText();
         }
@@ -190,35 +183,33 @@ public class Utils {
         }
     }
 
-    /**
-     * A general purpose builder for objects of type {@code T}. This interface
-     * should be implemented by classes that might benefit from incremental
-     * construction -- meaning through chained calls to a series of builder
-     * methods that return back a {@code Builder} subclass.
+    /** A general purpose builder for objects of type {@code T}. This interface
+     *  should be implemented by classes that might benefit from incremental
+     *  construction -- meaning through chained calls to a series of builder
+     *  methods that return back a {@code Builder} subclass.
      *
-     * @param <T> the type of the object to be built
-     * @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder
-     * for an example usage
+     *  @param <T> the type of the object to be built
+     *  @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder
+     *  for an example usage
      */
     @FunctionalInterface public interface Builder<T> {
 
         @NotNull T build();
     }
 
-    /**
-     * Returns a new {@link CommonToken} from some arbtrary existing
-     * {@code Token}. This is useful for when you want create a {@code Token}
-     * consisting of {@code desiredText}, but using existing location information
-     * from {@code t}.
-     * <p>
-     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
-     * the text for the resulting {@code Token} will contain whatever text was
-     * already in {@code t} starting out.</p>
+    /** Returns a new {@link CommonToken} from some arbtrary existing
+     *  {@code Token}. This is useful for when you want create a {@code Token}
+     *  consisting of {@code desiredText}, but using existing location information
+     *  from {@code t}.
+     *  <p>
+     *  <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
+     *  the text for the resulting {@code Token} will contain whatever text was
+     *  already in {@code t} starting out.</p>
      *
-     * @param t an existing token (preferably near where {@code desiredText}
+     *  @param t an existing token (preferably near where {@code desiredText}
      *          should appear)
-     * @param desiredText the text we want the resulting token to hold
-     * @return a new token
+     *  @param desiredText the text we want the resulting token to hold
+     *  @return a new token
      */
     @NotNull public static CommonToken createTokenFrom(@NotNull Token t,
                                                        @Nullable String desiredText) {
@@ -229,12 +220,11 @@ public class Utils {
         return result;
     }
 
-    /**
-     * Returns the raw text encapsulated by a {@link ParserRuleContext} exactly
-     * as it appears within whatever sourcecode the user typed in.
+    /** Returns the raw text encapsulated by a {@link ParserRuleContext} exactly
+     *  as it appears within whatever sourcecode the user typed in.
      *
-     * @param ctx the rule context
-     * @return the raw sourcecode represented by {@code ctx}
+     *  @param ctx the rule context
+     *  @return the raw sourcecode represented by {@code ctx}
      */
     @NotNull public static String getRawText(@Nullable ParserRuleContext ctx) {
         if (ctx == null) return "";
@@ -242,14 +232,13 @@ public class Utils {
         return ctx.start.getInputStream().getText(interval);
     }
 
-    /**
-     * Strips leading directories off a file's name; for example:
+    /** Strips leading directories off a file's name; for example:
      *      {@code ../Foo/facilities/Basic_Natural_Number_Theory.resolve}
-     * grooms to
+     *  grooms to
      *      {@code Basic_Natural_Number_Theory.resolve}.
      *
-     * @param name a file name with zero or more '/' delimited directories
-     * @return the extensionless filename
+     *  @param name a file name with zero or more '/' delimited directories
+     *  @return the extensionless filename
      */
     @NotNull public static String groomFileName(@NotNull String name) {
         int start = name.lastIndexOf("/");

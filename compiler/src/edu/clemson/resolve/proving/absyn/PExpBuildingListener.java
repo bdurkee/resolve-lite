@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -61,7 +62,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
-    @SuppressWarnings("unchecked") public T getBuiltPExp(ParseTree t) {
+    @SuppressWarnings("unchecked")
+    @Nullable public T getBuiltPExp(ParseTree t) {
         return (T) repo.get(t);
     }
 
@@ -83,11 +85,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
+    @Override public void exitMathPrimeExp(
+            ResolveParser.MathPrimeExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathPrimaryExp()));
     }
 
-    @Override public void exitMathPrimaryExp(ResolveParser.MathPrimaryExpContext ctx) {
+    @Override public void exitMathPrimaryExp(
+            ResolveParser.MathPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 

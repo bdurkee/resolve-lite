@@ -35,7 +35,7 @@ public class TypeModelSymbol extends ProgTypeSymbol {
         return (PTFamily) super.getProgramType();
     }
 
-    @NotNull @Override public TypeModelSymbol toProgTypeModelSymbol() {
+    @NotNull @Override public TypeModelSymbol toTypeModelSymbol() {
         return this;
     }
 }

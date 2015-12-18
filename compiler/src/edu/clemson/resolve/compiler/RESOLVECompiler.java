@@ -308,7 +308,7 @@ public  class RESOLVECompiler {
             }
             catch (IOException ioe) {
                 errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.getNameToken(), root.getNameToken(),
+                        importRequest.getNameToken(), root.getNameToken().getText(),
                         importRequest.getNameToken().getText());
                 //mark the current root as erroneous
                 root.hasErrors = true;
@@ -318,7 +318,7 @@ public  class RESOLVECompiler {
                 if (pathExists(g, module.getNameToken().getText(),
                         root.getNameToken().getText())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
-                            importRequest.getNameToken(), root.getNameToken(),
+                            importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
                     break;
                 }

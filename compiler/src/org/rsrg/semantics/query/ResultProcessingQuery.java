@@ -50,7 +50,7 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
         return result;
     }
 
-    //TODO: Unfuckingbelievable. "Google checked exception java 8 method ref" and have fun. Thanks oracle.
+    //TODO: Unfuckingbelievable. "Google checked exception java 8 method ref" and have fun.
     @FunctionalInterface public interface SymbolTransformerFunction<V extends Symbol, U extends Symbol>
             extends
                 Function<V, U> {

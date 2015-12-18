@@ -11,4 +11,5 @@ Concept Bdd_Spiral_Template(type Label;
         end;
         exemplar P;
 
+
 end Bdd_Spiral_Template;

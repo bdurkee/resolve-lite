@@ -6,8 +6,8 @@ import java.util.List;
 
 public abstract class AbstractCompilationPipeline {
 
-    @NotNull protected final List<AnnotatedModule> compilationUnits;
-    @NotNull protected final RESOLVECompiler compiler;
+    protected final List<AnnotatedModule> compilationUnits;
+    protected final RESOLVECompiler compiler;
 
     public AbstractCompilationPipeline(@NotNull RESOLVECompiler compiler,
                                        @NotNull List<AnnotatedModule> compilationUnits) {

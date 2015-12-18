@@ -18,11 +18,11 @@ public class UsesListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
- /*   @Override public void enterConceptImplModule(
-            ResolveParser.ConceptImplModuleContext ctx) {
-        tr.uses.add(new AnnotatedTree.UsesRef(ctx.concept));
-        tr.semanticallyRelevantUses.add(ctx.concept.getText());
-    }*/
+    @Override public void enterConceptImplModuleDecl(
+            ResolveParser.ConceptImplModuleDeclContext ctx) {
+        tr.uses.add(new ModuleIdentifier(ctx.concept));
+        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
+    }
 
     @Override public void enterPrecisExtensionModuleDecl(
             ResolveParser.PrecisExtensionModuleDeclContext ctx) {

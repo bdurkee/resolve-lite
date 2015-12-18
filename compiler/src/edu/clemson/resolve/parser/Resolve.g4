@@ -35,7 +35,10 @@ moduleDecl
     |   precisExtensionModuleDecl
     |   facilityModuleDecl
     |   conceptModuleDecl
+    |   conceptImplModuleDecl
     ;
+
+// precis
 
 precisModuleDecl
     :   'Precis' name=ID ';'
@@ -43,6 +46,8 @@ precisModuleDecl
         precisBlock
         'end' closename=ID ';' EOF
     ;
+
+// precis extensions
 
 precisExtensionModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
@@ -59,19 +64,41 @@ precisBlock
         )*
     ;
 
+// concepts
+
 conceptModuleDecl
     :   'Concept' name=ID (specModuleParameterList)? ';'
-            (usesList)?
-            (requiresClause)?
-            conceptBlock
+        (usesList)?
+        (requiresClause)?
+        conceptBlock
         'end' closename=ID ';'
     ;
 
 conceptBlock
     :   ( mathStandardDefinitionDecl
         | typeModelDecl
+        | operationDecl
         )*
     ;
+
+// concept impls
+
+conceptImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
+implBlock
+    :   ( operationProcedureDecl
+        | procedureDecl
+        | typeRepresentationDecl
+        )*
+    ;
+
+// facilities
 
 facilityModuleDecl
     :   'Facility' name=ID ';'
@@ -213,10 +240,6 @@ mathOutfixDefinitionSig
 mathSymbolName
     :   ID
     |   ('+'|'-'|'...'|'/'|'\\'|'|'|'||'|'<'|'>'|'o'|'*'|'>='|'<='|INT|'not')
-    |   '|' '...' '|'
-    |   '<' '...' '>'
-    |   '||' '...' '||'
-    |   '\\' '...' '/'
     ;
 
 mathCategoricalDefinitionDecl
@@ -258,6 +281,31 @@ moduleArgumentList
 
 moduleArgument
     :   progExp
+    ;
+
+// functions
+
+operationDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)? (ensuresClause)?
+    ;
+
+operationProcedureDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)?
+        (ensuresClause)?
+        (recursive='Recursive')? 'Procedure'
+        (variableDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
+    ;
+
+procedureDecl
+    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
+        (':' type)? ';'
+        (variableDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
     ;
 
 // mathematical clauses
@@ -399,8 +447,7 @@ progVarExp
     ;
 
 progParamExp
-    :   (qualifier=ID '::')? name=ID
-        '(' (progExp (',' progExp)*)? ')'
+    :   (qualifier=ID '::')? name=ID '(' (progExp (',' progExp)*)? ')'
     ;
 
 progNamedExp
