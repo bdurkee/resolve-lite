@@ -36,7 +36,7 @@ public abstract class SpecModule extends Module {
                 funcs.add(buildGetterSignature(s.getName()));
             }
             /*else if ( s instanceof GenericSymbol ) {
-                funcs.add(buildGetterSignature(s.getName()));
+                funcs.add(buildGetterSignature(s.getNameToken()));
             }*/
         }
     }

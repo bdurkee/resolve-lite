@@ -17,7 +17,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
 
     @Override public void process() {
         for (AnnotatedModule unit : compilationUnits) {
-            if ( compiler.targetNames.contains(unit.getName()) && compiler.vcs ) {
+            if ( compiler.targetNames.contains(unit.getNameToken()) && compiler.vcs ) {
                 if (unit.getRoot().getChild(0) instanceof
                         ResolveParser.PrecisModuleDeclContext) continue;
                /* else if (unit.getRoot().getChild(0) instanceof
@@ -25,7 +25,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 else if (unit.getRoot().getChild(0) instanceof
                         ResolveParser.ExtensionModuleContext) continue;*/
                 VCGenerator gen = new VCGenerator(compiler, unit);
-                compiler.info("generating vcs for: " + unit.getName());
+                compiler.info("generating vcs for: " + unit.getNameToken());
                 ST x = gen.generateAssertions();
                 //List<VC> vcs = gen.getProverInput();
                 System.out.println(x.render());

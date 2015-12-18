@@ -23,8 +23,7 @@ Concept Stack_Template(type Entry;
         ensures
             @S = <e> o S;
 
-    Operation Depth
-            (restores S : Stack) :
+    Operation Depth (restores S : Stack) :
                     Std_Ints :: Integer;
         ensures Depth = (|S|);
 

@@ -52,7 +52,7 @@ public class VC extends OutputModelObject {
 
     /*@Override public String toString() {
         String retval =
-                "========== " + getName() + " ==========\n" + antecedent
+                "========== " + getNameToken() + " ==========\n" + antecedent
                             + "  -->\n" + consequent;
         return retval;
     }*/

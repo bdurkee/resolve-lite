@@ -63,19 +63,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private boolean walkingDefParams = false;
 
-    /**
-     * Keeps track of the current operationProcedure (and procedure) we're
-     * visiting; {@code null} otherwise. We use this to check whether a
-     * recursive call is being made to an operation procedure decl that hasn't
-     * been marked 'Recursive'.
+    /** Keeps track of the current operationProcedure (and procedure) we're
+     *  visiting; {@code null} otherwise. We use this to check whether a
+     *  recursive call is being made to an operation procedure decl that hasn't
+     *  been marked 'Recursive'.
      */
     //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
     //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
-    /**
-     * Set to {@code true} when we're walking the arguments to a module
-     * (i.e. walking some set of args to a facility decl); or when we're walking
-     * module formal parameters. Should be {@code false} otherwise;
+    /** Set to {@code true} when we're walking the arguments to a module
+     *  (i.e. walking some set of args to a facility decl); or when we're walking
+     *  module formal parameters. Should be {@code false} otherwise;
      */
     private boolean walkingModuleArgOrParamList = false;
 
@@ -95,22 +93,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private int globalSpecCount = 0;
     private int anonymousApplicationDepth = 0;
 
-    /**
-     * Any quantification-introducing syntactic context (e.g., an
-     * {@link ResolveParser.MathQuantifiedExpContext}),
-     * introduces a level to this stack to reflect the quantification that
-     * should be applied to named variables as they are encountered.
-     * <p>
-     * Note that this may change as the children of the node are processed;
-     * for example, MathVariableDecls found in the declaration portion of a
-     * quantified ctx should have quantification (universal or existential)
-     * applied, while those found in the body of the quantified ctx should have
-     * no quantification (unless there is an embedded quantified ctx). In this
-     * case, ctx should not remove its layer, but rather change it to
-     * {@code Quantification.NONE}.</p>
+    /** Any quantification-introducing syntactic context (e.g., an
+     *  {@link ResolveParser.MathQuantifiedExpContext}),
+     *  introduces a level to this stack to reflect the quantification that
+     *  should be applied to named variables as they are encountered.
+     *  <p>
+     *  Note that this may change as the children of the node are processed;
+     *  for example, MathVariableDecls found in the declaration portion of a
+     *  quantified ctx should have quantification (universal or existential)
+     *  applied, while those found in the body of the quantified ctx should have
+     *  no quantification (unless there is an embedded quantified ctx). In this
+     *  case, ctx should not remove its layer, but rather change it to
+     *  {@code Quantification.NONE}.</p>
      *
-     * <p>This stack is never empty, but rather the bottom layer is always
-     * {@code Quantification.NONE}.</p>
+     *  <p>This stack is never empty, but rather the bottom layer is always
+     *  {@code Quantification.NONE}.</p>
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
@@ -534,7 +531,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                          ctx.name.getText(), typeDefnSym, getRootModuleIdentifier());
          try {
              String exemplarName = typeDefnSym != null ?
-                     typeDefnSym.getExemplar().getName() : ctx.name.getText()
+                     typeDefnSym.getExemplar().getNameToken() : ctx.name.getText()
                      .substring(0, 1).toUpperCase();
              symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
                      exemplarName, ctx, reprType, getRootModuleIdentifier()));
@@ -696,7 +693,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private Token getSignatureName(
             @NotNull ResolveParser.MathDefinitionSigContext signature) {
-        CommonToken result = null;
+        CommonToken result;
         if (signature.mathPrefixDefinitionSig() != null) {
             result = new CommonToken(signature
                     .mathPrefixDefinitionSig().name.getStart());
@@ -719,19 +716,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         return result;
     }
-    /**
-     * Since 'MathDefinitionSig' appears all over the place within our three
-     * styles of definitions (categorical, standard, and inductive), we simply
-     * use this signature visitor method to visit and type all relevant
-     * children. This way the top level definition nodes can simply grab the type
-     * of the signature and build/populate the appropriate object. However,
-     * know that in the defn top level nodes, we must remember to start scope,
-     * visit the signature, and end scope. We don't do this in the signature
-     * because certain information (i.e. body) is rightfully not present.
+    /** Since 'MathDefinitionSig' appears all over the place within our three
+     *  styles of definitions (categorical, standard, and inductive), we simply
+     *  use this signature visitor method to visit and type all relevant
+     *  children. This way the top level definition nodes can simply grab the type
+     *  of the signature and build/populate the appropriate object. However,
+     *  know that in the defn top level nodes, we must remember to start scope,
+     *  visit the signature, and end scope. We don't do this in the signature
+     *  because certain information (i.e. body) is rightfully not present.
      *
-     * <p>Note also that here we also add a binding for the name of this
-     * sig to the active scope (so inductive and implicit definitions may
-     * reference themselves).</p>
+     *  <p>Note also that here we also add a binding for the name of this
+     *  sig to the active scope (so inductive and implicit definitions may
+     *  reference themselves).</p>
      */
     @Override public Void visitMathDefinitionSig(
             ResolveParser.MathDefinitionSigContext ctx) {
@@ -1699,7 +1695,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void emitPreApplicationType(ParserRuleContext ctx,
                                         List<? extends ParseTree> args) {
-        String foundExp = ctx.getText();
         MTFunction foundExpType;
         foundExpType = PApply.getConservativePreApplicationType(g, args, tr.mathTypes);
         emit("expression: " + ctx.getText() + "("

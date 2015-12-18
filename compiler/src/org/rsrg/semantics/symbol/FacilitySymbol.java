@@ -55,7 +55,7 @@ public class FacilitySymbol extends Symbol {
 
             spec =
                     new ModuleParameterization(new ModuleIdentifier(
-                            realizationEnhancement.getName().getName()),
+                            realizationEnhancement.getNameToken().getNameToken()),
                             realizationEnhancement.getParams(), this,
                             mySourceRepository);
 

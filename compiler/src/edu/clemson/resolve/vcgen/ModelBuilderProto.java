@@ -70,7 +70,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
             moduleScope = symtab.getModuleScope(
-                    new ModuleIdentifier(tr.getName()));
+                    new ModuleIdentifier(tr.getNameToken()));
         }
         catch (NoSuchModuleException e) {
             gen.getCompiler().errMgr
@@ -264,7 +264,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
-                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
+                    "T_Init_Hypo=" + currentTypeReprSym.getNameToken(), ctx)
                     .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                     .assume(getAssertionsFromFormalParameters(moduleParamSyms,
                             this::extractAntecedentsFromParameter));
@@ -523,7 +523,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         else { //PTGeneric
             resultingAssumptions.add(g.formInitializationPredicate(
-                    p.getDeclaredType(), p.getName()));
+                    p.getDeclaredType(), p.getNameToken()));
         }
         return resultingAssumptions;
     }
@@ -582,10 +582,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private PExp substituteByFacilities(List<FacilitySymbol> facilities,
                                         GlobalMathAssertionSymbol e) {
         for (FacilitySymbol facility : facilities) {
-            if (facility.getFacility().getSpecification().getName()
+            if (facility.getFacility().getSpecification().getNameToken()
                     .equals(e.getModuleIdentifier())) {
                 return e.getEnclosedExp().substitute(
-                        getSpecializationsForFacility(facility.getName()));
+                        getSpecializationsForFacility(facility.getNameToken()));
             }
         }
         return e.getEnclosedExp();

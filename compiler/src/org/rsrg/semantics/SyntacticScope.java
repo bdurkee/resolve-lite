@@ -48,7 +48,7 @@ public abstract class SyntacticScope extends AbstractScope {
             throw new DuplicateSymbolException(symbols.get(s.getName()));
         }
         //TODO: bubble me over to the populator so I can be nicely printed.
-        /*if ( s.getName().equals(moduleIdentifier) ) {
+        /*if ( s.getNameToken().equals(moduleIdentifier) ) {
 
             symtab.getCompiler().errMgr.semanticError(
                     ErrorKind.SYMBOL_NAME_MATCHES_MODULE_NAME,

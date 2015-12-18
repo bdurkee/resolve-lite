@@ -4,10 +4,9 @@ import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-/**
- * Visits statements within a parse tree context and looks for recursive
- * calls. The visit chain returns {@code true} if a recursive call was found;
- * {@code false} otherwise.
+/** Visits statements within a parse tree context and looks for recursive
+ *  calls. The visit chain returns {@code true} if a recursive call was found;
+ *  {@code false} otherwise.
  */
 public class RecursiveCallCheckingVisitor
         extends

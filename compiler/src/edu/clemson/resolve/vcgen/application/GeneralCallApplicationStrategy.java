@@ -117,7 +117,7 @@ public class GeneralCallApplicationStrategy
                /* if (p.getMode() == CLEARS) {
                     PExp initPred =
                             block.g.formInitializationPredicate(
-                                    p.getDeclaredType(), p.getName());
+                                    p.getDeclaredType(), p.getNameToken());
                     newAssume = block.g.formConjunct(newAssume, initPred);
                 }*/
             }

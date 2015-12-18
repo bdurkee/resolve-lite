@@ -8,9 +8,8 @@ import org.rsrg.semantics.ModuleIdentifier;
 
 import static edu.clemson.resolve.compiler.AnnotatedModule.*;
 
-/**
- * Updates the containers tracking uses reference info by visiting the
- * various {@link ParseTree} nodes that include references to other modules.
+/** Updates the containers tracking uses reference info by visiting the
+ *  various {@link ParseTree} nodes that include references to other modules.
  */
 public class UsesListener extends ResolveBaseListener {
     private final AnnotatedModule tr;

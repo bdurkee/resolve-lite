@@ -27,7 +27,7 @@ public class EnhancementImplModule extends AbstractSpecImplModule {
             /*else if ( s instanceof GenericSymbol ||
                     s instanceof ProgParameterSymbol) {
                 delegateMethods.add(
-                        new ConceptDelegateMethod("get"+s.getName(), true));
+                        new ConceptDelegateMethod("get"+s.getNameToken(), true));
             }*/
             else if ( s instanceof TypeModelSymbol) {
                 delegateMethods.add(

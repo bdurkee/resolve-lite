@@ -34,15 +34,15 @@ public abstract class AbstractSpecImplModule extends Module {
                 memberVars.add(new VariableDef(s.getName(), null));
             }
             /*else if ( s instanceof GenericSymbol) {
-                funcImpls.add(buildGetterMethod(s.getName()));
-                funcImpls.add(buildInitMethod(s.getName()));
-                memberVars.add(new VariableDef(s.getName(), null));
+                funcImpls.add(buildGetterMethod(s.getNameToken()));
+                funcImpls.add(buildInitMethod(s.getNameToken()));
+                memberVars.add(new VariableDef(s.getNameToken(), null));
             }
             else if (s instanceof OperationSymbol && ((OperationSymbol) s)
                     .isModuleParameter()) {
-                funcImpls.add(buildGetterMethod(s.getName()));
-                funcImpls.add(buildInitMethod(s.getName()));
-                memberVars.add(new VariableDef(s.getName(), null));
+                funcImpls.add(buildGetterMethod(s.getNameToken()));
+                funcImpls.add(buildInitMethod(s.getNameToken()));
+                memberVars.add(new VariableDef(s.getNameToken(), null));
             }*/
         }
     }

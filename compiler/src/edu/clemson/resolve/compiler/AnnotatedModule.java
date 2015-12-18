@@ -19,12 +19,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Represents a collection of information to be associated with a top level
- * {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
- * <p>
- * We use this approach over {@code returns} clauses in the grammar to help
- * us keep our grammar as general as possible.</p>
+/** Represents a collection of information to be associated with a top level
+ *  {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
+ *  <p>
+ *  We use this approach over {@code returns} clauses in the grammar to help
+ *  us keep our grammar as general as possible.</p>
  */
 public class AnnotatedModule {
 
@@ -82,7 +81,7 @@ public class AnnotatedModule {
         return result != null ? result : g.getTrueExp();
     }
 
-    @NotNull public Token getName() {
+    @NotNull public Token getNameToken() {
         return name;
     }
 
@@ -101,7 +100,8 @@ public class AnnotatedModule {
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
         if ( result ) {
-            result = this.name.equals(((AnnotatedModule) o).name);
+            result = this.name.getText()
+                    .equals(((AnnotatedModule) o).name.getText());
         }
         return result;
     }

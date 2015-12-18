@@ -269,13 +269,13 @@ public  class RESOLVECompiler {
             if ( t == null || t.hasErrors ) {
                 continue;
             }
-            roots.put(t.getName().getText(), t);
+            roots.put(t.getNameToken().getText(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(roots.values())) {
-            g.addVertex(t.getName().getText());
+            g.addVertex(t.getNameToken().getText());
             findDependencies(g, t, roots);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
@@ -302,28 +302,28 @@ public  class RESOLVECompiler {
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
-                        roots.put(module.getName().getText(), module);
+                        roots.put(module.getNameToken().getText(), module);
                     }
                 }
             }
             catch (IOException ioe) {
                 errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.getNameToken(), root.getName(),
+                        importRequest.getNameToken(), root.getNameToken(),
                         importRequest.getNameToken().getText());
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
             if (module != null) {
-                if (pathExists(g, module.getName().getText(),
-                        root.getName().getText())) {
+                if (pathExists(g, module.getNameToken().getText(),
+                        root.getNameToken().getText())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
-                            importRequest.getNameToken(), root.getName(),
+                            importRequest.getNameToken(), root.getNameToken(),
                             importRequest.getNameToken().getText());
                     break;
                 }
-                Graphs.addEdgeWithVertices(g, root.getName().getText(),
-                        module.getName().getText());
+                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(),
+                        module.getNameToken().getText());
                 findDependencies(g, module, roots);
             }
         }

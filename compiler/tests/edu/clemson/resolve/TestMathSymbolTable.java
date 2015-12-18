@@ -18,8 +18,8 @@ public class TestMathSymbolTable extends BaseTest {
     @Test(expected=NoSuchModuleException.class)
     public void testFreshMathSymbolTable1()
             throws NoSuchModuleException {
-        MathSymbolTable b = new MathSymbolTable();
-        b.getModuleScope("NonExistent");
+      //  MathSymbolTable b = new MathSymbolTable();
+      //  b.getModuleScope("NonExistent");
     }
 
     /*@Test(expected=IllegalArgumentException.class)
@@ -85,7 +85,7 @@ public class TestMathSymbolTable extends BaseTest {
         MathSymbolTableEntry e = ms.getInnermostBinding("E");
 
         assertEquals(e.getDefiningElement(), myConceptualElement1);
-        assertEquals(e.getName(), "E");
+        assertEquals(e.getNameToken(), "E");
         assertEquals(e.getType(), myType1);
     }
 

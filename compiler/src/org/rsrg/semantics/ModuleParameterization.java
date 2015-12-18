@@ -66,7 +66,7 @@ public class ModuleParameterization {
                 actualGenerics.iterator();
         Iterator<GenericSymbol> formalGenericIter = formalGenerics.iterator();
         while (formalGenericIter.hasNext()) {
-            result.put(formalGenericIter.next().getName(), suppliedGenericIter
+            result.put(formalGenericIter.next().getNameToken(), suppliedGenericIter
                     .next().getProgramType());
         }
         return result;

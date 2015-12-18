@@ -171,7 +171,7 @@ public class MathSymbolTable {
 
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                module.getName(), (ParserRuleContext)contextTree, parent, this);
+                module.getNameToken(), (ParserRuleContext)contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleIdentifier(), s);

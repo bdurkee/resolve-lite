@@ -20,7 +20,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
     @Override public void process() {
         if (compiler.errMgr.getErrorCount() > 0) return;
         for (AnnotatedModule unit : compilationUnits) {
-            compiler.info("populating: " + unit.getName());
+            compiler.info("populating: " + unit.getNameToken().getText());
             ParseTreeWalker walker = new ParseTreeWalker();
             PopulatingVisitor defSymsAndScopes =
                     new PopulatingVisitor(compiler, compiler.symbolTable,

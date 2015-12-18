@@ -322,7 +322,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private boolean referencesOperationParameter(String name) {
         return !moduleScope.getSymbolsOfType(OperationSymbol.class).stream()
-                .filter(f -> f.getName().equals(name))
+                .filter(f -> f.getNameToken().equals(name))
                 .filter(OperationSymbol::isModuleParameter)
                 .collect(Collectors.toList())
                 .isEmpty();
@@ -542,7 +542,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        //System.out.println("symbol: "+s.getName()+":"+s.getModuleIdentifier()+" is locally accessible?");
+        //System.out.println("symbol: "+s.getNameToken()+":"+s.getModuleIdentifier()+" is locally accessible?");
         boolean result = isJavaLocallyAccessibleSymbol(s.getModuleIdentifier());
         //System.out.println(result);
         return result;
@@ -618,7 +618,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     moduleScope.queryForOne(new NameQuery(refQualifier,
                             refName, true));
             return new Qualifier.FacilityQualifier(
-                    corresondingSym.getModuleIdentifier(), s.getName());
+                    corresondingSym.getModuleIdentifier(), s.getNameToken());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
