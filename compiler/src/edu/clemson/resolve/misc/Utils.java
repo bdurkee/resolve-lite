@@ -37,6 +37,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.Trees;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -225,7 +226,9 @@ public class Utils {
      *
      *  @param ctx the rule context
      *  @return the raw sourcecode represented by {@code ctx}
+     *  @deprecated use {@link Trees#getNodeText)} instead
      */
+    @Deprecated
     @NotNull public static String getRawText(@Nullable ParserRuleContext ctx) {
         if (ctx == null) return "";
         Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());

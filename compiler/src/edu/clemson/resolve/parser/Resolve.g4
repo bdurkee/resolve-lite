@@ -351,7 +351,7 @@ mathQuantifiedExp
 
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
-    |   mathExp op='.' mathExp                                  #mathSelectorExp
+    |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
     |   mathExp op=('*'|'/'|'~') mathExp                        #mathInfixApplyExp
     |   mathExp op=('+'|'-') mathExp                            #mathInfixApplyExp
     |   mathExp op=('..'|'->') mathExp                          #mathInfixApplyExp

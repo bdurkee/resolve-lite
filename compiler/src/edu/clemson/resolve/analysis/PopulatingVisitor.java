@@ -60,8 +60,9 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = false;
+    private static final boolean EMIT_DEBUG = true;
 
+    //TODO: Many of these flags can probably be eliminate via a antlr4 helper method Trees.*
     private boolean walkingDefParams = false;
 
     /** Keeps track of the current operationProcedure (and procedure) we're
@@ -77,19 +78,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  module formal parameters. Should be {@code false} otherwise;
      */
     private boolean walkingModuleArgOrParamList = false;
+    private boolean walkingFunctionAppArgs = false;
+    private ResolveParser.MathExpContext prevMathSelectorAccess = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
     private final ParseTreeProperty<MTType> anonymousFunctionExpectedRangeTypes =
             new ParseTreeProperty<>();
-    private TypeModelSymbol currentTypeModelSym = null;
+
+    /**
+     * Keeps track of a global type model symbol.  the type representation for some type family
+     */
+    private TypeModelSymbol curTypeReprModelSymbol = null;
 
     private RESOLVECompiler compiler;
     private MathSymbolTable symtab;
     private AnnotatedModule tr;
     private TypeGraph g;
 
-    boolean walkingFunctionReferenceInApplication = false;
     private int typeValueDepth = 0;
     private int globalSpecCount = 0;
     private int anonymousApplicationDepth = 0;
@@ -100,15 +106,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  should be applied to named variables as they are encountered.
      *  <p>
      *  Note that this may change as the children of the node are processed;
-     *  for example, MathVariableDecls found in the declaration portion of a
-     *  quantified ctx should have quantification (universal or existential)
-     *  applied, while those found in the body of the quantified ctx should have
+     *  for example, {@link ResolveParser.MathVariableDeclContext}s found in the
+     *  declaration portion of a quantified ctx should have quantification
+     *  (universal or existential) applied, while those found in the body of
+     *  the quantified ctx should have
      *  no quantification (unless there is an embedded quantified ctx). In this
      *  case, ctx should not remove its layer, but rather change it to
-     *  {@code Quantification.NONE}.</p>
+     *  {@link Quantification#NONE}.</p>
      *  <p>
      *  This stack is never empty, but rather the bottom layer is always
-     *  {@code Quantification.NONE}.</p>
+     *  {@link Quantification#NONE}.</p>
      */
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
@@ -515,12 +522,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
         symtab.startScope(ctx);
-        TypeModelSymbol typeDefnSym = null;
         ParseTree reprTypeNode = ctx.type();
         this.visit(reprTypeNode);
 
         try {
-            typeDefnSym = symtab.getInnermostActiveScope()
+            curTypeReprModelSymbol = symtab.getInnermostActiveScope()
                     .queryForOne(new NameQuery(null, ctx.name,
                             false)).toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
@@ -537,13 +543,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         PTRepresentation reprType =
                 new PTRepresentation(g, tr.progTypeValues.get(reprTypeNode),
-                        ctx.name.getText(), typeDefnSym, getRootModuleIdentifier());
+                        ctx.name.getText(), curTypeReprModelSymbol,
+                        getRootModuleIdentifier());
         try {
-            String representationInternalRefName = ctx.name.getText()
-                    .substring(0, 1).toUpperCase();
+            String exemplarName = curTypeReprModelSymbol != null ?
+                    curTypeReprModelSymbol.getExemplar().getName() :
+                    ctx.name.getText().substring(0, 1).toUpperCase();
             symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
-                    representationInternalRefName, ctx, reprType,
-                    getRootModuleIdentifier()));
+                    exemplarName, ctx, reprType, getRootModuleIdentifier()));
+
         } catch (DuplicateSymbolException dse) {
             //This shouldn't be possible--the type declaration has a
             //scope all its own and we're the first ones to get to
@@ -560,13 +568,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
                     ctx.name.getText(), ctx, getRootModuleIdentifier(),
-                    typeDefnSym, reprType, convention, correspondence);
+                    curTypeReprModelSymbol, reprType, convention,
+                    correspondence);
             reprType.setReprTypeSymbol(rep);
             symtab.getInnermostActiveScope().define(rep);
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
         }
+        curTypeReprModelSymbol = null;
         return null;
     }
 /*
@@ -981,7 +991,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             new ProgVariableQuery(ctx.qualifier, ctx.name,
                                     false));
             tr.progTypes.put(ctx, variable.getProgramType());
-            exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+            typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return null;
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
@@ -1500,92 +1510,90 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //'function's first class' name (and  type)
         List<ResolveParser.MathExpContext> args =
                 ctx.mathExp().subList(1, ctx.mathExp().size());
+        walkingFunctionAppArgs = true;
         args.forEach(this::visit);
+        walkingFunctionAppArgs = false;
         typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
         return null;
     }
 
     @Override public Void visitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
-        exitMathSymbolExp(ctx, null, ctx.getText());
+        typeMathSymbolExp(ctx, null, ctx.getText());
         return null;
     }
 
     @Override public Void visitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
+        typeMathSymbolExp(ctx, ctx.qualifier, ctx.num.getText());
         return null;
     }
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        exitMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        if (prevMathSelectorAccess != null) {
+            typeMathSelectorAccessExp(ctx, prevMathSelectorAccess,
+                    ctx.name.getText());
+        }
+        else {
+            typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
+        }
         return null;
+    }
+
+    private void typeMathSelectorAccessExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull ResolveParser.MathExpContext prevAccessExp,
+                                           @NotNull String symbolName) {
+
+        MTType type = g.INVALID;
+        MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
+        //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
+        //it starts the access chain, rather than say terminating it.
+        if (prevAccessExp.getText().equals("conc")) {
+            tr.mathTypes.put(ctx, curTypeReprModelSymbol.getModelType());
+            return;
+        }
+        try {
+            MTCartesian typeCartesian = (MTCartesian) prevMathAccessType;
+            type = typeCartesian.getFactor(symbolName);
+        }
+        catch (ClassCastException cce) {
+            type = HardCoded.getMetaFieldType(g, symbolName);
+            if (type == null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.VALUE_NOT_TUPLE, ctx.getStart(),
+                        symbolName);
+                type = g.INVALID;
+            }
+        }
+        catch (NoSuchElementException nsee) {
+            type = HardCoded.getMetaFieldType(g, symbolName);
+            if (type == null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.NO_SUCH_FACTOR, ctx.getStart(),
+                        symbolName);
+                type = g.INVALID;
+            }
+        }
+        tr.mathTypes.put(ctx, type);
     }
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        Iterator<ResolveParser.MathExpContext> segsIter =
-                ctx.mathExp().iterator();
-        ResolveParser.MathExpContext nextSeg, lastSeg = null;
-        nextSeg = segsIter.next();
-        MTType curType = null;
-        this.visit(nextSeg);
-        if (nextSeg.getText().equals("conc")) {
-            nextSeg = segsIter.next();
-            this.visit(nextSeg);    //type conc.
-            try {
-                ProgVariableSymbol programmaticExemplar =
-                        symtab.getInnermostActiveScope().queryForOne(
-                                new ProgVariableQuery(null, nextSeg.getStart(),
-                                        false));
-                PTRepresentation repr =
-                        ((PTRepresentation) programmaticExemplar
-                                .toProgVariableSymbol());
-                curType = repr.getFamily().getModelType();
-            } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-                e.printStackTrace();
-            }
-        } else {
-            curType = tr.mathTypes.get(nextSeg);
-            // }
+        this.visit(ctx.lhs);
+        prevMathSelectorAccess = ctx.mathExp(0);
+        this.visit(ctx.rhs);
+        prevMathSelectorAccess = null;
 
-            MTCartesian curTypeCartesian;
-            while (segsIter.hasNext()) {
-                lastSeg = nextSeg;
-                nextSeg = segsIter.next();
-                String segmentName = HardCoded.getMetaFieldName(nextSeg);
-                try {
-                    curTypeCartesian = (MTCartesian) curType;
-                    curType = curTypeCartesian.getFactor(segmentName);
-                } catch (ClassCastException cce) {
-                    curType = HardCoded.getMetaFieldType(g, segmentName);
-                    if (curType == null) {
-                        compiler.errMgr.semanticError(
-                                ErrorKind.VALUE_NOT_TUPLE, nextSeg.getStart(),
-                                segmentName);
-                        curType = g.INVALID;
-                    }
-                } catch (NoSuchElementException nsee) {
-                    curType = HardCoded.getMetaFieldType(g, segmentName);
-                    if (curType == null) {
-                        compiler.errMgr.semanticError(
-                                ErrorKind.NO_SUCH_FACTOR, nextSeg.getStart(),
-                                segmentName);
-                        curType = g.INVALID;
-                    }
-                }
-                tr.mathTypes.put(nextSeg, curType);
-            }
-            compiler.info("expression: " + ctx.getText() + " of type " + curType);
-            tr.mathTypes.put(ctx, curType);
-            return null;
-        }
+        MTType finalType = tr.mathTypes.get(ctx.rhs);
+        compiler.info("expression: " + ctx.getText() + " of type " + finalType);
+        tr.mathTypes.put(ctx, finalType);
+        return null;
+    }
 
-    private MathSymbol exitMathSymbolExp(ParserRuleContext ctx,
+    private MathSymbol typeMathSymbolExp(ParserRuleContext ctx,
                                          Token qualifier,
                                          String symbolName) {
-
         MathSymbol intendedEntry = getIntendedEntry(qualifier, symbolName, ctx);
         if (intendedEntry == null) {
             tr.mathTypes.put(ctx, g.INVALID);
@@ -1621,6 +1629,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     MathSymbol intendedEntry) {
         try {
             if (anonymousApplicationDepth > 0) return; //hmmm..
+
             if (intendedEntry.getQuantification() == Quantification.NONE) {
                 tr.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             } else {
@@ -1630,7 +1639,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         } catch (SymbolNotOfKindTypeException snokte) {
             if (typeValueDepth > 0) {
-                tr.mathTypeValues.put(ctx, g.INVALID);
+                //TODO: So in <something> : Sp_Loc(k), the k clearly WOULDN't have a value,
+                //so I'm just going to make it Z. I don't understand why arguments to
+                //a function application serving as a type designator necessarily need values...
+
+                //Another thought, why the hell would Powerset(Z) typecheck then... Z wouldn't have a value...
+                if (walkingFunctionAppArgs) {
+                    tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
+                } else {
+                    tr.mathTypeValues.put(ctx, g.INVALID);
+                }
             }
         }
     }
@@ -1713,8 +1731,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathTypes.put(ctx, expectedType.getRange());
         //I had better identify a type
         if (typeValueDepth > 0) {
-            tr.mathTypeValues.put(ctx, formRealApplicationType(
-                    intendedEntry.getName(), expectedType, args));
+            MTType realAppType = formRealApplicationType(
+                    intendedEntry.getName(), expectedType, args);
+            tr.mathTypeValues.put(ctx, realAppType);
         }
     }
 

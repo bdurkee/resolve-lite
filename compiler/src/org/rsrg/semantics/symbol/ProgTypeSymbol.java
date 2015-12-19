@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ProgTypeSymbol extends Symbol {
 
-    @Nullable protected final MTType modelType;
+    @NotNull protected final MTType modelType;
     @NotNull protected final PTType type;
     @NotNull protected final MathSymbol mathTypeAlterEgo;
     @NotNull protected final TypeGraph g;
@@ -24,7 +24,7 @@ public class ProgTypeSymbol extends Symbol {
         super(name, definingTree, moduleIdentifier);
         this.type = progType;
         this.g = g;
-        this.modelType = modelType;
+        this.modelType = modelType == null ? g.INVALID : modelType;
         this.mathTypeAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, g.SSET, modelType,
                         definingTree, moduleIdentifier);
@@ -34,7 +34,7 @@ public class ProgTypeSymbol extends Symbol {
         return type;
     }
 
-    @Nullable public MTType getModelType() {
+    @NotNull public MTType getModelType() {
         return modelType;
     }
 

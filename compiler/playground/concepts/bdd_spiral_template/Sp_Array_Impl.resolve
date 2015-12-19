@@ -4,5 +4,5 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             Length,
             Curr_Place : Std_Ints :: Integer;
         end;
-        convention S.Length = 0;
+        convention P.Lab;
 end Sp_Array_Impl;
