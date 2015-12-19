@@ -50,6 +50,11 @@ public class ModuleParameterSymbol extends Symbol {
         return wrappedParamSymbol.toProgParameterSymbol();
     }
 
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol()
+            throws UnexpectedSymbolException {
+        return wrappedParamSymbol.toProgTypeSymbol();
+    }
+
     @NotNull @Override public String getSymbolDescription() {
         return "a module parameter symbol";
     }

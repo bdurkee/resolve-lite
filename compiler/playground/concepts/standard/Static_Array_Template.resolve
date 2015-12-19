@@ -1,15 +1,11 @@
 Concept Static_Array_Template(type Entry;
         evaluates Lower_Bound,
                   Upper_Bound : Std_Ints :: Integer);
-    uses Standard_Integers;
+    uses Standard_Integers, Basic_Integer_Theory;
 
     Type family Static_Array
             is modeled by Z -> Entry;
         exemplar A;
-        initialization
-            ensures Forall i : Z,
-              (start <= i and i <= stop) implies
-                   Entry.Is_Initial(A(i));
 
     Operation Swap_Entry (updates A : Static_Array;
                           updates e : Entry;

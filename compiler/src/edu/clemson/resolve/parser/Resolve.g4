@@ -95,6 +95,7 @@ implBlock
     :   ( operationProcedureDecl
         | procedureDecl
         | typeRepresentationDecl
+        | facilityDecl
         )*
     ;
 
@@ -425,10 +426,10 @@ mathAlternativeItemExp
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
+    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
     |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('++'|'--')                          #progPostfixExp
     |   progExp op='%' progExp                          #progInfixExp
-    |   progExp op=('*'|'/'|'++') progExp               #progInfixExp
+    |   progExp op=('*'|'/') progExp                    #progInfixExp
     |   progExp op=('+'|'-') progExp                    #progInfixExp
     |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
     |   progExp op=('='|'/=') progExp                   #progInfixExp
@@ -437,13 +438,8 @@ progExp
 
 progPrimary
     :   progLiteralExp
-    |   progVarExp
     |   progParamExp
-    ;
-
-progVarExp
-    :   progNamedExp
-    |   progMemberExp
+    |   progNamedExp
     ;
 
 progParamExp
@@ -452,10 +448,6 @@ progParamExp
 
 progNamedExp
     :   (qualifier=ID '::')? name=ID
-    ;
-
-progMemberExp
-    :   (progParamExp|progNamedExp) ('.' ID)+
     ;
 
 progLiteralExp

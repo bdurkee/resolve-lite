@@ -10,20 +10,20 @@ Concept Bdd_Spiral_Template(type Label;
             Curr_Loc, Trmnl_Loc : Sp_Loc(k);
         end;
         exemplar P;
-        constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
-                    P.Lab(P.Trmnl_Loc) = Label.Base_Point;
+    //    constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
+    //                P.Lab(P.Trmnl_Loc) = Label.Base_Point;
         initialization
             ensures P.Trmnl_Loc = Cen(k);
 
     Operation Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
-        requires SCD(k)(P.Trmnl_Loc) < Max_Length;
+     /*   requires SCD(k)(P.Trmnl_Loc) < Max_Length;
         ensures P.Trmnl_Loc = SS(k)(@P.Trmnl_Loc) and
                 P.Curr_Loc = @P.Curr_Loc and
                 P.Lab = lambda (q : Sp_Loc(k)).(
                       {{@e if q = @P; @P.Lab(q) otherwise; }});
 
-    Operation Spiral_Out (updates P : Spiral_Pos);
-        requires SS(k)(P.Curr_Loc);
-        ensures true;
+*/
+
+
 end Bdd_Spiral_Template;

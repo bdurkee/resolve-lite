@@ -71,7 +71,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  been marked 'Recursive'.
      */
     //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-    //private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
+    private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /** Set to {@code true} when we're walking the arguments to a module
      *  (i.e. walking some set of args to a facility decl); or when we're walking
@@ -259,55 +259,65 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /* @Override public Void visitProcedureDecl(
-             ResolveParser.ProcedureDeclContext ctx) {
-         OperationSymbol correspondingOp = null;
-         currentProcedureDecl = ctx;
-         try {
-             correspondingOp =
-                     symtab.getInnermostActiveScope()
-                             .queryForOne(new NameQuery(null, ctx.name, false))
-                             .toOperationSymbol();
-         } catch (NoSuchSymbolException nse) {
-             compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
-                     ctx.getStart(), ctx.name.getText());
-         } catch (DuplicateSymbolException dse) {
-             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                     ctx.getStart(), ctx.getText());
-         }
-         symtab.startScope(ctx);
-         this.visit(ctx.operationParameterList());
-         PTType returnType = null;
-         if (ctx.type() != null) {
-             this.visit(ctx.type());
-             returnType = tr.progTypeValues.get(ctx.type());
-             try {
-                 symtab.getInnermostActiveScope().define(
+    @Override public Void visitProcedureDecl(
+            ResolveParser.ProcedureDeclContext ctx) {
+        OperationSymbol correspondingOp = null;
+        currentProcedureDecl = ctx;
+        try {
+            correspondingOp =
+                    symtab.getInnermostActiveScope()
+                         .queryForOne(new NameQuery(null, ctx.name, false))
+                         .toOperationSymbol();
+        } catch (NoSuchSymbolException nse) {
+            compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
+                 ctx.getStart(), ctx.name.getText());
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                 ctx.getStart(), ctx.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                 ctx.name, "an operation", ctx.name.getText(),
+                 use.getTheUnexpectedSymbolsDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        symtab.startScope(ctx);
+        this.visit(ctx.operationParameterList());
+        PTType returnType = null;
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            returnType = tr.progTypeValues.get(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
                          new ProgVariableSymbol(ctx.name.getText(), ctx,
                                  returnType, getRootModuleIdentifier()));
-             }
-             catch (DuplicateSymbolException dse) {
-                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
-                         ctx.name.getText());
-             }
-         }
-         else {
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+            }
+        }
+        else {
              returnType = PTVoid.getInstance(g);
-         }
-         ctx.variableDeclGroup().forEach(this::visit);
-         ctx.stmt().forEach(this::visit);
-         symtab.endScope();
-         try {
+        }
+        ctx.variableDeclGroup().forEach(this::visit);
+         //ctx.stmt().forEach(this::visit);
+        symtab.endScope();
+        if (correspondingOp == null) { //backout
+            currentProcedureDecl = null;
+            return null;
+        }
+        try {
              symtab.getInnermostActiveScope().define(
                      new ProcedureSymbol(ctx.name.getText(), ctx,
                              getRootModuleIdentifier(), correspondingOp));
-         } catch (DuplicateSymbolException dse) {
-             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                     ctx.getStart(), ctx.name.getText());
-         }
-         currentProcedureDecl = null;
-         return null;
-     }*/
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.name.getText());
+        }
+        currentProcedureDecl = null;
+        return null;
+    }
 
     @Override public Void visitOperationDecl(
             ResolveParser.OperationDeclContext ctx) {
@@ -491,15 +501,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), "a type", ctx.name.getText(),
                     use.getTheUnexpectedSymbolsDescription());
         } catch (NoSuchModuleException nsme) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    nsme.getRequestedModule(),
-                    nsme.getRequestedModule().getText());
+            noSuchModule(nsme);
         }
         tr.progTypes.put(ctx, PTInvalid.getInstance(g));
         tr.progTypeValues.put(ctx, PTInvalid.getInstance(g));
         tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
         tr.mathTypeValues.put(ctx, MTInvalid.getInstance(g));
         return null;
+    }
+
+    private void noSuchModule(NoSuchModuleException nsme) {
+        compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                nsme.getRequestedModule(),
+                nsme.getRequestedModule().getText());
     }
 
     @Override public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
@@ -953,7 +967,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     //---------------------------------------------------
     // P R O G    E X P    T Y P I N G
     //---------------------------------------------------
-
+*/
     @Override public Void visitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
         this.visit(ctx.progExp());
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
@@ -1068,7 +1082,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         for (TerminalNode term : ctx.ID()) {
             PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
             curFieldType = recordType.getFieldType(term.getText());
-            if ( curFieldType == null ) {
+            if (curFieldType == null) {
                 compiler.errMgr.semanticError(ErrorKind.NO_SUCH_SYMBOL,
                         term.getSymbol(), term.getText());
                 curFieldType = PTInvalid.getInstance(g);
@@ -1086,7 +1100,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.progTypes.put(ctx, curFieldType);
         tr.mathTypes.put(ctx, curFieldType.toMath());
         return null;
-    }*/
+    }
 
     /*@Override public Void visitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
@@ -1122,7 +1136,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
-    }
+    }*/
 
     @Override public Void visitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
@@ -1151,7 +1165,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
     }
 
-    private Void typeProgLiteralExp(ParserRuleContext ctx,
+  /*  private Void typeProgLiteralExp(ParserRuleContext ctx,
                                     String typeQualifier, String typeName) {
         ProgTypeSymbol p =
                 getProgTypeSymbol(ctx, typeQualifier, typeName);

@@ -136,10 +136,21 @@ public class ProgParameterSymbol extends Symbol {
         return this;
     }
 
-    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
-        return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
-                typeGraph, getName()), new MTNamed(typeGraph, getName()),
-                getDefiningTree(), getModuleIdentifier());
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol()
+            throws UnexpectedSymbolException {
+        ProgTypeSymbol result;
+
+        if (!mode.equals(ParameterMode.TYPE)) {
+            //This will throw an appropriate error
+            result = super.toProgTypeSymbol();
+        }
+        else {
+            result =
+                    new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
+                            typeGraph, getName()), new MTNamed(typeGraph, getName()),
+                            getDefiningTree(), getModuleIdentifier());
+        }
+        return result;
     }
 
     @NotNull public PSymbol asPSymbol() {
