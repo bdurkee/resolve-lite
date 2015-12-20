@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ProgVariableSymbol extends Symbol {
 
-    @NotNull private final PTType type;
+    private final PTType type;
     @NotNull private final MathSymbol mathSymbolAlterEgo;
 
     public ProgVariableSymbol(@NotNull String name,
@@ -23,6 +23,10 @@ public class ProgVariableSymbol extends Symbol {
         this.mathSymbolAlterEgo =
                 new MathSymbol(type.getTypeGraph(), name, Quantification.NONE,
                         type.toMath(), null, definingTree, moduleIdentifier);
+    }
+
+    @NotNull public PTType getProgramType() {
+        return type;
     }
 
     @NotNull @Override public String getSymbolDescription() {

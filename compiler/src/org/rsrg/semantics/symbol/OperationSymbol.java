@@ -13,9 +13,8 @@ import java.util.stream.Collectors;
 
 public class OperationSymbol extends Symbol {
 
-    @NotNull private final PTType returnType;
-    @NotNull private final List<ProgParameterSymbol> parameters =
-            new ArrayList<>();
+    private final PTType returnType;
+    private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
     @NotNull private final PExp requires, ensures;
     private final boolean moduleParameter;
@@ -47,6 +46,12 @@ public class OperationSymbol extends Symbol {
         return parameters;
     }
 
+    /** Get the return type of this operation. Note that in the cases where
+     *  there isn't something returned, this should always return an instance
+     *  of {@link org.rsrg.semantics.programtype.PTVoid}.
+     *
+     *  @return the return {@link PTType}.
+     */
     @NotNull public PTType getReturnType() {
         return returnType;
     }

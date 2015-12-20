@@ -277,11 +277,7 @@ facilityDecl
     ;
 
 moduleArgumentList
-    :   '(' moduleArgument (',' moduleArgument)* ')'
-    ;
-
-moduleArgument
-    :   progExp
+    :   '(' progExp (',' progExp)* ')'
     ;
 
 // functions

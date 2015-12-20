@@ -11,15 +11,15 @@ import java.util.Map;
 
 /** A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
  *  {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
- *  functioning as a module formal parameter when declared.
+ *  functioning as a formal parameter for a module when declared.
  */
 public class ModuleParameterSymbol extends Symbol {
 
-    @NotNull private final Symbol wrappedParamSymbol;
+    private final Symbol wrappedParamSymbol;
 
-    public ModuleParameterSymbol(@NotNull Symbol symbol, String name,
-                                 ParserRuleContext definingTree,
-                                 ModuleIdentifier moduleIdentifier) {
+    public ModuleParameterSymbol(@NotNull Symbol symbol, @NotNull String name,
+                                 @Nullable ParserRuleContext definingTree,
+                                @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.wrappedParamSymbol = symbol;
     }
@@ -32,8 +32,22 @@ public class ModuleParameterSymbol extends Symbol {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
-    /** Handle these toXXXX methods strategically, meaning only the ones that
-     *  a conceivably module parameterizable {@link Symbol} might need.
+    /** Returns the program type; will be {@code null} in the case where we
+     *  wrap an {@code MathSymbol} (arising from a defn passed to facility).
+     */
+    @Nullable public PTType getProgramType() {
+        PTType progType = null;
+        if (wrappedParamSymbol instanceof OperationSymbol) {
+            progType = ((OperationSymbol) wrappedParamSymbol).getReturnType();
+        }
+        else if (wrappedParamSymbol instanceof ProgParameterSymbol) {
+            progType = ((ProgParameterSymbol) wrappedParamSymbol).getDeclaredType();
+        }
+        return progType;
+    }
+
+    /** Handle these toXXXX methods strategically, meaning only those that a
+     *  conceivably module parameterizable {@link Symbol} might need.
      */
     @NotNull @Override public MathSymbol toMathSymbol()
             throws UnexpectedSymbolException {

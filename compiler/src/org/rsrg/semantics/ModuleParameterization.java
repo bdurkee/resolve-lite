@@ -16,7 +16,7 @@ public class ModuleParameterization {
     @NotNull private final MathSymbolTable scopeRepo;
     @NotNull private final ModuleIdentifier moduleIdentifier;
 
-    @NotNull private final List<ResolveParser.ModuleArgumentContext> arguments =
+    @NotNull private final List<ResolveParser.ProgExpContext> arguments =
             new ArrayList<>();
     @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     @NotNull private final FacilitySymbol instantiatingFacility;
@@ -31,7 +31,7 @@ public class ModuleParameterization {
         this.actualGenerics.addAll(actualGenerics);
 
         if ( actualArgListNode != null ) {
-            arguments.addAll(actualArgListNode.moduleArgument());
+            arguments.addAll(actualArgListNode.progExp());
         }
         this.moduleIdentifier = moduleIdentifier;
     }
@@ -76,7 +76,7 @@ public class ModuleParameterization {
         return moduleIdentifier;
     }
 
-    @NotNull public List<ResolveParser.ModuleArgumentContext> getArguments() {
+    @NotNull public List<ResolveParser.ProgExpContext> getArguments() {
         return arguments;
     }
 }

@@ -990,63 +990,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
-        this.visit(ctx.getChild(0));
-        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
-        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.getChild(0)));
-        return null;
-    }
-
     @Override public Void visitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
         try {
-            ProgVariableSymbol variable =
+            //definition, operation, type, or of course, just some variable.
+            Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
-                            new ProgVariableQuery(ctx.qualifier, ctx.name,
-                                    false));
-            tr.progTypes.put(ctx, variable.getProgramType());
+                            new NameQuery(ctx.qualifier, ctx.name,
+                                    true));
+            PTType programType = PTInvalid.getInstance(g);
+            if (namedSymbol instanceof ProgVariableSymbol) {
+                programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
+            }
+            else if (namedSymbol instanceof ModuleParameterSymbol) {
+                programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+            }
+            tr.progTypes.put(ctx, programType);
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return null;
+        } catch (UnexpectedSymbolException e) {
+            e.printStackTrace();
+        } catch (NoSuchSymbolException e) {
+            e.printStackTrace();
+        } catch (DuplicateSymbolException e) {
+            e.printStackTrace();
+        } catch (NoSuchModuleException e) {
+            e.printStackTrace();
         }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
-                    ctx.name.getText());
-        }
-        catch (UnexpectedSymbolException use) {
-            //ok, maybe we're dealing with a reference to an operation then?
-            if (walkingModuleArgOrParamList) {
-                Symbol s = null;
-                try {
-                    s = symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(ctx.qualifier,
-                                    ctx.name, true));
-                    //TODO: get rid of ModuleParameterizableSymbol and just use OperationSymbol here.
-                    if (s instanceof ModuleParameterizableSymbol) {
-                        tr.progTypes.put(ctx, ((ModuleParameterizableSymbol) s).getProgramType());
-                        tr.mathTypes.put(ctx, ((ModuleParameterizableSymbol) s).getMathType());
-                        return null;
-                    }
-                } catch (NoSuchSymbolException|DuplicateSymbolException e) {
-                    compiler.errMgr.semanticError(e.getErrorKind(), ctx.name,
-                            ctx.name.getText());
-                }
-            }
-            //nope. not expecting this at all if we got here. Let's indicate this
-            //and type the thing as invalid.
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.name, "a variable reference", ctx.name.getText(),
-                    use.getTheUnexpectedSymbolsDescription());
-        }
-        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-        return null;
-    }
-
-    @Override public Void visitModuleArgument(
-            ResolveParser.ModuleArgumentContext ctx) {
-        this.visit(ctx.progExp());
-        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
-        tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.progExp()));
         return null;
     }
 
@@ -1058,48 +1028,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgMemberExp(
-            ResolveParser.ProgMemberExpContext ctx) {
-        ParseTree firstRecordRef = ctx.getChild(0);
-        this.visit(firstRecordRef);
-        PTType first = tr.progTypes.get(firstRecordRef);
-
-        //start by checking the first to ensure we're dealing with a record
-        if ( !first.isAggregateType() ) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.ILLEGAL_MEMBER_ACCESS, ctx.getStart(),
-                    ctx.getText(), ctx.getChild(0).getText());
-            tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-            tr.mathTypes.put(ctx, g.INVALID);
-            return null;
-        }
-        PTRepresentation curAggregateType = (PTRepresentation) first;
-
-        //note this will represent the rightmost field type when finished.
-        PTType curFieldType = curAggregateType;
-
-        //now we need to make sure our mem accesses aren't nonsense.
-        for (TerminalNode term : ctx.ID()) {
-            PTRecord recordType = (PTRecord) curAggregateType.getBaseType();
-            curFieldType = recordType.getFieldType(term.getText());
-            if (curFieldType == null) {
-                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_SYMBOL,
-                        term.getSymbol(), term.getText());
-                curFieldType = PTInvalid.getInstance(g);
-                tr.progTypes.put(term, curFieldType);
-                tr.mathTypes.put(term, curFieldType.toMath());
-                break;
-            }
-            tr.progTypes.put(term, curFieldType);
-            tr.mathTypes.put(term, curFieldType.toMath());
-
-            if ( curFieldType.isAggregateType() ) {
-                curAggregateType = (PTRepresentation) curFieldType;
-            }
-        }
-        tr.progTypes.put(ctx, curFieldType);
-        tr.mathTypes.put(ctx, curFieldType.toMath());
-        return null;
+    @Override public Void visitProgSelectorExp(
+            ResolveParser.ProgSelectorExpContext ctx) {
+        throw new UnsupportedOperationException("not implemented yet..");
     }
 
     /*@Override public Void visitProgInfixExp(
@@ -1140,22 +1071,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
-        ctx.progExp().forEach(this::visit);
-        typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+       // ctx.progExp().forEach(this::visit);
+       // typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
         return null;
     }
 
     @Override public Void visitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
-        return typeProgLiteralExp(ctx, "Std_Boolean_Fac", "Boolean");
+        return typeProgLiteralExp(ctx, "Std_Bools", "Boolean");
     }
 
     @Override public Void visitProgIntegerLiteralExp(
             ResolveParser.ProgIntegerLiteralExpContext ctx) {
-        return typeProgLiteralExp(ctx, "Std_Integer_Fac", "Integer");
+        return typeProgLiteralExp(ctx, "Std_Ints", "Integer");
     }
 
-    @Override public Void visitProgCharacterLiteralExp(
+    /*@Override public Void visitProgCharacterLiteralExp(
             ResolveParser.ProgCharacterLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
     }
@@ -1163,9 +1094,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitProgStringLiteralExp(
             ResolveParser.ProgStringLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
-    }
+    }*/
 
-  /*  private Void typeProgLiteralExp(ParserRuleContext ctx,
+    private Void typeProgLiteralExp(ParserRuleContext ctx,
                                     String typeQualifier, String typeName) {
         ProgTypeSymbol p =
                 getProgTypeSymbol(ctx, typeQualifier, typeName);
@@ -1195,88 +1126,92 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(),
                     ctx.getStart(), typeName);
+        } catch (UnexpectedSymbolException e) {
+            e.printStackTrace();
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
         }
         return result;
     }
 
-    protected void typeOperationRefExp(ParserRuleContext ctx,
-                                       Token qualifier, Token name,
-                                       ResolveParser.ProgExpContext... args) {
-        typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
-    }
+    /*   protected void typeOperationRefExp(ParserRuleContext ctx,
+                                      Token qualifier, Token name,
+                                      ResolveParser.ProgExpContext... args) {
+       typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
+   }
 
-    protected void typeOperationRefExp(ParserRuleContext ctx,
-                                       Token qualifier, Token name,
-                                       List<ResolveParser.ProgExpContext> args) {
-        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
-                .collect(Collectors.toList());
-        //for recursive calls
-        if (currentOpProcedureDecl != null || currentProcedureDecl != null) {
-            String currentName = currentOpProcedureDecl != null ?
-                    currentOpProcedureDecl.name.getText() :
-                    currentProcedureDecl.name.getText();
+   protected void typeOperationRefExp(ParserRuleContext ctx,
+                                      Token qualifier, Token name,
+                                      List<ResolveParser.ProgExpContext> args) {
+       List<PTType> argTypes = args.stream().map(tr.progTypes::get)
+               .collect(Collectors.toList());
+       //for recursive calls
+       if (currentOpProcedureDecl != null || currentProcedureDecl != null) {
+           String currentName = currentOpProcedureDecl != null ?
+                   currentOpProcedureDecl.name.getText() :
+                   currentProcedureDecl.name.getText();
 
-            boolean isMarkedRecursive = currentOpProcedureDecl != null ?
-                    currentOpProcedureDecl.recursive != null :
-                    currentProcedureDecl.recursive != null;
+           boolean isMarkedRecursive = currentOpProcedureDecl != null ?
+                   currentOpProcedureDecl.recursive != null :
+                   currentProcedureDecl.recursive != null;
 
-            ResolveParser.OperationParameterListContext formalParamListNode =
-                    currentOpProcedureDecl != null ?
-                            currentOpProcedureDecl.operationParameterList() :
-                            currentProcedureDecl.operationParameterList();
+           ResolveParser.OperationParameterListContext formalParamListNode =
+                   currentOpProcedureDecl != null ?
+                           currentOpProcedureDecl.operationParameterList() :
+                           currentProcedureDecl.operationParameterList();
 
-            ResolveParser.TypeContext declaredTypeCtx =
-                    currentOpProcedureDecl != null ?
-                            currentOpProcedureDecl.type() :
-                            currentProcedureDecl.type();
+           ResolveParser.TypeContext declaredTypeCtx =
+                   currentOpProcedureDecl != null ?
+                           currentOpProcedureDecl.type() :
+                           currentProcedureDecl.type();
 
-            if (currentName.equals(name.getText()) && qualifier == null) {
-                if (formalParamListNode.parameterDeclGroup().size() !=
-                        argTypes.size()) {
-                    compiler.errMgr.semanticError(ErrorKind.MALFORMED_RECURSIVE_OP_CALL,
-                            ctx.getStart(), ctx.getText(),
-                            currentOpProcedureDecl.name.getText());
-                    tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-                    tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-                    return;
-                }
-                PTType t = declaredTypeCtx != null ?
-                        tr.progTypeValues.get(declaredTypeCtx) :
-                        PTVoid.getInstance(g);
-                tr.progTypes.put(ctx, t);
-                tr.mathTypes.put(ctx, t.toMath());
-                return;
-            }
-        }
+           if (currentName.equals(name.getText()) && qualifier == null) {
+               if (formalParamListNode.parameterDeclGroup().size() !=
+                       argTypes.size()) {
+                   compiler.errMgr.semanticError(ErrorKind.MALFORMED_RECURSIVE_OP_CALL,
+                           ctx.getStart(), ctx.getText(),
+                           currentOpProcedureDecl.name.getText());
+                   tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+                   tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+                   return;
+               }
+               PTType t = declaredTypeCtx != null ?
+                       tr.progTypeValues.get(declaredTypeCtx) :
+                       PTVoid.getInstance(g);
+               tr.progTypes.put(ctx, t);
+               tr.mathTypes.put(ctx, t.toMath());
+               return;
+           }
+       }
 
-        //every other call
-        try {
-            OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
-                    new OperationQuery(qualifier, name, argTypes,
-                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                            MathSymbolTable.ImportStrategy.IMPORT_NAMED));
+       //every other call
+       try {
+           OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
+                   new OperationQuery(qualifier, name, argTypes,
+                           MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                           MathSymbolTable.ImportStrategy.IMPORT_NAMED));
 
-            tr.progTypes.put(ctx, opSym.getReturnType());
-            tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
-            return;
-        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            List<String> argStrList = args.stream()
-                    .map(ResolveParser.ProgExpContext::getText)
-                    .collect(Collectors.toList());
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                    ctx.getStart(), name.getText(), argStrList, argTypes);
-        }
-        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-    }
-    private void handleRecursiveOperationRef(ParserRuleContext ctx,
-                                             Token qualifier, Token name,
-                                             List<PTType> actualArgTypes) {
-    }
+           tr.progTypes.put(ctx, opSym.getReturnType());
+           tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
+           return;
+       } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+           List<String> argStrList = args.stream()
+                   .map(ResolveParser.ProgExpContext::getText)
+                   .collect(Collectors.toList());
+           compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
+                   ctx.getStart(), name.getText(), argStrList, argTypes);
+       }
+       tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+       tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+   }
+   private void handleRecursiveOperationRef(ParserRuleContext ctx,
+                                            Token qualifier, Token name,
+                                            List<PTType> actualArgTypes) {
+   }
 
-    //---------------------------------------------------
-    //  M A T H   E X P   T Y P I N G
-    //---------------------------------------------------
+   //---------------------------------------------------
+   //  M A T H   E X P   T Y P I N G
+   //---------------------------------------------------
 */
     @Override public Void visitMathTypeExp(
             ResolveParser.MathTypeExpContext ctx) {

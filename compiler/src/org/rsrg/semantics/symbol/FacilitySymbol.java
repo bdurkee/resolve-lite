@@ -41,9 +41,9 @@ public class FacilitySymbol extends Symbol {
 
         ModuleParameterization impl = null;
 
-        List<ResolveParser.ModuleArgumentContext> actualArgs =
+        List<ResolveParser.ProgExpContext> actualArgs =
                 facility.implArgs != null ? facility.implArgs
-                        .moduleArgument() : new ArrayList<>();
+                        .progExp() : new ArrayList<>();
         impl = new ModuleParameterization(new ModuleIdentifier(facility.impl),
                         new ArrayList<>(), facility.implArgs, this, scopeRepo);
 
