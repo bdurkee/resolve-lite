@@ -130,7 +130,8 @@ public enum ErrorKind {
     /**
      * Compiler Error 20: no such factor <em>name</em>.
      */
-    NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR),
+    NO_SUCH_FACTOR(20, "no such factor <arg> (perhaps trying to access" +
+            " something that isn't of type cartesian?)", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 21: procedure <em>name</em> does not implement any known

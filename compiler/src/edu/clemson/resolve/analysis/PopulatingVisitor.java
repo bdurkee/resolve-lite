@@ -79,6 +79,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private boolean walkingModuleArgOrParamList = false;
     private boolean walkingFunctionAppArgs = false;
+
+
     private ResolveParser.MathExpContext prevMathSelectorAccess = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
@@ -86,9 +88,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private final ParseTreeProperty<MTType> anonymousFunctionExpectedRangeTypes =
             new ParseTreeProperty<>();
 
-    /**
-     * Keeps track of a global type model symbol.  the type representation for some type family
-     */
+    /** Holds a ref to a type model symbol while walking it (or its repr). */
     private TypeModelSymbol curTypeReprModelSymbol = null;
 
     private RESOLVECompiler compiler;
@@ -431,7 +431,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-        //Todo: visit the generic arg types too
         ctx.moduleArgumentList().forEach(this::visit);
         ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
                 new ParseTreeProperty<>();
@@ -1499,6 +1498,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
         //it starts the access chain, rather than say terminating it.
         if (prevAccessExp.getText().equals("conc")) {
+            if (curTypeReprModelSymbol == null) {
+                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR,
+                        ctx.getStart(), symbolName);
+                tr.mathTypes.put(ctx, g.INVALID); return;
+            }
             tr.mathTypes.put(ctx, curTypeReprModelSymbol.getModelType());
             return;
         }
@@ -1507,15 +1511,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             type = typeCartesian.getFactor(symbolName);
         }
         catch (ClassCastException cce) {
-            type = HardCoded.getMetaFieldType(g, symbolName);
-            if (type == null) {
-                compiler.errMgr.semanticError(
-                        ErrorKind.VALUE_NOT_TUPLE, ctx.getStart(),
-                        symbolName);
-                type = g.INVALID;
-            }
-        }
-        catch (NoSuchElementException nsee) {
             type = HardCoded.getMetaFieldType(g, symbolName);
             if (type == null) {
                 compiler.errMgr.semanticError(
@@ -1530,7 +1525,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
         this.visit(ctx.lhs);
-        prevMathSelectorAccess = ctx.mathExp(0);
+        prevMathSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
         prevMathSelectorAccess = null;
 
@@ -1592,7 +1587,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //so I'm just going to make it Z. I don't understand why arguments to
                 //a function application serving as a type designator necessarily need values...
 
-                //Another thought, why the hell would Powerset(Z) typecheck then... Z wouldn't have a value...
+                //Another thought, why the hell would Powerset(Z) typecheck in that case... Z wouldn't have a value... right?
+                //Ok, I guess because it's MTPowersetApplication it's "special", jesus.
                 if (walkingFunctionAppArgs) {
                     tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
                 } else {
@@ -1614,7 +1610,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull ParserRuleContext functionPortion,
                                            @NotNull List<? extends ParserRuleContext> args) {
 
-        emitPreApplicationType(ctx, args);
         ParseTree kid = functionPortion.getChild(0).getChild(0);
 
         //We're dealing with a simple function application: e.g.: Powerset(Z);
@@ -1628,6 +1623,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //we're dealing with a more exotic, curried, anonymous
         //application: i.e.: SS(k)(Cen(k))
         else {
+            emitPreApplicationType(ctx, args);
+
             MTType expectedType = anonymousFunctionExpectedRangeTypes.get(functionPortion);
             if (expectedType == null || !(expectedType instanceof MTFunction)) {
                 tr.mathTypes.put(ctx, g.INVALID);
