@@ -1,5 +1,6 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.TypeGraph;
@@ -12,17 +13,17 @@ import java.util.Map;
  */
 public class PTElement extends PTType {
 
-    public PTElement(TypeGraph g) {
+    public PTElement(@NotNull TypeGraph g) {
         super(g);
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return getTypeGraph().ELEMENT;
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }
 }

@@ -18,13 +18,9 @@ public class HardCoded {
             b.addBinding("El", null, g.CLS, g.ELEMENT);
             b.addBinding("Cls", null, g.CLS, g.CLS);
             b.addBinding("SSet", null, g.CLS, g.SSET);
-            b.addBinding("SStr", null, g.SSET, g.SSTR);
 
-            b.addBinding("_", null, g.ELEMENT, null);
             b.addBinding("Entity", null, g.CLS, g.ENTITY);
-
             b.addBinding("B", null, g.SSET, g.BOOLEAN);
-
             b.addBinding("conc", null, g.SSET, g.BOOLEAN);
 
             b.addBinding("true", null, g.BOOLEAN);
@@ -55,8 +51,10 @@ public class HardCoded {
             b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
 
-            b.addBinding("union", null, g.UNION);
-            b.addBinding("intersect", null, g.INTERSECT);
+            b.addBinding("union", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.SSET, g.SSET).build());
+            b.addBinding("intersect", null, new MTFunctionBuilder(g, g.BOOLEAN)
+                    .paramTypes(g.SSET, g.SSET).build());
             b.addBinding("Empty_Set", null, g.SSET, g.EMPTY_SET);
             b.addBinding("||...||", null, new MTFunctionBuilder(g, g.NAT)
                     .paramTypes(g.SSET).build());
@@ -74,15 +72,7 @@ public class HardCoded {
     }
 
     @NotNull public static String getMetaFieldName(@NotNull ParserRuleContext t) {
-        String result = "";
-        if ( t instanceof ResolveParser.MathSymbolExpContext ) {
-            result = ((ResolveParser.MathSymbolExpContext) t).name.getText();
-        }
-        else {
-            throw new RuntimeException("not a variable exp or function exp: "
-                    + t.getText() + " (" + t.getClass() + ")");
-        }
-        return result;
+        return t.getText();
     }
 
     public static MTType getMetaFieldType(TypeGraph g, String metaSegment) {

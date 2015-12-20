@@ -9,9 +9,8 @@ import org.rsrg.semantics.MTType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * An anonymous (lambda) function consisting of one or more typed bound
- * variables and a body.
+/** An anonymous (lambda) function consisting of one or more typed bound
+ *  variables and a body.
  */
 public class PLambda extends PExp {
 

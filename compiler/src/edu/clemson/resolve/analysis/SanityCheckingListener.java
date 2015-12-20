@@ -9,12 +9,11 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.rsrg.semantics.programtype.PTType;
 
-/**
- * Uses a combination of listeners and visitors to check for some semantic
- * errors uncheckable in the grammar and ommited by {@link PopulatingVisitor}.
- * <p>
- * To make many of our checks here easier, we make sure to have already built
- * the ast for exprs in a previous phase.</p>
+/** Uses a combination of listeners and visitors to check for some semantic
+ *  errors uncheckable in the grammar and ommited by {@link PopulatingVisitor}.
+ *  <p>
+ *  To make many of our checks here easier, we make sure to have already built
+ *  the ast for exprs in a previous phase.</p>
  */
 public class SanityCheckingListener extends ResolveBaseListener {
 
@@ -118,8 +117,8 @@ public class SanityCheckingListener extends ResolveBaseListener {
 
     private boolean hasRecursiveReferenceInStmts(
             ParserRuleContext ctx, Token name) {
-        RecursiveStatementCheckingVisitor checker =
-                new RecursiveStatementCheckingVisitor(name);
+        RecursiveCallCheckingVisitor checker =
+                new RecursiveCallCheckingVisitor(name);
         return checker.visit(ctx);
     }
 

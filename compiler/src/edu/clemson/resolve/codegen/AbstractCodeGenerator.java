@@ -14,10 +14,10 @@ public abstract class AbstractCodeGenerator {
     public static final String TEMPLATE_ROOT =
             "edu/clemson/resolve/templates/codegen";
 
-    @NotNull protected final RESOLVECompiler compiler;
-    @NotNull protected final AnnotatedModule module;
-    @NotNull private final STGroup templates;
-    @NotNull private final String language;
+    protected final RESOLVECompiler compiler;
+    protected final AnnotatedModule module;
+    private final STGroup templates;
+    private final String language;
 
     public AbstractCodeGenerator(@NotNull RESOLVECompiler rc,
                                  @NotNull AnnotatedModule module,
@@ -43,7 +43,7 @@ public abstract class AbstractCodeGenerator {
 
     @NotNull public String getFileName() {
         ST extST = templates.getInstanceOf("fileExtension");
-        String moduleName = module.getName();
+        String moduleName = module.getNameToken().getText();
         return moduleName + extST.render();
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractCodeGenerator {
             compiler.errMgr.toolError(
                     ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, "Java");
         }
-        if ( result == null ) {
+        if (result == null) {
             return null;
         }
         result.registerRenderer(Integer.class, new NumberRenderer());

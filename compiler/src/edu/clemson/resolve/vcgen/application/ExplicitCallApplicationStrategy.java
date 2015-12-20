@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
+import org.rsrg.semantics.SymbolTableException;
 import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
@@ -49,7 +50,7 @@ public class ExplicitCallApplicationStrategy
             return s.queryForOne(new OperationQuery(qualifier, name.getName(),
                     Utils.apply(app.getArguments(), PExp::getProgType)));
         }
-        catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        catch (SymbolTableException e) {
             //shouldn't happen; well, depends on s.
             throw new RuntimeException(e);
         }

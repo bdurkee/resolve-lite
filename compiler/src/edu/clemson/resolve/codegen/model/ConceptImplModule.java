@@ -1,6 +1,5 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.GenericSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 

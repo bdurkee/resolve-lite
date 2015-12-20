@@ -3,22 +3,16 @@ Precis Basic_Spiral_Theory;
 
     Definition N2 : Powerset(N) is {n : N | n >= 2};
 
-    Definition Is_k_Spiral_Like
-            (Sp_Loc : (k : N2) -> SSet,
-             Cen : N2 -> SSet,
-             SS, RS : N2 -> (Sp_Loc(k) -> Sp_Loc(k))) : B;
-    /*is (Forall k : N2,
-        (Forall p : Sp_Loc(k), Exists n : N, SS(k)(n, Cen(k)) = p) and
-        (Forall m, n : N, SS(k)(m, Cen(k)) = SS(k)(n, Cen(k)) implies m = n) and
-        (RS(k)(Cen(k)) = SS(k)(Cen(k))) and
-        (Forall p : Sp_Loc(k), RS(k)(SS(k)(p)) = SS(k)(k, RS(k)(p)))
-     );*/
+    Definition Is_k_Spiral_Like(sp_loc : (k : N2) -> SSet,
+        center : N2 -> SSet, ss,
+            rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
 
     Categorical Definition for Sp_Loc : (k : N2) -> SSet,
-        SS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
-        RS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
-        Cen : (k : N2) -> Sp_Loc(k) is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
+            SS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
+            RS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
+            Cen(k : N2) : Sp_Loc(k)
+        is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
 
-    Implicit Definition SCD(p : Sp_Loc(k : N2)) : N is
-        (Forall p : Sp_Loc(k), SS(k)(Cen(k)));
+    Implicit Definition SCD(p : Sp_Loc(k : N2)) : N;
+
 end Basic_Spiral_Theory;

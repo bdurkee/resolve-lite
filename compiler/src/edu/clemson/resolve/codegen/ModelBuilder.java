@@ -2,6 +2,7 @@ package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.*;
 import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
@@ -10,16 +11,15 @@ public class ModelBuilder extends ResolveBaseListener {
 
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-    private final ModuleScopeBuilder moduleScope;
+    //private final ModuleScopeBuilder moduleScope;
     private final JavaCodeGenerator gen;
     private final MathSymbolTable symtab;
     private final AnnotatedModule tr;
 
-    public ModelBuilder(JavaCodeGenerator g, MathSymbolTable symtab) {
-        this.gen = g;
-        this.moduleScope = symtab.getModuleScope(g.getModule().getName());
+    public ModelBuilder(JavaCodeGenerator gen, MathSymbolTable symtab) {
+        this.gen = gen;
         this.symtab = symtab;
-        this.tr = g.getModule();
+        this.tr = gen.getModule();
     }
 
   /*  @Override public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
@@ -322,7 +322,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private boolean referencesOperationParameter(String name) {
         return !moduleScope.getSymbolsOfType(OperationSymbol.class).stream()
-                .filter(f -> f.getName().equals(name))
+                .filter(f -> f.getNameToken().equals(name))
                 .filter(OperationSymbol::isModuleParameter)
                 .collect(Collectors.toList())
                 .isEmpty();
@@ -510,7 +510,7 @@ public class ModelBuilder extends ResolveBaseListener {
         Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
         impl.addDelegateMethods(
                 conceptScope.getSymbolsOfType(OperationSymbol.class,
-                        ProgTypeModelSymbol.class));
+                        TypeModelSymbol.class));
         if ( ctx.implBlock() != null ) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
@@ -542,15 +542,15 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
             throws NoSuchSymbolException {
-        //System.out.println("symbol: "+s.getName()+":"+s.getModuleID()+" is locally accessible?");
-        boolean result = isJavaLocallyAccessibleSymbol(s.getModuleID());
+        //System.out.println("symbol: "+s.getNameToken()+":"+s.getModuleIdentifier()+" is locally accessible?");
+        boolean result = isJavaLocallyAccessibleSymbol(s.getModuleIdentifier());
         //System.out.println(result);
         return result;
     }
 
     protected boolean isJavaLocallyAccessibleSymbol(String symbolModuleID) {
         //was s defined in the module we're translating?
-        if ( moduleScope.getModuleID().equals(symbolModuleID) ) {
+        if ( moduleScope.getModuleIdentifier().equals(symbolModuleID) ) {
             return true;
         }
         else { //was s defined in our parent concept or enhancement?
@@ -591,7 +591,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 if ( isJavaLocallyAccessibleSymbol(corresondingSym) ) {
                     //this.<symName>
                     if ( withinFacilityModule() ) {
-                        q = new Qualifier.NormalQualifier(moduleScope.getModuleID());
+                        q = new Qualifier.NormalQualifier(moduleScope.getModuleIdentifier());
                     }
                     else {
                         q = new Qualifier.NormalQualifier("this");
@@ -600,7 +600,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 else {
                     //Test_Fac.<symName>
                     q = new Qualifier.NormalQualifier(
-                            corresondingSym.getModuleID());
+                            corresondingSym.getModuleIdentifier());
                 }
                 return q;
             }
@@ -618,7 +618,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     moduleScope.queryForOne(new NameQuery(refQualifier,
                             refName, true));
             return new Qualifier.FacilityQualifier(
-                    corresondingSym.getModuleID(), s.getName());
+                    corresondingSym.getModuleIdentifier(), s.getNameToken());
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.

@@ -4,7 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 
 import java.util.*;
 
-public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
+public class MTFunctionApplication extends MTType {
 
     private static final int BASE_HASH = "MTFunctionApplication".hashCode();
 
@@ -112,7 +112,6 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     @Override public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTAbstract(this);
         v.beginMTFunctionApplication(this);
     }
 
@@ -131,7 +130,6 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTFunctionApplication(this);
-        v.endMTAbstract(this);
         v.endMTType(this);
     }
 

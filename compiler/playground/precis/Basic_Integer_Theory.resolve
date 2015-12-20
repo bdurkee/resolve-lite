@@ -1,10 +1,13 @@
-Precis Integer_Theory;
+Precis Basic_Integer_Theory;
+        uses Monogenerator_Theory;
 
-
+    Categorical Definition for Z : SSet, 0 : Z, NB : Z -> Z is
+        Is_Monogeneric_for(Z, 0, NB);
 
     Definition +(m, n : Z) : Z;
 
-    Definition 0 : Z;
+    Definition <=(m, n : Z) : B;
+
     Definition 1 : Z;
     Definition 2 : Z;
-end Integer_Theory;
+end Basic_Integer_Theory;

@@ -1,15 +1,18 @@
 package org.rsrg.semantics;
 
-public class UnexpectedSymbolException extends RuntimeException {
+import edu.clemson.resolve.compiler.ErrorKind;
+import org.jetbrains.annotations.NotNull;
 
-    private final String actualSymbolDescription;
+public class UnexpectedSymbolException extends SymbolTableException {
 
-    public UnexpectedSymbolException(String actualSymbolDescription) {
-        super();
+    @NotNull private final String actualSymbolDescription;
+
+    public UnexpectedSymbolException(@NotNull String actualSymbolDescription) {
+        super(ErrorKind.UNEXPECTED_SYMBOL);
         this.actualSymbolDescription = actualSymbolDescription;
     }
 
-    public String getActualSymbolDescription() {
+    @NotNull public String getTheUnexpectedSymbolsDescription() {
         return actualSymbolDescription;
     }
 }

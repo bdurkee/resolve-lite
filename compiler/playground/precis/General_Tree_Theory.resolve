@@ -1,5 +1,5 @@
 Precis General_Tree_Theory;
-    uses General_String_Theory with (Str_Relativization_Ext);
+    uses General_String_Theory, Str_Relativization_Ext;
 
     Definition Is_Tree_Former(Tr : Cls, omega : Tr,
             Jn : Str(Tr) * El -> (Tr ~ {omega})) : B;

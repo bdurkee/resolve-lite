@@ -1,5 +1,7 @@
 package org.rsrg.semantics;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
@@ -15,25 +17,32 @@ import java.util.Set;
 
 public interface Scope {
 
-    public <E extends Symbol> List<E> query(MultimatchSymbolQuery<E> query);
+    @NotNull public <E extends Symbol> List<E> query(
+            @NotNull MultimatchSymbolQuery<E> query)
+            throws NoSuchModuleException, UnexpectedSymbolException;
 
-    public <E extends Symbol> E queryForOne(SymbolQuery<E> query)
-            throws NoSuchSymbolException,
-            DuplicateSymbolException, NoSuchModuleException;
+    @NotNull public <E extends Symbol> E queryForOne(
+            @NotNull SymbolQuery<E> query) throws NoSuchSymbolException,
+            DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException;
 
-    public <E extends Symbol> boolean addMatches(TableSearcher<E> searcher,
-                         List<E> matches, Set<Scope> searchedScopes,
-                         Map<String, PTType> genericInstantiations,
-                         FacilitySymbol instantiatingFacility, SearchContext l)
+    public <E extends Symbol> boolean addMatches(
+            @NotNull TableSearcher<E> searcher,
+            @NotNull List<E> matches, @NotNull Set<Scope> searchedScopes,
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility,
+            @NotNull SearchContext l)
+            throws DuplicateSymbolException, UnexpectedSymbolException;
+
+    @NotNull public <E extends Symbol> List<E> getMatches(
+            @NotNull TableSearcher<E> searcher, @NotNull SearchContext l)
+            throws DuplicateSymbolException, UnexpectedSymbolException;
+
+    @NotNull public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException;
 
-    public <E extends Symbol> List<E> getMatches(TableSearcher<E> searcher,
-                             SearchContext l) throws DuplicateSymbolException;
+    @NotNull public <T extends Symbol> List<T> getSymbolsOfType(
+            @NotNull Class<T> type);
 
-    public Symbol define(Symbol s) throws DuplicateSymbolException;
-
-    public <T extends Symbol> List<T> getSymbolsOfType(Class<T> type);
-
-    public List<Symbol> getSymbolsOfType(Class<?> ... types);
+    @NotNull public List<Symbol> getSymbolsOfType(@NotNull Class<?> ... types);
 
 }

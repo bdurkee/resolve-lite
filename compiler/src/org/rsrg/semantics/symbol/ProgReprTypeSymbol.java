@@ -2,29 +2,41 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTRepresentation;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ProgReprTypeSymbol extends Symbol {
 
-    //Note: This is null in the case where we represent a standalone
-    //representation (e.g.: a facility module bound record)
-    protected final ProgTypeModelSymbol definition;
-    protected final PExp convention, correspondence;
-    protected final TypeGraph typeGraph;
-    protected final PTRepresentation representation;
+    /** A backing field for our (type model) {@code definition} parameter. This
+     *  might be {@code null} in the case where we represent a facility bound
+     *  type representation.
+     */
+    @Nullable protected final TypeModelSymbol definition;
 
-    public ProgReprTypeSymbol(TypeGraph g, String name,
-            ParserRuleContext definingElement, String moduleID,
-            ProgTypeModelSymbol definition, PTRepresentation representation,
-            PExp convention, PExp correspondence) {
-        super(name, definingElement, moduleID);
+    /** These annotation exprs should never be {@code null}; use just
+     *  {@code true} instead.
+     */
+    @NotNull protected final PExp convention, correspondence;
+
+    @NotNull protected final TypeGraph typeGraph;
+    @NotNull protected final PTRepresentation representation;
+
+    public ProgReprTypeSymbol(@NotNull TypeGraph g,
+                              @NotNull String name,
+                              @Nullable ParserRuleContext definingElement,
+                              @NotNull ModuleIdentifier moduleIdentifier,
+                              @Nullable TypeModelSymbol definition,
+                              @NotNull PTRepresentation representation,
+                              @NotNull PExp convention,
+                              @NotNull PExp correspondence) {
+        super(name, definingElement, moduleIdentifier);
         this.definition = definition;
         this.representation = representation;
         this.convention = convention;
@@ -32,52 +44,52 @@ public class ProgReprTypeSymbol extends Symbol {
         this.typeGraph = g;
     }
 
-    public PSymbol exemplarAsPSymbol(boolean incoming) {
+    @NotNull public PSymbol exemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
                 .mathType(representation.toMath()).incoming(incoming).build();
     }
 
-    public PSymbol exemplarAsPSymbol() {
+    @NotNull public PSymbol exemplarAsPSymbol() {
         return exemplarAsPSymbol(false);
     }
 
-    public PSymbol conceptualExemplarAsPSymbol(boolean incoming) {
+    @NotNull public PSymbol conceptualExemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(
-                "conc."+representation.getExemplarName())
+                "conc." + representation.getExemplarName())
                 .mathType(representation.toMath()).incoming(incoming).build();
     }
 
-    public PSymbol conceptualExemplarAsPSymbol() {
+    @NotNull public PSymbol conceptualExemplarAsPSymbol() {
         return conceptualExemplarAsPSymbol(false);
     }
 
-    public PTRepresentation getRepresentationType() {
+    @NotNull public PTRepresentation getRepresentationType() {
         return representation;
     }
 
-    public ProgTypeModelSymbol getDefinition() {
+    @Nullable public TypeModelSymbol getDefinition() {
         return definition;
     }
 
-    public PExp getConvention() {
+    @NotNull public PExp getConvention() {
         return convention;
     }
 
-    public PExp getCorrespondence() {
+    @NotNull public PExp getCorrespondence() {
         return correspondence;
     }
 
-    @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), representation,
                 (definition == null) ? null : definition.modelType,
-                getDefiningTree(), getModuleID());
+                getDefiningTree(), getModuleIdentifier());
     }
 
-    @Override public ProgReprTypeSymbol toProgReprTypeSymbol() {
+    @NotNull @Override public ProgReprTypeSymbol toProgReprTypeSymbol() {
         return this;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a program type representation definition";
     }
 
@@ -85,12 +97,13 @@ public class ProgReprTypeSymbol extends Symbol {
         return getName();
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility) {
 
-        //Representation is an internal implementation detail of a realization
-        //and cannot be accessed through a facility instantiation
+        //type representations are an internal implementation detail of
+        //some realization and shouldn't be accessible through a facility
+        //instantiation
         throw new UnsupportedOperationException("Cannot instantiate "
                 + this.getClass());
     }

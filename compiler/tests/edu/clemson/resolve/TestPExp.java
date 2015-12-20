@@ -7,6 +7,7 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -468,7 +469,8 @@ public class TestPExp extends BaseTest {
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule fakeModule =
-                new AnnotatedModule(t, "T", "T.resolve", false);
+                new AnnotatedModule(t, new CommonToken(ResolveLexer.ID, "T"),
+                        "T.resolve", false);
         PExpBuildingListener<PExp> l =
                 new PExpBuildingListener<>(g, fakeModule, true);
         ParseTreeWalker.DEFAULT.walk(l, t);

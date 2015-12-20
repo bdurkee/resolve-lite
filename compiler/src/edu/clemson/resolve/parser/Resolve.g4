@@ -33,7 +33,12 @@ grammar Resolve;
 moduleDecl
     :   precisModuleDecl
     |   precisExtensionModuleDecl
+    |   facilityModuleDecl
+    |   conceptModuleDecl
+    |   conceptImplModuleDecl
     ;
+
+// precis
 
 precisModuleDecl
     :   'Precis' name=ID ';'
@@ -41,6 +46,8 @@ precisModuleDecl
         precisBlock
         'end' closename=ID ';' EOF
     ;
+
+// precis extensions
 
 precisExtensionModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
@@ -57,10 +64,150 @@ precisBlock
         )*
     ;
 
+// concepts
+
+conceptModuleDecl
+    :   'Concept' name=ID (specModuleParameterList)? ';'
+        (usesList)?
+        (requiresClause)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptBlock
+    :   ( mathStandardDefinitionDecl
+        | typeModelDecl
+        | operationDecl
+        )*
+    ;
+
+// concept impls
+
+conceptImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
+implBlock
+    :   ( operationProcedureDecl
+        | procedureDecl
+        | typeRepresentationDecl
+        | facilityDecl
+        )*
+    ;
+
+// facilities
+
+facilityModuleDecl
+    :   'Facility' name=ID ';'
+         (usesList)?
+         (requiresClause)?
+         facilityBlock
+        'end' closename=ID ';'
+    ;
+
+facilityBlock
+    :   ( facilityDecl )*
+    ;
+
 // uses, imports
 
 usesList
     :   'uses' ID (',' ID)* ';'
+    ;
+
+// parameter and parameter-list related rules
+
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    ;
+
+specModuleParameterList
+    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
+    ;
+
+implModuleParameterList
+    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+    ;
+
+specModuleParameterDecl
+    :   parameterDeclGroup
+    |   mathStandardDefinitionDecl
+    |   genericTypeParameterDecl
+    ;
+
+implModuleParameterDecl
+    :   parameterDeclGroup
+   // |   operationDecl
+    ;
+
+parameterDeclGroup
+    :   parameterMode ID (',' ID)* ':' type
+    ;
+
+genericTypeParameterDecl
+    :   'type' name=ID
+    ;
+
+parameterMode
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
+    ;
+
+variableDeclGroup
+    :   'Var' ID (',' ID)* ':' type ';'?
+    ;
+
+// statements
+
+
+// type and record related rules
+
+type
+    :   (qualifier=ID '::')? name=ID                #namedType
+    |    'Record' (recordVariableDeclGroup)* 'end'  #recordType
+    ;
+
+recordVariableDeclGroup
+    :   ID (',' ID)* ':' type ';'?
+    ;
+
+typeModelDecl
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
+        'exemplar' exemplar=ID ';'?
+        (constraintClause)?
+        (typeModelInit)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=ID '=' type ';'?
+        (conventionClause)?
+        (correspondenceClause)?
+        (typeImplInit)?
+    ;
+
+// type initialization rules
+
+specModuleInit
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
+    ;
+
+typeModelInit
+    :   'initialization' (ensuresClause)?
+    ;
+
+typeImplInit
+    :   'initialization' (ensuresClause)?
+        (variableDeclGroup)* //(stmt)*
+        'end' ';'?
     ;
 
 // math constructs
@@ -87,17 +234,13 @@ mathInfixDefinitionSig
     ;
 
 mathOutfixDefinitionSig
-    :   leftSym=mathSymbolName '(' mathVariableDecl ')'
+    :   leftSym=mathSymbolName mathVariableDecl
         rightSym=mathSymbolName ':' mathTypeExp
     ;
 
 mathSymbolName
     :   ID
     |   ('+'|'-'|'...'|'/'|'\\'|'|'|'||'|'<'|'>'|'o'|'*'|'>='|'<='|INT|'not')
-    |   '|' '...' '|'
-    |   '<' '...' '>'
-    |   '||' '...' '||'
-    |   '\\' '...' '/'
     ;
 
 mathCategoricalDefinitionDecl
@@ -123,6 +266,43 @@ mathVariableDeclGroup
 
 mathVariableDecl
     :   ID ':' mathTypeExp
+    ;
+
+// facilitydecls, enhancements, etc
+
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? /*(enhancementPairDecl)*/ ';'?
+    ;
+
+moduleArgumentList
+    :   '(' progExp (',' progExp)* ')'
+    ;
+
+// functions
+
+operationDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)? (ensuresClause)?
+    ;
+
+operationProcedureDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)?
+        (ensuresClause)?
+        (recursive='Recursive')? 'Procedure'
+        (variableDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
+    ;
+
+procedureDecl
+    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
+        (':' type)? ';'
+        (variableDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
     ;
 
 // mathematical clauses
@@ -168,7 +348,7 @@ mathQuantifiedExp
 
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
-    |   mathExp op='.' mathExp                                  #mathSelectorExp
+    |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
     |   mathExp op=('*'|'/'|'~') mathExp                        #mathInfixApplyExp
     |   mathExp op=('+'|'-') mathExp                            #mathInfixApplyExp
     |   mathExp op=('..'|'->') mathExp                          #mathInfixApplyExp
@@ -234,6 +414,45 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
+// program expressions
+
+//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
+//we could really use some unit tests to perhaps check precendence so that in the future when
+//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
+progExp
+    :   progPrimary                                     #progPrimaryExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op='%' progExp                          #progInfixExp
+    |   progExp op=('*'|'/') progExp                    #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op=('and'|'or') progExp                 #progInfixExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNamedExp
+    ;
+
+progParamExp
+    :   (qualifier=ID '::')? name=ID '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNamedExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
+    ;
+
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
@@ -241,12 +460,8 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;
-FLOAT
-	:   '-'? INT '.' INT EXP?   // 1.35, 1.35E-9, 0.3, -4.5
-	|   '-'? INT EXP            // 1e10 -3e4
-	;
-fragment EXP :   [Ee] [+\-]? INT ;
 
+CHAR: '\'' . '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;
 fragment ESC :   '\\' ["\bfnrt] ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

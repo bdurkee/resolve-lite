@@ -1,6 +1,8 @@
 package org.rsrg.semantics.query;
 
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.PossiblyQualifiedPath;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
@@ -18,14 +20,16 @@ public class NameQuery extends BaseMultimatchSymbolQuery<Symbol>
         implements
             MultimatchSymbolQuery<Symbol> {
 
-    public NameQuery(Token qualifier, String name,
-                     ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+    public NameQuery(@Nullable Token qualifier, @NotNull String name,
+                     @NotNull ImportStrategy importStrategy,
+                     @NotNull FacilityStrategy facilityStrategy,
                      boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
                 facilityStrategy, localPriority), new NameSearcher(name, false));
     }
 
-    public NameQuery(Token qualifier, Token name, boolean localPriority) {
+    public NameQuery(@Nullable Token qualifier, @NotNull Token name,
+                     boolean localPriority) {
         this(qualifier, name.getText(), ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_IGNORE, localPriority);
     }

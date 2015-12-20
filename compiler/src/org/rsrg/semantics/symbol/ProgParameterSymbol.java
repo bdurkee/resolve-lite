@@ -1,10 +1,10 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import org.rsrg.semantics.TypeGraph;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTNamed;
-import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTGeneric;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -48,7 +48,12 @@ public class ProgParameterSymbol extends Symbol {
         },
         EVALUATES {
             @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { EVALUATES };
+                return new ParameterMode[]{EVALUATES};
+            }
+        },
+        TYPE {
+            @Override public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[] { TYPE };
             }
         };
         public boolean canBeImplementedWith(ParameterMode o) {
@@ -78,86 +83,94 @@ public class ProgParameterSymbol extends Symbol {
         return Collections.unmodifiableMap(result);
     }
 
-    private final ParameterMode mode;
-    private final PTType declaredType;
-    private final TypeGraph typeGraph;
-    private final boolean moduleParameterFlag;
-    private final MathSymbol mathSymbolAlterEgo;
+    @NotNull private final ParameterMode mode;
+    @NotNull private final PTType declaredType;
+    @NotNull private final TypeGraph typeGraph;
 
-    private final String typeQualifier;
-    private final ProgVariableSymbol progVariableAlterEgo;
+    @NotNull private final MathSymbol mathSymbolAlterEgo;
+    @NotNull private final ProgVariableSymbol progVariableAlterEgo;
 
-    public ProgParameterSymbol(TypeGraph g, String name, ParameterMode mode,
-                               String typeQualifier,
-            PTType type, ParserRuleContext definingTree, boolean moduleParameter,
-                               String moduleID) {
-        super(name, definingTree, moduleID);
+    public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
+                               @NotNull ParameterMode mode,
+                               @NotNull PTType type,
+                               @NotNull ParserRuleContext definingTree,
+                               @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.typeGraph = g;
-        this.mode = mode;
-        this.typeQualifier = typeQualifier;
         this.declaredType = type;
-        this.moduleParameterFlag = moduleParameter;
+        this.mode = mode;
+
+        MTType typeValue = null;
+        if (mode == ParameterMode.TYPE) {
+            typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
+        }
+
+        //TODO: Probably need to recajigger this to correctly account for any
+        //      generics in the defining context
         this.mathSymbolAlterEgo =
                 new MathSymbol(g, name, Quantification.NONE, type.toMath(),
-                        null, definingTree, moduleID);
+                        typeValue, definingTree, moduleIdentifier);
+
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
-                        declaredType, getModuleID());
+                        declaredType, getModuleIdentifier());
     }
 
-    public String getTypeQualifier() {
-        return typeQualifier;
-    }
-
-    public PTType getDeclaredType() {
+    @NotNull public PTType getDeclaredType() {
         return declaredType;
     }
 
-    public ParameterMode getMode() {
+    @NotNull public ParameterMode getMode() {
         return mode;
     }
 
-    public boolean isModuleParameter() {
-        return moduleParameterFlag;
-    }
-
-    @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
         return progVariableAlterEgo;
     }
 
-    @Override public ProgParameterSymbol toProgParameterSymbol() {
+    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol() {
         return this;
     }
 
-    @Override public ProgTypeSymbol toProgTypeSymbol() {
-        return new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
-                typeGraph, getName()), new MTNamed(typeGraph, getName()),
-                getDefiningTree(), getModuleID());
+    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol()
+            throws UnexpectedSymbolException {
+        ProgTypeSymbol result;
+
+        if (!mode.equals(ParameterMode.TYPE)) {
+            //This will throw an appropriate error
+            result = super.toProgTypeSymbol();
+        }
+        else {
+            result =
+                    new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
+                            typeGraph, getName()), new MTNamed(typeGraph, getName()),
+                            getDefiningTree(), getModuleIdentifier());
+        }
+        return result;
     }
 
-    public PSymbol asPSymbol() {
+    @NotNull public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
                 .mathType(declaredType.toMath()).build();
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a parameter";
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
-                typeQualifier,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(),
-                moduleParameterFlag, getModuleID());
+                getModuleIdentifier());
     }
 
     @Override public String toString() {

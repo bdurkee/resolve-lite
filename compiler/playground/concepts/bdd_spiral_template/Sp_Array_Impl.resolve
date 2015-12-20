@@ -1,0 +1,17 @@
+Implementation Sp_Array_Impl for Bdd_Spiral_Template;
+
+    Facility Arry_Fac is Static_Array_Template
+            (Label, 1, Max_Length)
+        externally implemented by Array_Impl;
+
+    Type Spiral_Pos = Record
+            Labl : Arry_Fac :: Static_Array;
+            Length, Curr_Place :
+                Std_Ints :: Integer;
+        end;
+
+    Procedure Lengthen (updates P : Spiral_Pos;
+                        alters e : Label);
+    end Lengthen;
+
+end Sp_Array_Impl;

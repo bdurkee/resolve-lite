@@ -1,44 +1,48 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.symbol.MathSymbol;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/**
- * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
- * <p>
- * Note that {@code ScopeBuilder} has no public constructor. Instances of this
- * class can be acquired through calls to some of the methods of
- * {@link MathSymbolTable}.</p>
+/** A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
+ *  <p>
+ *  Note that {@code ScopeBuilder} has no public constructor. Instances of this
+ *  class can be acquired through calls to some of the methods of
+ *  {@link MathSymbolTable}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
-    protected final List<ScopeBuilder> children = new ArrayList<>();
-    private final TypeGraph typeGraph;
+    @NotNull protected final List<ScopeBuilder> children = new ArrayList<>();
+    @NotNull private final TypeGraph typeGraph;
 
-    //Todo: We definitely want a linkedHashMap here to preserve the order
+    //We definitely want a linkedHashMap here for the bindings to preserve the order
     //in which entries were added to the table. Though it shouldn't necessarily
     //matter. It just does currently because of the way we grab lists of
     //formal parameters (from scope) for functions before we insert the
     //completed sym into the table.
-    ScopeBuilder(MathSymbolTable s, TypeGraph g, ParserRuleContext definingTree,
-                 Scope parent, String moduleID) {
-        super(s, definingTree, parent, moduleID, new LinkedHashMap<>());
+    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull TypeGraph g,
+                 @Nullable ParserRuleContext definingTree,
+                 @NotNull Scope parent,
+                 @NotNull ModuleIdentifier moduleIdentifier) {
+        super(s, definingTree, parent, moduleIdentifier, new LinkedHashMap<>());
         this.typeGraph = g;
     }
 
-    void setParent(Scope parent) {
+    //TODO: I think these parent and child methods can go eventually
+    void setParent(@NotNull Scope parent) {
         this.parent = parent;
     }
 
-    void addChild(ScopeBuilder b) {
+    void addChild(@NotNull ScopeBuilder b) {
         children.add(b);
     }
 
-    public List<ScopeBuilder> getChildren() {
+    @NotNull public List<ScopeBuilder> getChildren() {
         return new ArrayList<>(children);
     }
 
@@ -48,7 +52,7 @@ public class ScopeBuilder extends SyntacticScope {
 
         MathSymbol entry =
                 new MathSymbol(typeGraph, name, q, type, typeValue,
-                        definingTree, moduleID);
+                        definingTree, moduleIdentifier);
         symbols.put(name, entry);
         return entry;
     }

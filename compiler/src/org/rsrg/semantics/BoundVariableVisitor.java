@@ -1,3 +1,4 @@
+
 package org.rsrg.semantics;
 
 import java.util.*;
@@ -8,14 +9,6 @@ public class BoundVariableVisitor extends TypeVisitor {
 
     public MTType getInnermostBinding(String name) {
         return getInnermostBindingInfo(name).type;
-    }
-
-    @Override public final void beginMTBigUnion(MTBigUnion u) {
-        boundVariables.push(toBindingInfoMap(u.getQuantifiedVariables()));
-    }
-
-    @Override public final void endMTBigUnion(MTBigUnion u) {
-        boundVariables.pop();
     }
 
     public void annotateInnermostBinding(String name, Object key, Object value) {
@@ -33,7 +26,6 @@ public class BoundVariableVisitor extends TypeVisitor {
         while (binding == null && scopes.hasNext()) {
             binding = scopes.next().get(name);
         }
-
         if ( binding == null ) {
             throw new NoSuchElementException();
         }
@@ -41,7 +33,7 @@ public class BoundVariableVisitor extends TypeVisitor {
     }
 
     protected Map<String, BindingInfo>
-            toBindingInfoMap(Map<String, MTType> vars) {
+    toBindingInfoMap(Map<String, MTType> vars) {
         Map<String, BindingInfo> result = new HashMap<>();
 
         for (Map.Entry<String, MTType> entry : vars.entrySet()) {

@@ -1,5 +1,6 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.MTType;
@@ -8,17 +9,17 @@ import java.util.Map;
 
 public abstract class PTType {
 
-    private final TypeGraph typeGraph;
+    @NotNull private final TypeGraph typeGraph;
 
-    public PTType(TypeGraph g) {
+    public PTType(@NotNull TypeGraph g) {
         this.typeGraph = g;
     }
 
-    public final TypeGraph getTypeGraph() {
+    @NotNull public final TypeGraph getTypeGraph() {
         return typeGraph;
     }
 
-    public abstract MTType toMath();
+    @NotNull public abstract MTType toMath();
 
     /**
      * Returns {@code true} if this program type is a 'typed container' of
@@ -29,9 +30,9 @@ public abstract class PTType {
         return false;
     }
 
-    public abstract PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility);
+    @NotNull public abstract PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility);
 
     /**
      * Returns {@code true} <strong>iff</strong> a value of this type
@@ -42,7 +43,7 @@ public abstract class PTType {
      *         would be acceptable where one of type {@code t} were
      *         required
      */
-    public boolean acceptableFor(PTType t) {
+    public boolean acceptableFor(@NotNull PTType t) {
         return equals(t);
     }
 }

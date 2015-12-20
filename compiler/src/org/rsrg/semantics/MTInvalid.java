@@ -54,4 +54,8 @@ public class MTInvalid extends MTType {
     @Override public int getHashCode() {
         return objectReferenceHashCode();
     }
+
+    @Override public String toString() {
+        return "INVD_MATH_TYPE";
+    }
 }

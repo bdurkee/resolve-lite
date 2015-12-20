@@ -1,6 +1,7 @@
 package org.rsrg.semantics.searchers;
 
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.programtype.PTType;
@@ -15,33 +16,35 @@ import java.util.Map;
 
 public class OperationSearcher implements TableSearcher<OperationSymbol> {
 
-    private final String queryName;
-    private final List<PTType> actualArgTypes;
+    @NotNull private final String queryName;
+    @NotNull private final List<PTType> actualArgTypes;
 
-    public OperationSearcher(Token name, List<PTType> argumentTypes) {
+    public OperationSearcher(@NotNull Token name,
+                             @NotNull List<PTType> argumentTypes) {
         this(name.getText(), argumentTypes);
     }
 
-    public OperationSearcher(String name, List<PTType> argumentTypes) {
+    public OperationSearcher(@NotNull String name,
+                             @NotNull List<PTType> argumentTypes) {
         this.queryName = name;
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
 
-    @Override public boolean addMatches(Map<String, Symbol> entries,
-            List<OperationSymbol> matches, SearchContext l)
+    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                                        @NotNull List<OperationSymbol> matches,
+                                        @NotNull SearchContext l)
             throws DuplicateSymbolException {
 
-        if ( entries.containsKey(queryName) ) {
+        if (entries.containsKey(queryName)) {
             try {
                 OperationSymbol operation =
                         entries.get(queryName).toOperationSymbol();
 
                 if ( argumentsMatch(operation.getParameters()) ) {
                     //We have a match at this point
-                    if ( !matches.isEmpty() ) {
+                    if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
-
                     matches.add(operation);
                 }
             }
@@ -50,11 +53,12 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
         return false;
     }
 
-    private boolean argumentsMatch(List<ProgParameterSymbol> formalParameters) {
+    private boolean argumentsMatch(
+            @NotNull List<ProgParameterSymbol> formalParameters) {
 
         boolean result = (formalParameters.size() == actualArgTypes.size());
 
-        if ( result ) {
+        if (result) {
             Iterator<ProgParameterSymbol> formalParametersIter =
                     formalParameters.iterator();
             Iterator<PTType> actualArgumentTypeIter = actualArgTypes.iterator();
@@ -68,7 +72,6 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
                 result = actualArgumentType.acceptableFor(formalParameterType);
             }
         }
-
         return result;
     }
 }

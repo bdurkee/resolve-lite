@@ -6,21 +6,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class MTFunction extends MTAbstract<MTFunction> {
+public class MTFunction extends MTType {
 
     private static final int BASE_HASH = "MTFunction".hashCode();
 
     private static final FunctionApplicationFactory DEFAULT_FACTORY =
             new VanillaFunctionApplicationFactory();
 
-    /**
-     * In cases where myDomain is an instance of MTCartesian, the names of
-     * the original parameters are stored in the tags of that cartesian product.
-     * However, when myDomain is another type, we represent a function with
-     * a SINGLE PARAMETER and we have no way to embed the name of our parameter.
-     * In the latter case, this field will reflect the parameter name (or be
-     * null if we represent a function with un-named parameters). In the former
-     * case, the value of this field is undefined.
+    /** In cases where myDomain is an instance of MTCartesian, the names of
+     *  the original parameters are stored in the tags of that cartesian product.
+     *  However, when myDomain is another type, we represent a function with
+     *  a SINGLE PARAMETER and we have no way to embed the name of our parameter.
+     *  In the latter case, this field will reflect the parameter name (or be
+     *  null if we represent a function with un-named parameters). In the former
+     *  case, the value of this field is undefined.
      */
     private final String singleParameterName;
 
@@ -181,108 +180,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return result;
     }
 
-    /**
-     * Takes a set of typed parameters as they would be passed to a function
-     * of this type, and returns a new function type with the same number of
-     * parameters as this one, but any unbound type variables that appear as
-     * top level parameters "filled in".
-     * 
-     * So, for example, if this function type were
-     * {@code (T : MType, S : Str(R : MType), t : T) -> (T * S)} and you
-     * were to provide the parameters {@code (Z, true, false, false, false)},
-     * this method would return the function type
-     * {@code (T : MType, S : Str(R : MType), t : Z) -> (Z * S)}. Note that
-     * the parameters in this example do not type against the given
-     * function type, but that is irrelevant to this method. The unbound
-     * type variable {@code T} would be matched to {@code Z} and
-     * replaced throughout, while the unbound type variable {@code R} would
-     * not be bound, since it is not at the top level. Note for simplicity of
-     * implementation that the top-level type parameter itself remains unchanged
-     * (i.e., in theory you could later pass a different type to {@code T},
-     * despite having already "decided" that {@code T} is {@code Z}. This
-     * shouldn't be a problem in the normal type checking algorithm, but being
-     * certain not to abuse this is the client's responsibility.
-     * 
-     * If the parameters cannot be applied to this function type, either
-     * because of an inappropriate number of parameters, or a parameter value
-     * offered that is not within the bounds of a type parameter, this function
-     * will throw a {@link NoSolutionException}.
-     * 
-     * @param parameters Some typed parameters.
-     * 
-     * @return A version of this function type with any top-level type
-     *         parameters filled in.
-     */
-    public MTFunction deschematize(List<PExp> parameters)
-            throws NoSolutionException {
-        if ( domain.equals(getTypeGraph().VOID) ) {
-            if ( !parameters.isEmpty() ) {
-                throw NoSolutionException.INSTANCE;
-            }
-        }
-
-        Map<String, MTType> concreteValues = new HashMap<>();
-        if ( domain instanceof MTCartesian ) {
-            MTCartesian domainAsMTCartesian = (MTCartesian) domain;
-
-            int domainSize = domainAsMTCartesian.size();
-            int parametersSize = parameters.size();
-
-            if ( domainSize != parametersSize ) {
-                throw NoSolutionException.INSTANCE;
-            }
-            for (int i = 0; i < domainSize; i++) {
-                deschematizeParameter(domainAsMTCartesian.getTag(i),
-                        domainAsMTCartesian.getFactor(i), parameters.get(i),
-                        concreteValues);
-            }
-        }
-        else {
-            if ( parameters.size() != 1 ) {
-                throw NoSolutionException.INSTANCE;
-            }
-            deschematizeParameter(singleParameterName, domain,
-                    parameters.get(0), concreteValues);
-        }
-        return (MTFunction) getCopyWithVariablesSubstituted(concreteValues);
-    }
-
-    private void deschematizeParameter(String formalParameterName,
-            MTType formalParameterType, PExp actualParameter,
-            Map<String, MTType> accumulatedConcreteValues)
-            throws NoSolutionException {
-
-        formalParameterType =
-                formalParameterType
-                        .getCopyWithVariablesSubstituted(accumulatedConcreteValues);
-
-        if ( formalParameterType.isKnownToContainOnlyMTypes() ) {
-            //MTType actualParameterMathTypeValue =
-            //        actualParameter.getMathTypeValue();
-            //S --> Power(T) --> 'T' isknowntobein SSet
-            //S union S -->
-           /* if ( actualParameterMathTypeValue == null
-                    || !getTypeGraph().isKnownToBeIn(
-                            actualParameterMathTypeValue, formalParameterType) ) {
-                if ( actualParameterMathTypeValue != null ) {
-                    System.err.println("math actual parameter: "
-                            + actualParameter + " is not" + " within: "
-                            + formalParameterType);
-                }
-                else {
-                    System.err.println("math actual parameter: "
-                            + actualParameter
-                            + " does not have a type value, and is therefore"
-                            + " not within: " + formalParameterType);
-                }
-
-                throw NoSolutionException.INSTANCE;
-            }
-            accumulatedConcreteValues.put(formalParameterName,
-                    actualParameter.getMathTypeValue());*/
-        }
-    }
-
     public MTType getDomain() {
         return domain;
     }
@@ -393,7 +290,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
     @Override public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTAbstract(this);
         v.beginMTFunction(this);
     }
 
@@ -410,7 +306,6 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTFunction(this);
-        v.endMTAbstract(this);
         v.endMTType(this);
     }
 }

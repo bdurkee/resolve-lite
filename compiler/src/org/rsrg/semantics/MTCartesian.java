@@ -1,11 +1,12 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.ErrorManager;
 import edu.clemson.resolve.misc.Utils;
 
 import java.util.*;
 
-public class MTCartesian extends MTAbstract<MTCartesian> {
+public class MTCartesian extends MTType {
 
     private static final int BASE_HASH = "MTCartesian".hashCode();
 
@@ -187,7 +188,6 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
     @Override public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTAbstract(this);
         v.beginMTCartesian(this);
     }
 
@@ -203,7 +203,13 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
     @Override public void acceptClose(TypeVisitor v) {
         v.endMTCartesian(this);
-        v.endMTAbstract(this);
         v.endMTType(this);
+    }
+
+    public class UnexpectedCartesianSizeException extends SymbolTableException {
+
+        public UnexpectedCartesianSizeException(ErrorKind kind) {
+            super(kind);
+        }
     }
 }

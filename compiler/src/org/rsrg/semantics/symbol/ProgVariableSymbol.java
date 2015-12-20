@@ -1,50 +1,49 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.Map;
 
-public class ProgVariableSymbol extends Symbol implements ModuleParameterizableSymbol {
+public class ProgVariableSymbol extends Symbol {
 
     private final PTType type;
-    private final MathSymbol mathSymbolAlterEgo;
+    @NotNull private final MathSymbol mathSymbolAlterEgo;
 
-    public ProgVariableSymbol(String name,
-                              ParserRuleContext definingTree, PTType type,
-            String moduleID) {
-        super(name, definingTree, moduleID);
+    public ProgVariableSymbol(@NotNull String name,
+                              @Nullable ParserRuleContext definingTree,
+                              @NotNull PTType type,
+                              @NotNull ModuleIdentifier moduleIdentifier) {
+        super(name, definingTree, moduleIdentifier);
         this.type = type;
         this.mathSymbolAlterEgo =
                 new MathSymbol(type.getTypeGraph(), name, Quantification.NONE,
-                        type.toMath(), null, definingTree, moduleID);
+                        type.toMath(), null, definingTree, moduleIdentifier);
     }
 
-    @Override public PTType getProgramType() {
+    @NotNull public PTType getProgramType() {
         return type;
     }
 
-    @Override public String getSymbolDescription() {
+    @NotNull @Override public String getSymbolDescription() {
         return "a program variable";
     }
 
-    @Override public MTType getMathType() {
-        return mathSymbolAlterEgo.getType();
-    }
-
-    @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
         return this;
     }
 
-    @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @Override public Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility) {
 
         Symbol result;
         PTType instantiatedType =
@@ -54,7 +53,7 @@ public class ProgVariableSymbol extends Symbol implements ModuleParameterizableS
         if ( instantiatedType != type ) {
             result =
                     new ProgVariableSymbol(getName(), getDefiningTree(),
-                            instantiatedType, getModuleID());
+                            instantiatedType, getModuleIdentifier());
         }
         else {
             result = this;

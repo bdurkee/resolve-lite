@@ -37,11 +37,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Traverses a tree of directories. Each file encountered is reported via the
- * {@link #visitFile(Path, BasicFileAttributes)} method and each directory via
- * optional {@link #preVisitDirectory} or {@link #postVisitDirectory} methods.
- * Override others as needed.
+/** Traverses a tree of directories. Each file encountered is reported via the
+ *  {@link #visitFile(Path, BasicFileAttributes)} method and each directory via
+ *  optional {@link #preVisitDirectory} or {@link #postVisitDirectory} methods.
+ *  Override others as needed.
  */
 public class FileLocator extends SimpleFileVisitor<Path> {
 
@@ -50,12 +49,11 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     private List<File> matches = new ArrayList<>();
 
-    /**
-     * Constructs a new {@code FileLocator} that will match based on the
-     * {@code (pattern, extensions)} pair provided.
+    /** Constructs a new {@code FileLocator} that will match based on the
+     *  {@code (pattern, extensions)} pair provided.
      *
-     * @param pattern An extensionless pattern.
-     * @param extensions An list of valid extensions to choose from after a
+     *  @param pattern An extensionless pattern.
+     *  @param extensions An list of valid extensions to choose from after a
      *        pattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
@@ -80,12 +78,11 @@ public class FileLocator extends SimpleFileVisitor<Path> {
         return FileVisitResult.CONTINUE;
     }
 
-    /**
-     * Returns a single file matching {@code this.pattern}.
+    /** Returns a single file matching {@code this.pattern}.
      *
-     * @throws NoSuchFileException If a file matching {@code this.pattern} could
+     *  @throws NoSuchFileException If a file matching {@code this.pattern} could
      *         not be found.
-     * @return The matching file.
+     *  @return The matching file.
      */
     public File getFile() throws IOException {
         if ( matches.size() == 0 ) {

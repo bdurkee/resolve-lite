@@ -2,33 +2,33 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.HardCoded;
-import edu.clemson.resolve.parser.ResolveLexer;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.MultimatchSymbolQuery;
+import org.rsrg.semantics.query.SymbolQuery;
+import org.rsrg.semantics.searchers.TableSearcher;
+import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.Symbol;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class MathSymbolTable {
 
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
-    /**
-     * When starting a search from a particular scope, specifies how any
-     * available facilities should be searched.
+    /** When starting a search from a particular scope, specifies how any
+     *  available facilities should be searched.
      * 
-     * Available facilities are those facilities defined in a module searched by
-     * the search's {@code ImportStrategy} (which necessarily always includes
-     * the source module).
+     *  Available facilities are those facilities defined in a module searched by
+     *  the search's {@link ImportStrategy} (which necessarily always includes
+     *  the source module).
      * 
-     * Note that facilities cannot be recursively searched. Imports and
-     * facilities appearing in available facilities will not be searched.
+     *  Note that facilities cannot be recursively searched. Imports and
+     *  facilities appearing in available facilities will not be searched.
      */
     public static enum FacilityStrategy {
 
@@ -60,13 +60,13 @@ public class MathSymbolTable {
      * When starting a search from a particular scope, specifies which
      * additional modules should be searched, based on any imported modules.
      * 
-     * Imported modules are those listed in the <em>uses</em> clause of the
+     * Imported modules are those listed in the {@code uses} clause of the
      * source module scope in which the scope is introduced. For searches
      * originating directly in a module scope, the source module scope is the
      * scope itself. In addition to those scopes directly imported in the
      * <em>uses</em> clause, any modules implicitly imported will also be
      * searched. Implicitly imported modules include the standard modules (
-     * <code>Std_Boolean_Fac</code>, etc.), and any modules named in the header
+     * {@code Std_Bools}, etc.), and any modules named in the header
      * of the source module (e.g., an enhancement realization implicitly imports
      * it's associate enhancement and concept.)
      */
@@ -136,14 +136,14 @@ public class MathSymbolTable {
         public abstract boolean considerImports();
     }
 
-    private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
-    private final Map<String, ModuleScopeBuilder> moduleScopes = new HashMap<>();
-
-    private final ParseTreeProperty<ScopeBuilder> scopes =
+    @NotNull private final Deque<ScopeBuilder> lexicalScopeStack =
+            new LinkedList<>();
+    @NotNull private final Map<ModuleIdentifier, ModuleScopeBuilder> moduleScopes =
+            new HashMap<>();
+    @NotNull private final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
-
-    private ModuleScopeBuilder curModuleScope = null;
-    private final TypeGraph typeGraph;
+    @Nullable private ModuleScopeBuilder curModuleScope = null;
+    @NotNull private final TypeGraph typeGraph;
 
     public MathSymbolTable() {
         this.typeGraph = new TypeGraph();
@@ -151,54 +151,59 @@ public class MathSymbolTable {
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
                 new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
-                        "GLOBAL");
+                        ModuleIdentifier.GLOBAL);
 
         HardCoded.addBuiltInSymbols(typeGraph, globalScope);
         lexicalScopeStack.push(globalScope);
     }
 
-    public TypeGraph getTypeGraph() {
+    @NotNull public TypeGraph getTypeGraph() {
         return typeGraph;
     }
 
-    public ModuleScopeBuilder startModuleScope(AnnotatedModule module) {
-
-        if (module == null) {
-            throw new IllegalArgumentException("tree may not be null");
-        }
-        ParseTree contextTree = module.getRoot();
-
+    @NotNull public ModuleScopeBuilder startModuleScope(
+            @NotNull AnnotatedModule module) {
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }
+        ParseTree contextTree = module.getRoot();
+
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                module.getName(), (ParserRuleContext)contextTree, parent, this);
+                module.getNameToken(), (ParserRuleContext)contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
-        moduleScopes.put(s.getModuleID(), s);
+        moduleScopes.put(s.getModuleIdentifier(), s);
         return s;
     }
 
-    public ScopeBuilder startScope(ParserRuleContext definingTree) {
-        if ( definingTree == null ) {
-            throw new IllegalArgumentException("defining tree may not be null");
+    @NotNull public ScopeBuilder startScope(
+            @NotNull ParserRuleContext definingTree) {
+        if (curModuleScope == null) {
+            throw new IllegalStateException("no open module scope");
         }
-        checkModuleScopeOpen();
         ScopeBuilder parent = lexicalScopeStack.peek();
         ScopeBuilder s =
                 new ScopeBuilder(this, typeGraph, definingTree, parent,
-                        curModuleScope.getModuleID());
+                        curModuleScope.getModuleIdentifier());
 
         addScope(s, parent);
         return s;
     }
 
-    public ScopeBuilder endScope() {
+    /**
+     * Closes the most recently opened, unclosed working scope, including
+     * those opened with {@link #startModuleScope(AnnotatedModule)}.
+     *
+     * @return The new innermost active scope after the former one was closed
+     *         by this call. If the scope that was closed was the module scope,
+     *         then returns {@code null}
+     */
+    @Nullable public ScopeBuilder endScope() {
         checkScopeOpen();
         lexicalScopeStack.pop();
         ScopeBuilder result;
-        if ( lexicalScopeStack.size() == 1 ) {
+        if (lexicalScopeStack.size() == 1) {
             result = null;
             curModuleScope = null;
         }
@@ -213,42 +218,72 @@ public class MathSymbolTable {
         return lexicalScopeStack.peek();
     }
 
-    private void checkModuleScopeOpen() {
-        if ( curModuleScope == null ) {
-            throw new IllegalStateException("no open module scope");
-        }
-    }
-
     private void checkScopeOpen() {
         if ( lexicalScopeStack.size() == 1 ) {
             throw new IllegalStateException("no open scope");
         }
     }
 
-    private void addScope(ScopeBuilder s, ScopeBuilder parent) {
-        parent.addChild(s);
+    private void addScope(@NotNull ScopeBuilder s,
+                          @NotNull ScopeBuilder parent) {
         lexicalScopeStack.push(s);
         scopes.put(s.getDefiningTree(), s);
     }
 
-    public ScopeBuilder getScope(ParserRuleContext e) {
+    @NotNull public ScopeBuilder getScope(@NotNull ParserRuleContext e) {
         if (scopes.get(e) == null) {
             throw new IllegalArgumentException("no such scope: " + e.getText());
         }
         return scopes.get(e);
     }
 
-    public ModuleScopeBuilder getModuleScope(@NotNull String name)
+    @NotNull public ModuleScopeBuilder getModuleScope(
+            @NotNull ModuleIdentifier identifier)
             throws NoSuchModuleException {
-        return getModuleScope(new CommonToken(ResolveLexer.ID, name));
-    }
-
-    public ModuleScopeBuilder getModuleScope(@NotNull Token name)
-            throws NoSuchModuleException {
-        ModuleScopeBuilder module = moduleScopes.get(name.getText());
+        ModuleScopeBuilder module = moduleScopes.get(identifier);
         if (module == null) {
-            throw new NoSuchModuleException(name);
+            throw new NoSuchModuleException(identifier);
         }
         return module;
+    }
+
+    protected static class DummyIdentifierResolver extends AbstractScope {
+
+        @Override @NotNull public <E extends Symbol> List<E> query(
+                @NotNull MultimatchSymbolQuery<E> query) {
+            return new ArrayList<>();
+        }
+
+        @Override @NotNull public <E extends Symbol> E queryForOne(
+                @NotNull SymbolQuery<E> query)
+                throws NoSuchSymbolException, DuplicateSymbolException {
+            throw new NoSuchSymbolException();
+        }
+
+        @Override public <E extends Symbol> boolean addMatches(
+                @NotNull TableSearcher<E> searcher,
+                @NotNull List<E> matches,
+                @NotNull Set<Scope> searchedScopes,
+                @NotNull Map<String, PTType> genericInstantiations,
+                FacilitySymbol instantiatingFacility,
+                @NotNull TableSearcher.SearchContext l)
+                throws DuplicateSymbolException {
+            return false;
+        }
+
+        @Override @NotNull public Symbol define(@NotNull Symbol s)
+                throws DuplicateSymbolException {
+            return s;
+        }
+
+        @Override @NotNull public <T extends Symbol> List<T> getSymbolsOfType(
+                @NotNull Class<T> type) {
+            return new ArrayList<>();
+        }
+
+        @Override @NotNull public List<Symbol> getSymbolsOfType(
+                @NotNull Class<?>... type) {
+            return new ArrayList<>();
+        }
     }
 }

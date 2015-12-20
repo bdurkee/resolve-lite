@@ -1,33 +1,3 @@
-/*
- * [The "BSD license"]
- * Copyright (c) 2015 Clemson University
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- *
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.codegen.CodeGenPipeline;
@@ -39,6 +9,8 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -47,6 +19,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.rsrg.semantics.MathSymbolTable;
+import org.rsrg.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -55,6 +28,16 @@ import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/** The main entrypoint for the compiler. All input flows into here and this is
+ *  also where we manage flags for commandline args which are encapsulated via
+ *  instances of the {@link Option} class (which also resides here).
+ *  <p>
+ *  The structure and much of the code appearing here has been adapted to our
+ *  compiler's needs from the frontend of the ANTLRv4 tool, publically
+ *  available here: {@code https://github.com/antlr/antlr4}.</p>
+ *
+ *  @since 0.0.1
+ */
 public  class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
@@ -110,22 +93,20 @@ public  class RESOLVECompiler {
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Track separately so if someone adds a listener, it's the only one
-     * instead of it and the default stderr listener.
+    /** Track separately so if someone adds a listener, it's the only one
+     *  instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
-    public final MathSymbolTable symbolTable =
-            new MathSymbolTable();
+    public final MathSymbolTable symbolTable = new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    public final ErrorManager errMgr;
-    public LogManager logMgr = new LogManager();
+    @NotNull public final ErrorManager errMgr;
+    @NotNull public LogManager logMgr = new LogManager();
 
     public RESOLVECompiler() { this(null); }
 
-    public RESOLVECompiler(String[] args) {
+    public RESOLVECompiler(@Nullable String[] args) {
         this.errMgr = new ErrorManager(this);
         this.args = args;
         handleArgs();
@@ -260,20 +241,20 @@ public  class RESOLVECompiler {
         vcsPipe.process();
     }
 
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
+    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (String fileName : targetFiles) {
             AnnotatedModule t = parseModule(fileName);
             if ( t == null || t.hasErrors ) {
                 continue;
             }
-            roots.put(t.getName(), t);
+            roots.put(t.getNameToken().getText(), t);
         }
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(roots.values())) {
-            g.addVertex(t.getName());
+            g.addVertex(t.getNameToken().getText());
             findDependencies(g, t, roots);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
@@ -288,35 +269,42 @@ public  class RESOLVECompiler {
         return finalOrdering;
     }
 
-    private void findDependencies(DefaultDirectedGraph<String, DefaultEdge> g,
-                                  AnnotatedModule root,
-                                  Map<String, AnnotatedModule> roots) {
-        for (AnnotatedModule.UsesRef importRequest : root.uses) {
-            AnnotatedModule module = roots.get(importRequest.name);
+    private void findDependencies(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                                  @NotNull AnnotatedModule root,
+                                  @NotNull Map<String, AnnotatedModule> roots) {
+        for (ModuleIdentifier importRequest : root.uses) {
+            AnnotatedModule module =
+                    roots.get(importRequest.getNameToken().getText());
             try {
-                File file = findResolveFile(importRequest.name, NATIVE_EXTENSION);
+                File file = findResolveFile(importRequest
+                        .getNameToken().getText());
                 if ( module == null ) {
                     module = parseModule(file.getAbsolutePath());
-                    roots.put(module.getName(), module);
+                    if (module != null) {
+                        roots.put(module.getNameToken().getText(), module);
+                    }
                 }
             }
             catch (IOException ioe) {
                 errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.location, root.getName(),
-                        importRequest.name);
+                        importRequest.getNameToken(), root.getNameToken().getText(),
+                        importRequest.getNameToken().getText());
                 //mark the current root as erroneous
                 root.hasErrors = true;
                 continue;
             }
-
-            if ( pathExists(g, module.getName(), root.getName()) ) {
-                errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
-                        importRequest.location,
-                        importRequest.name, root.getName());
-                break;
+            if (module != null) {
+                if (pathExists(g, module.getNameToken().getText(),
+                        root.getNameToken().getText())) {
+                    errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
+                            importRequest.getNameToken(), root.getNameToken().getText(),
+                            importRequest.getNameToken().getText());
+                    break;
+                }
+                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(),
+                        module.getNameToken().getText());
+                findDependencies(g, module, roots);
             }
-            Graphs.addEdgeWithVertices(g, root.getName(), module.getName());
-            findDependencies(g, module, roots);
         }
     }
 
@@ -335,11 +323,11 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    protected boolean pathExists(DefaultDirectedGraph<String, DefaultEdge> g,
-                                 String src, String dest) {
+    protected boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                                 @NotNull String src,  @NotNull String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if ( !g.containsVertex(src) ) {
+        if (!g.containsVertex(src)) {
             return false;
         }
         GraphIterator<String, DefaultEdge> iterator =
@@ -347,16 +335,16 @@ public  class RESOLVECompiler {
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if ( next.equals(dest) ) {
+            if (next.equals(dest)) {
                 return true;
             }
         }
         return false;
     }
 
-    private File findResolveFile(String fileName,
-                                 List<String> extensions) throws IOException {
-        FileLocator l = new FileLocator(fileName, extensions);
+    @NotNull private File findResolveFile(@NotNull String fileName)
+            throws IOException {
+        FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
             Files.walkFileTree(new File(workingDirectory).toPath(), l);
@@ -370,7 +358,7 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    private AnnotatedModule parseModule(String fileName) {
+    @Nullable private AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
@@ -395,7 +383,7 @@ public  class RESOLVECompiler {
         return null;
     }
 
-    public static String getCoreLibraryDirectory() {
+    @NotNull public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
         if (rootDir == null) {
             return ".";
@@ -403,23 +391,23 @@ public  class RESOLVECompiler {
         return rootDir + File.separator + getCoreLibraryName();
     }
 
-    public static String getCoreLibraryName() {
+    @NotNull public static String getCoreLibraryName() {
         return "src";
     }
 
-    public void log(String component, String msg) {
+    public void log(@Nullable String component, @NotNull String msg) {
         logMgr.log(component, msg);
     }
 
-    public void log(String msg) {
+    public void log(@NotNull String msg) {
         log(null, msg);
     }
 
-    public void addListener(RESOLVECompilerListener cl) {
+    public void addListener(@Nullable RESOLVECompilerListener cl) {
         if ( cl!=null ) listeners.add(cl);
     }
 
-    public void removeListener(RESOLVECompilerListener tl) {
+    public void removeListener(@Nullable RESOLVECompilerListener tl) {
         listeners.remove(tl);
     }
 
@@ -427,7 +415,7 @@ public  class RESOLVECompiler {
         listeners.clear();
     }
 
-    public List<RESOLVECompilerListener> getListeners() {
+    @NotNull public List<RESOLVECompilerListener> getListeners() {
         return listeners;
     }
 
@@ -445,24 +433,24 @@ public  class RESOLVECompiler {
         }
     }
 
-    public void info(String msg) {
-        if ( listeners.isEmpty() ) {
+    public void info(@NotNull String msg) {
+        if (listeners.isEmpty()) {
             defaultListener.info(msg);
             return;
         }
         for (RESOLVECompilerListener l : listeners) l.info(msg);
     }
 
-    public void error(RESOLVEMessage msg) {
-        if ( listeners.isEmpty() ) {
+    public void error(@NotNull RESOLVEMessage msg) {
+        if (listeners.isEmpty()) {
             defaultListener.error(msg);
             return;
         }
         for (RESOLVECompilerListener l : listeners) l.error(msg);
     }
 
-    public void warning(RESOLVEMessage msg) {
-        if ( listeners.isEmpty() ) {
+    public void warning(@NotNull RESOLVEMessage msg) {
+        if (listeners.isEmpty()) {
             defaultListener.warning(msg);
         }
         else {

@@ -1,6 +1,7 @@
 package org.rsrg.semantics;
 
 import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -13,18 +14,21 @@ import java.util.List;
 
 public class QualifiedPath implements ScopeSearchPath {
 
+    @NotNull private final Token qualifier;
     private final boolean instantiateGenerics;
-    private final Token qualifier;
 
-    public QualifiedPath(Token qualifier, FacilityStrategy facilityStrategy) {
+    public QualifiedPath(@NotNull Token qualifier,
+                         @NotNull FacilityStrategy facilityStrategy) {
         this.instantiateGenerics =
                 facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
     }
 
-    @Override public <E extends Symbol> List<E> searchFromContext(
-            TableSearcher<E> searcher, Scope source, MathSymbolTable repo)
-            throws DuplicateSymbolException {
+    @Override @NotNull public <E extends Symbol> List<E> searchFromContext(
+            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
+            @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException,
+            UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         try {
             FacilitySymbol facility =
@@ -38,22 +42,18 @@ public class QualifiedPath implements ScopeSearchPath {
             //Dtw test:
             for (ModuleParameterization enh : facility.getEnhancements()) {
                 Scope enhScope = enh.getScope(instantiateGenerics);
-                result.addAll(enhScope.getMatches(searcher, SearchContext.FACILITY));
+                result.addAll(enhScope.getMatches(searcher,
+                        SearchContext.FACILITY));
             }
         }
         catch (NoSuchSymbolException e) {
             //then perhaps it identifies a module..
-            ModuleScopeBuilder moduleScope = null;
-            try {
-                moduleScope = repo.getModuleScope(
-                        qualifier.getText());
-            }
-            catch (NoSuchModuleException nsme) {
-                throw new NoSuchModuleException(qualifier);
-            }
+            ModuleScopeBuilder moduleScope =
+                    repo.getModuleScope(new ModuleIdentifier(qualifier));
             result =
                     moduleScope.getMatches(searcher,
                             TableSearcher.SearchContext.IMPORT);
+
         }
         return result;
     }

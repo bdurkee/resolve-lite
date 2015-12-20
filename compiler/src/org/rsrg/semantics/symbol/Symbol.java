@@ -1,8 +1,11 @@
 package org.rsrg.semantics.symbol;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.ModuleIdentifier;
+import org.rsrg.semantics.SyntacticScope;
 import org.rsrg.semantics.UnexpectedSymbolException;
 import org.rsrg.semantics.programtype.PTType;
 
@@ -11,95 +14,104 @@ import java.util.Map;
 
 public abstract class Symbol {
 
-    protected final String name, moduleID;
-    protected final ParserRuleContext definingTree;
+    @NotNull protected final String name;
 
-    public Symbol(String name, ParserRuleContext definingTree,
-                  String moduleID) {
+    /** Identifies the particular module in which this {@code Symbol} lives. */
+    @NotNull protected final ModuleIdentifier moduleIdentifier;
+
+    /** The parse tree context this symbol was derived from. Note that it can
+     *  be {@code null}. Note that contexts that <em>define</em> scopes keep
+     *  track of this as well.
+     *
+     * @see {@link SyntacticScope#getDefiningTree()}
+     */
+    @Nullable protected final ParserRuleContext definingTree;
+
+    public Symbol(@NotNull String name,
+                  @Nullable ParserRuleContext definingTree,
+                  @NotNull ModuleIdentifier moduleIdentifier) {
         this.name = name;
         this.definingTree = definingTree;
-        this.moduleID = moduleID;
+        this.moduleIdentifier = moduleIdentifier;
     }
 
-    public String getModuleID() {
-        return moduleID;
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    //Todo: This should really be changed across the board to return
-    //"ParserRuleContext" instead, as that gives start and stop info easier
-    //(without needing casts)
-    public ParserRuleContext getDefiningTree() {
+    @Nullable public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
 
-    public abstract String getSymbolDescription();
+    @NotNull public abstract String getSymbolDescription();
 
-    public MathSymbol toMathSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgTypeModelSymbol toProgTypeModelSymbol()
+    @NotNull public MathSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProgParameterSymbol toProgParameterSymbol()
+    @NotNull public ProgTypeSymbol toProgTypeSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public GenericSymbol toGenericSymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
-        throw new UnexpectedSymbolException(this.getSymbolDescription());
-    }
-
-    public ProgReprTypeSymbol toProgReprTypeSymbol()
+    @NotNull public TypeModelSymbol toTypeModelSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProgVariableSymbol toProgVariableSymbol()
+    @NotNull public ProgParameterSymbol toProgParameterSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+    @NotNull public OperationSymbol toOperationSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public ProcedureSymbol toProcedureSymbol() {
+    @NotNull public FacilitySymbol toFacilitySymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public TheoremSymbol toTheoremSymbol() {
+    @NotNull public ProgReprTypeSymbol toProgReprTypeSymbol()
+            throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    public abstract Symbol instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility);
+    @NotNull public ProgVariableSymbol toProgVariableSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
 
-    public static Map<String, MTType> buildMathTypeGenerics(
-            Map<String, PTType> genericInstantiations) {
+    @NotNull public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
 
-        Map<String, MTType> genericMathematicalInstantiations =
-                new HashMap<String, MTType>();
+    @NotNull public ProcedureSymbol toProcedureSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
+    @NotNull public TheoremSymbol toTheoremSymbol()
+            throws UnexpectedSymbolException {
+        throw new UnexpectedSymbolException(this.getSymbolDescription());
+    }
+
+    @NotNull public abstract Symbol instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @Nullable FacilitySymbol instantiatingFacility);
+
+    @NotNull public static Map<String, MTType> buildMathTypeGenerics(
+            @NotNull Map<String, PTType> genericInstantiations) {
+
+        Map<String, MTType> genericMathematicalInstantiations = new HashMap<>();
 
         for (Map.Entry<String, PTType> instantiation : genericInstantiations
                 .entrySet()) {

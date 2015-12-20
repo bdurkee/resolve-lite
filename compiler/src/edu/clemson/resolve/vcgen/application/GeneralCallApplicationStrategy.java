@@ -36,7 +36,7 @@ public class GeneralCallApplicationStrategy
                 .snapshot();
     }
 
-    //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
+    //TODO: Walk through this step by step in a .md file. Then store the .md file in /doc/
     public static class GeneralCallRuleSubstitutor extends PExpListener {
         private final VCAssertiveBlockBuilder block;
         public Map<PExp, PExp> test = new HashMap<>();
@@ -117,7 +117,7 @@ public class GeneralCallApplicationStrategy
                /* if (p.getMode() == CLEARS) {
                     PExp initPred =
                             block.g.formInitializationPredicate(
-                                    p.getDeclaredType(), p.getName());
+                                    p.getDeclaredType(), p.getNameToken());
                     newAssume = block.g.formConjunct(newAssume, initPred);
                 }*/
             }

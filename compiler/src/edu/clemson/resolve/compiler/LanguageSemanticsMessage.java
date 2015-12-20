@@ -33,6 +33,10 @@ package edu.clemson.resolve.compiler;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 
+/** A problem with the symbols and/or meaning of a grammar such as symbol
+ *  redefinition. Any sort of message where we're able to a concrete location
+ *  in the sourcefile.
+ */
 public class LanguageSemanticsMessage extends RESOLVEMessage {
 
     public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken,

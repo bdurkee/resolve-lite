@@ -1,6 +1,10 @@
 package org.rsrg.semantics;
 
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
@@ -9,36 +13,35 @@ import java.util.*;
 
 public class ModuleParameterization {
 
-    private final MathSymbolTable scopeRepo;
-    private final String moduleID;
+    @NotNull private final MathSymbolTable scopeRepo;
+    @NotNull private final ModuleIdentifier moduleIdentifier;
 
-    //private final List<ResolveParser.ModuleArgumentContext> arguments =
-    //        new ArrayList<>();
-    private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
-    private final FacilitySymbol instantiatingFacility;
+    @NotNull private final List<ResolveParser.ProgExpContext> arguments =
+            new ArrayList<>();
+    @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
+    @NotNull private final FacilitySymbol instantiatingFacility;
 
-    public ModuleParameterization(String moduleID,
-                                  List<ProgTypeSymbol> actualGenerics,
-                                  ParserRuleContext TEMP,//ResolveParser.ModuleArgumentListContext actualArgs,
-                                  FacilitySymbol instantiatingFacility, MathSymbolTable scopeRepo) {
+    public ModuleParameterization(@NotNull ModuleIdentifier moduleIdentifier,
+                                  @NotNull List<ProgTypeSymbol> actualGenerics,
+                                  @Nullable ResolveParser.ModuleArgumentListContext actualArgListNode,
+                                  @NotNull FacilitySymbol instantiatingFacility,
+                                  @NotNull MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
         this.actualGenerics.addAll(actualGenerics);
 
-        if ( TEMP != null ) {
-            //arguments.addAll(actualArgs.moduleArgument());
+        if ( actualArgListNode != null ) {
+            arguments.addAll(actualArgListNode.progExp());
         }
-        this.moduleID = moduleID;
+        this.moduleIdentifier = moduleIdentifier;
     }
 
-    public Scope getScope(boolean instantiated) {
+    @NotNull public Scope getScope(boolean instantiated)
+            throws NoSuchModuleException {
         Scope result;
-        ModuleScopeBuilder originalScope =
-                scopeRepo.getModuleScope(moduleID);
-        result = originalScope;
+        result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
             Map<String, PTType> genericInstantiations;
-
            // genericInstantiations =
            //         getGenericInstantiations(originalScope, null);
             //result =
@@ -63,21 +66,17 @@ public class ModuleParameterization {
                 actualGenerics.iterator();
         Iterator<GenericSymbol> formalGenericIter = formalGenerics.iterator();
         while (formalGenericIter.hasNext()) {
-            result.put(formalGenericIter.next().getName(), suppliedGenericIter
+            result.put(formalGenericIter.next().getNameToken(), suppliedGenericIter
                     .next().getProgramType());
         }
         return result;
     }*/
 
-    public String getName() {
-        return moduleID;
+    @NotNull public ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
-    public String getModuleID() {
-        return moduleID;
+    @NotNull public List<ResolveParser.ProgExpContext> getArguments() {
+        return arguments;
     }
-
-   // public List<ResolveParser.ModuleArgumentContext> getArguments() {
-   //     return arguments;
-   // }
 }

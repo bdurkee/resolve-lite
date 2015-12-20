@@ -1,5 +1,6 @@
 package org.rsrg.semantics.programtype;
 
+import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.TypeGraph;
@@ -9,10 +10,10 @@ import java.util.WeakHashMap;
 
 public class PTInvalid extends PTType {
 
-    private static WeakHashMap<TypeGraph, PTInvalid> instances =
+    @NotNull private static WeakHashMap<TypeGraph, PTInvalid> instances =
             new WeakHashMap<>();
 
-    public static PTInvalid getInstance(TypeGraph g) {
+    @NotNull public static PTInvalid getInstance(@NotNull TypeGraph g) {
         PTInvalid result = instances.get(g);
         if ( result == null ) {
             result = new PTInvalid(g);
@@ -21,11 +22,11 @@ public class PTInvalid extends PTType {
         return result;
     }
 
-    private PTInvalid(TypeGraph g) {
+    private PTInvalid(@NotNull TypeGraph g) {
         super(g);
     }
 
-    @Override public MTType toMath() {
+    @NotNull @Override public MTType toMath() {
         return getTypeGraph().INVALID;
     }
 
@@ -33,9 +34,9 @@ public class PTInvalid extends PTType {
         return "Invalid";
     }
 
-    @Override public PTType instantiateGenerics(
-            Map<String, PTType> genericInstantiations,
-            FacilitySymbol instantiatingFacility) {
+    @NotNull @Override public PTType instantiateGenerics(
+            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }
 

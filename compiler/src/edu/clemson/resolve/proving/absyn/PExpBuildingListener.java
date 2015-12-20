@@ -12,46 +12,45 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Converts parse tree math exprs to an equivalent abstract-syntax form,
- * represented by the {@link PExp} hierarchy.
+/** Converts parse tree math exprs to an equivalent abstract-syntax form,
+ *  represented by the {@link PExp} hierarchy. Get the final,
+ *  built {@link PExp} via a call to {@link #getBuiltPExp(ParseTree)}.
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
-    @NotNull private final AnnotatedModule annotations;
-    @NotNull private final ParseTreeProperty<PExp> repo;
+    private final AnnotatedModule annotations;
+    private final ParseTreeProperty<PExp> repo;
 
-    @NotNull private final Map<String, Quantification> quantifiedVars =
+    private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
     private final boolean skipDummyQuantifierNodes;
-    @NotNull private final TypeGraph g;
+    private final TypeGraph g;
 
-    /**
-     * Constructs a new {@code PExpBuildingListener} given an
-     * {@link AnnotatedModule} with it's associated type and expression bindings.
+    /** Constructs a new {@code PExpBuildingListener} given an
+     *  {@link AnnotatedModule} with it's associated type and expression bindings.
      *
-     * @param g a typegraph
-     * @param annotations annotations to be used for constructing expressions
+     *  @param g a typegraph
+     *  @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull TypeGraph g,
                                 @NotNull AnnotatedModule annotations) {
         this(g, annotations, false);
     }
 
-    /**
-     * Constructs a new {@code PExpBuildingListener} given an instance of
-     * {@link TypeGraph}, some module {@code annotations} and a boolean flag
-     * indicating whether or not to construct special syntactic nodes that
-     * pair an arbitrary number of quantified bound variables with a
-     * {@code PExp}s.
+    /** Constructs a new {@code PExpBuildingListener} given an instance of
+     *  {@link TypeGraph}, some module {@code annotations} and a boolean flag
+     *  {@code skipDummyQuantifiedNodes} indicating whether or not to construct
+     *  special syntactic nodes that pair an arbitrary number of quantified
+     *  bound variables with a {@code PExp}s.
      *
-     * @param annotations annotations to be used for constructing expressions
+     *  @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull TypeGraph g,
                                 @NotNull AnnotatedModule annotations,
@@ -63,7 +62,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
-    @SuppressWarnings("unchecked") public T getBuiltPExp(ParseTree t) {
+    @SuppressWarnings("unchecked")
+    @Nullable public T getBuiltPExp(ParseTree t) {
         return (T) repo.get(t);
     }
 
@@ -85,11 +85,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
+    @Override public void exitMathPrimeExp(
+            ResolveParser.MathPrimeExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathPrimaryExp()));
     }
 
-    @Override public void exitMathPrimaryExp(ResolveParser.MathPrimaryExpContext ctx) {
+    @Override public void exitMathPrimaryExp(
+            ResolveParser.MathPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 

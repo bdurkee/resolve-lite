@@ -2,9 +2,7 @@ package org.rsrg.semantics;
 
 import java.util.*;
 
-/**
- * The parent class of all mathematical types.
- */
+/** The parent class of all mathematical types. */
 public abstract class MTType {
 
     protected final TypeGraph myTypeGraph;
@@ -13,9 +11,7 @@ public abstract class MTType {
     private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
             new HashMap<>();
 
-    /**
-     * Allows us to detect if we're getting into an equals-loop.
-     */
+    /** Allows us to detect if we're getting into an equals-loop. */
     private int myEqualsDepth = 0;
 
     public MTType(TypeGraph typeGraph) {
@@ -59,60 +55,8 @@ public abstract class MTType {
         return result;
     }
 
-    public final Map<String, MTType> getSyntacticSubtypeBindings(MTType o)
-            throws NoSolutionException {
-
-        Map<String, MTType> result;
-
-        if ( myKnownSyntacticSubtypeBindings.containsKey(o) ) {
-            result = myKnownSyntacticSubtypeBindings.get(o);
-        }
-        else {
-            SyntacticSubtypeChecker checker =
-                    new SyntacticSubtypeChecker(myTypeGraph);
-
-            try {
-                checker.visit(this, o);
-            }
-            catch (RuntimeException e) {
-
-                Throwable cause = e;
-                while (cause != null
-                        && !(cause instanceof TypeMismatchException)) {
-                    cause = cause.getCause();
-                }
-
-                if ( cause == null ) {
-                    throw e;
-                }
-
-                throw NoSolutionException.INSTANCE;
-            }
-
-            result = Collections.unmodifiableMap(checker.getBindings());
-            myKnownSyntacticSubtypeBindings.put(o, result);
-        }
-
-        return result;
-    }
-
-    public final boolean isSubtypeOf(MTType o) {
-        return myTypeGraph.isSubtype(this, o);
-    }
-
     public final boolean isSyntacticSubtypeOf(MTType o) {
-
-        boolean result;
-
-        try {
-            getSyntacticSubtypeBindings(o);
-            result = true;
-        }
-        catch (NoSolutionException e) {
-            result = false;
-        }
-
-        return result;
+        return true;
     }
 
     public final boolean isBoolean() {
@@ -156,22 +100,6 @@ public abstract class MTType {
 
         return bind.getBindings();
     }*/
-
-    public Map<String, MTType>
-            bindTo(MTType template, Map<String, MTType> thisContext,
-                    Map<String, MTType> templateContext)
-                    throws BindingException {
-
-        BindingVisitor bind =
-                new BindingVisitor(myTypeGraph, thisContext, templateContext);
-        bind.visit(this, template);
-
-        if ( !bind.binds() ) {
-            throw new BindingException(this, template);
-        }
-
-        return bind.getBindings();
-    }
 
     public MTType getType() {
         //TODO : Each MTType should really contain it's declared type.  I.e.,
@@ -225,7 +153,6 @@ public abstract class MTType {
     private class MTTypeObjectHashWrapper {
 
         public final MTType type;
-
         public MTTypeObjectHashWrapper(MTType t) {
             type = t;
         }
@@ -233,7 +160,6 @@ public abstract class MTType {
         @Override public boolean equals(Object o) {
             return type.equals(o);
         }
-
         @Override public int hashCode() {
             return type.objectReferenceHashCode();
         }

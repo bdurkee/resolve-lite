@@ -26,13 +26,13 @@ public class HardCodedProgOps {
             return result;
         }
         PTNamed firstArgType = (PTNamed)args.get(0);
-        if ( firstArgType.getName().equals("Boolean") ) {
+        if ( firstArgType.getNameToken().equals("Boolean") ) {
             result = convertBooleanProgramOp(op);
         }
-        else if ( firstArgType.getName().equals("Integer") ) {
+        else if ( firstArgType.getNameToken().equals("Integer") ) {
             result = convertIntegerProgramOp(op);
         }
-        else if ( firstArgType.getName().equals("Char_Str") ) {
+        else if ( firstArgType.getNameToken().equals("Char_Str") ) {
             result = convertCharStrProgramOp(op);
         }*/
         return result;

@@ -12,15 +12,15 @@ Precis General_String_Theory;
             s : T * U * SStr * El -> (SStr ~ {Empty_String})) : T * SStr -> U is
         Is_String_Former(SStr, Empty_String, ext);
 
-    Inductive Definition (alpha : SStr) o (beta : SStr) : SStr is
-        (i.) alpha o Empty_String = alpha;
-        (ii.) alpha o ext(beta, _ ) = ext(alpha o beta, _ );
+    Inductive Definition (a : SStr) o (b : SStr) : SStr is
+        (i.) a o Empty_String = a;
+        (ii.) a o ext(b, _ ) = ext(a o b, _ );
 
-    Inductive Definition |alpha : SStr| : N is
+    Inductive Definition |a : SStr| : N is
         (i.)  |Empty_String| = 0;
-        (ii.) |ext(alpha, _ )| = suc(|alpha|);
+        (ii.) |ext(a, _ )| = suc(|a|);
 
     Corollary Cor_Length1:
-        Forall alpha : SStr, |alpha| = 0 iff alpha = Empty_String;
+        Forall a : SStr, |a| = 0 iff a = Empty_String;
 
 end General_String_Theory;
