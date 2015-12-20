@@ -307,6 +307,11 @@ public class PSymbol extends PExp {
             return this;
         }
 
+        public PSymbolBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
         public PSymbolBuilder literal(boolean e) {
             this.literal = e;
             return this;

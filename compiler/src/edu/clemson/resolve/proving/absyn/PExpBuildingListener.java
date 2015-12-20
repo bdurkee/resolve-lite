@@ -148,7 +148,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     //TODO: Convert biconditional ('iff') into longhand implication
-    @Override public void exitMathInfixApplyExp(
+   /* @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.op))
                 .applicationType(getMathType(ctx))
@@ -157,7 +157,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
         //OK, you're going to need a map from STRING -> MTType for the infix ops.
-    }
+    }*/
 
     @Override public void exitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
@@ -245,22 +245,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        /*List<String> nameComponents = ctx.mathSymbolExp().stream()
-                .map(app -> repo.get(app).getCanonicalName())
-                .collect(Collectors.toList());
-        PExp last = repo.get(ctx.mathSymbolExp()
-                .get(ctx.mathSymbolExp().size() - 1));
-        PExp first = repo.get(ctx.mathSymbolExp().get(0));
-        PExp result = new PSymbolBuilder(Utils.join(nameComponents, "."))
-                .mathType(last.getMathType()).incoming(first.isIncoming())
-                .build();
 
-        if (!ctx.mathExp().isEmpty()) {
-             result = new PApplyBuilder(result)
-                    .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo))
-                    .applicationType(last.getMathType()).build();
-        }
-        repo.put(ctx, result);*/
+        //conc.p.curr_place
+
+        //TODO: This doesn't currently handle things like: P.Lab(x)
+        //or (the odder) P.Lab(u).z, and other combinations with applications.
+        //also: P(x).v.z.
+        PExp typedRHS = repo.get(ctx.rhs);
+        PSymbol result = new PSymbolBuilder((PSymbol)typedRHS)
+                .name(ctx.getText()).build();
+        repo.put(ctx, result);//*/
     }
 
     @Override public void exitMathBooleanLiteralExp(

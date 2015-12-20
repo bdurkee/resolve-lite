@@ -34,6 +34,7 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
@@ -1007,6 +1008,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.progTypes.put(ctx, programType);
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return null;
+
+            //TODO TODO
         } catch (UnexpectedSymbolException e) {
             e.printStackTrace();
         } catch (NoSuchSymbolException e) {
@@ -1206,12 +1209,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
    private void handleRecursiveOperationRef(ParserRuleContext ctx,
                                             Token qualifier, Token name,
                                             List<PTType> actualArgTypes) {
-   }
+   }*/
 
    //---------------------------------------------------
    //  M A T H   E X P   T Y P I N G
    //---------------------------------------------------
-*/
+
     @Override public Void visitMathTypeExp(
             ResolveParser.MathTypeExpContext ctx) {
         typeValueDepth++;
@@ -1433,25 +1436,76 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathInfixApplyExp(
-            ResolveParser.MathInfixApplyExpContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, null, ctx.op, ctx.mathExp());
+    @Override public Void visitMathMultInfixApplyExp(
+            ResolveParser.MathMultInfixApplyExpContext ctx) {
+        this.visit(ctx.mathMultOp());
+        ctx.mathExp().forEach(this::visit); //visit each argument
+        //typeMathFunctionLikeThing(ctx, null, ctx, ctx.mathExp());
         return null;
     }
 
-    @Override public Void visitMathOutfixApplyExp(
+    //OK, now that we typed the operator, all that's left to do is:
+    //1. check to ensure the actual arg count == formal arg count.
+    //2. ensure that each argument 'is contained in' or 'is alpha equivalent to'
+    //the formal.
+    @Override public Void visitMathRelationalInfixApplyExp(
+            ResolveParser.MathRelationalInfixApplyExpContext ctx) {
+        this.visit(ctx.mathRelationalOp());
+        ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, ctx.mathRelationalOp(), ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathApplicationInfixApplyExp(
+            ResolveParser.MathApplicationInfixApplyExpContext ctx) {
+        this.visit(ctx.mathApplicationOp());
+        ctx.mathExp().forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, ctx.mathApplicationOp(), ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathMultOp(
+            ResolveParser.MathMultOpContext ctx) {
+        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
+    }
+
+    @Override public Void visitMathRelationalOp(
+            ResolveParser.MathRelationalOpContext ctx) {
+        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
+    }
+
+    @Override public Void visitMathApplicationOp(
+            ResolveParser.MathApplicationOpContext ctx) {
+        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
+    }
+
+    private void typeOperator(@NotNull ParserRuleContext ctx,
+                              @Nullable Token qualifier,
+                              @NotNull Token operator) {
+        MathSymbol function =
+                getIntendedEntry(qualifier, operator.getText(), ctx);
+        MTType type = g.INVALID;
+        if (function != null) {
+            type = function.getType();
+            tr.mathTypes.put(ctx, type);
+        }
+        emit("processed operator: " + operator.getText() +
+                " with formal type: " + type);
+    }
+
+    /*@Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
         typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
                 ctx.lop.getText() + "..." + ctx.rop.getText()), ctx.mathExp());
         return null;
-    }
+    }*/
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
         //System.out.println("mth prefix apply ctx text= "+ctx.getText());
         anonymousApplicationDepth++;
+        System.out.println("prefix apply ctx=" + ctx.getText());
         this.visit(ctx.functionExp);
         anonymousApplicationDepth--;
         //looks weird cause the 0th is now the expr representing the
@@ -1486,6 +1540,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         }
+        return null;
+    }
+
+    @Override public Void visitConventionClause(
+            ResolveParser.ConventionClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        expectType(ctx.mathAssertionExp(),
+                tr.mathTypes.get(ctx.mathAssertionExp()),
+                g.BOOLEAN);
+        chainMathTypes(ctx, ctx.mathAssertionExp());
         return null;
     }
 
@@ -1598,15 +1662,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
-                                           @Nullable Token qualifier,
-                                           @NotNull Token name,
-                                           @NotNull ParserRuleContext... args) {
-
-        typeMathFunctionLikeThing(ctx, qualifier, name, Arrays.asList(args));
-    }
-
-    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
+/*    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
                                            @NotNull ParserRuleContext functionPortion,
                                            @NotNull List<? extends ParserRuleContext> args) {
 
@@ -1635,7 +1691,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             //I had better identify a type
             if (typeValueDepth > 0) {
-                tr.mathTypeValues.put(ctx, formRealApplicationType(
+                tr.mathTypeValues.put(ctx, formActualApplicationType(
                         functionPortion.getText(), expectedAsFxn, args));
             }
         }
@@ -1644,48 +1700,61 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     tr.mathTypes.get(ctx));
         }
     }
+*/
+    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
+                                           @NotNull ParserRuleContext firstClassPortion,
+                                           @NotNull List<? extends ParserRuleContext> args) {
 
-    private void emitPreApplicationType(ParserRuleContext ctx,
-                                        List<? extends ParseTree> args) {
-        MTFunction foundExpType;
-        foundExpType = PApply.getConservativePreApplicationType(g, args, tr.mathTypes);
-        emit("expression: " + ctx.getText() + "("
-                + ctx.getStart().getLine() + ","
-                + ctx.getStop().getCharPositionInLine() + ") of type "
-                + foundExpType.toString());
-    }
-
-    private void typeMathFunctionLikeThing(ParserRuleContext ctx,
-                                           Token qualifier, Token name,
-                                           List<? extends ParserRuleContext> args) {
-        emitPreApplicationType(ctx, args);
-        MathSymbol intendedEntry =
-                getIntendedFunction(ctx, qualifier, name, args);
-        if (intendedEntry == null) {
-            tr.mathTypes.put(ctx, g.INVALID);
-            return;
+        if (!(tr.mathTypes.get(firstClassPortion) instanceof MTFunction)) {
+            //TODO: give better error here, either we're trying to apply args to some
+            //expression that is not function typed or we're dumb, etc. This is a real nice,
+            //natural way of checking this. E.g. SS(k)(Cen(k)), the SS(k) bit is fine because it returns a function
+            //from Sp_Loc(k) -> Sp_Loc(k).
+            tr.mathTypes.put(ctx, g.INVALID); return;
         }
-        MTFunction expectedType = (MTFunction) intendedEntry.getType();
+        MTFunction expectedFunctionType =
+                (MTFunction) tr.mathTypes.get(firstClassPortion);
+        if (expectedFunctionType == null) {
+            tr.mathTypes.put(ctx, g.INVALID); return;
+        }
         List<MTType> formalParameterTypes =
-                MathSymbol.getParameterTypes(expectedType);
+                MathSymbol.getParameterTypes(expectedFunctionType);
         if (args.size() != formalParameterTypes.size()) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
-                    ctx.getStart(), expectedType.toString());
+                    ctx.getStart(), expectedFunctionType.toString());
         }
-        //We know we match expectedType--otherwise the above would have thrown
-        //an exception.
-        tr.mathTypes.put(ctx, expectedType.getRange());
+        //>SUBTYPE CHECK FOR ARGS GOES HERE...
+        tr.mathTypes.put(ctx, expectedFunctionType.getRange());
+        emitActualApplicationType(ctx, args, expectedFunctionType.getRange());
         //I had better identify a type
         if (typeValueDepth > 0) {
-            MTType realAppType = formRealApplicationType(
-                    intendedEntry.getName(), expectedType, args);
+            MTType realAppType = formActualApplicationType(
+                    firstClassPortion.getText(), expectedFunctionType, args);
             tr.mathTypeValues.put(ctx, realAppType);
         }
     }
 
-    private MTType formRealApplicationType(String functionName,
-                                           MTFunction expectedType,
-                                           List<? extends ParserRuleContext> args) {
+    private void emitActualApplicationType(@NotNull ParserRuleContext ctx,
+                                           @NotNull List<? extends ParserRuleContext> args,
+                                           @NotNull MTType range) {
+        List<MTType> argTypes = new ArrayList<>();
+        for (ParserRuleContext arg : args) {
+            argTypes.add(tr.mathTypes.get(arg));
+        }
+        String actualType = Utils.join(argTypes, " * ") + " -> " + range;
+        emit("expression: " + ctx.getText() + "("
+                + ctx.getStart().getLine() + ","
+                + ctx.getStop().getCharPositionInLine() + ") of type "
+                + actualType);
+    }
+
+    /**  Returns the application type of the function with the actual
+     *   arg types; for instance if + : Z * Z -> Z, but N * Z  is supplied, then
+     *   the 'actual' application type is N * Z -> Z.
+     */
+    private MTType formActualApplicationType(String functionName,
+                                             MTFunction expectedType,
+                                             List<? extends ParserRuleContext> args) {
         List<MTType> arguments = new ArrayList<>();
         MTType argTypeValue;
         for (ParserRuleContext arg : args) {
@@ -1700,48 +1769,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             arguments.add(argTypeValue);
         }
         return expectedType.getApplicationType(functionName, arguments);
-    }
-
-    @Nullable private MathSymbol getIntendedFunction(@NotNull ParserRuleContext ctx,
-                                           @Nullable Token qualifier,
-                                           @NotNull Token name,
-                                           @NotNull List<? extends ParserRuleContext> args) {
-        MTType preAppType = PApply.getConservativePreApplicationType(g,
-                args, tr.mathTypes);
-        tr.mathTypes.put(ctx, preAppType);
-        MTFunction eType = (MTFunction) tr.mathTypes.get(ctx);
-        MathSymbol intendedFunction = null;
-
-        List<MathSymbol> sameNameFunctions = new ArrayList<>();
-
-        try {
-            sameNameFunctions.addAll(
-                    symtab.getInnermostActiveScope()
-                            .query(new MathFunctionNamedQuery(qualifier, name))
-                            .stream().filter(s -> s.getType() instanceof MTFunction)
-                            .collect(Collectors.toList()));
-        } catch (NoSuchModuleException nsme) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    nsme.getRequestedModule(),
-                    nsme.getRequestedModule().getText());
-        } catch (UnexpectedSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    name, "a math symbol", name.getText(),
-                    e.getTheUnexpectedSymbolsDescription());
-        }
-
-        if (sameNameFunctions.isEmpty()) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MATH_FUNCTION,
-                    ctx.getStart(), name.getText());
-        } else {
-            //TODO: For now, we can at least check arg counts, etc for now.
-            intendedFunction = sameNameFunctions.get(0);
-        }
-        if (intendedFunction == null) return null;
-        MTFunction intendedEntryType = (MTFunction) intendedFunction.getType();
-        emit("matching " + name.getText() + " : " + eType
-                + " to " + intendedFunction.getName() + " : " + intendedEntryType);
-        return intendedFunction;
     }
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
@@ -1760,9 +1787,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @NotNull protected final PExp getPExpFor(ParseTree ctx) {
-        if (ctx == null) {
-            return g.getTrueExp();
-        }
+        if (ctx == null) return g.getTrueExp();
         PExpBuildingListener<PExp> builder = new PExpBuildingListener<>(g, tr);
         ParseTreeWalker.DEFAULT.walk(builder, ctx);
         PExp result = builder.getBuiltPExp(ctx);
@@ -1783,9 +1808,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return symtab.getInnermostActiveScope().getModuleIdentifier();
     }
 
-    private void emit(String msg) {
-        if (EMIT_DEBUG) {
-            compiler.info(msg);
+    private void expectType(@NotNull ParserRuleContext ctx,
+                            @NotNull MTType found, @NotNull MTType expected) {
+        if (!(found.equals(expected))) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
+                    ctx.getStart(), expected.toString(), found.toString());
         }
+    }
+
+    private void emit(String msg) {
+        if (EMIT_DEBUG) compiler.info(msg);
     }
 }

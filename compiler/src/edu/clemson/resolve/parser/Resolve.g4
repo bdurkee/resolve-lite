@@ -349,19 +349,30 @@ mathQuantifiedExp
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
     |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
-    |   mathExp op=('*'|'/'|'~') mathExp                        #mathInfixApplyExp
-    |   mathExp op=('+'|'-') mathExp                            #mathInfixApplyExp
-    |   mathExp op=('..'|'->') mathExp                          #mathInfixApplyExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp            #mathInfixApplyExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp                #mathInfixApplyExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp                  #mathInfixApplyExp
-    |   mathExp op=('='|'/=') mathExp                           #mathInfixApplyExp
-    |   mathExp op=('implies'|'iff') mathExp                    #mathInfixApplyExp
-    |   mathExp op=('and'|'or') mathExp                         #mathInfixApplyExp
+    |   mathExp mathMultOp mathExp                              #mathMultInfixApplyExp
+    |   mathExp mathAddOp mathExp                               #mathAddInfixApplyExp
+    |   mathExp mathJoiningOp mathExp                           #mathJoiningInfixApplyExp
+    |   mathExp mathApplicationOp mathExp                       #mathApplicationInfixApplyExp
+    |   mathExp mathRelationalOp mathExp                        #mathRelationalInfixApplyExp
+    |   mathExp mathEqualityOp mathExp                          #mathEqualityInfixApplyExp
+    |   mathExp mathBooleanOp mathExp                           #mathBooleanInfixApplyExp
     |   mathExp op=':' mathTypeExp                              #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                                #mathNestedExp
     |   mathPrimaryExp                                          #mathPrimeExp
     ;
+
+/** Because operators are now first class citizens with expressions all of their
+ *  own (as opposed to being simple strings embedded within the context of some application)
+ *  we need these annoying intermediate rules to convince antlr to create visitable, *annotatable*,
+ *  contexts for these -- which greatly eases the creation (and subsequent typing) of an AST.
+ */
+mathMultOp : (qualifier=ID '::')? op=('*'|'/'|'%');
+mathAddOp : (qualifier=ID '::')? op=('+'|'-'|'~');
+mathRelationalOp : (qualifier=ID '::')? op=('<='|'>='|'>'|'<');
+mathBooleanOp : (qualifier=ID '::')? op=('implies'|'iff'|'and'|'or'|'is_in'|'is_not_in');
+mathEqualityOp : (qualifier=ID '::')? op=('='|'/=');
+mathApplicationOp : (qualifier=ID '::')? op=('..'|'->');
+mathJoiningOp : (qualifier=ID '::')? op=('o'|'union'|'intersect');
 
 mathPrimaryExp
     :   mathLiteralExp
