@@ -75,13 +75,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
     /** Set to {@code true} when we're walking the arguments to a module
-     *  (i.e. walking some set of args to a facility decl); or when we're walking
-     *  module formal parameters. Should be {@code false} otherwise;
+     *  (eg args to a facility decl); or when we're walking
+     *  module formal parameters; should be {@code false} otherwise;
      */
     private boolean walkingModuleArgOrParamList = false;
-    private boolean walkingFunctionAppArgs = false;
 
-
+    /** A reference to the expr context that represents the previous segment
+     *  accessed in a {@link ResolveParser.MathSelectorExpContext} or
+     *  {@link ResolveParser.ProgSelectorExpContext}, no need to worry about
+     *  overlap here -- as we use two separate expr hierarchies. This is
+     *  {@code null} the rest of the time.
+     */
     private ResolveParser.MathExpContext prevMathSelectorAccess = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
@@ -99,7 +103,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private int typeValueDepth = 0;
     private int globalSpecCount = 0;
-    private int anonymousApplicationDepth = 0;
 
     /** Any quantification-introducing syntactic context (e.g., an
      *  {@link ResolveParser.MathQuantifiedExpContext}),
@@ -1503,18 +1506,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
-        //System.out.println("mth prefix apply ctx text= "+ctx.getText());
-        anonymousApplicationDepth++;
-        System.out.println("prefix apply ctx=" + ctx.getText());
+        //emit("prefix apply ctx=" + ctx.getText());
         this.visit(ctx.functionExp);
-        anonymousApplicationDepth--;
         //looks weird cause the 0th is now the expr representing the
-        //'function's first class' name (and  type)
+        //application's first class 'function-portion'
         List<ResolveParser.MathExpContext> args =
                 ctx.mathExp().subList(1, ctx.mathExp().size());
-        walkingFunctionAppArgs = true;
         args.forEach(this::visit);
-        walkingFunctionAppArgs = false;
         typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
         return null;
     }
@@ -1636,8 +1634,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void setSymbolTypeValue(ParserRuleContext ctx, String symbolName,
                                     MathSymbol intendedEntry) {
         try {
-            if (anonymousApplicationDepth > 0) return; //hmmm..
-
             if (intendedEntry.getQuantification() == Quantification.NONE) {
                 tr.mathTypeValues.put(ctx, intendedEntry.getTypeValue());
             } else {
@@ -1652,55 +1648,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //a function application serving as a type designator necessarily need values...
 
                 //Another thought, why the hell would Powerset(Z) typecheck in that case... Z wouldn't have a value... right?
-                //Ok, I guess because it's MTPowersetApplication it's "special", jesus.
-                if (walkingFunctionAppArgs) {
-                    tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
-                } else {
-                    tr.mathTypeValues.put(ctx, g.INVALID);
-                }
+                //edit: Ok, I guess because it's MTPowersetApplication -- meaning it's "special". jesus.
+
+                //In summary, here's my question: why do arguments to arbitrary (read: not necessarily powerset)
+                //function applications appearing on the rhs of a colon necessarily need
+                //have arguments that are guaranteed to only contain values?? Maybe an example for me? Please?
+                tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
     }
 
-/*    private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
-                                           @NotNull ParserRuleContext functionPortion,
-                                           @NotNull List<? extends ParserRuleContext> args) {
-
-        ParseTree kid = functionPortion.getChild(0).getChild(0);
-
-        //We're dealing with a simple function application: e.g.: Powerset(Z);
-        if (kid instanceof ResolveParser.MathSymbolExpContext) {
-            ResolveParser.MathSymbolExpContext kidAsSym =
-                    (ResolveParser.MathSymbolExpContext) kid;
-
-            typeMathFunctionLikeThing(ctx, kidAsSym.qualifier,
-                    kidAsSym.mathSymbolName().getStart(), args);
-        }
-        //we're dealing with a more exotic, curried, anonymous
-        //application: i.e.: SS(k)(Cen(k))
-        else {
-            emitPreApplicationType(ctx, args);
-
-            MTType expectedType = anonymousFunctionExpectedRangeTypes.get(functionPortion);
-            if (expectedType == null || !(expectedType instanceof MTFunction)) {
-                tr.mathTypes.put(ctx, g.INVALID);
-                return;
-            }
-            MTFunction expectedAsFxn = (MTFunction) expectedType;
-            tr.mathTypes.put(ctx, expectedAsFxn.getRange());
-
-            //I had better identify a type
-            if (typeValueDepth > 0) {
-                tr.mathTypeValues.put(ctx, formActualApplicationType(
-                        functionPortion.getText(), expectedAsFxn, args));
-            }
-        }
-        if (anonymousApplicationDepth > 0) {
-            anonymousFunctionExpectedRangeTypes.put(functionPortion.getParent(),
-                    tr.mathTypes.get(ctx));
-        }
-    }
-*/
     private void typeMathFunctionLikeThing(@NotNull ParserRuleContext ctx,
                                            @NotNull ParserRuleContext firstClassPortion,
                                            @NotNull List<? extends ParserRuleContext> args) {
@@ -1744,8 +1701,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String actualType = Utils.join(argTypes, " * ") + " -> " + range;
         emit("expression: " + ctx.getText() + "("
                 + ctx.getStart().getLine() + ","
-                + ctx.getStop().getCharPositionInLine() + ") of type "
-                + actualType);
+                + ctx.getStop().getCharPositionInLine() + ") of app type "
+                + actualType + ", with final type: " + range);
     }
 
     /**  Returns the application type of the function with the actual
