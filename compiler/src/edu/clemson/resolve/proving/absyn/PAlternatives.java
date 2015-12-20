@@ -6,9 +6,8 @@ import org.rsrg.semantics.MTType;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * A container for a piecewise collection of conditional functions followed by
- * a default, otherwise clause.
+/** A container for a piecewise collection of conditional functions followed by
+ *  a default, otherwise clause.
  */
 public class PAlternatives extends PExp {
 

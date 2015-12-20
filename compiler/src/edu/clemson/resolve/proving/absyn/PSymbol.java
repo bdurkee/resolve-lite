@@ -11,13 +11,12 @@ import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
 
-/**
- * Represents a reference to a named element such as a variable, constant, or
- * function.
- * <p>
- * Specifically, if this refers to a <em>name</em> of a funtion, then that
- * instance represents a typed reference to the first class portion of the function,
- * independent of any supplied arguments.</p>
+/** Represents a reference to a named element such as a variable, constant, or
+ *  function.
+ *  <p>
+ *  Specifically, if this refers to a <em>name</em> of a funtion, then that
+ *  instance represents a typed reference to the first class portion of the function,
+ *  independent of any supplied arguments.</p>
  */
 public class PSymbol extends PExp {
 
@@ -29,12 +28,11 @@ public class PSymbol extends PExp {
 
     private final boolean literalFlag, incomingFlag;
 
-    /**
-     * Constructs a new {@code PSymbol}. Note that this is specifically made
-     * private; thus clients should instead go through {@link PSymbolBuilder} to
-     * construct new instances.
+    /** Constructs a new {@code PSymbol}. Note that this is specifically made
+     *  private; thus clients should instead go through {@link PSymbolBuilder}
+     *  to construct new instances.
      *
-     * @param builder a 'buildable' version of {@code PSymbol}
+     *  @param builder a 'buildable' version of {@code PSymbol}
      */
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.name), builder.mathType,
@@ -106,12 +104,11 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    /**
-     * A helper method to be used alongside this class's
-     * {@link PExp PExp#substitute} that allows the name of a PSymbol to be
-     * segmented into {@code .}-delimited segments. This is useful for instance
-     * when we need to replace a {@code PSymbol} such as {@code P.Length} with
-     * {@code conc.P.Length}.
+    /** A helper method to be used alongside this class's
+     *  {@link PExp PExp#substitute} that allows the name of a PSymbol to be
+     *  segmented into {@code .}-delimited segments. This is useful for instance
+     *  when we need to replace a {@code PSymbol} such as {@code P.Length} with
+     *  {@code conc.P.Length}.
      */
     private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
         if (!name.contains(".")) return name;
@@ -239,11 +236,10 @@ public class PSymbol extends PExp {
         return result += name;
     }
 
-    /**
-     * A builder for {@code PSymbol}s.
-     * <p>
-     * As usual, a final, immutable instance of {@link PSymbol} can be obtained
-     * through a call to {@link PSymbolBuilder#build()}.</p>
+    /** A builder for {@code PSymbol}s.
+     *  <p>
+     *  As usual, a final, immutable instance of {@link PSymbol} can be obtained
+     *  through a call to {@link PSymbolBuilder#build()}.</p>
      */
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
         protected String name, lprint, rprint;

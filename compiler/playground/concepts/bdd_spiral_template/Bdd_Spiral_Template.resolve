@@ -12,8 +12,8 @@ Concept Bdd_Spiral_Template(type Label;
         exemplar P;
     //    constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
     //                P.Lab(P.Trmnl_Loc) = Label.Base_Point;
-        initialization
-            ensures P.Curr_Loc.foo.ss;
+       // initialization
+       //     ensures P.Curr_Loc.foo.ss;
 
     Operation Lengthen (updates P : Spiral_Pos;
                         alters e : Label);

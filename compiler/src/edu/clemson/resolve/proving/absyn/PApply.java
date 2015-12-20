@@ -13,28 +13,26 @@ import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.misc.Utils.apply;
 
-/**
- * This class represents exclusively function applications, specifically
- * applications with some non-zero number of arguments.
+/** This class represents exclusively function applications, specifically
+ *  applications with some non-zero number of arguments.
  *
- * @author dtwelch <dtw.welch@gmail.com>
+ *  @author dtwelch <dtw.welch@gmail.com>
  */
 public class PApply extends PExp {
 
-    /**
-     * An enumerated type that provides additional information about how to
-     * display an instance of {@link PApply}, specifically whether it should be
-     * displayed as an infix, outfix, prefix, or postfix style application.
-     *
-     * <p>Note that while this enum indeed stands-in for the four subclasses
-     * we'd otherwise need to represent the application styles mentioned, we
-     * still can get specific visitor methods for each style (even with an enum)
-     * courtesy of the following accept methods:</p>
-     * <ul>
-     * <li>{@link #beginAccept(PExpListener, PApply)}</li>
-     * <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
-     * <li>{@link #endAccept(PExpListener, PApply)}</li>
-     * </ul>
+    /** An enumerated type that provides additional information about how to
+     *  display an instance of {@link PApply}, specifically whether it should be
+     *  displayed as an infix, outfix, prefix, or postfix style application.
+     *  <p>
+     *  Note that while this enum indeed stands-in for the four subclasses
+     *  we'd otherwise need to represent the application styles mentioned, we
+     *  still can get specific visitor methods for each style (even with an enum)
+     *  courtesy of the following accept methods:</p>
+     *  <ul>
+     *  <li>{@link #beginAccept(PExpListener, PApply)}</li>
+     *  <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
+     *  <li>{@link #endAccept(PExpListener, PApply)}</li>
+     *  </ul>
      */
     public static enum DisplayStyle {
 
@@ -146,15 +144,14 @@ public class PApply extends PExp {
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 
-    /**
-     * Represents the 'first class function' this application is referencing.
-     * Note that the type of {@code functionPortion} can be considered
-     * independent of the types of the actuals
-     * (which are rightly embedded here in the argument {@code PExp}s).
+    /** Represents the 'first class function' this application is referencing.
+     *  Note that the type of {@code functionPortion} can be considered
+     *  independent of the types of the actuals
+     *  (which are rightly embedded here in the argument {@code PExp}s).
      *
-     * <p>While this field in most cases will simply be an instance of
-     * {@link PSymbol}, realize that it could also be something more 'exotic'
-     * such as a {@code PLambda} or even another {@code PApply}.</p>
+     *  <p>While this field in most cases will simply be an instance of
+     *  {@link PSymbol}, realize that it could also be something more 'exotic'
+     *  such as a {@code PLambda} or even another {@code PApply}.</p>
      */
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();
@@ -218,9 +215,7 @@ public class PApply extends PExp {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @NotNull @Override public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
         PExp result;
@@ -431,12 +426,11 @@ public class PApply extends PExp {
         return displayStyle.toString(this);
     }
 
-    /**
-     * A mutable, under-construction version of {@code PApply} capable of being
-     * incrementally built-up through chained calls to 'builder' methods.
-     * <p>
-     * When the building is complete, an immutable {@code PApply} instance can
-     * be obtained through a call to {@link PApplyBuilder#build()}.</p>
+    /** A mutable, under-construction version of {@code PApply} capable of being
+     *  incrementally built-up through chained calls to 'builder' methods.
+     *  <p>
+     *  When the building is complete, an immutable {@code PApply} instance can
+     *  be obtained through a call to {@link PApplyBuilder#build()}.</p>
      */
     public static class PApplyBuilder implements Utils.Builder<PApply> {
 
