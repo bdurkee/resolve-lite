@@ -1,10 +1,10 @@
 Concept Bdd_Spiral_Template(type Label;
-            evaluates k : Std_Ints :: Integer );
-        uses Basic_Natural_Number_Theory, Standard_Integers,
-                Basic_Spiral_Theory;
-           //  Basic_Function_Properties,
-           //  Basic_Spiral_Theory;
-    requires k >= 2;
+            evaluates k, Max_Length : Std_Ints :: Integer);
+        uses Standard_Integers, Basic_Natural_Number_Theory,
+             Basic_Function_Properties,
+             Basic_Spiral_Theory;
+    requires k >= 2 and Max_Length > 0
+                which_entails Max_Length : N2;
 
 /*   Type family Spiral_Pos is modeled by Cart_Prod
             Lab : Sp_Loc(k) -> Label;

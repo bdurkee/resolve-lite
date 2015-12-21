@@ -38,7 +38,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.CommonToken;
@@ -57,7 +56,6 @@ import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -281,7 +279,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                  ctx.name, "an operation", ctx.name.getText(),
-                 use.getTheUnexpectedSymbolsDescription());
+                 use.getTheUnexpectedSymbolDescription());
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
         }
@@ -477,7 +475,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              catch (UnexpectedSymbolException use) {
                  compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                          generic.getStart(), "a program type", generic.getText(),
-                         use.getTheUnexpectedSymbolsDescription());
+                         use.getTheUnexpectedSymbolDescription());
              }
          }
          return result;
@@ -502,7 +500,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a type", ctx.name.getText(),
-                    use.getTheUnexpectedSymbolsDescription());
+                    use.getTheUnexpectedSymbolDescription());
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
         }
@@ -752,7 +750,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  children. This way the top level definition nodes can simply grab the type
      *  of the signature and build/populate the appropriate object. However,
      *  know that in the defn top level nodes, we must remember to start scope,
-     *  visit the signature, and end scope. We don't do this in the signature
+     *  visit the signature, body, and end scope. We don't do this in the signature
      *  because certain information (i.e. body) is rightfully not present.
      *  <p>
      *  <p>Note also that here we also add a binding for the name of this
@@ -1441,45 +1439,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathMultInfixApplyExp(
             ResolveParser.MathMultInfixApplyExpContext ctx) {
-        this.visit(ctx.mathMultOp());
-        ctx.mathExp().forEach(this::visit); //visit each argument
-        //typeMathFunctionLikeThing(ctx, null, ctx, ctx.mathExp());
-        return null;
+        return typeApplyExp(ctx, ctx.mathMultOp(), ctx.mathExp());
     }
+
+    @Override public Void visitMathRelationalInfixApplyExp(
+            ResolveParser.MathRelationalInfixApplyExpContext ctx) {
+        return typeApplyExp(ctx, ctx.mathRelationalOp(), ctx.mathExp());
+    }
+
+    @Override public Void visitMathApplicationInfixApplyExp(
+            ResolveParser.MathApplicationInfixApplyExpContext ctx) {
+        return typeApplyExp(ctx, ctx.mathApplicationOp(), ctx.mathExp());
+    }
+
+    //operator typing
+    @Override public Void visitMathMultOp(ResolveParser.MathMultOpContext ctx) {typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathAddOp(ResolveParser.MathAddOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathRelationalOp(ResolveParser.MathRelationalOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathBooleanOp(ResolveParser.MathBooleanOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathEqualityOp(ResolveParser.MathEqualityOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathApplicationOp(ResolveParser.MathApplicationOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathJoiningOp(ResolveParser.MathJoiningOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
 
     //OK, now that we typed the operator, all that's left to do is:
     //1. check to ensure the actual arg count == formal arg count.
     //2. ensure that each argument 'is contained in' or 'is alpha equivalent to'
     //the formal.
-    @Override public Void visitMathRelationalInfixApplyExp(
-            ResolveParser.MathRelationalInfixApplyExpContext ctx) {
-        this.visit(ctx.mathRelationalOp());
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, ctx.mathRelationalOp(), ctx.mathExp());
+    private Void typeApplyExp(@NotNull ParserRuleContext ctx,
+                              @NotNull ParserRuleContext operator,
+                              @NotNull List<? extends ParserRuleContext> args) {
+        this.visit(operator);
+        args.forEach(this::visit);
+        typeMathFunctionLikeThing(ctx, operator, args);
         return null;
-    }
-
-    @Override public Void visitMathApplicationInfixApplyExp(
-            ResolveParser.MathApplicationInfixApplyExpContext ctx) {
-        this.visit(ctx.mathApplicationOp());
-        ctx.mathExp().forEach(this::visit);
-        typeMathFunctionLikeThing(ctx, ctx.mathApplicationOp(), ctx.mathExp());
-        return null;
-    }
-
-    @Override public Void visitMathMultOp(
-            ResolveParser.MathMultOpContext ctx) {
-        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
-    }
-
-    @Override public Void visitMathRelationalOp(
-            ResolveParser.MathRelationalOpContext ctx) {
-        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
-    }
-
-    @Override public Void visitMathApplicationOp(
-            ResolveParser.MathApplicationOpContext ctx) {
-        typeOperator(ctx, ctx.qualifier, ctx.op); return null;
     }
 
     private void typeOperator(@NotNull ParserRuleContext ctx,
@@ -1626,7 +1618,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a math symbol", symbolName,
-                    use.getTheUnexpectedSymbolsDescription());
+                    use.getTheUnexpectedSymbolDescription());
         }
         return null;
     }
@@ -1643,7 +1635,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         } catch (SymbolNotOfKindTypeException snokte) {
             if (typeValueDepth > 0) {
-                //TODO: So in <something> : Sp_Loc(k), the k clearly WOULDN't have a value,
+                //TODO: So in the case of:
+                // k : Powerset(N)
+                // <something> : Sp_Loc(k), the k clearly WOULDN't have a value,
                 //so I'm just going to make it Z. I don't understand why arguments to
                 //a function application serving as a type designator necessarily need values...
 
@@ -1652,7 +1646,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 //In summary, here's my question: why do arguments to arbitrary (read: not necessarily powerset)
                 //function applications appearing on the rhs of a colon necessarily need
-                //have arguments that are guaranteed to only contain values?? Maybe an example for me? Please?
+                //have arguments that are guaranteed to only contain values? Maybe an example would help? According
+                //to Hws's old type chcker, that's just how it needs to be.
                 tr.mathTypeValues.put(ctx, g.INVALID);
             }
         }
@@ -1663,10 +1658,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull List<? extends ParserRuleContext> args) {
 
         if (!(tr.mathTypes.get(firstClassPortion) instanceof MTFunction)) {
-            //TODO: give better error here, either we're trying to apply args to some
+            //TODO: give me a better error here, either we're trying to apply args to some
             //expression that is not function typed or we're dumb, etc. This is a real nice,
-            //natural way of checking this. E.g. SS(k)(Cen(k)), the SS(k) bit is fine because it returns a function
-            //from Sp_Loc(k) -> Sp_Loc(k).
+            //natural way of checking this. As an example: SS(k)(Cen(k)), the SS(k) bit is fine
+            //because it returns a function from Sp_Loc(k) -> Sp_Loc(k).
             tr.mathTypes.put(ctx, g.INVALID); return;
         }
         MTFunction expectedFunctionType =

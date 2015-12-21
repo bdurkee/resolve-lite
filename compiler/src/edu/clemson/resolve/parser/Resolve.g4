@@ -364,8 +364,8 @@ mathExp
  *  own (as opposed to being simple strings embedded within the context of some application)
  *  we need these intermediate rules to convince antlr to create visitable, *annotatable*,
  *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST
- *  (won't need to pass maps around from Token -> MTType, etc -- now we just need to visit them
- *  like any other node).
+ *  (won't need to pass special maps around from Token -> MTType, etc --
+ *  now we just need to visit and annotate them like any other node).
  */
 mathMultOp : (qualifier=ID '::')? op=('*'|'/'|'%');
 mathAddOp : (qualifier=ID '::')? op=('+'|'-'|'~');
