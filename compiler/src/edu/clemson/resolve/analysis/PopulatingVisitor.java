@@ -81,7 +81,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /** A reference to the expr context that represents the previous segment
      *  accessed in a {@link ResolveParser.MathSelectorExpContext} or
      *  {@link ResolveParser.ProgSelectorExpContext}, no need to worry about
-     *  overlap here -- as we use two separate expr hierarchies. This is
+     *  overlap here as we use two separate expr hierarchies. This is
      *  {@code null} the rest of the time.
      */
     private ResolveParser.MathExpContext prevMathSelectorAccess = null;
@@ -1437,19 +1437,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathMultInfixApplyExp(
-            ResolveParser.MathMultInfixApplyExpContext ctx) {
-        return typeApplyExp(ctx, ctx.mathMultOp(), ctx.mathExp());
-    }
-
-    @Override public Void visitMathRelationalInfixApplyExp(
-            ResolveParser.MathRelationalInfixApplyExpContext ctx) {
-        return typeApplyExp(ctx, ctx.mathRelationalOp(), ctx.mathExp());
-    }
-
-    @Override public Void visitMathApplicationInfixApplyExp(
-            ResolveParser.MathApplicationInfixApplyExpContext ctx) {
-        return typeApplyExp(ctx, ctx.mathApplicationOp(), ctx.mathExp());
+    @Override public Void visitMathInfixApplyExp(
+            ResolveParser.MathInfixApplyExpContext ctx) {
+        //risky, but better than 20 different overriden visitor methods...
+        return typeApplyExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
     }
 
     //operator typing
@@ -1463,8 +1454,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     //OK, now that we typed the operator, all that's left to do is:
     //1. check to ensure the actual arg count == formal arg count.
-    //2. ensure that each argument 'is contained in' or 'is alpha equivalent to'
-    //the formal.
+    //2. ensure that each argument 'is contained in' (bill parlance) or
+    //   'is alpha equivalent to' the formal (hampton parlance).
     private Void typeApplyExp(@NotNull ParserRuleContext ctx,
                               @NotNull ParserRuleContext operator,
                               @NotNull List<? extends ParserRuleContext> args) {

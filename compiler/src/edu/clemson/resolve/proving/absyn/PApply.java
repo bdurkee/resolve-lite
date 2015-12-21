@@ -15,8 +15,6 @@ import static edu.clemson.resolve.misc.Utils.apply;
 
 /** This class represents exclusively function applications, specifically
  *  applications with some non-zero number of arguments.
- *
- *  @author dtwelch <dtw.welch@gmail.com>
  */
 public class PApply extends PExp {
 
@@ -182,28 +180,6 @@ public class PApply extends PExp {
 
     @NotNull public List<PExp> getArguments() {
         return arguments;
-    }
-
-    public MTFunction getConservativePreApplicationType(TypeGraph g) {
-        return new MTFunctionBuilder(g, g.EMPTY_SET)
-                .paramTypes(arguments.stream()
-                        .map(PExp::getMathType)
-                        .collect(Collectors.toList())).build();
-    }
-
-    public static MTFunction getConservativePreApplicationType(TypeGraph g,
-                                                               List<? extends ParseTree> arguments,
-                                                               ParseTreeProperty<MTType> types) {
-        MTFunctionBuilder preApplicationType =
-                new MTFunctionBuilder(g, g.EMPTY_SET);
-        for (ParseTree arg : arguments) {
-            MTType argType = types.get(arg);
-            if (argType == null) {
-                argType = MTInvalid.getInstance(g);
-            }
-            preApplicationType.paramTypes(argType);
-        }
-        return preApplicationType.build();
     }
 
     @Override public boolean containsName(String name) {

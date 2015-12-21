@@ -115,7 +115,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result;
     }
 
-
     @Override public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> declaredVars =
@@ -147,17 +146,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    //TODO: Convert biconditional ('iff') into longhand implication
-   /* @Override public void exitMathInfixApplyExp(
+    @Override public void exitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
-        PApplyBuilder result = new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.op))
-                .applicationType(getMathType(ctx))
-                .applicationTypeValue(getMathTypeValue(ctx))
-                .style(PApply.DisplayStyle.INFIX)
-                .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
+        PApplyBuilder result =
+                new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
+                        .applicationType(getMathType(ctx))
+                        .style(PApply.DisplayStyle.INFIX)
+                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
-        //OK, you're going to need a map from STRING -> MTType for the infix ops.
-    }*/
+    }
 
     @Override public void exitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
@@ -167,27 +164,49 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     .applicationTypeValue(getMathTypeValue(ctx))
                     .style(PApply.DisplayStyle.OUTFIX)
                     .arguments(repo.get(ctx.mathExp()));
-        PApply x = result.build();
-        repo.put(ctx, x);
+        repo.put(ctx, result.build());
     }
 
-    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
-                                         Token lop, Token rop) {
-        return new PSymbolBuilder(lop.getText(), rop.getText())
-                .mathType(getMathType(app))
-                .build();
+    @Override public void exitMathMultOp(ResolveParser.MathMultOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
 
-    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
-                                         Token operator) {
-        return buildOperatorPSymbol(app, operator.getText());
+    @Override public void exitMathAddOp(ResolveParser.MathAddOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
 
-    private PSymbol buildOperatorPSymbol(ParserRuleContext app,
-                                         String operator) {
-        return new PSymbolBuilder(operator)
-                .mathType(getMathType(app))
-                .quantification(quantifiedVars.get(operator))
+    @Override public void exitMathRelationalOp(
+            ResolveParser.MathRelationalOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
+    @Override public void exitMathBooleanOp(
+            ResolveParser.MathBooleanOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
+    @Override public void exitMathEqualityOp(
+            ResolveParser.MathEqualityOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
+    @Override public void exitMathApplicationOp(
+            ResolveParser.MathApplicationOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
+    @Override public void exitMathJoiningOp(
+            ResolveParser.MathJoiningOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
+    private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
+                                         @Nullable Token qualifier,
+                                         @NotNull Token operator) {
+        return new PSymbolBuilder(operator.getText())
+                .qualifier(qualifier)
+                .mathType(getMathType(ctx))
+                .quantification(quantifiedVars.get(operator.getText()))
                 .build();
     }
 

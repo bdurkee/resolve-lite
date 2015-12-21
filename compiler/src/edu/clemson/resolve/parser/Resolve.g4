@@ -348,13 +348,13 @@ mathQuantifiedExp
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
     |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
-    |   mathExp mathMultOp mathExp                              #mathMultInfixApplyExp
-    |   mathExp mathAddOp mathExp                               #mathAddInfixApplyExp
-    |   mathExp mathJoiningOp mathExp                           #mathJoiningInfixApplyExp
-    |   mathExp mathApplicationOp mathExp                       #mathApplicationInfixApplyExp
-    |   mathExp mathRelationalOp mathExp                        #mathRelationalInfixApplyExp
-    |   mathExp mathEqualityOp mathExp                          #mathEqualityInfixApplyExp
-    |   mathExp mathBooleanOp mathExp                           #mathBooleanInfixApplyExp
+    |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
+    |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
+    |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
+    |   mathExp mathApplicationOp mathExp                       #mathInfixApplyExp
+    |   mathExp mathRelationalOp mathExp                        #mathInfixApplyExp
+    |   mathExp mathEqualityOp mathExp                          #mathInfixApplyExp
+    |   mathExp mathBooleanOp mathExp                           #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                              #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                                #mathNestedExp
     |   mathPrimaryExp                                          #mathPrimeExp
