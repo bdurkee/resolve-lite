@@ -144,10 +144,10 @@ public class PApply extends PExp {
 
     /** Represents the 'first class function' this application is referencing.
      *  Note that the type of {@code functionPortion} can be considered
-     *  independent of the types of the actuals
+     *  independent of the types of the formals
      *  (which are rightly embedded here in the argument {@code PExp}s).
-     *
-     *  <p>While this field in most cases will simply be an instance of
+     *  <p>
+     *  While this field in most cases will simply be an instance of
      *  {@link PSymbol}, realize that it could also be something more 'exotic'
      *  such as a {@code PLambda} or even another {@code PApply}.</p>
      */
