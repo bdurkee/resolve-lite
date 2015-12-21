@@ -268,17 +268,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-
-        //conc.p.curr_place
-
-        //TODO: This doesn't currently handle things like: P.Lab(x)
-        //or (the odder) P.Lab(u).z, and other combinations with applications.
-        //also: P(x).v.z.
-        PExp typedRHS = repo.get(ctx.rhs);
-        PSymbol result =
-                new PSymbolBuilder((PSymbol)typedRHS)
-                        .name(ctx.getText()).build();
-        repo.put(ctx, result);//*/
+        repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
     }
 
     @Override public void exitMathBooleanLiteralExp(
@@ -398,13 +388,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .progType(progType).mathTypeValue(typeValue)
                         .literal(true);
         return result.build();
-    }
-
-    //this should probably actually always return MTFunction...
-    private MTType getOperandFunctionType(ParserRuleContext app) {
-        //return seenOperatorTypes.get(app) == null ? MTInvalid.getInstance(g) :
-        //        seenOperatorTypes.get(app);
-        return null;
     }
 
     private MTType getMathType(ParseTree t) {

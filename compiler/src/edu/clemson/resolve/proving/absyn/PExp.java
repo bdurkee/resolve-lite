@@ -339,6 +339,8 @@ public abstract class PExp {
 
     @NotNull public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
+    //TODO: Consider making this List<PApply>.. but what about lambdas, isn't
+    //that a function application? Just a nameless function application?
     @NotNull public final List<PExp> getFunctionApplications() {
         if ( cachedFunctionApplications == null ) {
             //We're immutable, so only do this once

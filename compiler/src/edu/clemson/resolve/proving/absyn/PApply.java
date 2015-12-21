@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.misc.Utils.apply;
 
-/** This class represents exclusively function applications, specifically
- *  applications with some non-zero number of arguments.
+/** This class represents exclusively (non-nullary) function applications,
+ *  meaning those with some non-zero number of arguments.
  */
 public class PApply extends PExp {
 
@@ -149,7 +149,7 @@ public class PApply extends PExp {
      *  <p>
      *  While this field in most cases will simply be an instance of
      *  {@link PSymbol}, realize that it could also be something more 'exotic'
-     *  such as a {@code PLambda} or even another {@code PApply}.</p>
+     *  such as a {@link PLambda} or even another {@code PApply}.</p>
      */
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();

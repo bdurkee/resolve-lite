@@ -149,6 +149,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitConceptImplModuleDecl(
             ResolveParser.ConceptImplModuleDeclContext ctx) {
         try {
+            //implementations implicitly gain the parenting concept's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
@@ -1454,8 +1455,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     //OK, now that we typed the operator, all that's left to do is:
     //1. check to ensure the actual arg count == formal arg count.
-    //2. ensure that each argument 'is contained in' (bill parlance) or
-    //   'is alpha equivalent to' the formal (hampton parlance).
+    //2. ensure that each argument 'is contained in' or 'is alpha equivalent to'
+    //   the formal
     private Void typeApplyExp(@NotNull ParserRuleContext ctx,
                               @NotNull ParserRuleContext operator,
                               @NotNull List<? extends ParserRuleContext> args) {

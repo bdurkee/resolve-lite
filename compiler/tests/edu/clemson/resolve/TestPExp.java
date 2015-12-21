@@ -92,6 +92,8 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(g, "bar :: foo"));
         Assert.assertEquals(parseMathAssertionExp(g, "bar :: f.x"),
                 parseMathAssertionExp(g, "bar :: f.x"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "bar :: f.x"),
+                parseMathAssertionExp(g, "bar :: f.y"));
         Assert.assertEquals(parseMathAssertionExp(g, "||S||"),
                 parseMathAssertionExp(g, "||S||"));
     }
@@ -285,6 +287,12 @@ public class TestPExp extends BaseTest {
         for (boolean anExpected : expected) {
             Assert.assertEquals(false, exps.next().isIncoming());
         }
+    }
+
+    @Test public void testSelectorExpWithCall() {
+        PExp result = parseMathAssertionExp(g, "P.Q.Lab(s)(Cen(k))");
+        Assert.assertEquals(false, result.isIncoming());
+
     }
 
     @Test public void testGetIncomingVariables() {

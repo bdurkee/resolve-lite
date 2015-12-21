@@ -2,6 +2,8 @@ Precis Basic_Integer_Theory;
        // uses Monogenerator_Theory;
 
     Definition Z : SSet;
+        Definition <=(m, n : Z) : B;
+
 /*    Categorical Definition for Z : SSet, 0 : Z, NB : Z -> Z is
         Is_Monogeneric_for(Z, 0, NB);
 

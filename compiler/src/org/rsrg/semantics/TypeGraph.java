@@ -50,14 +50,6 @@ public class TypeGraph {
                     CARTESIAN_PRODUCT_APPLICATION, CLS)
                     .paramTypes(CLS, CLS).build();
 
-    public final MTFunction STR =
-            new MTFunctionBuilder(this, SSTR)
-                    .paramTypes(SSTR).build();
-
-    public final MTFunction STR_CAT =
-            new MTFunctionBuilder(this, SSTR)
-                    .paramTypes(SSTR, SSTR).build();
-    
     public final MTFunction POWERSET =
             new MTFunctionBuilder(this, POWERSET_APPLICATION, SSET)
                     .paramTypes(SSET)
@@ -170,7 +162,7 @@ public class TypeGraph {
 
     public final PApply formImplies(PExp left, PExp right) {
         PExp functionPortion = new PSymbolBuilder("implies")
-                .mathType(RELATIONAL_FUNCTION).build();
+                .mathType(BOOLEAN_FUNCTION).build();
         return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
