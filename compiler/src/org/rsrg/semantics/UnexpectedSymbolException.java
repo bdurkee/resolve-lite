@@ -12,7 +12,7 @@ public class UnexpectedSymbolException extends SymbolTableException {
         this.actualSymbolDescription = actualSymbolDescription;
     }
 
-    @NotNull public String getTheUnexpectedSymbolsDescription() {
+    @NotNull public String getTheUnexpectedSymbolDescription() {
         return actualSymbolDescription;
     }
 }

@@ -9,9 +9,16 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
+        convention P.Curr_Place = 0;
+        /*convention 0 < P.Curr_Place and
+                   P.Curr_Place <= P.Length and
+                   P.Length <= Max_Length which_entails
+                        P.Curr_Place, P.Length : N;
+        correspondence*/
 
     Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
+
     end Lengthen;
 
 end Sp_Array_Impl;

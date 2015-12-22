@@ -239,8 +239,7 @@ mathOutfixDefinitionSig
     ;
 
 mathSymbolName
-    :   ID
-    |   ('+'|'-'|'...'|'/'|'\\'|'|'|'||'|'<'|'>'|'o'|'*'|'>='|'<='|INT|'not')
+    :   ID|('+'|'-'|'...'|'/'|'|'|'||'|'<'|'>'|'o'|'*'|'>='|'<='|INT|'not')
     ;
 
 mathCategoricalDefinitionDecl
@@ -349,19 +348,32 @@ mathQuantifiedExp
 mathExp
     :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
     |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
-    |   mathExp op=('*'|'/'|'~') mathExp                        #mathInfixApplyExp
-    |   mathExp op=('+'|'-') mathExp                            #mathInfixApplyExp
-    |   mathExp op=('..'|'->') mathExp                          #mathInfixApplyExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp            #mathInfixApplyExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp                #mathInfixApplyExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp                  #mathInfixApplyExp
-    |   mathExp op=('='|'/=') mathExp                           #mathInfixApplyExp
-    |   mathExp op=('implies'|'iff') mathExp                    #mathInfixApplyExp
-    |   mathExp op=('and'|'or') mathExp                         #mathInfixApplyExp
+    |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
+    |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
+    |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
+    |   mathExp mathApplicationOp mathExp                       #mathInfixApplyExp
+    |   mathExp mathRelationalOp mathExp                        #mathInfixApplyExp
+    |   mathExp mathEqualityOp mathExp                          #mathInfixApplyExp
+    |   mathExp mathBooleanOp mathExp                           #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                              #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                                #mathNestedExp
     |   mathPrimaryExp                                          #mathPrimeExp
     ;
+
+/** Because operators are now first class citizens with expressions all of their
+ *  own (as opposed to being simple strings embedded within the context of some application)
+ *  we need these intermediate rules to convince antlr to create visitable, *annotatable*,
+ *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST
+ *  (won't need to pass special maps around from Token -> MTType, etc --
+ *  now we just need to visit and annotate them like any other node).
+ */
+mathMultOp : (qualifier=ID '::')? op=('*'|'/'|'%');
+mathAddOp : (qualifier=ID '::')? op=('+'|'-'|'~');
+mathRelationalOp : (qualifier=ID '::')? op=('<='|'>='|'>'|'<');
+mathBooleanOp : (qualifier=ID '::')? op=('implies'|'iff'|'and'|'or'|'is_in'|'is_not_in');
+mathEqualityOp : (qualifier=ID '::')? op=('='|'/=');
+mathApplicationOp : (qualifier=ID '::')? op=('..'|'->');
+mathJoiningOp : (qualifier=ID '::')? op=('o'|'union'|'intersect');
 
 mathPrimaryExp
     :   mathLiteralExp

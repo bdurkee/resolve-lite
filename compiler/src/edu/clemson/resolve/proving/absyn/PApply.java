@@ -13,10 +13,8 @@ import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.misc.Utils.apply;
 
-/** This class represents exclusively function applications, specifically
- *  applications with some non-zero number of arguments.
- *
- *  @author dtwelch <dtw.welch@gmail.com>
+/** This class represents exclusively (non-nullary) function applications,
+ *  meaning those with some non-zero number of arguments.
  */
 public class PApply extends PExp {
 
@@ -146,12 +144,12 @@ public class PApply extends PExp {
 
     /** Represents the 'first class function' this application is referencing.
      *  Note that the type of {@code functionPortion} can be considered
-     *  independent of the types of the actuals
+     *  independent of the types of the formals
      *  (which are rightly embedded here in the argument {@code PExp}s).
-     *
-     *  <p>While this field in most cases will simply be an instance of
+     *  <p>
+     *  While this field in most cases will simply be an instance of
      *  {@link PSymbol}, realize that it could also be something more 'exotic'
-     *  such as a {@code PLambda} or even another {@code PApply}.</p>
+     *  such as a {@link PLambda} or even another {@code PApply}.</p>
      */
     @NotNull private final PExp functionPortion;
     @NotNull private final List<PExp> arguments = new ArrayList<>();
@@ -182,28 +180,6 @@ public class PApply extends PExp {
 
     @NotNull public List<PExp> getArguments() {
         return arguments;
-    }
-
-    public MTFunction getConservativePreApplicationType(TypeGraph g) {
-        return new MTFunctionBuilder(g, g.EMPTY_SET)
-                .paramTypes(arguments.stream()
-                        .map(PExp::getMathType)
-                        .collect(Collectors.toList())).build();
-    }
-
-    public static MTFunction getConservativePreApplicationType(TypeGraph g,
-                                                               List<? extends ParseTree> arguments,
-                                                               ParseTreeProperty<MTType> types) {
-        MTFunctionBuilder preApplicationType =
-                new MTFunctionBuilder(g, g.EMPTY_SET);
-        for (ParseTree arg : arguments) {
-            MTType argType = types.get(arg);
-            if (argType == null) {
-                argType = MTInvalid.getInstance(g);
-            }
-            preApplicationType.paramTypes(argType);
-        }
-        return preApplicationType.build();
     }
 
     @Override public boolean containsName(String name) {

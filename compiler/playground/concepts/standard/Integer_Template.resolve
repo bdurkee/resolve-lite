@@ -1,12 +1,12 @@
 Concept Integer_Template;
-        uses Basic_Integer_Theory;
+       uses Basic_Integer_Theory;
 
     Type family Integer is modeled by Z;
         exemplar I;
-        initialization
-                ensures I = 0;
+     //   initialization
+     //           ensures I = 0;
 
-    Operation Sum
+    /*Operation Sum
             (updates a, b : Integer)
                 : Integer;
         ensures Sum = (a + b);
@@ -15,6 +15,6 @@ Concept Integer_Template;
             (updates a, b : Integer)
                 : Integer;
         ensures true;
-
+*/
 
 end Integer_Template;

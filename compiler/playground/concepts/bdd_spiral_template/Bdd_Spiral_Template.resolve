@@ -1,15 +1,16 @@
 Concept Bdd_Spiral_Template(type Label;
             evaluates k, Max_Length : Std_Ints :: Integer);
         uses Standard_Integers, Basic_Natural_Number_Theory,
+             Basic_Function_Properties,
              Basic_Spiral_Theory;
-    requires k >= 2 and Max_Length > 0
-                which_entails Max_Length : N2;
+    requires k >= 2;
 
     Type family Spiral_Pos is modeled by Cart_Prod
             Lab : Sp_Loc(k) -> Label;
             Curr_Loc, Trmnl_Loc : Sp_Loc(k);
         end;
         exemplar P;
+
     //    constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
     //                P.Lab(P.Trmnl_Loc) = Label.Base_Point;
        // initialization
@@ -22,8 +23,5 @@ Concept Bdd_Spiral_Template(type Label;
                 P.Curr_Loc = @P.Curr_Loc and
                 P.Lab = lambda (q : Sp_Loc(k)).(
                       {{@e if q = @P; @P.Lab(q) otherwise; }});
-
 */
-
-
 end Bdd_Spiral_Template;

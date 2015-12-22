@@ -4,8 +4,8 @@ Precis Basic_Spiral_Theory;
     Definition N2 : Powerset(N) is {n : N | n >= 2};
 
     Definition Is_k_Spiral_Like(sp_loc : (k : N2) -> SSet,
-        center : N2 -> SSet, ss,
-            rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
+        center : N2 -> SSet,
+            ss, rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
 
     Categorical Definition for Sp_Loc : (k : N2) -> SSet,
             SS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
