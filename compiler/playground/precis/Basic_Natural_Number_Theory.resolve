@@ -9,10 +9,10 @@ Precis Basic_Natural_Number_Theory;
         (ii.)   m + suc(n) = suc(m + n);
 
     Definition (m : N) >= (n : N) : B;
-/*    Definition (m : N) <= (n : N) : B;
+    Definition (m : N) <= (n : N) : B;
     Definition (m : N) > (n : N) : B;
     Definition (m : N) < (n : N) : B;
-*/
+
     Definition 1 : N; //is suc(0);
     Definition 2 : N;// is suc(1);
 

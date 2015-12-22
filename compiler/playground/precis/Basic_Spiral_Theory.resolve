@@ -1,5 +1,5 @@
 Precis Basic_Spiral_Theory;
-    uses Basic_Natural_Number_Theory;
+    uses Basic_Natural_Number_Theory, Basic_Function_Properties;
 
     Definition N2 : Powerset(N) is {n : N | n >= 2};
 
@@ -14,5 +14,12 @@ Precis Basic_Spiral_Theory;
         is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
 
     Implicit Definition SCD(p : Sp_Loc(k : N2)) : N;
+
+    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
+        {p : Sp_Loc(k) | SCD(p) < SCD(b)};
+
+    Corollary Inw1: Forall k : N2, Forall m, n : N,
+        SS(k)(Cen(k)) is_in Inward_Loc(SS(k)(Cen(k))) iff m < n;
+
 
 end Basic_Spiral_Theory;

@@ -32,6 +32,7 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.compiler.ErrorManager;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
@@ -77,6 +78,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  module formal parameters; should be {@code false} otherwise;
      */
     private boolean walkingModuleArgOrParamList = false;
+    private boolean walkingApplicationArgs = false;
 
     /** A reference to the expr context that represents the previous segment
      *  accessed in a {@link ResolveParser.MathSelectorExpContext} or
@@ -1496,7 +1498,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //application's first class 'function-portion'
         List<ResolveParser.MathExpContext> args =
                 ctx.mathExp().subList(1, ctx.mathExp().size());
+        walkingApplicationArgs = true;
         args.forEach(this::visit);
+        walkingApplicationArgs = false;
         typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
         return null;
     }
@@ -1556,7 +1560,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTCartesian typeCartesian = (MTCartesian) prevMathAccessType;
             type = typeCartesian.getFactor(symbolName);
         }
-        catch (ClassCastException cce) {
+        catch (ClassCastException|NoSuchElementException cce) {
             type = HardCoded.getMetaFieldType(g, symbolName);
             if (type == null) {
                 compiler.errMgr.semanticError(
@@ -1570,6 +1574,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
+        System.out.println("selector ctx=" + ctx.getText());
         this.visit(ctx.lhs);
         prevMathSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
@@ -1640,7 +1645,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //function applications appearing on the rhs of a colon necessarily need
                 //have arguments that are guaranteed to only contain values? Maybe an example would help? According
                 //to Hws's old type chcker, that's just how it needs to be.
-                tr.mathTypeValues.put(ctx, g.INVALID);
+                if (walkingApplicationArgs) {
+                    tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
+                }
+                else {
+                    tr.mathTypeValues.put(ctx, g.INVALID);
+                }
             }
         }
     }

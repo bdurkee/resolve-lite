@@ -346,8 +346,8 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
-    |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
+    :   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
+    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
     |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
     |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
     |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp

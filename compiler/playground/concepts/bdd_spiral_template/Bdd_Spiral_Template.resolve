@@ -3,16 +3,22 @@ Concept Bdd_Spiral_Template(type Label;
         uses Standard_Integers, Basic_Natural_Number_Theory,
              Basic_Function_Properties,
              Basic_Spiral_Theory;
-    requires k >= 2;
+    requires k >= 2 and Max_Length > 0
+            which_entails
+                Max_Length : N;
 
-    Type family Spiral_Pos is modeled by Cart_Prod
-            Lab : Sp_Loc(k) -> Label;
-            Curr_Loc, Trmnl_Loc : Sp_Loc(k);
+    Type family Spiral_Pos
+            is modeled by Cart_Prod
+                Lab : Sp_Loc(k) -> Label;
+                Curr_Loc,
+                Trmnl_Loc : Sp_Loc(k);
         end;
         exemplar P;
+        constraints
+            SCD(P.Trmnl_Loc) <= Max_Length and
+            P.Curr_Loc is_in Inward_Loc(P.Trmnl_Loc) and
+            P.Lab(P.Trmnl_Loc);
 
-    //    constraints SCD(k)(P.Trmnl_Loc) <= Max_Length and
-    //                P.Lab(P.Trmnl_Loc) = Label.Base_Point;
        // initialization
        //     ensures P.Curr_Loc.foo.ss;
 

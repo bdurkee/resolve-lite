@@ -83,7 +83,7 @@ public class HardCoded {
                     new MTFunction.MTFunctionBuilder(g, g.BOOLEAN).paramTypes(
                             g.ENTITY).build();
         }
-        else if ( metaSegment.equals("Base_Point") ) {
+        else if ( metaSegment.equals("base_point") ) {
             result = new MTFunction.MTFunctionBuilder(g, g.ENTITY).build();
         }
         return result;
