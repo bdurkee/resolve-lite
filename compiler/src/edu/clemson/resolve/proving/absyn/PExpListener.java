@@ -59,6 +59,14 @@ public abstract class PExpListener {
 
     public void endPSymbol(@NotNull PSymbol p) {}
 
+    //PSelector
+
+    public void beginPSelector(@NotNull PSelector p) {}
+
+    public void fencepostPSelector(@NotNull PSelector p) {}
+
+    public void endPSelector(@NotNull PSelector p) {}
+
     //PAlternatives
     public void beginPAlternatives(@NotNull PAlternatives p) {}
 

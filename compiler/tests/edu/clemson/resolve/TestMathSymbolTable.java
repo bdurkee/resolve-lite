@@ -15,7 +15,7 @@ import java.io.StringReader;
 
 public class TestMathSymbolTable extends BaseTest {
 
-    @Test(expected=NoSuchModuleException.class)
+    //@Test(expected=NoSuchModuleException.class)
     public void testFreshMathSymbolTable1() {
       //  MathSymbolTable b = new MathSymbolTable();
       //  b.getModuleScope("NonExistent");

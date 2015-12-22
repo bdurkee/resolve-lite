@@ -65,15 +65,23 @@ public class TestASTStructure extends BaseTest {
             "<PSymbol:end>:=\n" +
             "<PSymbol:begin>:q\n" +
             "<PSymbol:end>:q\n" +
-            "<PSymbol:begin>:@P.Trmnl_Loc\n" +
-            "<PSymbol:end>:@P.Trmnl_Loc\n" +
+            "<PSelector:begin>:@P.Trmnl_Loc\n" +
+            "<PSymbol:begin>:@P\n" +
+            "<PSymbol:end>:@P\n" +
+            "<PSymbol:begin>:Trmnl_Loc\n" +
+            "<PSymbol:end>:Trmnl_Loc\n" +
+            "<PSelector:end>:@P.Trmnl_Loc\n" +
             "<PApply:infixPApply:end>:(q = @P.Trmnl_Loc)\n" +
-            "<PApply:prefixPApply:begin>:@P.Lab(q)\n" +
-            "<PSymbol:begin>:@P.Lab\n" +
-            "<PSymbol:end>:@P.Lab\n" +
+            "<PSelector:begin>:@P.Lab(q)\n" +
+            "<PSymbol:begin>:@P\n" +
+            "<PSymbol:end>:@P\n" +
+            "<PApply:prefixPApply:begin>:Lab(q)\n" +
+            "<PSymbol:begin>:Lab\n" +
+            "<PSymbol:end>:Lab\n" +
             "<PSymbol:begin>:q\n" +
             "<PSymbol:end>:q\n" +
-            "<PApply:prefixPApply:end>:@P.Lab(q)\n" +
+            "<PApply:prefixPApply:end>:Lab(q)\n" +
+            "<PSelector:end>:@P.Lab(q)\n" +
             "<PAlternatives:end>:{{@e if (q = @P.Trmnl_Loc);@P.Lab(q) otherwise;}}\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g,

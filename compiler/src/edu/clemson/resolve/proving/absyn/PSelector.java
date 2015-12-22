@@ -22,6 +22,16 @@ public class PSelector extends PExp {
     }
 
     @Override public void accept(PExpListener v) {
+        v.beginPExp(this);
+        v.beginPSelector(this);
+        v.beginChildren(this);
+
+        left.accept(v);
+        right.accept(v);
+
+        v.endChildren(this);
+        v.endPSelector(this);
+        v.endPExp(this);
     }
 
     @NotNull @Override public PExp substitute(
