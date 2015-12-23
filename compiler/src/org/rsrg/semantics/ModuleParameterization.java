@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.ModuleParameterSymbol;
+import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgTypeSymbol;
 
 import java.util.*;
@@ -38,39 +40,50 @@ public class ModuleParameterization {
 
     @NotNull public Scope getScope(boolean instantiated)
             throws NoSuchModuleException {
-        Scope result;
+        ModuleScopeBuilder originalScope =
+                scopeRepo.getModuleScope(moduleIdentifier);
+        Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
             Map<String, PTType> genericInstantiations;
-           // genericInstantiations =
-           //         getGenericInstantiations(originalScope, null);
-            //result =
-           //         new InstantiatedScope(originalScope,
-            //                genericInstantiations, instantiatingFacility);
+            genericInstantiations = getGenericInstantiations(originalScope, null);
+            result = new InstantiatedScope(originalScope,
+                        genericInstantiations, instantiatingFacility);
         }
         return result;
     }
 
-    /*private Map<String, PTType> getGenericInstantiations(
+    private Map<String, PTType> getGenericInstantiations(
             ModuleScopeBuilder moduleScope,
-            List<ResolveParser.ModuleArgumentContext> actualArguments) {
+            List<ResolveParser.ProgExpContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
-        List<GenericSymbol> formalGenerics =
-                moduleScope.getSymbolsOfType(GenericSymbol.class);
+        List<ModuleParameterSymbol> moduleParams =
+                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
+        List<ProgParameterSymbol> formalGenerics = new ArrayList<>();
 
+        for (ModuleParameterSymbol param : moduleParams) {
+            try {
+                ProgParameterSymbol p = param.toProgParameterSymbol();
+                if (p.getMode() == ProgParameterSymbol.ParameterMode.TYPE) {
+                    formalGenerics.add(p);
+                }
+            } catch (UnexpectedSymbolException e) {
+                //no problem, we wont add it.
+            }
+        }
         if ( formalGenerics.size() != actualGenerics.size() ) {
             throw new RuntimeException("generic list sizes do not match");
         }
         Iterator<ProgTypeSymbol> suppliedGenericIter =
                 actualGenerics.iterator();
-        Iterator<GenericSymbol> formalGenericIter = formalGenerics.iterator();
+        Iterator<ProgParameterSymbol> formalGenericIter = formalGenerics.iterator();
         while (formalGenericIter.hasNext()) {
-            result.put(formalGenericIter.next().getNameToken(), suppliedGenericIter
+            result.put(formalGenericIter.next().getName(), suppliedGenericIter
                     .next().getProgramType());
         }
         return result;
-    }*/
+    }
 
     @NotNull public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;

@@ -1001,7 +1001,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return null;
         }
         try {
-            //definition, operation, type, or just some variable.
+            //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name,
