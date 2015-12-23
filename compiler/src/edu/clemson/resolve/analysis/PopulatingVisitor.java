@@ -32,7 +32,6 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.ErrorManager;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
 import edu.clemson.resolve.misc.Utils;
@@ -57,6 +56,7 @@ import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -86,7 +86,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  overlap here as we use two separate expr hierarchies. This is
      *  {@code null} the rest of the time.
      */
-    private ResolveParser.MathExpContext prevMathSelectorAccess = null;
+    private ParserRuleContext prevSelectorAccess = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
@@ -199,7 +199,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          walkingModuleArgOrParamList = false;
          return null;
      }*/
-
     @Override public Void visitSpecModuleParameterList(
             ResolveParser.SpecModuleParameterListContext ctx) {
         walkingModuleArgOrParamList = true;
@@ -306,7 +305,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              returnType = PTVoid.getInstance(g);
         }
         ctx.variableDeclGroup().forEach(this::visit);
-         //ctx.stmt().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         if (correspondingOp == null) { //backout
             currentProcedureDecl = null;
@@ -576,12 +575,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //introduce anything
             throw new RuntimeException(dse);
         }
-        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
+        if (ctx.conventionsClause() != null) this.visit(ctx.conventionsClause());
         if (ctx.correspondenceClause() != null)
             this.visit(ctx.correspondenceClause());
         if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         symtab.endScope();
-        PExp convention = getPExpFor(ctx.conventionClause());
+        PExp convention = getPExpFor(ctx.conventionsClause());
         PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
             ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
@@ -996,8 +995,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
+        if (prevSelectorAccess != null) {
+            typeProgSelectorAccessExp(ctx, prevSelectorAccess,
+                    ctx.name.getText());
+            return null;
+        }
         try {
-            //definition, operation, type, or of course, just some variable.
+            //definition, operation, type, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name,
@@ -1005,6 +1009,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             PTType programType = PTInvalid.getInstance(g);
             if (namedSymbol instanceof ProgVariableSymbol) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
+            }
+            else if (namedSymbol instanceof ProgParameterSymbol) {
+                programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
+            }
+            //special case (don't want to adapt "mathVariableQuery" to coerce
+            //OperationSymbols, so in the meantime
+            else if (namedSymbol instanceof OperationSymbol) {
+                PTType returnType = ((OperationSymbol) namedSymbol).getReturnType();
+                tr.progTypes.put(ctx, returnType);
+                tr.mathTypes.put(ctx, returnType.toMath());
+                return null;
             }
             else if (namedSymbol instanceof ModuleParameterSymbol) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
@@ -1014,16 +1029,55 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return null;
 
             //TODO TODO
-        } catch (UnexpectedSymbolException e) {
-            e.printStackTrace();
-        } catch (NoSuchSymbolException e) {
-            e.printStackTrace();
-        } catch (DuplicateSymbolException e) {
-            e.printStackTrace();
-        } catch (NoSuchModuleException e) {
-            e.printStackTrace();
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a variable", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
         }
         return null;
+    }
+
+    private void typeProgSelectorAccessExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull ParserRuleContext previousAccess,
+                                           @NotNull String fieldName) {
+        PTType prevAccessType = tr.progTypes.get(previousAccess);
+        PTType type = PTInvalid.getInstance(g);
+        if (prevAccessType instanceof PTRepresentation) {
+            PTType baseType = ((PTRepresentation) prevAccessType).getBaseType();
+            try {
+                PTRecord record = (PTRecord) baseType;
+                type = record.getFieldType(fieldName);
+            } catch (ClassCastException | NoSuchElementException cce) {
+                //todo: Error shhould be something like, either previousAccess wasn't record, or field not there
+                compiler.errMgr.semanticError(
+                        ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                        previousAccess.getText(), fieldName);
+            }
+        }
+        else if (prevAccessType instanceof PTRecord) {
+            try {
+                type = ((PTRecord) prevAccessType).getFieldType(fieldName);
+            }
+            catch (NoSuchElementException nse) {
+                //remember ctx here (should) be the context of the rightmost/current field access
+                compiler.errMgr.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(),
+                        ctx.getText());
+            }
+        }
+        else {
+            //TODO: Maybe change this one to something like: Not a record at all..
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                    previousAccess.getText(), fieldName);
+        }
+        tr.mathTypes.put(ctx, type.toMath());
+        tr.progTypes.put(ctx, type);
     }
 
     @Override public Void visitModuleArgumentList(
@@ -1036,7 +1090,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
-        throw new UnsupportedOperationException("not implemented yet..");
+        this.visit(ctx.lhs);
+        prevSelectorAccess = ctx.lhs;
+        this.visit(ctx.rhs);
+        prevSelectorAccess = null;
+
+        PTType finalType = tr.progTypes.get(ctx.rhs);
+        MTType finalMathType = tr.mathTypes.get(ctx.rhs);
+        compiler.info("prog expression: " + ctx.getText() + " of type " + finalType);
+        tr.progTypes.put(ctx, finalType);
+        tr.mathTypes.put(ctx, finalMathType);
+        return null;
     }
 
     /*@Override public Void visitProgInfixExp(
@@ -1077,8 +1141,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
-       // ctx.progExp().forEach(this::visit);
-       // typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+        this.visit(ctx.progNamedExp());
+        ctx.progExp().forEach(this::visit);
+        typeOperationRefExp(ctx, ctx.progNamedExp(), ctx.progExp());
         return null;
     }
 
@@ -1140,60 +1205,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return result;
     }
 
-    /*   protected void typeOperationRefExp(ParserRuleContext ctx,
-                                      Token qualifier, Token name,
-                                      ResolveParser.ProgExpContext... args) {
-       typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull ResolveParser.ProgExpContext ... args) {
+       typeOperationRefExp(ctx, name, Arrays.asList(args));
    }
 
-   protected void typeOperationRefExp(ParserRuleContext ctx,
-                                      Token qualifier, Token name,
-                                      List<ResolveParser.ProgExpContext> args) {
+   protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                      @NotNull ResolveParser.ProgNamedExpContext name,
+                                      @NotNull List<ResolveParser.ProgExpContext> args) {
        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                .collect(Collectors.toList());
-       //for recursive calls
-       if (currentOpProcedureDecl != null || currentProcedureDecl != null) {
-           String currentName = currentOpProcedureDecl != null ?
-                   currentOpProcedureDecl.name.getText() :
-                   currentProcedureDecl.name.getText();
-
-           boolean isMarkedRecursive = currentOpProcedureDecl != null ?
-                   currentOpProcedureDecl.recursive != null :
-                   currentProcedureDecl.recursive != null;
-
-           ResolveParser.OperationParameterListContext formalParamListNode =
-                   currentOpProcedureDecl != null ?
-                           currentOpProcedureDecl.operationParameterList() :
-                           currentProcedureDecl.operationParameterList();
-
-           ResolveParser.TypeContext declaredTypeCtx =
-                   currentOpProcedureDecl != null ?
-                           currentOpProcedureDecl.type() :
-                           currentProcedureDecl.type();
-
-           if (currentName.equals(name.getText()) && qualifier == null) {
-               if (formalParamListNode.parameterDeclGroup().size() !=
-                       argTypes.size()) {
-                   compiler.errMgr.semanticError(ErrorKind.MALFORMED_RECURSIVE_OP_CALL,
-                           ctx.getStart(), ctx.getText(),
-                           currentOpProcedureDecl.name.getText());
-                   tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-                   tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-                   return;
-               }
-               PTType t = declaredTypeCtx != null ?
-                       tr.progTypeValues.get(declaredTypeCtx) :
-                       PTVoid.getInstance(g);
-               tr.progTypes.put(ctx, t);
-               tr.mathTypes.put(ctx, t.toMath());
-               return;
-           }
-       }
-
        //every other call
        try {
            OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
-                   new OperationQuery(qualifier, name, argTypes,
+                   new OperationQuery(name.qualifier, name.name, argTypes,
                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                            MathSymbolTable.ImportStrategy.IMPORT_NAMED));
 
@@ -1206,14 +1232,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                    .collect(Collectors.toList());
            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
                    ctx.getStart(), name.getText(), argStrList, argTypes);
+       } catch (UnexpectedSymbolException use) {
+           compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                   ctx.getStart(), "an operation", name.name.getText(),
+                   use.getTheUnexpectedSymbolDescription());
+       } catch (NoSuchModuleException nsme) {
+           noSuchModule(nsme);
        }
        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
    }
-   private void handleRecursiveOperationRef(ParserRuleContext ctx,
-                                            Token qualifier, Token name,
-                                            List<PTType> actualArgTypes) {
-   }*/
 
    //---------------------------------------------------
    //  M A T H   E X P   T Y P I N G
@@ -1350,7 +1378,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /* @Override public Void visitMathLambdaExp(
+    @Override public Void visitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
         emit("lambda exp: " + ctx.getText());
@@ -1403,12 +1431,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathAlternativeItemExp(
             ResolveParser.MathAlternativeItemExpContext ctx) {
         if ( ctx.condition != null ) {
-            //expectType(ctx.condition, g.BOOLEAN);
+            expectType(ctx.condition, tr.mathTypes.get(ctx.condition),
+                    g.BOOLEAN);
         }
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
-    }*/
+    }
 
     @Override public Void visitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
@@ -1442,11 +1471,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
-        //risky, but better than 20 different overriden visitor methods...
         return typeApplyExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
     }
 
-    //operator typing
+    // operator typing
     @Override public Void visitMathMultOp(ResolveParser.MathMultOpContext ctx) {typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathAddOp(ResolveParser.MathAddOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathRelationalOp(ResolveParser.MathRelationalOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
@@ -1519,8 +1547,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        if (prevMathSelectorAccess != null) {
-            typeMathSelectorAccessExp(ctx, prevMathSelectorAccess,
+        if (prevSelectorAccess != null) {
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
                     ctx.name.getText());
         }
         else {
@@ -1529,18 +1557,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitConventionClause(
-            ResolveParser.ConventionClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        expectType(ctx.mathAssertionExp(),
-                tr.mathTypes.get(ctx.mathAssertionExp()),
-                g.BOOLEAN);
-        chainMathTypes(ctx, ctx.mathAssertionExp());
+    @Override public Void visitConventionsClause(
+            ResolveParser.ConventionsClauseContext ctx) {
+        return typeMathClause(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public Void visitCorrespondenceClause(
+            ResolveParser.CorrespondenceClauseContext ctx) {
+        return typeMathClause(ctx, ctx.mathAssertionExp());
+    }
+
+    private Void typeMathClause(@NotNull ParserRuleContext clauseCtx,
+                                @NotNull ParserRuleContext assertionCtx) {
+        this.visit(assertionCtx);
+        expectType(assertionCtx, tr.mathTypes.get(assertionCtx), g.BOOLEAN);
+        chainMathTypes(clauseCtx, assertionCtx);
         return null;
     }
 
     private void typeMathSelectorAccessExp(@NotNull ParserRuleContext ctx,
-                                           @NotNull ResolveParser.MathExpContext prevAccessExp,
+                                           @NotNull ParserRuleContext prevAccessExp,
                                            @NotNull String symbolName) {
 
         MTType type = g.INVALID;
@@ -1574,11 +1610,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        System.out.println("selector ctx=" + ctx.getText());
+        //System.out.println("selector ctx=" + ctx.getText());
         this.visit(ctx.lhs);
-        prevMathSelectorAccess = ctx.lhs;
+        prevSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
-        prevMathSelectorAccess = null;
+        prevSelectorAccess = null;
 
         MTType finalType = tr.mathTypes.get(ctx.rhs);
         compiler.info("expression: " + ctx.getText() + " of type " + finalType);

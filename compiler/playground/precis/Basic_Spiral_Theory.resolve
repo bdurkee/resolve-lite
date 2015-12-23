@@ -8,8 +8,8 @@ Precis Basic_Spiral_Theory;
             ss, rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
 
     Categorical Definition for Sp_Loc : (k : N2) -> SSet,
-            SS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
-            RS : (k : N2) -> (Sp_Loc(k) -> Sp_Loc(k)),
+            SS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
+            RS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
             Cen(k : N2) : Sp_Loc(k)
         is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
 

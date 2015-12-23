@@ -9,6 +9,7 @@ import org.rsrg.semantics.TypeGraph;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class PTRecord extends PTType {
 
@@ -30,8 +31,13 @@ public class PTRecord extends PTType {
         this.mathTypeAlterEgo = new MTCartesian(g, elements);
     }
 
-    @NotNull public PTType getFieldType(@NotNull String name) {
-        return fields.get(name);
+    @NotNull public PTType getFieldType(@NotNull String name)
+            throws NoSuchElementException {
+        PTType result = fields.get(name);
+        if (result == null) {
+            throw new NoSuchElementException();
+        }
+        return result;
     }
 
     @Override public boolean isAggregateType() {
