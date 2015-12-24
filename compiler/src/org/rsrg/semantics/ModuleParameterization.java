@@ -17,6 +17,9 @@ public class ModuleParameterization {
 
     @NotNull private final List<ResolveParser.ProgExpContext> arguments =
             new ArrayList<>();
+
+    //OK, so I guess we need both actual symbols + The PTTypes since we (obviously)
+    //won't get symbols for things like 1, 0, or other literals or exprs...
     @NotNull private final List<Symbol> actualSymbols = new ArrayList<>();
     @NotNull private final FacilitySymbol instantiatingFacility;
 

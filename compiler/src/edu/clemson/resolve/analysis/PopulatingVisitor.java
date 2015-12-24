@@ -116,8 +116,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private ModuleScopeBuilder moduleScope = null;
 
-    private final Map<ResolveParser.ModuleArgumentListContext, List<Symbol>>
-            facilityActualExpsToActualSymbols = new HashMap<>();
+    private final ParseTreeProperty<List<ProgTypeSymbol>>
+            actualGenericTypesPerFacilitySpecArgs = new ParseTreeProperty<>();
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
@@ -427,8 +427,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //first make sure we initialize the list of symbols that will what we
         //work with internally (in {@link FacilitySymbol},
         //{@link ModuleParameterization}, etc)
-        if (ctx.specArgs != null) facilityActualExpsToActualSymbols.put(ctx.specArgs, new ArrayList<>());
-        if (ctx.implArgs != null) facilityActualExpsToActualSymbols.put(ctx.implArgs, new ArrayList<>());
+        if (ctx.specArgs != null) {
+            actualGenericTypesPerFacilitySpecArgs
+                    .put(ctx.specArgs, new ArrayList<>());
+        }
         //now visit the actual arg exprs
         ctx.moduleArgumentList().forEach(this::visit);
         try {
@@ -442,7 +444,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }*/
             symtab.getInnermostActiveScope().define(
                     new FacilitySymbol(ctx, getRootModuleIdentifier(),
-                            facilityActualExpsToActualSymbols, symtab));
+                            actualGenericTypesPerFacilitySpecArgs, symtab));
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
@@ -976,20 +978,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     symtab.getInnermostActiveScope().queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name,
                                     true));
+            PTType programType = PTInvalid.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx,
                             ResolveParser.ModuleArgumentListContext.class);
-            if (parentFacilityArgListCtx != null) {
-                facilityActualExpsToActualSymbols.get(
-                        (ResolveParser.ModuleArgumentListContext)
-                                parentFacilityArgListCtx).add(namedSymbol);
-            }
-            PTType programType = PTInvalid.getInstance(g);
             if (namedSymbol instanceof ProgVariableSymbol) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
             }
             else if (namedSymbol instanceof ProgParameterSymbol) {
                 programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
+            }
+            else if (namedSymbol instanceof ProgTypeSymbol) {
+                programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
+
+                if (parentFacilityArgListCtx != null) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
+                }
             }
             //special case (don't want to adapt "mathVariableQuery" to coerce
             //OperationSymbols, so in the meantime
@@ -1001,6 +1007,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             else if (namedSymbol instanceof ModuleParameterSymbol) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+                if (parentFacilityArgListCtx != null) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add(
+                            namedSymbol.toProgTypeSymbol());
+                }
             }
             tr.progTypes.put(ctx, programType);
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());

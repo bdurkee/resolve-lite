@@ -28,8 +28,7 @@ public class FacilitySymbol extends Symbol {
      *  {@link ProgParameterSymbol}s with a 'mode' of {@link ProgParameterSymbol.ParameterMode#TYPE}.
      *  </p>
      */
-    @NotNull private final Map<ResolveParser.ModuleArgumentListContext,
-            List<Symbol>> actualArgSymbols;
+    @NotNull private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
 
     private final Map<ModuleParameterization, ModuleParameterization>
             enhancementImplementations = new HashMap<>();
@@ -39,14 +38,13 @@ public class FacilitySymbol extends Symbol {
     public FacilitySymbol(
             @NotNull ResolveParser.FacilityDeclContext facility,
             @NotNull ModuleIdentifier moduleIdentifier,
-            @NotNull Map<ResolveParser.ModuleArgumentListContext,
-                         List<Symbol>> actualArgSymbols,
+            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
             @NotNull MathSymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
-        this.actualArgSymbols = actualArgSymbols;
-        List<Symbol> specArgSymbols = actualArgSymbols.get(facility.specArgs);
-        List<Symbol> implArgSymbols = actualArgSymbols.get(facility.implArgs);
+        this.actualGenerics = actualGenerics;
+        List<ProgTypeSymbol> specArgSymbols =
+                actualGenerics.get(facility.specArgs);
 
         ModuleParameterization spec =
                 new ModuleParameterization(new ModuleIdentifier(facility.spec),
