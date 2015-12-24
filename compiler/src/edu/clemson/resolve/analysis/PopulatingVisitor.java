@@ -43,10 +43,7 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
@@ -71,13 +68,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  been marked 'Recursive'.
      */
     //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-    private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
-    /** Set to {@code true} when we're walking the arguments to a module
-     *  (eg args to a facility decl); or when we're walking
-     *  module formal parameters; should be {@code false} otherwise;
-     */
-    private boolean walkingModuleArgOrParamList = false;
     private boolean walkingApplicationArgs = false;
 
     /** A reference to the expr context that represents the previous segment
@@ -124,6 +115,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
     private ModuleScopeBuilder moduleScope = null;
+
+    private final Map<ResolveParser.ModuleArgumentListContext, List<Symbol>>
+            facilityActualExpsToActualSymbols = new HashMap<>();
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
@@ -190,27 +184,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         this.visitChildren(ctx);
         return null;
-    }
-
-    @Override public Void visitImplModuleParameterList(
-             ResolveParser.ImplModuleParameterListContext ctx) {
-         walkingModuleArgOrParamList = true;
-         this.visitChildren(ctx);
-         walkingModuleArgOrParamList = false;
-         return null;
-     }*/
-    @Override public Void visitSpecModuleParameterList(
-            ResolveParser.SpecModuleParameterListContext ctx) {
-        walkingModuleArgOrParamList = true;
-        this.visitChildren(ctx);
-        walkingModuleArgOrParamList = false;
-        return null;
-    }
+    }*/
 
     @Override public Void visitGenericTypeParameterDecl(
             ResolveParser.GenericTypeParameterDeclContext ctx) {
         try {
-            //all generic params are module params (grammar says so)
+            //all generic params are module params; its the only way they can
+            //be introduced.
             ModuleParameterSymbol moduleParam =
                     new ModuleParameterSymbol(new ProgParameterSymbol(g,
                             ctx.name.getText(),
@@ -266,7 +246,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
         OperationSymbol correspondingOp = null;
-        currentProcedureDecl = ctx;
         try {
             correspondingOp =
                     symtab.getInnermostActiveScope()
@@ -308,7 +287,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.stmt().forEach(this::visit);
         symtab.endScope();
         if (correspondingOp == null) { //backout
-            currentProcedureDecl = null;
             return null;
         }
         try {
@@ -319,7 +297,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.name.getText());
         }
-        currentProcedureDecl = null;
         return null;
     }
 
@@ -404,8 +381,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //if we're walking a specmodule param list
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(name.getText(), ctx, requiresExp,
-                            ensuresExp, returnType, getRootModuleIdentifier(), params,
-                            walkingModuleArgOrParamList));
+                            ensuresExp, returnType, getRootModuleIdentifier(),
+                            params));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
                     name.getText());
@@ -421,10 +398,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ProgParameterSymbol.ParameterMode mode =
                         ProgParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
-                symtab.getInnermostActiveScope().define(
+                ProgParameterSymbol p =
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
-                                .getText(), mode, groupType,
-                                ctx, getRootModuleIdentifier()));
+                        .getText(), mode, groupType,
+                        ctx, getRootModuleIdentifier());
+                boolean walkingModuleParamList = Utils.getFirstAncestorOfType(
+                        ctx, ResolveParser.SpecModuleParameterListContext.class,
+                             ResolveParser.ImplModuleParameterListContext.class) != null;
+                if (walkingModuleParamList) {
+                    symtab.getInnermostActiveScope()
+                            .define(new ModuleParameterSymbol(p));
+                }
+                else {
+                    symtab.getInnermostActiveScope()
+                            .define(p);
+                }
             } catch (DuplicateSymbolException dse) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
@@ -435,53 +423,32 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-        ctx.moduleArgumentList().forEach(this::visit);
-        ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
-                new ParseTreeProperty<>();
-        try {
-            //map the base facility to any generic symbols parameterizing it
-            facOrEnhToGenericArgs.put(ctx, new ArrayList<>());
-            //getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
 
+        //first make sure we initialize the list of symbols that will what we
+        //work with internally (in {@link FacilitySymbol},
+        //{@link ModuleParameterization}, etc)
+        if (ctx.specArgs != null) facilityActualExpsToActualSymbols.put(ctx.specArgs, new ArrayList<>());
+        if (ctx.implArgs != null) facilityActualExpsToActualSymbols.put(ctx.implArgs, new ArrayList<>());
+        //now visit the actual arg exprs
+        ctx.moduleArgumentList().forEach(this::visit);
+        try {
             //now do the same for each enhancement pair
-            /* for (ResolveParser.EnhancementPairDeclContext enh :
+            /*for (ResolveParser.EnhancementPairDeclContext enh :
                      ctx.enhancementPairDecl()) {
                  //Todo: visit the generic arg types too
                  enh.moduleArgumentList().forEach(this::visit);
                  facOrEnhToGenericArgs.put(enh,
                          getGenericArgumentSymsForFacilityOrEnh(enh.type()));
-             }*/
+            }*/
             symtab.getInnermostActiveScope().define(
                     new FacilitySymbol(ctx, getRootModuleIdentifier(),
-                            facOrEnhToGenericArgs, symtab));
+                            facilityActualExpsToActualSymbols, symtab));
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
         return null;
     }
-/*
-     private List<ProgTypeSymbol> getGenericArgumentSymsForFacilityOrEnh(
-             List<ResolveParser.TypeContext> actualTypes) {
-         List<ProgTypeSymbol> result = new ArrayList<>();
-         for (ResolveParser.TypeContext generic : actualTypes) {
-             try {
-                 result.add(symtab.getInnermostActiveScope()
-                         .queryForOne(new NameQuery(generic.qualifier,
-                                 generic.name, true)).toProgTypeSymbol());
-             }
-             catch (DuplicateSymbolException | NoSuchSymbolException e) {
-                 compiler.errMgr.semanticError(e.getErrorKind(), generic.name,
-                         generic.name.getText());
-             }
-             catch (UnexpectedSymbolException use) {
-                 compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                         generic.getStart(), "a program type", generic.getText(),
-                         use.getTheUnexpectedSymbolDescription());
-             }
-         }
-         return result;
-     }*/
 
     @Override public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
         try {
@@ -847,7 +814,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //(not the actual arg list!)
             Symbol defnSym = new MathSymbol(g, name.getText(),
                     defnType, null, ctx, getRootModuleIdentifier());
-            if (walkingModuleArgOrParamList) {
+            //we only need to check spec module param list contexts,
+            boolean isModuleParameter = Utils.getFirstAncestorOfType(ctx,
+                    ResolveParser.SpecModuleParameterListContext.class) != null;
+            if (isModuleParameter) {
                 defnSym = new ModuleParameterSymbol((MathSymbol) defnSym);
             }
             symtab.getInnermostActiveScope().define(defnSym);
@@ -1006,6 +976,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     symtab.getInnermostActiveScope().queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name,
                                     true));
+            ParserRuleContext parentFacilityArgListCtx =
+                    Utils.getFirstAncestorOfType(ctx,
+                            ResolveParser.ModuleArgumentListContext.class);
+            if (parentFacilityArgListCtx != null) {
+                facilityActualExpsToActualSymbols.get(
+                        (ResolveParser.ModuleArgumentListContext)
+                                parentFacilityArgListCtx).add(namedSymbol);
+            }
             PTType programType = PTInvalid.getInstance(g);
             if (namedSymbol instanceof ProgVariableSymbol) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
@@ -1027,8 +1005,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.progTypes.put(ctx, programType);
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return null;
-
-            //TODO TODO
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
                     ctx.name.getText());
@@ -1078,14 +1054,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         tr.mathTypes.put(ctx, type.toMath());
         tr.progTypes.put(ctx, type);
-    }
-
-    @Override public Void visitModuleArgumentList(
-            ResolveParser.ModuleArgumentListContext ctx) {
-        walkingModuleArgOrParamList = true;
-        this.visitChildren(ctx);
-        walkingModuleArgOrParamList = false;
-        return null;
     }
 
     @Override public Void visitProgSelectorExp(

@@ -17,9 +17,19 @@ import java.util.Map;
 
 public class FacilitySymbol extends Symbol {
 
-    @NotNull private  SpecImplementationPairing type;
+    @NotNull private SpecImplementationPairing type;
     @NotNull private MathSymbolTable scopeRepo;
-    @NotNull private ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
+
+    /** A mapping from the rule contexts representing an module arg list
+     *  to all the various {@link Symbol}s that represent the actual arguments
+     *  supplied.
+     *  <p>Right now I'm really only especially concerned about
+     *  generics in this list ({@link ProgTypeSymbol} or
+     *  {@link ProgParameterSymbol}s with a 'mode' of {@link ProgParameterSymbol.ParameterMode#TYPE}.
+     *  </p>
+     */
+    @NotNull private final Map<ResolveParser.ModuleArgumentListContext,
+            List<Symbol>> actualArgSymbols;
 
     private final Map<ModuleParameterization, ModuleParameterization>
             enhancementImplementations = new HashMap<>();
@@ -29,15 +39,19 @@ public class FacilitySymbol extends Symbol {
     public FacilitySymbol(
             @NotNull ResolveParser.FacilityDeclContext facility,
             @NotNull ModuleIdentifier moduleIdentifier,
-            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
+            @NotNull Map<ResolveParser.ModuleArgumentListContext,
+                         List<Symbol>> actualArgSymbols,
             @NotNull MathSymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
-        this.genericsPerFacility = actualGenerics;
+        this.actualArgSymbols = actualArgSymbols;
+        List<Symbol> specArgSymbols = actualArgSymbols.get(facility.specArgs);
+        List<Symbol> implArgSymbols = actualArgSymbols.get(facility.implArgs);
+
         ModuleParameterization spec =
                 new ModuleParameterization(new ModuleIdentifier(facility.spec),
-                        genericsPerFacility.get(facility), facility.specArgs,
-                        this, scopeRepo);
+                        specArgSymbols == null ?
+                                new ArrayList<>() : specArgSymbols, this, scopeRepo);
 
         ModuleParameterization impl = null;
 
@@ -45,7 +59,8 @@ public class FacilitySymbol extends Symbol {
                 facility.implArgs != null ? facility.implArgs
                         .progExp() : new ArrayList<>();
         impl = new ModuleParameterization(new ModuleIdentifier(facility.impl),
-                        new ArrayList<>(), facility.implArgs, this, scopeRepo);
+                implArgSymbols == null ?
+                        new ArrayList<>() : implArgSymbols, this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);
 

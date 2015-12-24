@@ -6,10 +6,7 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
-import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.ModuleParameterSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
-import org.rsrg.semantics.symbol.ProgTypeSymbol;
+import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
 
@@ -20,21 +17,16 @@ public class ModuleParameterization {
 
     @NotNull private final List<ResolveParser.ProgExpContext> arguments =
             new ArrayList<>();
-    @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
+    @NotNull private final List<Symbol> actualSymbols = new ArrayList<>();
     @NotNull private final FacilitySymbol instantiatingFacility;
 
     public ModuleParameterization(@NotNull ModuleIdentifier moduleIdentifier,
-                                  @NotNull List<ProgTypeSymbol> actualGenerics,
-                                  @Nullable ResolveParser.ModuleArgumentListContext actualArgListNode,
+                                  @NotNull List<Symbol> actualSymbols,
                                   @NotNull FacilitySymbol instantiatingFacility,
                                   @NotNull MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
-        this.actualGenerics.addAll(actualGenerics);
-
-        if ( actualArgListNode != null ) {
-            arguments.addAll(actualArgListNode.progExp());
-        }
+        this.actualSymbols.addAll(actualSymbols);
         this.moduleIdentifier = moduleIdentifier;
     }
 
@@ -72,7 +64,7 @@ public class ModuleParameterization {
                 //no problem, we wont add it.
             }
         }
-        if ( formalGenerics.size() != actualGenerics.size() ) {
+       /* if ( formalGenerics.size() != actualGenerics.size() ) {
             throw new RuntimeException("generic list sizes do not match");
         }
         Iterator<ProgTypeSymbol> suppliedGenericIter =
@@ -81,7 +73,7 @@ public class ModuleParameterization {
         while (formalGenericIter.hasNext()) {
             result.put(formalGenericIter.next().getName(), suppliedGenericIter
                     .next().getProgramType());
-        }
+        }*/
         return result;
     }
 
