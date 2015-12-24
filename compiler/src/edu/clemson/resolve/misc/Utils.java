@@ -194,7 +194,6 @@ public class Utils {
      *  for an example usage
      */
     @FunctionalInterface public interface Builder<T> {
-
         @NotNull T build();
     }
 
@@ -240,8 +239,8 @@ public class Utils {
         return getFirstAncestorOfType(t, Arrays.asList(clazzes));
     }
 
-    /** Return first ancestor node up the chain towards the root that is clazz.
-     *  Search includes the current node.
+    /** Return first ancestor node up the chain towards the root that is in
+     *  {@code clazzes}. Search includes the current node.
      */
     @Nullable public static ParserRuleContext getFirstAncestorOfType(
             @Nullable ParserRuleContext t, @NotNull List<Class<?>> clazzes) {

@@ -18,23 +18,21 @@ public class HardCodedProgOps {
     public static BuiltInOpAttributes convert(Token op, List<PTType> args) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
 
-       /* if (args.isEmpty()) {
-            return convertBooleanProgramOp(op); //only thing we could possibly match that has no arguments is true or false
+        if (args.isEmpty()) {
+            return convertBooleanProgramOp(op); //only (pseudo hardcoded) thing we could possibly match currently that has no arguments is true or false
         }
-        BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        if (!(args.get(0) instanceof PTNamed)) {
-            return result;
-        }
+        if (!(args.get(0) instanceof PTNamed)) return result;
         PTNamed firstArgType = (PTNamed)args.get(0);
-        if ( firstArgType.getNameToken().equals("Boolean") ) {
+
+        if ( firstArgType.getName().equals("Boolean") ) {
             result = convertBooleanProgramOp(op);
         }
-        else if ( firstArgType.getNameToken().equals("Integer") ) {
+        else if ( firstArgType.getName().equals("Integer") ) {
             result = convertIntegerProgramOp(op);
         }
-        else if ( firstArgType.getNameToken().equals("Char_Str") ) {
+        else if ( firstArgType.getName().equals("Char_Str") ) {
             result = convertCharStrProgramOp(op);
-        }*/
+        }
         return result;
     }
 
@@ -50,20 +48,20 @@ public class HardCodedProgOps {
 
     public static BuiltInOpAttributes convertIntegerProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        /*switch (op.getType()) {
+        switch (op.getType()) {
             case ResolveLexer.PLUS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Sum");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Sum");
                 break;
             case ResolveLexer.MINUS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Difference");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Difference");
                 break;
             case ResolveLexer.MULT:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Product");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Product");
                 break;
-            case ResolveLexer.DIVIDE:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Divide");
+            case ResolveLexer.DIV:
+                result = new BuiltInOpAttributes("Std_Ints", op, "Divide");
                 break;
-            case ResolveLexer.LTE:
+         /*   case ResolveLexer.LTE:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less_Or_Equal");
                 break;
             case ResolveLexer.LT:
@@ -89,7 +87,7 @@ public class HardCodedProgOps {
                 break;
             case ResolveLexer.MOD:
                 result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Mod");
-                break;
+                break;*/
         }
         return result;
     }
@@ -98,27 +96,27 @@ public class HardCodedProgOps {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
         switch (op.getType()) {
             case ResolveLexer.NOT:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Not");
+                result = new BuiltInOpAttributes("Std_Bools", op, "Not");
                 break;
             case ResolveLexer.EQUALS:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Are_Equal");
+                result = new BuiltInOpAttributes("Std_Bools", op, "Are_Equal");
                 break;
             case ResolveLexer.NEQUALS:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Are_Not_Equal");
+                result = new BuiltInOpAttributes("Std_Bools", op, "Are_Not_Equal");
                 break;
             case ResolveLexer.TRUE:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "True");
+                result = new BuiltInOpAttributes("Std_Bools", op, "True");
                 break;
             case ResolveLexer.FALSE:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "False");
+                result = new BuiltInOpAttributes("Std_Bools", op, "False");
                 break;
             case ResolveLexer.AND:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "And");
+                result = new BuiltInOpAttributes("Std_Bools", op, "And");
                 break;
             case ResolveLexer.OR:
-                result = new BuiltInOpAttributes("Std_Boolean_Fac", op, "Or");
+                result = new BuiltInOpAttributes("Std_Bools", op, "Or");
                 break;
-        }*/
+        }
         return result;
     }
 

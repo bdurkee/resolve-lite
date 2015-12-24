@@ -15,21 +15,16 @@ public class ModuleParameterization {
     @NotNull private final MathSymbolTable scopeRepo;
     @NotNull private final ModuleIdentifier moduleIdentifier;
 
-    @NotNull private final List<ResolveParser.ProgExpContext> arguments =
-            new ArrayList<>();
-
-    //OK, so I guess we need both actual symbols + The PTTypes since we (obviously)
-    //won't get symbols for things like 1, 0, or other literals or exprs...
-    @NotNull private final List<Symbol> actualSymbols = new ArrayList<>();
+    @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
     @NotNull private final FacilitySymbol instantiatingFacility;
 
     public ModuleParameterization(@NotNull ModuleIdentifier moduleIdentifier,
-                                  @NotNull List<Symbol> actualSymbols,
+                                  @NotNull List<ProgTypeSymbol> actualGenerics,
                                   @NotNull FacilitySymbol instantiatingFacility,
                                   @NotNull MathSymbolTable scopeRepo) {
         this.instantiatingFacility = instantiatingFacility;
         this.scopeRepo = scopeRepo;
-        this.actualSymbols.addAll(actualSymbols);
+        this.actualGenerics.addAll(actualGenerics);
         this.moduleIdentifier = moduleIdentifier;
     }
 
@@ -47,6 +42,18 @@ public class ModuleParameterization {
         }
         return result;
     }
+
+    /*private List<ModuleParameterSymbol> getFormalParameters(
+            boolean instantiateGenerics)
+            throws NoSuchModuleException {
+        ModuleScopeBuilder s = scopeRepo.getModuleScope(moduleIdentifier);
+        List<ModuleParameterSymbol> moduleParams =
+                s.getSymbolsOfType(ModuleParameterSymbol.class);
+        if (instantiateGenerics) {
+            for (ModuleParameterSymbol moduleParam : )
+        }
+        return
+    }*/
 
     private Map<String, PTType> getGenericInstantiations(
             ModuleScopeBuilder moduleScope,
@@ -67,24 +74,25 @@ public class ModuleParameterization {
                 //no problem, we wont add it.
             }
         }
-       /* if ( formalGenerics.size() != actualGenerics.size() ) {
+        if ( formalGenerics.size() != actualGenerics.size() ) {
+            //we shouldn't have to do this in here I don't think. Can't really
+            //give a nice error (no pointer to errMgr here), and we can't throw
+            // an exception to be caught
+            //in the populator -- unless of course adding yet another caught
+            //exception to the signature of Scope.* methods sounds appealing...
+            //which it certainly doesn't.
             throw new RuntimeException("generic list sizes do not match");
         }
         Iterator<ProgTypeSymbol> suppliedGenericIter =
                 actualGenerics.iterator();
-        Iterator<ProgParameterSymbol> formalGenericIter = formalGenerics.iterator();
-        while (formalGenericIter.hasNext()) {
-            result.put(formalGenericIter.next().getName(), suppliedGenericIter
+        for (ProgParameterSymbol formalGeneric : formalGenerics) {
+            result.put(formalGeneric.getName(), suppliedGenericIter
                     .next().getProgramType());
-        }*/
+        }
         return result;
     }
 
     @NotNull public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
-    }
-
-    @NotNull public List<ResolveParser.ProgExpContext> getArguments() {
-        return arguments;
     }
 }

@@ -93,7 +93,7 @@ public class ProgParameterSymbol extends Symbol {
     public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
                                @NotNull ParameterMode mode,
                                @NotNull PTType type,
-                               @NotNull ParserRuleContext definingTree,
+                               @Nullable ParserRuleContext definingTree,
                                @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.typeGraph = g;

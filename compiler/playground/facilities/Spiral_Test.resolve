@@ -1,0 +1,15 @@
+Facility Spiral_Test;
+    uses Standard_Facs;
+
+    Facility Sp_Fac is Bdd_Spiral_Template
+                (Std_Ints :: Integer, 1, 5)
+        implemented
+            by Sp_Array_Impl;
+
+    Operation name ();
+        Procedure
+            Var x : Std_Bools :: Boolean;
+            Var P : Sp_Fac :: Spiral_Pos;
+            Sp_Fac :: Lengthen(P, )
+    end name;
+end Spiral_Test;

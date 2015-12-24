@@ -110,7 +110,9 @@ facilityModuleDecl
     ;
 
 facilityBlock
-    :   ( facilityDecl )*
+    :   ( facilityDecl
+        | operationProcedureDecl
+        )*
     ;
 
 // uses, imports
@@ -503,6 +505,18 @@ progLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
+
+NOT : 'not' ;
+EQUALS : '=' ;
+NEQUALS : '/=' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+AND : 'and' ;
+OR : 'or' ;
+PLUS : '+' ;
+MINUS : '-' ;
+MULT : '*' ;
+DIV : '/' ;
 
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');

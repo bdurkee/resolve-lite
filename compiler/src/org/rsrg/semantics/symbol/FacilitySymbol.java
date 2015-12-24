@@ -21,11 +21,10 @@ public class FacilitySymbol extends Symbol {
     @NotNull private MathSymbolTable scopeRepo;
 
     /** A mapping from the rule contexts representing an module arg list
-     *  to all the various {@link Symbol}s that represent the actual arguments
-     *  supplied.
-     *  <p>Right now I'm really only especially concerned about
-     *  generics in this list ({@link ProgTypeSymbol} or
-     *  {@link ProgParameterSymbol}s with a 'mode' of {@link ProgParameterSymbol.ParameterMode#TYPE}.
+     *  to all the various {@link ProgTypeSymbol}s that represent the actual
+     *  versions of formal (generic) type params.
+     *  <p>Right now I'm really only especially concerned about these as they
+     *  factor into the searching process in {@link ModuleParameterization}.
      *  </p>
      */
     @NotNull private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
@@ -46,19 +45,14 @@ public class FacilitySymbol extends Symbol {
         List<ProgTypeSymbol> specArgSymbols =
                 actualGenerics.get(facility.specArgs);
 
-        ModuleParameterization spec =
-                new ModuleParameterization(new ModuleIdentifier(facility.spec),
+        ModuleParameterization spec = new ModuleParameterization(
+                new ModuleIdentifier(facility.spec),
                         specArgSymbols == null ?
                                 new ArrayList<>() : specArgSymbols, this, scopeRepo);
 
-        ModuleParameterization impl = null;
-
-        List<ResolveParser.ProgExpContext> actualArgs =
-                facility.implArgs != null ? facility.implArgs
-                        .progExp() : new ArrayList<>();
-        impl = new ModuleParameterization(new ModuleIdentifier(facility.impl),
-                implArgSymbols == null ?
-                        new ArrayList<>() : implArgSymbols, this, scopeRepo);
+        ModuleParameterization impl = new ModuleParameterization(
+                new ModuleIdentifier(facility.impl),
+                        new ArrayList<>(), this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);
 

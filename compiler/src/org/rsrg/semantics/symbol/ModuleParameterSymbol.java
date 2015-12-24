@@ -46,6 +46,19 @@ public class ModuleParameterSymbol extends Symbol {
         return progType;
     }
 
+    public boolean isTypeParameter() {
+        boolean result = (wrappedParamSymbol instanceof ProgParameterSymbol);
+        if (result) {
+            result = ((ProgParameterSymbol)wrappedParamSymbol).getMode() ==
+                    ProgParameterSymbol.ParameterMode.TYPE;
+        }
+        return result;
+    }
+
+    @NotNull public Symbol getWrappedParamSymbol() {
+        return wrappedParamSymbol;
+    }
+
     /** Handle these toXXXX methods strategically, meaning only those that a
      *  conceivably module parameterizable {@link Symbol} might need.
      */
