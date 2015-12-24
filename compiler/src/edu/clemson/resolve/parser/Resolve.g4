@@ -110,7 +110,9 @@ facilityModuleDecl
     ;
 
 facilityBlock
-    :   ( facilityDecl )*
+    :   ( facilityDecl
+        | operationProcedureDecl
+        )*
     ;
 
 // uses, imports
@@ -168,6 +170,29 @@ variableDeclGroup
 
 // statements
 
+stmt
+    :   simpleStmt
+    |   whileStmt
+    |   ifStmt
+    ;
+
+simpleStmt
+    :   progExp (assignStmt|swapStmt)? ';'
+    ;
+
+assignStmt : ':=' progExp ;
+
+swapStmt : ':=:' progExp ;
+
+whileStmt
+    :   'While' progExp
+        changingClause? maintainingClause? decreasingClause?
+        'do' stmt* 'end' ';'
+    ;
+
+ifStmt
+    :   'If' progExp 'then' stmt* ('else' stmt*)? 'end' ';'
+    ;
 
 // type and record related rules
 
@@ -189,7 +214,7 @@ typeModelDecl
 
 typeRepresentationDecl
     :   'Type' name=ID '=' type ';'?
-        (conventionClause)?
+        (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
     ;
@@ -205,9 +230,9 @@ typeModelInit
     ;
 
 typeImplInit
-    :   'initialization' (ensuresClause)?
-        (variableDeclGroup)* //(stmt)*
-        'end' ';'?
+    :   'initialization'
+        (variableDeclGroup)* (stmt)*
+        'end' ';'
     ;
 
 // math constructs
@@ -292,7 +317,7 @@ operationProcedureDecl
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
         (variableDeclGroup)*
-        //(stmt)*
+        (stmt)*
         'end' closename=ID ';'
     ;
 
@@ -300,7 +325,7 @@ procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
         (variableDeclGroup)*
-        //(stmt)*
+        (stmt)*
         'end' closename=ID ';'
     ;
 
@@ -318,12 +343,24 @@ constraintClause
     :   ('Constraints'|'constraints') mathAssertionExp ';'
     ;
 
-conventionClause
-    :   'convention' mathAssertionExp (entailsClause)? ';'
+conventionsClause
+    :   'conventions' mathAssertionExp (entailsClause)? ';'
     ;
 
 correspondenceClause
     :   'correspondence' mathAssertionExp ';'
+    ;
+
+changingClause
+    :   'changing' mathExp (',' mathExp)* ';'
+    ;
+
+maintainingClause
+    :   'maintaining' mathAssertionExp ';'
+    ;
+
+decreasingClause
+    :   'decreasing'  mathExp (',' mathExp)* ';'
     ;
 
 entailsClause
@@ -346,8 +383,8 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
-    |   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
+    :   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
+    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
     |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
     |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
     |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
@@ -363,8 +400,8 @@ mathExp
 /** Because operators are now first class citizens with expressions all of their
  *  own (as opposed to being simple strings embedded within the context of some application)
  *  we need these intermediate rules to convince antlr to create visitable, *annotatable*,
- *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST
- *  (won't need to pass special maps around from Token -> MTType, etc --
+ *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST.
+ *  No longer a need to pass special maps around from Token -> MTType, etc --
  *  now we just need to visit and annotate them like any other node).
  */
 mathMultOp : (qualifier=ID '::')? op=('*'|'/'|'%');
@@ -450,8 +487,12 @@ progPrimary
     |   progNamedExp
     ;
 
+//operations are first class citizens with respect to a certain class of
+//parameterized resolve implementation-modules. So we
+//represent the name portion as its own (potentially qualified) expression,
+//once again this makes building our function application AST node much easier.
 progParamExp
-    :   (qualifier=ID '::')? name=ID '(' (progExp (',' progExp)*)? ')'
+    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
     ;
 
 progNamedExp
@@ -464,6 +505,18 @@ progLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
+
+NOT : 'not' ;
+EQUALS : '=' ;
+NEQUALS : '/=' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+AND : 'and' ;
+OR : 'or' ;
+PLUS : '+' ;
+MINUS : '-' ;
+MULT : '*' ;
+DIV : '/' ;
 
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');

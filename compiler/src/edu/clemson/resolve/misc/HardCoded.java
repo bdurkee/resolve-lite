@@ -43,10 +43,6 @@ public class HardCoded {
             b.addBinding("iff", null, new MTFunctionBuilder(g, g.BOOLEAN)
                     .paramTypes(g.BOOLEAN, g.BOOLEAN).build());
 
-            /* b.addBinding("Is_Initial", null,
-                     new MTFunctionBuilder(g, g.BOOLEAN).paramTypes(g.ENTITY)
-                             .build());*/
-
             //S E T   R E L A T E D
             b.addBinding("Finite_Powerset", null, g.POWERSET);
             b.addBinding("Powerset", null, g.POWERSET);
@@ -83,8 +79,8 @@ public class HardCoded {
                     new MTFunction.MTFunctionBuilder(g, g.BOOLEAN).paramTypes(
                             g.ENTITY).build();
         }
-        else if ( metaSegment.equals("Base_Point") ) {
-            result = new MTFunction.MTFunctionBuilder(g, g.ENTITY).build();
+        else if ( metaSegment.equals("base_point") ) {
+            result = g.ENTITY;
         }
         return result;
     }

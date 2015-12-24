@@ -194,7 +194,6 @@ public class Utils {
      *  for an example usage
      */
     @FunctionalInterface public interface Builder<T> {
-
         @NotNull T build();
     }
 
@@ -233,6 +232,27 @@ public class Utils {
         if (ctx == null) return "";
         Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
         return ctx.start.getInputStream().getText(interval);
+    }
+
+    @Nullable public static ParserRuleContext getFirstAncestorOfType(
+            @Nullable ParserRuleContext t, @NotNull Class<?> ... clazzes) {
+        return getFirstAncestorOfType(t, Arrays.asList(clazzes));
+    }
+
+    /** Return first ancestor node up the chain towards the root that is in
+     *  {@code clazzes}. Search includes the current node.
+     */
+    @Nullable public static ParserRuleContext getFirstAncestorOfType(
+            @Nullable ParserRuleContext t, @NotNull List<Class<?>> clazzes) {
+        while ( t!=null ) {
+            for (Class<?> clazz : clazzes) {
+                if ( t.getClass()==clazz ) {
+                    return t;
+                }
+            }
+            t = t.getParent();
+        }
+        return null;
     }
 
     /** Strips leading directories off a file's name; for example:

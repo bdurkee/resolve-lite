@@ -17,19 +17,16 @@ public class OperationSymbol extends Symbol {
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
     @NotNull private final PExp requires, ensures;
-    private final boolean moduleParameter;
 
     public OperationSymbol(@NotNull String name,
                            @Nullable ParserRuleContext definingTree,
                            @NotNull PExp requires, @NotNull PExp ensures,
                            @NotNull PTType type,
                            @NotNull ModuleIdentifier moduleIdentifier,
-                           @NotNull List<ProgParameterSymbol> params,
-                           boolean moduleParameter) {
+                           @NotNull List<ProgParameterSymbol> params) {
         super(name, definingTree, moduleIdentifier);
         this.parameters.addAll(params);
         this.returnType = type;
-        this.moduleParameter = moduleParameter;
         this.requires = requires;
         this.ensures = ensures;
     }
@@ -84,8 +81,7 @@ public class OperationSymbol extends Symbol {
                 .map(f::apply).collect(Collectors.toList());
         return new OperationSymbol(getName(), getDefiningTree(), requires,
                 ensures, returnType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), getModuleIdentifier(), newParams,
-                moduleParameter);
+                        instantiatingFacility), getModuleIdentifier(), newParams);
     }
 
     private static class InstantiationFunction

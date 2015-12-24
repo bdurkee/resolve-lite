@@ -54,7 +54,7 @@ public class TestASTStructure extends BaseTest {
         Assert.assertEquals(expected[0], v.trace);
     }
 
-    @Test public void testPAltStructure() {
+    /*@Test public void testPAltStructure() {
         TypeGraph g = new TypeGraph();
         String[] expected = {
             "<PAlternatives:begin>:{{@e if (q = @P.Trmnl_Loc);@P.Lab(q) otherwise;}}\n" +
@@ -89,7 +89,7 @@ public class TestASTStructure extends BaseTest {
         TestListener v = new TestListener();
         tree.accept(v);
         Assert.assertEquals(expected[0], v.trace);
-    }
+    }*/
 
     @Test public void testPSetStructure() {
 

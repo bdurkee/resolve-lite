@@ -20,23 +20,23 @@ import java.util.Set;
  */
 public class InstantiatedScope extends AbstractScope {
 
-    private final Scope myBaseScope;
-    private final FacilitySymbol myInstantiatingFacility;
-    private final Map<String, PTType> myAdditionalGenericInstantiations =
+    private final Scope baseScope;
+    private final FacilitySymbol instantiatingFacility;
+    private final Map<String, PTType> additionalGenericInstantiations =
             new HashMap<>();
 
     public InstantiatedScope(Scope baseScope,
                              Map<String, PTType> genericInstantiations,
                              FacilitySymbol instantiatingFacility) {
-        myBaseScope = baseScope;
-        myAdditionalGenericInstantiations.putAll(genericInstantiations);
-        myInstantiatingFacility = instantiatingFacility;
+        this.baseScope = baseScope;
+        additionalGenericInstantiations.putAll(genericInstantiations);
+        this.instantiatingFacility = instantiatingFacility;
     }
 
     @NotNull @Override public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException {
-        return myBaseScope.query(query);
+        return baseScope.query(query);
     }
 
     @NotNull @Override public <E extends Symbol> E queryForOne(
@@ -44,7 +44,7 @@ public class InstantiatedScope extends AbstractScope {
             throws NoSuchSymbolException,
             DuplicateSymbolException, NoSuchModuleException,
             UnexpectedSymbolException {
-        return myBaseScope.queryForOne(query);
+        return baseScope.queryForOne(query);
     }
 
     @Override public <E extends Symbol> boolean
@@ -62,20 +62,23 @@ public class InstantiatedScope extends AbstractScope {
             throw new RuntimeException("Duplicate instantiation???");
         }
 
-        return myBaseScope.addMatches(searcher, matches, searchedScopes,
-                myAdditionalGenericInstantiations, myInstantiatingFacility, l);
+        return baseScope.addMatches(searcher, matches, searchedScopes,
+                additionalGenericInstantiations, instantiatingFacility, l);
     }
 
-    @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type) {
-        return myBaseScope.getSymbolsOfType(type);
+    @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(
+            @NotNull Class<T> type) {
+        return baseScope.getSymbolsOfType(type);
     }
 
-    @NotNull @Override public List<Symbol> getSymbolsOfType(@NotNull Class<?>... type) {
-        return myBaseScope.getSymbolsOfType(type);
+    @NotNull @Override public List<Symbol> getSymbolsOfType(
+            @NotNull Class<?>... type) {
+        return baseScope.getSymbolsOfType(type);
     }
 
-    @NotNull @Override public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException {
-        return myBaseScope.define(s);
+    @NotNull @Override public Symbol define(@NotNull Symbol s)
+            throws DuplicateSymbolException {
+        return baseScope.define(s);
     }
 
 }

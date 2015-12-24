@@ -17,9 +17,17 @@ import java.util.Map;
 
 public class FacilitySymbol extends Symbol {
 
-    @NotNull private  SpecImplementationPairing type;
+    @NotNull private SpecImplementationPairing type;
     @NotNull private MathSymbolTable scopeRepo;
-    @NotNull private ParseTreeProperty<List<ProgTypeSymbol>> genericsPerFacility;
+
+    /** A mapping from the rule contexts representing an module arg list
+     *  to all the various {@link ProgTypeSymbol}s that represent the actual
+     *  versions of formal (generic) type params.
+     *  <p>Right now I'm really only especially concerned about these as they
+     *  factor into the searching process in {@link ModuleParameterization}.
+     *  </p>
+     */
+    @NotNull private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
 
     private final Map<ModuleParameterization, ModuleParameterization>
             enhancementImplementations = new HashMap<>();
@@ -33,19 +41,18 @@ public class FacilitySymbol extends Symbol {
             @NotNull MathSymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
-        this.genericsPerFacility = actualGenerics;
-        ModuleParameterization spec =
-                new ModuleParameterization(new ModuleIdentifier(facility.spec),
-                        genericsPerFacility.get(facility), facility.specArgs,
-                        this, scopeRepo);
+        this.actualGenerics = actualGenerics;
+        List<ProgTypeSymbol> specArgSymbols =
+                actualGenerics.get(facility.specArgs);
 
-        ModuleParameterization impl = null;
+        ModuleParameterization spec = new ModuleParameterization(
+                new ModuleIdentifier(facility.spec),
+                        specArgSymbols == null ?
+                                new ArrayList<>() : specArgSymbols, this, scopeRepo);
 
-        List<ResolveParser.ProgExpContext> actualArgs =
-                facility.implArgs != null ? facility.implArgs
-                        .progExp() : new ArrayList<>();
-        impl = new ModuleParameterization(new ModuleIdentifier(facility.impl),
-                        new ArrayList<>(), facility.implArgs, this, scopeRepo);
+        ModuleParameterization impl = new ModuleParameterization(
+                new ModuleIdentifier(facility.impl),
+                        new ArrayList<>(), this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);
 

@@ -34,6 +34,7 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCoded;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
@@ -43,12 +44,11 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
+import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
 import org.rsrg.semantics.TypeGraph;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.*;
@@ -56,6 +56,7 @@ import org.rsrg.semantics.query.*;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -70,13 +71,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  been marked 'Recursive'.
      */
     //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-    private ResolveParser.ProcedureDeclContext currentProcedureDecl = null;
 
-    /** Set to {@code true} when we're walking the arguments to a module
-     *  (eg args to a facility decl); or when we're walking
-     *  module formal parameters; should be {@code false} otherwise;
-     */
-    private boolean walkingModuleArgOrParamList = false;
+    private boolean walkingApplicationArgs = false;
 
     /** A reference to the expr context that represents the previous segment
      *  accessed in a {@link ResolveParser.MathSelectorExpContext} or
@@ -84,7 +80,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  overlap here as we use two separate expr hierarchies. This is
      *  {@code null} the rest of the time.
      */
-    private ResolveParser.MathExpContext prevMathSelectorAccess = null;
+    private ParserRuleContext prevSelectorAccess = null;
 
     private Map<String, MTType> definitionSchematicTypes = new HashMap<>();
 
@@ -122,6 +118,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private Deque<Quantification> activeQuantifications = new LinkedList<>();
 
     private ModuleScopeBuilder moduleScope = null;
+
+    private final ParseTreeProperty<List<ProgTypeSymbol>>
+            actualGenericTypesPerFacilitySpecArgs = new ParseTreeProperty<>();
 
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
@@ -188,28 +187,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         this.visitChildren(ctx);
         return null;
-    }
-
-    @Override public Void visitImplModuleParameterList(
-             ResolveParser.ImplModuleParameterListContext ctx) {
-         walkingModuleArgOrParamList = true;
-         this.visitChildren(ctx);
-         walkingModuleArgOrParamList = false;
-         return null;
-     }*/
-
-    @Override public Void visitSpecModuleParameterList(
-            ResolveParser.SpecModuleParameterListContext ctx) {
-        walkingModuleArgOrParamList = true;
-        this.visitChildren(ctx);
-        walkingModuleArgOrParamList = false;
-        return null;
-    }
+    }*/
 
     @Override public Void visitGenericTypeParameterDecl(
             ResolveParser.GenericTypeParameterDeclContext ctx) {
         try {
-            //all generic params are module params (grammar says so)
+            //all generic params are module params; its the only way they can
+            //be introduced.
             ModuleParameterSymbol moduleParam =
                     new ModuleParameterSymbol(new ProgParameterSymbol(g,
                             ctx.name.getText(),
@@ -265,7 +249,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
         OperationSymbol correspondingOp = null;
-        currentProcedureDecl = ctx;
         try {
             correspondingOp =
                     symtab.getInnermostActiveScope()
@@ -304,10 +287,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
              returnType = PTVoid.getInstance(g);
         }
         ctx.variableDeclGroup().forEach(this::visit);
-         //ctx.stmt().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
         symtab.endScope();
         if (correspondingOp == null) { //backout
-            currentProcedureDecl = null;
             return null;
         }
         try {
@@ -318,7 +300,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.name.getText());
         }
-        currentProcedureDecl = null;
         return null;
     }
 
@@ -403,8 +384,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //if we're walking a specmodule param list
             symtab.getInnermostActiveScope().define(
                     new OperationSymbol(name.getText(), ctx, requiresExp,
-                            ensuresExp, returnType, getRootModuleIdentifier(), params,
-                            walkingModuleArgOrParamList));
+                            ensuresExp, returnType, getRootModuleIdentifier(),
+                            params));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
                     name.getText());
@@ -420,10 +401,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ProgParameterSymbol.ParameterMode mode =
                         ProgParameterSymbol.getModeMapping().get(
                                 ctx.parameterMode().getText());
-                symtab.getInnermostActiveScope().define(
+                ProgParameterSymbol p =
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
-                                .getText(), mode, groupType,
-                                ctx, getRootModuleIdentifier()));
+                        .getText(), mode, groupType,
+                        ctx, getRootModuleIdentifier());
+                boolean walkingModuleParamList = Utils.getFirstAncestorOfType(
+                        ctx, ResolveParser.SpecModuleParameterListContext.class,
+                             ResolveParser.ImplModuleParameterListContext.class) != null;
+                if (walkingModuleParamList) {
+                    symtab.getInnermostActiveScope()
+                            .define(new ModuleParameterSymbol(p));
+                }
+                else {
+                    symtab.getInnermostActiveScope()
+                            .define(p);
+                }
             } catch (DuplicateSymbolException dse) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
@@ -432,55 +424,68 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    /** Really just checks two things before we add it to the symboltable:
+     *  1. That the number of actuals supplied to module {@code i}
+     *     matches the number of formals.
+     *  2. The number prog types (or even generics) supplied matches the number
+     *     of formal type parameters.
+     */
+    private void sanityCheckParameterizationArgs(
+            @NotNull List<ResolveParser.ProgExpContext> actuals,
+            @NotNull ModuleIdentifier i) {
+        List<PTType> argTypes = new LinkedList<>();
+        try {
+            ModuleScopeBuilder module = symtab.getModuleScope(i);
+            List<ModuleParameterSymbol> formals =
+                    module.getSymbolsOfType(ModuleParameterSymbol.class);
+            for (ResolveParser.ProgExpContext arg : actuals) {
+                argTypes.add(tr.progTypes.get(arg));
+            }
+            if (argTypes.size() != formals.size()) {
+                //ERROR
+            }
+            //now make sure the top level type params (at least) match up...
+            Iterator<PTType> actualTypesIter = argTypes.iterator();
+            Iterator<ModuleParameterSymbol> formalParamIter = formals.iterator();
+            /*while (actualTypesIter.hasNext()) {
+                PTType actualType = actualTypesIter.next();
+                ModuleParameterSymbol formalParam = formalParamIter.next();
+                if (formalParam.getWrappedParamSymbol() instanceof MathSymbol) continue;
+                //unbelievable, we need the actual Symbols for the actual args...
+                //if (formalParam.isTypeParameter() && actualType.)
+                //if (actualType.isTypeLike() && formalParam.getProgramType().isTypeLike())
+            }*/
+        } catch (NoSuchModuleException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override public Void visitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-        ctx.moduleArgumentList().forEach(this::visit);
-        ParseTreeProperty<List<ProgTypeSymbol>> facOrEnhToGenericArgs =
-                new ParseTreeProperty<>();
-        try {
-            //map the base facility to any generic symbols parameterizing it
-            facOrEnhToGenericArgs.put(ctx, new ArrayList<>());
-            //getGenericArgumentSymsForFacilityOrEnh(ctx.type()));
 
-            //now do the same for each enhancement pair
-            /* for (ResolveParser.EnhancementPairDeclContext enh :
-                     ctx.enhancementPairDecl()) {
-                 //Todo: visit the generic arg types too
-                 enh.moduleArgumentList().forEach(this::visit);
-                 facOrEnhToGenericArgs.put(enh,
-                         getGenericArgumentSymsForFacilityOrEnh(enh.type()));
-             }*/
-            symtab.getInnermostActiveScope().define(
-                    new FacilitySymbol(ctx, getRootModuleIdentifier(),
-                            facOrEnhToGenericArgs, symtab));
+        if (ctx.specArgs != null) {
+            sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
+                    new ModuleIdentifier(ctx.spec));
+            actualGenericTypesPerFacilitySpecArgs
+                    .put(ctx.specArgs, new ArrayList<>());
+        }
+        //now visit the actual arg exprs
+        ctx.moduleArgumentList().forEach(this::visit);
+        try {
+            //before we even construct the facility we ensure things like
+            //formal counts and actual counts (also for generics) is the same
+            FacilitySymbol facility = new FacilitySymbol(ctx,
+                    getRootModuleIdentifier(),
+                    actualGenericTypesPerFacilitySpecArgs, symtab);
+            symtab.getInnermostActiveScope().define(facility);
+            //we got some checking to do now..
+           // facility.getFacility().getSpecification().getArguments()
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
                     ctx.name.getText());
         }
         return null;
     }
-/*
-     private List<ProgTypeSymbol> getGenericArgumentSymsForFacilityOrEnh(
-             List<ResolveParser.TypeContext> actualTypes) {
-         List<ProgTypeSymbol> result = new ArrayList<>();
-         for (ResolveParser.TypeContext generic : actualTypes) {
-             try {
-                 result.add(symtab.getInnermostActiveScope()
-                         .queryForOne(new NameQuery(generic.qualifier,
-                                 generic.name, true)).toProgTypeSymbol());
-             }
-             catch (DuplicateSymbolException | NoSuchSymbolException e) {
-                 compiler.errMgr.semanticError(e.getErrorKind(), generic.name,
-                         generic.name.getText());
-             }
-             catch (UnexpectedSymbolException use) {
-                 compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                         generic.getStart(), "a program type", generic.getText(),
-                         use.getTheUnexpectedSymbolDescription());
-             }
-         }
-         return result;
-     }*/
 
     @Override public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
         try {
@@ -574,12 +579,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //introduce anything
             throw new RuntimeException(dse);
         }
-        if (ctx.conventionClause() != null) this.visit(ctx.conventionClause());
+        if (ctx.conventionsClause() != null) this.visit(ctx.conventionsClause());
         if (ctx.correspondenceClause() != null)
             this.visit(ctx.correspondenceClause());
         if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         symtab.endScope();
-        PExp convention = getPExpFor(ctx.conventionClause());
+        PExp convention = getPExpFor(ctx.conventionsClause());
         PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
             ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
@@ -595,7 +600,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         curTypeReprModelSymbol = null;
         return null;
     }
-/*
+
      @Override public Void visitVariableDeclGroup(
              ResolveParser.VariableDeclGroupContext ctx) {
          this.visit(ctx.type());
@@ -603,7 +608,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          return null;
      }
 
-     @Override public Void visitMathAssertionDecl(
+     /*@Override public Void visitMathAssertionDecl(
              ResolveParser.MathAssertionDeclContext ctx) {
          symtab.startScope(ctx);
          this.visit(ctx.mathAssertionExp());
@@ -621,14 +626,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          emit("new theorem: " + ctx.name.getText());
          return null;
      }
-
-     private void checkMathTypes(ParserRuleContext ctx, MTType expected) {
-         MTType foundType = tr.mathTypes.get(ctx);
-         if (!foundType.equals(expected)) {
-             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                     ctx.getStart(), expected, foundType);
-         }
-     }*/
+     */
 
     @Override public Void visitMathCategoricalDefinitionDecl(
             ResolveParser.MathCategoricalDefinitionDeclContext ctx) {
@@ -846,7 +844,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //(not the actual arg list!)
             Symbol defnSym = new MathSymbol(g, name.getText(),
                     defnType, null, ctx, getRootModuleIdentifier());
-            if (walkingModuleArgOrParamList) {
+            //we only need to check spec module param list contexts,
+            boolean isModuleParameter = Utils.getFirstAncestorOfType(ctx,
+                    ResolveParser.SpecModuleParameterListContext.class) != null;
+            if (isModuleParameter) {
                 defnSym = new ModuleParameterSymbol((MathSymbol) defnSym);
             }
             symtab.getInnermostActiveScope().define(defnSym);
@@ -901,9 +902,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*private void insertVariables(@NotNull ParserRuleContext ctx,
-                                 List<TerminalNode> terminalGroup,
-                                 ResolveParser.TypeContext type) {
+    private void insertVariables(@NotNull ParserRuleContext ctx,
+                                 @NotNull List<TerminalNode> terminalGroup,
+                                 @NotNull ResolveParser.TypeContext type) {
         PTType progType = tr.progTypeValues.get(type);
         for (TerminalNode t : terminalGroup) {
             try {
@@ -919,7 +920,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override public Void visitRequiresClause(
+    /*@Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         if ( ctx.entailsClause() != null ) this.visit(ctx.entailsClause());
@@ -964,12 +965,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathAssertionExp());
         chainMathTypes(ctx, ctx.mathAssertionExp());
         return null;
-    }
+    }*/
 
     //---------------------------------------------------
     // P R O G    E X P    T Y P I N G
     //---------------------------------------------------
-*/
+
     @Override public Void visitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
         this.visit(ctx.progExp());
         tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
@@ -994,50 +995,124 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
+        if (prevSelectorAccess != null) {
+            typeProgSelectorAccessExp(ctx, prevSelectorAccess,
+                    ctx.name.getText());
+            return null;
+        }
         try {
-            //definition, operation, type, or of course, just some variable.
+            //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
                             new NameQuery(ctx.qualifier, ctx.name,
                                     true));
             PTType programType = PTInvalid.getInstance(g);
+            ParserRuleContext parentFacilityArgListCtx =
+                    Utils.getFirstAncestorOfType(ctx,
+                            ResolveParser.ModuleArgumentListContext.class);
             if (namedSymbol instanceof ProgVariableSymbol) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
             }
+            else if (namedSymbol instanceof ProgParameterSymbol) {
+                programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
+            }
+            else if (namedSymbol instanceof ProgTypeSymbol) {
+                programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
+
+                if (parentFacilityArgListCtx != null) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
+                }
+            }
+            //special case (don't want to adapt "mathVariableQuery" to coerce
+            //OperationSymbols, so in the meantime
+            else if (namedSymbol instanceof OperationSymbol) {
+                PTType returnType = ((OperationSymbol) namedSymbol).getReturnType();
+                tr.progTypes.put(ctx, returnType);
+                tr.mathTypes.put(ctx, returnType.toMath());
+                return null;
+            }
             else if (namedSymbol instanceof ModuleParameterSymbol) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+                if (parentFacilityArgListCtx != null &&
+                        ((ModuleParameterSymbol) namedSymbol).isTypeParameter()) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add(
+                            namedSymbol.toProgTypeSymbol());
+                }
             }
             tr.progTypes.put(ctx, programType);
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
             return null;
-
-            //TODO TODO
-        } catch (UnexpectedSymbolException e) {
-            e.printStackTrace();
-        } catch (NoSuchSymbolException e) {
-            e.printStackTrace();
-        } catch (DuplicateSymbolException e) {
-            e.printStackTrace();
-        } catch (NoSuchModuleException e) {
-            e.printStackTrace();
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a variable", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
         }
         return null;
     }
 
-    @Override public Void visitModuleArgumentList(
-            ResolveParser.ModuleArgumentListContext ctx) {
-        walkingModuleArgOrParamList = true;
-        this.visitChildren(ctx);
-        walkingModuleArgOrParamList = false;
-        return null;
+    private void typeProgSelectorAccessExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull ParserRuleContext previousAccess,
+                                           @NotNull String fieldName) {
+        PTType prevAccessType = tr.progTypes.get(previousAccess);
+        PTType type = PTInvalid.getInstance(g);
+        if (prevAccessType instanceof PTRepresentation) {
+            PTType baseType = ((PTRepresentation) prevAccessType).getBaseType();
+            try {
+                PTRecord record = (PTRecord) baseType;
+                type = record.getFieldType(fieldName);
+            } catch (ClassCastException | NoSuchElementException cce) {
+                //todo: Error shhould be something like, either previousAccess wasn't record, or field not there
+                compiler.errMgr.semanticError(
+                        ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                        previousAccess.getText(), fieldName);
+            }
+        }
+        else if (prevAccessType instanceof PTRecord) {
+            try {
+                type = ((PTRecord) prevAccessType).getFieldType(fieldName);
+            }
+            catch (NoSuchElementException nse) {
+                //remember ctx here (should) be the context of the rightmost/current field access
+                compiler.errMgr.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(),
+                        ctx.getText());
+            }
+        }
+        else {
+            //TODO: Maybe change this one to something like: Not a record at all..
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                    previousAccess.getText(), fieldName);
+        }
+        tr.mathTypes.put(ctx, type.toMath());
+        tr.progTypes.put(ctx, type);
     }
 
     @Override public Void visitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
-        throw new UnsupportedOperationException("not implemented yet..");
+        this.visit(ctx.lhs);
+        prevSelectorAccess = ctx.lhs;
+        this.visit(ctx.rhs);
+        prevSelectorAccess = null;
+
+        PTType finalType = tr.progTypes.get(ctx.rhs);
+        MTType finalMathType = tr.mathTypes.get(ctx.rhs);
+        //compiler.info("prog expression: " + ctx.getText() + " of type " + finalType);
+        tr.progTypes.put(ctx, finalType);
+        tr.mathTypes.put(ctx, finalMathType);
+        return null;
     }
 
-    /*@Override public Void visitProgInfixExp(
+    @Override public Void visitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<PTType> argTypes = ctx.progExp().stream()
@@ -1048,7 +1123,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+   /* @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());
         if (ctx.NOT() != null) {
             HardCodedProgOps.BuiltInOpAttributes attr =
@@ -1063,20 +1138,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
 
         return null;
-    }
-
-    @Override public Void visitProgPostfixExp(ResolveParser.ProgPostfixExpContext ctx) {
-        this.visit(ctx.progExp());
-        HardCodedProgOps.BuiltInOpAttributes attr =
-                HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
-        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
-        return null;
     }*/
 
     @Override public Void visitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
-       // ctx.progExp().forEach(this::visit);
-       // typeOperationRefExp(ctx, ctx.qualifier, ctx.name, ctx.progExp());
+        this.visit(ctx.progNamedExp());
+        ctx.progExp().forEach(this::visit);
+        typeOperationRefExp(ctx, ctx.progNamedExp(), ctx.progExp());
         return null;
     }
 
@@ -1138,84 +1206,54 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return result;
     }
 
-    /*   protected void typeOperationRefExp(ParserRuleContext ctx,
-                                      Token qualifier, Token name,
-                                      ResolveParser.ProgExpContext... args) {
-       typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
-   }
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull ResolveParser.ProgExpContext ... args) {
+        typeOperationRefExp(ctx, name, Arrays.asList(args));
+    }
 
-   protected void typeOperationRefExp(ParserRuleContext ctx,
-                                      Token qualifier, Token name,
-                                      List<ResolveParser.ProgExpContext> args) {
-       List<PTType> argTypes = args.stream().map(tr.progTypes::get)
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull List<ResolveParser.ProgExpContext> args) {
+        typeOperationRefExp(ctx, name.qualifier, name.name, args);
+    }
+
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @Nullable Token qualifier,
+                                       @NotNull Token name,
+                                       @NotNull List<ResolveParser.ProgExpContext> args) {
+        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                .collect(Collectors.toList());
-       //for recursive calls
-       if (currentOpProcedureDecl != null || currentProcedureDecl != null) {
-           String currentName = currentOpProcedureDecl != null ?
-                   currentOpProcedureDecl.name.getText() :
-                   currentProcedureDecl.name.getText();
-
-           boolean isMarkedRecursive = currentOpProcedureDecl != null ?
-                   currentOpProcedureDecl.recursive != null :
-                   currentProcedureDecl.recursive != null;
-
-           ResolveParser.OperationParameterListContext formalParamListNode =
-                   currentOpProcedureDecl != null ?
-                           currentOpProcedureDecl.operationParameterList() :
-                           currentProcedureDecl.operationParameterList();
-
-           ResolveParser.TypeContext declaredTypeCtx =
-                   currentOpProcedureDecl != null ?
-                           currentOpProcedureDecl.type() :
-                           currentProcedureDecl.type();
-
-           if (currentName.equals(name.getText()) && qualifier == null) {
-               if (formalParamListNode.parameterDeclGroup().size() !=
-                       argTypes.size()) {
-                   compiler.errMgr.semanticError(ErrorKind.MALFORMED_RECURSIVE_OP_CALL,
-                           ctx.getStart(), ctx.getText(),
-                           currentOpProcedureDecl.name.getText());
-                   tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-                   tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-                   return;
-               }
-               PTType t = declaredTypeCtx != null ?
-                       tr.progTypeValues.get(declaredTypeCtx) :
-                       PTVoid.getInstance(g);
-               tr.progTypes.put(ctx, t);
-               tr.mathTypes.put(ctx, t.toMath());
-               return;
-           }
-       }
-
-       //every other call
-       try {
-           OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
+        //every other call
+        try {
+            OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                    new OperationQuery(qualifier, name, argTypes,
-                           MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                           MathSymbolTable.ImportStrategy.IMPORT_NAMED));
+                           FacilityStrategy.FACILITY_INSTANTIATE,
+                           ImportStrategy.IMPORT_NAMED));
 
-           tr.progTypes.put(ctx, opSym.getReturnType());
-           tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
-           return;
-       } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-           List<String> argStrList = args.stream()
-                   .map(ResolveParser.ProgExpContext::getText)
-                   .collect(Collectors.toList());
-           compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                   ctx.getStart(), name.getText(), argStrList, argTypes);
-       }
-       tr.progTypes.put(ctx, PTInvalid.getInstance(g));
-       tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
-   }
-   private void handleRecursiveOperationRef(ParserRuleContext ctx,
-                                            Token qualifier, Token name,
-                                            List<PTType> actualArgTypes) {
-   }*/
+            tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.mathTypes.put(ctx, opSym.getReturnType().toMath());
+            return;
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            List<String> argStrList = args.stream()
+                    .map(ResolveParser.ProgExpContext::getText)
+                    .collect(Collectors.toList());
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
+                    ctx.getStart(), name.getText(), argStrList, argTypes);
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                   ctx.getStart(), "an operation", name.getText(),
+                   use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, MTInvalid.getInstance(g));
+    }
 
-   //---------------------------------------------------
-   //  M A T H   E X P   T Y P I N G
-   //---------------------------------------------------
+    //---------------------------------------------------
+    //  M A T H   E X P   T Y P I N G
+    //---------------------------------------------------
 
     @Override public Void visitMathTypeExp(
             ResolveParser.MathTypeExpContext ctx) {
@@ -1348,7 +1386,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /* @Override public Void visitMathLambdaExp(
+    @Override public Void visitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
         emit("lambda exp: " + ctx.getText());
@@ -1401,12 +1439,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathAlternativeItemExp(
             ResolveParser.MathAlternativeItemExpContext ctx) {
         if ( ctx.condition != null ) {
-            //expectType(ctx.condition, g.BOOLEAN);
+            expectType(ctx.condition, tr.mathTypes.get(ctx.condition),
+                    g.BOOLEAN);
         }
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
-    }*/
+    }
 
     @Override public Void visitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
@@ -1440,11 +1479,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
-        //risky, but better than 20 different overriden visitor methods...
         return typeApplyExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
     }
 
-    //operator typing
+    // operator typing
     @Override public Void visitMathMultOp(ResolveParser.MathMultOpContext ctx) {typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathAddOp(ResolveParser.MathAddOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathRelationalOp(ResolveParser.MathRelationalOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
@@ -1496,7 +1534,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //application's first class 'function-portion'
         List<ResolveParser.MathExpContext> args =
                 ctx.mathExp().subList(1, ctx.mathExp().size());
+        walkingApplicationArgs = true;
         args.forEach(this::visit);
+        walkingApplicationArgs = false;
         typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
         return null;
     }
@@ -1515,8 +1555,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        if (prevMathSelectorAccess != null) {
-            typeMathSelectorAccessExp(ctx, prevMathSelectorAccess,
+        if (prevSelectorAccess != null) {
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
                     ctx.name.getText());
         }
         else {
@@ -1525,18 +1565,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitConventionClause(
-            ResolveParser.ConventionClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        expectType(ctx.mathAssertionExp(),
-                tr.mathTypes.get(ctx.mathAssertionExp()),
-                g.BOOLEAN);
-        chainMathTypes(ctx, ctx.mathAssertionExp());
+    @Override public Void visitConventionsClause(
+            ResolveParser.ConventionsClauseContext ctx) {
+        return typeMathClause(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public Void visitCorrespondenceClause(
+            ResolveParser.CorrespondenceClauseContext ctx) {
+        return typeMathClause(ctx, ctx.mathAssertionExp());
+    }
+
+    private Void typeMathClause(@NotNull ParserRuleContext clauseCtx,
+                                @NotNull ParserRuleContext assertionCtx) {
+        this.visit(assertionCtx);
+        expectType(assertionCtx, tr.mathTypes.get(assertionCtx), g.BOOLEAN);
+        chainMathTypes(clauseCtx, assertionCtx);
         return null;
     }
 
     private void typeMathSelectorAccessExp(@NotNull ParserRuleContext ctx,
-                                           @NotNull ResolveParser.MathExpContext prevAccessExp,
+                                           @NotNull ParserRuleContext prevAccessExp,
                                            @NotNull String symbolName) {
 
         MTType type = g.INVALID;
@@ -1556,7 +1604,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MTCartesian typeCartesian = (MTCartesian) prevMathAccessType;
             type = typeCartesian.getFactor(symbolName);
         }
-        catch (ClassCastException cce) {
+        catch (ClassCastException|NoSuchElementException cce) {
             type = HardCoded.getMetaFieldType(g, symbolName);
             if (type == null) {
                 compiler.errMgr.semanticError(
@@ -1570,10 +1618,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
+        //System.out.println("selector ctx=" + ctx.getText());
         this.visit(ctx.lhs);
-        prevMathSelectorAccess = ctx.lhs;
+        prevSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
-        prevMathSelectorAccess = null;
+        prevSelectorAccess = null;
 
         MTType finalType = tr.mathTypes.get(ctx.rhs);
         compiler.info("expression: " + ctx.getText() + " of type " + finalType);
@@ -1640,7 +1689,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //function applications appearing on the rhs of a colon necessarily need
                 //have arguments that are guaranteed to only contain values? Maybe an example would help? According
                 //to Hws's old type chcker, that's just how it needs to be.
-                tr.mathTypeValues.put(ctx, g.INVALID);
+                if (walkingApplicationArgs) {
+                    tr.mathTypeValues.put(ctx, new MTNamed(g, symbolName));
+                }
+                else {
+                    tr.mathTypeValues.put(ctx, g.INVALID);
+                }
             }
         }
     }

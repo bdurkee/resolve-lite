@@ -1,10 +1,7 @@
 Precis Basic_Integer_Theory;
-       // uses Monogenerator_Theory;
+        uses Monogenerator_Theory;
 
-    Definition Z : SSet;
-        Definition <=(m, n : Z) : B;
-
-/*    Categorical Definition for Z : SSet, 0 : Z, NB : Z -> Z is
+    Categorical Definition for Z : SSet, 0 : Z, NB : Z -> Z is
         Is_Monogeneric_for(Z, 0, NB);
 
     Definition +(m, n : Z) : Z;
@@ -12,5 +9,7 @@ Precis Basic_Integer_Theory;
     Definition <=(m, n : Z) : B;
 
     Definition 1 : Z;
-    Definition 2 : Z;*/
+    Definition 2 : Z;
+    Definition 3 : Z;
+    Definition 4 : Z;
 end Basic_Integer_Theory;

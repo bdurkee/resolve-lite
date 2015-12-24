@@ -119,7 +119,7 @@ public enum ErrorKind {
     /**
      * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
      */
-    UNEXPECTED_TYPE(18, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR),
+    UNEXPECTED_TYPE(18, "expected: <arg>, found: <arg2>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 19: value on seg <em>name</em> is not a tuple.
@@ -144,8 +144,9 @@ public enum ErrorKind {
      * Compiler Error 22: "illegal member access expression: <em>exp</em>;
      * <em>exp first-component</em> must refer to a record".
      */
-    ILLEGAL_MEMBER_ACCESS(22, "illegal member access expression: <arg>; <arg2>"
-            + " must refer to a record/aggregate type", ErrorSeverity.ERROR),
+    ILLEGAL_MEMBER_ACCESS(22, "illegal member access: " +
+            "either <arg> is not a record/aggregate type, or <arg2> is a " +
+            "missing (undeclared) field.", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 30: no operation found corresponding to call
