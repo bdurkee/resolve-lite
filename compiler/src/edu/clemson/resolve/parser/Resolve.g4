@@ -189,8 +189,10 @@ whileStmt
     ;
 
 ifStmt
-    :   'If' progExp 'then' stmt* ('else' stmt*)? 'end' ';'
+    :   'If' progExp 'then' stmt* elseStmt? 'end' ';'
     ;
+
+elseStmt : 'else' stmt* ;
 
 // type and record related rules
 
@@ -299,10 +301,8 @@ facilityDecl
     ;
 
 moduleArgumentList
-    :   '(' moduleArgument (',' moduleArgument)* ')'
+    :   '(' progExp (',' progExp)* ')'
     ;
-
-moduleArgument : progExp;
 
 // functions
 

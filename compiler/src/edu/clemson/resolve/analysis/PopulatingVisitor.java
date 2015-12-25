@@ -431,14 +431,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *     of formal type parameters.
      */
     private void sanityCheckParameterizationArgs(
-            @NotNull List<ResolveParser.ModuleArgumentContext> actuals,
+            @NotNull List<ResolveParser.ProgExpContext> actuals,
             @NotNull ModuleIdentifier i) {
         List<PTType> argTypes = new LinkedList<>();
         try {
             ModuleScopeBuilder module = symtab.getModuleScope(i);
             List<ModuleParameterSymbol> formals =
                     module.getSymbolsOfType(ModuleParameterSymbol.class);
-            for (ResolveParser.ModuleArgumentContext arg : actuals) {
+            for (ResolveParser.ProgExpContext arg : actuals) {
                 argTypes.add(tr.progTypes.get(arg));
             }
             if (argTypes.size() != formals.size()) {
@@ -464,7 +464,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.FacilityDeclContext ctx) {
 
         if (ctx.specArgs != null) {
-            sanityCheckParameterizationArgs(ctx.specArgs.moduleArgument(),
+            sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
                     new ModuleIdentifier(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs
                     .put(ctx.specArgs, new ArrayList<>());

@@ -18,7 +18,9 @@ import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
+import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -61,7 +63,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
-  /*   @Override public void exitOperationDecl(
+    @Override public void exitOperationDecl(
             ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
@@ -133,23 +135,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 new DecoratedFacilityInstantiation(ctx.spec.getText(),
                         ctx.impl.getText());
         basePtr.isProxied = false;
-        for (ResolveParser.TypeContext t : ctx.type()) {
-            try {
-                Symbol s =
-                        moduleScope.queryForOne(new NameQuery(t.qualifier,
-                                t.name, true));
-                if ( s instanceof GenericSymbol) {
-                    basePtr.args.add(new MethodCall((TypeInit) built.get(t)));
-                }
-                else {
-                    basePtr.args.add((TypeInit) built.get(t));
-                }
-            }
-            catch (NoSuchSymbolException | DuplicateSymbolException e) {
-                e.printStackTrace();
-            }
-        }
-        List<Expr> specArgs =
+        /*List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.specArgs.moduleArgument(), built);
         List<Expr> implArgs =
@@ -180,7 +166,7 @@ public class ModelBuilder extends ResolveBaseListener {
             else {
                 layers.get(i).child = basePtr;
             }
-        }
+        }*/
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
     }
@@ -233,9 +219,11 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
-        if ( ctx.record() != null ) {
-            for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
-                    .record().recordVariableDeclGroup()) {
+        if ( ctx.type() instanceof ResolveParser.RecordTypeContext ) {
+            ResolveParser.RecordTypeContext typeAsRecord =
+                    (ResolveParser.RecordTypeContext)ctx.type();
+            for (ResolveParser.RecordVariableDeclGroupContext grp :
+                    typeAsRecord.recordVariableDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.ID(), built));
             }
@@ -297,7 +285,7 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             return symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(qualifier, name, true));
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        } catch (SymbolTableException e) {
             throw new RuntimeException();//shouldn't happen
         }
     }
@@ -315,7 +303,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
-        built.put(ctx, new CallStat((Expr) built.get(ctx.progExp())));
+        built.put(ctx, new CallStat((Expr) built.get(ctx.progParamExp())));
     }
 
     @Override public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
@@ -327,9 +315,9 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
         IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
         i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
-        if ( ctx.elsePart() != null ) {
+        if ( ctx.elseStmt() != null ) {
             i.elseStats.addAll(Utils.collect(Stat.class,
-                    ctx.elsePart().stmt(), built));
+                    ctx.elseStmt().stmt(), built));
         }
         built.put(ctx, i);
     }
@@ -365,8 +353,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 .collect(Collectors.toList())
                 .isEmpty();
     }
-*/
-    /*@Override public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+
+    @Override public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         if (ctx.NOT() != null) {
             built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
         }
@@ -377,8 +365,8 @@ public class ModelBuilder extends ResolveBaseListener {
             built.put(ctx, new MethodCall(buildQualifier(qualifier, name),
                     name.getText(), (Expr) built.get(ctx.progExp())));
         }
-    }*/
-/*
+    }
+
     @Override public void exitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
         built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
@@ -664,5 +652,5 @@ public class ModelBuilder extends ResolveBaseListener {
         catch (UnexpectedSymbolException use) {
             throw new RuntimeException(); //should've been caught looong ago.
         }
-    }*/
+    }
 }

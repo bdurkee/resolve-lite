@@ -19,8 +19,11 @@ public class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     @NotNull private OutputModelObject buildModuleOutputModel() {
-        ModelBuilderNew builder =
-                new ModelBuilderNew(this, getCompiler().symbolTable);
+        ModelBuilder builder = null;
+        try {
+            builder = new ModelBuilder(this, getCompiler().symbolTable);
+        } catch (NoSuchModuleException e) { //shouldn't happen
+        }
         ParseTree root = getModule().getRoot();
         ParseTreeWalker.DEFAULT.walk(builder, root);
         return builder.built.get(root);
