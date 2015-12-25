@@ -431,14 +431,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *     of formal type parameters.
      */
     private void sanityCheckParameterizationArgs(
-            @NotNull List<ResolveParser.ProgExpContext> actuals,
+            @NotNull List<ResolveParser.ModuleArgumentContext> actuals,
             @NotNull ModuleIdentifier i) {
         List<PTType> argTypes = new LinkedList<>();
         try {
             ModuleScopeBuilder module = symtab.getModuleScope(i);
             List<ModuleParameterSymbol> formals =
                     module.getSymbolsOfType(ModuleParameterSymbol.class);
-            for (ResolveParser.ProgExpContext arg : actuals) {
+            for (ResolveParser.ModuleArgumentContext arg : actuals) {
                 argTypes.add(tr.progTypes.get(arg));
             }
             if (argTypes.size() != formals.size()) {
@@ -464,7 +464,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.FacilityDeclContext ctx) {
 
         if (ctx.specArgs != null) {
-            sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
+            sanityCheckParameterizationArgs(ctx.specArgs.moduleArgument(),
                     new ModuleIdentifier(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs
                     .put(ctx.specArgs, new ArrayList<>());
@@ -1439,8 +1439,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathAlternativeItemExp(
             ResolveParser.MathAlternativeItemExpContext ctx) {
         if ( ctx.condition != null ) {
-            expectType(ctx.condition, tr.mathTypes.get(ctx.condition),
-                    g.BOOLEAN);
+            expectType(ctx.condition, g.BOOLEAN);
         }
         tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
         tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
@@ -1565,20 +1564,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitEnsuresClause(
+            ResolveParser.EnsuresClauseContext ctx) {
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
+    }
+
     @Override public Void visitConventionsClause(
             ResolveParser.ConventionsClauseContext ctx) {
-        return typeMathClause(ctx, ctx.mathAssertionExp());
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
     }
 
     @Override public Void visitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
-        return typeMathClause(ctx, ctx.mathAssertionExp());
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
     }
 
-    private Void typeMathClause(@NotNull ParserRuleContext clauseCtx,
-                                @NotNull ParserRuleContext assertionCtx) {
+    private Void typeAndCheckClause(@NotNull ParserRuleContext clauseCtx,
+                                    @NotNull ParserRuleContext assertionCtx) {
         this.visit(assertionCtx);
-        expectType(assertionCtx, tr.mathTypes.get(assertionCtx), g.BOOLEAN);
+        expectType(assertionCtx, g.BOOLEAN);
         chainMathTypes(clauseCtx, assertionCtx);
         return null;
     }
@@ -1807,10 +1811,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void expectType(@NotNull ParserRuleContext ctx,
-                            @NotNull MTType found, @NotNull MTType expected) {
-        if (!(found.equals(expected))) {
+                            @NotNull MTType expected) {
+        MTType foundType = tr.mathTypes.get(ctx);
+        if (foundType == null) {
+            throw new RuntimeException("null math type on: " + ctx.getText());
+        }
+        if (!(foundType.equals(expected))) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                    ctx.getStart(), expected.toString(), found.toString());
+                    ctx.getStart(), expected.toString(), foundType + "");
         }
     }
 

@@ -3,30 +3,66 @@ package edu.clemson.resolve.codegen;
 import edu.clemson.resolve.codegen.model.*;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCodedProgOps;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTNamed;
+import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.query.UnqualifiedNameQuery;
+import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
+import org.rsrg.semantics.symbol.Symbol;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static edu.clemson.resolve.codegen.model.Stat.*;
 
 public class ModelBuilder extends ResolveBaseListener {
 
     public ParseTreeProperty<OutputModelObject> built =
             new ParseTreeProperty<>();
-    //private final ModuleScopeBuilder moduleScope;
+
     private final JavaCodeGenerator gen;
     private final MathSymbolTable symtab;
-    private final AnnotatedModule tr;
 
-    public ModelBuilder(JavaCodeGenerator gen, MathSymbolTable symtab) {
+    @NotNull private final AnnotatedModule tr;
+    @NotNull private final ModuleScopeBuilder moduleScope;
+    @NotNull private final RESOLVECompiler compiler;
+
+    public ModelBuilder(@NotNull JavaCodeGenerator gen,
+                        @NotNull MathSymbolTable symtab)
+            throws NoSuchModuleException {
         this.gen = gen;
         this.symtab = symtab;
+        this.compiler = gen.compiler;
         this.tr = gen.getModule();
+        this.moduleScope = symtab.getModuleScope(
+                new ModuleIdentifier(tr.getNameToken()));
     }
 
-  /*  @Override public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
+    @Override public void exitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
+    }
+
+    @Override public void exitTypeModelDecl(
+            ResolveParser.TypeModelDeclContext ctx) {
         built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
-    @Override public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
+  /*   @Override public void exitOperationDecl(
+            ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
         f.isStatic = withinFacilityModule();
@@ -59,11 +95,11 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    protected FunctionImpl buildFunctionImpl(String name,
-                                             ResolveParser.TypeContext type,
-                                             List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
-                                             List<ResolveParser.VariableDeclGroupContext> variableGroupings,
-                                             List<ResolveParser.StmtContext> stats) {
+    protected FunctionImpl buildFunctionImpl(@NotNull String name,
+                                             @Nullable ResolveParser.TypeContext type,
+                                             @NotNull List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
+                                             @NotNull List<ResolveParser.VariableDeclGroupContext> variableGroupings,
+                                             @NotNull List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
@@ -149,7 +185,7 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override public void exitVariableDeclGroup(
+   @Override public void exitVariableDeclGroup(
             ResolveParser.VariableDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
@@ -167,7 +203,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitType(ResolveParser.TypeContext ctx) {
+    @Override public void exitNamedType(ResolveParser.NamedTypeContext ctx) {
         built.put(ctx, new TypeInit(buildQualifier(
                 ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
@@ -188,6 +224,12 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         catch (NoSuchSymbolException | DuplicateSymbolException e) {
             exemplarName = ctx.name.getText().substring(0, 1); //default name
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a type representation", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException e) {
+            e.printStackTrace();
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
@@ -213,10 +255,6 @@ public class ModelBuilder extends ResolveBaseListener {
         for (TerminalNode t : ctx.ID()) {
             built.put(t, new ParameterDef(t.getText()));
         }
-    }
-
-    @Override public void exitModule(ResolveParser.ModuleContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
     }
 
     @Override public void exitModuleArgument(
@@ -327,8 +365,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 .collect(Collectors.toList())
                 .isEmpty();
     }
-
-    @Override public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+*/
+    /*@Override public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         if (ctx.NOT() != null) {
             built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
         }
@@ -339,34 +377,28 @@ public class ModelBuilder extends ResolveBaseListener {
             built.put(ctx, new MethodCall(buildQualifier(qualifier, name),
                     name.getText(), (Expr) built.get(ctx.progExp())));
         }
-    }
-
-    @Override public void exitProgPostfixExp(
-            ResolveParser.ProgPostfixExpContext ctx) {
+    }*/
+/*
+    @Override public void exitProgInfixExp(
+            ResolveParser.ProgInfixExpContext ctx) {
         built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
     }
 
-    @Override public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
-    }
-
-    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
-                                           ParseTree... args) {
+    private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull Token op,
+                                           @NotNull ParseTree... args) {
         return buildSugaredProgExp(ctx, op, Arrays.asList(args));
     }
 
-    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
-                                           List<? extends ParseTree> args) {
+    private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull Token op,
+                                           @NotNull List<? extends ParseTree> args) {
         List<PTType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
         HardCodedProgOps.BuiltInOpAttributes o =
                 HardCodedProgOps.convert(op, argTypes);
         return new MethodCall(buildQualifier(o.qualifier, o.name),
                 o.name.getText(), Utils.collect(Expr.class, args, built));
-    }
-
-    @Override public void exitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
     }
 
     @Override public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
@@ -448,8 +480,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitFacilityModule(ResolveParser.FacilityModuleContext ctx) {
         ModuleFile file = buildFile();
-        FacilityImplModule impl =
-                new FacilityImplModule(ctx.name.getText(), file);
+        FacilityModuleDecl impl =
+                new FacilityModuleDecl(ctx.name.getText(), file);
 
         if ( ctx.facilityBlock() != null ) {
             impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx
@@ -537,7 +569,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected boolean withinFacilityModule() {
         ParseTree t = gen.getModule().getRoot();
-        return t.getChild(0) instanceof ResolveParser.FacilityModuleContext;
+        return t.getChild(0) instanceof ResolveParser.FacilityModuleDeclContext;
     }
 
     protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
@@ -573,14 +605,15 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected CallStat buildPrimitiveInfixStat(String name,
-                                               ParserRuleContext left,
-                                               ParserRuleContext right) {
+                                                    ParserRuleContext left,
+                                                    ParserRuleContext right) {
         Qualifier.NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
         return new CallStat(qualifier, name, (Expr) built.get(left),
                 (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(Token refQualifier, Token refName) {
+    protected Qualifier buildQualifier(@Nullable Token refQualifier,
+                                       @NotNull Token refName) {
         try {
             Symbol corresondingSym = null;
             if ( refQualifier == null ) {

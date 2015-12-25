@@ -76,7 +76,7 @@ public  class RESOLVECompiler {
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
-    public String genCode;
+    public boolean genCode;
     public String workspaceDir;
     public boolean log = false;
 

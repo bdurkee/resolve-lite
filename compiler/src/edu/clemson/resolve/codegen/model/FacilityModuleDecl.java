@@ -5,11 +5,11 @@ import org.rsrg.semantics.symbol.Symbol;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FacilityImplModule extends Module {
+public class FacilityModuleDecl extends Module {
     public String conceptName, definedMain;
     @ModelElement public List<FacilityDef> facilities = new ArrayList<>();
 
-    public FacilityImplModule(String name, ModuleFile file) {
+    public FacilityModuleDecl(String name, ModuleFile file) {
         super(name, file);
     }
 

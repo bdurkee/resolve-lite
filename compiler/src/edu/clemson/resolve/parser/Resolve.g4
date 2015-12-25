@@ -171,18 +171,16 @@ variableDeclGroup
 // statements
 
 stmt
-    :   simpleStmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
     |   whileStmt
     |   ifStmt
     ;
 
-simpleStmt
-    :   progExp (assignStmt|swapStmt)? ';'
-    ;
-
-assignStmt : ':=' progExp ;
-
-swapStmt : ':=:' progExp ;
+assignStmt : left=progExp ':=' right=progExp ;
+swapStmt : left=progExp ':=:' right=progExp ;
+callStmt : progParamExp ';' ;
 
 whileStmt
     :   'While' progExp
@@ -301,8 +299,10 @@ facilityDecl
     ;
 
 moduleArgumentList
-    :   '(' progExp (',' progExp)* ')'
+    :   '(' moduleArgument (',' moduleArgument)* ')'
     ;
+
+moduleArgument : progExp;
 
 // functions
 

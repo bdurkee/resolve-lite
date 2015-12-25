@@ -24,9 +24,11 @@ Concept Bdd_Spiral_Template(type Label;
             ensures
                 P.Trmnl_Loc = Cen(k);
 
-    Operation Lengthen (updates P : Spiral_Pos; alters e : Label);
-        requires SCD(P.Trmnl_Loc) < Max_Length;
-        ensures P.Trmnl_Loc = SS(k)(@P.Trmnl_Loc);
-
+    Operation Lengthen (updates P : Spiral_Pos;
+                        alters e : Label);
+        requires
+            SCD(P.Trmnl_Loc) < Max_Length;
+        ensures P.Trmnl_Loc =
+                    SS(k)(@P.Trmnl_Loc);
 
 end Bdd_Spiral_Template;

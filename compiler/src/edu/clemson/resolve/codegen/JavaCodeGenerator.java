@@ -6,6 +6,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.NoSuchModuleException;
 import org.stringtemplate.v4.*;
 
 public class JavaCodeGenerator extends AbstractCodeGenerator {
@@ -18,7 +19,8 @@ public class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     @NotNull private OutputModelObject buildModuleOutputModel() {
-        ModelBuilder builder = new ModelBuilder(this, getCompiler().symbolTable);
+        ModelBuilderNew builder =
+                new ModelBuilderNew(this, getCompiler().symbolTable);
         ParseTree root = getModule().getRoot();
         ParseTreeWalker.DEFAULT.walk(builder, root);
         return builder.built.get(root);

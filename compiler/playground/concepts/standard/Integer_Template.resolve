@@ -1,5 +1,5 @@
 Concept Integer_Template;
-       uses Basic_Integer_Theory;
+       uses Basic_Integer_Theory, Standard_Booleans;
 
     Type family Integer is modeled by Z;
         exemplar I;
