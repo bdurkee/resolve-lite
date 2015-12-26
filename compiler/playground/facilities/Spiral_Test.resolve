@@ -1,20 +1,10 @@
 Facility Spiral_Test;
-    //uses Standard_Booleans,
-    //     Standard_Integers;
+    uses Standard_Booleans,
+         Standard_Integers;
 
-    /*Facility Sp_Fac is Bdd_Spiral_Template
-                (Std_Ints :: Integer, 1, 5)
+    Facility Sp_Fac is Bdd_Spiral_Template
+                (Std_Bools :: Boolean, 1, 3)
         implemented
             by Sp_Array_Impl;
 
-    Operation name ();
-        Procedure
-            Var x : Std_Ints :: Integer;
-            Var P : Sp_Fac :: Spiral_Pos;
-            Sp_Fac :: Lengthen(P, x);
-    end name;*/
-    Operation Main ();
-        Procedure
-
-    end Main;
 end Spiral_Test;

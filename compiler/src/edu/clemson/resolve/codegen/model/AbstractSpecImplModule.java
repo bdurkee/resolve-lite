@@ -39,7 +39,7 @@ public abstract class AbstractSpecImplModule extends Module {
                 memberVars.add(new VariableDef(s.getNameToken(), null));
             }
             else if (s instanceof OperationSymbol && ((OperationSymbol) s)
-                    .isModuleParameter()) {
+                    .isModuleOperationParameter()) {
                 funcImpls.add(buildGetterMethod(s.getNameToken()));
                 funcImpls.add(buildInitMethod(s.getNameToken()));
                 memberVars.add(new VariableDef(s.getNameToken(), null));

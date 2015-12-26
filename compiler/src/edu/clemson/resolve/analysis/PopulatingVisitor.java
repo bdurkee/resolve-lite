@@ -329,10 +329,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-     /*@Override public Void visitOperationProcedureDecl(
+    @Override public Void visitOperationProcedureDecl(
              ResolveParser.OperationProcedureDeclContext ctx) {
          symtab.startScope(ctx);
-         currentOpProcedureDecl = ctx;
          ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
          if (ctx.type() != null) {
              this.visit(ctx.type());
@@ -356,17 +355,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
          ctx.stmt().forEach(this::visit);
 
          symtab.endScope();
-         currentOpProcedureDecl = null;
          insertFunction(ctx.name, ctx.type(),
                  ctx.requiresClause(), ctx.ensuresClause(), ctx);
          return null;
-     }*/
+     }
 
-    private void insertFunction(Token name,
-                                ResolveParser.TypeContext type,
-                                ResolveParser.RequiresClauseContext requires,
-                                ResolveParser.EnsuresClauseContext ensures,
-                                ParserRuleContext ctx) {
+    private void insertFunction(@NotNull Token name,
+                                @Nullable ResolveParser.TypeContext type,
+                                @Nullable ResolveParser.RequiresClauseContext requires,
+                                @Nullable ResolveParser.EnsuresClauseContext ensures,
+                                @NotNull ParserRuleContext ctx) {
         try {
             List<ProgParameterSymbol> params =
                     symtab.getScope(ctx).getSymbolsOfType(
@@ -452,7 +450,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ModuleParameterSymbol formalParam = formalParamIter.next();
                 if (formalParam.getWrappedParamSymbol() instanceof MathSymbol) continue;
                 //unbelievable, we need the actual Symbols for the actual args...
-                //if (formalParam.isTypeParameter() && actualType.)
+                //if (formalParam.isModuleTypeParameter() && actualType.)
                 //if (actualType.isTypeLike() && formalParam.getProgramType().isTypeLike())
             }*/
         } catch (NoSuchModuleException e) {
@@ -1036,7 +1034,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             else if (namedSymbol instanceof ModuleParameterSymbol) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
                 if (parentFacilityArgListCtx != null &&
-                        ((ModuleParameterSymbol) namedSymbol).isTypeParameter()) {
+                        ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
                     actualGenericTypesPerFacilitySpecArgs.get(
                             (ResolveParser.ModuleArgumentListContext)
                                     parentFacilityArgListCtx).add(

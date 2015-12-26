@@ -32,14 +32,14 @@
 ModuleFile(file, module) ::= <<
 <fileHeader(file.resolveFileName, file.RESOLVEVersion)>
 import java.lang.reflect.*;
+import edu.clemson.resolve.runtime.*;
 
 <module>
 >>
 
 fileHeader(resolveFileName, RESOLVEVersion) ::= <<
-/**
- * Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>.
- * This file should not be modified.
+/** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>.
+ *  This file should not be modified.
  */
 >>
 
@@ -125,14 +125,14 @@ public <if(func.func.hasReturn)>RType<else>void<endif> <\\>
 }
 >>
 
-FacilityImplModule(impl, facilities, funcImpls, repClasses) ::= <<
-public class <impl.name> {
+FacilityImplModule(facility, facilities, funcImpls, repClasses) ::= <<
+public class <facility.name> {
     <facilities; separator="\n">
     <repClasses; separator="\n">
     <funcImpls; separator="\n">
-    <if(impl.definedMain)>
+    <if(facility.definedMain)>
     public static void main(String[] args) {
-        <impl.definedMain>();
+        <facility.definedMain>();
     }
     <endif>
 }
@@ -143,12 +143,11 @@ public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
     this(<[ctor.members, "null"]; separator=", ">);
 }
 
-/**
- * This constructor should only get invoked in the case of enhancements; as
- * the last parameter 'delegate' takes an instance of the base concept.
- * \<p>
- * The only reason it's here is simplicity. If the compiler is correct,
- * this will never get invoked from the wrong place.\</p>
+/** This constructor should only get invoked in the case of enhancements; as
+ *  the last parameter 'delegate' takes an instance of the base concept.
+ *  \<p>
+ *  The only reason it's here is simplicity. If the compiler is correct,
+ *  this will(!) never get invoked from the wrong place.\</p>
  */
 public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
                      {<ctor.delegateInterface> delegate}]; anchor, separator=", \n">) {
@@ -324,10 +323,10 @@ toJavaPrimitive ::= [
 ]
 
 toStdFacilityName ::= [
-    "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",
-    "Std_Integer_Fac":"Standard_Integers.INSTANCE",
-    "Std_Character_Fac":"Standard_Characters.INSTANCE",
-    "Std_Char_Str_Fac":"Standard_Char_Strings.INSTANCE"
+    "Std_Bools":"Standard_Booleans.INSTANCE",
+    "Std_Ints":"Standard_Integers.INSTANCE",
+    "Std_Chars":"Standard_Characters.INSTANCE",
+    "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
 
 fileExtension() ::= ".java"

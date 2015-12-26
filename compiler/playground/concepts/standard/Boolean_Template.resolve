@@ -25,17 +25,22 @@ Concept Boolean_Template;
                     : Boolean;
         ensures Not = not(a);
 
+    Operation Are_Equal
+            (evaluates a, b : Boolean)
+                    : Boolean;
+        ensures Are_Equal = (a = b);
+
     Operation Are_Not_Equal
             (evaluates a, b : Boolean)
                     : Boolean;
         ensures Are_Not_Equal = (a /= b);
 
     Operation Read
-            (replaces a : Boolean)
-                    : Boolean;
+            (replaces a : Boolean);
 
     Operation Write
-            (evaluates a : Boolean)
-                    : Boolean;
+            (evaluates a : Boolean);
 
+    Operation Write_Line
+            (evaluates a : Boolean);
 end Boolean_Template;

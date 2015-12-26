@@ -33,7 +33,7 @@ public class ModuleParameterSymbol extends Symbol {
     }
 
     /** Returns the program type; will be {@code null} in the case where we
-     *  wrap an {@code MathSymbol} (arising from a defn passed to facility).
+     *  wrap a {@code MathSymbol} (arising from a defn passed to facility).
      */
     @Nullable public PTType getProgramType() {
         PTType progType = null;
@@ -46,13 +46,17 @@ public class ModuleParameterSymbol extends Symbol {
         return progType;
     }
 
-    public boolean isTypeParameter() {
+    @Override public boolean isModuleTypeParameter() {
         boolean result = (wrappedParamSymbol instanceof ProgParameterSymbol);
         if (result) {
             result = ((ProgParameterSymbol)wrappedParamSymbol).getMode() ==
                     ProgParameterSymbol.ParameterMode.TYPE;
         }
         return result;
+    }
+
+    @Override public boolean isModuleOperationParameter() {
+        return wrappedParamSymbol instanceof OperationSymbol;
     }
 
     @NotNull public Symbol getWrappedParamSymbol() {

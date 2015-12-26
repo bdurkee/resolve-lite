@@ -178,8 +178,8 @@ stmt
     |   ifStmt
     ;
 
-assignStmt : left=progExp ':=' right=progExp ;
-swapStmt : left=progExp ':=:' right=progExp ;
+assignStmt : left=progExp ':=' right=progExp ';' ;
+swapStmt : left=progExp ':=:' right=progExp ';' ;
 callStmt : progParamExp ';' ;
 
 whileStmt

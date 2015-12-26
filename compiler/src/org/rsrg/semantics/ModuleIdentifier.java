@@ -36,6 +36,9 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         this.name = t;
         this.globalFlag = false;
     }
+    @NotNull public String getNameString() {
+        return name.getText();
+    }
 
     @NotNull public Token getNameToken() {
         return name;
