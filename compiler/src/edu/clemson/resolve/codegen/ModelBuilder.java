@@ -251,41 +251,6 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    /*@Override public void exitModuleArgument(
-            ResolveParser.ModuleArgumentContext ctx) {
-        Expr e = (Expr) built.get(ctx.progExp());
-        if ( e instanceof VarNameRef ) {
-            //If this is true, then we're likely dealing with a math definition
-            //(which has no sensible prog type), so we ignore the rest of our
-            //logic here
-            //Yes, kind of weird, but then again, so is passing defs as params...
-            if (tr.progTypes.get(ctx.progExp()) == null) return;
-
-            //Todo: I think it's ok to do getChild(0) here; we know we're
-            //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
-            //Todo2: this line below is pretty fugly. Change me eventually.
-            ResolveParser.ProgNamedExpContext argAsNamedExp =
-                    (ResolveParser.ProgNamedExpContext) ctx.progExp()
-                            .getChild(0).getChild(0).getChild(0);
-            try {
-                OperationSymbol s =
-                        moduleScope.queryForOne(
-                                new NameQuery(argAsNamedExp.qualifier,
-                                        argAsNamedExp.name, true))
-                                .toOperationSymbol();
-                e = new AnonOpParameterClassInstance(buildQualifier(
-                                argAsNamedExp.qualifier, argAsNamedExp.name), s);
-            }
-            catch (UnexpectedSymbolException use) {
-                e = new VarNameRef(null, "get" + argAsNamedExp.name.getText() + "()");
-            }
-            catch (NoSuchSymbolException | DuplicateSymbolException e1) {
-                e1.printStackTrace();
-            }
-        }
-        built.put(ctx, e);
-    }*/
-
     @Override public void exitStmt(ResolveParser.StmtContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }

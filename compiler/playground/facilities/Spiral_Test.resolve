@@ -2,12 +2,12 @@ Facility Spiral_Test;
     uses Standard_Booleans,
          Standard_Integers;
 
-    /*Facility Sp_Fac is Bdd_Spiral_Template
+    Facility Sp_Fac is Bdd_Spiral_Template
                 (Std_Bools :: Boolean, 1, 3)
         implemented
             by Sp_Array_Impl;
-*/
-    Type Person = Record
+
+/*    Type Person = Record
             age, rank : Std_Bools :: Boolean;
         end;
 
@@ -26,4 +26,5 @@ Facility Spiral_Test;
 
             y := x.person.rank;
     end Main;
+*/
 end Spiral_Test;
