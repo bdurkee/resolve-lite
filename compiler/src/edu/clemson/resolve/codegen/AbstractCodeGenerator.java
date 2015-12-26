@@ -9,6 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;
 
+/** A general base class for anything in the compiler that requires us to
+ *  produce a 'significant' amount of structured code/output/text. This includes
+ *  our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
+ *  from {@link edu.clemson.resolve.vcgen.VCGenerator}.
+ */
 public abstract class AbstractCodeGenerator {
 
     public static final String TEMPLATE_ROOT =

@@ -1,5 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
+import org.rsrg.semantics.symbol.ModuleParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ public class FacilityImplModule extends Module {
     }
 
     //does nothing for impls. No module params or generics possible...
-    @Override public void addGettersAndMembersForModuleParameterizableSyms(
-            List<? extends Symbol> symbols) {}
+    @Override public void addGettersAndMembersForModuleParameterSyms(
+            List<ModuleParameterSymbol> symbols) {}
 
     @Override public void addOperationParameterModelObjects(
             FunctionDef wrappedFunction) {}

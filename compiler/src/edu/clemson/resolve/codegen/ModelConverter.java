@@ -41,26 +41,24 @@ import org.stringtemplate.v4.compiler.FormalArgument;
 import java.lang.reflect.Field;
 import java.util.*;
 
-/**
- * Convert an output model tree to template hierarchy by walking
- * the output model. Each output model object has a corresponding template
- * of the same name. An output model object can have nested objects.
- * We identify those nested objects by the list of arguments in the template
- * definition. For example, here is the definition of the parser template:
- * <code>
- *     Parser(parser, scopes, funcs) ::= <<...>>
- * </code>
- * <p>
- * The first template argument is always the output model object from which this
- * walker will create the template. Any other arguments identify the field names
- * within the output model object of nested model objects. So, in this case,
- * template Parser is saying that output model object Parser has two fields the
- * walker should chase called scopes and funcs.
- * <p>
- * This simple mechanism means we don't have to include code in every output
- * model object that says how to create the corresponding template.
+/** Convert an output model tree to template hierarchy by walking
+ *  the output model (depth first). Each output model object has a corresponding
+ *  template of the same name. An output model object can have nested objects.
+ *  We identify those nested objects by the list of arguments in the template
+ *  definition. For example, here is the definition of the parser template:
+ *
+ *  <code> Parser(parser, scopes, funcs) ::= <<...>> </code>
+ *  <p>
+ *  The first template argument is always the output model object from which this
+ *  walker will create the template. Any other arguments identify the field names
+ *  within the output model object of nested model objects. So, in this case,
+ *  template Parser is saying that output model object Parser has two fields the
+ *  walker should chase called scopes and funcs.</p>
+ *  <p>
+ *  This simple mechanism means we don't have to include code in every output
+ *  model object that says how to create the corresponding template.</p>
  * 
- * @author TParr <parrt@cs.usfca.edu>
+ *  @author TParr <parrt@cs.usfca.edu>
  */
 public class ModelConverter {
 

@@ -47,6 +47,14 @@ public abstract class Symbol {
         return definingTree;
     }
 
+    public boolean isModuleOperationParameter() {
+        return false;
+    }
+
+    public boolean isModuleTypeParameter() {
+        return false;
+    }
+
     @NotNull public abstract String getSymbolDescription();
 
     @NotNull public MathSymbol toMathSymbol()

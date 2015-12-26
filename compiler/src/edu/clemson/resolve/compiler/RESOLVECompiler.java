@@ -76,7 +76,7 @@ public  class RESOLVECompiler {
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
-    public String genCode;
+    public boolean genCode;
     public String workspaceDir;
     public boolean log = false;
 
@@ -367,7 +367,6 @@ public  class RESOLVECompiler {
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
             ResolveLexer lexer = new ResolveLexer(input);
-
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
             parser.removeErrorListeners();

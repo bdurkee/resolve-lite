@@ -78,6 +78,7 @@ conceptBlock
     :   ( mathStandardDefinitionDecl
         | typeModelDecl
         | operationDecl
+        | constraintClause
         )*
     ;
 
@@ -112,6 +113,7 @@ facilityModuleDecl
 facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
+        | typeRepresentationDecl
         )*
     ;
 
@@ -171,18 +173,16 @@ variableDeclGroup
 // statements
 
 stmt
-    :   simpleStmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
     |   whileStmt
     |   ifStmt
     ;
 
-simpleStmt
-    :   progExp (assignStmt|swapStmt)? ';'
-    ;
-
-assignStmt : ':=' progExp ;
-
-swapStmt : ':=:' progExp ;
+assignStmt : left=progExp ':=' right=progExp ';' ;
+swapStmt : left=progExp ':=:' right=progExp ';' ;
+callStmt : progParamExp ';' ;
 
 whileStmt
     :   'While' progExp
@@ -191,8 +191,10 @@ whileStmt
     ;
 
 ifStmt
-    :   'If' progExp 'then' stmt* ('else' stmt*)? 'end' ';'
+    :   'If' progExp 'then' stmt* elseStmt? 'end' ';'
     ;
+
+elseStmt : 'else' stmt* ;
 
 // type and record related rules
 
