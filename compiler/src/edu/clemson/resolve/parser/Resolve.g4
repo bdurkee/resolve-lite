@@ -78,6 +78,7 @@ conceptBlock
     :   ( mathStandardDefinitionDecl
         | typeModelDecl
         | operationDecl
+        | constraintClause
         )*
     ;
 
@@ -112,6 +113,7 @@ facilityModuleDecl
 facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
+        | typeRepresentationDecl
         )*
     ;
 

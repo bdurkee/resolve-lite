@@ -33,8 +33,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             ST generatedST = gen.generateModule();
             System.out.println("t="+generatedST.render());
-            //gen.writeFile(generatedST);
-            //writeReferencedExternalFiles(unit);
+            gen.writeFile(generatedST);
+            writeReferencedExternalFiles(unit);
         }
     }
     private void writeReferencedExternalFiles(AnnotatedModule unit) {

@@ -147,7 +147,7 @@ public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
  *  the last parameter 'delegate' takes an instance of the base concept.
  *  \<p>
  *  The only reason it's here is simplicity. If the compiler is correct,
- *  this will(!) never get invoked from the wrong place.\</p>
+ *  this should never get invoked from the wrong place.\</p>
  */
 public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
                      {<ctor.delegateInterface> delegate}]; anchor, separator=", \n">) {
@@ -283,15 +283,9 @@ OperationParameterMethodCall(call, args) ::=
 
 VarNameRef(v) ::= "<v.name>"
 
-MemberRef(ref, child) ::= <%
-<if(ref.isBaseRef)>
-((<ref.typeQualifier>.<ref.typeName>)<ref.name>)
-<elseif(ref.isLastRef)>
-(<child>).rep.<ref.name>
-<else>
-((<ref.typeQualifier>.<ref.typeName>)(<child>).rep.<ref.name>)
-<endif>
-%>
+AccessRef(a, left, right) ::= "<left>.<right>"
+LeafAccessRefLeft(l, name) ::= "((<l.type>)<name>)"
+LeafAccessRefRight(l, name) ::= "rep.<name>"
 
 AnonOpParameterClassInstance(wrappedFunc, q) ::= <<
 new BaseOperationParameter() {

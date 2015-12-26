@@ -1,5 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
+import org.rsrg.semantics.symbol.ModuleParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
@@ -22,8 +23,8 @@ public abstract class Module extends OutputModelObject {
      * Like the name suggests, adds getters and member variabes for the formal
      * parameters to a concept (or enhancement).
      */
-    public abstract void addGettersAndMembersForModuleParameterizableSyms(
-            List<? extends Symbol> symbols);
+    public abstract void addGettersAndMembersForModuleParameterSyms(
+            List<ModuleParameterSymbol> symbols);
 
     /**
      * For implementations that take an operation as a parameter, this method

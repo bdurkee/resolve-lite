@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static edu.clemson.resolve.codegen.model.AccessRef.*;
 import static edu.clemson.resolve.codegen.model.Qualifier.*;
 import static edu.clemson.resolve.codegen.model.Stat.*;
 
@@ -382,6 +383,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
+        //if we're within a module argument list:
         if (Utils.getFirstAncestorOfType(ctx,
                 ResolveParser.ModuleArgumentListContext.class) != null) {
             built.put(ctx, createFacilityArgumentModel(ctx));
@@ -390,6 +392,16 @@ public class ModelBuilder extends ResolveBaseListener {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"),
                     ctx.name.getText()));
         }
+    }
+
+    @Override public void exitProgSelectorExp(
+            ResolveParser.ProgSelectorExpContext ctx) {
+        PTType leftType = tr.progTypes.get(ctx.lhs);
+        Expr left = new LeafAccessRefLeft(((PTNamed)leftType).getName(),
+                (Expr) built.get(ctx.lhs));
+        Expr right = new LeafAccessRefRight((Expr) built.get(ctx.rhs));
+        AccessRef ref = new AccessRef(left, right);
+        built.put(ctx, ref);
     }
 
     /** Given an arbitrary expression within some
@@ -420,14 +432,10 @@ public class ModelBuilder extends ResolveBaseListener {
                         ctx.name.getText());
             }
         } catch (SymbolTableException e) {
-            throw new RuntimeException();//shouldn't happen
+            throw new RuntimeException();//shouldn't happen now
         }
         return result;
     }
-
-   // private OutputModelObject buildWrapperModelForFacilityArg(
-   //         @NotNull ResolveParser.ProgNamedExpContext ctx) {
-   // }
 
     @Override public void exitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
@@ -469,15 +477,15 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx
                     .implBlock().facilityDecl(), built));
         }
-        List<Symbol> allSymsFromConceptAndImpl = null;
+        List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
         try {
-            allSymsFromConceptAndImpl =
+            allParamsFromSpecAndImpl =
                     symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
-                            .getSymbolsOfType(Symbol.class);
-            allSymsFromConceptAndImpl.addAll(moduleScope
-                    .getSymbolsOfType(Symbol.class));
-            impl.addGettersAndMembersForModuleParameterizableSyms(
-                    allSymsFromConceptAndImpl);
+                            .getSymbolsOfType(ModuleParameterSymbol.class);
+            allParamsFromSpecAndImpl.addAll(moduleScope
+                    .getSymbolsOfType(ModuleParameterSymbol.class));
+            impl.addGettersAndMembersForModuleParameterSyms(
+                    allParamsFromSpecAndImpl);
         } catch (NoSuchModuleException e) { //shouldn't happen
         }
         impl.addCtor();
@@ -496,8 +504,8 @@ public class ModelBuilder extends ResolveBaseListener {
                     .facilityBlock().facilityDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .facilityBlock().operationProcedureDecl(), built));
-            //impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
-            //        .facilityBlock().typeRepresentationDecl(), built));
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
+                   .facilityBlock().typeRepresentationDecl(), built));
         }
         file.module = impl;
         built.put(ctx, file);
@@ -515,8 +523,8 @@ public class ModelBuilder extends ResolveBaseListener {
                     .conceptBlock().operationDecl(), built));
         }
         try {
-            spec.addGettersAndMembersForModuleParameterizableSyms(moduleScope
-                    .query(new SymbolTypeQuery<>(Symbol.class)));
+            spec.addGettersAndMembersForModuleParameterSyms(moduleScope
+                    .query(new SymbolTypeQuery<>(ModuleParameterSymbol.class)));
         } catch (NoSuchModuleException|UnexpectedSymbolException e) {
         }
         file.module = spec;
@@ -539,7 +547,7 @@ public class ModelBuilder extends ResolveBaseListener {
         //Note that here we only need to query locally for symbols. Meaning
         //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
         //etc from the concept. We just want the ones (if any) from enhancement.
-        spec.addGettersAndMembersForModuleParameterizableSyms(
+        spec.addGettersAndMembersForModuleParameterSyms(
                 moduleScope.getSymbolsOfType(Symbol.class));
         file.module = spec;
         built.put(ctx, file);
@@ -566,7 +574,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 ctx.concept.getText()).getSymbolsOfType(Symbol.class);
         allSymsFromConceptAndImpl.addAll(moduleScope
                 .getSymbolsOfType(Symbol.class));
-        impl.addGettersAndMembersForModuleParameterizableSyms(
+        impl.addGettersAndMembersForModuleParameterSyms(
                 allSymsFromConceptAndImpl);
 
         impl.addCtor();

@@ -1,17 +1,18 @@
 Implementation Sp_Array_Impl for Bdd_Spiral_Template;
 
-    Facility Arry_Fac is Static_Array_Template
+    Facility Arry_Fac is Bdd_Ceramic_Array_Template
             (Label, 1, Max_Length)
         externally implemented by Array_Impl;
 
     Type Spiral_Pos = Record
-            Labl : Arry_Fac :: Static_Array;
+            Labl : Arry_Fac :: Ceramic_Array;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
         conventions 0 < P.Curr_Place and
                    P.Curr_Place <= P.Length and
-                   P.Length <= Max_Length which_entails
+                   P.Length <= Max_Length
+               which_entails
                         P.Curr_Place, P.Length : N;
         correspondence
             conc.P.Trmnl_Loc = SS(k)(Cen(k)) and

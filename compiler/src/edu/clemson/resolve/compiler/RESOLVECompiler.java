@@ -367,7 +367,6 @@ public  class RESOLVECompiler {
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
             ResolveLexer lexer = new ResolveLexer(input);
-
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
             parser.removeErrorListeners();

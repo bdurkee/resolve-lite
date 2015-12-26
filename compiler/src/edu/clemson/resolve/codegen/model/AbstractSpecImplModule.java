@@ -1,5 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
+import org.rsrg.semantics.symbol.ModuleParameterSymbol;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -23,27 +24,26 @@ public abstract class AbstractSpecImplModule extends Module {
         this.concept = concept;
     }
 
-    @Override public void addGettersAndMembersForModuleParameterizableSyms(
-            List<? extends Symbol> symbols) {
-        for (Symbol s : symbols) {
-            if ( s instanceof ProgParameterSymbol) {
+    public void addGettersAndMembersForModuleParameterSyms(
+            List<ModuleParameterSymbol> symbols) {
+        for (ModuleParameterSymbol s : symbols) {
+            if ( s.getWrappedParamSymbol() instanceof ProgParameterSymbol) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 //Note that the variables representing these parameters
                 //do not have inits... they get assigned within ctor
                 //for this class (which is a separate model object)
                 memberVars.add(new VariableDef(s.getName(), null));
             }
-            /*else if ( s instanceof GenericSymbol) {
-                funcImpls.add(buildGetterMethod(s.getNameToken()));
-                funcImpls.add(buildInitMethod(s.getNameToken()));
-                memberVars.add(new VariableDef(s.getNameToken(), null));
+            else if (s.isModuleTypeParameter()) {
+                funcImpls.add(buildGetterMethod(s.getName()));
+                funcImpls.add(buildInitMethod(s.getName()));
+                memberVars.add(new VariableDef(s.getName(), null));
             }
-            else if (s instanceof OperationSymbol && ((OperationSymbol) s)
-                    .isModuleOperationParameter()) {
-                funcImpls.add(buildGetterMethod(s.getNameToken()));
-                funcImpls.add(buildInitMethod(s.getNameToken()));
-                memberVars.add(new VariableDef(s.getNameToken(), null));
-            }*/
+            else if (s.isModuleOperationParameter()) {
+                funcImpls.add(buildGetterMethod(s.getName()));
+                funcImpls.add(buildInitMethod(s.getName()));
+                memberVars.add(new VariableDef(s.getName(), null));
+            }
         }
     }
 

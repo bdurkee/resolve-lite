@@ -1,19 +1,87 @@
 Concept Integer_Template;
-       uses Basic_Integer_Theory, Standard_Booleans;
+       uses Basic_Integer_Theory,
+            Standard_Booleans;
+
+    Definition max_int : Z;
+    Definition min_int : Z;
+
+    constraints min_int <= 0 and
+                    1 <= max_int;
 
     Type family Integer is modeled by Z;
         exemplar I;
         initialization
                 ensures I = 0;
 
+    Operation Increment
+            (updates i : Integer);
+        requires 1 + i <= max_int;
+        ensures	i = 1 + @i;
+
+    Operation Decrement
+            (updates i : Integer);
+        requires min_int <= i;
+        //ensures	i = @i - 1;
+
+    Operation Less_Or_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures	Less_Or_Equal =
+                    (i <= j);
+
+    Operation Less
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures Less =
+                    (1 + i <= j );
+
+    Operation Greater
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures Greater =
+                    (1 + j <= i);
+
+    Operation Greater_Or_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures Greater_Or_Equal =
+                    ( j <= i );
+
     Operation Sum
-            (updates a, b : Integer)
+            (evaluates i, j : Integer)
                 : Integer;
-        ensures Sum = (a + b);
+       // requires min_int <=i + j and i + j <= max_int;
+       // ensures	Sum = ( i + j );
 
     Operation Difference
-            (updates a, b : Integer)
+            (evaluates i, j : Integer)
                 : Integer;
-        ensures true;
+        requires min_int <= i + j and
+                    i + j <= max_int;
+       // ensures Difference =
+       //             (i - j);
 
+    Operation Product
+            (evaluates i, j : Integer)
+                : Integer;
+        requires min_int <= i * j and
+            i * j <= max_int;
+        ensures Product = (i * j);
+
+
+    Operation Are_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures Are_Equal = (i = j);
+
+    Operation Are_Not_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools :: Boolean;
+        ensures Are_Not_Equal = (i /= j);
+
+    Operation Read(replaces i : Integer);
+
+    Operation Write(evaluates i : Integer);
+
+    Operation Write_Line(evaluates i : Integer);
 end Integer_Template;
