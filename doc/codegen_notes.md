@@ -381,7 +381,7 @@ The remaining sections delve into more detail as to how this all working. In fac
 
 The `Cartesian_Grid_Fac` facility -- which appears above in the 'Types' section of this document -- when run through ANTLR produces the following parse tree:
 
-![translation input](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/translationinput.png)
+![translation input](https://github.com/Welchd1/resolve-lite/blob/master/doc/images/translationinput.png)
 
 You'll notice this representation of the tree has been overlaid with information about `PTType`s (program types) and scopes for clarity. It's the phase of compilation preceding codegen that is responsible for building the scopes delineated above, filling them, and annotating all expression nodes and references within the tree with appropriate `PTType` (program-type) information.
 
@@ -391,7 +391,7 @@ More information on RESOLVEs current approach to symbol table construction and e
 
 In order to generate code from the representation shown above, we once again walk the parse tree. But, instead of printing or buffering text output directly, we instead create model objects because it is a much more flexible mechanism. The order we create these objects and hook them together is irrelevant. We don't generate output until the entire model has been created. Consequently, we can follow the order of the input by walking the input parse tree to construct the model. The model objects I create represent the important elements of our desired Java output: namely definitions (defs), statements (stats), and exprs (expressions):
 
-![output model objects](https://github.com/Welchd1/resolve-lite/blob/stripped-down/doc/images/models.png)
+![output model objects](https://github.com/Welchd1/resolve-lite/blob/master/doc/images/models.png)
 
 In the [`Java.stg`](https://github.com/Welchd1/resolve-lite/blob/master/compiler/resources/edu/clemson/resolve/templates/codegen/Java.stg) template group file, you will see templates that correspond by name with the model objects:
 
