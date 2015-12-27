@@ -30,27 +30,6 @@
  */
 package edu.clemson.resolve.runtime;
 
-import java.lang.reflect.*;
-
-/** This class is provided to allow non-RESOLVE objects to interact with
- *  RESOLVE objects.
- */
-public class RTypeWrapper implements RType {
-    private Object contents;
-
-    public RTypeWrapper(Object o) {
-        this.contents = o;
-    }
-
-    public Object getRep() {
-        return contents;
-    }
-
-    public void setRep(Object setRep) {
-        this.contents = setRep;
-    }
-
-    public RType initialValue() {
-        return new RTypeWrapper("(an empty RTypeWrapper)");
-    }
+public interface OperationParameter extends RType {
+    public RType op(RType... e);
 }

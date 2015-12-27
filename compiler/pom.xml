@@ -33,6 +33,11 @@
             <version>${antlr4.version}</version>
         </dependency>
         <dependency>
+            <groupId>edu.clemson</groupId>
+            <artifactId>resolve-runtime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
             <version>4.0.8</version>

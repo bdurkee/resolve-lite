@@ -30,21 +30,25 @@
  */
 package edu.clemson.resolve.runtime;
 
-import java.lang.reflect.*;
+/** This class is provided to allow non-RESOLVE objects to interact with
+ *  RESOLVE objects.
+ */
+public class RTypeWrapper implements RType {
+    private Object contents;
 
-public interface RType {
+    public RTypeWrapper(Object o) {
+        this.contents = o;
+    }
 
-    /** Returns the RESOLVE representation of a programmatic type.
-     *  @return A {@link Object} containing pointing this types representation
-     */
-    Object getRep();
+    public Object getRep() {
+        return contents;
+    }
 
-    void setRep(Object setRep);
+    public void setRep(Object setRep) {
+        this.contents = setRep;
+    }
 
-    /** All types in Resolve are given an initialzation value at in the modeling
-     *  phase. This initial value is implicitly applied when a variable is
-     *  declared to a Resolve {@code RType}.
-     */
-    RType initialValue();
-    // boolean representationIsPrimitive();
+    public RType initialValue() {
+        return new RTypeWrapper("(an empty RTypeWrapper)");
+    }
 }
