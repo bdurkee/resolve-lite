@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;
 
+import java.io.IOException;
+import java.io.Writer;
+
 /** A general base class for anything in the compiler that requires us to
  *  produce a 'significant' amount of structured code/output/text. This includes
  *  our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
@@ -21,7 +24,7 @@ public abstract class AbstractCodeGenerator {
 
     protected final RESOLVECompiler compiler;
     protected final AnnotatedModule module;
-    private final STGroup templates;
+    protected final STGroup templates;
     private final String language;
 
     public AbstractCodeGenerator(@NotNull RESOLVECompiler rc,
@@ -47,14 +50,39 @@ public abstract class AbstractCodeGenerator {
     }
 
     @NotNull public String getFileName() {
-        ST extST = templates.getInstanceOf("fileExtension");
         String moduleName = module.getNameToken().getText();
-        return moduleName + extST.render();
+        return moduleName + getFileExtension();
     }
 
-    public void writeFile(ST outputFileST) {
-        Utils.writeFile(compiler.outputDirectory, getFileName(),
-                outputFileST.render());
+    @NotNull protected String getFileExtension() {
+        ST extST = templates.getInstanceOf("fileExtension");
+        if (extST == null) {
+            throw new IllegalStateException("forgot to define template for" +
+                    "language file extension " +
+                    "(for example: fileExtension() ::= '.java'))");
+        }
+        return extST.render();
+    }
+
+    public void write(ST code, String fileName) {
+        try {
+//			long start = System.currentTimeMillis();
+            Writer w = compiler.getOutputFileWriter(fileName);
+            STWriter wr = new AutoIndentWriter(w);
+            wr.setLineWidth(80);
+            code.write(wr);
+            w.close();
+//			long stop = System.currentTimeMillis();
+        }
+        catch (IOException ioe) {
+            compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
+                    ioe,
+                    fileName);
+        }
+    }
+
+    public void write(ST code) {
+        write(code, getFileName());
     }
 
     public STGroup loadTemplates() {

@@ -24,8 +24,8 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
                         if SCD(q) + 1 <= P.Length;
                       Label.base_point otherwise;}});
         initialization
-            P.Length := 0;
-            P.Curr_Place := 0;
+            P.Length := 1;
+            P.Curr_Place := 1;
         end;
 
     Procedure Lengthen (updates P : Spiral_Pos;
@@ -33,7 +33,5 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
         P.Length := P.Length + 1;
     end Lengthen;
-
-
 
 end Sp_Array_Impl;

@@ -105,21 +105,6 @@ public class Integer_Impl
         return new Integer(((Integer)i1).val * ((Integer)i2).val);
     }
 
-    //@Override public RType Divide(RType i1, RType i2) {
-    //    return new Integer((((Integer)i1).val / ((Integer)i2).val));
-    //}
-
-    //@Override public RType Mod(RType i1, RType i2) {
-    //    /*if(((Std_Integer_Realiz.Integer)i1).val < 0){
-    //        ((Std_Integer_Realiz.Integer)i1).val = ((Std_Integer_Realiz.Integer)i1).val + ((Std_Integer_Realiz.Integer)i2).val;
-     //   }*/
-     //   return new Integer(((Integer)i1).val % ((Integer)i2).val);
-    //}
-
-    //@Override public RType Negate(RType i1) {
-    //    return new Integer(-((Integer)i1).val);
-    //}
-
     @Override public void Read(RType e) {
         Scanner sc = new Scanner(System.in);
         ((Integer)e).val = sc.nextInt();

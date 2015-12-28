@@ -18,8 +18,6 @@ Precis Basic_Binary_Relation_Properties;
     Definition Is_Irreflexive(p : (D : SSet) * D -> B) : B is
         Forall x : D, not(p(x, x));
 
-    //Todo: add 'iff' to grammar and support PExp transformation of it into the
-    //canonical (longhand) form appearing below.
     Theorem R1n1: Forall D : SSet, Forall p : D * D -> B,
         Is_Transitive(p) implies
             (Is_Irreflexive(p) iff Is_Asymmetric(p));

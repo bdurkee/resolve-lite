@@ -22,7 +22,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     }
 
     @Override public void process() {
-        if ( !compiler.genCode ) return;
+        if ( compiler.genCode == null ) return;
         File external = new File(RESOLVECompiler.getCoreLibraryDirectory()
                 + File.separator + "external");
         for (AnnotatedModule unit : compilationUnits) {
@@ -32,20 +32,9 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
 
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             ST generatedST = gen.generateModule();
-            System.out.println("t="+generatedST.render());
-            gen.writeFile(generatedST);
-            writeReferencedExternalFiles(unit);
-        }
-    }
-    private void writeReferencedExternalFiles(AnnotatedModule unit) {
-        for (ModuleIdentifier e : unit.externalUses.values()) {
-            File f = new File("resources/externaljava/" + e.getNameString());
-            try {
-                Utils.writeFile(compiler.outputDirectory, f.getName() + ".java",
-                        Utils.readFile(f.getAbsolutePath()));
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+           // System.out.println("t="+generatedST.render());
+            gen.write(generatedST);
+            gen.writeReferencedExternalFiles();
         }
     }
 }

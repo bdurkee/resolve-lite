@@ -1,0 +1,9 @@
+Facility Boo;
+    uses Standard_Integers;
+
+    Operation Main ();
+        Procedure
+            Var X : Std_Ints :: Integer;
+            Std_Ints :: Write(4);
+    end Main;
+end Boo;

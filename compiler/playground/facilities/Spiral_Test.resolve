@@ -7,6 +7,13 @@ Facility Spiral_Test;
         implemented
             by Sp_Array_Impl;
 
+    Operation Main ();
+        Procedure
+            Var P : Sp_Fac :: Spiral_Pos;
+            Var x : Std_Bools :: Boolean;
+
+
+    end Main;
 /*    Type Person = Record
             age, rank : Std_Bools :: Boolean;
         end;

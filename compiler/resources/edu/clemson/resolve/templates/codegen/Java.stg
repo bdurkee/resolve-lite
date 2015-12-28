@@ -31,6 +31,10 @@
 
 ModuleFile(file, module) ::= <<
 <fileHeader(file.resolveFileName, file.RESOLVEVersion)>
+<if(file.genPackage)>
+package <file.genPackage>;
+<endif>
+
 import java.lang.reflect.*;
 import edu.clemson.resolve.runtime.*;
 
@@ -322,5 +326,330 @@ toStdFacilityName ::= [
     "Std_Chars":"Standard_Characters.INSTANCE",
     "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
+
+Boolean_Impl(pkg) ::= <<
+<if(pkg)>
+package <pkg>;
+<endif>
+
+import java.lang.reflect.*;
+import java.util.Scanner;
+
+import edu.clemson.resolve.runtime.*;
+
+public class Boolean_Impl
+		extends
+			RESOLVEBase implements Boolean_Template {
+
+    public class Boolean
+    		implements
+    			Boolean_Template.Boolean {
+        public boolean val;
+
+        Boolean() {
+            val = false;
+        }
+
+        Boolean(boolean i) {
+            val = i;
+        }
+
+        public Object getRep() {
+            return new Boolean(val);
+        }
+
+        public void setRep(Object o) {
+            val = ((Boolean)o).val;
+        }
+
+        public RType initialValue() {
+            return new Boolean();
+        }
+
+        public String toString() {
+            return new java.lang.Boolean(val).toString();
+        }
+    }
+
+    public RType replica(RType b) {
+        return new Boolean(((Boolean)b).val);
+    }
+
+    public RType initBoolean(boolean ... e) {
+        if (e.length >= 1) {
+            return new Boolean(e[0]);
+        }
+        else {
+            return new Boolean();
+        }
+    }
+
+    @Override public RType True() {
+        return new Boolean(true);
+    }
+
+    @Override public RType False() {
+        return new Boolean(false);
+    }
+
+    @Override public RType And(RType b1, RType b2) {
+        return new Boolean(((Boolean)b1).val && ((Boolean)b2).val);
+    }
+
+    @Override public RType Or(RType b1, RType b2) {
+        return new Boolean(((Boolean)b1).val || ((Boolean)b2).val);
+    }
+
+    @Override public RType Not(RType b) {
+        return new Boolean(!((Boolean)b).val);
+    }
+
+    @Override public RType Are_Equal(RType b1, RType b2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Boolean)b1).val ==
+                ((Boolean)b2).val);
+    }
+
+    @Override public RType Are_Not_Equal(RType b1, RType b2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Boolean)b1).val !=
+                ((Boolean)b2).val);
+    }
+
+    @Override public void Read(RType e) {
+        Scanner sc = new Scanner(System.in);
+        ((Boolean)e).val = sc.nextBoolean();
+    }
+
+    @Override public void Write(RType i) {
+        System.out.print(((Boolean) i).val);
+    }
+
+    @Override public void Write_Line(RType i) {
+        System.out.println(((Boolean) i).val);
+    }
+}>>
+
+Array_Impl(pkg) ::= <<
+<if(pkg)>
+package <pkg>;
+<endif>
+
+import java.lang.reflect.*;
+import edu.clemson.resolve.runtime.*;
+
+public class Array_Impl extends RESOLVEBase
+        implements
+            Bdd_Ceramic_Array_Template {
+    RType type;
+    int lowerBound, upperBound;
+
+    class Ceramic_Array extends RESOLVEBase implements RType {
+        Array_Rep rep;
+        Ceramic_Array() {
+            rep = new Array_Rep();
+        }
+
+        @Override public Object getRep() {
+            return rep;
+        }
+
+        @Override public void setRep(Object o) {
+            rep = (Array_Rep)o;
+        }
+
+        @Override public String toString() {
+            return rep.toString();
+        }
+
+        @Override public RType initialValue() {
+            return new Ceramic_Array();
+        }
+    }
+    class Array_Rep {
+        RType[] content;
+        Array_Rep() {
+            content = new RType[upperBound - lowerBound + 1];
+            for(int i = 0; i \< content.length; i++) {
+                content[i] = type.initialValue();
+            }
+        }
+        @Override public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (RType aContent : content) {
+                sb.append(aContent.toString());
+                sb.append("\n");
+            }
+            return sb.toString();
+        }
+    }
+
+    @Override public RType initCeramic_Array() {
+        return new Ceramic_Array();
+    }
+
+    public Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
+        this.type = type;
+        this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).val;
+        this.upperBound = ((Integer_Impl.Integer)Upper_Bound).val;
+    }
+
+    @Override public void Swap_Entry(RType A, RType e, RType i) {
+        int adj = ((Integer_Impl.Integer)i).val - lowerBound;
+        RType[] temp1 = ((Array_Rep)A.getRep()).content;
+        swap(e, temp1[adj]);
+    }
+
+    /*@Override public void Swap_Two_Elements(RType A, RType i, RType j) {
+        int adjI = ((Integer_Impl.Integer)i).val - lowerBound;
+        int adjJ = ((Integer_Impl.Integer)j).val - lowerBound;
+        RType[] temp1 = ((Array_Rep)A.getRep()).content;
+        swap(temp1[adjI], temp1[adjJ]);
+    }
+
+    @Override public void Assign_Element(RType A, RType e, RType i) {
+        int adjI = ((Integer_Impl.Integer)i).rep.val - lowerBound;
+        RType[] temp1 = ((Array_Rep)A.getRep()).content;
+        assign(temp1[adjI], e);
+    }*/
+
+    @Override public RType getUpper_Bound() {
+        return Standard_Integers.INSTANCE.initInteger(upperBound);
+    }
+
+    @Override public RType getLower_Bound() {
+        return Standard_Integers.INSTANCE.initInteger(lowerBound);
+    }
+
+    @Override public RType getEntry() {
+        return type;
+    }
+}
+>>
+
+Integer_Impl(pkg) ::= <<
+<if(pkg)>
+package <pkg>;
+<endif>
+
+import java.lang.reflect.*;
+import edu.clemson.resolve.runtime.*;
+
+import java.util.Scanner;
+
+public class Integer_Impl
+		extends
+			RESOLVEBase implements Integer_Template {
+
+    public class Integer implements Integer_Template.Integer {
+        int val;
+        Integer() {
+            val = 0;
+        }
+
+        Integer(int i) {
+            val = i;
+        }
+
+        // getRep is special case, this will never be called
+        public Object getRep() {
+            return new Integer(val);
+        }
+
+        // setRep is special case, this will never be called
+        public void setRep(Object o) {
+            val = ((Integer)o).val;
+        }
+
+        public RType initialValue() {
+            return new Integer();
+        }
+
+        public String toString() {
+            return new java.lang.Integer(val).toString();
+        }
+    }
+
+    public RType initInteger(int ... e) {
+        if (e.length >= 1) {
+            return new Integer(e[0]);
+        }
+        else {
+            return new Integer();
+        }
+    }
+
+    /*@Override public RType Is_Zero(RType i) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i).val == 0);
+    }
+
+    @Override public RType Is_Not_Zero(RType i) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i).val != 0);
+    }*/
+
+    @Override public void Increment(RType i) {
+        ((Integer)i).val = ((Integer)i).val + 1;
+    }
+
+    @Override public void Decrement(RType i) {
+        ((Integer)i).val = ((Integer)i).val - 1;
+    }
+
+    @Override public RType Are_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer)i1).val ==
+                ((Integer)i2).val);
+    }
+
+    @Override public RType Are_Not_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val !=
+                ((Integer) i2).val);
+    }
+
+    @Override public RType Less_Or_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val \<=
+                ((Integer) i2).val);
+    }
+
+    @Override public RType Less(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val \<
+                ((Integer) i2).val);
+    }
+
+    @Override public RType Greater(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val >
+                ((Integer) i2).val);
+    }
+
+    @Override public RType Greater_Or_Equal(RType i1, RType i2) {
+        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val >=
+                ((Integer) i2).val);
+    }
+
+    @Override public RType Sum(RType i1, RType i2) {
+        return new Integer(((Integer)i1).val +
+                ((Integer)i2).val);
+    }
+
+    @Override public RType Difference(RType i1, RType i2) {
+        return new Integer(((Integer)i1).val -
+                ((Integer)i2).val);
+    }
+
+    @Override public RType Product(RType i1, RType i2) {
+        return new Integer(((Integer)i1).val * ((Integer)i2).val);
+    }
+
+    @Override public void Read(RType e) {
+        Scanner sc = new Scanner(System.in);
+        ((Integer)e).val = sc.nextInt();
+    }
+
+    @Override public void Write(RType i) {
+        System.out.print(((Integer) i).val);
+    }
+
+    @Override public void Write_Line(RType i) {
+        System.out.println(((Integer) i).val);
+    }
+}
+>>
 
 fileExtension() ::= ".java"
