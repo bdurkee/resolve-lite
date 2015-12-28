@@ -387,6 +387,7 @@ mathQuantifiedExp
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
     |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
+    |   functionExp=mathExp '[' mathExp (',' mathExp)* ']'      #mathPrefixGeneralizedApplyExp
     |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
     |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
     |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
@@ -442,6 +443,7 @@ mathOutfixApplyExp
     :   lop='<' mathExp rop='>'
     |   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
+    |   lop='[' mathExp rop=']'
     ;
 
 mathSetComprehensionExp

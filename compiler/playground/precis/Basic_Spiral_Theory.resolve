@@ -22,5 +22,4 @@ Precis Basic_Spiral_Theory;
     Corollary Inw1: Forall k : N2, Forall m, n : N,
         SS(k)(Cen(k)) is_in Inward_Loc(SS(k)(Cen(k))) iff m < n;
 
-
 end Basic_Spiral_Theory;

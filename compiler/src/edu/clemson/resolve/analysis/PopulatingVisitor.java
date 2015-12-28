@@ -1054,6 +1054,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
         }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, g.INVALID);
         return null;
     }
 
@@ -1525,17 +1527,31 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
-        //emit("prefix apply ctx=" + ctx.getText());
-        this.visit(ctx.functionExp);
         //looks weird cause the 0th is now the expr representing the
         //application's first class 'function-portion'
-        List<ResolveParser.MathExpContext> args =
-                ctx.mathExp().subList(1, ctx.mathExp().size());
+        handleFunctionApplication(ctx, ctx.functionExp,
+                ctx.mathExp().subList(1, ctx.mathExp().size()));
+        return null;
+    }
+
+    @Override public Void visitMathPrefixGeneralizedApplyExp(
+            ResolveParser.MathPrefixGeneralizedApplyExpContext ctx) {
+        //looks weird cause the 0th is now the expr representing the
+        //application's first class 'function-portion'
+        handleFunctionApplication(ctx, ctx.functionExp,
+                ctx.mathExp().subList(1, ctx.mathExp().size()));
+        return null;
+    }
+
+    private void handleFunctionApplication(@NotNull ParserRuleContext ctx,
+                                           @NotNull ResolveParser.MathExpContext functionPortion,
+                                           @NotNull List<ResolveParser.MathExpContext> args) {
+        //emit("prefix apply ctx=" + ctx.getText());
+        this.visit(functionPortion);
         walkingApplicationArgs = true;
         args.forEach(this::visit);
         walkingApplicationArgs = false;
-        typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
-        return null;
+        typeMathFunctionLikeThing(ctx, functionPortion, args);
     }
 
     @Override public Void visitMathBooleanLiteralExp(
