@@ -1517,13 +1517,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 " with formal type: " + type);
     }
 
-    /*@Override public Void visitMathOutfixApplyExp(
+    @Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
-                ctx.lop.getText() + "..." + ctx.rop.getText()), ctx.mathExp());
+        tr.mathTypes.put(ctx, g.POWERSET); //temporary
         return null;
-    }*/
+    }
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
@@ -1607,6 +1606,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MTType type = g.INVALID;
         MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
+        MTType sss = tr.mathTypeValues.get(prevAccessExp);
         //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
         //it starts the access chain, rather than say terminating it.
         if (prevAccessExp.getText().equals("conc")) {
@@ -1745,7 +1745,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //I had better identify a type
         if (typeValueDepth > 0) {
             MTType realAppType = formActualApplicationType(
-                    firstClassPortion.getText(), expectedFunctionType, args);
+                firstClassPortion.getText(), expectedFunctionType, args);
             tr.mathTypeValues.put(ctx, realAppType);
         }
     }
@@ -1772,15 +1772,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                              MTFunction expectedType,
                                              List<? extends ParserRuleContext> args) {
         List<MTType> arguments = new ArrayList<>();
-        MTType argTypeValue;
+        MTType argTypeValue, argType;
         for (ParserRuleContext arg : args) {
+            argType = tr.mathTypes.get(arg);
             argTypeValue = tr.mathTypeValues.get(arg);
 
             if (argTypeValue == null) {
-                compiler.errMgr.semanticError(
+               /* compiler.errMgr.semanticError(
                         ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                         arg.getText());
-                argTypeValue = g.INVALID;
+                argTypeValue = g.INVALID;*/
+                argTypeValue = argType;
             }
             arguments.add(argTypeValue);
         }

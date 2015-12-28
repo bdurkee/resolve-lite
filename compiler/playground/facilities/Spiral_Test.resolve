@@ -11,7 +11,6 @@ Facility Spiral_Test;
         Procedure
             Var P : Sp_Fac :: Spiral_Pos;
             Var xs, y : Std_Bools :: Boolean;
-
             If xs then
                 Sp_Fac :: Lengthen(P, xs);
             else
