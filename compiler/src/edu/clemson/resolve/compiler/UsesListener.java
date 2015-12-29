@@ -36,6 +36,12 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
+    @Override public void enterConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
+        tr.uses.add(new ModuleIdentifier(ctx.concept));
+        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
+    }
+
     @Override public void enterConceptExtImplModuleDecl(
             ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.extension));

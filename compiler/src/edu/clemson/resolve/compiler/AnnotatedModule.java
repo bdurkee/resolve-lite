@@ -45,6 +45,11 @@ public class AnnotatedModule {
     //UPDATE: Can't really remember why the hell I made a separate set for this.
     //need to think about it some more, likely in trying to delete I'll remember,
     //but let me try to remember why I thought it was necessary (several months ago)
+    //UPDATE2: Ok, now i remember, like the comment says, we need to consider
+            //facility impls when coming up with module compile ordering, but
+            //we don't want to include them in the set of available things the
+            //symboltable machinery will search through when going through imports. I think
+            //that was it anyways.
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
 
@@ -94,6 +99,11 @@ public class AnnotatedModule {
         return root;
     }
 
+    /** If we represent a module that implements some root conceptual specification,
+     *  this method returns its {@link ModuleIdentifier}; {@code null} otherwise.
+     *
+     *  @return a module identifier
+     */
     @Nullable public ModuleIdentifier getParentConceptIdentifier() {
         ModuleIdentifier result = null;
         if (root.getChild(0) instanceof

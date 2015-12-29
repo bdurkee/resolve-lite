@@ -20,6 +20,7 @@ import org.rsrg.semantics.programtype.PTType;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -99,16 +100,19 @@ public class SanityCheckingListener extends ResolveBaseListener {
                                  !e.progNamedExp().name.getText().equals(name.getText()));
             ParseTreeWalker.DEFAULT.walk(searcher, ctx);
 
-            //if we found a call to a primary operation from another procedure
-            if (searcher.result && searcher.satisfyingContext != null) {
-                compiler.errMgr.semanticError(
-                        ErrorKind.ILLEGAL_PRIMARY_OPERATION_CALL,
-                        searcher.satisfyingContext.getStart(),
-                        name.getText(),
-                        searcher.satisfyingContext.getText());
+            //if we found one or more calls to a primary operation from our
+            //procedure, then report em'
+            if (searcher.result && !searcher.satisfyingContexts.isEmpty()) {
+                for (ResolveParser.ProgParamExpContext e :
+                        searcher.satisfyingContexts) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.ILLEGAL_PRIMARY_OPERATION_CALL,
+                            e.getStart(), name.getText(), e.getText());
+                }
+
             }
         } catch (NoSuchModuleException e) {
-            //that's fine, we just won't bother
+            //that's fine, we just won't bother; shouldn't happen anyways.
         }
     }
 
@@ -147,6 +151,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
+    /** Checks to ensure two {@link PTType}s are acceptable for each other. */
     private void sanityCheckProgOpTypes(@NotNull ParserRuleContext ctx,
                                         @NotNull PTType l, @NotNull PTType r) {
         if (!l.equals(r)) {
@@ -170,6 +175,9 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
+    /** Checks to ensure the name {@link Token}s bookending some scoped block
+     *  are the same -- meaning they have the same text.
+     */
     private void sanityCheckBlockEnds(@NotNull Token topName,
                                       @NotNull Token bottomName) {
         if (!topName.getText().equals(bottomName.getText())) {
@@ -180,14 +188,14 @@ public class SanityCheckingListener extends ResolveBaseListener {
     }
 
     /** Checks to ensure that only the correct modes are used in the declaration
-     *  of an operation, {@code name}, that has some return, {@code type}.
+     *  of an operation, {@code name}, that has some return {@code type}.
      *  <p>
      *  Note: as far as I'm aware, only {@code restores}, {@code preserves},
-     *  and {@code evaluates} mode params are acceptable in this case;
-     *  add others as needed.</p>
+     *  and {@code evaluates} mode parameters are permitted in the case where
+     *  the return {@code type} is not null; add others as needed.</p>
      *
      * @param name the operation's name
-     * @param type the declared return type
+     * @param type the declared return type (possibly {@code null})
      * @param parameters the formal parameters
      */
     private void sanityCheckFunctionalOperationParameterModes(
@@ -230,12 +238,25 @@ public class SanityCheckingListener extends ResolveBaseListener {
         return searcher.result;
     }
 
+    /** Decends into every node in an arbitrary parsetree and listens for
+     *  {@link ResolveParser.ProgParamExpContext}s whose characteristics satisfy
+     *  some arbitrary {@link Predicate}.
+     *  <p>
+     *  After a listen, you can check to see if at any point the predicate was
+     *  satisfied via the public {@link #result} member. If you need more
+     *  specific information, such as "which contexts satisfied my predicate?",
+     *  refer to {@link #satisfyingContexts} for a complete list.</p>
+     */
     protected static class CallCheckingListener
             extends
                 ResolveBaseListener {
+
+        /** Some {@link Predicate} that operates on {@link ResolveParser.ProgParamExpContext}s */
         private final Predicate<ResolveParser.ProgParamExpContext> checker;
+
         public boolean result = false;
-        public ResolveParser.ProgParamExpContext satisfyingContext = null;
+        public List<ResolveParser.ProgParamExpContext> satisfyingContexts =
+                new ArrayList<>();
 
         public CallCheckingListener(
                 @NotNull Predicate<ResolveParser.ProgParamExpContext> checker) {
@@ -245,7 +266,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
                 ResolveParser.ProgParamExpContext ctx) {
             if (checker.test(ctx)) {
                 result = true;
-                satisfyingContext = ctx;
+                satisfyingContexts.add(ctx);
             }
         }
     }
