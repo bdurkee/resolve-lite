@@ -61,33 +61,27 @@ public class HardCodedProgOps {
             case ResolveLexer.DIV:
                 result = new BuiltInOpAttributes("Std_Ints", op, "Divide");
                 break;
-         /*   case ResolveLexer.LTE:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less_Or_Equal");
+            case ResolveLexer.LTE:
+                result = new BuiltInOpAttributes("Std_Ints", op, "Less_Or_Equal");
                 break;
             case ResolveLexer.LT:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Less");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Less");
                 break;
             case ResolveLexer.GTE:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater_Or_Equal");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Greater_Or_Equal");
                 break;
             case ResolveLexer.GT:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Greater");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Greater");
                 break;
             case ResolveLexer.EQUALS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Equal");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Are_Equal");
                 break;
             case ResolveLexer.NEQUALS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Are_Not_Equal");
-                break;
-            case ResolveLexer.MINUSMINUS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Decrement");
-                break;
-            case ResolveLexer.PLUSPLUS:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Increment");
+                result = new BuiltInOpAttributes("Std_Ints", op, "Are_Not_Equal");
                 break;
             case ResolveLexer.MOD:
-                result = new BuiltInOpAttributes("Std_Integer_Fac", op, "Mod");
-                break;*/
+                result = new BuiltInOpAttributes("Std_Ints", op, "Mod");
+                break;
         }
         return result;
     }

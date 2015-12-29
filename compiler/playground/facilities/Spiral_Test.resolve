@@ -11,30 +11,6 @@ Facility Spiral_Test;
         Procedure
             Var P : Sp_Fac :: Spiral_Pos;
             Var xs, y : Std_Bools :: Boolean;
-            If xs then
-                Sp_Fac :: Lengthen(P, xs);
-            else
-                Sp_Fac :: Lengthen(P, y);
-            end;
+
     end Main;
-/*    Type Person = Record
-            age, rank : Std_Bools :: Boolean;
-        end;
-
-    Type Foo = Record
-            x, y : Std_Bools :: Boolean;
-            person : Person;
-        end;
-
-    Operation Main ();
-        Procedure
-            Var x : Foo;
-            Var z : Person;
-            Var y : Std_Bools :: Boolean;
-           // z := x.person;
-           //((Person)(((Foo)x).rep.person)).rep.rank
-
-            y := x.person.rank;
-    end Main;
-*/
 end Spiral_Test;

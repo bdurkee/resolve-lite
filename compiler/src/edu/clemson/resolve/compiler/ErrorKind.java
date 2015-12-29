@@ -228,7 +228,7 @@ public enum ErrorKind {
             "'<arg>' != '<arg2>'",
                             ErrorSeverity.WARNING),
 
-    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked as recursive, " +
+    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked 'Recursive', " +
             "but contains no recursive calls",
             ErrorSeverity.WARNING),
 
@@ -236,7 +236,12 @@ public enum ErrorKind {
             "<arg2>, <arg3>; these need to be the same types",
             ErrorSeverity.ERROR),
 
-    ILLEGAL_INCOMING_REF_IN_REQUIRES(42, "found illegal '@'-valued " +
+    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return " +
+            "assignment stmt (e.g.: the concluding statement should be " +
+            "<arg> := [SOME RETURN VALUE];",
+            ErrorSeverity.ERROR),
+
+    ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued " +
             "variable ref(s): [<arg; separator={, }>] in requires " +
             "clause: <arg2>; '@-variables' are not permitted in requires clauses",
             ErrorSeverity.ERROR),
@@ -248,7 +253,17 @@ public enum ErrorKind {
 
     SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, " +
             "(which is <arg2>) shares the same name as the enclosing module; " +
-            "it needs a unique name", ErrorSeverity.ERROR);
+            "it needs a unique name", ErrorSeverity.ERROR),
+
+    ILLEGAL_MODE_FOR_FUNCTIONAL_OP(61, "operation <arg> declares a return, " +
+            "but parameter(s) [<arg2; separator = ', '>] use mode <arg3>; " +
+            "operations with a return can only use these modes: " +
+            "[preserves, restores, evaluates]",
+            ErrorSeverity.ERROR),
+
+    ILLEGAL_PRIMARY_OPERATION_CALL(62, "procedure '<arg>' references another " +
+            "primary operation with: <arg2>; primary operations shouldn't " +
+            "reference each other", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

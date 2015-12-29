@@ -513,6 +513,11 @@ progLiteralExp
 NOT : 'not' ;
 EQUALS : '=' ;
 NEQUALS : '/=' ;
+LT : '<' ;
+LTE : '<=' ;
+GT : '>' ;
+GTE : '>=' ;
+MOD : '%' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 AND : 'and' ;

@@ -577,14 +577,6 @@ public class Integer_Impl
         }
     }
 
-    /*@Override public RType Is_Zero(RType i) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i).val == 0);
-    }
-
-    @Override public RType Is_Not_Zero(RType i) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i).val != 0);
-    }*/
-
     @Override public void Increment(RType i) {
         ((Integer)i).val = ((Integer)i).val + 1;
     }
@@ -635,6 +627,10 @@ public class Integer_Impl
 
     @Override public RType Product(RType i1, RType i2) {
         return new Integer(((Integer)i1).val * ((Integer)i2).val);
+    }
+
+    @Override public RType Div(RType i1, RType i2) {
+        return new Integer(((Integer)i1).val / ((Integer)i2).val);
     }
 
     @Override public void Read(RType e) {
