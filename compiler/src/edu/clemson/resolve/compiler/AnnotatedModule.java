@@ -30,6 +30,8 @@ public class AnnotatedModule {
     public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
 
     public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
+
+
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
     //use a map for more efficiency when checking whether a module references
@@ -40,6 +42,9 @@ public class AnnotatedModule {
      *  orderings, etc. Think of these strings the refs the symboltable will see.
      *  We don't want implementations of facilities showing up in this set.
      */
+    //UPDATE: Can't really remember why the hell I made a separate set for this.
+    //need to think about it some more, likely in trying to delete I'll remember,
+    //but let me try to remember why I thought it was necessary (several months ago)
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
 

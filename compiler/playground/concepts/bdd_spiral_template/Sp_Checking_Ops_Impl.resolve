@@ -1,0 +1,8 @@
+Implementation Sp_Checking_Ops_Impl
+    for
+      Sp_Checking_Ops of Bdd_Spiral_Template;
+
+    Procedure At_Center (restores P : Spiral_Pos);
+        At_Center := (Curr_Ctr_Dist(P) = 0);
+    end At_Center;
+end Sp_Checking_Ops_Impl;

@@ -36,13 +36,13 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
-    /*@Override public void enterExtensionImplModule(
-            ResolveParser.ExtensionImplModuleContext ctx) {
-        tr.uses.add(new AnnotatedModule.UsesRef(ctx.enhancement));
-        tr.uses.add(new AnnotatedModule.UsesRef(ctx.concept));
-        tr.semanticallyRelevantUses.add(ctx.enhancement.getText());
-        tr.semanticallyRelevantUses.add(ctx.concept.getText());
-    }*/
+    @Override public void enterConceptExtImplModuleDecl(
+            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+        tr.uses.add(new ModuleIdentifier(ctx.extension));
+        tr.uses.add(new ModuleIdentifier(ctx.concept));
+        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.extension));
+        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
+    }
 
     @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         for (TerminalNode t : ctx.ID()) {

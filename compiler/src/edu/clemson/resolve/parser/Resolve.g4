@@ -36,6 +36,8 @@ moduleDecl
     |   facilityModuleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
+    |   conceptExtModuleDecl
+    |   conceptExtImplModuleDecl
     ;
 
 // precis

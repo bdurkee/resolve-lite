@@ -161,7 +161,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    ctx.concept);
+                    ctx.concept, ctx.concept.getText());
         }
         this.visitChildren(ctx);
         return null;
