@@ -100,12 +100,12 @@ public class SanityCheckingListener extends ResolveBaseListener {
             ParseTreeWalker.DEFAULT.walk(searcher, ctx);
 
             //if we found a call to a primary operation from another procedure
-            if (searcher.result && searcher.foundCall != null) {
+            if (searcher.result && searcher.satisfyingContext != null) {
                 compiler.errMgr.semanticError(
                         ErrorKind.ILLEGAL_PRIMARY_OPERATION_CALL,
-                        searcher.foundCall.getStart(),
+                        searcher.satisfyingContext.getStart(),
                         name.getText(),
-                        searcher.foundCall.getText());
+                        searcher.satisfyingContext.getText());
             }
         } catch (NoSuchModuleException e) {
             //that's fine, we just won't bother
@@ -179,13 +179,12 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
-    /** Checks to ensure that only the correct modes are used in the
-     *  declaration of an operation {@code name} that has some return
-     *  {@code type}.
+    /** Checks to ensure that only the correct modes are used in the declaration
+     *  of an operation, {@code name}, that has some return, {@code type}.
      *  <p>
-     *  Note: as far as I'm aware only {@code restores}, {@code preserves},
+     *  Note: as far as I'm aware, only {@code restores}, {@code preserves},
      *  and {@code evaluates} mode params are acceptable in this case;
-     *  add with others as needed.</p>
+     *  add others as needed.</p>
      *
      * @param name the operation's name
      * @param type the declared return type
@@ -209,9 +208,8 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
-    /** Returns {@code true} if {@code name} appears in any programming call
-     *  expression ({@link ResolveParser.ProgParamExpContext}) within parse
-     *  context {@code ctx}.
+    /** Returns {@code true} if {@code name} appears in any
+     * {@link ResolveParser.ProgParamExpContext}) within parse context {@code ctx}.
      *  <p>
      *  One caveat: if we find a matching expression but it's
      *  <em>qualified</em>, we return {@code false} as this indicates we're
@@ -237,7 +235,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
                 ResolveBaseListener {
         private final Predicate<ResolveParser.ProgParamExpContext> checker;
         public boolean result = false;
-        public ResolveParser.ProgParamExpContext foundCall = null;
+        public ResolveParser.ProgParamExpContext satisfyingContext = null;
 
         public CallCheckingListener(
                 @NotNull Predicate<ResolveParser.ProgParamExpContext> checker) {
@@ -247,7 +245,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
                 ResolveParser.ProgParamExpContext ctx) {
             if (checker.test(ctx)) {
                 result = true;
-                foundCall = ctx;
+                satisfyingContext = ctx;
             }
         }
     }

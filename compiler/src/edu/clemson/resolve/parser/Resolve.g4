@@ -100,6 +100,24 @@ implBlock
         )*
     ;
 
+// concept extension
+
+conceptExtModuleDecl
+    :   'Concept' 'Extension' name=ID specModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptExtImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' extension=ID 'of' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
 // facilities
 
 facilityModuleDecl
