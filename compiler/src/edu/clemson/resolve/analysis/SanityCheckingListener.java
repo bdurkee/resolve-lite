@@ -3,6 +3,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -83,8 +84,9 @@ public class SanityCheckingListener extends ResolveBaseListener {
     /** Ensure the call we're looking at is not to another primary operation */
     public void sanityCheckCalls(@NotNull ParserRuleContext ctx,
                                  @NotNull Token name) {
-        //get conceptual scope
-        ModuleIdentifier parentConceptID = tr.getParentConceptIdentifier();
+        //get immediate conceptual scope
+        ModuleIdentifier parentConceptID = getSpecModuleIdentifierFor(ctx);
+        if (parentConceptID == null) return;
         try {
             ModuleScopeBuilder conceptualScope =
                     compiler.symbolTable.getModuleScope(parentConceptID);
@@ -149,6 +151,36 @@ public class SanityCheckingListener extends ResolveBaseListener {
                     requires.getIncomingVariables(),
                     ctx.mathAssertionExp().getText());
         }
+    }
+
+    /** If we represent a module that implements some specification,
+     *  this method returns its {@link ModuleIdentifier}; {@code null} otherwise.
+     *  <p>
+     *  So for instance, if {@code ctx} is within an concept extension implementation,
+     *  this method will return the {@link ModuleIdentifier} naming the
+     *  extension specification.</p>
+     *
+     *  @return a module identifier
+     */
+    @Nullable public ModuleIdentifier getSpecModuleIdentifierFor(
+            @NotNull ParserRuleContext ctx) {
+        ModuleIdentifier result = null;
+
+        ParserRuleContext found = Utils.getFirstAncestorOfType(ctx,
+                ResolveParser.ConceptImplModuleDeclContext.class);
+        if (found != null) {
+            return new ModuleIdentifier(
+                    ((ResolveParser.ConceptImplModuleDeclContext) found)
+                            .concept);
+        }
+        found = Utils.getFirstAncestorOfType(ctx,
+                ResolveParser.ConceptExtImplModuleDeclContext.class);
+        if (found != null) {
+            return new ModuleIdentifier(
+                    ((ResolveParser.ConceptExtImplModuleDeclContext) found)
+                            .extension);
+        }
+        return null;
     }
 
     /** Checks to ensure two {@link PTType}s are acceptable for each other. */

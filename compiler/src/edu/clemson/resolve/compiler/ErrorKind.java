@@ -233,7 +233,7 @@ public enum ErrorKind {
             ErrorSeverity.WARNING),
 
     INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: " +
-            "<arg2>, <arg3>; these need to be the same types",
+            "[<arg2>, <arg3>]; these need to be the same types",
             ErrorSeverity.ERROR),
 
     MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return " +
