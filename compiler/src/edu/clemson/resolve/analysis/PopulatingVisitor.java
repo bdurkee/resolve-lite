@@ -64,13 +64,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private boolean walkingDefParams = false;
 
-    /** Keeps track of the current operationProcedure (and procedure) we're
-     *  visiting; {@code null} otherwise. We use this to check whether a
-     *  recursive call is being made to an operation procedure decl that hasn't
-     *  been marked 'Recursive'.
-     */
-    //private ResolveParser.OperationProcedureDeclContext currentOpProcedureDecl = null;
-
     private boolean walkingApplicationArgs = false;
 
     /** A reference to the expr context that represents the previous segment
@@ -159,12 +152,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitConceptExtensionModuleDecl(
-            ResolveParser.ConceptExtensionModuleDeclContext ctx) {
+    @Override public Void visitConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
         try {
-            List<String> implicitImports =
-                    symtab.getModuleScope(ctx.concept).getImports();
-            moduleScope.addImports(implicitImports);
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(
+                    new ModuleIdentifier(ctx.concept));
+            moduleScope.addImports(conceptScope.getImports());
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -174,19 +167,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitExtensionImplModule(
-            ResolveParser.ExtensionImplModuleContext ctx) {
+    @Override public Void visitConceptExtImplModuleDecl(
+            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         try {
-            moduleScope.addImports(symtab.getModuleScope(ctx.enhancement)
-                    .getImports());
+            //first add implicit imports from conceptual extension
+            ModuleScopeBuilder conceptExtScope = symtab.getModuleScope(
+                    new ModuleIdentifier(ctx.extension));
+            moduleScope.addImports(conceptExtScope.getImports());
+
+            //now add implicit imports from the parenting concept
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(
+                    new ModuleIdentifier(ctx.concept));
+            moduleScope.addImports(conceptScope.getImports());
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
-                    ctx.enhancement);
+                    nsme.getRequestedModule());
         }
         this.visitChildren(ctx);
         return null;
-    }*/
+    }
 
     @Override public Void visitGenericTypeParameterDecl(
             ResolveParser.GenericTypeParameterDeclContext ctx) {
@@ -1448,11 +1448,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 establishedType = tr.mathTypes.get(alt.result);
                 establishedTypeValue = tr.mathTypeValues.get(alt.result);
             }
-            else {
-                if ( alt.condition != null ) {
+            //else {
+                //if ( alt.condition != null ) {
                     // expectType(alt, establishedType);
-                }
-            }
+                //}
+            //}
         }
         tr.mathTypes.put(ctx, establishedType);
         tr.mathTypeValues.put(ctx, establishedTypeValue);
@@ -1627,9 +1627,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull ParserRuleContext prevAccessExp,
                                            @NotNull String symbolName) {
 
-        MTType type = g.INVALID;
+        MTType type;
         MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
-        MTType sss = tr.mathTypeValues.get(prevAccessExp);
         //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
         //it starts the access chain, rather than say terminating it.
         if (prevAccessExp.getText().equals("conc")) {
@@ -1812,7 +1811,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return expectedType.getApplicationType(functionName, arguments);
     }
 
-    private void insertGlobalAssertion(ParserRuleContext ctx,
+    /*private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
                                        ResolveParser.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
@@ -1825,7 +1824,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-    }
+    }*/
 
     @NotNull protected final PExp getPExpFor(ParseTree ctx) {
         if (ctx == null) return g.getTrueExp();
@@ -1838,11 +1837,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void chainMathTypes(ParseTree current, ParseTree child) {
         tr.mathTypes.put(current, tr.mathTypes.get(child));
         tr.mathTypeValues.put(current, tr.mathTypeValues.get(child));
-    }
-
-    private void chainProgTypes(ParseTree current, ParseTree child) {
-        tr.progTypes.put(current, tr.progTypes.get(child));
-        tr.progTypeValues.put(current, tr.progTypeValues.get(child));
     }
 
     private ModuleIdentifier getRootModuleIdentifier() {

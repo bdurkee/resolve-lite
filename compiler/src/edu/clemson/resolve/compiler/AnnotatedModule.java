@@ -91,16 +91,18 @@ public class AnnotatedModule {
 
     @Nullable public ModuleIdentifier getParentConceptIdentifier() {
         ModuleIdentifier result = null;
-        if (root.getChild(0) instanceof ResolveParser.ConceptImplModuleDeclContext) {
+        if (root.getChild(0) instanceof
+                ResolveParser.ConceptImplModuleDeclContext) {
             result = new ModuleIdentifier(
                     ((ResolveParser.ConceptImplModuleDeclContext) root
                             .getChild(0)).concept);
         }
-        /*else if (root.getChild(0) instanceof ResolveParser.EnhancementImplModuleDeclContext) { {
+        else if (root.getChild(0) instanceof
+                ResolveParser.ConceptExtImplModuleDeclContext) {
             result = new ModuleIdentifier(
-                    ((ResolveParser.ConceptImplModuleDeclContext) root
+                    ((ResolveParser.ConceptExtImplModuleDeclContext) root
                             .getChild(0)).concept);
-        }*/
+        }
         return result;
     }
 
