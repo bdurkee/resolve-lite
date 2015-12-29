@@ -30,8 +30,6 @@
  */
 package edu.clemson.resolve.runtime;
 
-import java.lang.reflect.*;
-
 public class RESOLVEBase {
 
     public static void swap(RType r1, RType r2) {

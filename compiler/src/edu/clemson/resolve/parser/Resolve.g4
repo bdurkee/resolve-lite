@@ -100,6 +100,24 @@ implBlock
         )*
     ;
 
+// concept extension
+
+conceptExtModuleDecl
+    :   'Concept' 'Extension' name=ID specModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptExtImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' extension=ID 'of' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
 // facilities
 
 facilityModuleDecl
@@ -387,6 +405,7 @@ mathQuantifiedExp
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                          #mathSelectorExp
     |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'      #mathPrefixApplyExp
+    |   functionExp=mathExp '[' mathExp (',' mathExp)* ']'      #mathPrefixGeneralizedApplyExp
     |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
     |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
     |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
@@ -442,6 +461,7 @@ mathOutfixApplyExp
     :   lop='<' mathExp rop='>'
     |   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
+    |   lop='[' mathExp rop=']'
     ;
 
 mathSetComprehensionExp
@@ -511,6 +531,11 @@ progLiteralExp
 NOT : 'not' ;
 EQUALS : '=' ;
 NEQUALS : '/=' ;
+LT : '<' ;
+LTE : '<=' ;
+GT : '>' ;
+GTE : '>=' ;
+MOD : '%' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 AND : 'and' ;

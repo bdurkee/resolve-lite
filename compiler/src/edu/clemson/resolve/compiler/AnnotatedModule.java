@@ -14,10 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTType;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /** Represents a collection of information to be associated with a top level
  *  {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
@@ -90,6 +87,21 @@ public class AnnotatedModule {
 
     @NotNull public ParseTree getRoot() {
         return root;
+    }
+
+    @Nullable public ModuleIdentifier getParentConceptIdentifier() {
+        ModuleIdentifier result = null;
+        if (root.getChild(0) instanceof ResolveParser.ConceptImplModuleDeclContext) {
+            result = new ModuleIdentifier(
+                    ((ResolveParser.ConceptImplModuleDeclContext) root
+                            .getChild(0)).concept);
+        }
+        /*else if (root.getChild(0) instanceof ResolveParser.EnhancementImplModuleDeclContext) { {
+            result = new ModuleIdentifier(
+                    ((ResolveParser.ConceptImplModuleDeclContext) root
+                            .getChild(0)).concept);
+        }*/
+        return result;
     }
 
     @Override public int hashCode() {

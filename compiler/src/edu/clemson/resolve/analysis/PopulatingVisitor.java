@@ -60,9 +60,8 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = true;
+    private static final boolean EMIT_DEBUG = false;
 
-    //TODO: Many of these flags can probably be eliminate via a antlr4 helper method Trees.*
     private boolean walkingDefParams = false;
 
     /** Keeps track of the current operationProcedure (and procedure) we're
@@ -288,6 +287,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         ctx.variableDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
+        sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
         symtab.endScope();
         if (correspondingOp == null) { //backout
             return null;
@@ -301,6 +301,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), ctx.name.getText());
         }
         return null;
+    }
+
+    private void sanityCheckStmtsForReturn(@NotNull Token operationName,
+                                           @Nullable ParserRuleContext type,
+                                           @NotNull List<ResolveParser.StmtContext> stmts) {
+        boolean missingReturn = false;
+        if (type == null) return;
+        if (stmts.size() == 0) missingReturn = true;
+        if (stmts.size() > 0) {
+            ResolveParser.StmtContext lastStmt = stmts.get(stmts.size() - 1);
+            if (lastStmt.getChild(0) instanceof ResolveParser.AssignStmtContext) {
+                ResolveParser.AssignStmtContext lastAsAssign =
+                        (ResolveParser.AssignStmtContext)lastStmt.getChild(0);
+                if (!lastAsAssign.left.getText().equals(operationName.getText())) {
+                    missingReturn = true;
+                }
+            }
+        }
+        if (missingReturn) {
+            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT,
+                    operationName, operationName.getText());
+        }
     }
 
     @Override public Void visitOperationDecl(
@@ -330,35 +352,36 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitOperationProcedureDecl(
-             ResolveParser.OperationProcedureDeclContext ctx) {
-         symtab.startScope(ctx);
-         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
-         if (ctx.type() != null) {
-             this.visit(ctx.type());
-             try {
-                 symtab.getInnermostActiveScope().define(
-                         new ProgVariableSymbol(ctx.name.getText(), ctx,
-                                 tr.progTypeValues.get(ctx.type()),
-                                 getRootModuleIdentifier()));
-             } catch (DuplicateSymbolException e) {
-                 //This shouldn't be possible--the operation declaration has a
-                 //scope all its own and we're the first ones to get to
-                 //introduce anything
-                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                         ctx.getStart(), ctx.getText());
-             }
-         }
-         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
-         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+            ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
+                    new ProgVariableSymbol(ctx.name.getText(), ctx,
+                        tr.progTypeValues.get(ctx.type()),
+                            getRootModuleIdentifier()));
+            } catch (DuplicateSymbolException e) {
+            //This shouldn't be possible--the operation declaration has a
+            //scope all its own and we're the first ones to get to
+            //introduce anything
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
 
-         ctx.variableDeclGroup().forEach(this::visit);
-         ctx.stmt().forEach(this::visit);
+        ctx.variableDeclGroup().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
+        sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
 
-         symtab.endScope();
-         insertFunction(ctx.name, ctx.type(),
-                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
-         return null;
-     }
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
 
     private void insertFunction(@NotNull Token name,
                                 @Nullable ResolveParser.TypeContext type,
@@ -1054,6 +1077,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
         }
+        tr.progTypes.put(ctx, PTInvalid.getInstance(g));
+        tr.mathTypes.put(ctx, g.INVALID);
         return null;
     }
 
@@ -1515,27 +1540,40 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 " with formal type: " + type);
     }
 
-    /*@Override public Void visitMathOutfixApplyExp(
+    @Override public Void visitMathOutfixApplyExp(
             ResolveParser.MathOutfixApplyExpContext ctx) {
         this.visit(ctx.mathExp());
-        typeMathFunctionLikeThing(ctx, null, new CommonToken(ResolveLexer.ID,
-                ctx.lop.getText() + "..." + ctx.rop.getText()), ctx.mathExp());
+        tr.mathTypes.put(ctx, g.POWERSET); //temporary
         return null;
-    }*/
+    }
 
     @Override public Void visitMathPrefixApplyExp(
             ResolveParser.MathPrefixApplyExpContext ctx) {
-        //emit("prefix apply ctx=" + ctx.getText());
-        this.visit(ctx.functionExp);
         //looks weird cause the 0th is now the expr representing the
         //application's first class 'function-portion'
-        List<ResolveParser.MathExpContext> args =
-                ctx.mathExp().subList(1, ctx.mathExp().size());
+        handleFunctionApplication(ctx, ctx.functionExp,
+                ctx.mathExp().subList(1, ctx.mathExp().size()));
+        return null;
+    }
+
+    @Override public Void visitMathPrefixGeneralizedApplyExp(
+            ResolveParser.MathPrefixGeneralizedApplyExpContext ctx) {
+        //looks weird cause the 0th is now the expr representing the
+        //application's first class 'function-portion'
+        handleFunctionApplication(ctx, ctx.functionExp,
+                ctx.mathExp().subList(1, ctx.mathExp().size()));
+        return null;
+    }
+
+    private void handleFunctionApplication(@NotNull ParserRuleContext ctx,
+                                           @NotNull ResolveParser.MathExpContext functionPortion,
+                                           @NotNull List<ResolveParser.MathExpContext> args) {
+        //emit("prefix apply ctx=" + ctx.getText());
+        this.visit(functionPortion);
         walkingApplicationArgs = true;
         args.forEach(this::visit);
         walkingApplicationArgs = false;
-        typeMathFunctionLikeThing(ctx, ctx.functionExp, args);
-        return null;
+        typeMathFunctionLikeThing(ctx, functionPortion, args);
     }
 
     @Override public Void visitMathBooleanLiteralExp(
@@ -1591,6 +1629,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MTType type = g.INVALID;
         MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
+        MTType sss = tr.mathTypeValues.get(prevAccessExp);
         //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
         //it starts the access chain, rather than say terminating it.
         if (prevAccessExp.getText().equals("conc")) {
@@ -1627,7 +1666,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         prevSelectorAccess = null;
 
         MTType finalType = tr.mathTypes.get(ctx.rhs);
-        compiler.info("expression: " + ctx.getText() + " of type " + finalType);
+        emit("expression: " + ctx.getText() + " of type " + finalType);
         tr.mathTypes.put(ctx, finalType);
         return null;
     }
@@ -1729,7 +1768,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //I had better identify a type
         if (typeValueDepth > 0) {
             MTType realAppType = formActualApplicationType(
-                    firstClassPortion.getText(), expectedFunctionType, args);
+                firstClassPortion.getText(), expectedFunctionType, args);
             tr.mathTypeValues.put(ctx, realAppType);
         }
     }
@@ -1756,15 +1795,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                              MTFunction expectedType,
                                              List<? extends ParserRuleContext> args) {
         List<MTType> arguments = new ArrayList<>();
-        MTType argTypeValue;
+        MTType argTypeValue, argType;
         for (ParserRuleContext arg : args) {
+            argType = tr.mathTypes.get(arg);
             argTypeValue = tr.mathTypeValues.get(arg);
 
             if (argTypeValue == null) {
-                compiler.errMgr.semanticError(
+               /* compiler.errMgr.semanticError(
                         ErrorKind.INVALID_MATH_TYPE, arg.getStart(),
                         arg.getText());
-                argTypeValue = g.INVALID;
+                argTypeValue = g.INVALID;*/
+                argTypeValue = argType;
             }
             arguments.add(argTypeValue);
         }

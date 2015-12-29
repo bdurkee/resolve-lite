@@ -5,8 +5,10 @@ Precis Basic_Integer_Theory;
         Is_Monogeneric_for(Z, 0, NB);
 
     Definition +(m, n : Z) : Z;
+    Definition -(m, n : Z) : Z;
 
     Definition <=(m, n : Z) : B;
+    Definition >=(m, n : Z) : B;
 
     Definition 1 : Z;
     Definition 2 : Z;

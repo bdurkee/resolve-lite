@@ -8,11 +8,20 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Predicate;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.xpath.XPath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.ModuleIdentifier;
+import org.rsrg.semantics.ModuleScopeBuilder;
+import org.rsrg.semantics.NoSuchModuleException;
 import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.symbol.OperationSymbol;
+import org.rsrg.semantics.symbol.Symbol;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** Uses a combination of listeners and visitors to check for some semantic
  *  errors uncheckable in the grammar and ommited by {@link PopulatingVisitor}.
@@ -65,12 +74,56 @@ public class SanityCheckingListener extends ResolveBaseListener {
             ResolveParser.ProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
+        sanityCheckFunctionalOperationParameterModes(ctx.name, ctx.type(),
+                ctx.operationParameterList().parameterDeclGroup());
+        sanityCheckCalls(ctx, ctx.name);
+    }
+
+    /** Ensure the call we're looking at is not to another primary operation */
+    public void sanityCheckCalls(@NotNull ParserRuleContext ctx,
+                                 @NotNull Token name) {
+        //get conceptual scope
+        ModuleIdentifier parentConceptID = tr.getParentConceptIdentifier();
+        try {
+            ModuleScopeBuilder conceptualScope =
+                    compiler.symbolTable.getModuleScope(parentConceptID);
+            List<String> operationNames =
+                    conceptualScope.getSymbolsOfType(OperationSymbol.class)
+                            .stream().map(Symbol::getName)
+                            .collect(Collectors.toList());
+
+            CallCheckingListener searcher =
+                    new CallCheckingListener(
+                            e -> e.progNamedExp().qualifier == null &&
+                                 operationNames.contains(e.progNamedExp().name.getText()) &&
+                                 !e.progNamedExp().name.getText().equals(name.getText()));
+            ParseTreeWalker.DEFAULT.walk(searcher, ctx);
+
+            //if we found a call to a primary operation from another procedure
+            if (searcher.result && searcher.satisfyingContext != null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.ILLEGAL_PRIMARY_OPERATION_CALL,
+                        searcher.satisfyingContext.getStart(),
+                        name.getText(),
+                        searcher.satisfyingContext.getText());
+            }
+        } catch (NoSuchModuleException e) {
+            //that's fine, we just won't bother
+        }
     }
 
     @Override public void exitOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
+        sanityCheckFunctionalOperationParameterModes(ctx.name, ctx.type(),
+                ctx.operationParameterList().parameterDeclGroup());
+    }
+
+    @Override public void exitOperationDecl(
+            ResolveParser.OperationDeclContext ctx) {
+        sanityCheckFunctionalOperationParameterModes(ctx.name, ctx.type(),
+                ctx.operationParameterList().parameterDeclGroup());
     }
 
     @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
@@ -105,7 +158,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
     private void sanityCheckRecursiveProcKeyword(@NotNull ParserRuleContext ctx,
                                                  @NotNull Token name,
                                                  @Nullable Token recursiveToken) {
-        boolean hasRecRef = hasRecursiveReferenceInStmts(ctx, name);
+        boolean hasRecRef = hasRecursiveReferenceInStmts(ctx, name.getText());
         if (recursiveToken == null && hasRecRef) {
             compiler.errMgr.semanticError(
                     ErrorKind.UNLABELED_RECURSIVE_FUNC, name, name.getText(),
@@ -126,8 +179,41 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
-    /** Returns {@code true} if {@code name} appears anywhere in some named
-     *  context {@code ctx}.
+    /** Checks to ensure that only the correct modes are used in the declaration
+     *  of an operation, {@code name}, that has some return, {@code type}.
+     *  <p>
+     *  Note: as far as I'm aware, only {@code restores}, {@code preserves},
+     *  and {@code evaluates} mode params are acceptable in this case;
+     *  add others as needed.</p>
+     *
+     * @param name the operation's name
+     * @param type the declared return type
+     * @param parameters the formal parameters
+     */
+    private void sanityCheckFunctionalOperationParameterModes(
+            @NotNull Token name, @Nullable ResolveParser.TypeContext type,
+            @NotNull List<ResolveParser.ParameterDeclGroupContext> parameters) {
+        if (type == null) return;
+        for (ResolveParser.ParameterDeclGroupContext group : parameters) {
+            if (!(group.parameterMode().getText().equals("restores") ||
+                  group.parameterMode().getText().equals("preserves") ||
+                  group.parameterMode().getText().equals("evaluates"))) {
+                List<String> paramNames = group.ID().stream()
+                        .map(ParseTree::getText).collect(Collectors.toList());
+                compiler.errMgr.semanticError(
+                        ErrorKind.ILLEGAL_MODE_FOR_FUNCTIONAL_OP,
+                        group.getStart(), name.getText(), paramNames,
+                        group.parameterMode().getText());
+            }
+        }
+    }
+
+    /** Returns {@code true} if {@code name} appears in any
+     * {@link ResolveParser.ProgParamExpContext}) within parse context {@code ctx}.
+     *  <p>
+     *  One caveat: if we find a matching expression but it's
+     *  <em>qualified</em>, we return {@code false} as this indicates we're
+     *  not looking at a recursive call (even though it's named the same).</p>
      *
      *  @param ctx the search context
      *  @param name the name of the (potentially) recursive reference
@@ -135,28 +221,32 @@ public class SanityCheckingListener extends ResolveBaseListener {
      *  recursively in {@code ctx}
      */
     private boolean hasRecursiveReferenceInStmts(@NotNull ParserRuleContext ctx,
-                                                 @NotNull Token name) {
-        RecursiveCallCheckingListener searcher =
-                new RecursiveCallCheckingListener(name.getText());
+                                                 @NotNull String name) {
+        CallCheckingListener searcher =
+                new CallCheckingListener(
+                        e -> e.progNamedExp().qualifier == null &&
+                             e.progNamedExp().name.getText().equals(name));
         ParseTreeWalker.DEFAULT.walk(searcher, ctx);
-        return searcher.found;
+        return searcher.result;
     }
 
-    protected static class RecursiveCallCheckingListener
+    protected static class CallCheckingListener
             extends
                 ResolveBaseListener {
-        private final String recursiveCall;
-        public boolean found = false;
+        private final Predicate<ResolveParser.ProgParamExpContext> checker;
+        public boolean result = false;
+        public ResolveParser.ProgParamExpContext satisfyingContext = null;
 
-        public RecursiveCallCheckingListener(@NotNull String call) {
-            this.recursiveCall = call;
+        public CallCheckingListener(
+                @NotNull Predicate<ResolveParser.ProgParamExpContext> checker) {
+            this.checker = checker;
         }
         @Override public void exitProgParamExp(
                 ResolveParser.ProgParamExpContext ctx) {
-            String foundName = ctx.progNamedExp().name.getText();
-
-            if (ctx.progNamedExp().qualifier == null &&
-                    foundName.equals(recursiveCall)) found = true;
+            if (checker.test(ctx)) {
+                result = true;
+                satisfyingContext = ctx;
+            }
         }
     }
 }

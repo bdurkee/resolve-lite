@@ -76,7 +76,8 @@ public  class RESOLVECompiler {
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
-    public boolean genCode;
+    public String genCode;
+    public String genPackage = null;
     public String workspaceDir;
     public boolean log = false;
 
@@ -85,8 +86,8 @@ public  class RESOLVECompiler {
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
             new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of resolve source files"),
-            new Option("genCode",           "-genCode", "generate code"),
-            new Option("jar",               "-jar", "generate an executable jar"),
+            new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
+            new Option("genPackage",		"-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
             new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
     };
@@ -392,6 +393,61 @@ public  class RESOLVECompiler {
 
     @NotNull public static String getCoreLibraryName() {
         return "src";
+    }
+
+    /** Used primarily by codegen to create new output files.
+     *  If {@code outputDirectory} (set by -o) isn't present it will be created.
+     *  The final filename is sensitive to the output directory and
+     *  the directory where the soure file was found in.  If -o is /tmp
+     *  and the original source file was foo/t.resolve then output files
+     *  go in /tmp/foo.
+     *  <p>
+     *  If no -o is specified, then just write to the directory where the
+     *  sourcefile was found.</p>
+     *
+     *  If {@code outputDirectory==null} then write a String.
+     */
+    public Writer getOutputFileWriter(@NotNull String fileName)
+            throws IOException {
+        if (outputDirectory == null) {
+            return new StringWriter();
+        }
+        // output directory is a function of where the source file lives
+        // for subdir/T.resolve, you get subdir here.  Well, depends on -o etc...
+        File outputDir = getOutputDirectory(fileName);
+        File outputFile = new File(outputDir, fileName);
+
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        return new BufferedWriter(new OutputStreamWriter(fos));
+    }
+
+    public File getOutputDirectory(@NotNull String fileNameWithPath) {
+        File outputDir;
+        String fileDirectory;
+
+        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
+            fileDirectory = ".";
+        }
+        else {
+            fileDirectory = fileNameWithPath.substring(0,
+                    fileNameWithPath.lastIndexOf(File.separatorChar));
+        }
+        if ( haveOutputDir ) {
+            if ((new File(fileDirectory).isAbsolute() ||
+                            fileDirectory.startsWith("~"))) {
+                outputDir = new File(outputDirectory);
+            }
+            else {
+                outputDir = new File(outputDirectory, fileDirectory);
+            }
+        }
+        else {
+            outputDir = new File(fileDirectory);
+        }
+        return outputDir;
     }
 
     public void log(@Nullable String component, @NotNull String msg) {

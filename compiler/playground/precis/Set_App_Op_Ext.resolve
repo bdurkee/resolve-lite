@@ -1,0 +1,4 @@
+Precis Extension Set_App_Op_Ext for Basic_Function_Properties;
+    Definition App_Op(f : (D : SSet) -> (R : SSet),
+        S : Powerset(D)) : Powerset(R);
+end Set_App_Op_Ext;

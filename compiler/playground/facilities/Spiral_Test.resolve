@@ -7,24 +7,10 @@ Facility Spiral_Test;
         implemented
             by Sp_Array_Impl;
 
-/*    Type Person = Record
-            age, rank : Std_Bools :: Boolean;
-        end;
-
-    Type Foo = Record
-            x, y : Std_Bools :: Boolean;
-            person : Person;
-        end;
-
     Operation Main ();
         Procedure
-            Var x : Foo;
-            Var z : Person;
-            Var y : Std_Bools :: Boolean;
-           // z := x.person;
-           //((Person)(((Foo)x).rep.person)).rep.rank
+            Var P : Sp_Fac :: Spiral_Pos;
+            Var xs, y : Std_Bools :: Boolean;
 
-            y := x.person.rank;
     end Main;
-*/
 end Spiral_Test;

@@ -238,7 +238,7 @@ public class MathSymbolTable {
     }
 
     @NotNull public ModuleScopeBuilder getModuleScope(
-            @NotNull ModuleIdentifier identifier)
+            @Nullable ModuleIdentifier identifier)
             throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
         if (module == null) {

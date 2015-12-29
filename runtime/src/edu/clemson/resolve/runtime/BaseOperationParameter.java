@@ -1,7 +1,5 @@
 package edu.clemson.resolve.runtime;
 
-import java.lang.reflect.*;
-
 /** A default operation-like parameter that filters all
  *  extraneous RType methods, while providing a dummy implementation of
  *  the primary {@link BaseOperationParameter#op} method.

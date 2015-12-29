@@ -550,7 +550,7 @@ public class ModelBuilder extends ResolveBaseListener {
     protected ModuleFile buildFile() {
         AnnotatedModule annotatedTree = gen.getModule();
         return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
-                .getFileName()));
+                .getFileName()), compiler.genPackage);
     }
 
     protected boolean withinFacilityModule() {

@@ -8,7 +8,7 @@ Precis Basic_Spiral_Theory;
         center : N2 -> SSet,
             ss, rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
 
-    Categorical Definition for Sp_Loc : (k : N2) -> SSet,
+    Categorical Definition for Sp_Loc(k : N2) : SSet,
             SS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
             RS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
             Cen(k : N2) : Sp_Loc(k)
@@ -21,6 +21,5 @@ Precis Basic_Spiral_Theory;
 
     Corollary Inw1: Forall k : N2, Forall m, n : N,
         SS(k)(Cen(k)) is_in Inward_Loc(SS(k)(Cen(k))) iff m < n;
-
 
 end Basic_Spiral_Theory;

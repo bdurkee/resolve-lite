@@ -171,14 +171,12 @@ public class Utils {
         else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
             return ((ResolveParser.ConceptImplModuleDeclContext) ctx).name;
         }
-        /*else if ( ctx instanceof ResolveParser.ExtensionModuleContext ) {
-            return ((ResolveParser.ExtensionModuleContext) ctx).name
-                    .getText();
+        else if ( ctx instanceof ResolveParser.ConceptExtModuleDeclContext ) {
+            return ((ResolveParser.ConceptExtModuleDeclContext) ctx).name;
         }
-        else if ( ctx instanceof ResolveParser.ExtensionImplModuleContext ) {
-            return ((ResolveParser.ExtensionImplModuleContext) ctx).name
-                    .getText();
-        }*/
+        else if ( ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext ) {
+            return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
+        }
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

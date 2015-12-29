@@ -16,12 +16,12 @@ Concept Integer_Template;
     Operation Increment
             (updates i : Integer);
         requires 1 + i <= max_int;
-        ensures	i = 1 + @i;
+        ensures	i = @i + 1;
 
     Operation Decrement
             (updates i : Integer);
         requires min_int <= i;
-        //ensures	i = @i - 1;
+        ensures	i = @i - 1;
 
     Operation Less_Or_Equal
             (evaluates i, j : Integer)
@@ -45,21 +45,21 @@ Concept Integer_Template;
             (evaluates i, j : Integer)
                 : Std_Bools :: Boolean;
         ensures Greater_Or_Equal =
-                    ( j <= i );
+                    ( j >= i );
 
     Operation Sum
             (evaluates i, j : Integer)
                 : Integer;
-       // requires min_int <=i + j and i + j <= max_int;
-       // ensures	Sum = ( i + j );
+        requires min_int <= i + j and
+            i + j <= max_int;
+        ensures	Sum = (i + j);
 
     Operation Difference
             (evaluates i, j : Integer)
                 : Integer;
         requires min_int <= i + j and
                     i + j <= max_int;
-       // ensures Difference =
-       //             (i - j);
+        ensures Difference = (i - j);
 
     Operation Product
             (evaluates i, j : Integer)
@@ -68,6 +68,10 @@ Concept Integer_Template;
             i * j <= max_int;
         ensures Product = (i * j);
 
+    Operation Div
+            (evaluates i, j : Integer)
+                : Integer;
+        //ensures Div = (i / j);
 
     Operation Are_Equal
             (evaluates i, j : Integer)
@@ -84,4 +88,5 @@ Concept Integer_Template;
     Operation Write(evaluates i : Integer);
 
     Operation Write_Line(evaluates i : Integer);
+
 end Integer_Template;

@@ -457,18 +457,22 @@ public class TestPExp extends BaseTest {
         }
     }
 
-    /**
-     * Constructs an (untyped) {@link PExp} from string {@code input}.
+    /** Constructs an (untyped) {@link PExp} from string {@code input}. If the
+     *  In the interest of avoiding null pointer exceptions, if the AST builder
+     *  fails and comes back with {@code null}, this function will always
+     *  return a dummy {@code true} expr; never just {@code null}!
      *
-     * <p>Building even moderately sized {@link PExp}s is a pain; building one
-     * with real type information is an even bigger pain. Thus, for test methods
-     * where this function is used, know that we don't care about types so much
-     * as we do about correct expression structure and quantifier
-     * distribution.</p>
+     *  <p>Also: Building even moderately sized {@link PExp}s is a pain; building one
+     *  with real type information is an even bigger pain. Thus, for test methods
+     *  where this function is used, know that we don't care about types so much
+     *  as we do about correct expression structure and quantifier
+     *  distribution. So instead of real type information we typically just use
+     *  {@link org.rsrg.semantics.MTInvalid}.</p>
      *
-     * <p>In other words, if you want to test something math type related, just
-     * construct smaller exprs manually using {@link PSymbol.PSymbolBuilder},
-     * otherwise parse the actual larger expr using this method.</p>
+     *  <p>If you <em>want</em> to test something math type related, just
+     *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
+     *  or {@link PApply.PApplyBuilder}; otherwise parse the actual larger expr
+     *  using this method.</p>
      *
      * @param input The input to parse.
      * @return The dummy-typed {@link PExp} representation of {@code input}.
@@ -482,6 +486,7 @@ public class TestPExp extends BaseTest {
         PExpBuildingListener<PExp> l =
                 new PExpBuildingListener<>(g, fakeModule, true);
         ParseTreeWalker.DEFAULT.walk(l, t);
-        return l.getBuiltPExp(t);
+        PExp result = l.getBuiltPExp(t);
+        return result == null ? g.getTrueExp() : result ;
     }
 }

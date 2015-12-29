@@ -103,11 +103,11 @@ public class TypeGraph {
     public TypeGraph() {
     }
 
-    public PExp formConjuncts(PExp... e) {
+    @NotNull public PExp formConjuncts(PExp... e) {
         return formConjuncts(Arrays.asList(e));
     }
 
-    public PExp formConjuncts(List<PExp> e) {
+    @NotNull public PExp formConjuncts(List<PExp> e) {
         if ( e == null ) {
             throw new IllegalArgumentException("can't conjunct a null list");
         }
@@ -141,17 +141,17 @@ public class TypeGraph {
                 .build();
     }
 
-    public final PSymbol getTrueExp() {
+    @NotNull public final PSymbol getTrueExp() {
         return new PSymbolBuilder("true").mathType(BOOLEAN).literal(true)
                 .build();
     }
 
-    public final PSymbol getFalseExp() {
+    @NotNull public final PSymbol getFalseExp() {
         return new PSymbolBuilder("false").mathType(BOOLEAN).literal(true)
                 .build();
     }
 
-    public final PApply formEquals(PExp left, PExp right) {
+    @NotNull public final PApply formEquals(PExp left, PExp right) {
         PExp functionPortion = new PSymbolBuilder("=")
                 .mathType(BOOLEAN_FUNCTION).build();
         return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
@@ -160,7 +160,7 @@ public class TypeGraph {
                 .build();
     }
 
-    public final PApply formImplies(PExp left, PExp right) {
+    @NotNull public final PApply formImplies(PExp left, PExp right) {
         PExp functionPortion = new PSymbolBuilder("implies")
                 .mathType(BOOLEAN_FUNCTION).build();
         return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
@@ -169,12 +169,13 @@ public class TypeGraph {
                 .build();
     }
 
-    public final PSymbol formConcExp() {
+    @NotNull public final PSymbol formConcExp() {
         return new PSymbolBuilder("conc").mathType(BOOLEAN).build();
     }
 
-    public final PApply formInitializationPredicate(@NotNull PTType argType,
-                                                    @NotNull String argName) {
+    @NotNull public final PApply formInitializationPredicate(
+            @NotNull PTType argType,
+            @NotNull String argName) {
         PSymbol predicateArg = new PSymbolBuilder(argName)
                 .mathType(argType.toMath()).build();
         MTFunction initType = new MTFunctionBuilder(this, BOOLEAN)
