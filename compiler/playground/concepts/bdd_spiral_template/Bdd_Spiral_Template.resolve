@@ -7,7 +7,7 @@ Concept Bdd_Spiral_Template(type Label;
              Basic_Spiral_Theory;
     requires k >= 2 and Max_Length > 0
             which_entails
-                Max_Length : N;
+                    Max_Length : N;
 
     Type family Spiral_Pos
         is modeled by Cart_Prod

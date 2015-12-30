@@ -21,10 +21,9 @@ public abstract class PTType {
 
     @NotNull public abstract MTType toMath();
 
-    /**
-     * Returns {@code true} if this program type is a 'typed container' of
-     * other program types. Basically makes it much easier for us to determine
-     * if objects typed with this have members capable of being accessed.
+    /** Returns {@code true} if this program type is a 'typed container' of
+     *  other program types. Basically makes it much easier for us to determine
+     *  if objects typed with this have members capable of being accessed.
      */
     public boolean isAggregateType() {
         return false;
@@ -34,14 +33,13 @@ public abstract class PTType {
             @NotNull Map<String, PTType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility);
 
-    /**
-     * Returns {@code true} <strong>iff</strong> a value of this type
-     * would be acceptable where one of type {@code t} were required.
+    /** Returns {@code true} <strong>iff</strong> a value of this type
+     *  would be acceptable where one of type {@code t} were required.
      * 
-     * @param t the required type
-     * @return {@code true} <strong>iff</strong> an value of this type
-     *         would be acceptable where one of type {@code t} were
-     *         required
+     *  @param t the required type
+     *  @return {@code true} <strong>iff</strong> an value of this type
+     *          would be acceptable where one of type {@code t} were
+     *          required
      */
     public boolean acceptableFor(@NotNull PTType t) {
         return equals(t);

@@ -145,20 +145,21 @@ public class ModelBuilder extends ResolveBaseListener {
         List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.specArgs.progExp(), built);
-        //List<Expr> implArgs =
-        //        ctx.implArgs == null ? new ArrayList<>() : Utils.collect(
-        //                Expr.class, ctx.implArgs.moduleArgument(), built);
+        List<Expr> implArgs =
+                ctx.implArgs == null ? new ArrayList<>() : Utils.collect(
+                        Expr.class, ctx.implArgs.progExp(), built);
         basePtr.args.addAll(specArgs);
-        //basePtr.args.addAll(implArgs);
+        basePtr.args.addAll(implArgs);
 
-        /*for (ResolveParser.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
+        for (ResolveParser.ExtensionPairingContext pair :
+                ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
-            specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(
-                            Expr.class, pair.specArgs.moduleArgument(), built);
-            implArgs = pair.implArgs == null ? new ArrayList<>() : Utils.collect(
-                            Expr.class, pair.implArgs.moduleArgument(), built);
+            specArgs = pair.specArgs == null ? new ArrayList<>() :
+                    Utils.collect(Expr.class, pair.specArgs.progExp(), built);
+            implArgs = pair.implArgs == null ? new ArrayList<>() :
+                    Utils.collect(Expr.class, pair.implArgs.progExp(), built);
             layer.args.addAll(basePtr.args); // always prefaced with the base facility args
             layer.args.addAll(specArgs);
             layer.args.addAll(implArgs);
@@ -166,14 +167,14 @@ public class ModelBuilder extends ResolveBaseListener {
         }
 
         for (int i = 0; i < layers.size(); i++) {
-            layers.get(i).isProxied = ctx.enhancementPairDecl().size() > 1;
+            layers.get(i).isProxied = ctx.extensionPairing().size() > 1;
             if ( i + 1 < layers.size() ) {
                 layers.get(i).child = layers.get(i + 1);
             }
             else {
                 layers.get(i).child = basePtr;
             }
-        }*/
+        }
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
     }
@@ -496,56 +497,67 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, file);
     }
 
-    /*@Override
-    public void exitEnhancementModule(
-            ResolveParser.EnhancementModuleContext ctx) {
+    @Override public void exitConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.EnhancementModule(ctx.name.getText(),
+        SpecModule spec = new SpecModule.ExtensionModule(ctx.name.getText(),
                 ctx.concept.getText(), file);
 
-        if (ctx.enhancementBlock() != null) {
+        if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
-                    .enhancementBlock().typeModelDecl(), built));
+                    .conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
-                    .enhancementBlock().operationDecl(), built));
+                    .conceptBlock().operationDecl(), built));
         }
         //Note that here we only need to query locally for symbols. Meaning
         //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
         //etc from the concept. We just want the ones (if any) from enhancement.
         spec.addGettersAndMembersForModuleParameterSyms(
-                moduleScope.getSymbolsOfType(Symbol.class));
+                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
         file.module = spec;
         built.put(ctx, file);
     }
 
-    @Override
-    public void exitEnhancementImplModule(
-            ResolveParser.EnhancementImplModuleContext ctx) {
+    @Override public void exitConceptExtImplModuleDecl(
+            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        EnhancementImplModule impl =
-                new EnhancementImplModule(ctx.name.getText(),
-                        ctx.enhancement.getText(), ctx.concept.getText(), file);
-        Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
-        impl.addDelegateMethods(
-                conceptScope.getSymbolsOfType(OperationSymbol.class,
-                        TypeModelSymbol.class));
+        ExtensionImplModule impl =
+                new ExtensionImplModule(ctx.name.getText(),
+                        ctx.extension.getText(), ctx.concept.getText(), file);
+        Scope conceptScope = null;
+        try {
+            conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
+            impl.addDelegateMethods(
+                    conceptScope.getSymbolsOfType(OperationSymbol.class,
+                            TypeModelSymbol.class));
+        } catch (NoSuchModuleException e) {
+        }
         if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
         }
-        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
-                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
-        allSymsFromConceptAndImpl.addAll(moduleScope
-                .getSymbolsOfType(Symbol.class));
-        impl.addGettersAndMembersForModuleParameterSyms(
-                allSymsFromConceptAndImpl);
-
+        try {
+            //first the concept spec
+            List<ModuleParameterSymbol> allSymsFromConceptAndExtAndThisModule =
+                    symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
+                            .getSymbolsOfType(ModuleParameterSymbol.class);
+            //then the extension spec
+            allSymsFromConceptAndExtAndThisModule.addAll(
+                    symtab.getModuleScope(new ModuleIdentifier(ctx.extension))
+                            .getSymbolsOfType(ModuleParameterSymbol.class));
+            //now this
+            allSymsFromConceptAndExtAndThisModule.addAll(moduleScope
+                    .getSymbolsOfType(ModuleParameterSymbol.class));
+            impl.addGettersAndMembersForModuleParameterSyms(
+                    allSymsFromConceptAndExtAndThisModule);
+        } catch (NoSuchModuleException e) {
+        }
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
-    }*/
+    }
 
     protected ModuleFile buildFile() {
         AnnotatedModule annotatedTree = gen.getModule();
@@ -581,11 +593,12 @@ public class ModelBuilder extends ResolveBaseListener {
                         (ResolveParser.ConceptImplModuleDeclContext) thisTree;
                 return symbolModuleID.getNameString()
                         .equals(asConceptImpl.concept.getText());
-            } /*else if (thisTree instanceof ResolveParser.EnhancementImplModuleContext) {
-                ResolveParser.EnhancementImplModuleContext asEnhancementImpl =
-                        (ResolveParser.EnhancementImplModuleContext) thisTree;
-                return symbolModuleID.equals(asEnhancementImpl.concept.getText());
-            }*/
+            } else if (thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
+                ResolveParser.ConceptExtImplModuleDeclContext asExtensionImpl =
+                        (ResolveParser.ConceptExtImplModuleDeclContext) thisTree;
+                return symbolModuleID.getNameString()
+                        .equals(asExtensionImpl.concept.getText());
+            }
         }
         return false;
     }

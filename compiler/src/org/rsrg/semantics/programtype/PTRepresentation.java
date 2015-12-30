@@ -12,21 +12,19 @@ import org.rsrg.semantics.TypeGraph;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-/**
- * A {@code PTRepresentation} wraps an existing {@link PTType PTType} with
- * additional information about a {@link PTFamily PTFamily} this type
- * represents. An instance of {@code PTRepresentation} is thus a special
- * case of its wrapped type that happens to be functioning as a representation
- * type.
+/** A {@code PTRepresentation} wraps an existing {@link PTType PTType} with
+ *  additional information about a {@link PTFamily PTFamily} this type
+ *  represents. An instance of {@code PTRepresentation} is thus a special
+ *  case of its wrapped type that happens to be functioning as a representation
+ *  type.
  */
 public class PTRepresentation extends PTNamed {
 
     @NotNull private final PTType baseType;
     @NotNull private final String name;
 
-    /**
-     * This will be {@code null} for standalone representations (i.e. those that
-     * would appear in the context of a facility module.
+    /** This will be {@code null} for standalone representations (i.e. those that
+     *  would appear in the context of a facility module.
      */
     @Nullable private final TypeModelSymbol family;
     @Nullable private ProgReprTypeSymbol repr;

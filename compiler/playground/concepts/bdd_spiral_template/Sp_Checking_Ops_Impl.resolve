@@ -7,4 +7,10 @@ Implementation Sp_Checking_Ops_Impl
                 : Std_Bools :: Boolean;
         At_Center := Curr_Ctr_Dist(P) = 0;
     end At_Center;
+
+    Procedure At_End
+        (restores P : Spiral_Pos)
+                : Std_Bools :: Boolean;
+        At_End := Curr_Ctr_Dist(P) = Length_of(P);
+    end At_End;
 end Sp_Checking_Ops_Impl;

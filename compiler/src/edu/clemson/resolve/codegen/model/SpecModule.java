@@ -21,10 +21,10 @@ public abstract class SpecModule extends Module {
         }
     }
 
-    public static class EnhancementModule extends SpecModule {
+    public static class ExtensionModule extends SpecModule {
         public String concept;
 
-        public EnhancementModule(String name, String concept, ModuleFile file) {
+        public ExtensionModule(String name, String concept, ModuleFile file) {
             super(name, file);
             this.concept = concept;
         }

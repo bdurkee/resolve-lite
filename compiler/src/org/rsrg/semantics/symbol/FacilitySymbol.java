@@ -23,9 +23,9 @@ public class FacilitySymbol extends Symbol {
     /** A mapping from the rule contexts representing an module arg list
      *  to all the various {@link ProgTypeSymbol}s that represent the actual
      *  versions of formal (generic) type params.
-     *  <p>Right now I'm really only especially concerned about these as they
-     *  factor into the searching process in {@link ModuleParameterization}.
-     *  </p>
+     *  <p>
+     *  Right now I'm really only especially concerned about these as they
+     *  factor into the searching process in {@link ModuleParameterization}.</p>
      */
     @NotNull private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
 
@@ -42,13 +42,13 @@ public class FacilitySymbol extends Symbol {
         super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
         this.actualGenerics = actualGenerics;
-        List<ProgTypeSymbol> specArgSymbols =
+        List<ProgTypeSymbol> specGenericArgs =
                 actualGenerics.get(facility.specArgs);
 
         ModuleParameterization spec = new ModuleParameterization(
                 new ModuleIdentifier(facility.spec),
-                        specArgSymbols == null ?
-                                new ArrayList<>() : specArgSymbols, this, scopeRepo);
+                        specGenericArgs == null ?
+                                new ArrayList<>() : specGenericArgs, this, scopeRepo);
 
         ModuleParameterization impl = new ModuleParameterization(
                 new ModuleIdentifier(facility.impl),
@@ -70,20 +70,21 @@ public class FacilitySymbol extends Symbol {
             myEnhancementRealizations.put(spec, realization);
         }*/
 
-        //These are realized by individual enhancement realizations
-        /*for (ResolveParser.EnhancementPairDeclContext enhancement :
-                facility.enhancementPairDecl()) {
+        //These are realized by individual extension implementations
+        for (ResolveParser.ExtensionPairingContext extension :
+                facility.extensionPairing()) {
+            specGenericArgs = actualGenerics.get(extension.specArgs);
+            spec = new ModuleParameterization(new ModuleIdentifier(extension.spec),
+                    specGenericArgs == null ?
+                            new ArrayList<>() : specGenericArgs,
+                    this, scopeRepo);
 
-            spec = new ModuleParameterization(enhancement.spec.getText(),
-                            genericsPerFacility.get(enhancement),
-                            enhancement.specArgs, this, scopeRepo);
-
-            impl = new ModuleParameterization(enhancement.impl.getText(),
-                        new ArrayList<>(), enhancement.implArgs,
-                            this, scopeRepo);
+            impl = new ModuleParameterization(
+                    new ModuleIdentifier(extension.impl),
+                    new ArrayList<>(), this, scopeRepo);
             enhancements.add(spec);
             enhancementImplementations.put(spec, impl);
-        }*/
+        }
     }
 
     @NotNull public List<ModuleParameterization> getEnhancements() {

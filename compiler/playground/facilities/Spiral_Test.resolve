@@ -3,14 +3,21 @@ Facility Spiral_Test;
          Standard_Integers;
 
     Facility Sp_Fac is Bdd_Spiral_Template
-                (Std_Bools :: Boolean, 1, 3)
-        implemented
-            by Sp_Array_Impl;
+        (Std_Ints :: Integer, 2, 4)
+        implemented by
+            Sp_Array_Impl
+            extended by Sp_Checking_Ops
+                implemented by Sp_Checking_Ops_Impl;
 
     Operation Main ();
         Procedure
             Var P : Sp_Fac :: Spiral_Pos;
-            Var xs, y : Std_Bools :: Boolean;
+            Var x : Std_Ints :: Integer;
 
+            Sp_Fac :: Lengthen(P, x);
+            Sp_Fac :: Lengthen(P, x);
+
+            Std_Bools :: Write(Sp_Fac :: At_End(P));
     end Main;
+
 end Spiral_Test;

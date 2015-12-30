@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EnhancementImplModule extends AbstractSpecImplModule {
+public class ExtensionImplModule extends AbstractSpecImplModule {
     @ModelElement public List<ConceptDelegateMethod> delegateMethods =
             new ArrayList<>();
     public final String enhancement;
 
-    public EnhancementImplModule(String name, String enhancement,
-                                 String concept, ModuleFile file) {
+    public ExtensionImplModule(String name, String enhancement,
+                               String concept, ModuleFile file) {
         super(name, concept, file);
         this.enhancement = enhancement;
     }
@@ -24,11 +24,6 @@ public class EnhancementImplModule extends AbstractSpecImplModule {
                 delegateMethods.add(
                         new ConceptDelegateMethod((OperationSymbol)s));
             }
-            /*else if ( s instanceof GenericSymbol ||
-                    s instanceof ProgParameterSymbol) {
-                delegateMethods.add(
-                        new ConceptDelegateMethod("get"+s.getNameToken(), true));
-            }*/
             else if ( s instanceof TypeModelSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod("init"+s.getName(), true));

@@ -71,15 +71,15 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
-    /*@Override public void exitEnhancementPairDecl(
-            ResolveParser.EnhancementPairDeclContext ctx) {
-        tr.uses.add(new AnnotatedTree.UsesRef(ctx.spec));
+    @Override public void exitExtensionPairing(
+            ResolveParser.ExtensionPairingContext ctx) {
+        tr.uses.add(new ModuleIdentifier(ctx.spec));
         if ( ctx.externally != null ) {
             tr.externalUses.put(ctx.impl.getText(),
-                    new AnnotatedTree.UsesRef(ctx.impl));
+                    new ModuleIdentifier(ctx.impl));
         }
         else {
-            tr.uses.add(new AnnotatedTree.UsesRef(ctx.impl));
+            tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
-    }*/
+    }
 }

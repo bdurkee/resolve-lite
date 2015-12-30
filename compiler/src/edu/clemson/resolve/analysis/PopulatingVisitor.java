@@ -481,8 +481,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override public Void visitFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+    private void initializeAndSanityCheckInfo(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
 
         if (ctx.specArgs != null) {
             sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
@@ -490,8 +490,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             actualGenericTypesPerFacilitySpecArgs
                     .put(ctx.specArgs, new ArrayList<>());
         }
-        //now visit the actual arg exprs
+        if (ctx.implArgs != null) {
+            sanityCheckParameterizationArgs(ctx.implArgs.progExp(),
+                    new ModuleIdentifier(ctx.impl));
+        }
+        for (ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing()) {
+            if (extension.specArgs != null) {
+                actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
+            }
+        }
+    }
+
+    @Override public Void visitFacilityDecl(
+            ResolveParser.FacilityDeclContext ctx) {
+        initializeAndSanityCheckInfo(ctx);
+        //now visit all supplied actual arg exprs
         ctx.moduleArgumentList().forEach(this::visit);
+        for (ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing()) {
+            extension.moduleArgumentList().forEach(this::visit);
+        }
         try {
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same

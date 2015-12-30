@@ -54,8 +54,8 @@ public interface <concept.name> {
 }
 >>
 
-EnhancementModule(enhancement, types, funcs) ::= <<
-public interface <enhancement.name> extends <enhancement.concept> {
+ExtensionModule(ext, types, funcs) ::= <<
+public interface <ext.name> extends <ext.concept> {
     <types; separator="\n">
     <funcs; separator="\n">
 }
@@ -73,7 +73,7 @@ public class <impl.name> implements <impl.concept> {
 }
 >>
 
-EnhancementImplModule(impl, ctor, memberVars, repClasses, funcImpls, delegateMethods, opParams) ::= <<
+ExtensionImplModule(impl, ctor, memberVars, repClasses, funcImpls, delegateMethods, opParams) ::= <<
 public class <impl.name>
     implements
         <impl.enhancement>, <impl.concept>, InvocationHandler {
@@ -96,12 +96,20 @@ public class <impl.name>
     @Override public Object invoke(Object proxy, Method method,
             Object[] args) throws Throwable {
         <if(funcImpls)><\\>
+        switch (method.getName()) {
+        <funcImpls: {f | case "<f.func.name>": return method.invoke(this, args);}; separator="\n">
+        default: return method.invoke(delegate, args);
+        }
+        <else>
+        return method.invoke(delegate, args);
+        <endif>
+        <!<if(funcImpls)><\\>
         <first(funcImpls): {f | if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
         <rest(funcImpls) : {f | else if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
         else return method.invoke(delegate, args);
         <else>
         return method.invoke(delegate, args);
-        <endif>
+        <endif>!>
     }
 
     public static <impl.concept> createProxy(<[{<memberVars: {m|RType <m.var.name>}; anchor, separator=", \n">},

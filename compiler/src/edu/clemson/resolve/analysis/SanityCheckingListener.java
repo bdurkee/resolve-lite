@@ -84,7 +84,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
     /** Ensure the call we're looking at is not to another primary operation */
     public void sanityCheckCalls(@NotNull ParserRuleContext ctx,
                                  @NotNull Token name) {
-        //get immediate conceptual scope
+        //get immediate conceptual scope ctx is enclosed within
         ModuleIdentifier parentConceptID = getSpecModuleIdentifierFor(ctx);
         if (parentConceptID == null) return;
         try {
@@ -153,7 +153,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
         }
     }
 
-    /** If we represent a module that implements some specification,
+    /** If ctx is within a module that implements some specification,
      *  this method returns its {@link ModuleIdentifier}; {@code null} otherwise.
      *  <p>
      *  So for instance, if {@code ctx} is within an concept extension implementation,
@@ -186,7 +186,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
     /** Checks to ensure two {@link PTType}s are acceptable for each other. */
     private void sanityCheckProgOpTypes(@NotNull ParserRuleContext ctx,
                                         @NotNull PTType l, @NotNull PTType r) {
-        if (!l.equals(r)) {
+        if (!l.acceptableFor(r)) {
             compiler.errMgr.semanticError(ErrorKind.INCOMPATIBLE_OP_TYPES,
                     ctx.getStart(), ctx.getText(), l.toString(), r.toString());
         }

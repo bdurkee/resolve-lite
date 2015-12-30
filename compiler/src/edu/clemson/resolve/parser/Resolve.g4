@@ -319,7 +319,13 @@ mathVariableDecl
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
         (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)? /*(enhancementPairDecl)*/ ';'?
+        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    ;
+
+extensionPairing
+    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList
