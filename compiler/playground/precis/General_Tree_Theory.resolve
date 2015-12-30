@@ -10,27 +10,23 @@ Precis General_Tree_Theory;
             Jn : Str(Tr) * El -> (Tr ~ {omega}) is
         Is_Tree_Former(Tr, omega, Jn);
 
-    /** Node Count */
+    /** node Count */
     Inductive Definition N_C(T : Tr) : N is
         (i.)  N_C(omega) = 0;
         (ii.) Forall x : Tr, Forall a : Str(T),
                 N_C(Jn(a, x)) =
                     suc(Ag(N_C[[a]], +, 0));
 
-    /*Inductive Definition T_Rev(T : Tr) : Tr(T) is
-        (i.)  T_Rev(omega) = omega;
-        (ii.) Forall x : Tr, Forall a : Str(T),
-                             T_Rev(Jn(a, x)) = Jn((Reverse(T_Rev[[a]])), x);
-                             */
+    /** Is our guy a leaf? */
+    Definition Is_Leaf(T : Tr) : B is
+        Exists x : El,
+        Exists a : Str({omega}),
+            T = Jn(a, x);
 
     Definition Site : Cart_Prod Lab : El; LTS, RTS : Str(Tr); end;
 
-
-    Definition Tr_Pos : Cart_Prod Path : Str(Site); Rem_Tr : Tr; end;
-
-    Inductive Definition Zip(p : Str(Site), T : Tr) : Tr is
-     (i.)  Zip(Empty_String, T) = T;
-     (ii.) Forall S : Site, Zip(ext(p, S), T) = S.LTS;
+    Implicit Definition Site_Reversal(S : Site) : Site is
+        Site_Reversal(S.Lab) = S.Lab and Site_Reversal(S.LTS);
 
 
 end General_Tree_Theory;

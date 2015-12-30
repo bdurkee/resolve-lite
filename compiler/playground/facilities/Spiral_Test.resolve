@@ -17,7 +17,11 @@ Facility Spiral_Test;
             Sp_Fac :: Lengthen(P, x);
             Sp_Fac :: Lengthen(P, x);
 
-            Std_Bools :: Write(Sp_Fac :: At_End(P));
+            Sp_Fac :: Spiral_Out(P);
+            Sp_Fac :: Spiral_In(P);
+            //Sp_Fac :: Lengthen(P, x);
+            //Sp_Fac :: Spiral_Out(P);
+            Std_Bools :: Write(Sp_Fac :: At_Edge(P));
     end Main;
 
 end Spiral_Test;

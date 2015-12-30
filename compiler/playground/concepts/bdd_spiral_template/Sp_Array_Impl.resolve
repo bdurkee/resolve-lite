@@ -10,7 +10,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
-        conventions 0 <= P.Curr_Place and
+        conventions 0 < P.Curr_Place and
                    P.Curr_Place <= P.Length and
                    P.Length <= Max_Length
                which_entails
@@ -24,14 +24,14 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
                         if SCD(q) + 1 <= P.Length;
                       Label.base_point otherwise;}});
         initialization
-            P.Length := 0;
-            P.Curr_Place := 0;
+            P.Length := 1;
+            P.Curr_Place := 1;
         end;
 
     Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
-        P.Length := P.Length + 1;
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
+        P.Length := P.Length + 1;
     end Lengthen;
 
     Procedure Spiral_Out (updates P : Spiral_Pos);
