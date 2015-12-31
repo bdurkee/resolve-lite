@@ -1,0 +1,36 @@
+Precis Extension Syntax_Tree_Ext
+    for
+      General_Tree_Theory with Tr_Relativization_Ext;
+
+    /** S_Vcb = Syntactic Vocabulary
+     *  S_Cat = Syntactic Category
+     *  P_Cat = Position Category
+     *  Br_Lbls = Branch Labels
+     */
+    Definition Local_Form(S_Vcb : SSet, S_Cat : Powerset(S_Vcb))
+            : Cart_Prod
+                P_Cat : S_Cat;
+                Br_Lbls : Str(S_Vcb);
+              end;
+
+    /** Rt_Cat = Root Category, P_Forms = Position Forms */
+    Definition Local_Grammar(S_Vcb : SSet, S_Cat : Powerset(S_Vcb))
+            : Cart_Prod
+                Rt_Cat : S_Cat;
+                P_Forms : Powerset(Local_Form(S_Vcb, S_Cat));
+              end;
+
+    /** Conformal tree */
+    Definition Cfml_Tr(G : Local_Grammar(S_Vcb : SSet, S_Cat : Powerset(S_Vcb)))
+            : Powerset(Tr(S_Vcb) ~ {omega});
+
+    /** Syntax Tree */
+    Definition S_Tr(G : Local_Grammar(S_Vcb : SSet, S_Cat : Powerset(S_Vcb)))
+            : Powerset(Cfml_Tr(G)) is
+                {T : Cfml_Tr(G) | Rt_Lab(T) = G.Rt_Cat};
+
+    /** Language */
+    Definition Lang(G : Local_Grammar(S_Vcb : SSet, S_Cat : Powerset(S_Vcb)))
+            : Powerset(Str(S_Vcb ~ S_Cat));
+
+end Syntax_Tree_Ext;

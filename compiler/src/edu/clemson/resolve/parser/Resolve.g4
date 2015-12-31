@@ -32,7 +32,7 @@ grammar Resolve;
 
 moduleDecl
     :   precisModuleDecl
-    |   precisExtensionModuleDecl
+    |   precisExtModuleDecl
     |   facilityModuleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
@@ -51,9 +51,9 @@ precisModuleDecl
 
 // precis extensions
 
-precisExtensionModuleDecl
+precisExtModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
-        ('extended_by' precisExt=ID)? ';'
+        ('with' precisExt=ID)? ';'
         precisBlock
         'end' closename=ID ';'
     ;

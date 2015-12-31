@@ -1,0 +1,12 @@
+Precis Extension Tr_Ground_Term_Ext for General_Tree_Theory;
+
+    /** Op_Descptr = Operation Descriptor
+     *  Op_Nm = Operation name
+     *  SCD = Syntactic Class Designator
+     *  Args = Arguments
+     *  RC = Result Class
+     */
+    Definition Op_Descptr(Op_Nm, SCD : SSet)
+            : Op_Nm -> Cart_Prod Args : Str(SCD); RC : SCD; end;
+
+end Tr_Ground_Term_Ext;

@@ -1,0 +1,6 @@
+Precis Extension Tr_Relativization_Ext for General_Tree_Theory;
+    Definition Tr(T : Cls) : Powerset(TTr);
+    Corollary Tr1: Forall T : Cls, omega : Tr(T);
+
+
+end Tr_Relativization_Ext;

@@ -159,8 +159,8 @@ public class Utils {
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext ) {
             return ((ResolveParser.PrecisModuleDeclContext) ctx).name;
         }
-        else if (ctx instanceof ResolveParser.PrecisExtensionModuleDeclContext ) {
-            return ((ResolveParser.PrecisExtensionModuleDeclContext) ctx).name;
+        else if (ctx instanceof ResolveParser.PrecisExtModuleDeclContext ) {
+            return ((ResolveParser.PrecisExtModuleDeclContext) ctx).name;
         }
         else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
             return ((ResolveParser.FacilityModuleDeclContext) ctx).name;

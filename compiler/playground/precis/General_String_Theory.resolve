@@ -15,4 +15,11 @@ Precis General_String_Theory;
     Corollary Cor_Length1:
         Forall a : SStr, |a| = 0 iff a = Empty_String;
 
+    Inductive Definition (a : SStr) o (b : SStr) : SStr is
+        (i.)  a o Empty_String = a;
+        (ii.) Forall x : El,
+                a o ext(b, x) = ext(a o b, x);
+
+    Definition Stringify(x : El) : SStr;
+
 end General_String_Theory;

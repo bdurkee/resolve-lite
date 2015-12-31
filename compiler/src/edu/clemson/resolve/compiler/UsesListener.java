@@ -24,11 +24,17 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void enterPrecisExtensionModuleDecl(
-            ResolveParser.PrecisExtensionModuleDeclContext ctx) {
+    @Override public void enterPrecisExtModuleDecl(
+            ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
         tr.uses.add(precisRef);
         tr.semanticallyRelevantUses.add(precisRef);
+
+        if (ctx.precisExt != null) {
+            ModuleIdentifier withExtRef = new ModuleIdentifier(ctx.precisExt);
+            tr.uses.add(withExtRef);
+            tr.semanticallyRelevantUses.add(withExtRef);
+        }
         if (ctx.precisExt != null) {
             ModuleIdentifier precisExtRef = new ModuleIdentifier(ctx.precisExt);
             tr.uses.add(precisExtRef);

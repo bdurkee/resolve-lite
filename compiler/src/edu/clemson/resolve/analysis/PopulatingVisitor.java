@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = true;
+    private static final boolean EMIT_DEBUG = false;
 
     private boolean walkingDefParams = false;
 
@@ -135,6 +135,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
+    }
+
+    @Override public Void visitPrecisExtModuleDecl(
+            ResolveParser.PrecisExtModuleDeclContext ctx) {
+        try {
+            //exts implicitly gain the parenting precis's useslist
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(
+                    new ModuleIdentifier(ctx.precis));
+            moduleScope.addImports(conceptScope.getImports());
+        } catch (NoSuchModuleException e) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    ctx.precis, ctx.precis.getText());
+        }
+        super.visitChildren(ctx);
+        return null;
     }
 
     @Override public Void visitConceptImplModuleDecl(

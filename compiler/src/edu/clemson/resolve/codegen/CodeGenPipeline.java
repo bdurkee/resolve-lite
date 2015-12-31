@@ -28,7 +28,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         for (AnnotatedModule unit : compilationUnits) {
             ParseTree t = unit.getRoot().getChild(0);
             if (t instanceof ResolveParser.PrecisModuleDeclContext ||
-                t instanceof ResolveParser.PrecisExtensionModuleDeclContext) continue;
+                t instanceof ResolveParser.PrecisExtModuleDeclContext) continue;
 
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             ST generatedST = gen.generateModule();
