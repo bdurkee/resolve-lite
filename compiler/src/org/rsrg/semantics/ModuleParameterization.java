@@ -12,11 +12,11 @@ import java.util.*;
 
 public class ModuleParameterization {
 
-    @NotNull private final MathSymbolTable scopeRepo;
-    @NotNull private final ModuleIdentifier moduleIdentifier;
+    private final MathSymbolTable scopeRepo;
+    private final ModuleIdentifier moduleIdentifier;
 
-    @NotNull private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
-    @NotNull private final FacilitySymbol instantiatingFacility;
+    private final List<ProgTypeSymbol> actualGenerics = new ArrayList<>();
+    private final FacilitySymbol instantiatingFacility;
 
     public ModuleParameterization(@NotNull ModuleIdentifier moduleIdentifier,
                                   @NotNull List<ProgTypeSymbol> actualGenerics,
@@ -56,8 +56,8 @@ public class ModuleParameterization {
     }*/
 
     private Map<String, PTType> getGenericInstantiations(
-            ModuleScopeBuilder moduleScope,
-            List<ResolveParser.ProgExpContext> actualArguments) {
+            @NotNull ModuleScopeBuilder moduleScope,
+            @NotNull List<ResolveParser.ProgExpContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
         List<ModuleParameterSymbol> moduleParams =

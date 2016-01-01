@@ -1,7 +1,7 @@
-Concept Stack_Template(type Entry;
+Concept Bdd_Stack_Template(type Entry;
         evaluates Max_Depth :
                 Std_Ints :: Integer);
-    uses General_String_Theory,
+    uses General_String_Theory, Basic_Natural_Number_Theory,
          Str_Relativization_Ext,
          Standard_Integers;
     requires Max_Depth > 0
@@ -20,8 +20,7 @@ Concept Stack_Template(type Entry;
     Operation Pop (replaces e : Entry;
                    updates S : Stack);
         requires 1 <= |S|;
-        ensures
-            @S = <e> o S;
+        ensures @S = <e> o S;
 
     Operation Depth (restores S : Stack) :
                     Std_Ints :: Integer;
@@ -33,4 +32,4 @@ Concept Stack_Template(type Entry;
 
     Operation Clear (clears S : Stack);
 
-end Stack_Template;
+end Bdd_Stack_Template;

@@ -43,6 +43,14 @@ Concept Nested_List_Template(type Label;
                 P.Rem = Prt_btwn(|@P.Prec| - 1,
                             |@P.Prec|, @P.Prec) o @P.Rem;
 
+    Operation Insert_Sublist
+            (updates P : Nstd_Lst_Pos;
+             alters e : Label);
+        requires Rem_Cap > 0;
+        ensures P.Rem = <Jn(@e, Empty_String)> o @P.Rem and
+                P.Prec = @P.Prec and
+                P.Path = @P.Path;
+
     Operation Prec_Length
             (restores P : Nstd_Lst_Pos)
                         : Std_Ints :: Integer;
@@ -52,14 +60,6 @@ Concept Nested_List_Template(type Label;
             (restores P : Nstd_Lst_Pos)
                         : Std_Ints :: Integer;
         ensures Rem_Length = (|P.Rem|);
-
-    Operation Insert_Sublist
-            (updates P : Nstd_Lst_Pos;
-             alters e : Label);
-        requires Rem_Cap > 0;
-        ensures P.Rem = <Jn(@e, Empty_String)> o @P.Rem and
-                P.Prec = @P.Prec and
-                P.Path = @P.Path;
 
     Operation Path_Length
             (restores P : Nstd_Lst_Pos)

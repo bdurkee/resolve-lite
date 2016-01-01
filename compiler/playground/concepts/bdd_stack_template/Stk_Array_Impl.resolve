@@ -1,11 +1,12 @@
 Implementation Stk_Array_Impl for Bdd_Stack_Template;
 
-    Facility Arry_Fac is
-        Static_Array_Template(Entry, Max_Depth)
+    Facility Arry_Fac is Bdd_Ceramic_Array_Template
+            (Entry, 1, Max_Depth)
+        externally
             implemented by Array_Impl;
 
     Type Stack = Record
-            Contents : Arry_Fac :: Static_Array;
+            Contents : Arry_Fac :: Ceramic_Array;
             Top : Std_Ints :: Integer;
         end;
 
@@ -21,4 +22,17 @@ Implementation Stk_Array_Impl for Bdd_Stack_Template;
          S.Top := S.Top - 1;
     end Pop;
 
+    Procedure Depth (restores S : Stack)
+            : Std_Ints :: Integer;
+        Depth := S.Top;
+    end Depth;
+
+    Procedure Rem_Capacity (restores S : Stack)
+            : Std_Ints :: Integer;
+        Rem_Capacity := Max_Depth - S.Top;
+    end Rem_Capacity;
+
+    Procedure Clear (clears S : Stack);
+        S.Top := 0;
+    end Clear;
 end Stk_Array_Impl;

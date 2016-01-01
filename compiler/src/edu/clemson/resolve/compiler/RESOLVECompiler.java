@@ -259,6 +259,7 @@ public  class RESOLVECompiler {
             findDependencies(g, t, roots);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
+        List<String> intermediateOrdering = getCompileOrder(g);
         for (String s : getCompileOrder(g)) {
             AnnotatedModule m = roots.get(s);
             if ( m.hasErrors ) {
