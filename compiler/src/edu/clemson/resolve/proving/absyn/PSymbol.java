@@ -14,9 +14,9 @@ import java.util.*;
 /** Represents a reference to a named element such as a variable, constant, or
  *  function.
  *  <p>
- *  Specifically, if this refers to a <em>name</em> of a funtion, then that
- *  instance represents a typed reference to the first class portion of the function,
- *  independent of any supplied arguments.</p>
+ *  Specifically, if this refers to a <em>name</em> of a funtion, then this
+ *  instance represents a typed -- possibly qualified -- first-class reference
+ *  to some function, independent of any supplied arguments.</p>
  */
 public class PSymbol extends PExp {
 
@@ -203,10 +203,9 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    /**
-     * This class represents an atomic {@code PExp}. As such, we'll never have
-     * any sub-expressions; and hence are guaranteed to contain no
-     * applications.
+    /** This class represents an atomic {@code PExp}. As such, we'll never have
+     *  any sub-expressions; and hence are guaranteed to contain no
+     *  applications.
      */
     @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
         return new LinkedList<>();

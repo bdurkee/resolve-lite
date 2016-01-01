@@ -75,7 +75,7 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
     end At_Edge;
 
     Procedure Clear (clears P : Spiral_Pos);
-        P.Length := 0;
+        P.Length := 1;
     end Clear;
 
 end Sp_Array_Impl;

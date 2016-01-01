@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = false;
+    private static final boolean EMIT_DEBUG = true;
 
     private boolean walkingDefParams = false;
 

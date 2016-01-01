@@ -4,7 +4,8 @@ Concept Nested_List_Template(type Label;
     uses Standard_Booleans, Standard_Integers,
          General_String_Theory, Str_Relativization_Ext,
          General_Tree_Theory, Tr_Relativization_Ext,
-         Basic_Natural_Number_Theory;
+         Basic_Natural_Number_Theory,
+         Basic_Integer_Theory;
 
     requires Max_Total_Size > 0
         which_entails
@@ -12,13 +13,57 @@ Concept Nested_List_Template(type Label;
 
     Type family Nstd_Lst_Pos
         is modeled by Cart_Prod
-            Path : Str(NL_Site(Label));
-            Prec, Rem : Str(EStF_Tr(Label));
+            Path : Str(Tr_Relativization_Ext :: NL_Site(Label));
+            Prec, Rem : Str(Tr_Relativization_Ext :: EStF_Tr(Label));
         end;
         exemplar P;
         initialization
             ensures P.Path = Empty_String and
                     P.Prec = Empty_String and
                     P.Rem = Empty_String;
+
+    Definition Suture_of(P : Nstd_Lst_Pos) : N is
+        Suture(P.Path, P.Prec, P.Rem).VS o
+        Suture(P.Path, P.Prec, P.Rem).US;
+
+    Definition Agg_Size : N;
+    Definition Rem_Cap : Z;
+
+    Operation Advance (updates P : Nstd_Lst_Pos);
+        requires |P.Rem| >= 1;
+        ensures P.Prec = @P.Prec o
+            Prt_btwn(0, 1, @P.Rem) and
+                P.Rem = Prt_btwn(1, |@P.Rem|, @P.Rem) and
+                P.Path = @P.Path;
+
+    Operation Retreat (updates P : Nstd_Lst_Pos);
+        requires |P.Prec| >= 1;
+        ensures P.Path = @P.Path and
+                P.Prec = Prt_btwn(0, |@P.Prec| - 1, @P.Prec) and
+                P.Rem = Prt_btwn(|@P.Prec| - 1,
+                            |@P.Prec|, @P.Prec) o @P.Rem;
+
+    Operation Prec_Length
+            (restores P : Nstd_Lst_Pos)
+                        : Std_Ints :: Integer;
+        ensures Prec_Length = (|P.Prec|);
+
+    Operation Rem_Length
+            (restores P : Nstd_Lst_Pos)
+                        : Std_Ints :: Integer;
+        ensures Rem_Length = (|P.Rem|);
+
+    Operation Insert_Sublist
+            (updates P : Nstd_Lst_Pos;
+             alters e : Label);
+        requires Rem_Cap > 0;
+        ensures P.Rem = <Jn(@e, Empty_String)> o @P.Rem and
+                P.Prec = @P.Prec and
+                P.Path = @P.Path;
+
+    Operation Path_Length
+            (restores P : Nstd_Lst_Pos)
+                        : Std_Ints :: Integer;
+        ensures Path_Length = (|P.Path|);
 
 end Nested_List_Template;
