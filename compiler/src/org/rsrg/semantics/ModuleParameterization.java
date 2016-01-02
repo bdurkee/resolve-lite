@@ -36,7 +36,8 @@ public class ModuleParameterization {
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
             Map<String, PTType> genericInstantiations;
-            genericInstantiations = getGenericInstantiations(originalScope, null);
+            genericInstantiations =
+                    getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
                         genericInstantiations, instantiatingFacility);
         }
@@ -55,9 +56,10 @@ public class ModuleParameterization {
         return
     }*/
 
+    //TODO: Annotate actualArguments as not null!
     private Map<String, PTType> getGenericInstantiations(
             @NotNull ModuleScopeBuilder moduleScope,
-            @NotNull List<ResolveParser.ProgExpContext> actualArguments) {
+            List<ResolveParser.ProgExpContext> actualArguments) {
         Map<String, PTType> result = new HashMap<>();
 
         List<ModuleParameterSymbol> moduleParams =

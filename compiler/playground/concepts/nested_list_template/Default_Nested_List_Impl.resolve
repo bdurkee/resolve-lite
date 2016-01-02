@@ -1,4 +1,70 @@
 Implementation Default_Nested_List_Impl for Nested_List_Template;
 
+    //TODO: Eventually we should swap out this normal impl for a
+    //      clean array impl -- efficiency concerns
+    Facility Index_Stk_Fac is Bdd_Stack_Template
+            (Std_Ints :: Integer, Max_Total_Size)
+        implemented
+            by Stk_Array_Impl;
+
+    Facility Layer_Stk_Fac is Bdd_Stack_Template
+            (Index_Stk_Fac :: Stack, Max_Total_Size)
+        implemented
+            by Stk_Array_Impl;
+
+    /** Label array facility */
+    Facility Lab_Array_Fac is Bdd_Ceramic_Array_Template
+            (Label, 1, Max_Total_Size)
+        externally implemented by Array_Impl;
+
+    /** First Child array facility */
+    Facility FC_Array_Fac is Bdd_Ceramic_Array_Template
+            (Std_Ints :: Integer, 1, Max_Total_Size)
+        externally implemented by Array_Impl;
+
+    /** Next Sibling array facility */
+    Facility NS_Array_Fac is Bdd_Ceramic_Array_Template
+            (Std_Ints :: Integer, 1, Max_Total_Size)
+        externally implemented by Array_Impl;
+
+    Type Nstd_Lst_Pos = Record
+            Root, Next_Available_Index,
+            Curr_Position : Std_Ints :: Integer;
+
+            Horz_Stk : Index_Stk_Fac :: Stack;
+            Vert_Stk : Layer_Stk_Fac :: Stack;
+
+            Lbls : Lab_Array_Fac :: Ceramic_Array;  //labels
+            Sblngs : NS_Array_Fac :: Ceramic_Array; //siblings
+            First : FC_Array_Fac :: Ceramic_Array;  //first child
+        end;
+        conventions true;//Prt_btwn(0, |P.Horz_Stk| - 1, P.Next_);
+        initialization
+            Var Temp : Std_Ints :: Integer;
+            Temp := 1;
+            P.Next_Available_Index := 1;
+            While Temp < Max_Total_Size
+                changing P;
+            do
+                FC_Array_Fac :: Swap_Entry(P.First, Temp, 0 - (Temp + 1));
+                Temp := Temp + 1;
+            end;
+        end;
+
+    Procedure Advance (updates P : Nstd_Lst_Pos);
+        Var Next_Pos, Old_Curr_Position : Std_Ints :: Integer;
+        Index_Stk_Fac :: Push(P.Curr_Position, P.Horz_Stk);
+        NS_Array_Fac :: Swap_Entry(P.Sblngs, Next_Pos, P.Curr_Position);
+
+        Old_Curr_Position := P.Curr_Position;
+        P.Curr_Position := Next_Pos;
+        NS_Array_Fac :: Swap_Entry(P.Sblngs, Old_Curr_Position, Old_Curr_Position);
+    end Advance;
+
+    Procedure Retreat (updates P : Nstd_Lst_Pos);
+        Var Temp : Std_Ints :: Integer;
+        Index_Stk_Fac :: Pop(Temp, P.Horz_Stk);
+        P.Curr_Position := Temp;
+    end Retreat;
 
 end Default_Nested_List_Impl;

@@ -45,7 +45,7 @@ Concept Integer_Template;
             (evaluates i, j : Integer)
                 : Std_Bools :: Boolean;
         ensures Greater_Or_Equal =
-                    ( j >= i );
+                    (j >= i);
 
     Operation Sum
             (evaluates i, j : Integer)

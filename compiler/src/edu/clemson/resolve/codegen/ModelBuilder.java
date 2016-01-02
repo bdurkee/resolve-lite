@@ -236,9 +236,15 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         if (ctx.typeImplInit() != null) {
-            representationClass.initVars.addAll(Utils.collect(
-                    VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
-                    built));
+            //representationClass.initVars.addAll(Utils.collect(
+            //        VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
+            //        built));
+            for (ResolveParser.VariableDeclGroupContext grp :
+                    ctx.typeImplInit().variableDeclGroup()) {
+                for (TerminalNode t : grp.ID()) {
+                    representationClass.initVars.add((VariableDef) built.get(t));
+                }
+            }
             representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
                     .typeImplInit().stmt(), built));
         }
