@@ -25,8 +25,9 @@ public class GeneralCallApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
-    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              VCRuleBackedStat stat) {
+    @NotNull
+    @Override public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
+                                              @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
         GeneralCallRuleSubstitutor applier =
                 new GeneralCallRuleSubstitutor(block);
@@ -161,6 +162,7 @@ public class GeneralCallApplicationStrategy
         return oldSym;
     }
 
+    @NotNull
     @Override public String getDescription() {
         return "general call rule application";
     }

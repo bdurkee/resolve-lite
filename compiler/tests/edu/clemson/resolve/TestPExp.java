@@ -20,10 +20,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.rsrg.semantics.Quantification.*;
@@ -374,6 +371,16 @@ public class TestPExp extends BaseTest {
     }
 
     @Test public void testSubstitute() {
+        PExp s1 = parseMathAssertionExp(g,
+                "conc.P.Lab(conc.P.Trmnl_Loc)");
+        PExp key = parseMathAssertionExp(g, "conc.P.Lab");
+        PExp val = parseMathAssertionExp(g, "X");
+        boolean v = key.equals(val);
+        Map<PExp, PExp> subsitutions = new HashMap<>();
+        subsitutions.put(key, val);
+        PExp x = s1.substitute(subsitutions);
+        int i;
+        i=0;
     }
 
     @Test public void testSplitIntoSequents() {

@@ -6,15 +6,23 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.vcgen.application.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTFamily;
+import org.rsrg.semantics.programtype.PTNamed;
+import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
+import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
 
@@ -178,7 +186,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         return applier.test.get(exp);
     }
-
+*/
     @Override public void enterTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
@@ -187,51 +195,51 @@ public class ModelBuilderProto extends ResolveBaseListener {
             currentTypeReprSym =
                     moduleScope.queryForOne(new UnqualifiedNameQuery(
                             ctx.name.getText())).toProgReprTypeSymbol();
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
+        } catch (SymbolTableException e) {
         }
 
         List<PExp> opParamAntecedents = new ArrayList<>();
-        Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
-                this::extractAntecedentsFromParameter);
+        //Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
+        //        this::extractAntecedentsFromParameter);
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
                         .assume(opParamAntecedents)
-                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                       // .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
-    }*/
+    }
 
-    public List<ProgParameterSymbol> getAllModuleParameterSyms() {
+    public List<ModuleParameterSymbol> getAllModuleParameterSyms() {
         ParserRuleContext moduleCtx = moduleScope.getDefiningTree();
-        List<ProgParameterSymbol> result = new ArrayList<>();
-        List<String> modulesToSearch = new ArrayList<>();
+        List<ModuleParameterSymbol> result = new ArrayList<>();
+        Set<ModuleIdentifier> modulesToSearch = new HashSet<>();
 
-      //  modulesToSearch.add(moduleScope.getModuleIdentifier());
-       /* if (moduleCtx instanceof ResolveParser.ConceptImplModuleContext) {
-            ResolveParser.ConceptImplModuleContext moduleCtxAsConceptImpl =
-                    (ResolveParser.ConceptImplModuleContext)moduleCtx;
-            modulesToSearch.add(moduleCtxAsConceptImpl.concept.getText());
+        if (moduleCtx instanceof ResolveParser.ConceptImplModuleDeclContext) {
+            ResolveParser.ConceptImplModuleDeclContext asConceptImpl =
+                    (ResolveParser.ConceptImplModuleDeclContext)moduleCtx;
+            modulesToSearch.add(new ModuleIdentifier(asConceptImpl.concept));
         }
-        else */
-      /*  if (moduleCtx instanceof ResolveParser.ExtensionImplModuleContext) {
-            ResolveParser.ExtensionImplModuleContext moduleCtxAsEnhImpl =
-                    (ResolveParser.ExtensionImplModuleContext)moduleCtx;
-            modulesToSearch.add(moduleCtxAsEnhImpl.concept.getText());
-            modulesToSearch.add(moduleCtxAsEnhImpl.enhancement.getText());
-        }*/
-      /*  for (String moduleName : modulesToSearch) {
+        else {
+            if (moduleCtx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
+                ResolveParser.ConceptExtImplModuleDeclContext asExtImpl =
+                        (ResolveParser.ConceptExtImplModuleDeclContext) moduleCtx;
+                modulesToSearch.add(new ModuleIdentifier(asExtImpl.concept));
+                modulesToSearch.add(new ModuleIdentifier(asExtImpl.extension));
+            }
+        }
+        for (ModuleIdentifier identifier : modulesToSearch) {
             try {
-                result.addAll(symtab.getModuleScope(moduleName)
-                                .getSymbolsOfType(ProgParameterSymbol.class));
+                result.addAll(symtab.getModuleScope(identifier)
+                                .getSymbolsOfType(ModuleParameterSymbol.class));
             } catch (NoSuchModuleException e) {
                 e.printStackTrace();
             }
-        }*/
+        }
         return result;
     }
 
-   /* @Override public void exitTypeRepresentationDecl(
+    @Override public void exitTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
         PExp constraint = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
@@ -249,13 +257,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
         //'conc.P.Trmnl_Loc' ~> 'SS(k)(P.Length, Cen(k))'
         //'conc.P.Curr_Loc' ~> 'SS(k)(P.Curr_Place, Cen(k))'
         //'conc.P.Lab' ~> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
-        newConstraint = betaReduce(newConstraint, correspondence);
+        //newConstraint = betaReduce(newConstraint, correspondence);
+
         block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newConstraint);
         outputFile.addAssertiveBlock(block.build());
     }
 
-    @Override public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
+ /*   @Override public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
         Scope s = symtab.scopes.get(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -494,7 +503,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
+    }*/
 
     private List<PExp> extractAntecedentsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
@@ -523,22 +532,22 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         else { //PTGeneric
             resultingAssumptions.add(g.formInitializationPredicate(
-                    p.getDeclaredType(), p.getNameToken()));
+                    p.getDeclaredType(), p.getName()));
         }
         return resultingAssumptions;
     }
 
     private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {
         List<PExp> result = new ArrayList<>();
-        PExp incParamExp = new PSymbol.PSymbolBuilder(p.asPSymbol())
+        PExp incParamExp = new PSymbolBuilder(p.asPSymbol())
                 .incoming(true).build();
-        PExp paramExp = new PSymbol.PSymbolBuilder(p.asPSymbol())
+        PExp paramExp = new PSymbolBuilder(p.asPSymbol())
                 .incoming(false).build();
 
         if (p.getDeclaredType() instanceof PTNamed) {
             PTNamed t = (PTNamed) p.getDeclaredType();
             PExp exemplar =
-                    new PSymbol.PSymbolBuilder(t.getExemplarName())
+                    new PSymbolBuilder(t.getExemplarName())
                             .mathType(t.toMath()).build();
 
             if (t instanceof PTRepresentation) {
@@ -564,7 +573,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
+    /*private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
         Set<PExp> result = new LinkedHashSet<>();
         List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
                 new SymbolTypeQuery<GlobalMathAssertionSymbol>
@@ -577,21 +586,22 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return assertions.stream()
                 .map(assertion -> substituteByFacilities(facilities, assertion))
                 .collect(Collectors.toSet());
-    }
+    }*/
 
     private PExp substituteByFacilities(List<FacilitySymbol> facilities,
                                         GlobalMathAssertionSymbol e) {
         for (FacilitySymbol facility : facilities) {
-            if (facility.getFacility().getSpecification().getNameToken()
+            if (facility.getFacility().getSpecification().getModuleIdentifier()
                     .equals(e.getModuleIdentifier())) {
                 return e.getEnclosedExp().substitute(
-                        getSpecializationsForFacility(facility.getNameToken()));
+                        getSpecializationsForFacility(facility.getName()));
             }
         }
         return e.getEnclosedExp();
     }
 
-    private Map<PExp, PExp> getSpecializationsForFacility(String facility) {
+    private Map<PExp, PExp> getSpecializationsForFacility(
+            @Nullable String facility) {
         Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
         if (result == null) result = new HashMap<>();
         return result;
@@ -622,5 +632,5 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
         return resultingClause;
-    }*/
+    }
 }

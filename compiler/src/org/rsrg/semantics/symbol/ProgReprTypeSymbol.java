@@ -1,6 +1,7 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,13 +54,15 @@ public class ProgReprTypeSymbol extends Symbol {
         return exemplarAsPSymbol(false);
     }
 
-    @NotNull public PSymbol conceptualExemplarAsPSymbol(boolean incoming) {
-        return new PSymbol.PSymbolBuilder(
-                "conc." + representation.getExemplarName())
-                .mathType(representation.toMath()).incoming(incoming).build();
+    @NotNull public PSelector conceptualExemplarAsPSymbol(boolean incoming) {
+        return new PSelector(
+                new PSymbol.PSymbolBuilder("conc").mathType(typeGraph.BOOLEAN)
+                        .incoming(incoming).build(),
+                new PSymbol.PSymbolBuilder(representation.getExemplarName())
+                        .mathType(representation.toMath()).build());
     }
 
-    @NotNull public PSymbol conceptualExemplarAsPSymbol() {
+    @NotNull public PSelector conceptualExemplarAsPSymbol() {
         return conceptualExemplarAsPSymbol(false);
     }
 

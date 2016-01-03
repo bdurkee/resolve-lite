@@ -4,12 +4,15 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface StatRuleApplicationStrategy<T extends VCRuleBackedStat> {
 
-    public AssertiveBlock applyRule(VCAssertiveBlockBuilder block, T stat);
+    @NotNull public AssertiveBlock applyRule(
+            @NotNull VCAssertiveBlockBuilder block,
+            @NotNull T stat);
 
-    public String getDescription();
+    @NotNull public String getDescription();
 }

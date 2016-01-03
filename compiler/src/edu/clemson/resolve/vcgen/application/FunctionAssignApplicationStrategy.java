@@ -4,14 +4,16 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.jetbrains.annotations.NotNull;
 
 public class FunctionAssignApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
-    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              VCRuleBackedStat stat) {
+    @NotNull
+    @Override public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
+                                              @NotNull VCRuleBackedStat stat) {
      /*   PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
@@ -69,6 +71,7 @@ public class FunctionAssignApplicationStrategy
         return block.snapshot();
     }
 
+    @NotNull
     @Override public String getDescription() {
         return "function assignment rule application";
     }

@@ -36,12 +36,23 @@ public class PSelector extends PExp {
 
     @NotNull @Override public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
-        return new PSelector(left.substitute(substitutions),
-                right.substitute(substitutions));
+        PExp result;
+        if ( substitutions.containsKey(this) ) {
+            result = substitutions.get(this);
+        }
+        else {
+            result = new PSelector(left.substitute(substitutions),
+                    right.substitute(substitutions));
+        }
+        return result;
     }
 
     @Override public boolean isIncoming() {
         return left.isIncoming();
+    }
+
+    @Override public boolean isVariable() {
+        return right.isVariable();
     }
 
     @Override public boolean containsName(String name) {

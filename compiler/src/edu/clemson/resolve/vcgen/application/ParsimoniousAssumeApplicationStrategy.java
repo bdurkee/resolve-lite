@@ -7,6 +7,7 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCAssume;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,35 +16,35 @@ public class ParsimoniousAssumeApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCAssume> {
 
-    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              VCAssume stat) {
+    @NotNull @Override public AssertiveBlock applyRule(
+            @NotNull VCAssertiveBlockBuilder block,
+            @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
-        PExp confirmExp = block.finalConfirm.getConfirmExp();
+        PExp RP = block.finalConfirm.getConfirmExp();
+        Set<String> allSymbolNamesAppearingInConfirm = RP.getSymbolNames();
 
-        Set<String> allAssumptionSymbolNames = assumeExp.getSymbolNames();
-        Map<PExp, Set<String>> assumesToSymbols = new HashMap<>();
-
-        //Todo: We actually don't need to do this... results for each expr
-        //are cached internally (these nodes are immutable!) so we won't actually
-        //be redoing any work
+        List<PExp> thingsWeNeedToAssume = new ArrayList<>();
         for (PExp assume : assumeExp.splitIntoConjuncts()) {
-            assumesToSymbols.put(assume, assume.getSymbolNames());
-        }
+            Set<String> curIntersection = assume.getSymbolNames();
+            curIntersection.retainAll(allSymbolNamesAppearingInConfirm);
 
-        for (PExp confirm : confirmExp.splitIntoConjuncts()) {
-            Set<String> curIntersection = new HashSet<>();
-            confirm.getSymbolNames().retainAll(allAssumptionSymbolNames);
-
-            if (curIntersection.isEmpty()) continue;
-            for (PExp assume : assumesToSymbols.keySet()) {
-                assumesToSymbols.get(assume).retainAll(curIntersection);
-                if (!curIntersection.isEmpty()) {
-
-                }
+            if (!curIntersection.isEmpty()) {
+                thingsWeNeedToAssume.add(assume);
             }
         }
+        PExp newFinalConfirm;
 
-    /*    Map<PExp, PExp> equalsReplacements = new HashMap<>();
+        if (!thingsWeNeedToAssume.isEmpty()) {
+            PExp prunedAssumes = block.g.formConjuncts(thingsWeNeedToAssume);
+            newFinalConfirm = block.g.formImplies(prunedAssumes, RP);
+        }
+        else {
+            newFinalConfirm = RP; //just the RP
+        }
+        block.finalConfirm(newFinalConfirm);
+
+        //now form implies between prunedAssumes and the final confirm.
+       /* Map<PExp, PExp> equalsReplacements = new HashMap<>();
         List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
 
         List<PExp> relevantAssumptions = new ArrayList<>();
@@ -77,6 +78,7 @@ public class ParsimoniousAssumeApplicationStrategy
         return block.snapshot();
     }
 
+    @NotNull
     @Override public String getDescription() {
         return "parsimonious assume application";
     }

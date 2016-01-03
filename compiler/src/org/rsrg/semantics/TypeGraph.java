@@ -7,6 +7,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.programtype.PTType;
 
 import java.util.*;
@@ -103,11 +104,11 @@ public class TypeGraph {
     public TypeGraph() {
     }
 
-    @NotNull public PExp formConjuncts(PExp... e) {
+    @Nullable public PExp formConjuncts(PExp... e) {
         return formConjuncts(Arrays.asList(e));
     }
 
-    @NotNull public PExp formConjuncts(List<PExp> e) {
+    @Nullable public PExp formConjuncts(List<PExp> e) {
         if ( e == null ) {
             throw new IllegalArgumentException("can't conjunct a null list");
         }

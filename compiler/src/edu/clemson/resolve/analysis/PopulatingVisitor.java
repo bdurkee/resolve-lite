@@ -432,6 +432,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.ParameterDeclGroupContext ctx) {
         this.visit(ctx.type());
         PTType groupType = tr.progTypeValues.get(ctx.type());
+
         for (TerminalNode term : ctx.ID()) {
             try {
                 ProgParameterSymbol.ParameterMode mode =
@@ -441,6 +442,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
                         .getText(), mode, groupType,
                         ctx, getRootModuleIdentifier());
+                if (ctx.type().getChild(0) instanceof ResolveParser.NamedTypeContext) {
+                    ResolveParser.NamedTypeContext asNamedType =
+                            (ResolveParser.NamedTypeContext)ctx.type().getChild(0);
+                    p.setTypeQualifierString(asNamedType.qualifier == null ? null :
+                            asNamedType.qualifier.getText());
+                }
                 boolean walkingModuleParamList = Utils.getFirstAncestorOfType(
                         ctx, ResolveParser.SpecModuleParameterListContext.class,
                              ResolveParser.ImplModuleParameterListContext.class) != null;
@@ -634,13 +641,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //introduce anything
             throw new RuntimeException(dse);
         }
-        if (ctx.conventionsClause() != null) this.visit(ctx.conventionsClause());
-        if (ctx.correspondenceClause() != null)
+        PExp convention = g.getTrueExp();
+        PExp correspondence = g.getTrueExp();
+        if (ctx.conventionsClause() != null) {
+            this.visit(ctx.conventionsClause());
+            convention = getPExpFor(ctx.conventionsClause().mathAssertionExp());
+        }
+        if (ctx.correspondenceClause() != null) {
             this.visit(ctx.correspondenceClause());
+            correspondence = getPExpFor(ctx.correspondenceClause().mathAssertionExp());
+        }
         if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
         symtab.endScope();
-        PExp convention = getPExpFor(ctx.conventionsClause());
-        PExp correspondence = getPExpFor(ctx.correspondenceClause());
         try {
             ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
                     ctx.name.getText(), ctx, getRootModuleIdentifier(),

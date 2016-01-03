@@ -83,12 +83,14 @@ public class ProgParameterSymbol extends Symbol {
         return Collections.unmodifiableMap(result);
     }
 
-    @NotNull private final ParameterMode mode;
-    @NotNull private final PTType declaredType;
-    @NotNull private final TypeGraph typeGraph;
+    private final ParameterMode mode;
+    private final PTType declaredType;
+    private final TypeGraph typeGraph;
 
-    @NotNull private final MathSymbol mathSymbolAlterEgo;
-    @NotNull private final ProgVariableSymbol progVariableAlterEgo;
+    private final MathSymbol mathSymbolAlterEgo;
+    private final ProgVariableSymbol progVariableAlterEgo;
+
+    @Nullable private String typeQualifier;
 
     public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
                                @NotNull ParameterMode mode,
@@ -114,6 +116,14 @@ public class ProgParameterSymbol extends Symbol {
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleIdentifier());
+    }
+
+    public void setTypeQualifierString(String typeQualifier) {
+        this.typeQualifier = typeQualifier;
+    }
+
+    @Nullable public String getTypeQualifier() {
+        return typeQualifier;
     }
 
     @NotNull public PTType getDeclaredType() {

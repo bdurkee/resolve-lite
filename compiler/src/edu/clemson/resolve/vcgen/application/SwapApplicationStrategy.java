@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +16,9 @@ public class SwapApplicationStrategy
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Todo, maybe make vcswapStat, vcwh
-    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-            VCRuleBackedStat stat) {
+    @NotNull
+    @Override public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
+                                              @NotNull VCRuleBackedStat stat) {
        /* PExp workingConfirm = block.finalConfirm.getConfirmExp();
         PExp swapLeft = stat.getStatComponents().get(0);
         PExp swapRight = stat.getStatComponents().get(1);
@@ -30,6 +32,7 @@ public class SwapApplicationStrategy
         return block.snapshot();
     }
 
+    @NotNull
     @Override public String getDescription() {
         return "swap rule application";
     }

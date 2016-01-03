@@ -303,7 +303,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    /*@Override public void exitProgPrimaryExp(
+    @Override public void exitProgPrimaryExp(
             ResolveParser.ProgPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progPrimary()));
     }
@@ -315,41 +315,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
-        MTFunction mathType = fakeFunctionType(ctx.progExp(), types.get(ctx));
-        PSymbol namePortion = new PSymbolBuilder(ctx.name.getText())
-                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier)
-                .mathType(mathType)
-                .qualifier(ctx.qualifier)
-                .build();
-        PApplyBuilder result = new PApplyBuilder(namePortion)
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
-                .applicationType(types.get(ctx));
+                .applicationType(getMathType(ctx));
         repo.put(ctx, result.build());
-    }
-
-    //TODO: Until I come up with a palatable way of passing this info (already
-    //formed) into this builder, I'll just reconstruct the MTFunction manually
-    //from the types of the arguments for now.
-    private MTFunction fakeFunctionType(@NotNull List<? extends ParseTree> args,
-                                        @NotNull MTType retType) {
-        List<MTType> argMathTypes = args.stream()
-                .map(t -> repo.get(t).getMathType())
-                .collect(Collectors.toList());
-        return new MTFunctionBuilder(retType.getTypeGraph(), retType)
-                .paramTypes(argMathTypes).build();
-    }
-
-    @Override public void exitProgVarExp(ResolveParser.ProgVarExpContext ctx) {
-        repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
     @Override public void exitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
+                .progType(annotations.progTypes.get(ctx))
                 .mathTypeValue(getMathTypeValue(ctx))
-                .progType(progTypes.get(ctx)).qualifier(ctx.qualifier)
-                .mathType(getMathType(ctx));
-        repo.put(ctx, result.build());
+                .mathType(getMathType(ctx))
+                .qualifier(ctx.qualifier);
+       repo.put(ctx, result.build());
     }
 
     @Override public void exitProgNestedExp(
@@ -359,27 +338,27 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
-                typeValues.get(ctx), progTypes.get(ctx)));
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+                getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgIntegerLiteralExp(
             ResolveParser.ProgIntegerLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
-                typeValues.get(ctx), progTypes.get(ctx)));
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+                getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgCharacterLiteralExp(
             ResolveParser.ProgCharacterLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
-                typeValues.get(ctx), progTypes.get(ctx)));
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+                getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgStringLiteralExp(
             ResolveParser.ProgStringLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), types.get(ctx),
-                typeValues.get(ctx), progTypes.get(ctx)));
-    }*/
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+                getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
+    }
 
     private PExp buildLiteral(String literalText, MTType type, MTType typeValue,
                               PTType progType) {

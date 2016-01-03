@@ -27,8 +27,9 @@ public class ExplicitCallApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
+    @NotNull
     @Override public AssertiveBlock applyRule(
-            VCAssertiveBlockBuilder block, VCRuleBackedStat stat) {
+            @NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
         ExplicitCallRuleApplyingListener applier =
                 new ExplicitCallRuleApplyingListener(block);
@@ -38,6 +39,7 @@ public class ExplicitCallApplicationStrategy
                 .snapshot();
     }
 
+    @NotNull
     @Override public String getDescription() {
         return "explicit call rule application";
     }
