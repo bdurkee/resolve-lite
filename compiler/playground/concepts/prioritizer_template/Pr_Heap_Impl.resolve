@@ -1,0 +1,9 @@
+Implementation Pr_Heap_Impl(
+    Operation Is_GTR (restores x, y : Entry)
+                : Std_Bools :: Boolean;
+            ensures Is_GTR = (not(LEQV(x, y)));) for Prioritizer_Template;
+
+    Facility Heap_Spiral_Fac is Bdd_Spiral_Template(Entry, 2, Max_Capacity)
+        implemented by impl;
+
+end Pr_Heap_Impl;

@@ -15,12 +15,12 @@ import org.stringtemplate.v4.*;
 import java.io.File;
 import java.io.IOException;
 
-public class JavaCodeGenerator extends AbstractCodeGenerator {
+class JavaCodeGenerator extends AbstractCodeGenerator {
 
-    public static final String LANGUAGE = "Java";
+    private static final String LANGUAGE = "Java";
 
-    public JavaCodeGenerator(@NotNull RESOLVECompiler compiler,
-                             @NotNull AnnotatedModule module) {
+    JavaCodeGenerator(@NotNull RESOLVECompiler compiler,
+                      @NotNull AnnotatedModule module) {
         super(compiler, module, LANGUAGE);
     }
 
@@ -31,11 +31,11 @@ public class JavaCodeGenerator extends AbstractCodeGenerator {
         return builder.built.get(root);
     }
 
-    public ST generateModule() {
+    ST generateModule() {
         return walk(buildModuleOutputModel());
     }
 
-    public void writeReferencedExternalFiles() {
+    void writeReferencedExternalFiles() {
         for (ModuleIdentifier e : module.externalUses.values()) {
            ST hardcodedExternal =
                    templates.getInstanceOf(e.getNameString()).add("pkg",

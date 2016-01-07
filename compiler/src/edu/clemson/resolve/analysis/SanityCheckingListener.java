@@ -279,7 +279,7 @@ public class SanityCheckingListener extends ResolveBaseListener {
      *  specific information, such as "which contexts satisfied my predicate?",
      *  refer to {@link #satisfyingContexts} for a complete list.</p>
      */
-    protected static class CallCheckingListener
+    private static class CallCheckingListener
             extends
                 ResolveBaseListener {
 
@@ -287,10 +287,9 @@ public class SanityCheckingListener extends ResolveBaseListener {
         private final Predicate<ResolveParser.ProgParamExpContext> checker;
 
         public boolean result = false;
-        public List<ResolveParser.ProgParamExpContext> satisfyingContexts =
-                new ArrayList<>();
+        List<ResolveParser.ProgParamExpContext> satisfyingContexts = new ArrayList<>();
 
-        public CallCheckingListener(
+        CallCheckingListener(
                 @NotNull Predicate<ResolveParser.ProgParamExpContext> checker) {
             this.checker = checker;
         }

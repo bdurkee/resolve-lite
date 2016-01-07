@@ -18,20 +18,19 @@ Concept Nested_List_Template(type Label;
         end;
         exemplar P;
         initialization
-            ensures P.Path = Empty_String and
-                    P.Prec = Empty_String and
-                    P.Rem = Empty_String;
+            ensures P.Path = Empty_String;
+
 
     Definition Suture_of(P : Nstd_Lst_Pos) : N is
-        Suture(P.Path, P.Prec, P.Rem).VS o
+        Suture(P.Path, P.Prec, P.Rem).VS and
         Suture(P.Path, P.Prec, P.Rem).US;
 
     Definition Agg_Size : N;
     Definition Rem_Cap : Z;
 
-    Operation Advance (updates P : Nstd_Lst_Pos);
-        requires |P.Rem| >= 1;
-        ensures P.Prec = @P.Prec o
+    Operation Advance (updates Pss : Nstd_Lst_Pos);
+        requires |Pss.Rem| >= 1;
+        ensures Pss.Prec = @P.Prec o
             Prt_btwn(0, 1, @P.Rem) and
                 P.Rem = Prt_btwn(1, |@P.Rem|, @P.Rem) and
                 P.Path = @P.Path;

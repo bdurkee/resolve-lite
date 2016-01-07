@@ -1,0 +1,14 @@
+Facility Nstd_List_Test;
+        uses Standard_Integers;
+
+    Facility NL_Fac is Nested_List_Template
+            (Std_Ints :: Integer, 3)
+        implemented by
+            Default_Nested_List_Impl;
+
+    Operation Main ();
+        Procedure
+            Var N : NL_Fac :: Nstd_Lst_Pos;
+            NL_Fac :: Advance(N);
+    end Main;
+end Nstd_List_Test;

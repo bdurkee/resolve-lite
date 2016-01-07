@@ -1545,6 +1545,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    //TODO: This threatens to screw with the way I'm currently handling @ signs,
+    //we might need to make '@' simply one of the accepted 'unary symbols'
+    /*@Override public Void visitMathUnaryApplyExp(
+            ResolveParser.MathUnaryApplyExpContext ctx) {
+        return typeApplyExp(ctx, ctx.operator, ctx.mathExp());
+    }*/
+
     @Override public Void visitMathInfixApplyExp(
             ResolveParser.MathInfixApplyExpContext ctx) {
         return typeApplyExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
@@ -1558,6 +1565,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathEqualityOp(ResolveParser.MathEqualityOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathApplicationOp(ResolveParser.MathApplicationOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathJoiningOp(ResolveParser.MathJoiningOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+
+    private Void typeApplyExp(@NotNull ParserRuleContext ctx,
+                              @NotNull ParserRuleContext operator,
+                              @NotNull ParserRuleContext ... args) {
+        return typeApplyExp(ctx, operator, Arrays.asList(args));
+    }
 
     //OK, now that we typed the operator, all that's left to do is:
     //1. check to ensure the actual arg count == formal arg count.
