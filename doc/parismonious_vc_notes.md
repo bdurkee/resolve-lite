@@ -22,3 +22,9 @@ C\ x :=: y; Confirm RD;
 ```
 where *code* is all prior statements in the program, and **RD** is the **R**esult
 **D**escriptor
+
+
+## Hypothetical *working* pseudocode
+
+
+### Some test cases
