@@ -20,7 +20,7 @@ Concept Prioritizer_Template(type Entry;
             ensures K.Accepting = true and
                 Total_Entry_Ct(K.Entry_Count) = 0;
 
-    Definition Is_Only_Addition(ß, K2 : Entry_Keeper, e : Entry) : B;
+    Definition Is_Only_Addition(K1, K2 : Entry_Keeper, e : Entry) : B;
 
     Operation Add_Entry (updates K : Entry_Keeper; clears x : Entry);
         requires K.Entry_Count(x) < Max_Capacity and K.Accepting;
