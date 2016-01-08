@@ -370,17 +370,19 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));*/
     }
 
-    @Test public void testSubstitute() {
-        PExp s1 = parseMathAssertionExp(g,
-                "conc.P.Lab(conc.P.Trmnl_Loc)");
-        PExp key = parseMathAssertionExp(g, "conc.P.Lab");
-        PExp val = parseMathAssertionExp(g, "X");
-        boolean v = key.equals(val);
-        Map<PExp, PExp> subsitutions = new HashMap<>();
-        subsitutions.put(key, val);
-        PExp x = s1.substitute(subsitutions);
-        int i;
-        i=0;
+    @Test public void testSubstituteOnSelector() {
+        PExp result = parseMathAssertionExp(g, "conc.P.Lab(conc.P.Trmnl_Loc)")
+                .substitute(parseMathAssertionExp(g, "conc.P.Lab"),
+                            parseMathAssertionExp(g, "X"));
+        Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.toString());
+    }
+
+    //TODO: Question, what about S = @S[S ~> @S] that doesn't become (after substitution) this right: @S = @@S?
+    @Test public void testSubstituteOnLambda() {
+        PExp result = parseMathAssertionExp(g, "X = lambda(q : Inv).({{@e if j = i; @e(q) otherwise;}})")
+                .substitute(parseMathAssertionExp(g, "@e"),
+                        parseMathAssertionExp(g, "Y"));
+        Assert.assertEquals("(X = lambda(q:Inv).({{Y if (j = i);Y(q) otherwise;}}))", result.toString());
     }
 
     @Test public void testSplitIntoSequents() {
