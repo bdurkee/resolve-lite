@@ -38,9 +38,9 @@ Concept Prioritizer_Template(type Entry;
     Operation Remove_a_Smallest_Entry (updates K : Entry_Keeper;
                                        replaces e : Entry);
         requires K.Accepting = false and Total_Entry_Ct(K.Entry_Count) > 0;
-        ensures K.Accepting = false and Is_Only_Addition(s, K, @K) and
+        ensures K.Accepting = false and Is_Only_Addition(e, K, @K) and
             (Forall x : Entry,
-                    leqvs(x, s) implies @K.Entry_Count(x) = 0);
+                    leqvs(x, e) implies @K.Entry_Count(x) = 0);
 
     Operation Total_Entry_Count (restores K : Entry_Keeper)
                 : Std_Ints :: Integer;
