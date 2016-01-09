@@ -25,9 +25,9 @@ public class GeneralCallApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
 
-    @NotNull
-    @Override public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
-                                              @NotNull VCRuleBackedStat stat) {
+    @NotNull @Override public AssertiveBlock applyRule(
+            @NotNull VCAssertiveBlockBuilder block,
+            @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
         GeneralCallRuleSubstitutor applier =
                 new GeneralCallRuleSubstitutor(block);
@@ -37,16 +37,17 @@ public class GeneralCallApplicationStrategy
                 .snapshot();
     }
 
-    //TODO: Walk through this step by step in a .md file. Then store the .md file in /doc/
+    //TODO: Walk through this step by step in a .md file. Then store the .md file in doc/
     public static class GeneralCallRuleSubstitutor extends PExpListener {
         private final VCAssertiveBlockBuilder block;
         public Map<PExp, PExp> test = new HashMap<>();
 
-        public GeneralCallRuleSubstitutor(VCAssertiveBlockBuilder block) {
+        public GeneralCallRuleSubstitutor(
+                @NotNull VCAssertiveBlockBuilder block) {
             this.block = block;
         }
 
-        public PExp getCompletedExp() {
+        @NotNull public PExp getCompletedExp() {
             return block.finalConfirm.getConfirmExp().substitute(test);
         }
 
@@ -162,8 +163,7 @@ public class GeneralCallApplicationStrategy
         return oldSym;
     }
 
-    @NotNull
-    @Override public String getDescription() {
+    @NotNull @Override public String getDescription() {
         return "general call rule application";
     }
 }

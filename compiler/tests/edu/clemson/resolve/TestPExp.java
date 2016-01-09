@@ -377,7 +377,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.toString());
     }
 
-    //TODO: Question, what about S = @S[S ~> @S] that doesn't become (after substitution) this right: @S = @@S?
     @Test public void testSubstituteOnLambda() {
         PExp result = parseMathAssertionExp(g, "X = lambda(q : Inv).({{@e if j = i; @e(q) otherwise;}})")
                 .substitute(parseMathAssertionExp(g, "@e"),

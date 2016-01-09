@@ -20,7 +20,7 @@ Concept Prioritizer_Template(type Entry;
             ensures K.Accepting = true and
                 Total_Entry_Ct(K.Entry_Count) = 0;
 
-    /*Definition Is_Only_Addition(K1, K2 : Entry_Keeper, e : Entry) : B is
+    Definition Is_Only_Addition(K1, K2 : Entry_Keeper, e : Entry) : B is
         K2.Entry_Count(e) = K1.Entry_Count(e) + 1 and
             (Forall y : Entry,
                 y /= e implies K2.Entry_Count(y) = K1.Entry_Count(y));
@@ -39,10 +39,11 @@ Concept Prioritizer_Template(type Entry;
                                        replaces e : Entry);
         requires K.Accepting = false and Total_Entry_Ct(K.Entry_Count) > 0;
         ensures K.Accepting = false and Is_Only_Addition(K, @K) and
-            (Forall x : Entry,
+                (Forall x : Entry,
                     leqvs(x, e) implies @K.Entry_Count(x) = 0);
 
     Operation Total_Entry_Count (restores K : Entry_Keeper)
                 : Std_Ints :: Integer;
-        ensures Total_Entry_Count = (Total_Entry_Ct(K.Entry_Count));*/
+        ensures Total_Entry_Count = (Total_Entry_Ct(K.Entry_Count));
+
 end Prioritizer_Template;
