@@ -12,7 +12,7 @@ import java.util.*;
 /** This class represents the root of the prover abstract syntax tree (AST)
  *  hierarchy.
  *  <p>
- *  Unlike previous expression hierarchies used by the tool, {@code PExp}s are
+ *  Unlike previous expression hierarchies used by the compiler, {@code PExp}s are
  *  immutable and exist without the complications introduced by control
  *  structures. And while {@code PExp}s technically exist to represent
  *  <em>only</em> mathematical expressions, realize that many 'programmatic'
