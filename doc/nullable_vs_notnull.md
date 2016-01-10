@@ -1,4 +1,4 @@
-## The story on `@NotNull` and `@Nullable`
+## The Story on `@NotNull` and `@Nullable`
 
 These annotations are contracts for whether or not variables, fields, params,
 etc are allowed to be null (or not). Note that these annotations are external,
