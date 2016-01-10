@@ -1,4 +1,4 @@
-## Thoughts on parsimonious vc generation
+## Notes on parsimonious vc generation
 *The following is from an email written by Bill Ogden describing some thoughts, examples, and motivations for Clemson RSRG's new method of culling uneeded, extraneous verification conditions (VCs).*
 
 ### 11/14/2015
@@ -69,7 +69,7 @@ and the antecedent portion of the VC `G_2` would contain no clue that it arose s
 
 The new generation process then is following a separation of concerns strategy with the goal of simplifying the mathematical proof process (and the debugging process, when that fails). The order in which bugs are identified may be different (and perhaps better :-) with this strategy, but as long as it works at least as well as the old strategy and never "proves" any invalid code, then it's OK.
 
-So, what could go wrong? Well, in the old process, most of the antecedents in the result descriptors do arise from operation invocations, but a few arise from the control constructs of the language, and the simple rul of ignoring a potential antecedent `PA` if you're processing a sequent `GjGj` that has no variables in common with `PA`. Suppose for example, that you were verifying the code body: 
+So, what could go wrong? Well, in the old process, most of the antecedents in the result descriptors do arise from operation invocations, but a few arise from the control constructs of the language, and the simple rule of ignoring a potential antecedent `PA` if you're processing a sequent `GjGj` that has no variables in common with `PA`. Suppose for example, that you were verifying the code body: 
 
 ```
 If y < 8 then x := x + 1;
