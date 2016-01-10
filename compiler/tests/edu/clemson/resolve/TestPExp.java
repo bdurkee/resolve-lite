@@ -382,15 +382,12 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
         //now don't exclude applications or literals
-        PExp result2 =
-                parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
-                        "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
         expectedNames =
                 Arrays.asList("q", "Label.base_point", "P.Length", "P.Labl",
                         "SCD", "+", "<=", "1").stream()
                         .collect(Collectors.toSet());
-        Set<String> foundNames2 = result2.getSymbolNames();
-        Assert.assertEquals(expectedNames.size(), foundNames2.size());
+        foundNames = result.getSymbolNames();
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
     }
