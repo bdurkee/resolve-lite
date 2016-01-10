@@ -11,7 +11,6 @@ this:
 
 ```
 RESOLVE Compiler Version 0.0.1
- -longMessages       show exception details on errors
  -o ___              specify output directory where all output is generated
  -long-messages      show exception details when available for errors and warnings
  -lib ___            specify location of resolve source files
@@ -25,5 +24,30 @@ Here are some additional details on the options:
 
 ## `-o <outdir>`
 
+RESOLVE generates output files in the current directory by default. This option specifies where the compiler will place any generated code such as VC `asrt` files, executable java, proof results, logs files, etc.
 
+```
+$ resolve -o /tmp T.resolve
+$ ls /tmp/T*
+/tmp/T.java
+```
 
+## `-lib <libdir>`
+
+Sets a root search directory for the compiler. That is, when searching for a targetfile (or anything else) the compiler will start its search at `lib` and proceed recursively through all subdirectories. 
+
+Example. If your desired workspace directory is `playground` and is organized as follows:
+
+```
+$ cd ~/Documents/playground/
+$ ls
+$ concepts    facilities    precis
+```
+and you're targetfile is `Documents/playground/concepts/foo_template/T.resolve`, then you'll probably want to set `libdir` to `Documents/playground` as follows:
+```
+$ resolve concepts/foo_template/T.resolve -lib Documents/playground 
+```
+
+## `-package <pkg>`
+
+Use this option to specify a package or namespace for any generated, executable `.java` files. If this is not present when generating java code, no namespace is present for the generated files.
