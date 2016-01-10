@@ -332,11 +332,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
 
-        result = parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
-                "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
-        Set<String> x = result.getSymbolNames(true, true);
-        int i;
-        i=0;
       /*  result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
         foundNames = result.getSymbolNames();
         expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
@@ -373,6 +368,31 @@ public class TestPExp extends BaseTest {
                         .stream().collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));*/
+    }
+
+    @Test public void testGetSymbolNames2() {
+        PExp result =
+                parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
+                "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
+        Set<String> expectedNames =
+                Arrays.asList("q", "Label.base_point", "P.Length").stream()
+                        .collect(Collectors.toSet());
+        Set<String> foundNames = result.getSymbolNames(true, true);
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        //now don't exclude applications or literals
+        PExp result2 =
+                parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
+                        "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
+        expectedNames =
+                Arrays.asList("q", "Label.base_point", "P.Length", "P.Labl",
+                        "SCD", "+", "<=", "1").stream()
+                        .collect(Collectors.toSet());
+        Set<String> foundNames2 = result2.getSymbolNames();
+        Assert.assertEquals(expectedNames.size(), foundNames2.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
     }
 
     @Test public void testSubstituteOnSelector() {
