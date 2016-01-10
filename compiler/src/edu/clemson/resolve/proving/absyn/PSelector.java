@@ -67,7 +67,7 @@ public class PSelector extends PExp {
     }
 
     @NotNull @Override protected String getCanonicalName() {
-        return right.getCanonicalName();
+        return left.getCanonicalName() + "." + right.getCanonicalName();
     }
 
     @Override protected void splitIntoConjuncts(
@@ -107,14 +107,27 @@ public class PSelector extends PExp {
         return result;
     }
 
+    //TODO: I'm confused. Why, in dot expressions (i call these "selector exprs"), do we not consider the
+    //names of individual segments when performing the parsimonious step?
+    //For instance, say I have:
+    //      Assume conc.P.Trmn_Loc = x;
+    //      Confirm conc.P.Curr_Loc = y;
+    //The intersection of the assume and confirm in this case is the empty set.
+    //But why? If we're representing dot exps as a tree
+    //(which is what they really are) then "P" and "conc" should be in the
+    // intersection right? Why is it we only consider the entire string? Is
+    // there some mathematical justification for that?
     @Override protected Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
-        Set<String> result =
+        Set<String> result = new LinkedHashSet<>();
+        result.add(this.getCanonicalName());
+        return result;
+        /*Set<String> result =
                 new LinkedHashSet<>(left.getSymbolNames(
                         excludeApplications, excludeLiterals));
         result.addAll(right.getSymbolNames(
                 excludeApplications, excludeLiterals));
-        return result;
+        return result;*/
     }
 
     @Override public boolean equals(Object o) {

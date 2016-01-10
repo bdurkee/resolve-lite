@@ -207,10 +207,10 @@ public class PAlternatives extends PExp {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {
-            result.addAll(a.condition.getSymbolNames());
-            result.addAll(a.result.getSymbolNames());
+            result.addAll(a.condition.getSymbolNames(excludeApplications, excludeLiterals));
+            result.addAll(a.result.getSymbolNames(excludeApplications, excludeLiterals));
         }
-        result.addAll(otherwiseClauseResult.getSymbolNames());
+        result.addAll(otherwiseClauseResult.getSymbolNames(excludeApplications, excludeLiterals));
         return result;
     }
 

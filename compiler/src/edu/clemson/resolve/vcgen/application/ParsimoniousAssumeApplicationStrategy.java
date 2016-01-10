@@ -35,8 +35,8 @@ public class ParsimoniousAssumeApplicationStrategy
             int currentAssumeIndex = 0;
             for (PExp assumeConjunct : assumeConjuncts) {
                 PExp temp = currentConfirmConjunct;
+                boolean performedReplacement = false;
                 if (assumeConjunct.isEquality()) {
-                    boolean performedReplacement = false;
 
                     //note: .get(0) would get the '=' exp, not the first arg
                     PExp lhs = assumeConjunct.getSubExpressions().get(1);
@@ -57,34 +57,44 @@ public class ParsimoniousAssumeApplicationStrategy
                             assumeConjuncts.set(k, newAssumeExp);
                         }
                     }
-
-                    // Check to see if this is a stipulate assume clause
-                    // If yes, we keep a copy of the current
-                    // assume expression.
-                    //TODO TODO
-                   // if (isStipulate) {
-                   //     remAssumeExpList.add(Exp.copy(currentAssumeExp));
-                   // }
-                   // else {
-                        // Update the current confirm expression
-                        // if we did a replacement.
-                    if (performedReplacement) {
-                        currentConfirmConjunct = temp;
-                    }
-                    else {
-                        // Check to see if this a verification
-                        // variable. If yes, we don't keep this assume.
-                        // Otherwise, we need to store this for the
-                        // step that generates the parsimonious vcs.
-                        precAssumes.add(currentConfirmConjunct);
-                    }
+                }
+                // Check to see if this is a stipulate assume clause
+                // If yes, we keep a copy of the current
+                // assume expression.
+                //TODO TODO
+                // if (isStipulate) {
+                //     remAssumeExpList.add(Exp.copy(currentAssumeExp));
+                // }
+                // else {
+                // Update the current confirm expression
+                // if we did a replacement.
+                if (performedReplacement) {
+                    currentConfirmConjunct = temp;
+                }
+                else {
+                    // Check to see if this a verification
+                    // variable. If yes, we don't keep this assume.
+                    // Otherwise, we need to store this for the
+                    // step that generates the parsimonious vcs.
+                    precAssumes.add(assumeConjunct);
                 }
                 currentAssumeIndex = currentAssumeIndex + 1;
             }
             PExp newConfirmExp =
-                    formImplies(block.g, confirmConjunct, precAssumes);
+                    formImplies(block.g, currentConfirmConjunct, precAssumes);
             newConfirmConjuncts.add(newConfirmExp);
         }
+        // Form the return confirm statement
+        PExp newFinalConfirm = block.g.getTrueExp();
+        for (PExp e : newConfirmConjuncts) {
+            if (newFinalConfirm.equals(block.g.getTrueExp())) {
+                newFinalConfirm = e;
+            }
+            else {
+                newFinalConfirm = block.g.formConjunct(newFinalConfirm, e);
+            }
+        }
+        block.finalConfirm(newFinalConfirm);
         return block.snapshot();
     }
 
@@ -95,7 +105,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
         // Loop until we no longer add more expressions or we have added all
         // expressions in the remaining assume expression list.
-        while (checkList) {
+       // while (checkList) {
             boolean formedImplies = false;
 
             for (PExp assumeExp : precAssumes) {
@@ -118,8 +128,8 @@ public class ParsimoniousAssumeApplicationStrategy
                     }
                 }
             }
-            checkList = precAssumes.size() > 0 && formedImplies;
-        }
+            //checkList = precAssumes.size() > 0 && formedImplies;
+        //}
         return currentConfirm;
     }
 
