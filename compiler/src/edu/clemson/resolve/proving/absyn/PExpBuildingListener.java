@@ -193,6 +193,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
 
+    @Override public void exitMathImpliesOp(
+            ResolveParser.MathImpliesOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.getStop()));
+    }
+
+    @Override public void exitMathSetContainmentOp(
+            ResolveParser.MathSetContainmentOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
     @Override public void exitMathApplicationOp(
             ResolveParser.MathApplicationOpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));

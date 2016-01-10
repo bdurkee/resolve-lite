@@ -20,7 +20,6 @@ Concept Nested_List_Template(type Label;
         initialization
             ensures P.Path = Empty_String;
 
-
     Definition Suture_of(P : Nstd_Lst_Pos) : N is
         Suture(P.Path, P.Prec, P.Rem).VS and
         Suture(P.Path, P.Prec, P.Rem).US;

@@ -1,7 +1,6 @@
 Concept Bdd_Spiral_Template(type Label;
             evaluates k, Max_Length :
                         Std_Ints :: Integer);
-
         uses Standard_Integers, Standard_Booleans,
              Basic_Natural_Number_Theory,
              Basic_Function_Properties,

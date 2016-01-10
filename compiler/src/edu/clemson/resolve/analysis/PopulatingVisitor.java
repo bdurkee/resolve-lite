@@ -1562,6 +1562,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathAddOp(ResolveParser.MathAddOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathRelationalOp(ResolveParser.MathRelationalOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathBooleanOp(ResolveParser.MathBooleanOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathImpliesOp(ResolveParser.MathImpliesOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.getStop()); return null; }
+    @Override public Void visitMathSetContainmentOp(ResolveParser.MathSetContainmentOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathEqualityOp(ResolveParser.MathEqualityOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathApplicationOp(ResolveParser.MathApplicationOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathJoiningOp(ResolveParser.MathJoiningOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }

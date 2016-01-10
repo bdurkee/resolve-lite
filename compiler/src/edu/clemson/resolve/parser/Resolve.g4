@@ -417,9 +417,11 @@ mathExp
     |   mathExp mathMultOp mathExp                              #mathInfixApplyExp
     |   mathExp mathAddOp mathExp                               #mathInfixApplyExp
     |   mathExp mathJoiningOp mathExp                           #mathInfixApplyExp
+    |   mathExp mathSetContainmentOp mathExp                    #mathInfixApplyExp
     |   mathExp mathApplicationOp mathExp                       #mathInfixApplyExp
     |   mathExp mathRelationalOp mathExp                        #mathInfixApplyExp
     |   mathExp mathEqualityOp mathExp                          #mathInfixApplyExp
+    |   mathExp mathImpliesOp mathExp                           #mathInfixApplyExp
     |   mathExp mathBooleanOp mathExp                           #mathInfixApplyExp
     |   mathExp op=':' mathTypeExp                              #mathTypeAssertionExp
     |   '(' mathAssertionExp ')'                                #mathNestedExp
@@ -435,11 +437,13 @@ mathExp
  */
 mathMultOp : (qualifier=ID '::')? op=('*'|'/'|'%');
 mathAddOp : (qualifier=ID '::')? op=('+'|'-'|'~');
-mathRelationalOp : (qualifier=ID '::')? op=('<='|'>='|'>'|'<');
-mathBooleanOp : (qualifier=ID '::')? op=('implies'|'iff'|'and'|'or'|'is_in'|'is_not_in');
-mathEqualityOp : (qualifier=ID '::')? op=('='|'/=');
-mathApplicationOp : (qualifier=ID '::')? op=('..'|'->');
 mathJoiningOp : (qualifier=ID '::')? op=('o'|'union'|'intersect');
+mathApplicationOp : (qualifier=ID '::')? op=('..'|'->');
+mathRelationalOp : (qualifier=ID '::')? op=('<='|'>='|'>'|'<');
+mathEqualityOp : (qualifier=ID '::')? op=('='|'/=');
+mathSetContainmentOp : (qualifier=ID '::')? op=('is_in'|'is_not_in');
+mathImpliesOp : (qualifier=ID '::')? 'implies' ;
+mathBooleanOp : (qualifier=ID '::')? op=('iff'|'and'|'or');
 
 mathPrimaryExp
     :   mathLiteralExp
