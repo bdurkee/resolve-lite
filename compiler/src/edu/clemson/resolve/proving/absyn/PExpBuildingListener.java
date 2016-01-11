@@ -323,6 +323,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
+    @Override public void exitProgSelectorExp(
+            ResolveParser.ProgSelectorExpContext ctx) {
+        repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
+    }
+
     @Override public void exitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))

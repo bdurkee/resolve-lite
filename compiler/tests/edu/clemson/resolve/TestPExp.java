@@ -487,10 +487,10 @@ public class TestPExp extends BaseTest {
         }
     }
 
-    /** Constructs an (untyped) {@link PExp} from string {@code input}. If the
+    /** Constructs an (untyped) {@link PExp} from string {@code input}.
      *  In the interest of avoiding null pointer exceptions, if the AST builder
      *  fails and comes back with {@code null}, this function will always
-     *  return a dummy {@code true} expr; never just {@code null}!
+     *  return a dummy {@code true} expr; never just {@code null}.
      *
      *  <p>Also: Building even moderately sized {@link PExp}s is a pain; building one
      *  with real type information is an even bigger pain. Thus, for test methods
@@ -501,7 +501,7 @@ public class TestPExp extends BaseTest {
      *
      *  <p>If you <em>want</em> to test something math type related, just
      *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
-     *  or {@link PApply.PApplyBuilder}; otherwise parse the actual larger expr
+     *  or {@link PApply.PApplyBuilder}; otherwise parse the larger expr
      *  using this method.</p>
      *
      * @param input The input to parse.
