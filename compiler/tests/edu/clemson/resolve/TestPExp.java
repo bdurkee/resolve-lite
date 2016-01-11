@@ -433,11 +433,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
         Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
 
-        //e = parseMathAssertionExp(g, "((A implies (B implies (C implies (D and DI(SS(k)(Cen(k)), P.Curr_Place)) is_in Inward_Loc(DI(SS(k)(Cen(k)), P.Length)))))) and ((P.Length <= Max_Length) implies ((P.Curr_Place <= P.Length) implies (lambda(q:Sp_Loc('k')).({{P.Labl(SCD(q)) if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}})(DI(SS(k)(Cen(k)), P.Length)) = Label.base_point)))");
-        partitions = e.splitIntoSequents();
-        //Assert.assertEquals(2, partitions.size());
-        //Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
-        //Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
       /*  e = parseMathAssertionExp(g, "P");
         partitions = e.splitIntoSequents();
         Assert.assertEquals(1, partitions.size());

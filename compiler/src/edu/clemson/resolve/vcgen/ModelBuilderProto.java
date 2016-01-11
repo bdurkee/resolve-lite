@@ -5,11 +5,13 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.vcgen.application.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.TypeGraph;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
@@ -25,6 +27,8 @@ import org.rsrg.semantics.symbol.*;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
+
+import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
     private final AnnotatedModule tr;
@@ -264,24 +268,27 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
- /*   @Override public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
-        Scope s = symtab.scopes.get(ctx.getParent());
+    @Override public void enterTypeImplInit(
+            ResolveParser.TypeImplInitContext ctx) {
+        Scope s = symtab.getScope(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
-        List<ProgParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
+        List<ModuleParameterSymbol> moduleParamSyms =
+                getAllModuleParameterSyms();
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
-                    "T_Init_Hypo=" + currentTypeReprSym.getNameToken(), ctx)
-                    .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                    .assume(getAssertionsFromFormalParameters(moduleParamSyms,
-                            this::extractAntecedentsFromParameter));
+                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx);
+                    //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                    //.assume(getAssertionsFromFormalParameters(moduleParamSyms,
+                    //        this::extractAntecedentsFromParameter));
 
         assertiveBlocks.push(block);
     }
 
-    @Override public void exitTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
+    @Override public void exitTypeImplInit(
+            ResolveParser.TypeImplInitContext ctx) {
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
@@ -294,15 +301,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp newInitEnsures =
                 typeInitEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        //newInitEnsures =
-        //        betaReduce(newInitEnsures,
-        //                correspondence);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
-        block.confirm(convention);  //order here is imp.
-        block.assume(correspondence);
+        block.confirm(convention);  //order here is important
+        block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
-    }*/
+    }
 
    /* @Override public void enterOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
@@ -441,7 +445,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     // S T A T S
     //-----------------------------------------------
 
-   /* @Override public void exitStmt(ResolveParser.StmtContext ctx) {
+    @Override public void exitStmt(ResolveParser.StmtContext ctx) {
         stats.put(ctx, stats.get(ctx.getChild(0)));
     }
 
@@ -471,21 +475,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
-        PApply callExp = (PApply)tr.mathPExps.get(ctx.progExp());
+        PApply callExp = (PApply)tr.mathPExps.get(ctx.progParamExp());
         OperationSymbol op = getOperation(moduleScope, callExp);
         if (inSimpleForm(op.getEnsures(), op.getParameters())) {
-            symtab.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
+            gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     EXPLICIT_CALL_APPLICATION, callExp);
         }
         else {
-            System.out.println("Applying GENERAL call rule");
+            gen.getCompiler().info("APPLYING GENERAL CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     GENERAL_CALL_APPLICATION, callExp);
-        //}
+        }
         stats.put(ctx, s);
     }
-
+/*
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
     //otherwise,
     @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
@@ -494,16 +498,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }
+    }*/
 
     @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
+        PExp lft = tr.mathPExps.get(ctx.left);
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
                         tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }*/
+    }
 
     private List<PExp> extractAntecedentsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();

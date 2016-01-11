@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -14,7 +15,7 @@ public class FunctionAssignApplicationStrategy
     @NotNull @Override public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
-     /*   PExp leftReplacee = stat.getStatComponents().get(0);
+        PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
         if ( !(rightReplacer.isFunctionApplication()) ) {
@@ -23,7 +24,7 @@ public class FunctionAssignApplicationStrategy
                     rightReplacer));
             return block.snapshot();
         }
-        PSymbol call = (PSymbol)rightReplacer;
+       /* PSymbol call = (PA)rightReplacer;
         //we know rightReplacer is a function app, see if-catch above.
         OperationSymbol op = ExplicitCallApplicationStrategy
                 .getOperation(block.scope, (PSymbol) rightReplacer);
