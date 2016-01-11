@@ -144,6 +144,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.precis));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.precis, ctx.precis.getText());
@@ -159,6 +161,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.concept, ctx.concept.getText());
@@ -173,6 +177,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -194,6 +199,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept),
+                    new ModuleIdentifier(ctx.extension));
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -442,9 +450,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
                         .getText(), mode, groupType,
                         ctx, getRootModuleIdentifier());
-                if (ctx.type().getChild(0) instanceof ResolveParser.NamedTypeContext) {
+                if (ctx.type() instanceof ResolveParser.NamedTypeContext) {
                     ResolveParser.NamedTypeContext asNamedType =
-                            (ResolveParser.NamedTypeContext)ctx.type().getChild(0);
+                            (ResolveParser.NamedTypeContext)ctx.type();
                     p.setTypeQualifierString(asNamedType.qualifier == null ? null :
                             asNamedType.qualifier.getText());
                 }
@@ -991,7 +999,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
         typeAndCheckClause(ctx, ctx.mathAssertionExp());
-        if ( ctx.getParent() instanceof
+        if ( ctx.getParent().getParent() instanceof
                 ResolveParser.ModuleDeclContext ) {
             insertGlobalAssertion(ctx,
                     GlobalMathAssertionSymbol.ClauseType.REQUIRES,

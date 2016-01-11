@@ -29,6 +29,7 @@ import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
@@ -206,41 +207,26 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
 
         List<PExp> opParamAntecedents = new ArrayList<>();
-        //Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
-        //        this::extractAntecedentsFromParameter);
+       // Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
+       //         this::extractAssumptionsFromParameter);
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
                         .assume(opParamAntecedents)
-                       // .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(currentTypeReprSym.getConvention());
         assertiveBlocks.push(block);
     }
 
     public List<ModuleParameterSymbol> getAllModuleParameterSyms() {
-        ParserRuleContext moduleCtx = moduleScope.getDefiningTree();
-        List<ModuleParameterSymbol> result = new ArrayList<>();
-        Set<ModuleIdentifier> modulesToSearch = new HashSet<>();
-
-        if (moduleCtx instanceof ResolveParser.ConceptImplModuleDeclContext) {
-            ResolveParser.ConceptImplModuleDeclContext asConceptImpl =
-                    (ResolveParser.ConceptImplModuleDeclContext)moduleCtx;
-            modulesToSearch.add(new ModuleIdentifier(asConceptImpl.concept));
-        }
-        else {
-            if (moduleCtx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
-                ResolveParser.ConceptExtImplModuleDeclContext asExtImpl =
-                        (ResolveParser.ConceptExtImplModuleDeclContext) moduleCtx;
-                modulesToSearch.add(new ModuleIdentifier(asExtImpl.concept));
-                modulesToSearch.add(new ModuleIdentifier(asExtImpl.extension));
-            }
-        }
-        for (ModuleIdentifier identifier : modulesToSearch) {
+        List<ModuleParameterSymbol> result =
+                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
+        for (ModuleIdentifier e : moduleScope.getInheritedIdentifiers()) {
             try {
-                result.addAll(symtab.getModuleScope(identifier)
-                                .getSymbolsOfType(ModuleParameterSymbol.class));
-            } catch (NoSuchModuleException e) {
-                e.printStackTrace();
+                ModuleScopeBuilder s = symtab.getModuleScope(e);
+                result.addAll(s.getSymbolsOfType(ModuleParameterSymbol.class));
+            } catch (NoSuchModuleException e1) { //should've been caught a long time ago
+                throw new RuntimeException(e1);
             }
         }
         return result;
@@ -283,9 +269,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                     "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
-                    .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES));
-                    //.assume(getAssertionsFromFormalParameters(moduleParamSyms,
-                    //        this::extractAntecedentsFromParameter));
+                    .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                    .assume(getAssertionsFromModuleFormalParameters(moduleParamSyms,
+                            this::extractAssumptionsFromParameter));
 
         assertiveBlocks.push(block);
     }
@@ -322,7 +308,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         List<PExp> opParamAntecedents = new ArrayList<>();
         Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
-                this::extractAntecedentsFromParameter);
+                this::extractAssumptionsFromParameter);
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
@@ -372,7 +358,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
                     paramSyms, ctx, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
-            Utils.apply(paramSyms, opParamAntecedents, this::extractAntecedentsFromParameter);
+            Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
 
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
@@ -512,7 +498,31 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-    private List<PExp> extractAntecedentsFromParameter(ProgParameterSymbol p) {
+    private List<PExp> getAssertionsFromModuleFormalParameters(
+            List<ModuleParameterSymbol> parameters,
+            Function<ProgParameterSymbol, List<PExp>> extract) {
+        List<PExp> result = new ArrayList<>();
+        for (ModuleParameterSymbol p : parameters) {
+            //todo: For now.
+            if (p.getWrappedParamSymbol() instanceof ProgParameterSymbol) {
+                result.addAll(
+                        extract.apply((ProgParameterSymbol) p.getWrappedParamSymbol()));
+            }
+        }
+        return result;
+    }
+
+    private List<PExp> getAssertionsFromFormalParameters(
+            List<ProgParameterSymbol> parameters,
+            Function<ProgParameterSymbol, List<PExp>> extract) {
+        List<PExp> result = new ArrayList<>();
+        for (ProgParameterSymbol p : parameters) {
+            result.addAll(extract.apply(p));
+        }
+        return result;
+    }
+
+    private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
         if ( p.getDeclaredType() instanceof PTNamed) {
 

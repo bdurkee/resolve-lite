@@ -10,6 +10,8 @@ Concept Integer_Template;
 
     Type family Integer is modeled by Z;
         exemplar I;
+        constraints
+            min_int <= I and I <= max_int;
         initialization
                 ensures I = 0;
 
