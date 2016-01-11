@@ -22,11 +22,14 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
+import org.rsrg.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
@@ -279,8 +282,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
-                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx);
-                    //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                    "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
+                    .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES));
                     //.assume(getAssertionsFromFormalParameters(moduleParamSyms,
                     //        this::extractAntecedentsFromParameter));
 
@@ -501,7 +504,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }*/
 
     @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
-        PExp lft = tr.mathPExps.get(ctx.left);
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
@@ -578,20 +580,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return result;
     }
 
-    /*private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
+    private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
         Set<PExp> result = new LinkedHashSet<>();
-        List<GlobalMathAssertionSymbol> assertions = moduleScope.query(
-                new SymbolTypeQuery<GlobalMathAssertionSymbol>
-                        (GlobalMathAssertionSymbol.class)).stream()
-                        .filter(e -> e.getClauseType() == type)
-                        .collect(Collectors.toList());
-
-        List<FacilitySymbol> facilities = moduleScope.query(
-                new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class));
+        List<GlobalMathAssertionSymbol> assertions = new LinkedList<>();
+        List<FacilitySymbol> facilities = new LinkedList<>();
+        try {
+            assertions.addAll(moduleScope.query(
+                    new SymbolTypeQuery<GlobalMathAssertionSymbol>
+                            (GlobalMathAssertionSymbol.class)).stream()
+                            .filter(e -> e.getClauseType() == type)
+                            .collect(Collectors.toList()));
+            facilities.addAll(moduleScope.query(
+                    new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class)));
+        } catch (NoSuchModuleException|UnexpectedSymbolException e) {
+        }
         return assertions.stream()
                 .map(assertion -> substituteByFacilities(facilities, assertion))
                 .collect(Collectors.toSet());
-    }*/
+    }
 
     private PExp substituteByFacilities(List<FacilitySymbol> facilities,
                                         GlobalMathAssertionSymbol e) {

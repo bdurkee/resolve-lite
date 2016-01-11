@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
@@ -349,6 +350,21 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitProgNestedExp(
             ResolveParser.ProgNestedExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progExp()));
+    }
+
+    @Override public void exitProgInfixExp(
+            ResolveParser.ProgInfixExpContext ctx) {
+        List<PTType> argTypes = ctx.progExp().stream()
+                .map(annotations.progTypes::get).collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, argTypes);
+        PSymbol operator = new PSymbolBuilder(attr.name.getText())
+                .mathType(getMathType(ctx))  //<- this isn't right yet, this will just be the range.
+                .progType(annotations.progTypes.get(ctx)).build();
+        PApplyBuilder result = new PApplyBuilder(operator)
+                .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+                .applicationType(getMathType(ctx));
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitProgBooleanLiteralExp(

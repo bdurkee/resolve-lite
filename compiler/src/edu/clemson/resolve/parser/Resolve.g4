@@ -507,8 +507,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
     |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op='%' progExp                          #progInfixExp
-    |   progExp op=('*'|'/') progExp                    #progInfixExp
+    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
     |   progExp op=('+'|'-') progExp                    #progInfixExp
     |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
     |   progExp op=('='|'/=') progExp                   #progInfixExp
