@@ -82,7 +82,6 @@ public  class RESOLVECompiler {
     public boolean log = false;
 
     public static Option[] optionDefs = {
-            new Option("longMessages",      "-longMessages", "show exception details on errors"),
             new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
             new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of resolve source files"),
