@@ -26,111 +26,44 @@ public class ParsimoniousAssumeApplicationStrategy
         PExp assumeExp = stat.getAssumeExp();
         PExp RP = block.finalConfirm.getConfirmExp();
 
-        List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
-        List<PExp> newConfirmConjuncts = new LinkedList<>();
-
-        for (PExp confirmConjunct : RP.splitIntoConjuncts()) {
-            List<PExp> precAssumes = new LinkedList<>();
-            PExp currentConfirmConjunct = confirmConjunct;
-            int currentAssumeIndex = 0;
-            for (PExp assumeConjunct : assumeConjuncts) {
-                PExp temp = currentConfirmConjunct;
-                boolean performedReplacement = false;
-                if (assumeConjunct.isEquality()) {
-
-                    //note: .get(0) would get the '=' exp, not the first arg
-                    PExp lhs = assumeConjunct.getSubExpressions().get(1);
-                    PExp rhs = assumeConjunct.getSubExpressions().get(2);
-                    if (lhs.isVariable()) {
-                        temp = confirmConjunct.substitute(lhs, rhs);
-                        performedReplacement = !temp.equals(confirmConjunct);
-
-                        //Replace all instances of the left side in
-                        //the assume expressions we have already processed.
-                        Utils.apply(precAssumes, e -> e.substitute(lhs, rhs));
-
-                        //Replace all instances of the right side in
-                        //the assume expressions we haven't processed.
-                        for (int k = currentAssumeIndex + 1; k < assumeConjuncts.size(); k++) {
-                            PExp newAssumeExp =
-                                    assumeConjuncts.get(k).substitute(lhs, rhs);
-                            assumeConjuncts.set(k, newAssumeExp);
-                        }
-                    }
+        Map<PExp, PExp> concEqualitySubstitutions = new LinkedHashMap<>();
+        List<PExp> assumeConjunctsWithoutConcEqualities = new LinkedList<>();
+        for (PExp assume : assumeExp.splitIntoConjuncts()) {
+            boolean isConceptual = false;
+            if (assume.isEquality()) {
+                PExp lhs = assume.getSubExpressions().get(1);
+                PExp rhs = assume.getSubExpressions().get(2);
+                if (lhs.isVariable() && lhs.containsName("conc")) {
+                    concEqualitySubstitutions.put(lhs, rhs);
+                    isConceptual = true;
                 }
-                // Check to see if this is a stipulate assume clause
-                // If yes, we keep a copy of the current
-                // assume expression.
-                //TODO TODO
-                // if (isStipulate) {
-                //     remAssumeExpList.add(Exp.copy(currentAssumeExp));
-                // }
-                // else {
-                // Update the current confirm expression
-                // if we did a replacement.
-                if (performedReplacement) {
-                    currentConfirmConjunct = temp;
-                }
-                else {
-                    // Check to see if this a verification
-                    // variable. If yes, we don't keep this assume.
-                    // Otherwise, we need to store this for the
-                    // step that generates the parsimonious vcs.
-                    precAssumes.add(assumeConjunct);
-                }
-                currentAssumeIndex = currentAssumeIndex + 1;
             }
-            PExp newConfirmExp =
-                    formImplies(block.g, currentConfirmConjunct, precAssumes);
-            newConfirmConjuncts.add(newConfirmExp);
-        }
-        // Form the return confirm statement
-        PExp newFinalConfirm = block.g.getTrueExp();
-        for (PExp e : newConfirmConjuncts) {
-            if (newFinalConfirm.equals(block.g.getTrueExp())) {
-                newFinalConfirm = e;
-            }
-            else {
-                newFinalConfirm = block.g.formConjunct(newFinalConfirm, e);
+            if (!isConceptual) {
+                assumeConjunctsWithoutConcEqualities.add(assume);
             }
         }
-        block.finalConfirm(newFinalConfirm);
+        //now substitute any conc equalities into RP
+        RP = RP.substitute(concEqualitySubstitutions);
+
+        List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
+        for (PExp assume : assumeConjunctsWithoutConcEqualities) {
+            Set<String> intersection = assumeExp.getSymbolNames(true, true);
+            intersection.retainAll(RP.getSymbolNames(true, true));
+            if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
+                parsimoniousAssumeConjuncts.add(assume);
+            }
+
+        }
+        //this will be the pruned assume expr
+        if (!parsimoniousAssumeConjuncts.isEmpty()) {
+            assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
+            block.finalConfirm(block.g.formImplies(assumeExp, RP));
+        }
+        else {
+            block.finalConfirm(RP);
+        }
+
         return block.snapshot();
-    }
-
-    private PExp formImplies(TypeGraph g, PExp currentConfirm,
-                             List<PExp> precAssumes) {
-        boolean checkList = false;
-        if (precAssumes.size() > 0) checkList = true;
-
-        // Loop until we no longer add more expressions or we have added all
-        // expressions in the remaining assume expression list.
-       // while (checkList) {
-            boolean formedImplies = false;
-
-            for (PExp assumeExp : precAssumes) {
-                // Create a new implies expression if there are common symbols
-                // in the assume and in the confirm. (Parsimonious step)
-                Set<String> intersection = currentConfirm.getSymbolNames(true, true);
-                intersection.retainAll(assumeExp.getSymbolNames(true, true));
-
-                if (!intersection.isEmpty()) {
-                    // Don't form implies if we have "Assume true"
-                    if (!assumeExp.isObviouslyTrue()) {
-                        currentConfirm = g.formImplies(assumeExp, currentConfirm);
-                        formedImplies = true;
-                    }
-                } else {
-                    // Form implies if we have "Assume false"
-                    if (assumeExp.isLiteralFalse()) {
-                        currentConfirm = g.formImplies(assumeExp, currentConfirm);
-                        formedImplies = true;
-                    }
-                }
-            }
-            //checkList = precAssumes.size() > 0 && formedImplies;
-        //}
-        return currentConfirm;
     }
 
     @NotNull @Override public String getDescription() {

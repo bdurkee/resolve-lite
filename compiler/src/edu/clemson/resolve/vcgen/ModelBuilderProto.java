@@ -22,6 +22,7 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
+import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
 import org.rsrg.semantics.symbol.*;
@@ -340,7 +341,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
-    }
+    }*/
 
     @Override public void enterProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
@@ -371,10 +372,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .remember();
             assertiveBlocks.push(block);
         }
-        catch (DuplicateSymbolException|NoSuchSymbolException|
-                NoSuchModuleException e) {
-            e.printStackTrace();    //none of these should happen, we wouldn't
-            // be in vcgen if one or more did
+        catch (SymbolTableException e) {
+            throw new RuntimeException(e);   //this shouldn't happen now
         }
     }
 
@@ -384,9 +383,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<ProgParameterSymbol> paramSyms =
                 scope.getSymbolsOfType(ProgParameterSymbol.class);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        List<ProgParameterSymbol> formalParameters = scope.query(
-                new SymbolTypeQuery<ProgParameterSymbol>(
-                        ProgParameterSymbol.class));
+        List<ProgParameterSymbol> formalParameters = null;
+        try {
+            formalParameters = scope.query(
+                    new SymbolTypeQuery<ProgParameterSymbol>(
+                            ProgParameterSymbol.class));
+        } catch (NoSuchModuleException|UnexpectedSymbolException e) {
+            e.printStackTrace();
+        }
 
         List<PExp> corrFnExps = paramSyms.stream()
                 .filter(p -> p.getDeclaredType() instanceof PTRepresentation)
@@ -409,7 +413,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         currentProcOpSym = null;
     }
 
-    @Override public void exitVariableDeclGroup(
+    /*@Override public void exitVariableDeclGroup(
             ResolveParser.VariableDeclGroupContext ctx) {
         PTType type = tr.progTypeValues.get(ctx.type());
         MTType mathType = tr.mathTypeValues.get(ctx.type());
@@ -625,6 +629,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             @Nullable String facility) {
         Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
         if (result == null) result = new HashMap<>();
+        //TODO: If we come back null, go ahead query and specialize the specs...
         return result;
     }
 

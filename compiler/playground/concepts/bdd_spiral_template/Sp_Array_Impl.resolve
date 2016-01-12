@@ -26,14 +26,14 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
             P.Length := 1;
             P.Curr_Place := 1;
         end;
-/*
-    Procedure Lengthen (updates P : Spiral_Pos;
-                        alters e : Label);
-        Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
-        P.Length := P.Length + 1;
-    end Lengthen;
 
-    Procedure Spiral_Out (updates P : Spiral_Pos);
+   /* Procedure Lengthen (updates P : Spiral_Pos;
+                        alters e : Label);
+        //Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
+        //P.Length := P.Length + 1;
+    end Lengthen;
+*/
+/*    Procedure Spiral_Out (updates P : Spiral_Pos);
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
 
