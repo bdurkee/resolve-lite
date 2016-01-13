@@ -12,8 +12,8 @@ The sorts of files our translator will be taking as input are all *executable* R
 
 To give a flavor as to the type of code we'll be generating, the following is an abridged version of a stack concept specification
 ```
-Concept Stack_Template<T>
-        (evaluates Max_Depth :
+Concept Stack_Template(type T; 
+        evaluates Max_Depth :
               Std_Integer_Fac :: Integer)
     uses Standard_Integers,
          Integer_Theory
