@@ -48,6 +48,17 @@ and you're targetfile is `Documents/playground/concepts/foo_template/T.resolve`,
 $ resolve concepts/foo_template/T.resolve -lib Documents/playground 
 ```
 
+## `-genCode <target>`
+
+Specifies that the compiler should generate executable code for the current `target` file. Note that currently we only support a single target language: `Java`. 
+
+*Note: It's likely that we won't be adding any new targets (in near the future that is) so this command should likely be made argumentless soon.*
+
 ## `-package <pkg>`
 
 Use this option to specify a package or namespace for any generated, executable `.java` files. If this is not present when generating java code, no namespace is present for the generated files.
+
+## `-vcs`
+
+Tells the compiler to generate VCs (**V**erification **C**ondition**s**) for the current target file. Results are written out to the current directory (unless `-o` is present) as a `.asrt` file with the same name as the target file specified.
+
