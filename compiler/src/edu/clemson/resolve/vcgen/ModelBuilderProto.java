@@ -19,6 +19,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTElement;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
@@ -111,17 +112,22 @@ public class ModelBuilderProto extends ResolveBaseListener {
         ModuleScopeBuilder spec = null, impl = null;
         try {
             spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
-            impl = symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+            if (ctx.externally == null) {
+                impl = symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+            }
         }
         catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
         List<PExp> specArgs = ctx.specArgs.progExp().stream()
-                .map(tr.mathPExps::get).collect(Collectors.toList());
+                .map(tr.mathPExps::get)
+                .filter(e -> !(e.getProgType() instanceof PTElement))
+                .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(specArgs);
 
-        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
-                .stream().map(ProgParameterSymbol::asPSymbol)
+        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class)
+                .stream().filter(e -> !e.isModuleTypeParameter())
+                .map(ModuleParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
 
         Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
