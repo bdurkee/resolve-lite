@@ -79,7 +79,7 @@ public class GeneralCallApplicationStrategy
 
             while (formalIter.hasNext()) {
                 ProgParameterSymbol curFormal = formalIter.next();
-                PExp curActual = (PSymbol)argIter.next();
+                PExp curActual = (PExp) argIter.next();
 
                 //t ~> NQV(RP, a), @t ~> a
                 if (curFormal.getMode() == UPDATES) {

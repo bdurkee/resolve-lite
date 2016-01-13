@@ -326,7 +326,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
-        repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
+        PExp rhs = repo.get(ctx.rhs);
+        PTType t = annotations.progTypes.get(ctx.rhs);
+        repo.put(ctx, new PSelector(repo.get(ctx.lhs), rhs));
     }
 
     @Override public void exitProgParamExp(
@@ -341,7 +343,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
-                .progType(annotations.progTypeValues.get(ctx))
+                .progTypeValue(annotations.progTypeValues.get(ctx))
                 .mathTypeValue(getMathTypeValue(ctx))
                 .mathType(getMathType(ctx))
                 .qualifier(ctx.qualifier);
