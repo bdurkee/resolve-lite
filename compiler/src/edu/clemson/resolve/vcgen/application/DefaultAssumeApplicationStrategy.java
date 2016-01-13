@@ -14,9 +14,9 @@ public class DefaultAssumeApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCAssume> {
 
-    @NotNull
-    @Override public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
-                                              @NotNull VCAssume stat) {
+    @NotNull @Override public AssertiveBlock applyRule(
+            @NotNull VCAssertiveBlockBuilder block,
+            @NotNull VCAssume stat) {
         PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
         PExp assumeExp = stat.getStatComponents().get(0);
         if (curFinalConfirmExp.isObviouslyTrue()) {
@@ -28,8 +28,7 @@ public class DefaultAssumeApplicationStrategy
         return block.snapshot();
     }
 
-    @NotNull
-    @Override public String getDescription() {
+    @NotNull @Override public String getDescription() {
         return "assume confirm rule application";
     }
 }

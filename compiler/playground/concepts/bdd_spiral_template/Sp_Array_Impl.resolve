@@ -16,26 +16,24 @@ Implementation Sp_Array_Impl for Bdd_Spiral_Template;
                which_entails
                         P.Curr_Place, P.Length : N;
         correspondence
-            conc.P.Trmnl_Loc = DI(SS(k), P.Length)(Cen(k)) and
-            conc.P.Curr_Loc = DI(SS(k), P.Curr_Place)(Cen(k)) and
+            conc.P.Trmnl_Loc = DI(SS(k)(Cen(k)), P.Length) and
+            conc.P.Curr_Loc = DI(SS(k)(Cen(k)), P.Curr_Place) and
             conc.P.Lab =
                 lambda (q : Sp_Loc(k)).(
-                    {{P.Labl(SCD(q))
-                        if SCD(q) + 1 <= P.Length;
-                      Label.base_point otherwise;}});
+                    {{P.Labl(SCD(q)) if SCD(q) + 1 <= P.Length;
+                                Label.base_point otherwise;}});
         initialization
             P.Length := 1;
             P.Curr_Place := 1;
         end;
 
-    Procedure Lengthen (updates P : Spiral_Pos;
+   /* Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
-        Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
-        P.Length := P.Length + 1;
+        //Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
+        //P.Length := P.Length + 1;
     end Lengthen;
-
-/*
-    Procedure Spiral_Out (updates P : Spiral_Pos);
+*/
+/*    Procedure Spiral_Out (updates P : Spiral_Pos);
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
 

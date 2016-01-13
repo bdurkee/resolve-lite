@@ -12,7 +12,7 @@ import java.util.*;
 /** This class represents the root of the prover abstract syntax tree (AST)
  *  hierarchy.
  *  <p>
- *  Unlike previous expression hierarchies used by the tool, {@code PExp}s are
+ *  Unlike previous expression hierarchies used by the compiler, {@code PExp}s are
  *  immutable and exist without the complications introduced by control
  *  structures. And while {@code PExp}s technically exist to represent
  *  <em>only</em> mathematical expressions, realize that many 'programmatic'
@@ -27,8 +27,8 @@ public abstract class PExp {
     /** These are the backing fields for {@link #getMathType()} and
      *  {@link #getMathTypeValue()}, respectively.
      */
-    @NotNull private final MTType type;
-    @Nullable private final MTType typeValue;
+    private final MTType type;
+    private final MTType typeValue;
 
     /** Since the removal of the Exp hierarchy, the role of {@code PExps} has
      *  expanded considerably.
@@ -37,9 +37,8 @@ public abstract class PExp {
      *  programmatic expression (for vcgen), program type info should be
      *  present, if not, then these should/will be {@code null}.</p>
      */
-    @Nullable private final PTType progType, progTypeValue;
+    private final PTType progType, progTypeValue;
 
-    private Set<String> cachedSymbolNames = null;
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
@@ -357,12 +356,7 @@ public abstract class PExp {
 
     @NotNull public final Set<String> getSymbolNames(boolean excludeApplications,
                                                      boolean excludeLiterals) {
-        if ( cachedSymbolNames == null ) {
-            //We're immutable, so only do this once
-            cachedSymbolNames =
-                    getSymbolNamesNoCache(excludeApplications, excludeLiterals);
-        }
-        return cachedSymbolNames;
+        return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
     }
 
     protected abstract Set<String> getSymbolNamesNoCache(

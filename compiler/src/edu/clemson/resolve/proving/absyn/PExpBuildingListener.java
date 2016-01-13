@@ -1,6 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
@@ -193,6 +194,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
 
+    @Override public void exitMathImpliesOp(
+            ResolveParser.MathImpliesOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.getStop()));
+    }
+
+    @Override public void exitMathSetContainmentOp(
+            ResolveParser.MathSetContainmentOpContext ctx) {
+        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
+    }
+
     @Override public void exitMathApplicationOp(
             ResolveParser.MathApplicationOpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
@@ -313,6 +324,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
+    @Override public void exitProgSelectorExp(
+            ResolveParser.ProgSelectorExpContext ctx) {
+        repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
+    }
+
     @Override public void exitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))
@@ -334,6 +350,21 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitProgNestedExp(
             ResolveParser.ProgNestedExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progExp()));
+    }
+
+    @Override public void exitProgInfixExp(
+            ResolveParser.ProgInfixExpContext ctx) {
+        List<PTType> argTypes = ctx.progExp().stream()
+                .map(annotations.progTypes::get).collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, argTypes);
+        PSymbol operator = new PSymbolBuilder(attr.name.getText())
+                .mathType(getMathType(ctx))  //<- this isn't right yet, this will just be the range.
+                .progType(annotations.progTypes.get(ctx)).build();
+        PApplyBuilder result = new PApplyBuilder(operator)
+                .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
+                .applicationType(getMathType(ctx));
+        repo.put(ctx, result.build());
     }
 
     @Override public void exitProgBooleanLiteralExp(

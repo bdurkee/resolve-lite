@@ -14,15 +14,13 @@ public class RememberApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRemember> {
 
-    @NotNull
-    @Override public AssertiveBlock applyRule(
+    @NotNull @Override public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block, @NotNull VCRemember stat) {
         PExp confirm = block.finalConfirm.getConfirmExp();
         return block.finalConfirm(confirm.withIncomingSignsErased()).snapshot();
     }
 
-    @NotNull
-    @Override public String getDescription() {
+    @NotNull @Override public String getDescription() {
         return "remember rule application";
     }
 }

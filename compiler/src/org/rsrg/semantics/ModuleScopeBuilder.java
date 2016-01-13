@@ -9,8 +9,11 @@ import java.util.*;
 
 public class ModuleScopeBuilder extends ScopeBuilder {
 
-    @NotNull private final List<ModuleIdentifier> importedModules =
-            new ArrayList<>();
+    private final List<ModuleIdentifier> importedModules = new ArrayList<>();
+
+    /** The set of all modules {@code this} either extends or inherits from. */
+    private final Set<ModuleIdentifier> locallyInheritedModules =
+            new LinkedHashSet<>();
 
     ModuleScopeBuilder(@NotNull TypeGraph g, @NotNull Token name,
                        @Nullable ParserRuleContext definingTree,
@@ -21,6 +24,12 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     @NotNull public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
+    }
+
+    @NotNull public ModuleScopeBuilder addInheritedModules(
+            @NotNull ModuleIdentifier ... i) {
+        locallyInheritedModules.addAll(Arrays.asList(i));
+        return this;
     }
 
     @NotNull public ModuleScopeBuilder addImports(
@@ -44,4 +53,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return moduleIdentifier + ":" + symbols.keySet();
     }
 
+    public Set<ModuleIdentifier> getInheritedIdentifiers() {
+        return new LinkedHashSet<>(locallyInheritedModules);
+    }
 }

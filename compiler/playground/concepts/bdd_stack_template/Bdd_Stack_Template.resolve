@@ -14,8 +14,7 @@ Concept Bdd_Stack_Template(type Entry;
     Operation Push (alters e : Entry;
                     updates S : Stack);
         requires 1 + |S| < Max_Depth;
-        ensures
-            S = <@e> o @S;
+        ensures S = <@e> o @S;
 
     Operation Pop (replaces e : Entry;
                    updates S : Stack);

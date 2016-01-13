@@ -97,38 +97,10 @@ public class PSymbol extends PExp {
             @NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
         if (result == null) {
-            String newName = substituteNamedComponents(substitutions);
             String newLeft = leftPrint, newRight = rightPrint;
             result = new PSymbolBuilder(this).build();
         }
         return result;
-    }
-
-    /** A helper method to be used alongside this class's
-     *  {@link PExp PExp#substitute} that allows the name of a PSymbol to be
-     *  segmented into {@code .}-delimited segments. This is useful for instance
-     *  when we need to replace a {@code PSymbol} such as {@code P.Length} with
-     *  {@code conc.P.Length}.
-     */
-    private String substituteNamedComponents(Map<PExp, PExp> substitutions) {
-        if (!name.contains(".")) return name;
-        if (name.contains("...")) return name;
-
-        List<String> components = Arrays.asList(name.split("\\."));
-
-        for (Map.Entry<PExp, PExp> e : substitutions.entrySet()) {
-            for (String c : components) {
-                if (!(e.getKey() instanceof PSymbol &&
-                        e.getValue() instanceof PSymbol)) {
-                    continue;
-                }
-                if (c.equals(((PSymbol) e.getKey()).getName())) {
-                    Collections.replaceAll(components, c,
-                            ((PSymbol) e.getValue()).getName());
-                }
-            }
-        }
-        return Utils.join(components, ".");
     }
 
     @Override public boolean isObviouslyTrue() {

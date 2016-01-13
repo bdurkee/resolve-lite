@@ -1,6 +1,7 @@
 Concept Nested_List_Template(type Label;
         evaluates Max_Total_Size
                 : Std_Ints :: Integer);
+
     uses Standard_Booleans, Standard_Integers,
          General_String_Theory, Str_Relativization_Ext,
          General_Tree_Theory, Tr_Relativization_Ext,
@@ -19,7 +20,6 @@ Concept Nested_List_Template(type Label;
         exemplar P;
         initialization
             ensures P.Path = Empty_String;
-
 
     Definition Suture_of(P : Nstd_Lst_Pos) : N is
         Suture(P.Path, P.Prec, P.Rem).VS and

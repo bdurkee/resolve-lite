@@ -370,17 +370,40 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));*/
     }
 
-    @Test public void testSubstitute() {
-        PExp s1 = parseMathAssertionExp(g,
-                "conc.P.Lab(conc.P.Trmnl_Loc)");
-        PExp key = parseMathAssertionExp(g, "conc.P.Lab");
-        PExp val = parseMathAssertionExp(g, "X");
-        boolean v = key.equals(val);
-        Map<PExp, PExp> subsitutions = new HashMap<>();
-        subsitutions.put(key, val);
-        PExp x = s1.substitute(subsitutions);
-        int i;
-        i=0;
+    @Test public void testGetSymbolNames2() {
+        PExp result =
+                parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
+                "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
+        Set<String> expectedNames =
+                Arrays.asList("q", "Label.base_point", "P.Length").stream()
+                        .collect(Collectors.toSet());
+        Set<String> foundNames = result.getSymbolNames(true, true);
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+        //now don't exclude applications or literals
+        expectedNames =
+                Arrays.asList("q", "Label.base_point", "P.Length", "P.Labl",
+                        "SCD", "+", "<=", "1").stream()
+                        .collect(Collectors.toSet());
+        foundNames = result.getSymbolNames();
+        Assert.assertEquals(expectedNames.size(), foundNames.size());
+        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
+
+    }
+
+    @Test public void testSubstituteOnSelector() {
+        PExp result = parseMathAssertionExp(g, "conc.P.Lab(conc.P.Trmnl_Loc)")
+                .substitute(parseMathAssertionExp(g, "conc.P.Lab"),
+                            parseMathAssertionExp(g, "X"));
+        Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.toString());
+    }
+
+    @Test public void testSubstituteOnLambda() {
+        PExp result = parseMathAssertionExp(g, "X = lambda(q : Inv).({{@e if j = i; @e(q) otherwise;}})")
+                .substitute(parseMathAssertionExp(g, "@e"),
+                        parseMathAssertionExp(g, "Y"));
+        Assert.assertEquals("(X = lambda(q:Inv).({{Y if (j = i);Y(q) otherwise;}}))", result.toString());
     }
 
     @Test public void testSplitIntoSequents() {
@@ -464,10 +487,10 @@ public class TestPExp extends BaseTest {
         }
     }
 
-    /** Constructs an (untyped) {@link PExp} from string {@code input}. If the
+    /** Constructs an (untyped) {@link PExp} from string {@code input}.
      *  In the interest of avoiding null pointer exceptions, if the AST builder
      *  fails and comes back with {@code null}, this function will always
-     *  return a dummy {@code true} expr; never just {@code null}!
+     *  return a dummy {@code true} expr; never just {@code null}.
      *
      *  <p>Also: Building even moderately sized {@link PExp}s is a pain; building one
      *  with real type information is an even bigger pain. Thus, for test methods
@@ -478,7 +501,7 @@ public class TestPExp extends BaseTest {
      *
      *  <p>If you <em>want</em> to test something math type related, just
      *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
-     *  or {@link PApply.PApplyBuilder}; otherwise parse the actual larger expr
+     *  or {@link PApply.PApplyBuilder}; otherwise parse the larger expr
      *  using this method.</p>
      *
      * @param input The input to parse.

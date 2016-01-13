@@ -144,6 +144,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.precis));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.precis, ctx.precis.getText());
@@ -159,6 +161,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
                     ctx.concept, ctx.concept.getText());
@@ -173,6 +177,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -194,6 +199,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(
                     new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept),
+                    new ModuleIdentifier(ctx.extension));
         }
         catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
@@ -442,9 +450,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
                         .getText(), mode, groupType,
                         ctx, getRootModuleIdentifier());
-                if (ctx.type().getChild(0) instanceof ResolveParser.NamedTypeContext) {
+                if (ctx.type() instanceof ResolveParser.NamedTypeContext) {
                     ResolveParser.NamedTypeContext asNamedType =
-                            (ResolveParser.NamedTypeContext)ctx.type().getChild(0);
+                            (ResolveParser.NamedTypeContext)ctx.type();
                     p.setTypeQualifierString(asNamedType.qualifier == null ? null :
                             asNamedType.qualifier.getText());
                 }
@@ -987,13 +995,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*@Override public Void visitRequiresClause(
+
+    @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        if ( ctx.entailsClause() != null ) this.visit(ctx.entailsClause());
-        chainMathTypes(ctx, ctx.mathAssertionExp());
+        typeAndCheckClause(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent() instanceof
-                ResolveParser.ModuleContext ) {
+                ResolveParser.ModuleDeclContext ) {
             insertGlobalAssertion(ctx,
                     GlobalMathAssertionSymbol.ClauseType.REQUIRES,
                     ctx.mathAssertionExp());
@@ -1001,25 +1008,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitEntailsClause(
-            ResolveParser.EntailsClauseContext ctx) {
-        this.visitChildren(ctx);    //Todo : For now.
-        return null;
-    }
-
-    @Override public Void visitEnsuresClause(
-            ResolveParser.EnsuresClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        chainMathTypes(ctx, ctx.mathAssertionExp());
-        return null;
-    }
+    //@Override public Void visitEntailsClause(
+    //        ResolveParser.EntailsClauseContext ctx) {
+    //    this.visitChildren(ctx);    //Todo : For now.
+    //    return null;
+    //}
 
     @Override public Void visitConstraintClause(
             ResolveParser.ConstraintClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        chainMathTypes(ctx, ctx.mathAssertionExp());
+        typeAndCheckClause(ctx, ctx.mathAssertionExp());
         if ( ctx.getParent().getParent().getParent() instanceof
-                ResolveParser.ModuleContext ) {
+                ResolveParser.ModuleDeclContext ) {
             insertGlobalAssertion(ctx,
                     GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
                     ctx.mathAssertionExp());
@@ -1027,12 +1026,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitEnsuresClause(
+            ResolveParser.EnsuresClauseContext ctx) {
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
+    }
+
+    @Override public Void visitConventionsClause(
+            ResolveParser.ConventionsClauseContext ctx) {
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
+    }
+
     @Override public Void visitCorrespondenceClause(
             ResolveParser.CorrespondenceClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        chainMathTypes(ctx, ctx.mathAssertionExp());
+        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
+    }
+
+    private Void typeAndCheckClause(@NotNull ParserRuleContext clauseCtx,
+                                    @NotNull ParserRuleContext assertionCtx) {
+        this.visit(assertionCtx);
+        expectType(assertionCtx, g.BOOLEAN);
+        chainMathTypes(clauseCtx, assertionCtx);
         return null;
-    }*/
+    }
 
     //---------------------------------------------------
     // P R O G    E X P    T Y P I N G
@@ -1562,6 +1577,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathAddOp(ResolveParser.MathAddOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathRelationalOp(ResolveParser.MathRelationalOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathBooleanOp(ResolveParser.MathBooleanOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
+    @Override public Void visitMathImpliesOp(ResolveParser.MathImpliesOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.getStop()); return null; }
+    @Override public Void visitMathSetContainmentOp(ResolveParser.MathSetContainmentOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathEqualityOp(ResolveParser.MathEqualityOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathApplicationOp(ResolveParser.MathApplicationOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
     @Override public Void visitMathJoiningOp(ResolveParser.MathJoiningOpContext ctx) { typeOperator(ctx, ctx.qualifier, ctx.op); return null; }
@@ -1656,29 +1673,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             typeMathSymbolExp(ctx, ctx.qualifier, ctx.name.getText());
         }
-        return null;
-    }
-
-    @Override public Void visitEnsuresClause(
-            ResolveParser.EnsuresClauseContext ctx) {
-        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
-    }
-
-    @Override public Void visitConventionsClause(
-            ResolveParser.ConventionsClauseContext ctx) {
-        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
-    }
-
-    @Override public Void visitCorrespondenceClause(
-            ResolveParser.CorrespondenceClauseContext ctx) {
-        return typeAndCheckClause(ctx, ctx.mathAssertionExp());
-    }
-
-    private Void typeAndCheckClause(@NotNull ParserRuleContext clauseCtx,
-                                    @NotNull ParserRuleContext assertionCtx) {
-        this.visit(assertionCtx);
-        expectType(assertionCtx, g.BOOLEAN);
-        chainMathTypes(clauseCtx, assertionCtx);
         return null;
     }
 
@@ -1870,7 +1864,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return expectedType.getApplicationType(functionName, arguments);
     }
 
-    /*private void insertGlobalAssertion(ParserRuleContext ctx,
+    private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
                                        ResolveParser.MathAssertionExpContext assertion) {
         String name = ctx.getText() + "_" + globalSpecCount++;
@@ -1883,7 +1877,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-    }*/
+    }
 
     @NotNull protected final PExp getPExpFor(ParseTree ctx) {
         if (ctx == null) return g.getTrueExp();
