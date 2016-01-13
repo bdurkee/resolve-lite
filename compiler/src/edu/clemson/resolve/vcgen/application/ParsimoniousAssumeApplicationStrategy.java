@@ -18,8 +18,6 @@ public class ParsimoniousAssumeApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCAssume> {
 
-    //Basically Sami's parsimonious algorithm, but tweaked slightly --
-    //probably broke it
     @NotNull @Override public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCAssume stat) {
@@ -62,7 +60,6 @@ public class ParsimoniousAssumeApplicationStrategy
         else {
             block.finalConfirm(RP);
         }
-
         return block.snapshot();
     }
 

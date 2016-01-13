@@ -366,7 +366,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                            .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                            //constraints should be added on demand via notice...
+                            //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
@@ -552,8 +553,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
         else { //PTGeneric
-            resultingAssumptions.add(g.formInitializationPredicate(
-                    p.getDeclaredType(), p.getName()));
+        //    resultingAssumptions.add(g.formInitializationPredicate(
+        //            p.getDeclaredType(), p.getName()));
         }
         return resultingAssumptions;
     }
