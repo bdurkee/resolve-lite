@@ -39,7 +39,7 @@ Windows, Mac OSX, or Linux (any distribution should do).
 
 ###Installing
 1. You can download the latest stable build of the tool from the [releases page]
-(). Note that the tool comes packaged in a `.zip` containing both standard
+(https://github.com/ClemsonRSRG/resolve-lite/releases). Note that the tool comes packaged in a `.zip` containing both standard
 RESOLVE libraries and other core `.java` classes required by generated code.
 
 2. Unpack the `.zip` to the directory of your choosing, for example, on OSX:
