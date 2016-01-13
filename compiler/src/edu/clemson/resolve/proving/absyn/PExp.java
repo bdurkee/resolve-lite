@@ -372,6 +372,23 @@ public abstract class PExp {
      */
     @Override public abstract boolean equals(Object o);
 
+    /** Returns a map of equalities contained in the top level of {@code this}
+     *  of the form: {@code [variable name] = [some expr]}.
+     *
+     *  @return pairs of variable equalities in {@code this}.
+     */
+    public Map<String, PExp> getTopLevelVariableEqualities() {
+        Map<String, PExp> result = new HashMap<>();
+        for (PExp v : this.splitIntoConjuncts()) {
+            if (v.isEquality() &&
+                    v.getSubExpressions().get(1).isVariable()) {
+                result.put(v.getSubExpressions().get(1).getCanonicalName(),
+                        v.getSubExpressions().get(2));
+            }
+        }
+        return result;
+    }
+
     /** A util container for storing node structural and value hashcodes.*/
     public static class HashDuple {
         public int structureHash;

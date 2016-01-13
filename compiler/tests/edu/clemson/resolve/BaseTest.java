@@ -35,8 +35,8 @@ public abstract class BaseTest {
     public static final String PATHSEP = System.getProperty("path.separator");
 
     /**
-     * The base test directory is the directory where generated files get placed
-     * during unit test execution.
+     * The base returnEnsuresArgSubstitutions directory is the directory where generated files get placed
+     * during unit returnEnsuresArgSubstitutions execution.
      * <p>
      * The value for this property is the {@code java.io.tmpdir} system
      * property.</p>
@@ -309,7 +309,7 @@ public abstract class BaseTest {
         for (int i = 0; i < modules.length; i++) {
             String inputModule = modules[i];
             String fileName = names[i]+RESOLVECompiler.FILE_EXTENSION;
-            //write all of our test modules to tmpdir
+            //write all of our returnEnsuresArgSubstitutions modules to tmpdir
             writeFile(tmpdir, fileName, inputModule);
         }
     }

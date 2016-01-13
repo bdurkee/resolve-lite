@@ -13,8 +13,6 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.SymbolTableException;
 import org.rsrg.semantics.query.OperationQuery;
@@ -59,7 +57,7 @@ public class ExplicitCallApplicationStrategy
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     public static class ExplicitCallRuleApplyingListener extends PExpListener {
-        public Map<PExp, PExp> test = new HashMap<>();
+        public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
         public ExplicitCallRuleApplyingListener(
@@ -68,13 +66,14 @@ public class ExplicitCallApplicationStrategy
         }
 
         public PExp getCompletedExp() {
-            return block.finalConfirm.getConfirmExp().substitute(test);
+            return block.finalConfirm.getConfirmExp()
+                    .substitute(returnEnsuresArgSubstitutions);
         }
 
         @Override public void endPApply(@NotNull PApply e) {
-            PApply thisExp = (PApply) e.substitute(test);
+            PApply thisExp = (PApply) e.substitute(returnEnsuresArgSubstitutions);
             PSymbol name = (PSymbol) e.getFunctionPortion();
-            test.clear(); //TODO: hmmmm..
+            returnEnsuresArgSubstitutions.clear(); //TODO: hmmmm..
             List<PExp> actuals = thisExp.getArguments();
 
             OperationSymbol op = getOperation(block.scope, e);
@@ -130,7 +129,7 @@ public class ExplicitCallApplicationStrategy
                  */
                 PExp v = exp.getValue().substitute(
                         varsToReplaceInEnsures, actuals);
-                test.put(exp.getKey(), v);
+                returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
         }
     }

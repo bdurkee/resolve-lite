@@ -39,7 +39,7 @@ public class QualifiedPath implements ScopeSearchPath {
             Scope facilityScope = facility.getFacility().getSpecification() //
                     .getScope(instantiateGenerics);
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
-            //Dtw test:
+            //Dtw returnEnsuresArgSubstitutions:
             for (ModuleParameterization enh : facility.getEnhancements()) {
                 Scope enhScope = enh.getScope(instantiateGenerics);
                 result.addAll(enhScope.getMatches(searcher,

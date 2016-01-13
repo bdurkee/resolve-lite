@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.*;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
@@ -95,7 +96,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             Utils.getModuleName(ctx));
         }
     }
-/*
+
     @Override public void enterFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
@@ -109,13 +110,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
             ResolveParser.FacilityDeclContext ctx) {
         ModuleScopeBuilder spec = null, impl = null;
         try {
-            spec = symtab.getModuleScope(ctx.spec.getText());
-            impl = symtab.getModuleScope(ctx.impl.getText());
+            spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            impl = symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
         }
         catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-        List<PExp> specArgs = ctx.specArgs.moduleArgument().stream()
+        List<PExp> specArgs = ctx.specArgs.progExp().stream()
                 .map(tr.mathPExps::get).collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(specArgs);
 
@@ -141,7 +142,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             ClauseType.REQUIRES)
                     .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
 
-            List<PExp> implArgs = ctx.implArgs.moduleArgument().stream()
+            List<PExp> implArgs = ctx.implArgs.progExp().stream()
                     .map(tr.mathPExps::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(implArgs);
 
@@ -186,16 +187,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new ExplicitCallRuleApplyingListener(block);
         exp.accept(applier);
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
-        block.finalConfirm(finalConfirm.substitute(applier.test));
-        if (applier.test.isEmpty()) {
+        block.finalConfirm(finalConfirm);
+       /* if (applier.returnEnsuresArgSubstitutions.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
                     "call rule to: " + exp.toString()+".. " +
                     "could happen too right now if there's no spec for the op");
-        }
-        return applier.test.get(exp);
+        }*/
+        return applier.returnEnsuresArgSubstitutions.get(exp);
     }
-*/
+
     @Override public void enterTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
@@ -361,7 +362,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                            //constraints should be added on demand via notice...
+                            //constraints should be added on demand via NOTICE:...
                             //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
@@ -478,7 +479,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         stats.put(ctx, s);
     }
-/*
+
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
     //otherwise,
     @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
@@ -487,7 +488,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }*/
+    }
 
     @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         VCRuleBackedStat s =

@@ -10,13 +10,11 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.*;
 import static org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
@@ -40,7 +38,7 @@ public class GeneralCallApplicationStrategy
     //TODO: Walk through this step by step in a .md file. Then store the .md file in doc/
     public static class GeneralCallRuleSubstitutor extends PExpListener {
         private final VCAssertiveBlockBuilder block;
-        public Map<PExp, PExp> test = new HashMap<>();
+        public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
 
         public GeneralCallRuleSubstitutor(
                 @NotNull VCAssertiveBlockBuilder block) {
@@ -48,29 +46,42 @@ public class GeneralCallApplicationStrategy
         }
 
         @NotNull public PExp getCompletedExp() {
-            return block.finalConfirm.getConfirmExp().substitute(test);
+            return block.finalConfirm.getConfirmExp();
         }
 
         @Override public void endPApply(@NotNull PApply e) {
             OperationSymbol op = getOperation(block.scope, e);
             final Set<ParameterMode> distinguishedModes =
                     new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
+
+            PSymbol functionName = (PSymbol)e.getFunctionPortion();
+
             PExp newAssume = op.getEnsures();
             List<PExp> formalExps = Utils.apply(op.getParameters(),
                     ProgParameterSymbol::asPSymbol);
-            block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
-            for (ProgParameterSymbol p : op.getParameters()) {
+
+            PExp confirmPrecondition =
+                    op.getRequires().substitute(formalExps, e.getArguments());
+
+            //TODO:
+            confirmPrecondition = confirmPrecondition
+                    .substitute(returnEnsuresArgSubstitutions);
+            block.confirm(confirmPrecondition);
+            //^^^^^ Here's the old one:
+            //block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
+
+            /*for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
                 //TODO: Ask about these constraints
-              /* if (distinguishedModes.contains(p.getMode())) {
+                if (distinguishedModes.contains(p.getMode())) {
                     if (p.getDeclaredType() instanceof PTFamily) {
                         newAssume = block.g.formConjunct(newAssume,
                                 ((PTFamily) p.getDeclaredType())
                                         .getConstraint());
                     }
-                }*/
-            }
+                }
+            }*/
             PExp RP = block.finalConfirm.getConfirmExp();
             Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
             Iterator<ProgParameterSymbol> formalIter =
@@ -105,24 +116,31 @@ public class GeneralCallApplicationStrategy
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
                 }
             }
+
+            PExp r = newAssume.getTopLevelVariableEqualities().get(functionName.getName());
+            if (r != null) {
+                returnEnsuresArgSubstitutions.put(e, r.substitute(newAssumeSubtitutions));
+            }
+
             //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
             //Post [ t ~> NQV(RP, a), @t ~> a, u ~> Math(exp), v ~> NQV(RP, b),
             //       w ~> c, x ~> d, @y ~> e, @z ~> f]
-            block.assume(newAssume.substitute(newAssumeSubtitutions));
+            block.assume(newAssume.substitute(newAssumeSubtitutions)
+                    .substitute(returnEnsuresArgSubstitutions));
 
             //Ok, so this happens down here since the rule is laid out s.t.
             //substitutions occur prior to conjuncting this -- consult the
             //rule and see for yourself
-            for (ProgParameterSymbol p : op.getParameters()) {
+            /* for (ProgParameterSymbol p : op.getParameters()) {
                 //T7.Is_Initial(NQV(RP, f));
                 //TODO: See todo above
-               /* if (p.getMode() == CLEARS) {
+                if (p.getMode() == CLEARS) {
                     PExp initPred =
                             block.g.formInitializationPredicate(
                                     p.getDeclaredType(), p.getNameToken());
                     newAssume = block.g.formConjunct(newAssume, initPred);
-                }*/
-            }
+                }
+            }*/
 
             //reset the formal param iter in preperation for building the
             //substitution mapping for our confirm
