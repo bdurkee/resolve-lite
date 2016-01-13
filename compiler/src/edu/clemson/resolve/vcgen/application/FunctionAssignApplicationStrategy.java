@@ -1,11 +1,19 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
+import org.rsrg.semantics.symbol.OperationSymbol;
+import org.rsrg.semantics.symbol.ProgParameterSymbol;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FunctionAssignApplicationStrategy
         implements
@@ -24,20 +32,19 @@ public class FunctionAssignApplicationStrategy
                     rightReplacer));
             return block.snapshot();
         }
-       /* PSymbol call = (PA)rightReplacer;
+        PApply call = (PApply) rightReplacer;
         //we know rightReplacer is a function app, see if-catch above.
         OperationSymbol op = ExplicitCallApplicationStrategy
-                .getOperation(block.scope, (PSymbol) rightReplacer);
+                .getOperation(block.scope, (PApply) rightReplacer);
 
-        List<PExp> actuals = new ArrayList<PExp>();//call.getArguments();
-        List<PExp> formals = op.getParameters().stream()
-                .map(ProgParameterSymbol::asPSymbol).collect(Collectors.toList());*/
-        /**
-         * So: {@pre Oper op (x: T): U; pre /_x_\; post op = f/_x_\} is in Ctx
-         * and our statement reads as follows: {@code v := op(u);}. Informally
-         * this next line substitutes appearances of the formal parameter
-         * {@code x} in op's requires clause with the actuals (more formally,
-         * {@code pre[x ~> u]}).
+        List<PExp> actuals = call.getArguments();
+        List<PExp> formals = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
+
+        /** So: {@pre Oper op (x: T): U; pre /_x_\; post op = f/_x_\} is in Ctx
+         *  and our statement reads as follows: {@code v := op(u);}. Informally
+         *  this next line substitutes appearances of the formal parameter
+         *  {@code x} in op's requires clause with the actuals (more formally,
+         *  {@code pre[x ~> u]}).
          */
    /*     PExp opRequires = block.getPExpFor(op.getRequires()).substitute(
                 ModelBuilderProto.getFacilitySpecializations(

@@ -247,11 +247,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp newConstraint =
                 constraint.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        //If the correspondence is multi-part, we split it; E.g.:
-        //'conc.P.Trmnl_Loc' ~> 'SS(k)(P.Length, Cen(k))'
-        //'conc.P.Curr_Loc' ~> 'SS(k)(P.Curr_Place, Cen(k))'
-        //'conc.P.Lab' ~> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
-        //newConstraint = betaReduce(newConstraint, correspondence);
 
         block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newConstraint);
@@ -293,7 +288,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention);  //order here is important
-        block.assume(correspondence.splitIntoConjuncts());
+        block.assume(correspondence);
         block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
     }
@@ -535,12 +530,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PTNamed declaredType = (PTNamed)p.getDeclaredType();
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof PTFamily) {
-                PExp constraint = ((PTFamily) declaredType).getConstraint();
+                /*PExp constraint = ((PTFamily) declaredType).getConstraint();
 
                 constraint = constraint.substitute(
                         getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
+                */
             }
             else if (declaredType instanceof PTRepresentation)  {
                 ProgReprTypeSymbol repr =

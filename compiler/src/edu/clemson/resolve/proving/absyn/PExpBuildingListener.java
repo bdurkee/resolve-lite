@@ -341,6 +341,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
+                .progType(annotations.progTypeValues.get(ctx))
                 .mathTypeValue(getMathTypeValue(ctx))
                 .mathType(getMathType(ctx))
                 .qualifier(ctx.qualifier);
@@ -359,8 +360,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
+                .qualifier(attr.qualifier.getText())
                 .mathType(getMathType(ctx))  //<- this isn't right yet, this will just be the range.
-                .progType(annotations.progTypes.get(ctx)).build();
+                .progType(annotations.progTypeValues.get(ctx)).build();
         PApplyBuilder result = new PApplyBuilder(operator)
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathType(ctx));
