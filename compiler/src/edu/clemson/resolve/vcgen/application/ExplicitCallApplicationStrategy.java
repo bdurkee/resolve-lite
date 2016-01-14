@@ -21,6 +21,13 @@ import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
 import java.util.*;
 
+/** An explicit call application is for calls to ops with
+ *  1. no return
+ *  2. whose ensure's clause consists of only equality exprs whose lhs is a
+ *     variable from a parameter having mode updates
+ *  See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
+ *  more info on what consitutes a call as 'simple' or explicit.
+ */
 public class ExplicitCallApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
@@ -76,6 +83,7 @@ public class ExplicitCallApplicationStrategy
             returnEnsuresArgSubstitutions.clear(); //TODO: hmmmm..
             List<PExp> actuals = thisExp.getArguments();
 
+            PSymbol functionName = (PSymbol) e.getFunctionPortion();
             OperationSymbol op = getOperation(block.scope, e);
 
             List<PExp> formals = Utils.apply(op.getParameters(),
@@ -91,27 +99,24 @@ public class ExplicitCallApplicationStrategy
             Iterator<PExp> actualParamIter = e.getArguments().iterator();
 
             Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
-            Map<PExp, PExp> ensuresEqualities = new HashMap<>();
+            Map<String, PExp> ensuresEqualities = opEnsures.getTopLevelVariableEqualities();
 
-            for (PExp equals : opEnsures.splitIntoConjuncts()) {
-                if (equals.isEquality()) {
-                    ensuresEqualities.put(equals.getSubExpressions().get(1),
-                            equals.getSubExpressions().get(2));
-                }
-            }
-            if (ensuresEqualities.containsKey(e.getFunctionPortion())) {
+            //TODO: I don't think this will actually happen here. What we (were) worried about here is
+            //what the FunctionAssign application is responsible for.
+            //I think this should be erased.
+            if (ensuresEqualities.containsKey(functionName.getName())) {
                 intermediateBindings.put(e,
-                        ensuresEqualities.get(e.getFunctionPortion()));
+                        ensuresEqualities.get(functionName.getName()));
             }
             while (formalParamIter.hasNext()) {
                 ProgParameterSymbol formal = formalParamIter.next();
                 PExp actual = actualParamIter.next();
                 if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
-                    if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
+                    if (!ensuresEqualities.containsKey(formal.getName())) {
                         continue;
                     }
                     intermediateBindings.put(actual,
-                            ensuresEqualities.get(formal.asPSymbol()));
+                            ensuresEqualities.get(formal.getName()));
                 }
             }
             for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {

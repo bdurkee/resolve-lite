@@ -142,7 +142,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         if (specReq.isPresent()) {
             result = specReq.get();
         }
-        if (ctx.externally == null) {
+        if (ctx.externally == null && impl != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream().filter(e -> e.getClauseType() ==
                             ClauseType.REQUIRES)
