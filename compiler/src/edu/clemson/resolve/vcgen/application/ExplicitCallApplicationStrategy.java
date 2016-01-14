@@ -73,15 +73,13 @@ public class ExplicitCallApplicationStrategy
         }
 
         public PExp getCompletedExp() {
-            return block.finalConfirm.getConfirmExp()
-                    .substitute(returnEnsuresArgSubstitutions);
+            return block.finalConfirm.getConfirmExp();
         }
 
         @Override public void endPApply(@NotNull PApply e) {
-            PApply thisExp = (PApply) e.substitute(returnEnsuresArgSubstitutions);
             PSymbol name = (PSymbol) e.getFunctionPortion();
             returnEnsuresArgSubstitutions.clear(); //TODO: hmmmm..
-            List<PExp> actuals = thisExp.getArguments();
+            List<PExp> actuals = e.getArguments();
 
             PSymbol functionName = (PSymbol) e.getFunctionPortion();
             OperationSymbol op = getOperation(block.scope, e);
@@ -99,15 +97,17 @@ public class ExplicitCallApplicationStrategy
             Iterator<PExp> actualParamIter = e.getArguments().iterator();
 
             Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
-            Map<String, PExp> ensuresEqualities = opEnsures.getTopLevelVariableEqualities();
+            Map<String, PExp> ensuresEqualities =
+                    opEnsures.getTopLevelVariableEqualities();
 
             //TODO: I don't think this will actually happen here. What we (were) worried about here is
             //what the FunctionAssign application is responsible for.
-            //I think this should be erased.
+            //I think this 'if' (and its body) below should be erased.
             if (ensuresEqualities.containsKey(functionName.getName())) {
                 intermediateBindings.put(e,
                         ensuresEqualities.get(functionName.getName()));
             }
+
             while (formalParamIter.hasNext()) {
                 ProgParameterSymbol formal = formalParamIter.next();
                 PExp actual = actualParamIter.next();
@@ -136,6 +136,8 @@ public class ExplicitCallApplicationStrategy
                         varsToReplaceInEnsures, actuals);
                 returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
+            PExp existingConfirm = block.finalConfirm.getConfirmExp();
+            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions));
         }
     }
 }
