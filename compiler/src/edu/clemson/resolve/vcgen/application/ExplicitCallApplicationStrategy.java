@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
@@ -36,11 +37,17 @@ public class ExplicitCallApplicationStrategy
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
+
         ExplicitCallRuleApplyingListener applier =
                 new ExplicitCallRuleApplyingListener(block);
         callExp.accept(applier);
 
-        return block.finalConfirm(applier.getCompletedExp())
+        PExp completedExp = applier.getCompletedExp();
+        BasicBetaReducingListener lambdaReducer =
+                new BasicBetaReducingListener(completedExp);
+        completedExp.accept(lambdaReducer);
+
+        return block.finalConfirm(lambdaReducer.getReducedExp())
                 .snapshot();
     }
 
