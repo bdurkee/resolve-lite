@@ -25,7 +25,7 @@ import java.util.*;
 /** An explicit call application is for calls to ops with
  *  1. no return
  *  2. whose ensure's clause consists of only equality exprs whose lhs is a
- *     variable from a parameter having mode updates
+ *     variable referencing a parameter having mode updates
  *  See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
  *  more info on what consitutes a call as 'simple' or explicit.
  */
