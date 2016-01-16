@@ -282,8 +282,8 @@ public class MTFunction extends MTType {
             implements
                 FunctionApplicationFactory {
 
-        @Override public MTType buildFunctionApplication(TypeGraph g,
-                MTFunction f, String calledAsName, List<MTType> arguments) {
+        @Override public MTType buildFunctionApplication(@NotNull TypeGraph g,
+                                                         @NotNull MTFunction f, @NotNull String calledAsName, @NotNull List<MTType> arguments) {
             return new MTFunctionApplication(g, f, calledAsName, arguments);
         }
     }

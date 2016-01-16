@@ -1,8 +1,16 @@
 Facility Boo;
-    //uses Standard_Integers;
+    uses Standard_Integers;
 
     Operation Main ();
         Procedure
+            Var x : Std_Ints :: Integer;
+            Var x : Std_Ints :: Integer;
 
     end Main;
+
+    Operation Foo (evaluates e : Std_Ints :: Integer)
+            : Std_Ints :: Integer;
+        Procedure
+
+    end Foo;
 end Boo;
