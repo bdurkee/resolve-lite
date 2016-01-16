@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rsrg.semantics.TypeGraph;
 
-//TODO: test visitors for outfix style also something with fencepost accept
+//TODO: returnEnsuresArgSubstitutions visitors for outfix style also something with fencepost accept
 
 public class TestASTStructure extends BaseTest {
 

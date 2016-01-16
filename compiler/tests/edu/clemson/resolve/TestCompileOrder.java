@@ -54,7 +54,7 @@ public class TestCompileOrder extends BaseTest {
     }
 
     //Todo: When facilities, enhancements, and other constructs are
-    //are eventually added, we're going to want to test compilation ordering
+    //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.
     private void testOrdering(String expected, String root) {
         ErrorQueue e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);

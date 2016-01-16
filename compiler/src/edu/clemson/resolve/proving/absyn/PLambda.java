@@ -150,6 +150,10 @@ public class PLambda extends PExp {
             this.type = type;
         }
 
+        public PSymbol asPSymbol() {
+            return new PSymbol.PSymbolBuilder(name).mathType(type).build();
+        }
+
         @Override public boolean equals(Object o) {
             boolean result = o instanceof MathSymbolDeclaration;
             if ( result ) {

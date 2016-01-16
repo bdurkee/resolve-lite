@@ -16,7 +16,8 @@ public class PSelector extends PExp {
 
     public PSelector(@NotNull PExp left, @NotNull PExp right) {
         super(left.structureHash * 72, right.structureHash * 36,
-                right.getMathType(), right.getMathTypeValue());
+                right.getMathType(), right.getMathTypeValue(),
+                right.getProgType(), right.getProgTypeValue());
         this.left = left;
         this.right = right;
     }

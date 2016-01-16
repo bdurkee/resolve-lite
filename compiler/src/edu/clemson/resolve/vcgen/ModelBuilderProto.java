@@ -19,6 +19,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.PTElement;
 import org.rsrg.semantics.programtype.PTFamily;
 import org.rsrg.semantics.programtype.PTNamed;
 import org.rsrg.semantics.programtype.PTRepresentation;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.*;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
@@ -95,7 +97,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             Utils.getModuleName(ctx));
         }
     }
-/*
+
     @Override public void enterFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
@@ -109,18 +111,23 @@ public class ModelBuilderProto extends ResolveBaseListener {
             ResolveParser.FacilityDeclContext ctx) {
         ModuleScopeBuilder spec = null, impl = null;
         try {
-            spec = symtab.getModuleScope(ctx.spec.getText());
-            impl = symtab.getModuleScope(ctx.impl.getText());
+            spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            if (ctx.externally == null) {
+                impl = symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+            }
         }
         catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-        List<PExp> specArgs = ctx.specArgs.moduleArgument().stream()
-                .map(tr.mathPExps::get).collect(Collectors.toList());
+        List<PExp> specArgs = ctx.specArgs.progExp().stream()
+                .map(tr.mathPExps::get)
+                .filter(e -> !(e.getProgType() instanceof PTElement))
+                .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(specArgs);
 
-        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
-                .stream().map(ProgParameterSymbol::asPSymbol)
+        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class)
+                .stream().filter(e -> !e.isModuleTypeParameter())
+                .map(ModuleParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
 
         Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
@@ -135,13 +142,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
         if (specReq.isPresent()) {
             result = specReq.get();
         }
-        if (ctx.externally == null) {
+        if (ctx.externally == null && impl != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream().filter(e -> e.getClauseType() ==
                             ClauseType.REQUIRES)
                     .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
 
-            List<PExp> implArgs = ctx.implArgs.moduleArgument().stream()
+            List<PExp> implArgs = ctx.implArgs.progExp().stream()
                     .map(tr.mathPExps::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(implArgs);
 
@@ -186,16 +193,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new ExplicitCallRuleApplyingListener(block);
         exp.accept(applier);
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
-        block.finalConfirm(finalConfirm.substitute(applier.test));
-        if (applier.test.isEmpty()) {
+        block.finalConfirm(finalConfirm);
+       /* if (applier.returnEnsuresArgSubstitutions.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
                     "call rule to: " + exp.toString()+".. " +
                     "could happen too right now if there's no spec for the op");
-        }
-        return applier.test.get(exp);
+        }*/
+        return applier.returnEnsuresArgSubstitutions.get(exp);
     }
-*/
+
     @Override public void enterTypeRepresentationDecl(
             ResolveParser.TypeRepresentationDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
@@ -247,11 +254,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp newConstraint =
                 constraint.substitute(currentTypeReprSym.exemplarAsPSymbol(),
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
-        //If the correspondence is multi-part, we split it; E.g.:
-        //'conc.P.Trmnl_Loc' ~> 'SS(k)(P.Length, Cen(k))'
-        //'conc.P.Curr_Loc' ~> 'SS(k)(P.Curr_Place, Cen(k))'
-        //'conc.P.Lab' ~> \ 'q : Sp_Loc(k).({P.labl.Valu(SCD(q)) if SCD(q) + 1 <= P.Length; ...});'
-        //newConstraint = betaReduce(newConstraint, correspondence);
 
         block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newConstraint);
@@ -293,7 +295,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         currentTypeReprSym.conceptualExemplarAsPSymbol());
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention);  //order here is important
-        block.assume(correspondence.splitIntoConjuncts());
+        block.assume(correspondence);
         block.finalConfirm(newInitEnsures);
         outputFile.addAssertiveBlock(block.build());
     }
@@ -366,7 +368,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             "Correct_Op_Hypo="+ctx.name.getText(), ctx)
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                            //constraints should be added on demand via notice...
+                            //constraints should be added on demand via NOTICE:...
                             //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
@@ -483,7 +485,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         }
         stats.put(ctx, s);
     }
-/*
+
     //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
     //otherwise,
     @Override public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
@@ -492,7 +494,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         SWAP_APPLICATION, tr.mathPExps.get(ctx.left),
                         tr.mathPExps.get(ctx.right));
         stats.put(ctx, s);
-    }*/
+    }
 
     @Override public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         VCRuleBackedStat s =
@@ -535,12 +537,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PTNamed declaredType = (PTNamed)p.getDeclaredType();
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof PTFamily) {
-                PExp constraint = ((PTFamily) declaredType).getConstraint();
+                /*PExp constraint = ((PTFamily) declaredType).getConstraint();
 
                 constraint = constraint.substitute(
                         getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
+                */
             }
             else if (declaredType instanceof PTRepresentation)  {
                 ProgReprTypeSymbol repr =

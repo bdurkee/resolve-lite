@@ -6,6 +6,7 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
@@ -13,8 +14,6 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DuplicateSymbolException;
-import org.rsrg.semantics.NoSuchSymbolException;
 import org.rsrg.semantics.Scope;
 import org.rsrg.semantics.SymbolTableException;
 import org.rsrg.semantics.query.OperationQuery;
@@ -23,6 +22,13 @@ import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
 import java.util.*;
 
+/** An explicit call application is for calls to ops with
+ *  1. no return
+ *  2. whose ensure's clause consists of only equality exprs whose lhs is a
+ *     variable referencing a parameter having mode updates
+ *  See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
+ *  more info on what consitutes a call as 'simple' or explicit.
+ */
 public class ExplicitCallApplicationStrategy
         implements
             StatRuleApplicationStrategy<VCRuleBackedStat> {
@@ -31,11 +37,17 @@ public class ExplicitCallApplicationStrategy
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
+
         ExplicitCallRuleApplyingListener applier =
                 new ExplicitCallRuleApplyingListener(block);
         callExp.accept(applier);
 
-        return block.finalConfirm(applier.getCompletedExp())
+        PExp completedExp = applier.getCompletedExp();
+        BasicBetaReducingListener lambdaReducer =
+                new BasicBetaReducingListener(completedExp);
+        completedExp.accept(lambdaReducer);
+
+        return block.finalConfirm(lambdaReducer.getReducedExp())
                 .snapshot();
     }
 
@@ -59,7 +71,7 @@ public class ExplicitCallApplicationStrategy
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     public static class ExplicitCallRuleApplyingListener extends PExpListener {
-        public Map<PExp, PExp> test = new HashMap<>();
+        public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
         public ExplicitCallRuleApplyingListener(
@@ -68,15 +80,15 @@ public class ExplicitCallApplicationStrategy
         }
 
         public PExp getCompletedExp() {
-            return block.finalConfirm.getConfirmExp().substitute(test);
+            return block.finalConfirm.getConfirmExp();
         }
 
         @Override public void endPApply(@NotNull PApply e) {
-            PApply thisExp = (PApply) e.substitute(test);
             PSymbol name = (PSymbol) e.getFunctionPortion();
-            test.clear(); //TODO: hmmmm..
-            List<PExp> actuals = thisExp.getArguments();
+            returnEnsuresArgSubstitutions.clear(); //TODO: hmmmm..
+            List<PExp> actuals = e.getArguments();
 
+            PSymbol functionName = (PSymbol) e.getFunctionPortion();
             OperationSymbol op = getOperation(block.scope, e);
 
             List<PExp> formals = Utils.apply(op.getParameters(),
@@ -92,27 +104,26 @@ public class ExplicitCallApplicationStrategy
             Iterator<PExp> actualParamIter = e.getArguments().iterator();
 
             Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
-            Map<PExp, PExp> ensuresEqualities = new HashMap<>();
+            Map<String, PExp> ensuresEqualities =
+                    opEnsures.getTopLevelVariableEqualities();
 
-            for (PExp equals : opEnsures.splitIntoConjuncts()) {
-                if (equals.isEquality()) {
-                    ensuresEqualities.put(equals.getSubExpressions().get(1),
-                            equals.getSubExpressions().get(2));
-                }
-            }
-            if (ensuresEqualities.containsKey(e.getFunctionPortion())) {
+            //TODO: I don't think this will actually happen here. What we (were) worried about here is
+            //what the FunctionAssign application is responsible for.
+            //I think this 'if' (and its body) below should be erased.
+            if (ensuresEqualities.containsKey(functionName.getName())) {
                 intermediateBindings.put(e,
-                        ensuresEqualities.get(e.getFunctionPortion()));
+                        ensuresEqualities.get(functionName.getName()));
             }
+
             while (formalParamIter.hasNext()) {
                 ProgParameterSymbol formal = formalParamIter.next();
                 PExp actual = actualParamIter.next();
                 if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
-                    if (!ensuresEqualities.containsKey(formal.asPSymbol())) {
+                    if (!ensuresEqualities.containsKey(formal.getName())) {
                         continue;
                     }
                     intermediateBindings.put(actual,
-                            ensuresEqualities.get(formal.asPSymbol()));
+                            ensuresEqualities.get(formal.getName()));
                 }
             }
             for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {
@@ -130,8 +141,10 @@ public class ExplicitCallApplicationStrategy
                  */
                 PExp v = exp.getValue().substitute(
                         varsToReplaceInEnsures, actuals);
-                test.put(exp.getKey(), v);
+                returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
+            PExp existingConfirm = block.finalConfirm.getConfirmExp();
+            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions));
         }
     }
 }

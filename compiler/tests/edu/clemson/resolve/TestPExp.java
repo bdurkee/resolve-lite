@@ -478,7 +478,7 @@ public class TestPExp extends BaseTest {
             //even in the presence of errors.
             if ( parser.getNumberOfSyntaxErrors() > 0 ) {
                 throw new IllegalArgumentException("input string: " + input
-                        + " for PExp test contains syntax error");
+                        + " for PExp returnEnsuresArgSubstitutions contains syntax error");
             }
             return parser.mathAssertionExp();
         }
@@ -493,13 +493,13 @@ public class TestPExp extends BaseTest {
      *  return a dummy {@code true} expr; never just {@code null}.
      *
      *  <p>Also: Building even moderately sized {@link PExp}s is a pain; building one
-     *  with real type information is an even bigger pain. Thus, for test methods
+     *  with real type information is an even bigger pain. Thus, for returnEnsuresArgSubstitutions methods
      *  where this function is used, know that we don't care about types so much
      *  as we do about correct expression structure and quantifier
      *  distribution. So instead of real type information we typically just use
      *  {@link org.rsrg.semantics.MTInvalid}.</p>
      *
-     *  <p>If you <em>want</em> to test something math type related, just
+     *  <p>If you <em>want</em> to returnEnsuresArgSubstitutions something math type related, just
      *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
      *  or {@link PApply.PApplyBuilder}; otherwise parse the larger expr
      *  using this method.</p>

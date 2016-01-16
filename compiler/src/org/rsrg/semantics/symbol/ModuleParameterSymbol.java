@@ -1,5 +1,7 @@
 package org.rsrg.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +55,12 @@ public class ModuleParameterSymbol extends Symbol {
                     ProgParameterSymbol.ParameterMode.TYPE;
         }
         return result;
+    }
+
+    @Nullable public PExp asPSymbol() {
+        if (!(wrappedParamSymbol instanceof ProgParameterSymbol)) return null;
+        return new PSymbol.PSymbolBuilder(
+                ((ProgParameterSymbol) wrappedParamSymbol).asPSymbol()).build();
     }
 
     @Override public boolean isModuleOperationParameter() {

@@ -176,7 +176,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * Tests if that boolean expression contains equal conjuncts in the same
      * order as {@code this}.
      *
-     * @param otherConjuncts The set of conjuncts to test for ordered
+     * @param otherConjuncts The set of conjuncts to returnEnsuresArgSubstitutions for ordered
      * 						 equality.
      *
      * @return True <strong>iff</strong> the given expression is order-equal.
@@ -197,7 +197,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * Tests if each expression in the given {@code ImmutableConjuncts}
      * has an equal expression in {@code this}, and <em>visa versa</em>.
      *
-     * @param o The set of conjuncts to test against {@code this}.
+     * @param o The set of conjuncts to returnEnsuresArgSubstitutions against {@code this}.
      * @return True <strong>iff</strong> the given set of conjuncts is equal.
      */
     public boolean equals(Object o) {
@@ -228,8 +228,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * Answers the question, "Does each {@code PExp} in {@code query} have an
      * equal {@code PExp} in {@code base}?"
      *
-     * @param query expressions to test
-     * @param base expressions to test against
+     * @param query expressions to returnEnsuresArgSubstitutions
+     * @param base expressions to returnEnsuresArgSubstitutions against
      *
      * @return the answer
      */
@@ -259,7 +259,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * Returns {@code true} <strong>iff</strong> at least one of the
      * conjuncts in {@code this} is equal to {@code e}.
      *
-     * @param e The {@code PExp} to test for equality.
+     * @param e The {@code PExp} to returnEnsuresArgSubstitutions for equality.
      *
      * @return True <strong>iff</strong> {@code this} contains an
      *         equal conjunct.

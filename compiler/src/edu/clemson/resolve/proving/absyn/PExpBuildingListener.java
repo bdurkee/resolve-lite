@@ -326,7 +326,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
-        repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
+        PExp rhs = repo.get(ctx.rhs);
+        PTType t = annotations.progTypes.get(ctx.rhs);
+        repo.put(ctx, new PSelector(repo.get(ctx.lhs), rhs));
     }
 
     @Override public void exitProgParamExp(
@@ -341,6 +343,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
+                .progTypeValue(annotations.progTypeValues.get(ctx))
                 .mathTypeValue(getMathTypeValue(ctx))
                 .mathType(getMathType(ctx))
                 .qualifier(ctx.qualifier);
@@ -359,8 +362,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
+                .qualifier(attr.qualifier.getText())
                 .mathType(getMathType(ctx))  //<- this isn't right yet, this will just be the range.
-                .progType(annotations.progTypes.get(ctx)).build();
+                .progType(annotations.progTypes.get(ctx))
+                .progTypeValue(annotations.progTypeValues.get(ctx)).build();
         PApplyBuilder result = new PApplyBuilder(operator)
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathType(ctx));

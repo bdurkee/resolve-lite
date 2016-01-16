@@ -42,6 +42,7 @@ public class ParsimoniousAssumeApplicationStrategy
         }
         //now substitute any conc equalities into RP
         RP = RP.substitute(concEqualitySubstitutions);
+        //beta reduce any lambdas present now...
 
         List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
         for (PExp assume : assumeConjunctsWithoutConcEqualities) {
@@ -50,7 +51,6 @@ public class ParsimoniousAssumeApplicationStrategy
             if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
                 parsimoniousAssumeConjuncts.add(assume);
             }
-
         }
         //this will be the pruned assume expr
         if (!parsimoniousAssumeConjuncts.isEmpty()) {

@@ -71,8 +71,10 @@ public class TypeGraph {
             implements
                 FunctionApplicationFactory {
 
-        @Override public MTType buildFunctionApplication(TypeGraph g,
-                MTFunction f, String refName, List<MTType> args) {
+        @Override public MTType buildFunctionApplication(@NotNull TypeGraph g,
+                                                         @NotNull MTFunction f,
+                                                         @NotNull String refName,
+                                                         @NotNull List<MTType> args) {
             return new MTPowersetApplication(g, args.get(0));
         }
     }
@@ -81,8 +83,10 @@ public class TypeGraph {
             implements
                 FunctionApplicationFactory {
 
-        @Override public MTType buildFunctionApplication(TypeGraph g,
-                MTFunction f, String calledAsName, List<MTType> arguments) {
+        @Override public MTType buildFunctionApplication(@NotNull TypeGraph g,
+                                                         @NotNull MTFunction f,
+                                                         @NotNull String calledAsName,
+                                                         @NotNull List<MTType> arguments) {
             return new MTFunctionBuilder(g, arguments.get(1))
                     .paramTypes(arguments.get(0)).build();
         }
@@ -92,9 +96,10 @@ public class TypeGraph {
             implements
             FunctionApplicationFactory {
 
-        @Override
-        public MTType buildFunctionApplication(TypeGraph g, MTFunction f,
-                               String calledAsName, List<MTType> arguments) {
+        @Override public MTType buildFunctionApplication(@NotNull TypeGraph g,
+                                                         @NotNull MTFunction f,
+                                                         @NotNull String calledAsName,
+                                                         @NotNull List<MTType> arguments) {
             return new MTCartesian(g,
                     new MTCartesian.Element(arguments.get(0)),
                     new MTCartesian.Element(arguments.get(1)));
