@@ -152,7 +152,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(type);
         MathType colonRhsType = exactNamedIntermediateMathTypes.get(type);
 
-        String x = names.get(0).getText();
         MathType defnType = null;
         if (colonRhsType.typeRefDepth > 0) {
             int newTypeDepth = colonRhsType.typeRefDepth - 1;
@@ -177,10 +176,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), asNamed));
                 }
-                /*for (TerminalNode t : names) {
-                    defnEnclosingScope
-                            .define(new MathSymbol(g, t.getText(), defnType));
-                }*/
             } else {
                 for (ParseTree t : names) {
                     defnType = new MathNamedType(g, t.getText(),
@@ -214,11 +209,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-
     @Override public Void visitMathAssertionExp(
             ResolveParser.MathAssertionExpContext ctx) {
-        visitAndTypeMathExpCtx(ctx, ctx.getChild(0));
-        return null;
+        visitAndTypeMathExpCtx(ctx, ctx.getChild(0)); return null;
+    }
+
+    @Override public Void visitMathNestedExp(
+            ResolveParser.MathNestedExpContext ctx) {
+        visitAndTypeMathExpCtx(ctx, ctx.mathExp()); return null;
     }
 
     private void visitAndTypeMathExpCtx(ParseTree ctx, ParseTree child) {
@@ -237,7 +235,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             mathTypes.put(ctx, g.INVALID);
             return null;
         }
-        String here = ctx.getText();
+        String asString = ctx.getText();
         exactNamedIntermediateMathTypes.put(ctx, s.getMathType());
 
         if (s.getMathType().identifiesSchematicType) {
@@ -247,7 +245,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         return null;
     }
-    
+
     @Nullable private MathSymbol getIntendedMathSymbol(
             @Nullable Token qualifier, @NotNull String symbolName,
             @NotNull ParserRuleContext ctx) {
