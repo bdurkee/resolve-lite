@@ -24,6 +24,14 @@ public class MathSymbol extends Symbol {
     }
 
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+                      @NotNull MathType type,
+                      @Nullable ParserRuleContext definingTree,
+                      @NotNull ModuleIdentifier moduleIdentifier) {
+        this(g, name, Quantification.NONE, type, definingTree,
+                moduleIdentifier);
+    }
+
+    public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                       @NotNull Quantification q,
                       @NotNull MathType type,
                       @Nullable ParserRuleContext definingTree,

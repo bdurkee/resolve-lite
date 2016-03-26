@@ -24,8 +24,6 @@ public class SanityCheckingListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-
-
     /** Decends into every node in an arbitrary parsetree and listens for
      *  {@link ResolveParser.ProgParamExpContext}s whose characteristics satisfy
      *  some arbitrary {@link Predicate}.

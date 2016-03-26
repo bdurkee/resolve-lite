@@ -45,7 +45,7 @@ public abstract class SyntacticScope extends AbstractScope {
     @NotNull @Override public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException {
         if (symbols.containsKey(s.getName())) {
-            throw new DuplicateSymbolException(symbols.get(s.getName()));
+            throw new DuplicateSymbolException(s);
         }
         //TODO: bubble me over to the populator so I can be nicely printed.
         /*if ( s.getNameToken().equals(moduleIdentifier) ) {

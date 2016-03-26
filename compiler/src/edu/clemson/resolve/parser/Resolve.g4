@@ -54,9 +54,9 @@ precisExtModuleDecl
     ;
 
 precisBlock
-    :   ( mathStandardDefinitionDecl
-        | mathCategoricalDefinitionDecl
-        | mathInductiveDefinitionDecl
+    :   ( mathStandardDefnDecl
+        | mathCategoricalDefnDecl
+        | mathInductiveDefnDecl
         | mathTheoremDecl
         )*
     ;
@@ -73,16 +73,16 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-mathDefinitionSig
-    :   mathPrefixDefnSig
+mathDefnSig
+    :   mathPrefixDefnSigs
     |   mathInfixDefnSig
-    |   mathOutfixDefinitionSig
+    |   mathOutfixDefnSig
     |   mathPostfixDefnSig
     ;
 
 mathPrefixDefnSig
-    :   name=mathSymbolName ('('
-                mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
+    :   mathSymbolName (',' mathSymbolName)* ('('
+                mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
                 ':' mathTypeExp
     ;
 
@@ -96,7 +96,7 @@ mathInfixDefnSig
         '(' mathVariableDecl ')' ':' mathTypeExp
     ;
 
-mathOutfixDefinitionSig
+mathOutfixDefnSig
     :   leftSym=mathSymbolName mathVariableDecl
         rightSym=mathSymbolName ':' mathTypeExp
     ;
@@ -109,23 +109,23 @@ mathSymbolName
     :   ID|('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'<'|'<='|'>='|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ')
     ;
 
-mathCategoricalDefinitionDecl
+mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
         'is' mathAssertionExp ';'
     ;
 
-mathStandardDefinitionDecl
-    :   ('Implicit')? 'Definition' mathDefinitionSig
-        ('is' mathAssertionExp)? ';'
+mathStandardDefnDecl
+    :   ('Implicit')? 'Definition' mathDefnSig
+        ('is' body=mathAssertionExp)? ';'
     ;
 
-mathInductiveDefinitionDecl
-    :   'Inductive' 'Definition' mathDefinitionSig 'is'
+mathInductiveDefnDecl
+    :   'Inductive' 'Definition' mathDefnSig 'is'
         '(i.)' mathAssertionExp ';'
         '(ii.)' mathAssertionExp ';'
     ;
 
-mathVariableDeclGroup
+mathVarDeclGroup
     :   ID (',' ID)* ':' mathTypeExp
     ;
 
@@ -145,7 +145,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS|'∀'|'∃') mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
@@ -193,7 +193,7 @@ mathLiteralExp
     ;
 
 mathCrossTypeExp
-    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
+    :   'Cart_Prod' (mathVarDeclGroup ';')+ 'end'
     ;
 
 mathSymbolExp
@@ -218,8 +218,8 @@ mathSetExp
     ;
 
 mathLambdaExp
-    :   ('lambda'|'λ') '(' mathVariableDeclGroup
-        (',' mathVariableDeclGroup)* ')' '.' '(' mathExp ')'
+    :   ('lambda'|'λ') '(' mathVarDeclGroup
+        (',' mathVarDeclGroup)* ')' '.' '(' mathExp ')'
     ;
 
 mathAlternativeExp
