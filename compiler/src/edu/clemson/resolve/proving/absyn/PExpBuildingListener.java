@@ -238,8 +238,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
-        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
-                .mathVariableDeclGroup()) {
+        for (ResolveParser.MathVarDeclGroupContext grp : ctx
+                .mathVarDeclGroup()) {
             for (TerminalNode term : grp.ID()) {
                 parameters.add(new PLambda.MathSymbolDeclaration(term.getText(),
                         getMathType(grp.mathTypeExp())));

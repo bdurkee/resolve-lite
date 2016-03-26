@@ -10,7 +10,7 @@ public abstract class MathType {
 
     protected final DumbTypeGraph g;
     public int typeRefDepth = 0;
-    protected final MathType enclosingType;
+    public final MathType enclosingType;
 
     /** Really this should only apply to instances of {@link MathNamedType}s,
      *  as those are what represent the holes that can be filled in an arbitrary

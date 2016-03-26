@@ -6,11 +6,14 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
 
 import java.util.ArrayList;
@@ -192,6 +195,79 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         .define(new MathSymbol(g, t.getText(), g.INVALID));
             }
         }
+    }
+
+    @Override public Void visitMathTypeExp(
+            ResolveParser.MathTypeExpContext ctx) {
+        walkingType = true;
+        this.visit(ctx.mathExp());
+        walkingType = false;
+
+        MathType type = exactNamedIntermediateMathTypes.get(ctx.mathExp());
+        if (type == g.INVALID || type == null || type.typeRefDepth == 0) {
+            compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE,
+                    ctx.getStart(), ctx.mathExp().getText());
+            type = g.INVALID;
+        }
+        exactNamedIntermediateMathTypes.put(ctx, type);
+        mathTypes.put(ctx, type.enclosingType);
+        return null;
+    }
+
+
+    @Override public Void visitMathAssertionExp(
+            ResolveParser.MathAssertionExpContext ctx) {
+        visitAndTypeMathExpCtx(ctx, ctx.getChild(0));
+        return null;
+    }
+
+    private void visitAndTypeMathExpCtx(ParseTree ctx, ParseTree child) {
+        this.visit(child);
+        MathType t = exactNamedIntermediateMathTypes.get(child);
+        exactNamedIntermediateMathTypes.put(ctx, t);
+        mathTypes.put(ctx, t.getEnclosingType());
+    }
+
+    @Override public Void visitMathSymbolExp(
+            ResolveParser.MathSymbolExpContext ctx) {
+        MathSymbol s = getIntendedMathSymbol(ctx.qualifier,
+                ctx.name.getText(), ctx);
+        if (s == null || s.getMathType() == null) {
+            exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
+            mathTypes.put(ctx, g.INVALID);
+            return null;
+        }
+        String here = ctx.getText();
+        exactNamedIntermediateMathTypes.put(ctx, s.getMathType());
+
+        if (s.getMathType().identifiesSchematicType) {
+            mathTypes.put(ctx, s.getMathType());
+        } else {
+            mathTypes.put(ctx, s.getMathType().enclosingType);
+        }
+        return null;
+    }
+    
+    @Nullable private MathSymbol getIntendedMathSymbol(
+            @Nullable Token qualifier, @NotNull String symbolName,
+            @NotNull ParserRuleContext ctx) {
+        try {
+            return symtab.getInnermostActiveScope()
+                    .queryForOne(new MathSymbolQuery(qualifier,
+                            symbolName, ctx.getStart()));
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    symbolName);
+        } catch (NoSuchModuleException nsme) {
+            compiler.errMgr.semanticError(nsme.getErrorKind(),
+                    nsme.getRequestedModule(),
+                    nsme.getRequestedModule().getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a math symbol", symbolName,
+                    use.getTheUnexpectedSymbolDescription());
+        }
+        return null;
     }
 
     private ModuleIdentifier getRootModuleIdentifier() {
