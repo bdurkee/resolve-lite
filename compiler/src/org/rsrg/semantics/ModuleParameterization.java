@@ -1,11 +1,8 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.parser.ResolveParser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.symbol.*;
 
 import java.util.*;
@@ -35,7 +32,7 @@ public class ModuleParameterization {
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
-            Map<String, PTType> genericInstantiations;
+            Map<String, ProgType> genericInstantiations;
             genericInstantiations =
                     getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
@@ -57,10 +54,10 @@ public class ModuleParameterization {
     }*/
 
     //TODO: Annotate actualArguments as not null!
-    private Map<String, PTType> getGenericInstantiations(
+    private Map<String, ProgType> getGenericInstantiations(
             @NotNull ModuleScopeBuilder moduleScope,
             List<ResolveParser.ProgExpContext> actualArguments) {
-        Map<String, PTType> result = new HashMap<>();
+        Map<String, ProgType> result = new HashMap<>();
 
         List<ModuleParameterSymbol> moduleParams =
                 moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);

@@ -2,11 +2,10 @@ package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
@@ -48,7 +47,7 @@ public class GlobalMathAssertionSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         //Todo: Eventually we'll use the PExp hierarchy to perform generic
         //instantiations on field 'assertion'

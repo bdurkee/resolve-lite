@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final Map<String, Quantification> quantifiedVars =
             new HashMap<>();
     private final boolean skipDummyQuantifierNodes;
-    private final TypeGraph g;
+    private final DumbTypeGraph g;
 
     /** Constructs a new {@code PExpBuildingListener} given an
      *  {@link AnnotatedModule} with it's associated expression tree mappings.
@@ -42,20 +42,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      *  @param g a typegraph
      *  @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull TypeGraph g,
+    public PExpBuildingListener(@NotNull DumbTypeGraph g,
                                 @NotNull AnnotatedModule annotations) {
         this(g, annotations, false);
     }
 
     /** Constructs a new {@code PExpBuildingListener} given an instance of
-     *  {@link TypeGraph}, some module {@code annotations} and a boolean flag
+     *  {@link DumbTypeGraph}, some module {@code annotations} and a boolean flag
      *  {@code skipDummyQuantifiedNodes} indicating whether or not to construct
      *  special, explicit syntactic node representing existential or universal
      *  quantifiers.
      *
      *  @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull TypeGraph g,
+    public PExpBuildingListener(@NotNull DumbTypeGraph g,
                                 @NotNull AnnotatedModule annotations,
                                 boolean skipDummyQuantifiedNodes) {
         this.g = g;
@@ -70,7 +70,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
-    @Override public void exitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
+/*    @Override public void exitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
@@ -137,16 +137,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitMathPrefixApplyExp(
-            ResolveParser.MathPrefixApplyExpContext ctx) {
+    @Override public void exitMathPrefixAppExp(
+            ResolveParser.MathPrefixAppExpContext ctx) {
         List<? extends ParseTree> args = ctx.mathExp()
                 .subList(1, ctx.mathExp().size());
         PApplyBuilder result =
-                new PApplyBuilder(repo.get(ctx.functionExp))
+                new PApplyBuilder(repo.get(ctx.name))
                         .arguments(Utils.collect(PExp.class, args, repo))
                         .applicationType(getMathType(ctx))
-                        .style(PREFIX)
-                        .applicationTypeValue(getMathTypeValue(ctx));
+                        .style(PREFIX);
         repo.put(ctx, result.build());
     }
 
@@ -212,7 +211,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathJoiningOp(
             ResolveParser.MathJoiningOpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
+    }*/
 
     private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
                                          @Nullable Token qualifier,
@@ -226,13 +225,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        MTType t = getMathType(ctx);
+        MathType t = getMathType(ctx);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                     .qualifier(ctx.qualifier)
                     .incoming(ctx.incoming != null)
                     .quantification(quantifiedVars.get(ctx.name.getText()))
-                    .mathTypeValue(getMathTypeValue(ctx))
                     .mathType(getMathType(ctx));
         repo.put(ctx, result.build());
     }
@@ -244,7 +242,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .mathVariableDeclGroup()) {
             for (TerminalNode term : grp.ID()) {
                 parameters.add(new PLambda.MathSymbolDeclaration(term.getText(),
-                        getMathTypeValue(grp.mathTypeExp())));
+                        getMathType(grp.mathTypeExp())));
             }
         }
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
@@ -268,19 +266,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
         PAlternatives result =
                 new PAlternatives(conditions, results, otherwiseResult,
-                        getMathType(ctx), getMathTypeValue(ctx));
+                        getMathType(ctx));
         repo.put(ctx, result);
     }
 
     @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
-        repo.put(ctx, new PSet(annotations.mathTypes.get(ctx), null,
+        repo.put(ctx, new PSet(annotations.mathTypes.get(ctx),
                 Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
-    @Override public void exitMathSelectorExp(
+    /*@Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
-    }
+    }*/
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
@@ -299,7 +297,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitConstraintClause(
+    /*@Override public void exitConstraintClause(
             ResolveParser.ConstraintClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
@@ -327,7 +325,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
         PExp rhs = repo.get(ctx.rhs);
-        PTType t = annotations.progTypes.get(ctx.rhs);
+        ProgType t = annotations.progTypes.get(ctx.rhs);
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), rhs));
     }
 
@@ -357,7 +355,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
-        List<PTType> argTypes = ctx.progExp().stream()
+        List<ProgType> argTypes = ctx.progExp().stream()
                 .map(annotations.progTypes::get).collect(Collectors.toList());
         HardCodedProgOps.BuiltInOpAttributes attr =
                 HardCodedProgOps.convert(ctx.op, argTypes);
@@ -394,10 +392,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.ProgStringLiteralExpContext ctx) {
         repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
-    }
+    }*/
 
-    private PExp buildLiteral(String literalText, MTType type, MTType typeValue,
-                              PTType progType) {
+    private PExp buildLiteral(String literalText, MathType type, MathType typeValue,
+                              ProgType progType) {
         PSymbolBuilder result =
                 new PSymbolBuilder(literalText).mathType(type)
                         .progType(progType).mathTypeValue(typeValue)
@@ -405,13 +403,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result.build();
     }
 
-    private MTType getMathType(ParseTree t) {
+    private MathType getMathType(ParseTree t) {
         return annotations.mathTypes.get(t) == null ? g.INVALID :
                 annotations.mathTypes.get(t);
-    }
-
-    private MTType getMathTypeValue(ParseTree t) {
-        return annotations.mathTypeValues.get(t) == null ? g.INVALID :
-                annotations.mathTypeValues.get(t);
     }
 }

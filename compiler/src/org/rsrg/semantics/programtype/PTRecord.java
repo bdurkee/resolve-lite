@@ -1,39 +1,37 @@
 package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTCartesian;
-import org.rsrg.semantics.MTCartesian.Element;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.TypeGraph;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public class PTRecord extends PTType {
+public class PTRecord extends ProgType {
 
-    @NotNull private final Map<String, PTType> fields = new HashMap<>();
-    @NotNull private MTType mathTypeAlterEgo;
+    @NotNull private final Map<String, ProgType> fields = new HashMap<>();
+    @NotNull private MathType mathTypeAlterEgo;
 
-    public PTRecord(@NotNull TypeGraph g,
-                    @NotNull Map<String, PTType> types) {
+    public PTRecord(@NotNull DumbTypeGraph g,
+                    @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
 
-        Element[] elements = new Element[types.size()];
+       /* Element[] elements = new Element[types.size()];
         int index = 0;
-        for (Map.Entry<String, PTType> field : types.entrySet()) {
+        for (Map.Entry<String, ProgType> field : types.entrySet()) {
             elements[index] =
                     new Element(field.getKey(), field.getValue().toMath());
             index++;
         }
-        this.mathTypeAlterEgo = new MTCartesian(g, elements);
+        this.mathTypeAlterEgo = new MathCartesianType(g, elements);*/
     }
 
-    @NotNull public PTType getFieldType(@NotNull String name)
+    @NotNull public ProgType getFieldType(@NotNull String name)
             throws NoSuchElementException {
-        PTType result = fields.get(name);
+        ProgType result = fields.get(name);
         if (result == null) {
             throw new NoSuchElementException();
         }
@@ -44,7 +42,7 @@ public class PTRecord extends PTType {
         return true;
     }
 
-    @NotNull @Override public MTType toMath() {
+    @NotNull @Override public MathType toMath() {
         return mathTypeAlterEgo;
     }
 
@@ -52,12 +50,12 @@ public class PTRecord extends PTType {
         return "record " + fields;
     }
 
-    @NotNull @Override public PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull @Override public ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
 
-        Map<String, PTType> newFields = new HashMap<>();
-        for (Map.Entry<String, PTType> type : fields.entrySet()) {
+        Map<String, ProgType> newFields = new HashMap<>();
+        for (Map.Entry<String, ProgType> type : fields.entrySet()) {
             newFields.put(
                     type.getKey(),
                     type.getValue().instantiateGenerics(genericInstantiations,

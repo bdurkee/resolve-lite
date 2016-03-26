@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class ProcedureSymbol extends Symbol {
     }
 
     @NotNull @Override public ProcedureSymbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProcedureSymbol(getName(), getDefiningTree(), getModuleIdentifier(),

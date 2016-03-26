@@ -2,8 +2,8 @@ package org.rsrg.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTNamed;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathNamedType;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -12,11 +12,11 @@ import java.util.Map;
 
 public class PTFamily extends PTNamed {
 
-    @NotNull private final MTType model;
+    @NotNull private final MathType model;
     @NotNull private final String name, exemplarName;
     @NotNull private final PExp constraint;
 
-    public PTFamily(@NotNull MTType model, @NotNull String name,
+    public PTFamily(@NotNull MathType model, @NotNull String name,
                     @NotNull String exemplarName, @NotNull PExp constraint,
                     @NotNull PExp initEnsures,
                     @NotNull ModuleIdentifier moduleIdentifier) {
@@ -39,7 +39,7 @@ public class PTFamily extends PTNamed {
         return constraint;
     }
 
-    @NotNull @Override public MTType toMath() {
+    @NotNull @Override public MathType toMath() {
         return model;
     }
 
@@ -47,19 +47,19 @@ public class PTFamily extends PTNamed {
         return name;
     }
 
-    @NotNull @Override public PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull @Override public ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
 
-        Map<String, MTType> stringToMathType =
+        Map<String, MathType> stringToMathType =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
-        @SuppressWarnings("unchecked") Map<MTType, MTType> mathTypeToMathType =
-                (Map<MTType, MTType>) (Map<?, MTType>) MTNamed.toMTNamedMap(
+      /*  @SuppressWarnings("unchecked") Map<MathType, MathType> mathTypeToMathType =
+                (Map<MathType, MathType>) (Map<?, MathType>) MathNamedType.toMTNamedMap(
                         getTypeGraph(), stringToMathType);
 
         //Todo: Not currently substituting generics into math expressions..
-        /*MTType newModel =
+        MathType newModel =
                 myModel.getCopyWithVariablesSubstituted(stringToMathType);
 
         PExp newConstraint =

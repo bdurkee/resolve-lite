@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.MathSymbolTable.ImportStrategy;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.searchers.SymbolTypeSearcher;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
@@ -56,7 +56,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
-        Map<String, PTType> genericInstantiations = new HashMap<>();
+        Map<String, ProgType> genericInstantiations = new HashMap<>();
 
         searchModule(searcher, source, repo, result, searchedScopes,
                 genericInstantiations, null, importStrategy, 0);
@@ -68,7 +68,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo,  @NotNull List<E> results,
             @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull ImportStrategy importStrategy, int depth)
             throws DuplicateSymbolException,
@@ -119,7 +119,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     public <E extends Symbol> boolean searchFacilities(
             @NotNull TableSearcher<E> searcher, @NotNull List<E> result,
             @NotNull Scope source,
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull Set<Scope> searchedScopes, MathSymbolTable repo)
             throws DuplicateSymbolException, NoSuchModuleException,
             UnexpectedSymbolException {
@@ -144,7 +144,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
             finished =
                     facilityScope.addMatches(searcher, result, searchedScopes,
-                            new HashMap<String, PTType>(), null,
+                            new HashMap<String, ProgType>(), null,
                             SearchContext.FACILITY);
 
             // YS Edits
@@ -162,7 +162,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                       finished =
                               facilityScope.addMatches(searcher, result,
                                       searchedScopes,
-                                      new HashMap<String, PTType>(), null,
+                                      new HashMap<String, ProgType>(), null,
                                       SearchContext.FACILITY);
                   }
               }*/

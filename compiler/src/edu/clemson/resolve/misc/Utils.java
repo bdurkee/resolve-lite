@@ -162,7 +162,7 @@ public class Utils {
         else if (ctx instanceof ResolveParser.PrecisExtModuleDeclContext ) {
             return ((ResolveParser.PrecisExtModuleDeclContext) ctx).name;
         }
-        else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
+        /*else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
             return ((ResolveParser.FacilityModuleDeclContext) ctx).name;
         }
         else if ( ctx instanceof ResolveParser.ConceptModuleDeclContext ) {
@@ -176,7 +176,7 @@ public class Utils {
         }
         else if ( ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext ) {
             return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
-        }
+        }*/
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

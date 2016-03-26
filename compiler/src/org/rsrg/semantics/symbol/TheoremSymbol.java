@@ -3,11 +3,11 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.DumbTypeGraph;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class TheoremSymbol extends Symbol {
     @NotNull private PExp assertion;
     @NotNull private MathSymbol mathSymbolAlterEgo;
 
-    public TheoremSymbol(@NotNull TypeGraph g, @NotNull String name,
+    public TheoremSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                          @NotNull PExp theoremAssertion,
                          @Nullable ParserRuleContext definingTree,
                          @NotNull ModuleIdentifier moduleIdentifier) {
@@ -28,8 +28,8 @@ public class TheoremSymbol extends Symbol {
 
         this.assertion = theoremAssertion;
         this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, g.BOOLEAN, null
-                        , definingTree, moduleIdentifier);
+                new MathSymbol(g, name, Quantification.NONE, g.BOOLEAN,
+                        definingTree, moduleIdentifier);
     }
 
     @NotNull public PExp getAssertion() {
@@ -49,7 +49,7 @@ public class TheoremSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

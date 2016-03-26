@@ -1,12 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.MTFunction.MTFunctionBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -159,8 +156,7 @@ public class PApply extends PExp {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
         //no; builder.applicationType won't be null; this is checked in PApply:build()
-                builder.applicationTypeValue,
-                builder.functionPortion.getProgType(), null);
+                builder.functionPortion.getProgType());
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
         this.displayStyle = builder.displayStyle;
@@ -263,7 +259,7 @@ public class PApply extends PExp {
 
     @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        TypeGraph g = getMathType().getTypeGraph();
+        DumbTypeGraph g = getMathType().getTypeGraph();
         if (getCanonicalName().equals("and")) {
             arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
         }
@@ -287,7 +283,6 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
                 .applicationType(getMathType())
-                .applicationTypeValue(getMathTypeValue())
                 .style(displayStyle).build();
     }
 
@@ -295,7 +290,6 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
                 .applicationType(getMathType())
-                .applicationTypeValue(getMathTypeValue())
                 .style(displayStyle).build();
     }
 
@@ -413,7 +407,7 @@ public class PApply extends PExp {
         @NotNull protected final PExp functionPortion;
         @NotNull protected final List<PExp> arguments = new ArrayList<>();
 
-        @Nullable protected MTType applicationType, applicationTypeValue;
+        @Nullable protected MathType applicationType;
         @NotNull protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
@@ -425,13 +419,8 @@ public class PApply extends PExp {
             return this;
         }
 
-        public PApplyBuilder applicationType(@Nullable MTType type) {
+        public PApplyBuilder applicationType(@Nullable MathType type) {
             this.applicationType = type;
-            return this;
-        }
-
-        public PApplyBuilder applicationTypeValue(@Nullable MTType typeValue) {
-            this.applicationTypeValue = typeValue;
             return this;
         }
 

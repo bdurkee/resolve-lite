@@ -5,27 +5,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
 public class ProgVariableSymbol extends Symbol {
 
-    private final PTType type;
+    private final ProgType type;
     @NotNull private final MathSymbol mathSymbolAlterEgo;
 
     public ProgVariableSymbol(@NotNull String name,
                               @Nullable ParserRuleContext definingTree,
-                              @NotNull PTType type,
+                              @NotNull ProgType type,
                               @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.type = type;
         this.mathSymbolAlterEgo =
                 new MathSymbol(type.getTypeGraph(), name, Quantification.NONE,
-                        type.toMath(), null, definingTree, moduleIdentifier);
+                        type.toMath(), definingTree, moduleIdentifier);
     }
 
-    @NotNull public PTType getProgramType() {
+    @NotNull public ProgType getProgramType() {
         return type;
     }
 
@@ -42,11 +42,11 @@ public class ProgVariableSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         Symbol result;
-        PTType instantiatedType =
+        ProgType instantiatedType =
                 type.instantiateGenerics(genericInstantiations,
                         instantiatingFacility);
 

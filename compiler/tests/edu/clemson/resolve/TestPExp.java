@@ -9,7 +9,8 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathInvalidType;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -29,7 +30,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class TestPExp extends BaseTest {
 
-    private final TypeGraph g = new TypeGraph();
+    private final DumbTypeGraph g = new DumbTypeGraph();
 
     @Test public void testGetSubExpressions() throws Exception {
         PExp result = parseMathAssertionExp(g, "x + y");
@@ -497,7 +498,7 @@ public class TestPExp extends BaseTest {
      *  where this function is used, know that we don't care about types so much
      *  as we do about correct expression structure and quantifier
      *  distribution. So instead of real type information we typically just use
-     *  {@link org.rsrg.semantics.MTInvalid}.</p>
+     *  {@link MathInvalidType}.</p>
      *
      *  <p>If you <em>want</em> to returnEnsuresArgSubstitutions something math type related, just
      *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
@@ -507,7 +508,7 @@ public class TestPExp extends BaseTest {
      * @param input The input to parse.
      * @return The dummy-typed {@link PExp} representation of {@code input}.
      */
-    @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
+    @NotNull public static PExp parseMathAssertionExp(@NotNull DumbTypeGraph g,
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule fakeModule =

@@ -6,7 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExpListener;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.DumbTypeGraph;
 
 //TODO: returnEnsuresArgSubstitutions visitors for outfix style also something with fencepost accept
 
@@ -31,7 +31,7 @@ public class TestASTStructure extends BaseTest {
     }
 
     @Test public void testPSymbolStructure() {
-        TypeGraph g = new TypeGraph();
+        DumbTypeGraph g = new DumbTypeGraph();
         String[] expected = {
             "<PApply:infixPApply:begin>:(x + (1 * y))\n" +
             "<PSymbol:begin>:+\n" +
@@ -55,7 +55,7 @@ public class TestASTStructure extends BaseTest {
     }
 
     /*@Test public void testPAltStructure() {
-        TypeGraph g = new TypeGraph();
+        DumbTypeGraph g = new DumbTypeGraph();
         String[] expected = {
             "<PAlternatives:begin>:{{@e if (q = @P.Trmnl_Loc);@P.Lab(q) otherwise;}}\n" +
             "<PSymbol:begin>:@e\n" +

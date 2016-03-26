@@ -1,19 +1,19 @@
 package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.TypeGraph;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class PTVoid extends PTType {
+public class PTVoid extends ProgType {
 
-    @NotNull private static WeakHashMap<TypeGraph, PTVoid> instances =
+    @NotNull private static WeakHashMap<DumbTypeGraph, PTVoid> instances =
             new WeakHashMap<>();
 
-    @NotNull public static PTVoid getInstance(@NotNull TypeGraph g) {
+    @NotNull public static PTVoid getInstance(@NotNull DumbTypeGraph g) {
         PTVoid result = instances.get(g);
         if ( result == null ) {
             result = new PTVoid(g);
@@ -26,11 +26,11 @@ public class PTVoid extends PTType {
         return "Void";
     }
 
-    private PTVoid(@NotNull TypeGraph g) {
+    private PTVoid(@NotNull DumbTypeGraph g) {
         super(g);
     }
 
-    @NotNull @Override public MTType toMath() {
+    @NotNull @Override public MathType toMath() {
         return getTypeGraph().VOID;
     }
 
@@ -39,8 +39,8 @@ public class PTVoid extends PTType {
         return super.equals(o);
     }
 
-    @NotNull @Override public PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull @Override public ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }

@@ -3,7 +3,7 @@ package org.rsrg.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -89,7 +89,7 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
             @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException,
@@ -138,7 +138,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull private Map<String, Symbol> updateSymbols(
             @NotNull Map<String, Symbol> currentBindings,
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
 

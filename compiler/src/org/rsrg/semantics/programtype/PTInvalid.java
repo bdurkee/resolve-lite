@@ -1,19 +1,19 @@
 package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.TypeGraph;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class PTInvalid extends PTType {
+public class PTInvalid extends ProgType {
 
-    @NotNull private static WeakHashMap<TypeGraph, PTInvalid> instances =
+    @NotNull private static WeakHashMap<DumbTypeGraph, PTInvalid> instances =
             new WeakHashMap<>();
 
-    @NotNull public static PTInvalid getInstance(@NotNull TypeGraph g) {
+    @NotNull public static PTInvalid getInstance(@NotNull DumbTypeGraph g) {
         PTInvalid result = instances.get(g);
         if ( result == null ) {
             result = new PTInvalid(g);
@@ -22,11 +22,11 @@ public class PTInvalid extends PTType {
         return result;
     }
 
-    private PTInvalid(@NotNull TypeGraph g) {
+    private PTInvalid(@NotNull DumbTypeGraph g) {
         super(g);
     }
 
-    @NotNull @Override public MTType toMath() {
+    @NotNull @Override public MathType toMath() {
         return getTypeGraph().INVALID;
     }
 
@@ -34,8 +34,8 @@ public class PTInvalid extends PTType {
         return "Invalid";
     }
 
-    @NotNull @Override public PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull @Override public ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }

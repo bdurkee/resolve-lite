@@ -3,11 +3,11 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.SyntacticScope;
 import org.rsrg.semantics.UnexpectedSymbolException;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -113,15 +113,15 @@ public abstract class Symbol {
     }
 
     @NotNull public abstract Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility);
 
-    @NotNull public static Map<String, MTType> buildMathTypeGenerics(
-            @NotNull Map<String, PTType> genericInstantiations) {
+    @NotNull public static Map<String, MathType> buildMathTypeGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations) {
 
-        Map<String, MTType> genericMathematicalInstantiations = new HashMap<>();
+        Map<String, MathType> genericMathematicalInstantiations = new HashMap<>();
 
-        for (Map.Entry<String, PTType> instantiation : genericInstantiations
+        for (Map.Entry<String, ProgType> instantiation : genericInstantiations
                 .entrySet()) {
             genericMathematicalInstantiations.put(instantiation.getKey(),
                     instantiation.getValue().toMath());

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.UnexpectedSymbolException;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
@@ -37,8 +37,8 @@ public class ModuleParameterSymbol extends Symbol {
     /** Returns the program type; will be {@code null} in the case where we
      *  wrap a {@code MathSymbol} (arising from a defn passed to facility).
      */
-    @Nullable public PTType getProgramType() {
-        PTType progType = null;
+    @Nullable public ProgType getProgramType() {
+        ProgType progType = null;
         if (wrappedParamSymbol instanceof OperationSymbol) {
             progType = ((OperationSymbol) wrappedParamSymbol).getReturnType();
         }
@@ -99,7 +99,7 @@ public class ModuleParameterSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         return wrappedParamSymbol.instantiateGenerics(
                 genericInstantiations, instantiatingFacility);

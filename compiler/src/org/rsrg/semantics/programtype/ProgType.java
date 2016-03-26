@@ -1,25 +1,25 @@
 package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.MTType;
 
 import java.util.Map;
 
-public abstract class PTType {
+public abstract class ProgType {
 
-    @NotNull private final TypeGraph typeGraph;
+    @NotNull protected final DumbTypeGraph g;
 
-    public PTType(@NotNull TypeGraph g) {
-        this.typeGraph = g;
+    public ProgType(@NotNull DumbTypeGraph g) {
+        this.g = g;
     }
 
-    @NotNull public final TypeGraph getTypeGraph() {
-        return typeGraph;
+    @NotNull public final DumbTypeGraph getTypeGraph() {
+        return g;
     }
 
-    @NotNull public abstract MTType toMath();
+    @NotNull public abstract MathType toMath();
 
     /** Returns {@code true} if this program type is a 'typed container' of
      *  other program types. Basically makes it much easier for us to determine
@@ -29,8 +29,8 @@ public abstract class PTType {
         return false;
     }
 
-    @NotNull public abstract PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull public abstract ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility);
 
     /** Returns {@code true} <strong>iff</strong> a value of this type
@@ -41,7 +41,7 @@ public abstract class PTType {
      *          would be acceptable where one of type {@code t} were
      *          required
      */
-    public boolean acceptableFor(@NotNull PTType t) {
+    public boolean acceptableFor(@NotNull ProgType t) {
         return equals(t);
     }
 }

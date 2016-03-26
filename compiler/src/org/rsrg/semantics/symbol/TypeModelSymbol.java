@@ -3,10 +3,10 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.programtype.PTFamily;
 
 /** Describes a "Type family .." introduction as would be found in an
@@ -17,8 +17,8 @@ public class TypeModelSymbol extends ProgTypeSymbol {
 
     @NotNull private final MathSymbol exemplar;
 
-    public TypeModelSymbol(@NotNull TypeGraph g, @NotNull String name,
-                           @NotNull MTType modelType,
+    public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+                           @NotNull MathType modelType,
                            @NotNull PTFamily programType,
                            @NotNull MathSymbol exemplar,
                            @Nullable ParserRuleContext definingTree,

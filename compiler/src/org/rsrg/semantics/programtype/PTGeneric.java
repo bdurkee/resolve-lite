@@ -2,18 +2,18 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTNamed;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathNamedType;
+import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.TypeGraph;
+import org.rsrg.semantics.DumbTypeGraph;
 
 import java.util.Map;
 
-public class PTGeneric extends PTType {
+public class PTGeneric extends ProgType {
 
     @NotNull private final String name;
 
-    public PTGeneric(@NotNull TypeGraph g, @NotNull String name) {
+    public PTGeneric(@NotNull DumbTypeGraph g, @NotNull String name) {
         super(g);
         this.name = name;
     }
@@ -22,14 +22,15 @@ public class PTGeneric extends PTType {
         return name;
     }
 
-    @NotNull @Override public MTType toMath() {
-        return new MTNamed(getTypeGraph(), name);
+    @NotNull @Override public MathType toMath() {
+        return new MathNamedType(getTypeGraph(), name,
+                g.SSET.typeRefDepth - 1, g.SSET);
     }
 
-    @NotNull @Override public PTType instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+    @NotNull @Override public ProgType instantiateGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
-        PTType result = this;
+        ProgType result = this;
         if ( genericInstantiations.containsKey(name) ) {
             result = genericInstantiations.get(name);
         }
@@ -39,7 +40,7 @@ public class PTGeneric extends PTType {
     @Override public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof PTGeneric);
 
-        if ( result ) {
+        if (result) {
             PTGeneric oAsPTGeneric = (PTGeneric) o;
             result = name.equals(oAsPTGeneric.getName());
         }
