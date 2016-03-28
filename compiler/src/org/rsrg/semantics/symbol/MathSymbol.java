@@ -75,6 +75,10 @@ public class MathSymbol extends Symbol {
         return "a math symbol";
     }
 
+    @NotNull @Override public MathSymbol toMathSymbol() {
+        return this;
+    }
+
     @NotNull @Override public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {

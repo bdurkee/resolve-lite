@@ -214,6 +214,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         visitAndTypeMathExpCtx(ctx, ctx.getChild(0)); return null;
     }
 
+    @Override public Void visitMathPrimaryExp(
+            ResolveParser.MathPrimaryExpContext ctx) {
+        visitAndTypeMathExpCtx(ctx, ctx.mathPrimeExp());
+        return null;
+    }
+
+    @Override public Void visitMathPrimeExp(
+            ResolveParser.MathPrimeExpContext ctx) {
+        visitAndTypeMathExpCtx(ctx, ctx.getChild(0));
+        return null;
+    }
+
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
         visitAndTypeMathExpCtx(ctx, ctx.mathExp()); return null;
@@ -235,14 +247,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             mathTypes.put(ctx, g.INVALID);
             return null;
         }
-        String asString = ctx.getText();
+        String here = ctx.getText();
         exactNamedIntermediateMathTypes.put(ctx, s.getMathType());
-
-        if (s.getMathType().identifiesSchematicType) {
-            mathTypes.put(ctx, s.getMathType());
-        } else {
-            mathTypes.put(ctx, s.getMathType().enclosingType);
-        }
+        mathTypes.put(ctx, s.getMathType().enclosingType);
         return null;
     }
 
