@@ -92,17 +92,17 @@ mathPrefixDefnSigs
     ;
 
 mathInfixDefnSig
-    :   '(' mathVariableDecl ')' name=mathSymbolName
-        '(' mathVariableDecl ')' ':' mathTypeExp
+    :   '(' mathVarDecl ')' name=mathSymbolName
+        '(' mathVarDecl ')' ':' mathTypeExp
     ;
 
 mathOutfixDefnSig
-    :   leftSym=mathSymbolName mathVariableDecl
-        rightSym=mathSymbolName ':' mathTypeExp
+    :   leftSym=('|'|'||'|'<'|'⎝'|'⟨') mathVarDecl
+        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathTypeExp
     ;
 
 mathPostfixDefnSig
-    :   mathVariableDecl lop='[' mathVariableDecl rop=']' ':' mathTypeExp
+    :   mathVarDecl lop='[' mathVarDecl rop=']' ':' mathTypeExp
     ;
 
 mathSymbolName
@@ -129,7 +129,7 @@ mathVarDeclGroup
     :   ID (',' ID)* ':' mathTypeExp
     ;
 
-mathVariableDecl
+mathVarDecl
     :   ID ':' mathTypeExp
     ;
 
@@ -210,7 +210,7 @@ mathOutfixApplyExp
     ;
 
 mathSetComprehensionExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'
+    :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp

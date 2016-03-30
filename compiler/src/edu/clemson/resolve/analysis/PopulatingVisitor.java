@@ -3,6 +3,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -17,6 +18,8 @@ import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.symbol.MathSymbol;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
@@ -35,7 +38,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *      {@link ResolveParser.MathCategoricalDefnDeclContext} or
      *      {@link ResolveParser.MathStandardDefnDeclContext} or
      *      {@link ResolveParser.MathInductiveDefnDeclContext}
-     * (namely, one of the 4 styles of defn signatures therein), this
+     * (namely, one of the four styles of defn signatures therein), this
      * holds a ref to the scope that the defn binding should be added to;
      * is {@code null} otherwise.
      */
@@ -211,7 +214,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathAssertionExp(
             ResolveParser.MathAssertionExpContext ctx) {
-        visitAndTypeMathExpCtx(ctx, ctx.getChild(0)); return null;
+        visitAndTypeMathExpCtx(ctx, ctx.getChild(0));
+        return null;
     }
 
     @Override public Void visitMathPrimaryExp(
@@ -228,14 +232,121 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
-        visitAndTypeMathExpCtx(ctx, ctx.mathExp()); return null;
+        visitAndTypeMathExpCtx(ctx, ctx.mathExp());
+        return null;
     }
 
-    private void visitAndTypeMathExpCtx(ParseTree ctx, ParseTree child) {
-        this.visit(child);
-        MathType t = exactNamedIntermediateMathTypes.get(child);
-        exactNamedIntermediateMathTypes.put(ctx, t);
-        mathTypes.put(ctx, t.getEnclosingType());
+    @Override public Void visitMathPrefixAppExp(
+            ResolveParser.MathPrefixAppExpContext ctx) {
+        typeMathFunctionApp(ctx, ctx.name,
+                ctx.mathExp().subList(1, ctx.mathExp().size()));
+        return null;
+    }
+
+    private void typeMathFunctionApp(@NotNull ParserRuleContext ctx,
+                                     @NotNull ParserRuleContext nameExp,
+                                     @NotNull ParseTree... args) {
+        typeMathFunctionApp(ctx, nameExp, Arrays.asList(args));
+    }
+
+    private void typeMathFunctionApp(@NotNull ParserRuleContext ctx,
+                                     @NotNull ParserRuleContext nameExp,
+                                     @NotNull List<? extends ParseTree> args) {
+        this.visit(nameExp);
+        args.forEach(this::visit);
+        String asString = ctx.getText();
+        MathType t = exactNamedIntermediateMathTypes.get(nameExp);
+        //if we're a name identifying a function, get our function type.
+        if (t instanceof MathNamedType && t.getEnclosingType() instanceof MathFunctionType) {
+            t = ((MathNamedType) t).enclosingType;
+        }
+        if (!(t instanceof MathFunctionType)) {
+            compiler.errMgr.semanticError(ErrorKind.APPLYING_NON_FUNCTION,
+                    nameExp.getStart(), nameExp.getText());
+            exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
+            mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        MathFunctionType expectedFuncType = (MathFunctionType) t;
+        List<MathType> actualArgumentTypes = Utils.apply(args, mathTypes::get);
+        List<MathType> formalParameterTypes =
+                MathSymbol.getParameterTypes((MathFunctionType) expectedFuncType);
+        String applicationText = ctx.getText();
+
+        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
+            compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT,
+                    ctx.getStart(), ctx.getText());
+            exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
+            mathTypes.put(ctx, g.INVALID);
+            return;
+        }
+        try {
+            expectedFuncType = (MathFunctionType)
+                    expectedFuncType.deschematize(actualArgumentTypes);
+        } catch (BindingException e) {
+            System.out.println("formal params in: '" + asString +
+                    "' don't bind against the actual arg types");
+        }
+        //we have to redo this since deschematize above might've changed the
+        //args
+        formalParameterTypes = MathSymbol.getParameterTypes(
+                (MathFunctionType) expectedFuncType);
+
+        Iterator<MathType> actualsIter = actualArgumentTypes.iterator();
+        Iterator<MathType> formalsIter = formalParameterTypes.iterator();
+
+        //SUBTYPE AND EQUALITY CHECK FOR ARGS HAPPENS HERE
+        while (actualsIter.hasNext()) {
+            MathType actual = actualsIter.next();
+            MathType formal = formalsIter.next();
+            if (!formal.equals(actual)) {
+                if (!g.isSubtype(actual, formal)) {
+                    System.err.println("for function application: " +
+                            ctx.getText() + "; arg type: " + actual +
+                            " not acceptable where: " + formal + " was expected");
+                }
+            }
+        }
+
+        //If we're describing a type, then the range (as a result of hte function is too broad),
+        //so we'll annotate the type of this application with its (verbose) application type.
+        //but it's enclosing type will of course still be the range.
+
+        boolean isSpecialAppType =
+                nameExp.getText().equals("->")
+                /*ctx.parent instanceof ResolveMathParser.MathTypeExpContext*/ ||
+                        nameExp.getText().equals("Powerset");
+
+        if (walkingType && expectedFuncType.getResultType().getTypeRefDepth() <= 1) {
+            exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
+            mathTypes.put(ctx, g.INVALID);
+        } else if (walkingType && isSpecialAppType) {
+            List<MathType> actualNamedArgumentTypes = Utils.apply(args, exactNamedIntermediateMathTypes::get);
+
+            MathType appType = expectedFuncType.getApplicationType(
+                    nameExp.getText(), actualNamedArgumentTypes);
+            exactNamedIntermediateMathTypes.put(ctx, appType);
+            mathTypes.put(ctx, appType);
+        }
+        //OH FOR GODS SAKE. OH MEIN GOTT. This shits fucked here dawg. Somehow think about the first 'if' and
+        //the 'else if' below and somehow combine them. Also write a fucking junit suite with
+        //some of this stuff in here.
+        else if (walkingType) {
+            List<MathType> actualNamedArgumentTypes = Utils.apply(args, exactNamedIntermediateMathTypes::get);
+            MathType appType = new MathFunctionType(g,
+                    expectedFuncType.getResultType(), actualNamedArgumentTypes);
+            exactNamedIntermediateMathTypes.put(ctx, appType);
+            mathTypes.put(ctx, appType);
+        } else {
+            //the math type of an application is the range, according to the rule:
+            // C \ f : C x D -> R
+            // C \ E1 : C
+            // C \ E2 : D
+            // ---------------------
+            // C \ f(E1, E2) : R
+            exactNamedIntermediateMathTypes.put(ctx, expectedFuncType.getResultType());
+            mathTypes.put(ctx, expectedFuncType.getResultType());
+        }
     }
 
     @Override public Void visitMathSymbolExp(
@@ -273,6 +384,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     use.getTheUnexpectedSymbolDescription());
         }
         return null;
+    }
+
+    /** Given some context {@code ctx} and a
+     *  {@code child} context; this method visits {@code child} and chains/passes
+     *  its found {@link MathType} 'up' to {@code ctx}.
+     *
+     * @param ctx a parent {@code ParseTree}
+     * @param child one of {@code ctx}s children
+     */
+    private void visitAndTypeMathExpCtx(@NotNull ParseTree ctx,
+                                        @NotNull ParseTree child) {
+        this.visit(child);
+        MathType t = exactNamedIntermediateMathTypes.get(child);
+        exactNamedIntermediateMathTypes.put(ctx, t);
+        mathTypes.put(ctx, t.getEnclosingType());
     }
 
     private ModuleIdentifier getRootModuleIdentifier() {

@@ -96,25 +96,11 @@ public enum ErrorKind {
      */
     NO_SUCH_MATH_FUNCTION(15, "no such function: <arg>", ErrorSeverity.ERROR),
 
-    /**
-     * Compiler Error 16: no function applicable for domain <em>domain</em>;
-     * candidates: <em>candidatename</em> : <em>candidatetype</em>.
-     */
-    NO_MATH_FUNC_FOR_DOMAIN(
-            16,
-            "no function applicable for domain <arg>;"
-                    + "\ncandidates: "
-                    + "<arg2, arg3 : {name,domain|('<name.name>' : <domain>)};separator={,\n}>",
-            ErrorSeverity.ERROR),
+    APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
+            " application, but it isn't a function", ErrorSeverity.ERROR),
 
-    /**
-     * Compiler Error 17: multiple domain matches: <em>match1name</em> :
-     * <em>match1type</em> and <em>match2name</em> : <em>match2type</em>;
-     * consider explicitly qualifying.
-     */
-    AMBIGIOUS_DOMAIN(17, "multiple domain matches; for example: "
-            + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
-            + "qualifying", ErrorSeverity.WARNING),
+    INCORRECT_FUNCTION_ARG_COUNT(16, "no such math function: <arg>" +
+            "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
