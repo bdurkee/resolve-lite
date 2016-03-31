@@ -31,6 +31,6 @@ public class MathCartesianType extends MathType {
     }
 
     @Override public String toString() {
-        return "(" + Utils.join(components, " ⊠ ") + ")";
+        return "(" + Utils.join(components, " * ") + ")";
     }
 }

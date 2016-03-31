@@ -166,7 +166,7 @@ public class MathSymbolTable {
             globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
             globalScope.define(new MathSymbol(g, "->", g.ARROW_FUNCTION));
-            globalScope.define(new MathSymbol(g, "⊠", g.CROSS_PROD_FUNCTION));
+            globalScope.define(new MathSymbol(g, "*", g.CROSS_PROD_FUNCTION));
             globalScope.define(new MathSymbol(g, "=",
                     new MathFunctionType(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {

@@ -192,7 +192,7 @@ public class MathFunctionType extends MathType {
     }
 
     @Override public String toString() {
-        return "("+domainType+" -> "+resultType+")";
+        return "("+domainType+" ⟶ "+resultType+")";
     }
 
     private static class VanillaFunctionApplicationFactory

@@ -195,6 +195,49 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    @Override public Void visitMathVarDeclGroup(
+            ResolveParser.MathVarDeclGroupContext ctx) {
+        typeMathVarDecls(ctx, ctx.mathTypeExp(), ctx.ID());
+        return null;
+    }
+
+    @Override public Void visitMathVarDecl(
+            ResolveParser.MathVarDeclContext ctx) {
+        typeMathVarDecls(ctx, ctx.mathTypeExp(), ctx.ID());
+        return null;
+    }
+
+    private void typeMathVarDecls(@NotNull ParserRuleContext ctx,
+                                  @NotNull ResolveParser.MathTypeExpContext t,
+                                  @NotNull TerminalNode... terms) {
+        typeMathVarDecls(ctx, t, Arrays.asList(terms));
+    }
+
+    private void typeMathVarDecls(@NotNull ParserRuleContext ctx,
+                                  @NotNull ResolveParser.MathTypeExpContext t,
+                                  @NotNull List<TerminalNode> terms) {
+        this.visitMathTypeExp(t);
+        MathType rhsColonType = exactNamedIntermediateMathTypes.get(t);
+        for (TerminalNode term : terms) {
+            MathType ty = new MathNamedType(g, term.getText(),
+                    rhsColonType.typeRefDepth - 1, rhsColonType);
+
+            //ah! so this will keep things like "k" in the spiral examples from
+            //being considered schematic types.
+            ty.identifiesSchematicType = walkingDefnParams && rhsColonType.typeRefDepth > 1;
+            // if (rhsColonType.typeRefDepth > 1) {
+            //     defnSchematicTypes.put(term.getText(), rhsColonType);
+            // }
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, term.getText(), ty));
+            } catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), e.getOffendingSymbol().getName());
+            }
+        }
+    }
+
     @Override public Void visitMathTypeExp(
             ResolveParser.MathTypeExpContext ctx) {
         walkingType = true;
@@ -233,6 +276,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
         visitAndTypeMathExpCtx(ctx, ctx.mathExp());
+        return null;
+    }
+
+    @Override public Void visitMathInfixAppExp(
+            ResolveParser.MathInfixAppExpContext ctx) {
+        typeMathFunctionApp(ctx, (ParserRuleContext) ctx.getChild(1),
+                ctx.mathExp());
         return null;
     }
 
@@ -308,31 +358,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
 
-        //If we're describing a type, then the range (as a result of hte function is too broad),
+        //If we're describing a type, then the range (as a result of the function is too broad),
         //so we'll annotate the type of this application with its (verbose) application type.
         //but it's enclosing type will of course still be the range.
-
-        boolean isSpecialAppType =
-                nameExp.getText().equals("->")
-                /*ctx.parent instanceof ResolveMathParser.MathTypeExpContext*/ ||
-                        nameExp.getText().equals("Powerset");
-
         if (walkingType && expectedFuncType.getResultType().getTypeRefDepth() <= 1) {
             exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
             mathTypes.put(ctx, g.INVALID);
-        } else if (walkingType && isSpecialAppType) {
-            List<MathType> actualNamedArgumentTypes = Utils.apply(args, exactNamedIntermediateMathTypes::get);
-
-            MathType appType = expectedFuncType.getApplicationType(
-                    nameExp.getText(), actualNamedArgumentTypes);
-            exactNamedIntermediateMathTypes.put(ctx, appType);
-            mathTypes.put(ctx, appType);
         }
-        //OH FOR GODS SAKE. OH MEIN GOTT. This shits fucked here dawg. Somehow think about the first 'if' and
-        //the 'else if' below and somehow combine them. Also write a fucking junit suite with
-        //some of this stuff in here.
         else if (walkingType) {
-            List<MathType> actualNamedArgumentTypes = Utils.apply(args, exactNamedIntermediateMathTypes::get);
+            List<MathType> actualNamedArgumentTypes =
+                    Utils.apply(args, exactNamedIntermediateMathTypes::get);
             MathType appType = new MathFunctionType(g,
                     expectedFuncType.getResultType(), actualNamedArgumentTypes);
             exactNamedIntermediateMathTypes.put(ctx, appType);
@@ -347,6 +382,34 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             exactNamedIntermediateMathTypes.put(ctx, expectedFuncType.getResultType());
             mathTypes.put(ctx, expectedFuncType.getResultType());
         }
+    }
+
+    @Override public Void visitMathBooleanOpExp(
+            ResolveParser.MathBooleanOpExpContext ctx) {
+        exactNamedIntermediateMathTypes.put(ctx, g.BOOLEAN_FUNCTION);
+        mathTypes.put(ctx, g.BOOLEAN_FUNCTION);
+        return null;
+    }
+
+    @Override public Void visitMathImpliesOpExp(
+            ResolveParser.MathImpliesOpExpContext ctx) {
+        exactNamedIntermediateMathTypes.put(ctx, g.BOOLEAN_FUNCTION);
+        mathTypes.put(ctx, g.BOOLEAN_FUNCTION);
+        return null;
+    }
+
+    @Override public Void visitMathEqualityOpExp(
+            ResolveParser.MathEqualityOpExpContext ctx) {
+        exactNamedIntermediateMathTypes.put(ctx, g.EQUALITY_FUNCTION);
+        mathTypes.put(ctx, g.EQUALITY_FUNCTION);
+        return null;
+    }
+
+    @Override public Void visitMathArrowOpExp(
+            ResolveParser.MathArrowOpExpContext ctx) {
+        exactNamedIntermediateMathTypes.put(ctx, g.ARROW_FUNCTION);
+        mathTypes.put(ctx, g.ARROW_FUNCTION);
+        return null;
     }
 
     @Override public Void visitMathSymbolExp(
@@ -388,7 +451,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /** Given some context {@code ctx} and a
      *  {@code child} context; this method visits {@code child} and chains/passes
-     *  its found {@link MathType} 'up' to {@code ctx}.
+     *  its found {@link MathType} upto {@code ctx}.
      *
      * @param ctx a parent {@code ParseTree}
      * @param child one of {@code ctx}s children
