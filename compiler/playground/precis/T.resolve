@@ -1,5 +1,0 @@
-Precis T;
-    Definition x : B;
-
-    Definition y : Powerset(xs);
-end T;

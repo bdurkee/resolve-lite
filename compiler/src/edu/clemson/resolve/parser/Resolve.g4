@@ -106,7 +106,9 @@ mathPostfixDefnSig
     ;
 
 mathSymbolName
-    :   ID|('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'<'|'<='|'>='|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ')
+    : ( ID |
+      ('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'≤'|
+       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'))
     ;
 
 mathCategoricalDefnDecl
@@ -148,10 +150,9 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
+//TODO: Add rest of alts
 mathExp
-    :   ('not'|'⌐') mathExp                             #mathUnaryAppExp
-    |   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
-    |   mathExp mathCartesianProdOpExp mathExp          #mathInfixAppExp
+    :   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
     |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathBooleanOpExp mathExp                #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
@@ -169,16 +170,19 @@ mathExp
  *  No longer a need to pass special maps around from Token -> MathType, etc --
  *  now we just need to visit and annotate these names like any other node).
  */
-mathCartesianProdOpExp : (qualifier=ID '::')? '⊠';
-mathMultOpExp : (qualifier=ID '::')? ('*'|'/') ;
-mathBooleanOpExp : (qualifier=ID '::')? ('and'|'or'|'iff') ;
-mathEqualityOpExp : (qualifier=ID '::')? ('='|'/=') ;
+mathMultOpExp : (qualifier=ID '::')? ('*'|'/'|'%') ;
+mathAddOp : (qualifier=ID '::')? ('+'|'-'|'~');
+mathJoiningOp : (qualifier=ID '::')? ('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
 mathArrowOpExp : (qualifier=ID '::')? ('->'|'⟶') ;
-mathImpliesOpExp : (qualifier=ID '::')? ('implies') ;
+mathRelationalOpExp : (qualifier=ID '::')? ('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
+mathEqualityOpExp : (qualifier=ID '::')? ('='|'/='|'≠');
+mathSetContainmentOpExp : (qualifier=ID '::')? ('is_in'|'is_not_in'|'∈'|'∉');
+mathImpliesOpExp : (qualifier=ID '::')? ('implies');
+mathBooleanOpExp : (qualifier=ID '::')? ('and'|'or'|'iff');
 
 mathPrimeExp
     :   mathLiteralExp
-    |   mathCrossTypeExp
+    |   mathCartProdExp
     |   mathSymbolExp
     |   mathOutfixApplyExp
     |   mathSetComprehensionExp
@@ -192,7 +196,7 @@ mathLiteralExp
     |   (qualifier=ID '::')? num=INT            #mathIntegerLiteralExp
     ;
 
-mathCrossTypeExp
+mathCartProdExp
     :   'Cart_Prod' (mathVarDeclGroup ';')+ 'end'
     ;
 
@@ -201,10 +205,10 @@ mathSymbolExp
     ;
 
 mathOutfixApplyExp
-    :   lop='<' mathExp rop='>'
-    |   lop='⟨' mathExp rop='⟩'
-    |   lop='|' mathExp rop='|'
+    :   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
+    |   lop='<' mathExp rop='>'
+    |   lop='⟨' mathExp rop='⟩'
     |   lop='[' mathExp rop=']'
     |   lop='⎝' mathExp rop='⎠'
     ;
@@ -229,13 +233,9 @@ mathAlternativeExp
 mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
-progExp
-    :   'progExp'
-    ;
 
-facilityDecl
-    :   'Facility' name=ID
-    ;
+progExp:   'progExp';
+facilityDecl:   'Facility' name=ID;
 
 //prog ops here so I can use switch statements in the code
 NOT : 'not' ;
