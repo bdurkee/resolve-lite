@@ -34,6 +34,11 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
+
+            MathTypePrintingListener pl =
+                    new MathTypePrintingListener(defSymsAndScopes.mathTypes);
+            ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
+
         }
     }
 }

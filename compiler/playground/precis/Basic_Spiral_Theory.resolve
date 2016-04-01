@@ -19,6 +19,6 @@ Precis Basic_Spiral_Theory;
         {p : Sp_Loc(k) | SCD(p) < SCD(b)};
 
     Corollary Inw1: Forall k : N2, Forall m, n : N,
-        SS(k)(Cen(k)) ∈ Inward_Loc(SS(k)(Cen(k))) iff m < n;
+        SS(k)(Cen(k)) ∉ Inward_Loc(SS(k)(Cen(k))) iff m < n;
 
 end Basic_Spiral_Theory;

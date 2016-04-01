@@ -154,6 +154,7 @@ mathQuantifiedExp
 mathExp
     :   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
     |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
+    |   mathExp mathAddOpExp mathExp                    #mathInfixAppExp
     |   mathExp mathBooleanOpExp mathExp                #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
@@ -170,15 +171,15 @@ mathExp
  *  No longer a need to pass special maps around from Token -> MathType, etc --
  *  now we just need to visit and annotate these names like any other node).
  */
-mathMultOpExp : (qualifier=ID '::')? ('*'|'/'|'%') ;
-mathAddOp : (qualifier=ID '::')? ('+'|'-'|'~');
-mathJoiningOp : (qualifier=ID '::')? ('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
-mathArrowOpExp : (qualifier=ID '::')? ('->'|'⟶') ;
-mathRelationalOpExp : (qualifier=ID '::')? ('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
-mathEqualityOpExp : (qualifier=ID '::')? ('='|'/='|'≠');
-mathSetContainmentOpExp : (qualifier=ID '::')? ('is_in'|'is_not_in'|'∈'|'∉');
-mathImpliesOpExp : (qualifier=ID '::')? ('implies');
-mathBooleanOpExp : (qualifier=ID '::')? ('and'|'or'|'iff');
+mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
+mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
+mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
+mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
+mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
+mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
+mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
+mathImpliesOpExp : (qualifier=ID '::')? op='implies';
+mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
 
 mathPrimeExp
     :   mathLiteralExp
@@ -192,8 +193,8 @@ mathPrimeExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID '::')? ('true'|'false')   #mathBooleanLiteralExp
-    |   (qualifier=ID '::')? num=INT            #mathIntegerLiteralExp
+    :   (qualifier=ID '::')? op=('true'|'false')    #mathBooleanLiteralExp
+    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
     ;
 
 mathCartProdExp
