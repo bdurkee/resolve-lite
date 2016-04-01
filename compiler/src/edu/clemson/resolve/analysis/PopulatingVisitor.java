@@ -40,7 +40,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *      {@link ResolveParser.MathInductiveDefnDeclContext}
      * (namely, one of the four styles of defn signatures therein), this
      * holds a ref to the scope that the defn binding should be added to;
-     * is {@code null} otherwise.
+     * holds {@code null} otherwise.
      */
     private Scope defnEnclosingScope = null;
 
@@ -412,19 +412,36 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathBooleanLiteralExp(
+            ResolveParser.MathBooleanLiteralExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.ID().getText());
+        return null;
+    }
+
+    @Override public Void visitMathIntegerLiteralExp(
+            ResolveParser.MathIntegerLiteralExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.INT().getText());
+        return null;
+    }
+
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        MathSymbol s = getIntendedMathSymbol(ctx.qualifier,
-                ctx.name.getText(), ctx);
+        typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+        return null;
+    }
+
+    private void typeMathSymbol(@NotNull ParserRuleContext ctx,
+                                @Nullable Token qualifier,
+                                @NotNull String name) {
+        MathSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
         if (s == null || s.getMathType() == null) {
             exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
             mathTypes.put(ctx, g.INVALID);
-            return null;
+            return;
         }
         String here = ctx.getText();
         exactNamedIntermediateMathTypes.put(ctx, s.getMathType());
         mathTypes.put(ctx, s.getMathType().enclosingType);
-        return null;
     }
 
     @Nullable private MathSymbol getIntendedMathSymbol(
@@ -460,6 +477,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParseTree child) {
         this.visit(child);
         MathType t = exactNamedIntermediateMathTypes.get(child);
+        if (t == null) {
+            t = g.INVALID;
+        }
         exactNamedIntermediateMathTypes.put(ctx, t);
         mathTypes.put(ctx, t.getEnclosingType());
     }
@@ -473,5 +493,4 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 nsme.getRequestedModule(),
                 nsme.getRequestedModule().getText());
     }
-
 }
