@@ -19,9 +19,9 @@ public abstract class MathClassification {
     public boolean identifiesSchematicType = false;
 
     public MathClassification(@NotNull DumbTypeGraph g,
-                              @Nullable MathClassification enclosingType) {
+                              @Nullable MathClassification enclosingClassification) {
         this.g = g;
-        this.enclosingClassification = enclosingType;
+        this.enclosingClassification = enclosingClassification;
     }
 
     public DumbTypeGraph getTypeGraph() {

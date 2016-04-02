@@ -226,6 +226,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 for (ParseTree t : names) {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, defnType);
+                    if (asNamed.typeRefDepth < 1) {
+                        defnType = colonRhsType;
+                    }
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), asNamed));
                 }
@@ -233,6 +236,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 for (ParseTree t : names) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
+                    if (defnType.typeRefDepth < 1) {
+                        defnType = colonRhsType;
+                    }
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), defnType));
                 }
@@ -518,7 +524,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             mathTypes.put(ctx, s.getMathType().enclosingClassification);
         }
         else {
-            mathTypes.put(ctx, s.getMathType().enclosingClassification);
+            mathTypes.put(ctx, s.getMathType());
         }
     }
 
