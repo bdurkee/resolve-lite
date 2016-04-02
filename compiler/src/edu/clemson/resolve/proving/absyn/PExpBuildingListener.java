@@ -1,11 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -18,9 +16,6 @@ import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static edu.clemson.resolve.proving.absyn.PApply.DisplayStyle.*;
 
 /** Converts parse tree math exprs to an equivalent abstract-syntax form,
  *  represented by the {@link PExp} hierarchy. Get the final,
@@ -225,7 +220,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        MathType t = getMathType(ctx);
+        MathClassification t = getMathType(ctx);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                     .qualifier(ctx.qualifier)
@@ -394,7 +389,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }*/
 
-    private PExp buildLiteral(String literalText, MathType type, MathType typeValue,
+    private PExp buildLiteral(String literalText, MathClassification type, MathClassification typeValue,
                               ProgType progType) {
         PSymbolBuilder result =
                 new PSymbolBuilder(literalText).mathType(type)
@@ -403,7 +398,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result.build();
     }
 
-    private MathType getMathType(ParseTree t) {
+    private MathClassification getMathType(ParseTree t) {
         return annotations.mathTypes.get(t) == null ? g.INVALID :
                 annotations.mathTypes.get(t);
     }

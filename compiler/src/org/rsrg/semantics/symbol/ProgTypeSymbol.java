@@ -11,14 +11,14 @@ import java.util.Map;
 
 public class ProgTypeSymbol extends Symbol {
 
-    @NotNull protected final MathType modelType;
+    @NotNull protected final MathClassification modelType;
     @NotNull protected final ProgType type;
     @NotNull protected final MathSymbol mathTypeAlterEgo;
     @NotNull protected final DumbTypeGraph g;
 
     public ProgTypeSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                           @NotNull ProgType progType,
-                          @Nullable MathType modelType,
+                          @Nullable MathClassification modelType,
                           @Nullable ParserRuleContext definingTree,
                           @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
@@ -34,7 +34,7 @@ public class ProgTypeSymbol extends Symbol {
         return type;
     }
 
-    @NotNull public MathType getModelType() {
+    @NotNull public MathClassification getModelType() {
         return modelType;
     }
 
@@ -63,7 +63,7 @@ public class ProgTypeSymbol extends Symbol {
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
-        Map<String, MathType> genericMathematicalInstantiations =
+        Map<String, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
         /*VariableReplacingVisitor typeSubstitutor =

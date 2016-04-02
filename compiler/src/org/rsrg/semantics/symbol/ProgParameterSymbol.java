@@ -102,7 +102,7 @@ public class ProgParameterSymbol extends Symbol {
         this.declaredType = type;
         this.mode = mode;
 
-        MathType typeValue = null;
+        MathClassification typeValue = null;
         if (mode == ParameterMode.TYPE) {
             typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
         }
@@ -158,7 +158,7 @@ public class ProgParameterSymbol extends Symbol {
             /*result =
                     new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
                             typeGraph, getName()),
-                            new MathNamedType(typeGraph, getName()),
+                            new MathNamedClassification(typeGraph, getName()),
                             getDefiningTree(), getModuleIdentifier());*/
         }
         return result;

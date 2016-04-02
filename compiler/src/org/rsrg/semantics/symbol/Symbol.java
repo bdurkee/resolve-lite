@@ -3,7 +3,7 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.SyntacticScope;
 import org.rsrg.semantics.UnexpectedSymbolException;
@@ -116,10 +116,10 @@ public abstract class Symbol {
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility);
 
-    @NotNull public static Map<String, MathType> buildMathTypeGenerics(
+    @NotNull public static Map<String, MathClassification> buildMathTypeGenerics(
             @NotNull Map<String, ProgType> genericInstantiations) {
 
-        Map<String, MathType> genericMathematicalInstantiations = new HashMap<>();
+        Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();
 
         for (Map.Entry<String, ProgType> instantiation : genericInstantiations
                 .entrySet()) {

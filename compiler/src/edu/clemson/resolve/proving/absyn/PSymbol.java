@@ -4,7 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.DumbTypeGraph;
 import org.rsrg.semantics.programtype.ProgType;
@@ -219,7 +219,7 @@ public class PSymbol extends PExp {
         protected boolean incoming = false;
         protected boolean literal = false;
         protected Quantification quantification = Quantification.NONE;
-        protected MathType mathType, mathTypeValue;
+        protected MathClassification mathType, mathTypeValue;
         protected ProgType progType, progTypeValue;
 
         public PSymbolBuilder(PSymbol existingPSymbol) {
@@ -284,12 +284,12 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathType(MathType e) {
+        public PSymbolBuilder mathType(MathClassification e) {
             this.mathType = e;
             return this;
         }
 
-        public PSymbolBuilder mathTypeValue(MathType e) {
+        public PSymbolBuilder mathTypeValue(MathClassification e) {
             this.mathTypeValue = e;
             return this;
         }

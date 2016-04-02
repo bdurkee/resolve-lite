@@ -4,7 +4,7 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.ProgType;
 
@@ -26,7 +26,7 @@ public abstract class PExp {
     public final int valueHash;
 
     /** Backing field for {@link #getMathType()} */
-    private final MathType type;
+    private final MathClassification type;
 
     /** Since the removal of the Exp hierarchy, the role of {@code PExps} has
      *  expanded considerably.
@@ -41,20 +41,20 @@ public abstract class PExp {
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathType type) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type) {
         this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathType type,
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type,
                 @Nullable ProgType progType) {
         this(hashes.structureHash, hashes.valueHash, type, progType);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathType type) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type) {
         this(structureHash, valueHash, type, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathType type,
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
                 @Nullable ProgType progType) {
         this.type = type;
         this.progType = progType;
@@ -70,7 +70,7 @@ public abstract class PExp {
         return progType;
     }
 
-    @NotNull public final MathType getMathType() {
+    @NotNull public final MathClassification getMathType() {
         return type;
     }
 
@@ -123,18 +123,18 @@ public abstract class PExp {
         return substitute(e);
     }
 
-    /** Returns true if the {@link MathType} of this expression matches
+    /** Returns true if the {@link MathClassification} of this expression matches
      *  (or is a subtype) of {@code other}; {@code false} otherwise.
-     *  @param other some {@code MathType}.
+     *  @param other some {@code MathClassification}.
      *
      *  @return whether or not the math types of this or {@code other} matches
      */
-    public boolean typeMatches(MathType other) {
+    public boolean typeMatches(MathClassification other) {
         //return other.isSubtypeOf(getMathType());
         return true;
     }
 
-    /** @see PExp#typeMatches(MathType) */
+    /** @see PExp#typeMatches(MathClassification) */
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getMathType());
     }

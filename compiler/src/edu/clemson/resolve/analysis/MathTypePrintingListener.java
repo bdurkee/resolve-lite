@@ -5,14 +5,14 @@ import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 
 public class MathTypePrintingListener extends ResolveBaseListener {
 
-    @NotNull private final ParseTreeProperty<MathType> types;
+    @NotNull private final ParseTreeProperty<MathClassification> types;
 
     public MathTypePrintingListener(
-            @NotNull ParseTreeProperty<MathType> types) {
+            @NotNull ParseTreeProperty<MathClassification> types) {
         this.types = types;
     }
 
@@ -52,7 +52,7 @@ public class MathTypePrintingListener extends ResolveBaseListener {
     //}
 
     private void printType(@NotNull ParserRuleContext ctx) {
-        MathType t = types.get(ctx);
+        MathClassification t = types.get(ctx);
         if ( t == null ) {
             System.out.println("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");
             return;

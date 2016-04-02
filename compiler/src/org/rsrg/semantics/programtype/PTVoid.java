@@ -2,7 +2,7 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ public class PTVoid extends ProgType {
         super(g);
     }
 
-    @NotNull @Override public MathType toMath() {
+    @NotNull @Override public MathClassification toMath() {
         return getTypeGraph().VOID;
     }
 

@@ -2,7 +2,7 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 public class PTRecord extends ProgType {
 
     @NotNull private final Map<String, ProgType> fields = new HashMap<>();
-    @NotNull private MathType mathTypeAlterEgo;
+    @NotNull private MathClassification mathTypeAlterEgo;
 
     public PTRecord(@NotNull DumbTypeGraph g,
                     @NotNull Map<String, ProgType> types) {
@@ -26,7 +26,7 @@ public class PTRecord extends ProgType {
                     new Element(field.getKey(), field.getValue().toMath());
             index++;
         }
-        this.mathTypeAlterEgo = new MathCartesianType(g, elements);*/
+        this.mathTypeAlterEgo = new MathCartesianClassification(g, elements);*/
     }
 
     @NotNull public ProgType getFieldType(@NotNull String name)
@@ -42,7 +42,7 @@ public class PTRecord extends ProgType {
         return true;
     }
 
-    @NotNull @Override public MathType toMath() {
+    @NotNull @Override public MathClassification toMath() {
         return mathTypeAlterEgo;
     }
 

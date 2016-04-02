@@ -47,7 +47,7 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public MathSymbol addBinding(String name, Quantification q,
-                                 ParserRuleContext definingTree, MathType type, MathType typeValue)
+                                 ParserRuleContext definingTree, MathClassification type, MathClassification typeValue)
             throws DuplicateSymbolException {
 
         MathSymbol entry =
@@ -57,19 +57,19 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public MathSymbol addBinding(String name, Quantification q,
-                                 ParserRuleContext definingTree, MathType type)
+                                 ParserRuleContext definingTree, MathClassification type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
     public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-                                 MathType type, MathType typeValue) throws DuplicateSymbolException {
+                                 MathClassification type, MathClassification typeValue) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
     }
 
     public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-            MathType type) throws DuplicateSymbolException {
+            MathClassification type) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type);
     }
 }

@@ -2,7 +2,7 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.symbol.ProgReprTypeSymbol;
@@ -66,7 +66,7 @@ public class PTRepresentation extends PTNamed {
         return name.substring(0, 1);
     }
 
-    @NotNull @Override public MathType toMath() {
+    @NotNull @Override public MathClassification toMath() {
         return baseType.toMath();
     }
 

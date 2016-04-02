@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 
 import java.util.*;
 
@@ -12,7 +12,7 @@ public class PSet extends PExp {
     private final List<PExp> elements = new ArrayList<>();
 
     //TODO: Give me a real HashDuple (one based on my actual elements!)
-    public PSet(MathType type, List<PExp> elements) {
+    public PSet(MathClassification type, List<PExp> elements) {
         super(new HashDuple(0, 56), type);
         this.elements.addAll(elements);
     }

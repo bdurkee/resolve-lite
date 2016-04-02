@@ -1,7 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,7 +15,7 @@ public class PAlternatives extends PExp {
     private final PExp otherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
-                         PExp otherwiseClauseResult, MathType type) {
+                         PExp otherwiseClauseResult, MathClassification type) {
         super(calculateStructureHash(conditions, results,
                         otherwiseClauseResult), calculateStructureHash(
                         conditions, results, otherwiseClauseResult), type);

@@ -4,7 +4,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTFamily;
@@ -18,7 +18,7 @@ public class TypeModelSymbol extends ProgTypeSymbol {
     @NotNull private final MathSymbol exemplar;
 
     public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
-                           @NotNull MathType modelType,
+                           @NotNull MathClassification modelType,
                            @NotNull PTFamily programType,
                            @NotNull MathSymbol exemplar,
                            @Nullable ParserRuleContext definingTree,

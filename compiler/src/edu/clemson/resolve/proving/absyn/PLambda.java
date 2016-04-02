@@ -2,9 +2,9 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathFunctionType;
-import org.rsrg.semantics.MathInvalidType;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathArrowClassification;
+import org.rsrg.semantics.MathClassification;
+import org.rsrg.semantics.MathInvalidClassification;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ public class PLambda extends PExp {
     public PLambda(@NotNull List<MathSymbolDeclaration> parameters,
                    @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MathFunctionType(body.getMathType()
+                new MathArrowClassification(body.getMathType()
                         .getTypeGraph(), body.getMathType(),parameters.stream()
                         .map(p ->p.type).collect(Collectors.toList())), null);
         this.parameters.addAll(parameters);
@@ -135,9 +135,9 @@ public class PLambda extends PExp {
 
     public static class MathSymbolDeclaration {
         public final String name;
-        public final MathType type;
+        public final MathClassification type;
 
-        public MathSymbolDeclaration(String name, MathType type) {
+        public MathSymbolDeclaration(String name, MathClassification type) {
             //Todo: Again, I think this should probably be checked before now
             if ( name == null ) {
                 throw new IllegalArgumentException("name==null");
@@ -163,7 +163,7 @@ public class PLambda extends PExp {
         }
 
         @Override public String toString() {
-            return name + ":" + (type instanceof MathInvalidType ? "Inv" : type);
+            return name + ":" + (type instanceof MathInvalidClassification ? "Inv" : type);
         }
     }
 

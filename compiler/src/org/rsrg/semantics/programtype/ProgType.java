@@ -2,7 +2,7 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
 import java.util.Map;
@@ -19,7 +19,7 @@ public abstract class ProgType {
         return g;
     }
 
-    @NotNull public abstract MathType toMath();
+    @NotNull public abstract MathClassification toMath();
 
     /** Returns {@code true} if this program type is a 'typed container' of
      *  other program types. Basically makes it much easier for us to determine

@@ -14,30 +14,30 @@ import java.util.*;
 public class DumbTypeGraph {
 
     public DumbTypeGraph() {}
-    public final MathType INVALID = MathInvalidType.getInstance(this);
+    public final MathClassification INVALID = MathInvalidClassification.getInstance(this);
 
-    public final MathType CLS = new MathNamedType(this, "Cls", 2, INVALID);
-    public final MathType SSET = new MathNamedType(this, "SSet", 2, CLS);
+    public final MathClassification CLS = new MathNamedClassification(this, "Cls", 2, INVALID);
+    public final MathClassification SSET = new MathNamedClassification(this, "SSet", 2, CLS);
 
-    public final MathType ENTITY = new MathNamedType(this, "Entity", 1, INVALID);
-    public final MathType EL = new MathNamedType(this, "El", 1, INVALID);
+    public final MathClassification ENTITY = new MathNamedClassification(this, "Entity", 1, INVALID);
+    public final MathClassification EL = new MathNamedClassification(this, "El", 1, INVALID);
 
-    public final MathType BOOLEAN = new MathNamedType(this, "B", 1, SSET);
-    public final MathType VOID = new MathNamedType(this, "Void", 0, INVALID);
+    public final MathClassification BOOLEAN = new MathNamedClassification(this, "B", 1, SSET);
+    public final MathClassification VOID = new MathNamedClassification(this, "Void", 0, INVALID);
 
     /** General purpose (binary) boolean function type, useful for things like
      *  "and", "or", "xor", etc;
      */
-    public final MathFunctionType BOOLEAN_FUNCTION =
-            new MathFunctionType(this, BOOLEAN, BOOLEAN, BOOLEAN);
-    public final MathFunctionType EQUALITY_FUNCTION =
-            new MathFunctionType(this, BOOLEAN, ENTITY, ENTITY);
-    public final MathFunctionType POWERSET_FUNCTION =
-            new MathFunctionType(this, POWERSET_APPLICATION, SSET, SSET);
-    public final MathFunctionType ARROW_FUNCTION =
-            new MathFunctionType(this, ARROW_APPLICATION, CLS, CLS, CLS);
-    public final MathFunctionType CROSS_PROD_FUNCTION =
-            new MathFunctionType(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
+    public final MathArrowClassification BOOLEAN_FUNCTION =
+            new MathArrowClassification(this, BOOLEAN, BOOLEAN, BOOLEAN);
+    public final MathArrowClassification EQUALITY_FUNCTION =
+            new MathArrowClassification(this, BOOLEAN, ENTITY, ENTITY);
+    public final MathArrowClassification POWERSET_FUNCTION =
+            new MathArrowClassification(this, POWERSET_APPLICATION, SSET, SSET);
+    public final MathArrowClassification ARROW_FUNCTION =
+            new MathArrowClassification(this, ARROW_APPLICATION, CLS, CLS, CLS);
+    public final MathArrowClassification CROSS_PROD_FUNCTION =
+            new MathArrowClassification(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
 
     private final static FunctionApplicationFactory CARTESIAN_APPLICATION =
             new CartesianProductApplicationFactory();
@@ -50,11 +50,11 @@ public class DumbTypeGraph {
             implements
             FunctionApplicationFactory {
 
-        @Override public MathType buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionType f,
+        @Override public MathClassification buildFunctionApplication(
+                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
                 @NotNull String calledAsName,
-                @NotNull List<MathType> arguments) {
-            return new MathPowersetApplicationType(g, arguments.get(0));
+                @NotNull List<MathClassification> arguments) {
+            return new MathPowersetApplicationClassification(g, arguments.get(0));
         }
     }
 
@@ -62,11 +62,11 @@ public class DumbTypeGraph {
             implements
             FunctionApplicationFactory {
 
-        @Override public MathType buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionType f,
+        @Override public MathClassification buildFunctionApplication(
+                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
                 @NotNull String calledAsName,
-                @NotNull List<MathType> arguments) {
-            return new MathFunctionType(g, arguments.get(1), arguments.get(0));
+                @NotNull List<MathClassification> arguments) {
+            return new MathArrowClassification(g, arguments.get(1), arguments.get(0));
         }
     }
 
@@ -74,19 +74,19 @@ public class DumbTypeGraph {
             implements
             FunctionApplicationFactory {
 
-        @Override public MathType buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionType f,
+        @Override public MathClassification buildFunctionApplication(
+                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
                 @NotNull String calledAsName,
-                @NotNull List<MathType> arguments) {
-            return new MathCartesianType(g, arguments);
+                @NotNull List<MathClassification> arguments) {
+            return new MathCartesianClassification(g, arguments);
         }
     }
 
-    public boolean isSubtype(@NotNull MathType subtype,
-                             @NotNull MathType supertype) {
+    public boolean isSubtype(@NotNull MathClassification subtype,
+                             @NotNull MathClassification supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS);
         if ( !result ) {
-            MathType subtypesEnclosingType = subtype.enclosingType;
+            MathClassification subtypesEnclosingType = subtype.enclosingClassification;
             if (subtypesEnclosingType != null &&
                     subtypesEnclosingType.equals(supertype)) return true;
         }

@@ -2,8 +2,8 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathNamedType;
-import org.rsrg.semantics.MathType;
+import org.rsrg.semantics.MathNamedClassification;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 import org.rsrg.semantics.DumbTypeGraph;
 
@@ -22,8 +22,8 @@ public class PTGeneric extends ProgType {
         return name;
     }
 
-    @NotNull @Override public MathType toMath() {
-        return new MathNamedType(getTypeGraph(), name,
+    @NotNull @Override public MathClassification toMath() {
+        return new MathNamedClassification(getTypeGraph(), name,
                 g.SSET.typeRefDepth - 1, g.SSET);
     }
 

@@ -407,7 +407,7 @@ public class PApply extends PExp {
         @NotNull protected final PExp functionPortion;
         @NotNull protected final List<PExp> arguments = new ArrayList<>();
 
-        @Nullable protected MathType applicationType;
+        @Nullable protected MathClassification applicationType;
         @NotNull protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
@@ -419,7 +419,7 @@ public class PApply extends PExp {
             return this;
         }
 
-        public PApplyBuilder applicationType(@Nullable MathType type) {
+        public PApplyBuilder applicationType(@Nullable MathClassification type) {
             this.applicationType = type;
             return this;
         }

@@ -4,12 +4,12 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.rsrg.semantics.MathType;
 import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
@@ -22,8 +22,8 @@ import java.util.*;
  */
 public class AnnotatedModule {
 
-    public ParseTreeProperty<MathType> mathTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<MathType> mathTypeValues = new ParseTreeProperty<>();
+    public ParseTreeProperty<MathClassification> mathTypes = new ParseTreeProperty<>();
+    public ParseTreeProperty<MathClassification> mathTypeValues = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypeValues = new ParseTreeProperty<>();
 

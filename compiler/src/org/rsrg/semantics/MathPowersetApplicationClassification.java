@@ -1,8 +1,8 @@
 package org.rsrg.semantics;
 
-public class MathPowersetApplicationType extends MathFunctionApplicationType {
+public class MathPowersetApplicationClassification extends MathFunctionApplicationClassification {
 
-    protected MathPowersetApplicationType(DumbTypeGraph g, MathType argument) {
+    protected MathPowersetApplicationClassification(DumbTypeGraph g, MathClassification argument) {
         super(g, g.POWERSET_FUNCTION, "Powerset", argument);
         int normalResultRefDepth =
                 g.POWERSET_FUNCTION.getResultType().typeRefDepth - 1;
