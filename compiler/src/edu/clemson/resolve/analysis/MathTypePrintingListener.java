@@ -46,6 +46,11 @@ public class MathTypePrintingListener extends ResolveBaseListener {
         printType(ctx);
     }
 
+    @Override public void exitMathIntegerLiteralExp(
+            ResolveParser.MathIntegerLiteralExpContext ctx) {
+        printType(ctx);
+    }
+
     //@Override public void exitMathSetRestrictionExp(
     //        ResolveParser.MathSetRestrictionExpContext ctx) {
     //    printType(ctx);

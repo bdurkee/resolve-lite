@@ -8,18 +8,18 @@ import java.util.*;
 public class MathFunctionApplicationClassification extends MathClassification {
 
     private final List<MathClassification> arguments = new ArrayList<>();
-    private final MathArrowClassification function;
+    private final MathFunctionClassification function;
     private final String name;
 
     public MathFunctionApplicationClassification(@NotNull DumbTypeGraph g,
-                                                 @NotNull MathArrowClassification f,
+                                                 @NotNull MathFunctionClassification f,
                                                  @NotNull String name,
                                                  @NotNull MathClassification... arguments) {
         this(g, f, name, Arrays.asList(arguments));
     }
 
     public MathFunctionApplicationClassification(@NotNull DumbTypeGraph g,
-                                                 @NotNull MathArrowClassification f,
+                                                 @NotNull MathFunctionClassification f,
                                                  @NotNull String name,
                                                  @NotNull List<MathClassification> arguments) {
         //our range type is the result of an application, so we implicitly exhaust one layer from it...
@@ -43,8 +43,8 @@ public class MathFunctionApplicationClassification extends MathClassification {
 
     @Override public MathClassification withVariablesSubstituted(
             Map<MathClassification, MathClassification> substitutions) {
-        MathArrowClassification newNameType =
-                (MathArrowClassification)function
+        MathFunctionClassification newNameType =
+                (MathFunctionClassification)function
                         .withVariablesSubstituted(substitutions);
         List<MathClassification> newArgs = new ArrayList<>();
         for (MathClassification t : arguments) {

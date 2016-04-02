@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MathArrowClassification extends MathClassification {
+public class MathFunctionClassification extends MathClassification {
 
     private static final FunctionApplicationFactory DEFAULT_FACTORY =
             new VanillaFunctionApplicationFactory();
@@ -17,38 +17,38 @@ public class MathArrowClassification extends MathClassification {
     private final FunctionApplicationFactory applicationFactory;
     private final Map<String, MathClassification> schematicTypes = new LinkedHashMap<>();
 
-    public MathArrowClassification(@NotNull DumbTypeGraph g,
-                                   @NotNull MathClassification range,
-                                   @NotNull MathClassification... paramTypes) {
+    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                      @NotNull MathClassification range,
+                                      @NotNull MathClassification... paramTypes) {
         this(g, range, Arrays.asList(paramTypes));
     }
 
-    public MathArrowClassification(@NotNull DumbTypeGraph g,
-                                   @NotNull MathClassification range,
-                                   @NotNull List<MathClassification> paramTypes) {
+    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                      @NotNull MathClassification range,
+                                      @NotNull List<MathClassification> paramTypes) {
         this(g, DEFAULT_FACTORY, range, paramTypes);
     }
 
-    public MathArrowClassification(@NotNull DumbTypeGraph g,
-                                   @Nullable FunctionApplicationFactory apply,
-                                   @NotNull MathClassification range,
-                                   @NotNull MathClassification... paramTypes) {
+    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                      @Nullable FunctionApplicationFactory apply,
+                                      @NotNull MathClassification range,
+                                      @NotNull MathClassification... paramTypes) {
         this(g, apply, range, Arrays.asList(paramTypes));
     }
 
-    public MathArrowClassification(@NotNull DumbTypeGraph g,
-                                   @Nullable FunctionApplicationFactory apply,
-                                   @NotNull MathClassification range,
-                                   @NotNull List<MathClassification> paramTypes) {
+    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                      @Nullable FunctionApplicationFactory apply,
+                                      @NotNull MathClassification range,
+                                      @NotNull List<MathClassification> paramTypes) {
         this(g, apply, range, buildDummyNameListOfEqualLength(paramTypes),
                 paramTypes);
     }
 
-    private MathArrowClassification(@NotNull DumbTypeGraph g,
-                                    @Nullable FunctionApplicationFactory applyFactory,
-                                    @NotNull MathClassification range,
-                                    @NotNull List<String> paramNames,
-                                    @NotNull List<MathClassification> paramTypes) {
+    private MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                       @Nullable FunctionApplicationFactory applyFactory,
+                                       @NotNull MathClassification range,
+                                       @NotNull List<String> paramNames,
+                                       @NotNull List<MathClassification> paramTypes) {
         super(g, range);
         this.paramTypes.addAll(paramTypes);
         this.resultType = range;
@@ -94,7 +94,7 @@ public class MathArrowClassification extends MathClassification {
 
     @Override public MathClassification withVariablesSubstituted(
             Map<MathClassification, MathClassification> substitutions) {
-        return new MathArrowClassification(g, applicationFactory,
+        return new MathFunctionClassification(g, applicationFactory,
                 resultType.withVariablesSubstituted(substitutions),
                 domainType.withVariablesSubstituted(substitutions));
     }
@@ -142,8 +142,7 @@ public class MathArrowClassification extends MathClassification {
 
         if (t2.identifiesSchematicType) {
             //attempt to bind concrete t1 to template type t2
-            if (g.isSubtype(t1, t2.getEnclosingClassification()) ||
-                    t1.equals(t2.getEnclosingClassification())) {
+            if (g.isSubtype(t1, t2.getEnclosingClassification())) {
                 if (t2 instanceof MathNamedClassification && !bindingsAccumulator.containsKey(t1)) {
 
                     bindingsAccumulator.put(t2, t1);
@@ -198,7 +197,7 @@ public class MathArrowClassification extends MathClassification {
             FunctionApplicationFactory {
 
         @Override public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
+                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
             return new MathFunctionApplicationClassification(g, f, calledAsName, arguments);

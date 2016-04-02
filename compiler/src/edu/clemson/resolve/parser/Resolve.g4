@@ -159,7 +159,7 @@ mathExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                #mathInfixAppExp
-    |   ID ':' mathExp                                  #mathTypeAssertionExp
+    |   ID ':' mathExp                                  #mathClassificationAssertionExp
     |   '(' mathExp ')'                                 #mathNestedExp
     |   mathPrimeExp                                    #mathPrimaryExp
     ;
@@ -186,7 +186,7 @@ mathPrimeExp
     |   mathCartProdExp
     |   mathSymbolExp
     |   mathOutfixApplyExp
-    |   mathSetComprehensionExp
+    |   mathSetRestrictionExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
@@ -214,7 +214,7 @@ mathOutfixApplyExp
     |   lop='⎝' mathExp rop='⎠'
     ;
 
-mathSetComprehensionExp
+mathSetRestrictionExp
     :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 

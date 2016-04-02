@@ -221,14 +221,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             paramTypes.add(ty);
                     }
                 }
-                defnType = new MathArrowClassification(g, colonRhsType, paramTypes);
+                defnType = new MathFunctionClassification(g, colonRhsType, paramTypes);
 
                 for (ParseTree t : names) {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, defnType);
-                    if (asNamed.typeRefDepth < 1) {
-                        defnType = colonRhsType;
-                    }
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), asNamed));
                 }
@@ -236,9 +233,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 for (ParseTree t : names) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
-                    if (defnType.typeRefDepth < 1) {
-                        defnType = colonRhsType;
-                    }
+                    //if (defnType.typeRefDepth < 1) {
+                    //    defnType = colonRhsType;
+                    //}
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), defnType));
                 }
@@ -311,6 +308,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathTypeAssertionExp(
+            ResolveParser.MathTypeAssertionExpContext ctx) {
+        this.visit(ctx.mathExp());
+        MathClassification rhsColonType =
+                exactNamedIntermediateMathTypes.get(ctx.mathExp());
+        MathClassification ty =
+                new MathNamedClassification(g, ctx.ID().getText(),
+                        rhsColonType.typeRefDepth - 1, rhsColonType);
+        ty.identifiesSchematicType = true;
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, ctx.ID().getText(), ty));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), e.getOffendingSymbol().getName());
+        }
+        //defnSchematicTypes.put(ctx.ID().getText(), ty);
+        exactNamedIntermediateMathTypes.put(ctx, ty);
+        mathTypes.put(ctx, ty);
+        return null;
+    }
+
     @Override public Void visitMathAssertionExp(
             ResolveParser.MathAssertionExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.getChild(0));
@@ -337,8 +356,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathInfixAppExp(
             ResolveParser.MathInfixAppExpContext ctx) {
-        System.out.println("visiting: " + ctx.getText());
-        String x = ctx.getText();
         typeMathFunctionApp(ctx, (ParserRuleContext) ctx.getChild(1),
                 ctx.mathExp());
         return null;
@@ -365,20 +382,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String asString = ctx.getText();
         MathClassification t = exactNamedIntermediateMathTypes.get(nameExp);
         //if we're a name identifying a function, get our function type.
-        if (t instanceof MathNamedClassification && t.getEnclosingClassification() instanceof MathArrowClassification) {
+        if (t instanceof MathNamedClassification && t.getEnclosingClassification() instanceof MathFunctionClassification) {
             t = ((MathNamedClassification) t).enclosingClassification;
         }
-        if (!(t instanceof MathArrowClassification)) {
+        if (!(t instanceof MathFunctionClassification)) {
             compiler.errMgr.semanticError(ErrorKind.APPLYING_NON_FUNCTION,
                     nameExp.getStart(), nameExp.getText());
             exactNamedIntermediateMathTypes.put(ctx, g.INVALID);
             mathTypes.put(ctx, g.INVALID);
             return;
         }
-        MathArrowClassification expectedFuncType = (MathArrowClassification) t;
+        MathFunctionClassification expectedFuncType = (MathFunctionClassification) t;
         List<MathClassification> actualArgumentTypes = Utils.apply(args, mathTypes::get);
         List<MathClassification> formalParameterTypes =
-                MathSymbol.getParameterTypes((MathArrowClassification) expectedFuncType);
+                MathSymbol.getParameterTypes((MathFunctionClassification) expectedFuncType);
         String applicationText = ctx.getText();
 
         if (formalParameterTypes.size() != actualArgumentTypes.size()) {
@@ -389,7 +406,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         try {
-            expectedFuncType = (MathArrowClassification)
+            expectedFuncType = (MathFunctionClassification)
                     expectedFuncType.deschematize(actualArgumentTypes);
         } catch (BindingException e) {
             System.out.println("formal params in: '" + asString +
@@ -398,7 +415,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //we have to redo this since deschematize above might've changed the
         //args
         formalParameterTypes = MathSymbol.getParameterTypes(
-                (MathArrowClassification) expectedFuncType);
+                (MathFunctionClassification) expectedFuncType);
 
         Iterator<MathClassification> actualsIter = actualArgumentTypes.iterator();
         Iterator<MathClassification> formalsIter = formalParameterTypes.iterator();
@@ -427,16 +444,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             List<MathClassification> actualNamedArgumentTypes =
                     Utils.apply(args, exactNamedIntermediateMathTypes::get);
             MathClassification appType = null;
-            if (nameExp.getText().equals("⟶")) {
+            /*if (nameExp.getText().equals("⟶") || nameExp.getText().equals("->")) {
                  appType = expectedFuncType
                         .getApplicationType("⟶", actualNamedArgumentTypes);
             }
-            else {
-                appType = new MathArrowClassification(g,
+            else {*/
+                appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
+               /* appType = new MathFunctionClassification(g,
                         expectedFuncType.getResultType(),
-                        actualNamedArgumentTypes);
-            }
-
+                        actualNamedArgumentTypes);*/
+            //}
             exactNamedIntermediateMathTypes.put(ctx, appType);
             mathTypes.put(ctx, appType);
         } else {
@@ -466,16 +483,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathImpliesOpExp(
             ResolveParser.MathImpliesOpExpContext ctx) {
-        //exactNamedIntermediateMathTypes.put(ctx, g.BOOLEAN_FUNCTION);
-        //mathTypes.put(ctx, g.BOOLEAN_FUNCTION);
         typeMathSymbol(ctx, ctx.qualifier, ctx.ID().getText());
         return null;
     }
 
     @Override public Void visitMathEqualityOpExp(
             ResolveParser.MathEqualityOpExpContext ctx) {
-        //exactNamedIntermediateMathTypes.put(ctx, g.EQUALITY_FUNCTION);
-        //mathTypes.put(ctx, g.EQUALITY_FUNCTION);
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
@@ -506,6 +519,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathSetRestrictionExp(
+            ResolveParser.MathSetRestrictionExpContext ctx) {
+        this.visit(ctx.mathVarDecl());
+        this.visit(ctx.mathAssertionExp());
+        MathClassification t =
+                g.POWERSET_FUNCTION.getApplicationType("Powerset",
+                        exactNamedIntermediateMathTypes.get(
+                                ctx.mathVarDecl().mathTypeExp()));
+        exactNamedIntermediateMathTypes.put(ctx, t);
+        mathTypes.put(ctx, t);
+        return null;
+    }
+
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
                                 @Nullable Token qualifier,
                                 @NotNull String name) {
@@ -520,11 +546,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (s.getMathType().identifiesSchematicType) {
             mathTypes.put(ctx, s.getMathType());
         }
-        else if (walkingType) {
-            mathTypes.put(ctx, s.getMathType().enclosingClassification);
-        }
         else {
-            mathTypes.put(ctx, s.getMathType());
+            mathTypes.put(ctx, s.getMathType().enclosingClassification);
         }
     }
 
@@ -552,8 +575,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void expectType(ParserRuleContext ctx, MathClassification expected) {
         MathClassification foundType = mathTypes.get(ctx);
-        if (!foundType.equals(expected) &&
-                !g.isSubtype(foundType, expected)) {
+        if (!g.isSubtype(foundType, expected)) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
                     ctx.getStart(), expected, foundType);
         }

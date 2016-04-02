@@ -1,11 +1,11 @@
 Precis Basic_Function_Properties;
 
-     Definition Is_Identity(f : (D : SSet) -> D) : B is
+     /*Definition Is_Identity(f : (D : SSet) -> D) : B is
             Forall x : D, f(x) = x;
 
      Definition Is_Injective(f : (D : SSet) -> (R : SSet)) : B is
             Forall x, y : D, f(x) = f(y) implies x = y;
 
     Definition DI(f : (D : SSet) -> D, n : SSet) : D -> D;
-
+*/
 end Basic_Function_Properties;

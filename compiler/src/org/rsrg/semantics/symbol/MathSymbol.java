@@ -50,7 +50,7 @@ public class MathSymbol extends Symbol {
         return q;
     }
 
-    public static List<MathClassification> getParameterTypes(MathArrowClassification source) {
+    public static List<MathClassification> getParameterTypes(MathFunctionClassification source) {
         return expandAsNeeded(source.getDomainType());
     }
 

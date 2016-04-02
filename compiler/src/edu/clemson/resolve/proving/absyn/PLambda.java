@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathArrowClassification;
+import org.rsrg.semantics.MathFunctionClassification;
 import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.MathInvalidClassification;
 
@@ -20,7 +20,7 @@ public class PLambda extends PExp {
     public PLambda(@NotNull List<MathSymbolDeclaration> parameters,
                    @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MathArrowClassification(body.getMathType()
+                new MathFunctionClassification(body.getMathType()
                         .getTypeGraph(), body.getMathType(),parameters.stream()
                         .map(p ->p.type).collect(Collectors.toList())), null);
         this.parameters.addAll(parameters);

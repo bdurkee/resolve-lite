@@ -165,8 +165,8 @@ public class MathSymbolTable {
             globalScope.define(new MathSymbol(g, "and", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
-            globalScope.define(new MathSymbol(g, "true", g.BOOLEAN));
-            globalScope.define(new MathSymbol(g, "false", g.BOOLEAN));
+            globalScope.define(new MathSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
+            globalScope.define(new MathSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));
 
             //aliases for our 'arrow type'
             globalScope.define(new MathSymbol(g, "⟶", g.ARROW_FUNCTION));
@@ -174,7 +174,7 @@ public class MathSymbolTable {
 
             globalScope.define(new MathSymbol(g, "*", g.CROSS_PROD_FUNCTION));
             globalScope.define(new MathSymbol(g, "=",
-                    new MathArrowClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate builtin symbol");
         }

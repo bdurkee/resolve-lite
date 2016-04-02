@@ -28,16 +28,16 @@ public class DumbTypeGraph {
     /** General purpose (binary) boolean function type, useful for things like
      *  "and", "or", "xor", etc;
      */
-    public final MathArrowClassification BOOLEAN_FUNCTION =
-            new MathArrowClassification(this, BOOLEAN, BOOLEAN, BOOLEAN);
-    public final MathArrowClassification EQUALITY_FUNCTION =
-            new MathArrowClassification(this, BOOLEAN, ENTITY, ENTITY);
-    public final MathArrowClassification POWERSET_FUNCTION =
-            new MathArrowClassification(this, POWERSET_APPLICATION, SSET, SSET);
-    public final MathArrowClassification ARROW_FUNCTION =
-            new MathArrowClassification(this, ARROW_APPLICATION, CLS, CLS, CLS);
-    public final MathArrowClassification CROSS_PROD_FUNCTION =
-            new MathArrowClassification(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
+    public final MathFunctionClassification BOOLEAN_FUNCTION =
+            new MathFunctionClassification(this, BOOLEAN, BOOLEAN, BOOLEAN);
+    public final MathFunctionClassification EQUALITY_FUNCTION =
+            new MathFunctionClassification(this, BOOLEAN, ENTITY, ENTITY);
+    public final MathFunctionClassification POWERSET_FUNCTION =
+            new MathFunctionClassification(this, POWERSET_APPLICATION, SSET, SSET);
+    public final MathFunctionClassification ARROW_FUNCTION =
+            new MathFunctionClassification(this, ARROW_APPLICATION, CLS, CLS, CLS);
+    public final MathFunctionClassification CROSS_PROD_FUNCTION =
+            new MathFunctionClassification(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
 
     private final static FunctionApplicationFactory CARTESIAN_APPLICATION =
             new CartesianProductApplicationFactory();
@@ -51,7 +51,7 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
+                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
             return new MathPowersetApplicationClassification(g, arguments.get(0));
@@ -63,10 +63,10 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
+                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
-            return new MathArrowClassification(g, arguments.get(1), arguments.get(0));
+            return new MathFunctionClassification(g, arguments.get(1), arguments.get(0));
         }
     }
 
@@ -75,7 +75,7 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathArrowClassification f,
+                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
             return new MathCartesianClassification(g, arguments);
@@ -87,8 +87,26 @@ public class DumbTypeGraph {
         boolean result = (supertype == ENTITY || supertype == CLS);
         if ( !result ) {
             MathClassification subtypesEnclosingType = subtype.enclosingClassification;
-            if (subtypesEnclosingType != null &&
-                    subtypesEnclosingType.equals(supertype)) return true;
+
+            //if we're equal, we're a trivial subtype
+            if (subtype.equals(supertype)) result = true;
+            else if (subtypesEnclosingType != null &&
+                    subtypesEnclosingType.equals(supertype)) {
+                result = true;
+            }
+            else if (subtype instanceof MathFunctionApplicationClassification &&
+                    supertype instanceof MathFunctionApplicationClassification) {
+                result = isSubtype(subtype.getEnclosingClassification(),
+                        supertype.getEnclosingClassification());
+            }
+            else if (subtype instanceof MathFunctionClassification &&
+                    supertype instanceof MathFunctionClassification) {
+                result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
+                        ((MathFunctionClassification) supertype).getDomainType())
+                    && isSubtype(((MathFunctionClassification) subtype).getResultType(),
+                        ((MathFunctionClassification) supertype).getResultType());
+            }
+
         }
         return result;
     }

@@ -5,8 +5,8 @@ Precis Basic_Natural_Number_Theory;
         Is_Monogeneric_for(N, 0, suc);
 
     Inductive Definition (m : N) + (n : N) : N is
-        (i.)    true;
-        (ii.)  true;// m + suc(n) = suc(m + n);
+        (i.)    m + 0 = 0;
+        (ii.)   m + suc(n) = suc(m + n);
 
     /*Definition (m : N) >= (n : N) : B;
     Definition (m : N) <= (n : N) : B;
