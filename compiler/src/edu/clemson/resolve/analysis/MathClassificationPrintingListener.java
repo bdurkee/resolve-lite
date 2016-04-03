@@ -7,11 +7,11 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MathClassification;
 
-public class MathTypePrintingListener extends ResolveBaseListener {
+public class MathClassificationPrintingListener extends ResolveBaseListener {
 
     @NotNull private final ParseTreeProperty<MathClassification> types;
 
-    public MathTypePrintingListener(
+    public MathClassificationPrintingListener(
             @NotNull ParseTreeProperty<MathClassification> types) {
         this.types = types;
     }
@@ -48,6 +48,11 @@ public class MathTypePrintingListener extends ResolveBaseListener {
 
     @Override public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
+        printType(ctx);
+    }
+
+    @Override public void exitMathQuantifiedExp(
+            ResolveParser.MathQuantifiedExpContext ctx) {
         printType(ctx);
     }
 
