@@ -28,6 +28,14 @@ public class MathCartesianClassification extends MathClassification {
         return new MathCartesianClassification(g, newComponents);
     }
 
+    public int size() {
+        return components.size();
+    }
+
+    public MathClassification getFactor(int i) {
+        return components.get(i);
+    }
+
     @Override public String toString() {
         return "(" + Utils.join(components, " * ") + ")";
     }

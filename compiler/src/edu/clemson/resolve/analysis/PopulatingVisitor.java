@@ -328,8 +328,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathTypeAssertionExp(
-            ResolveParser.MathTypeAssertionExpContext ctx) {
+    @Override public Void visitMathClassificationAssertionExp(
+            ResolveParser.MathClassificationAssertionExpContext ctx) {
         this.visit(ctx.mathExp());
         MathClassification rhsColonType =
                 exactNamedIntermediateMathClassifications.get(ctx.mathExp());
@@ -398,7 +398,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
-        visitAndClassifyMathExpCtx(ctx, ctx.mathExp());
+        visitAndClassifyMathExpCtx(ctx, ctx.mathAssertionExp());
         return null;
     }
 
@@ -491,17 +491,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else if (walkingType) {
             List<MathClassification> actualNamedArgumentTypes =
                     Utils.apply(args, exactNamedIntermediateMathClassifications::get);
-            MathClassification appType = null;
-            /*if (nameExp.getText().equals("⟶") || nameExp.getText().equals("->")) {
-                 appType = expectedFuncType
-                        .getApplicationType("⟶", actualNamedArgumentTypes);
-            }
-            else {*/
-                appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
-               /* appType = new MathFunctionClassification(g,
-                        expectedFuncType.getResultType(),
-                        actualNamedArgumentTypes);*/
-            //}
+            MathClassification appType =
+                    expectedFuncType.getApplicationType(
+                            nameExp.getText(), actualNamedArgumentTypes);
             exactNamedIntermediateMathClassifications.put(ctx, appType);
             mathClassifications.put(ctx, appType);
         } else {
@@ -546,6 +538,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         exactNamedIntermediateMathClassifications.put(ctx, g.ARROW_FUNCTION);
         mathClassifications.put(ctx, g.ARROW_FUNCTION);
         //typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+
+    @Override public Void visitMathMultOpExp(
+            ResolveParser.MathMultOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 

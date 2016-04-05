@@ -10,6 +10,7 @@ Precis Basic_Natural_Number_Theory;
 
     Theorem N3: ∀ m, n : N, suc(m) + n = suc(m + n);
 
+    Theorem N6: ∀ n : N, n = 0 or (∃ p : N, n = suc(p));
 
     /*Definition (m : N) >= (n : N) : B;
     Definition (m : N) <= (n : N) : B;

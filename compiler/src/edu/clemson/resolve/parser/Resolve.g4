@@ -155,12 +155,12 @@ mathExp
     :   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
     |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathAddOpExp mathExp                    #mathInfixAppExp
+    |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
     |   mathExp mathBooleanOpExp mathExp                #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
-    |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                #mathInfixAppExp
     |   ID ':' mathExp                                  #mathClassificationAssertionExp
-    |   '(' mathExp ')'                                 #mathNestedExp
+    |   '(' mathAssertionExp ')'                        #mathNestedExp
     |   mathPrimeExp                                    #mathPrimaryExp
     ;
 

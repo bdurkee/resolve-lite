@@ -50,7 +50,7 @@ public class MathFunctionClassification extends MathClassification {
                                        @NotNull List<String> paramNames,
                                        @NotNull List<MathClassification> paramTypes) {
         super(g, range);
-        this.paramTypes.addAll(paramTypes);
+        this.paramTypes.addAll(expandAsNeeded(paramTypes));
         this.resultType = range;
         this.domainType = buildDomainType();
 
@@ -61,6 +61,36 @@ public class MathFunctionClassification extends MathClassification {
             this.applicationFactory = applyFactory;
         }
         this.typeRefDepth = range.typeRefDepth;
+    }
+
+    private static List<MathClassification> expandAsNeeded(
+            @NotNull List<MathClassification> t) {
+        List<MathClassification> result = new ArrayList<>();
+        for (MathClassification c : t) {
+            result.addAll(expandAsNeeded(c));
+        }
+        return result;
+    }
+
+    private static List<MathClassification> expandAsNeeded(
+            @NotNull MathClassification t) {
+        List<MathClassification> result = new ArrayList<>();
+
+        if (t instanceof MathCartesianClassification) {
+            MathCartesianClassification domainAsMTCartesian =
+                    (MathCartesianClassification) t;
+
+            int size = domainAsMTCartesian.size();
+            for (int i = 0; i < size; i++) {
+                result.add(domainAsMTCartesian.getFactor(i));
+            }
+        }
+        else {
+            if (!t.equals(t.getTypeGraph().VOID)) {
+                result.add(t);
+            }
+        }
+        return result;
     }
 
     @Override public MathClassification getEnclosingClassification() {
@@ -99,10 +129,6 @@ public class MathFunctionClassification extends MathClassification {
                 domainType.withVariablesSubstituted(substitutions));
     }
 
-    //ok, if there's an implicit type parameter what we need to do is get its enclosing type
-    //and return a new version of the formal functions signature. For example:
-    //if we have Foo(T : SSet; x : T) : B
-    //then we will operate on Foo(
     public MathClassification deschematize(@NotNull List<MathClassification> argTypes)
             throws BindingException {
         //for each supplied actual type
@@ -143,8 +169,8 @@ public class MathFunctionClassification extends MathClassification {
         if (t2.identifiesSchematicType) {
             //attempt to bind concrete t1 to template type t2
             if (g.isSubtype(t1, t2.getEnclosingClassification())) {
-                if (t2 instanceof MathNamedClassification && !bindingsAccumulator.containsKey(t1)) {
-
+                if (t2 instanceof MathNamedClassification &&
+                        !bindingsAccumulator.containsKey(t1)) {
                     bindingsAccumulator.put(t2, t1);
                 }
             }

@@ -1,9 +1,8 @@
 Concept Prioritizer_Template(type Entry;
             evaluates Max_Capacity : Std_Ints :: Integer;
-            Definition LEQV(x, y : Entry) : B;);
+            Definition ≼(x, y : Entry) : B;);
         uses Standard_Booleans, Standard_Integers,
             Basic_Integer_Theory, Basic_Natural_Number_Theory;
-
         requires Max_Capacity > 0
             which_entails Max_Capacity : N;
 
