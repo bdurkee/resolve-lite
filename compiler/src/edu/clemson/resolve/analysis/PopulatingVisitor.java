@@ -39,9 +39,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *      {@link ResolveParser.MathCategoricalDefnDeclContext} or
      *      {@link ResolveParser.MathStandardDefnDeclContext} or
      *      {@link ResolveParser.MathInductiveDefnDeclContext}
-     * (namely, one of the four styles of defn signatures therein), this
-     * holds a ref to the scope that the defn binding should be added to;
-     * holds {@code null} otherwise.
+     *  (namely, one of the four styles of defn signatures therein), this
+     *  holds a ref to the scope that the defn binding should be added to;
+     *  holds {@code null} otherwise.
      */
     private Scope defnEnclosingScope = null;
 
@@ -49,8 +49,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      *  hand side of a colon (<tt>:</tt>); {@code false} otherwise.
      */
     private boolean walkingType = false;
-
-    private boolean walkingFunctionName = false;
     private boolean walkingDefnParams = false;
 
     /** A mapping from {@code ParserRuleContext}s to their corresponding
@@ -216,7 +214,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         //next, visit the definition's 'return type' to give it a type
         this.visit(type);
-        MathClassification colonRhsType = exactNamedIntermediateMathClassifications.get(type);
+        MathClassification colonRhsType =
+                exactNamedIntermediateMathClassifications.get(type);
 
         MathClassification defnType = null;
         if (colonRhsType.typeRefDepth > 0) {
@@ -511,52 +510,67 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             mathClassifications.put(ctx, expectedFuncType.getResultType());
         }
     }
-
-    @Override public Void visitMathBooleanOpExp(
-            ResolveParser.MathBooleanOpExpContext ctx) {
-        exactNamedIntermediateMathClassifications.put(ctx, g.BOOLEAN_FUNCTION);
-        mathClassifications.put(ctx, g.BOOLEAN_FUNCTION);
-        return null;
-    }
-
-    @Override public Void visitMathAddOpExp(
-            ResolveParser.MathAddOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override public Void visitMathImpliesOpExp(
-            ResolveParser.MathImpliesOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override public Void visitMathEqualityOpExp(
-            ResolveParser.MathEqualityOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override public Void visitMathArrowOpExp(
-            ResolveParser.MathArrowOpExpContext ctx) {
-        exactNamedIntermediateMathClassifications.put(ctx, g.ARROW_FUNCTION);
-        mathClassifications.put(ctx, g.ARROW_FUNCTION);
-        //typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
+    /*
+    mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
+    mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
+    mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
+    mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
+    mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
+    mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
+    mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
+    mathImpliesOpExp : (qualifier=ID '::')? op='implies';
+    mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
+    */
     @Override public Void visitMathMultOpExp(
             ResolveParser.MathMultOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
-
+    @Override public Void visitMathAddOpExp(
+            ResolveParser.MathAddOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathJoiningOpExp(
+            ResolveParser.MathJoiningOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathArrowOpExp(
+            ResolveParser.MathArrowOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathRelationalOpExp(
+            ResolveParser.MathRelationalOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathEqualityOpExp(
+            ResolveParser.MathEqualityOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathSetContainmentOpExp(
+            ResolveParser.MathSetContainmentOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathImpliesOpExp(
+            ResolveParser.MathImpliesOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
+    @Override public Void visitMathBooleanOpExp(
+            ResolveParser.MathBooleanOpExpContext ctx) {
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
+        return null;
+    }
     @Override public Void visitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
-
     @Override public Void visitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.INT().getText());
@@ -582,9 +596,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    //Def X : SSet;
-    //Def Y : X;
-    //Def f ( x : X) : B = y(X);
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
                                 @Nullable Token qualifier,
                                 @NotNull String name) {
@@ -596,13 +607,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         String here = ctx.getText();
         exactNamedIntermediateMathClassifications.put(ctx, s.getMathType());
-        mathClassifications.put(ctx, s.getMathType());
-        /*if (s.getMathType().identifiesSchematicType) {
+        if (s.getMathType().identifiesSchematicType) {
             mathClassifications.put(ctx, s.getMathType());
         }
         else {
-            mathClassifications.put(ctx, s.getMathType().enclosingClassification);
-        }*/
+            mathClassifications.put(ctx, s.getMathType().getEnclosingClassification());
+        }
     }
 
     @Nullable private MathSymbol getIntendedMathSymbol(

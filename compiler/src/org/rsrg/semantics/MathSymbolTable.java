@@ -160,14 +160,18 @@ public class MathSymbolTable {
                                           @NotNull ScopeBuilder globalScope) {
         try {
             globalScope.define(new MathSymbol(g, "B", g.BOOLEAN));
-            globalScope.define(new MathSymbol(g, "SSet", g.CLS));
+            globalScope.define(new MathSymbol(g, "SSet", g.SSET));
             globalScope.define(new MathSymbol(g, "Cls", g.CLS));
             globalScope.define(new MathSymbol(g, "and", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
 
-            globalScope.define(new MathSymbol(g, "not", new MathNamedClassification(g, "not", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
-            globalScope.define(new MathSymbol(g, "⌐", new MathNamedClassification(g, "⌐", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
+            //alt
+            //globalScope.define(new MathSymbol(g, "not", new MathNamedClassification(g, "not", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
+            //globalScope.define(new MathSymbol(g, "⌐", new MathNamedClassification(g, "⌐", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
+            globalScope.define(new MathSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+
 
             globalScope.define(new MathSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
             globalScope.define(new MathSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));

@@ -1,0 +1,8 @@
+Precis T;
+
+    Definition N : SSet;
+
+    Definition 0 : N;
+
+    Definition x : B is 0 = 0;
+end T;
