@@ -50,6 +50,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private boolean walkingType = false;
 
+    private boolean walkingFunctionName = false;
     private boolean walkingDefnParams = false;
 
     /** A mapping from {@code ParserRuleContext}s to their corresponding
@@ -425,7 +426,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
+        walkingFunctionName = true;
         this.visit(nameExp);
+        walkingFunctionName = false;
+
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClassification t = exactNamedIntermediateMathClassifications.get(nameExp);
@@ -523,7 +527,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathImpliesOpExp(
             ResolveParser.MathImpliesOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.ID().getText());
+        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 
@@ -578,6 +582,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    //Def X : SSet;
+    //Def Y : X;
+    //Def f ( x : X) : B = y(X);
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
                                 @Nullable Token qualifier,
                                 @NotNull String name) {
@@ -589,12 +596,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         String here = ctx.getText();
         exactNamedIntermediateMathClassifications.put(ctx, s.getMathType());
-        if (s.getMathType().identifiesSchematicType) {
+        mathClassifications.put(ctx, s.getMathType());
+        /*if (s.getMathType().identifiesSchematicType) {
             mathClassifications.put(ctx, s.getMathType());
         }
         else {
             mathClassifications.put(ctx, s.getMathType().enclosingClassification);
-        }
+        }*/
     }
 
     @Nullable private MathSymbol getIntendedMathSymbol(
