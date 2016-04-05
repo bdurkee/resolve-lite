@@ -50,27 +50,6 @@ public class MathSymbol extends Symbol {
         return q;
     }
 
-    public static List<MathClassification> getParameterTypes(MathFunctionClassification source) {
-        return expandAsNeeded(source.getDomainType());
-    }
-
-    private static List<MathClassification> expandAsNeeded(MathClassification t) {
-        List<MathClassification> result = new ArrayList<>();
-        if ( t instanceof MathCartesianClassification) {
-            MathCartesianClassification domainAsMTCartesian = (MathCartesianClassification) t;
-            result.addAll(domainAsMTCartesian.getComponentTypes());
-            /*for (int i = 0; i < domainAsMTCartesian.size(); i++) {
-                result.add(domainAsMTCartesian.getFactor(i));
-            }*/
-        }
-        else {
-            if ( !(t == t.getTypeGraph().VOID) ) {
-                result.add(t);
-            }
-        }
-        return result;
-    }
-
     @NotNull @Override public String getSymbolDescription() {
         return "a math symbol";
     }

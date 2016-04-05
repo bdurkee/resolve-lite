@@ -425,10 +425,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
-        walkingFunctionName = true;
         this.visit(nameExp);
-        walkingFunctionName = false;
-
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClassification t = exactNamedIntermediateMathClassifications.get(nameExp);
@@ -446,8 +443,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathFunctionClassification expectedFuncType = (MathFunctionClassification) t;
         List<MathClassification> actualArgumentTypes = Utils.apply(args, mathClassifications::get);
         List<MathClassification> formalParameterTypes =
-                MathSymbol.getParameterTypes((MathFunctionClassification) expectedFuncType);
-        String applicationText = ctx.getText();
+                expectedFuncType.getParamTypes();
 
         if (formalParameterTypes.size() != actualArgumentTypes.size()) {
             compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT,
@@ -465,8 +461,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         //we have to redo this since deschematize above might've changed the
         //args
-        formalParameterTypes = MathSymbol.getParameterTypes(
-                (MathFunctionClassification) expectedFuncType);
+        formalParameterTypes = expectedFuncType.getParamTypes();
 
         Iterator<MathClassification> actualsIter = actualArgumentTypes.iterator();
         Iterator<MathClassification> formalsIter = formalParameterTypes.iterator();
