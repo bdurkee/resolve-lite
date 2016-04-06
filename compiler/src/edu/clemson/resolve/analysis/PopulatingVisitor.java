@@ -6,7 +6,6 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
-import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -83,6 +82,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
+    }
+
+    @Override public Void visitPrecisModuleDecl(
+            ResolveParser.PrecisModuleDeclContext ctx) {
+        if (ctx.tag != null) {
+            symtab.addTag(new ModuleIdentifier(ctx.tag));
+        }
+        super.visitChildren(ctx);
+        return null;
     }
 
     @Override public Void visitPrecisExtModuleDecl(
@@ -257,15 +265,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathSymbol exemplarSymbol = null;
         MathClassification modelType =
                 exactNamedIntermediateMathClassifications.get(ctx.mathTypeExp());
+        MathNamedClassification exemplarMathType =
+                new MathNamedClassification(g, ctx.exemplar.getText(),
+                modelType.getTypeRefDepth() - 1,
+                modelType);
         try {
 
             exemplarSymbol =
                     symtab.getInnermostActiveScope().addBinding(
                             ctx.exemplar.getText(), ctx,
                             //give the exemplar symbol a value for itself.
-                            new MathNamedClassification(g, ctx.exemplar.getText(),
-                                    modelType.getTypeRefDepth() - 1,
-                                    modelType));
+                            exemplarMathType);
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
@@ -554,13 +564,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 new MathNamedClassification(g, ctx.ID().getText(),
                         rhsColonType.typeRefDepth - 1, rhsColonType);
         ty.identifiesSchematicType = true;
-        try {
-            symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, ctx.ID().getText(), ty));
-        } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), e.getOffendingSymbol().getName());
+        boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
+                ctx, ResolveParser.EntailsClauseContext.class) != null;
+        if (walkingEntailsClause) {
+            MathSymbol s = getIntendedMathSymbol(null, ctx.ID().getText(), ctx);
+            if (s != null) s.setClassification(ty);
         }
+        else {
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, ctx.ID().getText(), ty));
+            } catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), e.getOffendingSymbol().getName());
+            }
+        }
+
         //defnSchematicTypes.put(ctx.ID().getText(), ty);
         exactNamedIntermediateMathClassifications.put(ctx, ty);
         tr.mathClssftns.put(ctx, ty);
@@ -818,18 +837,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                 @Nullable Token qualifier,
                                 @NotNull String name) {
         MathSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
-        if (s == null || s.getMathType() == null) {
+        if (s == null || s.getClassification() == null) {
             exactNamedIntermediateMathClassifications.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
         }
         String here = ctx.getText();
-        exactNamedIntermediateMathClassifications.put(ctx, s.getMathType());
-        if (s.getMathType().identifiesSchematicType) {
-            tr.mathClssftns.put(ctx, s.getMathType());
+        exactNamedIntermediateMathClassifications.put(ctx, s.getClassification());
+        if (s.getClassification().identifiesSchematicType) {
+            tr.mathClssftns.put(ctx, s.getClassification());
         }
         else {
-            tr.mathClssftns.put(ctx, s.getMathType().getEnclosingClassification());
+            tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
     }
 

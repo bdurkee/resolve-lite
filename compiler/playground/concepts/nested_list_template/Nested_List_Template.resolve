@@ -1,4 +1,4 @@
-Concept Nested_List_Template(type Label;
+Concept Nested_List_Template(classification Label;
         evaluates Max_Total_Size
                 : Std_Ints :: Integer);
     uses Standard_Booleans, Standard_Integers,

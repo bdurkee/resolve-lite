@@ -46,7 +46,7 @@ public class QualifiedPath implements ScopeSearchPath {
                         SearchContext.FACILITY));
             }
         }
-        catch (NoSuchSymbolException e) {
+        catch (NoSuchSymbolException |ClassCastException e) {
             //then perhaps it identifies a module..
             ModuleScopeBuilder moduleScope =
                     repo.getModuleScope(new ModuleIdentifier(qualifier));

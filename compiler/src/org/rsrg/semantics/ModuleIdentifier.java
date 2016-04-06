@@ -6,6 +6,11 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /** Identifies a particular module unambiguously.
  *  <p>
  *  <strong>Note:</strong> Currently, we only permit one level of namespace.
@@ -24,6 +29,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull public static final ModuleIdentifier GLOBAL =
             new ModuleIdentifier();
 
+    public final Set<String> tagAliases = new HashSet<>();
     @NotNull private final Token name;
     private final boolean globalFlag;
 
@@ -58,7 +64,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         return name.getText().hashCode();
     }
 
-    @Override public int compareTo(ModuleIdentifier o) {
+    @Override public int compareTo(@NotNull ModuleIdentifier o) {
         return name.getText().compareTo(o.name.getText());
     }
 

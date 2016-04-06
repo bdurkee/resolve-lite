@@ -40,7 +40,7 @@ moduleDecl
 // precis
 
 precisModuleDecl
-    :   'Precis' name=ID ';'
+    :   'Precis' name=ID ('tagged_as' tag=ID)? ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF
@@ -109,9 +109,9 @@ facilityBlock
 //implBlock
 //  :
 
-// type refs & decls
+// classification refs & decls
 
-type
+classification
     :   (qualifier=ID '::')? name=ID           #namedType
     |    'Record' (recordVarDeclGroup)* 'end'  #recordType
     ;
@@ -123,7 +123,7 @@ typeModelDecl
         (initializationClause)?
     ;
 
-// type initialization rules
+// classification initialization rules
 
 specModuleInit
     :   'Facility_Init' (requiresClause)? (ensuresClause)?
@@ -161,11 +161,11 @@ implModuleParameterDecl
     ;
 
 parameterDeclGroup
-    :   parameterMode ID (',' ID)* ':' type
+    :   parameterMode ID (',' ID)* ':' classification
     ;
 
 genericTypeParameterDecl
-    :   'type' name=ID
+    :   'classification' name=ID
     ;
 
 parameterMode
@@ -181,11 +181,11 @@ parameterMode
 // prog variable decls
 
 recordVarDeclGroup
-    :   ID (',' ID)* ':' type ';'?
+    :   ID (',' ID)* ':' classification ';'?
     ;
 
 varDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'?
+    :   'Var' ID (',' ID)* ':' classification ';'?
     ;
 
 // facility decls
@@ -324,6 +324,7 @@ mathExp
  *  No longer a need to pass special maps around from Token -> MathClassification, etc --
  *  now we just need to visit and annotate these names like any other node).
  */
+//mathMultOpExp : (qualifier=ID '::'|sym='ᶻ')? op=('*'|'/'|'%') ;
 mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
 mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
 mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
@@ -391,6 +392,7 @@ mathAlternativeItemExp
 progExp:   'progExp';
 
 
+
 //prog ops here so I can use switch statements in the code
 NOT : 'not' ;
 EQUALS : '=' ;
@@ -413,6 +415,7 @@ FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
+
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;

@@ -5,7 +5,7 @@ import edu.clemson.resolve.runtime.*;
 public class Array_Impl extends RESOLVEBase
         implements
             Bdd_Ceramic_Array_Template {
-    RType type;
+    RType classification;
     int lowerBound, upperBound;
 
     class Ceramic_Array extends RESOLVEBase implements RType {
@@ -35,7 +35,7 @@ public class Array_Impl extends RESOLVEBase
         Array_Rep() {
             content = new RType[upperBound - lowerBound + 1];
             for(int i = 0; i < content.length; i++) {
-                content[i] = type.initialValue();
+                content[i] = classification.initialValue();
             }
         }
         @Override public String toString() {
@@ -52,8 +52,8 @@ public class Array_Impl extends RESOLVEBase
         return new Ceramic_Array();
     }
 
-    public Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
-        this.type = type;
+    public Array_Impl(RType classification, RType Lower_Bound, RType Upper_Bound) {
+        this.classification = classification;
         this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).val;
         this.upperBound = ((Integer_Impl.Integer)Upper_Bound).val;
     }
@@ -86,6 +86,6 @@ public class Array_Impl extends RESOLVEBase
     }
 
     @Override public RType getEntry() {
-        return type;
+        return classification;
     }
 }

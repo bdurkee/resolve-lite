@@ -38,9 +38,9 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
         for (TerminalNode t : ctx.ID()) {
-            tr.uses.add(new ModuleIdentifier(t.getSymbol()));
-            tr.semanticallyRelevantUses.add(
-                    new ModuleIdentifier(t.getSymbol()));
+            ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
+            tr.uses.add(id);
+            tr.semanticallyRelevantUses.add(id);
         }
     }
 

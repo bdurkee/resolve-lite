@@ -1,4 +1,4 @@
-Concept Prioritizer_Template(type Entry;
+Concept Prioritizer_Template(classification Entry;
             evaluates Max_Capacity : Std_Ints :: Integer;
             Definition ≼(x, y : Entry) : B;);
         uses Standard_Booleans, Standard_Integers,

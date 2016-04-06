@@ -169,10 +169,10 @@ public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
 }
 >>
 
-TypeInterfaceDef(type) ::= <<
-interface <type.name> extends RType { }
-public RType init<type.name>(<\\>
-<if(toJavaPrimitive.(type.name))><toJavaPrimitive.(type.name)>... e<endif>);
+TypeInterfaceDef(classification) ::= <<
+interface <classification.name> extends RType { }
+public RType init<classification.name>(<\\>
+<if(toJavaPrimitive.(classification.name))><toJavaPrimitive.(classification.name)>... e<endif>);
 >>
 
 ParameterDef(param) ::= "RType <param.name>"
@@ -296,7 +296,7 @@ OperationParameterMethodCall(call, args) ::=
 VarNameRef(v) ::= "<v.name>"
 
 AccessRef(a, left, right) ::= "<left>.<right>"
-LeafAccessRefLeft(l, name) ::= "((<l.type>)<name>)"
+LeafAccessRefLeft(l, name) ::= "((<l.classification>)<name>)"
 LeafAccessRefRight(l, name) ::= "rep.<name>"
 
 AnonOpParameterClassInstance(wrappedFunc, q) ::= <<
@@ -447,7 +447,7 @@ import edu.clemson.resolve.runtime.*;
 public class Array_Impl extends RESOLVEBase
         implements
             Bdd_Ceramic_Array_Template {
-    RType type;
+    RType classification;
     int lowerBound, upperBound;
 
     class Ceramic_Array extends RESOLVEBase implements RType {
@@ -477,7 +477,7 @@ public class Array_Impl extends RESOLVEBase
         Array_Rep() {
             content = new RType[upperBound - lowerBound + 1];
             for(int i = 0; i \< content.length; i++) {
-                content[i] = type.initialValue();
+                content[i] = classification.initialValue();
             }
         }
         @Override public String toString() {
@@ -494,8 +494,8 @@ public class Array_Impl extends RESOLVEBase
         return new Ceramic_Array();
     }
 
-    public Array_Impl(RType type, RType Lower_Bound, RType Upper_Bound) {
-        this.type = type;
+    public Array_Impl(RType classification, RType Lower_Bound, RType Upper_Bound) {
+        this.classification = classification;
         this.lowerBound = ((Integer_Impl.Integer)Lower_Bound).val;
         this.upperBound = ((Integer_Impl.Integer)Upper_Bound).val;
     }
@@ -528,7 +528,7 @@ public class Array_Impl extends RESOLVEBase
     }
 
     @Override public RType getEntry() {
-        return type;
+        return classification;
     }
 }
 >>

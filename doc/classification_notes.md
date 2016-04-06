@@ -10,13 +10,13 @@ This is a collection of notes, compiled email chains, talks, and snippets of Goo
 
 - Makes theorem provers simpler.
 
-- Needs to be more permissive than programming language type checking (e.g. `5 : N`, `5 : Z`, `5 : C`).
+- Needs to be more permissive than programming language classification checking (e.g. `5 : N`, `5 : Z`, `5 : C`).
 
 - Needs to be a natural formalization of traditional informal conventions of mathematical presentation. Must be mathematician (and cs grad) friendly.
 
 - Should prevent mathematically bizarre "accidental" results from traditional set theoretic developments of math foundations (such as `3 : 7` or `{x} : <x, y>`) from being expressible.
 
-- It seems to be tricky to cap off a type system cleanly, since for any type universe `U` that seems to be adequate, `U : U` isn't a logically sound possibility, and there inevitably seems to be a need for a larger, `BigU`, such that `U : BigU`
+- It seems to be tricky to cap off a classification system cleanly, since for any classification universe `U` that seems to be adequate, `U : U` isn't a logically sound possibility, and there inevitably seems to be a need for a larger, `BigU`, such that `U : BigU`
 
 ## The Mystery Role of the ':'
 
@@ -24,15 +24,15 @@ This is a collection of notes, compiled email chains, talks, and snippets of Goo
 
 - Is `:` just a funny syntactic marker? Traditional mathematical discourse only uses it for function typing, as in `f : S -> T`. Does it carry some distinctive semantics?
 
-- If we had a mathematical type system, would we know it was "right"?
+- If we had a mathematical classification system, would we know it was "right"?
 
-- Is there an abstract metamathematical notion of precisely what sorts of calamitous outcomes a type system is intended to preclude from arising in a mathematical language?
+- Is there an abstract metamathematical notion of precisely what sorts of calamitous outcomes a classification system is intended to preclude from arising in a mathematical language?
 
-- Is there a relatively simple syntactic specification of what constitutes a type-conformal mathematical expression?
+- Is there a relatively simple syntactic specification of what constitutes a classification-conformal mathematical expression?
 
 - If so, can it be used to specify and verify an implementation of a classification checker?
 
-- And also, can it be proven that type-conformal expressions do indeed preclude the calamitous outcomes?
+- And also, can it be proven that classification-conformal expressions do indeed preclude the calamitous outcomes?
 
 ## Hypothetical RESOLVE Math Universe Diagrams
 

@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MathSymbol extends Symbol {
 
-    private final MathClassification type;
+    private MathClassification classification;
     private final DumbTypeGraph g;
     private final Quantification q;
 
@@ -19,39 +19,37 @@ public class MathSymbol extends Symbol {
             new HashMap<>();
 
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
-                      @NotNull MathClassification type) {
-        this(g, name, Quantification.NONE, type, null, ModuleIdentifier.GLOBAL);
+                      @NotNull MathClassification classification) {
+        this(g, name, Quantification.NONE, classification, null, ModuleIdentifier.GLOBAL);
     }
 
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
-                      @NotNull MathClassification type,
+                      @NotNull MathClassification classification,
                       @Nullable ParserRuleContext definingTree,
                       @NotNull ModuleIdentifier moduleIdentifier) {
-        this(g, name, Quantification.NONE, type, definingTree,
+        this(g, name, Quantification.NONE, classification, definingTree,
                 moduleIdentifier);
     }
 
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                       @NotNull Quantification q,
-                      @NotNull MathClassification type,
+                      @NotNull MathClassification classification,
                       @Nullable ParserRuleContext definingTree,
                       @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
-        this.type = type;
+        this.classification = classification;
         this.g = g;
         this.q = q;
     }
 
-    public MathClassification getMathType() {
-        return type;
-    }
-    /*public MathClassification getMathType() {
-        return type.getEnclosingClassification();
+    public void setClassification(MathClassification n) {
+        this.classification = n;
     }
 
-    public MathClassification getExactMathType() {
-        return type
-    }*/
+    public MathClassification getClassification() {
+        return classification;
+    }
+
     public Quantification getQuantification() {
         return q;
     }

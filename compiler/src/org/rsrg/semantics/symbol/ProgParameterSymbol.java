@@ -109,9 +109,11 @@ public class ProgParameterSymbol extends Symbol {
 
         //TODO: Probably need to recajigger this to correctly account for any
         //      generics in the defining context
+        int level = type.toMath().getTypeRefDepth() - 1;
         this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, type.toMath(),
-                        definingTree, moduleIdentifier);
+                new MathSymbol(g, name, Quantification.NONE,
+                        new MathNamedClassification(g, name, level, type.toMath()),
+                                definingTree, moduleIdentifier);
 
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),

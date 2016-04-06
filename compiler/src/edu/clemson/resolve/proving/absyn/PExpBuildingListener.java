@@ -139,7 +139,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PApplyBuilder result =
                 new PApplyBuilder(repo.get(ctx.name))
                         .arguments(Utils.collect(PExp.class, args, repo))
-                        .applicationType(getMathType(ctx))
+                        .applicationType(getClassification(ctx))
                         .style(PREFIX);
         repo.put(ctx, result.build());
     }
@@ -148,7 +148,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.MathInfixApplyExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
-                        .applicationType(getMathType(ctx))
+                        .applicationType(getClassification(ctx))
                         .style(INFIX)
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
@@ -158,7 +158,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.MathOutfixApplyExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
-                        .applicationType(getMathType(ctx))
+                        .applicationType(getClassification(ctx))
                         .applicationTypeValue(getMathTypeValue(ctx))
                         .style(OUTFIX)
                         .arguments(repo.get(ctx.mathExp()));
@@ -328,7 +328,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.ProgParamExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
-                .applicationType(getMathType(ctx));
+                .applicationType(getClassification(ctx));
         repo.put(ctx, result.build());
     }
 
@@ -338,7 +338,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .progType(annotations.progTypes.get(ctx))
                 .progTypeValue(annotations.progTypeValues.get(ctx))
                 .mathTypeValue(getMathTypeValue(ctx))
-                .mathType(getMathType(ctx))
+                .mathType(getClassification(ctx))
                 .qualifier(ctx.qualifier);
        repo.put(ctx, result.build());
     }
@@ -356,36 +356,36 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 HardCodedProgOps.convert(ctx.op, argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())
-                .mathType(getMathType(ctx))  //<- this isn't right yet, this will just be the range.
+                .mathType(getClassification(ctx))  //<- this isn't right yet, this will just be the range.
                 .progType(annotations.progTypes.get(ctx))
                 .progTypeValue(annotations.progTypeValues.get(ctx)).build();
         PApplyBuilder result = new PApplyBuilder(operator)
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
-                .applicationType(getMathType(ctx));
+                .applicationType(getClassification(ctx));
         repo.put(ctx, result.build());
     }
 
     @Override public void exitProgBooleanLiteralExp(
             ResolveParser.ProgBooleanLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+        repo.put(ctx, buildLiteral(ctx.getText(), getClassification(ctx),
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgIntegerLiteralExp(
             ResolveParser.ProgIntegerLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+        repo.put(ctx, buildLiteral(ctx.getText(), getClassification(ctx),
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgCharacterLiteralExp(
             ResolveParser.ProgCharacterLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+        repo.put(ctx, buildLiteral(ctx.getText(), getClassification(ctx),
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override public void exitProgStringLiteralExp(
             ResolveParser.ProgStringLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), getMathType(ctx),
+        repo.put(ctx, buildLiteral(ctx.getText(), getClassification(ctx),
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }*/
 

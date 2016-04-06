@@ -91,7 +91,7 @@ public class AnnotatedModule {
 
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
-        if ( result ) {
+        if (result) {
             result = this.name.getText()
                     .equals(((AnnotatedModule) o).name.getText());
         }

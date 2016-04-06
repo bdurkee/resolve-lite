@@ -1,7 +1,11 @@
-Concept Spiral_Template (type Label);
-    uses Standard_Booleans,
-         Standard_Integers;
+Concept Spiral_Template (type Label;
+        evaluates k : Std_Ints :: Integer);
+    uses Standard_Booleans, Standard_Integers,
+         conservatively Basic_Integer_Theory,
+         Basic_Natural_Number_Theory,
+         Basic_Spiral_Theory;
+    requires k ᶻ> 2; //which_entails k : N2;
+//make a keyword for 'uses' that allows
 
-         //N : SSet
-         //0 : N
 end Spiral_Template;
+//ᶻ  ᴬ ᴮ ᴰ ᴱ ᴳ ᴴ ᴵ ᴶ ᴷ ᴸ ᴹ ᴺ ᴼ ᴾ ᴿ ᵀ ᵁ ⱽ ᵂ

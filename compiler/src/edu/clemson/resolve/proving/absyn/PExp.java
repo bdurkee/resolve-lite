@@ -130,7 +130,7 @@ public abstract class PExp {
      *  @return whether or not the math types of this or {@code other} matches
      */
     public boolean typeMatches(MathClassification other) {
-        //return other.isSubtypeOf(getMathType());
+        //return other.isSubtypeOf(getClassification());
         return true;
     }
 

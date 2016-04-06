@@ -2,6 +2,7 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
@@ -221,6 +222,11 @@ public class MathSymbolTable {
 
         addScope(s, parent);
         return s;
+    }
+
+    public void addTag(ModuleIdentifier e) {
+        checkScopeOpen();
+        moduleScopes.put(e, curModuleScope);
     }
 
     /**
