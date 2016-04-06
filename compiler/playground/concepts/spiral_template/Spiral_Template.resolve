@@ -1,3 +1,7 @@
-Concept Spiral_Template(type Label);
+Concept Spiral_Template (type Label);
+    uses Standard_Booleans,
+         Standard_Integers;
 
+         //N : SSet
+         //0 : N
 end Spiral_Template;

@@ -45,7 +45,13 @@ public class MathSymbol extends Symbol {
     public MathClassification getMathType() {
         return type;
     }
+    /*public MathClassification getMathType() {
+        return type.getEnclosingClassification();
+    }
 
+    public MathClassification getExactMathType() {
+        return type
+    }*/
     public Quantification getQuantification() {
         return q;
     }

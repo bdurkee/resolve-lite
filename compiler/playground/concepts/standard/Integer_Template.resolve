@@ -2,11 +2,10 @@ Concept Integer_Template;
        uses Basic_Integer_Theory,
             Standard_Booleans;
 
-    Definition max_int : Z;
-    Definition min_int : Z;
+    Definition max_int, min_int : Z;
 
-    constraints min_int <= 0 and
-                    1 <= max_int;
+    //constraints min_int <= 0 and
+    //                1 <= max_int;
 
     Type family Integer is modeled by Z;
         exemplar I;
@@ -14,7 +13,7 @@ Concept Integer_Template;
             min_int <= I and I <= max_int;
         initialization
                 ensures I = 0;
-
+/*
     Operation Increment
             (updates i : Integer);
         requires 1 + i <= max_int;
@@ -90,5 +89,5 @@ Concept Integer_Template;
     Operation Write(evaluates i : Integer);
 
     Operation Write_Line(evaluates i : Integer);
-
+*/
 end Integer_Template;

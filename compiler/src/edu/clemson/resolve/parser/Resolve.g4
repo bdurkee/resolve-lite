@@ -308,6 +308,7 @@ mathExp
     |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathAddOpExp mathExp                    #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
+    |   mathExp mathRelationalOpExp mathExp             #mathInfixAppExp
     |   mathExp mathBooleanOpExp mathExp                #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                #mathInfixAppExp

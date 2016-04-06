@@ -6,6 +6,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -14,6 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.ProgFamilyType;
 import org.rsrg.semantics.programtype.ProgGenericType;
 import org.rsrg.semantics.programtype.ProgInvalidType;
 import org.rsrg.semantics.programtype.ProgType;
@@ -244,6 +246,47 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
         tr.mathClssftns.put(ctx, g.INVALID);
+        return null;
+    }
+
+
+    @Override public Void visitTypeModelDecl(
+            ResolveParser.TypeModelDeclContext ctx) {
+        symtab.startScope(ctx);
+        this.visit(ctx.mathTypeExp());
+        MathSymbol exemplarSymbol = null;
+        try {
+            exemplarSymbol =
+                    symtab.getInnermostActiveScope().addBinding(
+                            ctx.exemplar.getText(), ctx,
+                            exactNamedIntermediateMathClassifications
+                                    .get(ctx.mathTypeExp()));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+        if (ctx.constraintsClause() != null) this.visit(ctx.constraintsClause());
+        if (ctx.initializationClause() != null) this.visit(ctx.initializationClause());
+        symtab.endScope();
+        try {
+            //PExp constraint = getPExpFor(ctx.constraintClause());
+            //PExp initEnsures =
+            //        getPExpFor(ctx.typeModelInit() != null ? ctx
+            //                .typeModelInit().ensuresClause() : null);
+            MathClassification modelType = exactNamedIntermediateMathClassifications.get(ctx.mathTypeExp());
+
+            ProgTypeSymbol progType =
+                    new TypeModelSymbol(symtab.getTypeGraph(),
+                            ctx.name.getText(), modelType,
+                            new ProgFamilyType(modelType, ctx.name.getText(),
+                                    ctx.exemplar.getText(), g.getTrueExp(),
+                                    g.getTrueExp(), getRootModuleIdentifier()),
+                            exemplarSymbol, ctx, getRootModuleIdentifier());
+            symtab.getInnermostActiveScope().define(progType);
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
         return null;
     }
 
