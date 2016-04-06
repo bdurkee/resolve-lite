@@ -8,15 +8,15 @@ import org.rsrg.semantics.symbol.FacilitySymbol;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class PTVoid extends ProgType {
+public class ProgVoidType extends ProgType {
 
-    @NotNull private static WeakHashMap<DumbTypeGraph, PTVoid> instances =
+    @NotNull private static WeakHashMap<DumbTypeGraph, ProgVoidType> instances =
             new WeakHashMap<>();
 
-    @NotNull public static PTVoid getInstance(@NotNull DumbTypeGraph g) {
-        PTVoid result = instances.get(g);
+    @NotNull public static ProgVoidType getInstance(@NotNull DumbTypeGraph g) {
+        ProgVoidType result = instances.get(g);
         if ( result == null ) {
-            result = new PTVoid(g);
+            result = new ProgVoidType(g);
             instances.put(g, result);
         }
         return result;
@@ -26,7 +26,7 @@ public class PTVoid extends ProgType {
         return "Void";
     }
 
-    private PTVoid(@NotNull DumbTypeGraph g) {
+    private ProgVoidType(@NotNull DumbTypeGraph g) {
         super(g);
     }
 

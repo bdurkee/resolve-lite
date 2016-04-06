@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.programtype.PTGeneric;
+import org.rsrg.semantics.programtype.ProgGenericType;
 import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Collections;
@@ -104,7 +104,7 @@ public class ProgParameterSymbol extends Symbol {
 
         MathClassification typeValue = null;
         if (mode == ParameterMode.TYPE) {
-            typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
+            typeValue = new ProgGenericType(type.getTypeGraph(), name).toMath();
         }
 
         //TODO: Probably need to recajigger this to correctly account for any
@@ -156,7 +156,7 @@ public class ProgParameterSymbol extends Symbol {
         }
         else {
             /*result =
-                    new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
+                    new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
                             typeGraph, getName()),
                             new MathNamedClassification(typeGraph, getName()),
                             getDefiningTree(), getModuleIdentifier());*/

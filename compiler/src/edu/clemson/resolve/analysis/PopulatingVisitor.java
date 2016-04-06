@@ -14,11 +14,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.programtype.ProgGenericType;
+import org.rsrg.semantics.programtype.ProgInvalidType;
 import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.MathSymbolQuery;
-import org.rsrg.semantics.symbol.MathSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
-import org.rsrg.semantics.symbol.TheoremSymbol;
+import org.rsrg.semantics.query.NameQuery;
+import org.rsrg.semantics.symbol.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +54,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private boolean walkingType = false;
     private boolean walkingDefnParams = false;
 
+    private final ParseTreeProperty<List<ProgTypeSymbol>>
+            actualGenericTypesPerFacilitySpecArgs = new ParseTreeProperty<>();
     /** A mapping from {@code ParserRuleContext}s to their corresponding
      *  {@link MathClassification}s; only applies to exps.
      */
@@ -131,6 +134,134 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         term.getSymbol(), term.getText());
             }
+        }
+        return null;
+    }
+
+    @Override public Void visitFacilityDecl(
+            ResolveParser.FacilityDeclContext ctx) {
+        initializeAndSanityCheckInfo(ctx);
+        //now visit all supplied actual arg exprs
+        ctx.moduleArgumentList().forEach(this::visit);
+        for (ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing()) {
+            extension.moduleArgumentList().forEach(this::visit);
+        }
+        try {
+            //before we even construct the facility we ensure things like
+            //formal counts and actual counts (also for generics) is the same
+            FacilitySymbol facility = new FacilitySymbol(ctx,
+                    getRootModuleIdentifier(),
+                    actualGenericTypesPerFacilitySpecArgs, symtab);
+            symtab.getInnermostActiveScope().define(facility);
+            //we got some checking to do now..
+            // facility.getFacility().getSpecification().getArguments()
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                    ctx.name.getText());
+        }
+        return null;
+    }
+
+
+    /** Really just checks two things before we add it to the symboltable:
+     *  1. That the number of actuals supplied to module {@code i}
+     *     matches the number of formals.
+     *  2. The number prog types (or even generics) supplied matches the number
+     *     of formal type parameters.
+     */
+    private void sanityCheckParameterizationArgs(
+            @NotNull List<ResolveParser.ProgExpContext> actuals,
+            @NotNull ModuleIdentifier i) {
+        List<ProgType> argTypes = new ArrayList<>();
+        try {
+            ModuleScopeBuilder module = symtab.getModuleScope(i);
+            List<ModuleParameterSymbol> formals =
+                    module.getSymbolsOfType(ModuleParameterSymbol.class);
+            for (ResolveParser.ProgExpContext arg : actuals) {
+                argTypes.add(tr.progTypes.get(arg));
+            }
+            if (argTypes.size() != formals.size()) {
+                //ERROR
+            }
+            //now make sure the top level type params (at least) match up...
+            Iterator<ProgType> actualTypesIter = argTypes.iterator();
+            Iterator<ModuleParameterSymbol> formalParamIter = formals.iterator();
+            /*while (actualTypesIter.hasNext()) {
+                PTType actualType = actualTypesIter.next();
+                ModuleParameterSymbol formalParam = formalParamIter.next();
+                if (formalParam.getWrappedParamSymbol() instanceof MathSymbol) continue;
+                //unbelievable, we need the actual Symbols for the actual args...
+                //if (formalParam.isModuleTypeParameter() && actualType.)
+                //if (actualType.isTypeLike() && formalParam.getProgramType().isTypeLike())
+            }*/
+        } catch (NoSuchModuleException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeAndSanityCheckInfo(
+            @NotNull ResolveParser.FacilityDeclContext ctx) {
+
+        if (ctx.specArgs != null) {
+            sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
+                    new ModuleIdentifier(ctx.spec));
+            actualGenericTypesPerFacilitySpecArgs
+                    .put(ctx.specArgs, new ArrayList<>());
+        }
+        if (ctx.implArgs != null) {
+            sanityCheckParameterizationArgs(ctx.implArgs.progExp(),
+                    new ModuleIdentifier(ctx.impl));
+        }
+        for (ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing()) {
+            if (extension.specArgs != null) {
+                actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
+            }
+        }
+    }
+
+    @Override public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
+        try {
+            Token qualifier = ctx.qualifier;
+            ProgTypeSymbol type =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(qualifier, ctx.name, true))
+                            .toProgTypeSymbol();
+
+            tr.progTypes.put(ctx, type.getProgramType());
+            tr.mathClssftns.put(ctx, type.getModelType());
+            return null;
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a type", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
+        tr.mathClssftns.put(ctx, g.INVALID);
+        return null;
+    }
+
+    @Override public Void visitGenericTypeParameterDecl(
+            ResolveParser.GenericTypeParameterDeclContext ctx) {
+        try {
+            //all generic params are module params; its the only way they can
+            //be introduced.
+            ModuleParameterSymbol moduleParam =
+                    new ModuleParameterSymbol(new ProgParameterSymbol(g,
+                            ctx.name.getText(),
+                            ProgParameterSymbol.ParameterMode.TYPE,
+                            new ProgGenericType(g, ctx.name.getText()),
+                            ctx, getRootModuleIdentifier()));
+            symtab.getInnermostActiveScope().define(moduleParam);
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.ID().getText());
         }
         return null;
     }

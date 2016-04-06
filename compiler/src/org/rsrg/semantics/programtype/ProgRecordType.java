@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public class PTRecord extends ProgType {
+public class ProgRecordType extends ProgType {
 
     @NotNull private final Map<String, ProgType> fields = new HashMap<>();
     @NotNull private MathClassification mathTypeAlterEgo;
 
-    public PTRecord(@NotNull DumbTypeGraph g,
-                    @NotNull Map<String, ProgType> types) {
+    public ProgRecordType(@NotNull DumbTypeGraph g,
+                          @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
 
@@ -61,6 +61,6 @@ public class PTRecord extends ProgType {
                     type.getValue().instantiateGenerics(genericInstantiations,
                             instantiatingFacility));
         }
-        return new PTRecord(getTypeGraph(), newFields);
+        return new ProgRecordType(getTypeGraph(), newFields);
     }
 }

@@ -9,16 +9,16 @@ import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.Map;
 
-public class PTFamily extends PTNamed {
+public class ProgFamilyType extends ProgNamedType {
 
     @NotNull private final MathClassification model;
     @NotNull private final String name, exemplarName;
     @NotNull private final PExp constraint;
 
-    public PTFamily(@NotNull MathClassification model, @NotNull String name,
-                    @NotNull String exemplarName, @NotNull PExp constraint,
-                    @NotNull PExp initEnsures,
-                    @NotNull ModuleIdentifier moduleIdentifier) {
+    public ProgFamilyType(@NotNull MathClassification model, @NotNull String name,
+                          @NotNull String exemplarName, @NotNull PExp constraint,
+                          @NotNull PExp initEnsures,
+                          @NotNull ModuleIdentifier moduleIdentifier) {
         super(model.getTypeGraph(), name, initEnsures, moduleIdentifier);
         this.model = model;
         this.name = name;
@@ -68,15 +68,15 @@ public class PTFamily extends PTNamed {
                 myInitializationEnsures
                         .withTypesSubstituted(mathTypeToMathType);*/
 
-        return new PTFamily(model, name, exemplarName, constraint, initEnsures,
+        return new ProgFamilyType(model, name, exemplarName, constraint, initEnsures,
                 getModuleIdentifier());
     }
 
     @Override public boolean equals(Object o) {
-        boolean result = (o instanceof PTFamily);
+        boolean result = (o instanceof ProgFamilyType);
 
         if ( result ) {
-            PTFamily oAsPTFamily = (PTFamily) o;
+            ProgFamilyType oAsPTFamily = (ProgFamilyType) o;
             //Todo
             result =
                     (model.equals(oAsPTFamily.model))

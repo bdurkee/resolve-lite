@@ -9,11 +9,11 @@ import org.rsrg.semantics.DumbTypeGraph;
 
 import java.util.Map;
 
-public class PTGeneric extends ProgType {
+public class ProgGenericType extends ProgType {
 
     @NotNull private final String name;
 
-    public PTGeneric(@NotNull DumbTypeGraph g, @NotNull String name) {
+    public ProgGenericType(@NotNull DumbTypeGraph g, @NotNull String name) {
         super(g);
         this.name = name;
     }
@@ -38,10 +38,10 @@ public class PTGeneric extends ProgType {
     }
 
     @Override public boolean equals(@Nullable Object o) {
-        boolean result = (o instanceof PTGeneric);
+        boolean result = (o instanceof ProgGenericType);
 
         if (result) {
-            PTGeneric oAsPTGeneric = (PTGeneric) o;
+            ProgGenericType oAsPTGeneric = (ProgGenericType) o;
             result = name.equals(oAsPTGeneric.getName());
         }
         return result;

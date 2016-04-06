@@ -8,21 +8,21 @@ import org.rsrg.semantics.symbol.FacilitySymbol;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class PTInvalid extends ProgType {
+public class ProgInvalidType extends ProgType {
 
-    @NotNull private static WeakHashMap<DumbTypeGraph, PTInvalid> instances =
+    @NotNull private static WeakHashMap<DumbTypeGraph, ProgInvalidType> instances =
             new WeakHashMap<>();
 
-    @NotNull public static PTInvalid getInstance(@NotNull DumbTypeGraph g) {
-        PTInvalid result = instances.get(g);
+    @NotNull public static ProgInvalidType getInstance(@NotNull DumbTypeGraph g) {
+        ProgInvalidType result = instances.get(g);
         if ( result == null ) {
-            result = new PTInvalid(g);
+            result = new ProgInvalidType(g);
             instances.put(g, result);
         }
         return result;
     }
 
-    private PTInvalid(@NotNull DumbTypeGraph g) {
+    private ProgInvalidType(@NotNull DumbTypeGraph g) {
         super(g);
     }
 

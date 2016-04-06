@@ -34,6 +34,7 @@ moduleDecl
     :   precisModuleDecl
     |   precisExtModuleDecl
     |   conceptModuleDecl
+    |   facilityModuleDecl
     ;
 
 // precis
@@ -64,6 +65,16 @@ conceptModuleDecl
         'end' closename=ID ';'
     ;
 
+// facilities
+
+facilityModuleDecl
+    :   'Facility' name=ID ';'
+         (usesList)?
+         (requiresClause)?
+         facilityBlock
+        'end' closename=ID ';'
+    ;
+
 // uses, imports
 
 usesList
@@ -82,23 +93,46 @@ precisBlock
 
 conceptBlock
     :   ( mathStandardDefnDecl
-       // | typeModelDecl
+        | typeModelDecl
        // | operationDecl
        // | constraintClause
         )*
     ;
 
-//facilityBlock
-//  :
+facilityBlock
+    :   ( facilityDecl
+        //| operationProcedureDecl
+        //| typeRepresentationDecl
+        )*
+    ;
 
 //implBlock
 //  :
 
-// types
+// type refs & decls
 
 type
     :   (qualifier=ID '::')? name=ID           #namedType
     |    'Record' (recordVarDeclGroup)* 'end'  #recordType
+    ;
+
+typeModelDecl
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
+        'exemplar' exemplar=ID ';'?
+        (constraintsClause)?
+        (initializationClause)?
+    ;
+
+// type initialization rules
+
+specModuleInit
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
+    ;
+
+typeImplInit
+    :   'initialization'
+        (varDeclGroup)* //(stmt)*
+        'end' ';'
     ;
 
 // parameter and parameter-list related rules
@@ -152,6 +186,24 @@ recordVarDeclGroup
 
 varDeclGroup
     :   'Var' ID (',' ID)* ':' type ';'?
+    ;
+
+// facility decls
+
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    ;
+
+extensionPairing
+    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)?
+    ;
+
+moduleArgumentList
+    :   '(' progExp (',' progExp)* ')'
     ;
 
 // math constructs
@@ -336,7 +388,7 @@ mathAlternativeItemExp
     ;
 
 progExp:   'progExp';
-facilityDecl:   'Facility' name=ID;
+
 
 //prog ops here so I can use switch statements in the code
 NOT : 'not' ;

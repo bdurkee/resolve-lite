@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.programtype.ProgType;
+import org.rsrg.semantics.programtype.ProgVoidType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public class OperationSymbol extends Symbol {
 
     /** Get the return type of this operation. Note that in the cases where
      *  there isn't something returned, this should always return an instance
-     *  of {@link org.rsrg.semantics.programtype.PTVoid}.
+     *  of {@link ProgVoidType}.
      *
      *  @return the return {@link ProgType}.
      */

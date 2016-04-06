@@ -10,7 +10,7 @@ import org.rsrg.semantics.ModuleIdentifier;
  * Named types for which we know initialization and exemplar info. Note then
  * that this does not include generics.
  */
-public abstract class PTNamed extends ProgType {
+public abstract class ProgNamedType extends ProgType {
 
     @NotNull private final String name;
     @NotNull protected final PExp initEnsures;
@@ -20,9 +20,9 @@ public abstract class PTNamed extends ProgType {
      */
     @NotNull private final ModuleIdentifier moduleIdentifier;
 
-    public PTNamed(@NotNull DumbTypeGraph g, @NotNull String name,
-                   @NotNull PExp initEnsures,
-                   @NotNull ModuleIdentifier moduleIdentifier) {
+    public ProgNamedType(@NotNull DumbTypeGraph g, @NotNull String name,
+                         @NotNull PExp initEnsures,
+                         @NotNull ModuleIdentifier moduleIdentifier) {
         super(g);
         this.name = name;
         this.initEnsures = initEnsures;
