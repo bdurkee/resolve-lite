@@ -1,4 +1,4 @@
-Concept Bdd_Spiral_Template(type Label);
+Concept Bdd_Spiral_Template(classification Label);
 /*
         uses Standard_Integers, Standard_Booleans,
              Basic_Natural_Number_Theory,
