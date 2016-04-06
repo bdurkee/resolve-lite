@@ -33,6 +33,7 @@ grammar Resolve;
 moduleDecl
     :   precisModuleDecl
     |   precisExtModuleDecl
+    |   conceptModuleDecl
     ;
 
 // precis
@@ -53,6 +54,24 @@ precisExtModuleDecl
         'end' closename=ID ';'
     ;
 
+// concepts
+
+conceptModuleDecl
+    :   'Concept' name=ID specModuleParameterList? ';'
+        (usesList)?
+        (requiresClause)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+// uses, imports
+
+usesList
+    :   'uses' ID (',' ID)* ';'
+    ;
+
+// module blocks & items
+
 precisBlock
     :   ( mathStandardDefnDecl
         | mathCategoricalDefnDecl
@@ -61,10 +80,78 @@ precisBlock
         )*
     ;
 
-// uses, imports
+conceptBlock
+    :   ( mathStandardDefnDecl
+       // | typeModelDecl
+       // | operationDecl
+       // | constraintClause
+        )*
+    ;
 
-usesList
-    :   'uses' ID (',' ID)* ';'
+//facilityBlock
+//  :
+
+//implBlock
+//  :
+
+// types
+
+type
+    :   (qualifier=ID '::')? name=ID           #namedType
+    |    'Record' (recordVarDeclGroup)* 'end'  #recordType
+    ;
+
+// parameter and parameter-list related rules
+
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    ;
+
+specModuleParameterList
+    :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
+    ;
+
+implModuleParameterList
+    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+    ;
+
+specModuleParameterDecl
+    :   parameterDeclGroup
+    |   mathStandardDefnDecl
+    |   genericTypeParameterDecl
+    ;
+
+implModuleParameterDecl
+    :   parameterDeclGroup
+   // |   operationDecl
+    ;
+
+parameterDeclGroup
+    :   parameterMode ID (',' ID)* ':' type
+    ;
+
+genericTypeParameterDecl
+    :   'type' name=ID
+    ;
+
+parameterMode
+    :   ( 'alters'
+        | 'updates'
+        | 'clears'
+        | 'restores'
+        | 'preserves'
+        | 'replaces'
+        | 'evaluates' )
+    ;
+
+// prog variable decls
+
+recordVarDeclGroup
+    :   ID (',' ID)* ':' type ';'?
+    ;
+
+varDeclGroup
+    :   'Var' ID (',' ID)* ':' type ';'?
     ;
 
 // math constructs
@@ -134,6 +221,19 @@ mathVarDeclGroup
 mathVarDecl
     :   ID ':' mathTypeExp
     ;
+
+// mathematical clauses
+
+initializationClause : 'initialization' (ensuresClause);
+entailsClause : 'which_entails' mathExp (',' mathExp)*;
+requiresClause : 'requires' mathAssertionExp (entailsClause)? ';';
+ensuresClause : 'ensures' mathAssertionExp ';';
+constraintsClause : ('constraints') mathAssertionExp ';';
+conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
+correspondenceClause : 'correspondence' mathAssertionExp ';';
+//changingClause : 'changing' ExpArgumentList ';';
+//MaintainingClause ::= 'maintaining' MathAssertionExp ';' {pin=1}
+//DecreasingClause ::= 'decreasing' MathAssertionExp ';' {pin=1}
 
 // mathematical expressions
 

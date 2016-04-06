@@ -36,7 +36,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
 
             MathClassificationPrintingListener pl =
-                    new MathClassificationPrintingListener(defSymsAndScopes.mathClassifications);
+                    new MathClassificationPrintingListener(unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
 
         }

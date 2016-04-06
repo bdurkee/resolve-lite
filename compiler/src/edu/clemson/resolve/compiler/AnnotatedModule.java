@@ -22,13 +22,9 @@ import java.util.*;
  */
 public class AnnotatedModule {
 
-    public ParseTreeProperty<MathClassification> mathTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<MathClassification> mathTypeValues = new ParseTreeProperty<>();
+    public ParseTreeProperty<MathClassification> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<ProgType> progTypeValues = new ParseTreeProperty<>();
-
-    public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
-
+    public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
@@ -71,9 +67,9 @@ public class AnnotatedModule {
         }
     }
 
-    @NotNull public PExp getPExpFor(@NotNull DumbTypeGraph g,
-                                    @NotNull ParserRuleContext ctx) {
-        PExp result = mathPExps.get(ctx);
+    @NotNull public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
+                                          @NotNull ParserRuleContext ctx) {
+        PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
 

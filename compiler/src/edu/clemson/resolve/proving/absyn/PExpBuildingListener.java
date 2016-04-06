@@ -56,7 +56,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.g = g;
         this.annotations = annotations;
         this.skipDummyQuantifierNodes = skipDummyQuantifiedNodes;
-        this.repo = annotations.mathPExps;
+        this.repo = annotations.mathASTs;
     }
 
     /** Retrive the final built expr from concrete node {@code t}. */
@@ -266,7 +266,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
-        repo.put(ctx, new PSet(annotations.mathTypes.get(ctx),
+        repo.put(ctx, new PSet(annotations.mathClssftns.get(ctx),
                 Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
@@ -399,7 +399,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     private MathClassification getMathType(ParseTree t) {
-        return annotations.mathTypes.get(t) == null ? g.INVALID :
-                annotations.mathTypes.get(t);
+        return annotations.mathClssftns.get(t) == null ? g.INVALID :
+                annotations.mathClssftns.get(t);
     }
 }
