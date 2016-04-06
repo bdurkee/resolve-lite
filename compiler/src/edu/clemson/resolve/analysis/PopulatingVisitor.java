@@ -255,12 +255,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.startScope(ctx);
         this.visit(ctx.mathTypeExp());
         MathSymbol exemplarSymbol = null;
+        MathClassification modelType =
+                exactNamedIntermediateMathClassifications.get(ctx.mathTypeExp());
         try {
+
             exemplarSymbol =
                     symtab.getInnermostActiveScope().addBinding(
                             ctx.exemplar.getText(), ctx,
-                            exactNamedIntermediateMathClassifications
-                                    .get(ctx.mathTypeExp()));
+                            //give the exemplar symbol a value for itself.
+                            new MathNamedClassification(g, ctx.exemplar.getText(),
+                                    modelType.getTypeRefDepth() - 1,
+                                    modelType));
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
@@ -273,7 +278,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //PExp initEnsures =
             //        getPExpFor(ctx.typeModelInit() != null ? ctx
             //                .typeModelInit().ensuresClause() : null);
-            MathClassification modelType = exactNamedIntermediateMathClassifications.get(ctx.mathTypeExp());
 
             ProgTypeSymbol progType =
                     new TypeModelSymbol(symtab.getTypeGraph(),
