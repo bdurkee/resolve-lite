@@ -19,6 +19,7 @@ public class MathNamedClassification extends MathClassification {
         super(g, enclosingType);
         this.tag = tag;
         this.typeRefDepth = typeDepth;
+        this.identifiesSchematicType = false;
     }
 
     @Override public boolean containsSchematicType() {

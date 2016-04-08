@@ -15,12 +15,10 @@ public class MathSymbol extends Symbol {
     private final DumbTypeGraph g;
     private final Quantification q;
 
-    private final Map<String, MathClassification> genericsInDefiningContext =
-            new HashMap<>();
-
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                       @NotNull MathClassification classification) {
-        this(g, name, Quantification.NONE, classification, null, ModuleIdentifier.GLOBAL);
+        this(g, name, Quantification.NONE, classification, null,
+                ModuleIdentifier.GLOBAL);
     }
 
     public MathSymbol(@NotNull DumbTypeGraph g, @NotNull String name,

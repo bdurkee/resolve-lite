@@ -81,15 +81,22 @@ public class DumbTypeGraph {
             return new MathCartesianClassification(g, arguments);
         }
     }
+    public final Map<MathClassification, MathClassification> relationships =
+            new HashMap<>();
+
+
 
     public boolean isSubtype(@NotNull MathClassification subtype,
                              @NotNull MathClassification supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS);
         if ( !result ) {
             MathClassification subtypesEnclosingType = subtype.enclosingClassification;
-
+            MathClassification foundRelationship = relationships.get(subtype);
             //if we're equal, we're a trivial subtype
             if (subtype.equals(supertype)) result = true;
+            else if (foundRelationship != null && foundRelationship.equals(supertype)) {
+                result = true;
+            }
             else if (subtypesEnclosingType != null &&
                     subtypesEnclosingType.equals(supertype)) {
                 result = true;

@@ -88,6 +88,7 @@ precisBlock
         | mathCategoricalDefnDecl
         | mathInductiveDefnDecl
         | mathTheoremDecl
+        | mathTypeTheoremDecl
         )*
     ;
 
@@ -109,9 +110,9 @@ facilityBlock
 //implBlock
 //  :
 
-// classification refs & decls
+// type refs & decls
 
-classification
+type
     :   (qualifier=ID '::')? name=ID           #namedType
     |    'Record' (recordVarDeclGroup)* 'end'  #recordType
     ;
@@ -161,11 +162,11 @@ implModuleParameterDecl
     ;
 
 parameterDeclGroup
-    :   parameterMode ID (',' ID)* ':' classification
+    :   parameterMode ID (',' ID)* ':' type
     ;
 
 genericTypeParameterDecl
-    :   'classification' name=ID
+    :   'type' name=ID
     ;
 
 parameterMode
@@ -181,11 +182,11 @@ parameterMode
 // prog variable decls
 
 recordVarDeclGroup
-    :   ID (',' ID)* ':' classification ';'?
+    :   ID (',' ID)* ':' type ';'?
     ;
 
 varDeclGroup
-    :   'Var' ID (',' ID)* ':' classification ';'?
+    :   'Var' ID (',' ID)* ':' type ';'?
     ;
 
 // facility decls
@@ -210,6 +211,10 @@ moduleArgumentList
 
 mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
+    ;
+
+mathTypeTheoremDecl
+    :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
     ;
 
 mathDefnSig

@@ -87,7 +87,7 @@ public class ProgParameterSymbol extends Symbol {
     private final ProgType declaredType;
     private final DumbTypeGraph typeGraph;
 
-    private final MathSymbol mathSymbolAlterEgo;
+    private MathSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
 
     @Nullable private String typeQualifier;
@@ -102,19 +102,20 @@ public class ProgParameterSymbol extends Symbol {
         this.declaredType = type;
         this.mode = mode;
 
-        MathClassification typeValue = null;
+        this.mathSymbolAlterEgo = null;
         if (mode == ParameterMode.TYPE) {
-            typeValue = new ProgGenericType(type.getTypeGraph(), name).toMath();
+            this.mathSymbolAlterEgo =
+                    new MathSymbol(g, name, Quantification.NONE, type.toMath(),
+                            definingTree, moduleIdentifier);
         }
-
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        int level = type.toMath().getTypeRefDepth() - 1;
-        this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE,
-                        new MathNamedClassification(g, name, level, type.toMath()),
-                                definingTree, moduleIdentifier);
-
+        else {
+            int level = type.toMath().getTypeRefDepth();
+            this.mathSymbolAlterEgo =
+                    new MathSymbol(g, name, Quantification.NONE,
+                            new MathNamedClassification(g, name, level,
+                            type.toMath()),
+                            definingTree, moduleIdentifier);
+        }
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleIdentifier());

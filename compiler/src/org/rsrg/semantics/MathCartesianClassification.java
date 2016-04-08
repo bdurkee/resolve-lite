@@ -8,7 +8,8 @@ public class MathCartesianClassification extends MathClassification {
 
     private final List<MathClassification> components = new LinkedList<>();
 
-    public MathCartesianClassification(DumbTypeGraph g, List<MathClassification> componentTypes) {
+    public MathCartesianClassification(DumbTypeGraph g,
+                                       List<MathClassification> componentTypes) {
         super(g, g.INVALID);
         components.addAll(componentTypes);
         //I'm type permissible if each component is type permissible.. right?
@@ -16,6 +17,10 @@ public class MathCartesianClassification extends MathClassification {
 
     @Override public List<MathClassification> getComponentTypes() {
         return components;
+    }
+
+    @Override public int getTypeRefDepth() {
+        return 1;
     }
 
     @Override public MathClassification withVariablesSubstituted(

@@ -77,6 +77,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
+        compiler.errMgr.info("--------------\nMODULE: "+
+                tr.getNameToken().getText()+"\n--------------");
         moduleScope = symtab.startModuleScope(tr)
                 .addImports(tr.semanticallyRelevantUses);
         super.visitChildren(ctx);
@@ -323,6 +325,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathTypeTheoremDecl(
+            ResolveParser.MathTypeTheoremDeclContext ctx) {
+        ctx.mathExp().forEach(this::visit);
+        MathClassification x = exactNamedIntermediateMathClassifications.get(ctx.mathExp(0));
+        MathClassification y = exactNamedIntermediateMathClassifications.get(ctx.mathExp(1));
+        g.relationships.put(x, y);
+        return null;
+    }
+
     @Override public Void visitMathTheoremDecl(
             ResolveParser.MathTheoremDeclContext ctx) {
         symtab.startScope(ctx);
@@ -516,18 +527,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void insertMathVarDecls(@NotNull ParserRuleContext ctx,
                                     @NotNull ResolveParser.MathTypeExpContext t,
                                     @NotNull List<TerminalNode> terms) {
+        String x = ctx.getText();
         this.visitMathTypeExp(t);
         MathClassification rhsColonType = exactNamedIntermediateMathClassifications.get(t);
         for (TerminalNode term : terms) {
             MathClassification ty = new MathNamedClassification(g, term.getText(),
                     rhsColonType.typeRefDepth - 1, rhsColonType);
 
-            //ah! so this will keep things like "k" in the spiral examples from
-            //being considered schematic types.
-            ty.identifiesSchematicType = walkingDefnParams && rhsColonType.typeRefDepth > 1;
-            // if (rhsColonType.typeRefDepth > 1) {
-            //     defnSchematicTypes.put(term.getText(), rhsColonType);
-            // }
+            ty.identifiesSchematicType = walkingDefnParams &&
+                    (rhsColonType == g.SSET || rhsColonType == g.CLS ||
+                    rhsColonType instanceof MathPowersetApplicationClassification);
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, term.getText(), ty));
@@ -545,7 +554,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         walkingType = false;
 
         MathClassification type = exactNamedIntermediateMathClassifications.get(ctx.mathExp());
-        if (type == g.INVALID || type == null || type.typeRefDepth == 0) {
+        if (type == g.INVALID || type == null || type.getTypeRefDepth() == 0 ) {
             compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
             type = g.INVALID;
@@ -747,6 +756,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, expectedFuncType.getResultType());
         }
     }
+
     /*
     mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
     mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
@@ -836,19 +846,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
                                 @Nullable Token qualifier,
                                 @NotNull String name) {
+        String here = ctx.getText();
+
         MathSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
         if (s == null || s.getClassification() == null) {
             exactNamedIntermediateMathClassifications.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
         }
-        String here = ctx.getText();
         exactNamedIntermediateMathClassifications.put(ctx, s.getClassification());
         if (s.getClassification().identifiesSchematicType) {
             tr.mathClssftns.put(ctx, s.getClassification());
         }
         else {
-            tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
+            tr.mathClssftns.put(ctx, s.getClassification()
+                    .getEnclosingClassification());
         }
     }
 
@@ -871,6 +883,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), "a math symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
         }
+        return null;
+    }
+
+    @Override public Void visitMathCartProdExp(
+            ResolveParser.MathCartProdExpContext ctx) {
+        ctx.mathVarDeclGroup().forEach(this::visit);
+
+        List<MathClassification> fieldTypes = new ArrayList<>();
+        for (ResolveParser.MathVarDeclGroupContext grp : ctx
+                .mathVarDeclGroup()) {
+            MathClassification grpType =
+                    exactNamedIntermediateMathClassifications
+                            .get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                fieldTypes.add(grpType);
+            }
+        }
+        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fieldTypes));
+        exactNamedIntermediateMathClassifications.put(ctx,
+                new MathCartesianClassification(g, fieldTypes));
         return null;
     }
 
