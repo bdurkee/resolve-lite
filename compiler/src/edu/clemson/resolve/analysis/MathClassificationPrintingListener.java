@@ -66,6 +66,11 @@ public class MathClassificationPrintingListener extends ResolveBaseListener {
         printType(ctx);
     }
 
+    @Override public void exitMathSelectorExp(
+            ResolveParser.MathSelectorExpContext ctx) {
+        printType(ctx);
+    }
+
     private void printType(@NotNull ParserRuleContext ctx) {
         MathClassification t = types.get(ctx);
         if ( t == null ) {

@@ -762,7 +762,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, expectedFuncType.getResultType());
         }
     }
-
     /*
     mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
     mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
@@ -877,15 +876,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        //System.out.println("selector ctx=" + ctx.getText());
         this.visit(ctx.lhs);
         prevSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
         prevSelectorAccess = null;
 
         MathClassification finalClassfctn = tr.mathClssftns.get(ctx.rhs);
-        compiler.errMgr.info("expr: " + ctx.getText() + " of type " + finalClassfctn);
-        exactNamedIntermediateMathClassifications.put(ctx, finalClassfctn);
         tr.mathClssftns.put(ctx, finalClassfctn);
         return null;
     }
@@ -914,7 +910,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             type = typeCartesian.getFactor(symbolName);
         }
         catch (ClassCastException|NoSuchElementException cce) {
-            type = HardCoded.getMetaFieldType(g, symbolName);
+            type = getMetaFieldType(g, symbolName);
             if (type == null) {
                 compiler.errMgr.semanticError(
                         ErrorKind.NO_SUCH_FACTOR, ctx.getStart(),
@@ -922,7 +918,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 type = g.INVALID;
             }
         }
-        tr.mathTypes.put(ctx, type);
+        tr.mathClssftns.put(ctx, type);
     }
 
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
@@ -966,6 +962,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     use.getTheUnexpectedSymbolDescription());
         }
         return null;
+    }
+
+    public static MathClassification getMetaFieldType(
+            @NotNull DumbTypeGraph g, @NotNull String metaSegment) {
+        MathClassification result = null;
+
+        if ( metaSegment.equals("Is_Initial") ) {
+            result = new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY);
+        }
+        else if ( metaSegment.equals("base_point") ) {
+            result = g.ENTITY;
+        }
+        return result;
     }
 
     private void expectType(ParserRuleContext ctx, MathClassification expected) {

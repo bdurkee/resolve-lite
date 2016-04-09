@@ -9,10 +9,9 @@ Concept Spiral_Template (type Label;
     //TODO: The problem with k being considered an implicit type parameter is
     //in the visitMathClassificationAssertionExp
     Type family Spiral is modeled by Cart_Prod
-            Lab : Sp_Loc(k) ⟶ Label;
-            Curr_Loc, Trmnl_Loc : Sp_Loc(k);
+            a, b, c : Z;
     end;
     exemplar P;
-    constraints P = true;
+    constraints P.a = true;
 
 end Spiral_Template;
