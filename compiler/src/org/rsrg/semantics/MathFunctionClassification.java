@@ -63,7 +63,7 @@ public class MathFunctionClassification extends MathClassification {
         this.paramTypes.addAll(expandAsNeeded(paramTypes));
         this.resultType = range;
         this.paramNames.addAll(paramNames);
-        this.domainType = buildDomainType();
+        this.domainType = buildParameterType(g, paramNames, paramTypes);
 
         if (applyFactory == null) {
             this.applicationFactory = DEFAULT_FACTORY;
@@ -72,6 +72,31 @@ public class MathFunctionClassification extends MathClassification {
             this.applicationFactory = applyFactory;
         }
         this.typeRefDepth = range.typeRefDepth;
+    }
+
+    public static MathClassification buildParameterType(DumbTypeGraph g,
+                                                        List<String> paramNames,
+                                                        List<MathClassification> paramTypes) {
+
+        MathClassification result;
+        switch (paramTypes.size()) {
+            case 0:
+                result = g.VOID;
+                break;
+            case 1:
+                result = paramTypes.get(0);
+                break;
+            default:
+                List<Element> elements = new LinkedList<Element>();
+
+                Iterator<String> namesIter = paramNames.iterator();
+                Iterator<MathClassification> typesIter = paramTypes.iterator();
+                while (namesIter.hasNext()) {
+                    elements.add(new Element(namesIter.next(), typesIter.next()));
+                }
+                result = new MathCartesianClassification(g, elements);
+        }
+        return result;
     }
 
     private static List<MathClassification> expandAsNeeded(
@@ -111,25 +136,6 @@ public class MathFunctionClassification extends MathClassification {
     private static List<String> buildDummyNameListOfEqualLength(
             List<MathClassification> original) {
         return original.stream().map(t -> "").collect(Collectors.toList());
-    }
-
-    private MathClassification buildDomainType() {
-        if (paramTypes.isEmpty()) {
-            domainType = g.VOID;
-        }
-        else if (paramTypes.size() == 1) {
-            domainType = paramTypes.get(0);
-        }
-        else {
-            List<Element> elements = new ArrayList<>();
-            Iterator<String> namesIter = paramNames.iterator();
-            Iterator<MathClassification> typesIter = paramTypes.iterator();
-            while (namesIter.hasNext()) {
-                elements.add(new Element(namesIter.next(), typesIter.next()));
-            }
-            domainType = new MathCartesianClassification(g, elements);
-        }
-        return domainType;
     }
 
     @Override public List<MathClassification> getComponentTypes() {
