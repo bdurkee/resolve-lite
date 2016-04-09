@@ -309,7 +309,8 @@ mathQuantifiedExp
 
 //TODO: Add rest of alts
 mathExp
-    :   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
+    :   lhs=mathExp op='.' rhs=mathExp                  #mathSelectorExp
+    |   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
     |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathAddOpExp mathExp                    #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp

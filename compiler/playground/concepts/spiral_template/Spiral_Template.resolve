@@ -3,11 +3,9 @@ Concept Spiral_Template (type Label;
     uses Standard_Booleans, Standard_Integers,
          Basic_Integer_Theory,
          Basic_Spiral_Theory;
-    requires k ≥ 2 and Max_Length > 0 which_entails k : N2;
+    requires k ≥ 2 and Max_Length > 0
+                which_entails k : N2;
 
-    Type family Spiral is modeled by Cart_Prod
-            Lab : Sp_Loc(k) -> Label;
-    end;
-    exemplar e;
+    Definition X : Cart_Prod x, y : Z; end;
 
 end Spiral_Template;

@@ -63,6 +63,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public ParseTreeProperty<MathClassification> exactNamedIntermediateMathClassifications =
             new ParseTreeProperty<>();
 
+    /** A reference to the expr context that represents the previous segment
+     *  accessed in a {@link ResolveParser.MathSelectorExpContext} or
+     *  {@link ResolveParser.ProgSelectorExpContext}, no need to worry about
+     *  overlap here as we use two separate expr hierarchies. This is
+     *  {@code null} the rest of the time.
+     */
+    private ParserRuleContext prevSelectorAccess = null;
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
                              @NotNull AnnotatedModule annotatedTree) {
@@ -572,7 +580,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClassification ty =
                 new MathNamedClassification(g, ctx.ID().getText(),
                         rhsColonType.typeRefDepth - 1, rhsColonType);
-        ty.identifiesSchematicType = true;
         boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
                 ctx, ResolveParser.EntailsClauseContext.class) != null;
         if (walkingEntailsClause) {
@@ -580,6 +587,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             if (s != null) s.setClassification(ty);
         }
         else {
+            ty.identifiesSchematicType = true;
             try {
                 symtab.getInnermostActiveScope().define(
                         new MathSymbol(g, ctx.ID().getText(), ty));
@@ -826,7 +834,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+        if (prevSelectorAccess != null) {
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
+                    ctx.name.getText());
+        }
+        else {
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+        }
+        return null;
+    }
+
+    @Override public Void visitMathCartProdExp(
+            ResolveParser.MathCartProdExpContext ctx) {
+        ctx.mathVarDeclGroup().forEach(this::visit);
+
+        List<MathClassification> fieldTypes = new ArrayList<>();
+        for (ResolveParser.MathVarDeclGroupContext grp : ctx
+                .mathVarDeclGroup()) {
+            MathClassification grpType =
+                    exactNamedIntermediateMathClassifications
+                            .get(grp.mathTypeExp());
+            for (TerminalNode t : grp.ID()) {
+                fieldTypes.add(grpType);
+            }
+        }
+        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fieldTypes));
+        exactNamedIntermediateMathClassifications.put(ctx,
+                new MathCartesianClassification(g, fieldTypes));
         return null;
     }
 
@@ -841,6 +875,53 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         exactNamedIntermediateMathClassifications.put(ctx, t);
         tr.mathClssftns.put(ctx, t);
         return null;
+    }
+
+    @Override public Void visitMathSelectorExp(
+            ResolveParser.MathSelectorExpContext ctx) {
+        //System.out.println("selector ctx=" + ctx.getText());
+        this.visit(ctx.lhs);
+        prevSelectorAccess = ctx.lhs;
+        this.visit(ctx.rhs);
+        prevSelectorAccess = null;
+
+        //MathClassification finalClassfctn = tr.mathClssftns.get(ctx.rhs);
+        //compiler.errMgr.info("expr: " + ctx.getText() + " of type " + finalClassfctn);
+        //tr.mathClssftns.put(ctx, finalClassfctn);
+        return null;
+    }
+
+    private void typeMathSelectorAccessExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull ParserRuleContext prevAccessExp,
+                                           @NotNull String symbolName) {
+
+        /*MTType type;
+        MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
+        //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
+        //it starts the access chain, rather than say terminating it.
+        if (prevAccessExp.getText().equals("conc")) {
+            if (curTypeReprModelSymbol == null) {
+                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR,
+                        ctx.getStart(), symbolName);
+                tr.mathTypes.put(ctx, g.INVALID); return;
+            }
+            tr.mathTypes.put(ctx, curTypeReprModelSymbol.getModelType());
+            return;
+        }
+        try {
+            MTCartesian typeCartesian = (MTCartesian) prevMathAccessType;
+            type = typeCartesian.getFactor(symbolName);
+        }
+        catch (ClassCastException|NoSuchElementException cce) {
+            type = HardCoded.getMetaFieldType(g, symbolName);
+            if (type == null) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.NO_SUCH_FACTOR, ctx.getStart(),
+                        symbolName);
+                type = g.INVALID;
+            }
+        }
+        tr.mathTypes.put(ctx, type);*/
     }
 
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
@@ -883,26 +964,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), "a math symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
         }
-        return null;
-    }
-
-    @Override public Void visitMathCartProdExp(
-            ResolveParser.MathCartProdExpContext ctx) {
-        ctx.mathVarDeclGroup().forEach(this::visit);
-
-        List<MathClassification> fieldTypes = new ArrayList<>();
-        for (ResolveParser.MathVarDeclGroupContext grp : ctx
-                .mathVarDeclGroup()) {
-            MathClassification grpType =
-                    exactNamedIntermediateMathClassifications
-                            .get(grp.mathTypeExp());
-            for (TerminalNode t : grp.ID()) {
-                fieldTypes.add(grpType);
-            }
-        }
-        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fieldTypes));
-        exactNamedIntermediateMathClassifications.put(ctx,
-                new MathCartesianClassification(g, fieldTypes));
         return null;
     }
 

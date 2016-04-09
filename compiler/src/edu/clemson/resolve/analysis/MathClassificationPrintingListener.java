@@ -67,7 +67,11 @@ public class MathClassificationPrintingListener extends ResolveBaseListener {
             System.out.println("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");
             return;
         }
+        String colonOp = " : ";
+        if (t == t.getTypeGraph().CLS) {
+            colonOp = " ː ";
+        }
         System.out.println("["+ctx.getClass().getSimpleName()+"]"+
-                ctx.getText()+ " : "+t+"  <"+t.getClass().getSimpleName()+">");
+                ctx.getText()+colonOp+t+"  <"+t.getClass().getSimpleName()+">");
     }
 }

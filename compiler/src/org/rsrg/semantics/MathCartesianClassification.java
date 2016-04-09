@@ -1,12 +1,15 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.misc.Utils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class MathCartesianClassification extends MathClassification {
 
     private final List<MathClassification> components = new LinkedList<>();
+    private final List<Element> elements = new ArrayList<>();
 
     public MathCartesianClassification(DumbTypeGraph g,
                                        List<MathClassification> componentTypes) {
@@ -43,5 +46,37 @@ public class MathCartesianClassification extends MathClassification {
 
     @Override public String toString() {
         return "(" + Utils.join(components, " * ") + ")";
+    }
+
+    public static class Element {
+        private final String tag;
+        private final MathClassification clssfcn;
+
+        public Element(@Nullable String tag, @NotNull MathClassification c) {
+            this.tag = tag;
+            this.clssfcn = c;
+        }
+
+        public Element(@NotNull MathClassification c) {
+            this(null, c);
+        }
+
+        @Nullable public String getTag() {
+            return tag;
+        }
+
+        @NotNull public MathClassification getClassification() {
+            return clssfcn;
+        }
+
+        @Override public String toString() {
+            String result = clssfcn.toString();
+            if (tag != null) {
+                String colonOp = " : ";
+                if (clssfcn == clssfcn.getTypeGraph().CLS) colonOp = " ː ";
+                result = "("+tag+colonOp+clssfcn+")";
+            }
+            return result;
+        }
     }
 }
