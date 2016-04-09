@@ -8,18 +8,29 @@ import java.util.*;
 
 public class MathCartesianClassification extends MathClassification {
 
-    private final List<MathClassification> components = new LinkedList<>();
     private final List<Element> elements = new ArrayList<>();
+    private final List<MathClassification> elementClssfctns =
+            new ArrayList<>();
+    private final Map<String, Element> tagsToElements =
+            new LinkedHashMap<>();
+
+    public MathCartesianClassification(DumbTypeGraph g, Element ... e) {
+        this(g, Arrays.asList(e));
+    }
 
     public MathCartesianClassification(DumbTypeGraph g,
-                                       List<MathClassification> componentTypes) {
-        super(g, g.INVALID);
-        components.addAll(componentTypes);
-        //I'm type permissible if each component is type permissible.. right?
+                                       List<Element> elements) {
+        super(g, g.CLS);
+        this.elements.addAll(elements);
+        this.elementClssfctns.addAll(
+                Utils.apply(elements, Element::getClassification));
+        for (Element e : elements) {
+            tagsToElements.put(e.getTag(), e);
+        }
     }
 
     @Override public List<MathClassification> getComponentTypes() {
-        return components;
+        return elementClssfctns;
     }
 
     @Override public int getTypeRefDepth() {
@@ -28,24 +39,29 @@ public class MathCartesianClassification extends MathClassification {
 
     @Override public MathClassification withVariablesSubstituted(
             Map<MathClassification, MathClassification> substitutions) {
-        List<MathClassification> newComponents = new ArrayList<>();
-        for (MathClassification component : components) {
-            newComponents.add(
-                    component.withVariablesSubstituted(substitutions));
+        List<Element> newElements = new ArrayList<>();
+        for (Element element : elements) {
+            newElements.add(
+                    new Element(element.getTag(), element.getClassification()
+                            .withVariablesSubstituted(substitutions)));
         }
-        return new MathCartesianClassification(g, newComponents);
+        return new MathCartesianClassification(g, newElements);
     }
 
     public int size() {
-        return components.size();
+        return elements.size();
     }
 
     public MathClassification getFactor(int i) {
-        return components.get(i);
+        return elements.get(i).getClassification();
+    }
+
+    @Nullable public MathClassification getFactor(String tag) {
+        return tagsToElements.get(tag).clssfcn;
     }
 
     @Override public String toString() {
-        return "(" + Utils.join(components, " * ") + ")";
+        return "(" + Utils.join(elements, " * ") + ")";
     }
 
     public static class Element {
@@ -71,7 +87,7 @@ public class MathCartesianClassification extends MathClassification {
 
         @Override public String toString() {
             String result = clssfcn.toString();
-            if (tag != null) {
+            if (tag != null && !tag.equals("")) {
                 String colonOp = " : ";
                 if (clssfcn == clssfcn.getTypeGraph().CLS) colonOp = " ː ";
                 result = "("+tag+colonOp+clssfcn+")";

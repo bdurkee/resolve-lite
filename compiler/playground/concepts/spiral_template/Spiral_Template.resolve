@@ -6,6 +6,13 @@ Concept Spiral_Template (type Label;
     requires k ≥ 2 and Max_Length > 0
                 which_entails k : N2;
 
-    Definition X : Cart_Prod x, y : Z; end;
+    //TODO: The problem with k being considered an implicit type parameter is
+    //in the visitMathClassificationAssertionExp
+    Type family Spiral is modeled by Cart_Prod
+            Lab : Sp_Loc(k) ⟶ Label;
+            Curr_Loc, Trmnl_Loc : Sp_Loc(k);
+    end;
+    exemplar P;
+    constraints P = true;
 
 end Spiral_Template;

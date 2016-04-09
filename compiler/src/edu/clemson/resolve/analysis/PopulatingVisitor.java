@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
+import org.rsrg.semantics.MathCartesianClassification.Element;
 import org.rsrg.semantics.programtype.ProgFamilyType;
 import org.rsrg.semantics.programtype.ProgGenericType;
 import org.rsrg.semantics.programtype.ProgInvalidType;
@@ -22,10 +23,8 @@ import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.symbol.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -467,7 +466,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (colonRhsType.typeRefDepth > 0) {
             int newTypeDepth = colonRhsType.typeRefDepth - 1;
             List<MathClassification> paramTypes = new ArrayList<>();
-            //List<String> paramNames = new ArrayList<>();
+            List<String> paramNames = new ArrayList<>();
 
             if (!formals.isEmpty()) {
                 for (ParseTree formal : formals) {
@@ -477,7 +476,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         for (TerminalNode t : grp.ID()) {
                             MathClassification ty = exactNamedIntermediateMathClassifications.get(grp.mathTypeExp());
                             paramTypes.add(ty);
-                            //paramNames.add(t.getText());
+                            paramNames.add(t.getText());
                         }
                     }
                     catch (ClassCastException cce) {
@@ -485,9 +484,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                 (ResolveParser.MathVarDeclContext) formal;
                             MathClassification ty = exactNamedIntermediateMathClassifications.get(singularDecl.mathTypeExp());
                             paramTypes.add(ty);
+                            paramNames.add(singularDecl.ID().getText());
                     }
                 }
-                defnType = new MathFunctionClassification(g, colonRhsType, paramTypes);
+                defnType = new MathFunctionClassification(
+                        g, colonRhsType, paramNames, paramTypes);
 
                 for (ParseTree t : names) {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
@@ -499,9 +500,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 for (ParseTree t : names) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
-                    //if (defnType.typeRefDepth < 1) {
-                    //    defnType = colonRhsType;
-                    //}
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), defnType));
                 }
@@ -848,19 +846,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathCartProdExpContext ctx) {
         ctx.mathVarDeclGroup().forEach(this::visit);
 
-        List<MathClassification> fieldTypes = new ArrayList<>();
+        List<Element> fields= new ArrayList<>();
         for (ResolveParser.MathVarDeclGroupContext grp : ctx
                 .mathVarDeclGroup()) {
             MathClassification grpType =
                     exactNamedIntermediateMathClassifications
                             .get(grp.mathTypeExp());
-            for (TerminalNode t : grp.ID()) {
-                fieldTypes.add(grpType);
+            for (TerminalNode label : grp.ID()) {
+                fields.add(new Element(label.getText(), grpType));
             }
         }
-        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fieldTypes));
+        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fields));
         exactNamedIntermediateMathClassifications.put(ctx,
-                new MathCartesianClassification(g, fieldTypes));
+                new MathCartesianClassification(g, fields));
         return null;
     }
 
@@ -885,9 +883,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.rhs);
         prevSelectorAccess = null;
 
-        //MathClassification finalClassfctn = tr.mathClssftns.get(ctx.rhs);
-        //compiler.errMgr.info("expr: " + ctx.getText() + " of type " + finalClassfctn);
-        //tr.mathClssftns.put(ctx, finalClassfctn);
+        MathClassification finalClassfctn = tr.mathClssftns.get(ctx.rhs);
+        compiler.errMgr.info("expr: " + ctx.getText() + " of type " + finalClassfctn);
+        exactNamedIntermediateMathClassifications.put(ctx, finalClassfctn);
+        tr.mathClssftns.put(ctx, finalClassfctn);
         return null;
     }
 
@@ -895,21 +894,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull ParserRuleContext prevAccessExp,
                                            @NotNull String symbolName) {
 
-        /*MTType type;
-        MTType prevMathAccessType = tr.mathTypes.get(prevAccessExp);
+        MathClassification type;
+        MathClassification prevMathAccessType =
+                tr.mathClssftns.get(prevAccessExp);
         //Todo: This can't go into {@link TypeGraph#getMetaFieldType()} since
         //it starts the access chain, rather than say terminating it.
         if (prevAccessExp.getText().equals("conc")) {
-            if (curTypeReprModelSymbol == null) {
+            /*if (curTypeReprModelSymbol == null) {
                 compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR,
                         ctx.getStart(), symbolName);
                 tr.mathTypes.put(ctx, g.INVALID); return;
-            }
-            tr.mathTypes.put(ctx, curTypeReprModelSymbol.getModelType());
+            }*/
+            //tr.mathClssftns.put(ctx, curTypeReprModelSymbol.getModelType());
             return;
         }
         try {
-            MTCartesian typeCartesian = (MTCartesian) prevMathAccessType;
+            MathCartesianClassification typeCartesian =
+                    (MathCartesianClassification) prevMathAccessType;
             type = typeCartesian.getFactor(symbolName);
         }
         catch (ClassCastException|NoSuchElementException cce) {
@@ -921,7 +922,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 type = g.INVALID;
             }
         }
-        tr.mathTypes.put(ctx, type);*/
+        tr.mathTypes.put(ctx, type);
     }
 
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,

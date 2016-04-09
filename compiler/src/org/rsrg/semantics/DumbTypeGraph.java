@@ -78,7 +78,9 @@ public class DumbTypeGraph {
                 @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
-            return new MathCartesianClassification(g, arguments);
+            return new MathCartesianClassification(g,
+                    new MathCartesianClassification.Element(arguments.get(0)),
+                    new MathCartesianClassification.Element(arguments.get(1)));
         }
     }
     public final Map<MathClassification, MathClassification> relationships =

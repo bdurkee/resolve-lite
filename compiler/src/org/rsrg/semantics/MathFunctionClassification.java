@@ -2,6 +2,7 @@ package org.rsrg.semantics;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.MathCartesianClassification.Element;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,10 +13,11 @@ public class MathFunctionClassification extends MathClassification {
             new VanillaFunctionApplicationFactory();
 
     private final List<MathClassification> paramTypes = new LinkedList<>();
+    private final List<String> paramNames = new LinkedList<>();
+
     private MathClassification domainType, resultType;
 
     private final FunctionApplicationFactory applicationFactory;
-    private final Map<String, MathClassification> schematicTypes = new LinkedHashMap<>();
 
     public MathFunctionClassification(@NotNull DumbTypeGraph g,
                                       @NotNull MathClassification range,
@@ -28,6 +30,14 @@ public class MathFunctionClassification extends MathClassification {
                                       @NotNull List<MathClassification> paramTypes) {
         this(g, DEFAULT_FACTORY, range, paramTypes);
     }
+
+    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+                                      @NotNull MathClassification range,
+                                      @NotNull List<String> paramNames,
+                                      @NotNull List<MathClassification> paramTypes) {
+        this(g, DEFAULT_FACTORY, range, paramNames, paramTypes);
+    }
+
 
     public MathFunctionClassification(@NotNull DumbTypeGraph g,
                                       @Nullable FunctionApplicationFactory apply,
@@ -52,6 +62,7 @@ public class MathFunctionClassification extends MathClassification {
         super(g, range);
         this.paramTypes.addAll(expandAsNeeded(paramTypes));
         this.resultType = range;
+        this.paramNames.addAll(paramNames);
         this.domainType = buildDomainType();
 
         if (applyFactory == null) {
@@ -110,7 +121,13 @@ public class MathFunctionClassification extends MathClassification {
             domainType = paramTypes.get(0);
         }
         else {
-            domainType = new MathCartesianClassification(g, paramTypes);
+            List<Element> elements = new ArrayList<>();
+            Iterator<String> namesIter = paramNames.iterator();
+            Iterator<MathClassification> typesIter = paramTypes.iterator();
+            while (namesIter.hasNext()) {
+                elements.add(new Element(namesIter.next(), typesIter.next()));
+            }
+            domainType = new MathCartesianClassification(g, elements);
         }
         return domainType;
     }
