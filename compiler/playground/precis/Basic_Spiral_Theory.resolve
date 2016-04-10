@@ -15,10 +15,10 @@ Precis Basic_Spiral_Theory;
 
     Implicit Definition SCD(p : Sp_Loc(k : N2)) : N;
 
-    /*Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
+    Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
         {p : Sp_Loc(k) | SCD(p) < SCD(b)};
 
-    Corollary Inw1: Forall k : N2, Forall m, n : N,
+   /* Corollary Inw1: Forall k : N2, Forall m, n : N,
         SS(k)(Cen(k)) ∉ Inward_Loc(SS(k)(Cen(k))) iff m < n;
     */
 end Basic_Spiral_Theory;

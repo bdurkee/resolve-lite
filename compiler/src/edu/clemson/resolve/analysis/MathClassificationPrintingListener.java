@@ -28,50 +28,50 @@ public class MathClassificationPrintingListener extends ResolveBaseListener {
 
     @Override public void exitMathPrefixAppExp(
             ResolveParser.MathPrefixAppExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathInfixAppExp(
             ResolveParser.MathInfixAppExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathSetRestrictionExp(
             ResolveParser.MathSetRestrictionExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
     @Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        printType(ctx);
+        printClassification(ctx);
     }
 
-    private void printType(@NotNull ParserRuleContext ctx) {
+    private void printClassification(@NotNull ParserRuleContext ctx) {
         MathClassification t = types.get(ctx);
         if ( t == null ) {
             System.out.println("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");

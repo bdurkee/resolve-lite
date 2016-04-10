@@ -246,7 +246,7 @@ mathOutfixDefnSig
     ;
 
 mathPostfixDefnSig
-    :   mathVarDecl lop='[' mathVarDecl rop=']' ':' mathTypeExp
+    :   '('mathVarDecl')' lop='[' mathVarDecl rop=']' ':' mathTypeExp
     ;
 
 mathSymbolName
@@ -309,18 +309,21 @@ mathQuantifiedExp
 
 //TODO: Add rest of alts
 mathExp
-    :   lhs=mathExp op='.' rhs=mathExp                  #mathSelectorExp
-    |   name=mathExp '(' mathExp (',' mathExp)*')'      #mathPrefixAppExp
-    |   mathExp mathMultOpExp mathExp                   #mathInfixAppExp
-    |   mathExp mathAddOpExp mathExp                    #mathInfixAppExp
-    |   mathExp mathEqualityOpExp mathExp               #mathInfixAppExp
-    |   mathExp mathRelationalOpExp mathExp             #mathInfixAppExp
-    |   mathExp mathBooleanOpExp mathExp                #mathInfixAppExp
-    |   <assoc=right> mathExp mathArrowOpExp mathExp    #mathInfixAppExp
-    |   mathExp mathImpliesOpExp mathExp                #mathInfixAppExp
-    |   ID ':' mathExp                                  #mathClassificationAssertionExp
-    |   '(' mathAssertionExp ')'                        #mathNestedExp
-    |   mathPrimeExp                                    #mathPrimaryExp
+    :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
+    |   name=mathExp lop='[' mathExp (',' mathExp)*rop=']'  #mathPrefixAppExp
+    |   mathExp mathMultOpExp mathExp                       #mathInfixAppExp
+    |   mathExp mathAddOpExp mathExp                        #mathInfixAppExp
+    |   mathExp mathJoiningOpExp mathExp                    #mathInfixAppExp
+    |   mathExp mathSetContainmentOpExp mathExp             #mathInfixAppExp
+    |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
+    |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
+    |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
+    |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
+    |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
+    |   ID ':' mathExp                                      #mathClassificationAssertionExp
+    |   '(' mathAssertionExp ')'                            #mathNestedExp
+    |   mathPrimeExp                                        #mathPrimaryExp
     ;
 
 /** Because operators are now first class citizens with expressions all of their

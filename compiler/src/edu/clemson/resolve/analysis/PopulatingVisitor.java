@@ -6,6 +6,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -419,7 +420,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathInfixDefnSigContext ctx) {
         try {
             insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathTypeExp(),
-                    ctx.name);
+                    ctx.name.getStart());
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), e.getOffendingSymbol().getName());
@@ -431,7 +432,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.MathPrefixDefnSigContext ctx) {
         try {
             insertMathDefnSignature(ctx, ctx.mathVarDeclGroup(), ctx.mathTypeExp(),
-                    ctx.mathSymbolName());
+                    Utils.apply(ctx.mathSymbolName(),
+                            ParserRuleContext::getStart));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), e.getOffendingSymbol().getName());
+        }
+        return null;
+    }
+
+    @Override public Void visitMathPostfixDefnSig(
+            ResolveParser.MathPostfixDefnSigContext ctx) {
+        try {
+            CommonToken name = new CommonToken(ctx.lop);
+            name.setText(ctx.lop.getText()+".."+ctx.rop.getText());
+            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathTypeExp(),
+                    name);
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), e.getOffendingSymbol().getName());
@@ -442,7 +458,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
                                          @NotNull ResolveParser.MathTypeExpContext type,
-                                         @NotNull ParseTree ... names)
+                                         @NotNull Token ... names)
             throws DuplicateSymbolException {
         insertMathDefnSignature(ctx, formals, type, Arrays.asList(names));
     }
@@ -450,7 +466,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
                                          @NotNull ResolveParser.MathTypeExpContext type,
-                                         @NotNull List<? extends ParseTree> names)
+                                         @NotNull List<? extends Token> names)
             throws DuplicateSymbolException {
         //first visit the formal params
         walkingDefnParams = true;
@@ -490,14 +506,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 defnType = new MathFunctionClassification(
                         g, colonRhsType, paramNames, paramTypes);
 
-                for (ParseTree t : names) {
+                for (Token t : names) {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, defnType);
                     defnEnclosingScope
                             .define(new MathSymbol(g, t.getText(), asNamed));
                 }
             } else {
-                for (ParseTree t : names) {
+                for (Token t : names) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
                     defnEnclosingScope
@@ -505,7 +521,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
         } else {
-            for (ParseTree t : names) {
+            for (Token t : names) {
                 defnEnclosingScope
                         .define(new MathSymbol(g, t.getText(), g.INVALID));
             }
@@ -883,6 +899,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MathClassification finalClassfctn = tr.mathClssftns.get(ctx.rhs);
         tr.mathClssftns.put(ctx, finalClassfctn);
+        exactNamedIntermediateMathClassifications.put(ctx, finalClassfctn);
         return null;
     }
 
