@@ -311,7 +311,7 @@ mathQuantifiedExp
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
-    |   name=mathExp lop='[' mathExp (',' mathExp)*rop=']'  #mathPrefixAppExp
+    |   mathExp mathSqBrOpExp mathExp (',' mathExp)* ']' #mathBracketAppExp
     |   mathExp mathMultOpExp mathExp                       #mathInfixAppExp
     |   mathExp mathAddOpExp mathExp                        #mathInfixAppExp
     |   mathExp mathJoiningOpExp mathExp                    #mathInfixAppExp
@@ -334,6 +334,7 @@ mathExp
  *  now we just need to visit and annotate these names like any other node).
  */
 //mathMultOpExp : (qualifier=ID '::'|sym='ᶻ')? op=('*'|'/'|'%') ;
+mathSqBrOpExp : op='[' ;
 mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
 mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
 mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');

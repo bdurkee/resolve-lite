@@ -170,12 +170,18 @@ public class MathSymbolTable {
             globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
 
             globalScope.define(new MathSymbol(g, "is_in",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.SSET, g.SSET)));
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathSymbol(g, "∈",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.SSET, g.SSET)));
-            //alt
-            //globalScope.define(new MathSymbol(g, "not", new MathNamedClassification(g, "not", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
-            //globalScope.define(new MathSymbol(g, "⌐", new MathNamedClassification(g, "⌐", 1, new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN))));
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathSymbol(g, "is_not_in",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+            globalScope.define(new MathSymbol(g, "∉",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathSymbol(g, "~",
+                    new MathFunctionClassification(g, g.SSET, g.SSET, g.SSET)));
+
             globalScope.define(new MathSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
             globalScope.define(new MathSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
 

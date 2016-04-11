@@ -169,8 +169,12 @@ public class MathFunctionClassification extends MathClassification {
 
             if (formalParameterType.containsSchematicType()) {
 
-                Map<MathClassification, MathClassification> iterationBindings = new HashMap<>();
-                bind(argumentType, formalParameterType, iterationBindings);
+                Map<MathClassification, MathClassification> iterationBindings =
+                        new HashMap<>();
+                try {
+                    bind(argumentType, formalParameterType, iterationBindings);
+                } catch (BindingException be) {
+                }
                 bindingsSoFar.putAll(iterationBindings);
             }
         }
@@ -200,7 +204,7 @@ public class MathFunctionClassification extends MathClassification {
         }
         List<MathClassification> t1Components = t1.getComponentTypes();
         List<MathClassification> t2Components = t2.getComponentTypes();
-        if ( t1Components.size() != t2Components.size() ) throw new BindingException(t1, t2);
+        if ( t1Components.size() != t2Components.size() ) return;//throw new BindingException(t1, t2);
 
         Iterator<MathClassification> t1Iter = t1Components.iterator();
         Iterator<MathClassification> t2Iter = t2Components.iterator();

@@ -61,6 +61,10 @@ public class MathClassificationPrintingListener extends ResolveBaseListener {
         printClassification(ctx);
     }
 
+    @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
+        printClassification(ctx);
+    }
+
     @Override public void exitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
         printClassification(ctx);

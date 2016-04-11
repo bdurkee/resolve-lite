@@ -18,6 +18,7 @@ public class DumbTypeGraph {
 
     public final MathClassification CLS = new MathNamedClassification(this, "Cls", 2, INVALID);
     public final MathClassification SSET = new MathNamedClassification(this, "SSet", 2, CLS);
+    public final MathClassification EMPTY_SET = new MathNamedClassification(this, "Empty_Set", 1, SSET);
 
     public final MathClassification ENTITY = new MathNamedClassification(this, "Entity", 1, INVALID);
     public final MathClassification EL = new MathNamedClassification(this, "El", 1, INVALID);
@@ -83,10 +84,9 @@ public class DumbTypeGraph {
                     new MathCartesianClassification.Element(arguments.get(1)));
         }
     }
+
     public final Map<MathClassification, MathClassification> relationships =
             new HashMap<>();
-
-
 
     public boolean isSubtype(@NotNull MathClassification subtype,
                              @NotNull MathClassification supertype) {
@@ -112,10 +112,9 @@ public class DumbTypeGraph {
                     supertype instanceof MathFunctionClassification) {
                 result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
                         ((MathFunctionClassification) supertype).getDomainType())
-                    && isSubtype(((MathFunctionClassification) subtype).getResultType(),
+                        && isSubtype(((MathFunctionClassification) subtype).getResultType(),
                         ((MathFunctionClassification) supertype).getResultType());
             }
-
         }
         return result;
     }

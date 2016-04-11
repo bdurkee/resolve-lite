@@ -11,4 +11,12 @@ Precis Extension Set_App_Op_Ext for Basic_Function_Properties;
     Definition (f : (D : SSet) ⟶ (R : SSet))
                         [S : Powerset(D)] : Powerset(R); //is
                 //{y : R | (Exists x : S, f(x) = y)};
+
+
+   // S : Powerset(Sp_Loc(k))
+   //actual Sp_Loc(k)
+
+
+   // S : Powerset(Sp_Loc(k) ~ Powerset(Sp_Loc(k)))
+   // Sp_Loc(
 end Set_App_Op_Ext;

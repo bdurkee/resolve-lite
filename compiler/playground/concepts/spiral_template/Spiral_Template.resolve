@@ -1,13 +1,11 @@
 Concept Spiral_Template (type Label;
         evaluates k, Max_Length : Std_Ints :: Integer);
-    uses Standard_Booleans, Standard_Integers,
+    uses Standard_Booleans, Standard_Integers, Set_App_Op_Ext,
          Basic_Integer_Theory,
          Basic_Spiral_Theory;
     requires k ≥ 2 and Max_Length > 0
                 which_entails k : N2;
 
-    //TODO: The problem with k being considered an implicit type parameter is
-    //in the visitMathClassificationAssertionExp
     Type family Spiral is modeled by Cart_Prod
             Lab : Sp_Loc(k) -> Label;
             Curr_Loc, Trmnl_Loc : Sp_Loc(k);
@@ -15,6 +13,6 @@ Concept Spiral_Template (type Label;
     exemplar P;
     constraints SCD(P.Trmnl_Loc) ≤ Max_Length and
         P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc) and
-        P.Lab(P.Trmnl_Loc) = Label.base_point;
-
+        P.Lab(P.Trmnl_Loc) = Label.base_point and
+        P.Lab[Outward_Loc(P.Trmnl_Loc)] = {Label.base_point};
 end Spiral_Template;
