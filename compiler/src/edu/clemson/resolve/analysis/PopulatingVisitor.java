@@ -6,6 +6,7 @@ import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -16,10 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.MathCartesianClassification.Element;
-import org.rsrg.semantics.programtype.ProgFamilyType;
-import org.rsrg.semantics.programtype.ProgGenericType;
-import org.rsrg.semantics.programtype.ProgInvalidType;
-import org.rsrg.semantics.programtype.ProgType;
+import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.symbol.*;
@@ -182,8 +180,66 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitOperationDecl(
+            ResolveParser.OperationDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
+                        ctx.getParent(), exactNamedMathClssftns.get(ctx.type()));
+            } catch (DuplicateSymbolException e) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        symtab.endScope();
 
-    /** Really just checks two things before we add it to the symboltable:
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
+    private void insertFunction(@NotNull Token name,
+                                @Nullable ResolveParser.TypeContext type,
+                                @Nullable ResolveParser.RequiresClauseContext requires,
+                                @Nullable ResolveParser.EnsuresClauseContext ensures,
+                                @NotNull ParserRuleContext ctx) {
+        try {
+            List<ProgParameterSymbol> params =
+                    symtab.getScope(ctx).getSymbolsOfType(
+                            ProgParameterSymbol.class);
+            ProgType returnType;
+            if (type == null) {
+                returnType = ProgVoidType.getInstance(g);
+            } else {
+                returnType = tr.progTypes.get(type);
+            }
+
+            PExp requiresExp = g.getTrueExp();
+                    //getPExpFor(requires);
+           PExp ensuresExp = g.getTrueExp();
+                   //getPExpFor(ensures);
+            //TODO: this will need to be wrapped in a ModuleParameterSymbol
+            //if we're walking a specmodule param list
+            symtab.getInnermostActiveScope().define(
+                    new OperationSymbol(name.getText(), ctx, requiresExp,
+                            ensuresExp, returnType, getRootModuleIdentifier(),
+                            params));
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name,
+                    name.getText());
+        }
+    }
+
+    /** Really just checks two things before we add an {@link FacilitySymbol}
+     * to the table:
      *  1. That the number of actuals supplied to module {@code i}
      *     matches the number of formals.
      *  2. The number prog types (or even generics) supplied matches the number
@@ -265,6 +321,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, g.INVALID);
         return null;
     }
+
+
 
     @Override public Void visitTypeModelDecl(
             ResolveParser.TypeModelDeclContext ctx) {
@@ -784,11 +842,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //  C \ E2 : D
             //  ---------------------
             //  C \ f(E1, E2) : R
-            List<MathClassification> actualNamedArgumentTypes =
-                    Utils.apply(args, exactNamedMathClssftns::get);
-            exactNamedMathClssftns.put(
-                    ctx, expectedFuncType.getApplicationType(
-                            nameExp.getText(), actualNamedArgumentTypes));
+            exactNamedMathClssftns.put(ctx, expectedFuncType.getResultType());
             tr.mathClssftns.put(ctx, expectedFuncType.getResultType());
         }
     }
@@ -922,6 +976,61 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     .get(ctx.mathExp(0)));
             tr.mathClssftns.put(ctx, t);
         }
+        return null;
+    }
+
+    @Override public Void visitMathLambdaExp(
+            ResolveParser.MathLambdaExpContext ctx) {
+        symtab.startScope(ctx);
+        compiler.errMgr.info("lambda exp: " + ctx.getText());
+
+        walkingDefnParams = true;
+        //activeQuantifications.push(Quantification.UNIVERSAL);
+        this.visit(ctx.mathVarDecl());
+        //activeQuantifications.pop();
+        walkingDefnParams = false;
+
+        this.visit(ctx.mathExp());
+        symtab.endScope();
+
+        MathClassification bodyClss = tr.mathClssftns.get(ctx.mathExp());
+        MathClassification varClss = exactNamedMathClssftns.get(
+                ctx.mathVarDecl().mathTypeExp());
+        tr.mathClssftns.put(ctx, new MathFunctionClassification(
+                g, bodyClss, varClss));
+        return null;
+    }
+
+    @Override public Void visitMathAlternativeExp(
+            ResolveParser.MathAlternativeExpContext ctx) {
+
+        MathClassification establishedType = null;
+        MathClassification establishedTypeValue = null;
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
+            this.visit(alt.result);
+            if (alt.condition != null) this.visit(alt.condition);
+            if (establishedType == null) {
+                establishedType = tr.mathClssftns.get(alt.result);
+            }
+            //else {
+            //if ( alt.condition != null ) {
+            // expectType(alt, establishedType);
+            //}
+            //}
+        }
+        tr.mathClssftns.put(ctx, establishedType);
+        return null;
+    }
+
+    @Override public Void visitMathAlternativeItemExp(
+            ResolveParser.MathAlternativeItemExpContext ctx) {
+        if ( ctx.condition != null ) {
+            expectType(ctx.condition, g.BOOLEAN);
+        }
+        tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.result));
+        //tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
+        //tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
     }
 

@@ -158,11 +158,11 @@ public class ProgParameterSymbol extends Symbol {
             result = super.toProgTypeSymbol();
         }
         else {
-            /*result =
+            result =
                     new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
                             typeGraph, getName()),
-                            new MathNamedClassification(typeGraph, getName()),
-                            getDefiningTree(), getModuleIdentifier());*/
+                            mathSymbolAlterEgo.getClassification(),
+                            getDefiningTree(), getModuleIdentifier());
         }
         return result;
     }

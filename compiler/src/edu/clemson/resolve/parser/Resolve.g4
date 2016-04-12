@@ -95,7 +95,7 @@ precisBlock
 conceptBlock
     :   ( mathStandardDefnDecl
         | typeModelDecl
-       // | operationDecl
+        | operationDecl
        // | constraintClause
         )*
     ;
@@ -187,6 +187,31 @@ recordVarDeclGroup
 
 varDeclGroup
     :   'Var' ID (',' ID)* ':' type ';'?
+    ;
+
+// functions
+
+operationDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)? (ensuresClause)?
+    ;
+
+operationProcedureDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)?
+        (ensuresClause)?
+        (recursive='Recursive')? 'Procedure'
+        (varDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
+    ;
+
+procedureDecl
+    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
+        (':' type)? ';'
+        (varDeclGroup)*
+        //(stmt)*
+        'end' closename=ID ';'
     ;
 
 // facility decls
@@ -387,8 +412,7 @@ mathSetExp
     ;
 
 mathLambdaExp
-    :   ('lambda'|'λ') '(' mathVarDeclGroup
-        (',' mathVarDeclGroup)* ')' '.' '(' mathExp ')'
+    :   ('lambda'|'λ') mathVarDecl ',' mathExp
     ;
 
 mathAlternativeExp
@@ -400,8 +424,6 @@ mathAlternativeItemExp
     ;
 
 progExp:   'progExp';
-
-
 
 //prog ops here so I can use switch statements in the code
 NOT : 'not' ;

@@ -195,6 +195,8 @@ public class MathSymbolTable {
             globalScope.define(new MathSymbol(g, "*", g.CROSS_PROD_FUNCTION));
             globalScope.define(new MathSymbol(g, "=",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+            globalScope.define(new MathSymbol(g, "/=",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate builtin symbol");
         }
