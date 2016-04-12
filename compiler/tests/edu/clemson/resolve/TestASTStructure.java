@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rsrg.semantics.DumbTypeGraph;
 
-//TODO: returnEnsuresArgSubstitutions visitors for outfix style also something with fencepost accept
-
 public class TestASTStructure extends BaseTest {
 
     private static class TestListener extends PExpListener {

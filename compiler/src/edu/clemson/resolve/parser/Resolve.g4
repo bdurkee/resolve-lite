@@ -374,7 +374,7 @@ mathPrimeExp
     :   mathLiteralExp
     |   mathCartProdExp
     |   mathSymbolExp
-    |   mathOutfixApplyExp
+    |   mathOutfixAppExp
     |   mathSetRestrictionExp
     |   mathSetExp
     |   mathLambdaExp
@@ -394,7 +394,7 @@ mathSymbolExp
     :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
     ;
 
-mathOutfixApplyExp
+mathOutfixAppExp
     :   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
     |   lop='<' mathExp rop='>'

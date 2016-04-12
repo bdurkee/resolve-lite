@@ -289,11 +289,6 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathTypeValue(MathClassification e) {
-            this.mathTypeValue = e;
-            return this;
-        }
-
         public PSymbolBuilder progType(ProgType e) {
             this.progType = e;
             return this;

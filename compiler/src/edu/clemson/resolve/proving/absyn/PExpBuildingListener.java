@@ -7,6 +7,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PApply.DisplayStyle;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -161,16 +162,25 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    /*@Override public void exitMathOutfixApplyExp(
-            ResolveParser.MathOutfixApplyExpContext ctx) {
+    @Override public void exitMathOutfixAppExp(
+            ResolveParser.MathOutfixAppExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
-                        .applicationType(getClassification(ctx))
-                        .applicationTypeValue(getMathTypeValue(ctx))
+                        .applicationType(getMathClssfctn(ctx))
                         .style(OUTFIX)
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
-    }*/
+    }
+
+    @Override public void exitMathBracketAppExp(
+            ResolveParser.MathBracketAppExpContext ctx) {
+        PApplyBuilder result =
+                new PApplyBuilder((PSymbol) repo.get(ctx.mathSqBrOpExp()))
+                        .applicationType(getMathClssfctn(ctx))
+                        .style(PREFIX, true)
+                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
+        repo.put(ctx, result.build());
+    }
 /*
     mathSqBrOpExp : op='[' ;
     mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
@@ -183,6 +193,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     mathImpliesOpExp : (qualifier=ID '::')? op='implies';
     mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
 */
+    @Override public void exitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
+        CommonToken t = new CommonToken(ctx.op);
+        t.setText("[..]");
+        repo.put(ctx, buildOperatorPSymbol(ctx, null, t));
+    }
     @Override public void exitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
@@ -235,13 +250,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
-        /*for (ResolveParser.MathVarDeclGroupContext grp : ctx
-                .mathVarDeclGroup()) {
-            for (TerminalNode term : grp.ID()) {
-                parameters.add(new PLambda.MathSymbolDeclaration(term.getText(),
-                        getMathClssfctn(grp.mathTypeExp())));
-            }
-        }*/
+        parameters.add(new PLambda.MathSymbolDeclaration(
+                ctx.mathVarDecl().ID().getText(), getMathClssfctn(ctx)));
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 
@@ -273,10 +283,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
-    /*@Override public void exitMathSelectorExp(
+    @Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
-    }*/
+    }
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
@@ -392,11 +402,12 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }*/
 
-    private PExp buildLiteral(String literalText, MathClassification type, MathClassification typeValue,
-                              ProgType progType) {
+    @NotNull private PExp buildLiteral(@NotNull String literalText,
+                              @NotNull MathClassification type,
+                              @Nullable ProgType progType) {
         PSymbolBuilder result =
                 new PSymbolBuilder(literalText).mathType(type)
-                        .progType(progType).mathTypeValue(typeValue)
+                        .progType(progType)
                         .literal(true);
         return result.build();
     }
