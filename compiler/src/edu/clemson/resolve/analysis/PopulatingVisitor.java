@@ -807,6 +807,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
+
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClassification t = exactNamedMathClssftns.get(nameExp);
@@ -827,7 +828,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 Utils.apply(args, tr.mathClssftns::get);
         List<MathClassification> formalParameterTypes =
                 expectedFuncType.getParamTypes();
-
+        //ugly hook to handle chained operator applications like 0 <= i <= j or
+        //j >= i >= 0
+        if ((nameExp.getText().equals("<=") || nameExp.getText().equals("≤")) &&
+                args.size() == 2 &&
+                args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
+            ResolveParser.MathInfixAppExpContext argAsInfixApp =
+                    (ResolveParser.MathInfixAppExpContext)args.get(0);
+            if (argAsInfixApp.getChild(1).getText().equals("<=") ||
+                    argAsInfixApp.getChild(1).getText().equals("≤")) {
+                MathClassification x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
+                actualArgumentTypes.set(0, x);
+            }
+        }
         if (formalParameterTypes.size() != actualArgumentTypes.size()) {
             compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT,
                     ctx.getStart(), ctx.getText());
