@@ -34,6 +34,7 @@ moduleDecl
     :   precisModuleDecl
     |   precisExtModuleDecl
     |   conceptModuleDecl
+    |   conceptImplModuleDecl
     |   facilityModuleDecl
     ;
 
@@ -62,6 +63,16 @@ conceptModuleDecl
         (usesList)?
         (requiresClause)?
         conceptBlock
+        'end' closename=ID ';'
+    ;
+
+// concept impls
+
+conceptImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        implBlock
         'end' closename=ID ';'
     ;
 
@@ -100,6 +111,14 @@ conceptBlock
         )*
     ;
 
+implBlock
+    :   ( operationProcedureDecl
+        | procedureDecl
+        | typeRepresentationDecl
+        | facilityDecl
+        )*
+    ;
+
 facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
@@ -122,6 +141,13 @@ typeModelDecl
         'exemplar' exemplar=ID ';'?
         (constraintsClause)?
         (initializationClause)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=ID '=' type ';'?
+        (conventionsClause)?
+        (correspondenceClause)?
+        (typeImplInit)?
     ;
 
 // classification initialization rules
@@ -423,9 +449,48 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-progExp:   'progExp';
+// program expressions
 
-//prog ops here so I can use switch statements in the code
+//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
+//we could really use some unit tests to perhaps check precendence so that in the future when
+//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
+progExp
+    :   progPrimary                                     #progPrimaryExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op=('and'|'or') progExp                 #progInfixExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNamedExp
+    ;
+
+//operations are first class citizens with respect to a certain class of
+//parameterized resolve implementation-modules. So we
+//represent the name portion as its own (potentially qualified) expression,
+//once again this makes building our function application AST node much easier.
+progParamExp
+    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNamedExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
+    ;
+
 NOT : 'not' ;
 EQUALS : '=' ;
 NEQUALS : '/=' ;

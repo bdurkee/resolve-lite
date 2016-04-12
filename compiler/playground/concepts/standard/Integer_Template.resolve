@@ -3,14 +3,12 @@ Concept Integer_Template;
             Standard_Booleans;
 
     Definition max_int, min_int : Z;
-
-    //constraints min_int <= 0 and
-    //                1 <= max_int;
+    constraints min_int ≤ 0 and 1 ≤ max_int;
 
     Type family Integer is modeled by Z;
         exemplar I;
         constraints
-            min_int ≤ I and I ≤ max_int;
+            min_int ≤ I ≤ max_int;
         initialization
                 ensures I = 0;
 /*

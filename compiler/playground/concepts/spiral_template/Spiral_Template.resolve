@@ -21,9 +21,8 @@ Concept Spiral_Template (type Label;
       P.Lab[Outward_Loc(P.Trmnl_Loc)] =
                       {Label.base_point};
 
-    Operation Lengthen(
-                updates P : Spiral;
-                alters e : Label);
+    Operation Lengthen(updates P : Spiral;
+                       alters e : Label);
         requires SCD(P.Trmnl_Loc) < Max_Length;
         ensures P.Trmnl_Loc =
                     SS(k)(@P.Trmnl_Loc) and
