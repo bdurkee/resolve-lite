@@ -7,11 +7,13 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -218,10 +220,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 returnType = tr.progTypes.get(type);
             }
 
-            PExp requiresExp = g.getTrueExp();
-                    //getPExpFor(requires);
-           PExp ensuresExp = g.getTrueExp();
-                   //getPExpFor(ensures);
+            PExp requiresExp = getPExpFor(requires);
+           PExp ensuresExp = getPExpFor(ensures);
             //TODO: this will need to be wrapped in a ModuleParameterSymbol
             //if we're walking a specmodule param list
             symtab.getInnermostActiveScope().define(
@@ -344,10 +344,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.initializationClause() != null) this.visit(ctx.initializationClause());
         symtab.endScope();
         try {
-            //PExp constraint = getPExpFor(ctx.constraintClause());
-            //PExp initEnsures =
-            //        getPExpFor(ctx.typeModelInit() != null ? ctx
-            //                .typeModelInit().ensuresClause() : null);
+            PExp constraint = getPExpFor(ctx.constraintsClause());
+            PExp initEnsures = getPExpFor(ctx.initializationClause());
 
             ProgTypeSymbol progType =
                     new TypeModelSymbol(symtab.getTypeGraph(),
@@ -1154,6 +1152,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 exactNamedMathClssftns.get(child));
         MathClassification x = tr.mathClssftns.get(child);
         tr.mathClssftns.put(ctx, tr.mathClssftns.get(child));
+    }
+
+    private PExp getPExpFor(@Nullable ParserRuleContext ctx) {
+        if (ctx == null) {
+            return g.getTrueExp();
+        }
+        PExpBuildingListener l = new PExpBuildingListener(g, tr);
+        ParseTreeWalker.DEFAULT.walk(l, ctx);
+        return l.getBuiltPExp(ctx);
     }
 
     private ModuleIdentifier getRootModuleIdentifier() {

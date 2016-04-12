@@ -100,7 +100,7 @@ public class PQuantified extends PExp {
         List<String> symNames = declaredSymbols.stream()
                 .map(d -> d.name).collect(Collectors.toList());
         String qType = quantificationType == Quantification.UNIVERSAL ?
-                "Forall" : "Exists";
+                "∀" : "∃";
         return qType + " " + Utils.join(symNames, ", ") + ":" +
                 declaredSymbols.get(0).type + " " + assertion.toString();
     }

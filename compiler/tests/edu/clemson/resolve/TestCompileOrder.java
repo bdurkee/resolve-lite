@@ -38,8 +38,6 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-
-
     //Todo: When facilities, enhancements, and other constructs are
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.

@@ -102,7 +102,7 @@ conceptBlock
 
 facilityBlock
     :   ( facilityDecl
-        //| operationProcedureDecl
+        | operationProcedureDecl
         //| typeRepresentationDecl
         )*
     ;
@@ -336,7 +336,7 @@ mathQuantifiedExp
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
-    |   mathExp mathSqBrOpExp mathExp (',' mathExp)* ']' #mathBracketAppExp
+    |   mathExp mathSqBrOpExp mathExp (',' mathExp)* ']'    #mathBracketAppExp
     |   mathExp mathMultOpExp mathExp                       #mathInfixAppExp
     |   mathExp mathAddOpExp mathExp                        #mathInfixAppExp
     |   mathExp mathJoiningOpExp mathExp                    #mathInfixAppExp
