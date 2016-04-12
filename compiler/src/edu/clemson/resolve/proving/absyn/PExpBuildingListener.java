@@ -170,8 +170,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .style(OUTFIX)
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
-    }
-
+    }*/
+/*
     mathSqBrOpExp : op='[' ;
     mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
     mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
@@ -210,7 +210,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override public void exitMathBooleanOpExp(ResolveParser.MathBooleanOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    
     private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
                                          @Nullable Token qualifier,
                                          @NotNull Token operator) {
@@ -254,7 +253,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         for (ResolveParser.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
-            if ( alt.condition != null ) {
+            if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
             }

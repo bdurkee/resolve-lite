@@ -26,8 +26,6 @@ import java.util.*;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
-    private static final boolean EMIT_DEBUG = true;
-
     private ModuleScopeBuilder moduleScope = null;
 
     private final RESOLVECompiler compiler;
@@ -82,8 +80,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-        compiler.errMgr.info("--------------\nMODULE: "+
-                tr.getNameToken().getText()+"\n--------------");
         moduleScope = symtab.startModuleScope(tr)
                 .addImports(tr.semanticallyRelevantUses);
         super.visitChildren(ctx);
@@ -321,8 +317,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, g.INVALID);
         return null;
     }
-
-
 
     @Override public Void visitTypeModelDecl(
             ResolveParser.TypeModelDeclContext ctx) {

@@ -36,12 +36,12 @@ public class TestPExp extends BaseTest {
         PExp result = parseMathAssertionExp(g, "x + y");
         List<? extends PExp> subexprs = result.getSubExpressions();
         Assert.assertEquals(3, subexprs.size());
-     //   Iterator<? extends PExp> exps = subexprs.iterator();
-     //   Assert.assertEquals("+", exps.next().toString());
-     //   Assert.assertEquals("x", exps.next().toString());
-     //   Assert.assertEquals("y", exps.next().toString());
+        Iterator<? extends PExp> exps = subexprs.iterator();
+        Assert.assertEquals("+", exps.next().toString());
+        Assert.assertEquals("x", exps.next().toString());
+        Assert.assertEquals("y", exps.next().toString());
 
-        /*result = parseMathAssertionExp(g, "x(z + 1) + y");
+        result = parseMathAssertionExp(g, "x(z + 1) + y");
         exps = result.getSubExpressions().iterator();
         Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals("+", exps.next().toString());
@@ -56,7 +56,7 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("true", exps.next().toString());
         Assert.assertEquals("@y", exps.next().toString());
         Assert.assertEquals("(true and x)", exps.next().toString());
-        Assert.assertEquals("false", exps.next().toString());*/
+        Assert.assertEquals("false", exps.next().toString());
     }
 
     /*@Test public void testPSymbolAndPApplyEquals() throws Exception {
