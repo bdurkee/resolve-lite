@@ -96,7 +96,7 @@ conceptBlock
     :   ( mathStandardDefnDecl
         | typeModelDecl
         | operationDecl
-       // | constraintClause
+        | constraintsClause
         )*
     ;
 

@@ -204,6 +204,38 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitOperationProcedureDecl(
+            ResolveParser.OperationProcedureDeclContext ctx) {
+        symtab.startScope(ctx);
+        ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                tr.progTypes.get(ctx.type()),
+                                getRootModuleIdentifier()));
+            } catch (DuplicateSymbolException e) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), ctx.getText());
+            }
+        }
+        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
+        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+
+        ctx.varDeclGroup().forEach(this::visit);
+        //ctx.stmt().forEach(this::visit);
+        //sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
+
+        symtab.endScope();
+        insertFunction(ctx.name, ctx.type(),
+                ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
     private void insertFunction(@NotNull Token name,
                                 @Nullable ResolveParser.TypeContext type,
                                 @Nullable ResolveParser.RequiresClauseContext requires,
@@ -380,6 +412,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         return null;
     }
+
+    @Override public Void visitVarDeclGroup(
+            ResolveParser.VarDeclGroupContext ctx) {
+        this.visit(ctx.type());
+        insertVariables(ctx, ctx.ID(), ctx.type());
+        return null;
+    }
+
+    private void insertVariables(@NotNull ParserRuleContext ctx,
+                                 @NotNull List<TerminalNode> terminalGroup,
+                                 @NotNull ResolveParser.TypeContext type) {
+        ProgType progType = tr.progTypes.get(type);
+        for (TerminalNode t : terminalGroup) {
+            try {
+                ProgVariableSymbol vs =
+                        new ProgVariableSymbol(t.getText(), ctx, progType,
+                                getRootModuleIdentifier());
+                symtab.getInnermostActiveScope().define(vs);
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        t.getSymbol(), t.getText());
+            }
+        }
+    }
+
+    // math constructs
 
     @Override public Void visitMathTypeTheoremDecl(
             ResolveParser.MathTypeTheoremDeclContext ctx) {

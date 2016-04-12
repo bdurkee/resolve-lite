@@ -6,11 +6,11 @@ Concept Prioritizer_Template(classification Entry;
         requires Max_Capacity > 0
             which_entails Max_Capacity : N;
 
-    Definition Total_Entry_Ct(K : Entry -> N) : N;
+    Definition Total_Entry_Ct(K : Entry ⟶ N) : N;
 
     Type family Entry_Keeper
                 is modeled by Cart_Prod
-                    Entry_Count : Entry -> N;
+                    Entry_Count : Entry ⟶ N;
                     Accepting : B;
         end;
         exemplar K;

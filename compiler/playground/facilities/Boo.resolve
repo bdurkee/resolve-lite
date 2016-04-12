@@ -3,7 +3,13 @@ Facility Boo;
 
     Operation Main ();
         Procedure
-            Var x : Std_Ints :: Integer;
+            Var x, y : Std_Ints :: Integer;
+
     end Main;
+
+    Operation foo ();
+        Procedure
+
+    end foo;
 
 end Boo;
