@@ -3,6 +3,7 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.symbol.MathSymbol;
 
 import java.util.*;
 
@@ -11,6 +12,7 @@ public class MathCartesianClassification extends MathClassification {
     private final List<Element> elements = new ArrayList<>();
     private final List<MathClassification> elementClssfctns =
             new ArrayList<>();
+    public final Map<String, MathSymbol> syms = new LinkedHashMap<>();
     private final Map<String, Element> tagsToElements =
             new LinkedHashMap<>();
 

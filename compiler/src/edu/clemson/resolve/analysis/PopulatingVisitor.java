@@ -782,6 +782,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    @Override public Void visitRequiresClause(
+            ResolveParser.RequiresClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        this.visit(ctx.entailsClause());
+        return null;
+    }
+
+    private MathClassification entailsRetype = null;
+    @Override public Void visitEntailsClause(
+            ResolveParser.EntailsClauseContext ctx) {
+        for (ResolveParser.EntailsClssftnsContext clfsGrp :
+                ctx.entailsClssftns()) {
+            this.visit(clfsGrp.mathClssftnExp());
+            entailsRetype = exactNamedMathClssftns.get(clfsGrp.mathClssftnExp());
+            clfsGrp.mathExp().forEach(this::visit);
+            entailsRetype = null;
+        }
+        return null;
+    }
+
     @Override public Void visitMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
         walkingType = true;
@@ -807,14 +827,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     //boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
     //        ctx, ResolveParser.EntailsClauseContext.class) != null;
-    @Override public Void visitMathClassificationAssertionExp(
-            ResolveParser.MathClassificationAssertionExpContext ctx) {
+    @Override public Void visitMathClssftnAssertionExp(
+            ResolveParser.MathClssftnAssertionExpContext ctx) {
         this.visit(ctx.mathExp());
         MathClassification rhsColonType =
                 exactNamedMathClssftns.get(ctx.mathExp());
-        MathClassification ty =
-                new MathNamedClassification(g, ctx.ID().getText(),
-                        rhsColonType.typeRefDepth - 1, rhsColonType);
+        boolean walkingEntails =
+                Utils.getFirstAncestorOfType(ctx,
+                        ResolveParser.EntailsClauseContext.class) != null;
+
+        if (walkingEntails) {
+
+        }
+
         ty.identifiesSchematicType = true;
         try {
             symtab.getInnermostActiveScope().define(
@@ -918,7 +943,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String asString = ctx.getText();
         MathClassification t = exactNamedMathClssftns.get(nameExp);
         //if we're a name identifying a function, get our function type.
-        if (t instanceof MathNamedClassification && t.getEnclosingClassification() instanceof MathFunctionClassification) {
+        if (t instanceof MathNamedClassification &&
+                t.getEnclosingClassification() instanceof MathFunctionClassification) {
             t = ((MathNamedClassification) t).enclosingClassification;
         }
         if (!(t instanceof MathFunctionClassification)) {
@@ -1106,7 +1132,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
         ctx.mathVarDeclGroup().forEach(this::visit);
-
+        List<MathSymbol> fieldSyms = new ArrayList<>();
+        for (ResolveParser.MathVarDeclGroupContext grp :
+                ctx.mathVarDeclGroup()) {
+            for (TerminalNode t : grp.ID()) {
+                fieldSyms.add(getIntendedMathSymbol(null, t.getText(), grp));
+            }
+        }
         List<Element> fields= new ArrayList<>();
         for (ResolveParser.MathVarDeclGroupContext grp : ctx
                 .mathVarDeclGroup()) {
@@ -1116,6 +1148,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             for (TerminalNode label : grp.ID()) {
                 fields.add(new Element(label.getText(), grpType));
             }
+        }
+        MathCartesianClassification cartClssftn =
+                new MathCartesianClassification(g, fields);
+        for (MathSymbol fieldSym : fieldSyms) {
+            cartClssftn.syms.put(fieldSym.getName(), fieldSym);
         }
         tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fields));
         exactNamedMathClssftns.put(ctx,
@@ -1240,6 +1277,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             MathCartesianClassification typeCartesian =
                     (MathCartesianClassification) prevMathAccessType;
+            if (entailsRetype != null) {
+                MathSymbol x = typeCartesian.syms.get(symbolName);
+                if (x != null) x.setClassification(entailsRetype);
+            }
             type = typeCartesian.getFactor(symbolName);
         }
         catch (ClassCastException|NoSuchElementException cce) {
@@ -1264,6 +1305,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
+        }
+        if (entailsRetype != null) {
+            s.setClassification(
+                    new MathNamedClassification(g, name,
+                            entailsRetype.typeRefDepth-1, entailsRetype));
         }
         exactNamedMathClssftns.put(ctx, s.getClassification());
         if (s.getClassification().identifiesSchematicType) {

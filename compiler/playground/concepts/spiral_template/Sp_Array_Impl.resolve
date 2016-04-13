@@ -10,7 +10,7 @@ Implementation Sp_Array_Impl for Spiral_Template;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
-        conventions
+        /*conventions
           0 < P.Curr_Place ≤ P.Length ≤ Max_Length
              which_entails
                P.Curr_Place, P.Length : N;
@@ -18,7 +18,7 @@ Implementation Sp_Array_Impl for Spiral_Template;
           conc.P.Trmnl_Loc =
             IA(SS(k), Cen(k), P.Length);
 
-
+*/
  /*   Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
