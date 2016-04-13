@@ -799,11 +799,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitMathEntailsExp(
+    /*@Override public Void visitMathEntailsExp(
             ResolveParser.MathEntailsExpContext ctx) {
         //this.visit(ctx.m)
         return null;
-    }
+    }*/
 
     //boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
     //        ctx, ResolveParser.EntailsClauseContext.class) != null;

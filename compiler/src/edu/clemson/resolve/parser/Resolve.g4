@@ -400,7 +400,7 @@ mathVarDecl
 // mathematical clauses
 
 initializationClause : 'initialization' (ensuresClause);
-requiresClause : 'requires' mathAssertionExp ';';
+requiresClause : 'requires' mathAssertionExp (entailsClause)? ';';
 ensuresClause : 'ensures' mathAssertionExp ';';
 constraintsClause : ('constraints') mathAssertionExp ';';
 conventionsClause : 'conventions' mathAssertionExp ';';
@@ -408,6 +408,9 @@ correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
+
+entailsClause : 'which_entails' entailsAssertion (',' entailsAssertion)* ;
+entailsAssertion : mathExp ':' mathClssftnExp ;
 
 // mathematical expressions
 
@@ -438,7 +441,6 @@ mathExp
     |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
-    |   mathExp 'which_entails' mathExp (',' mathExp)* ':' mathExp #mathEntailsExp
     |   ID ':' mathExp                                      #mathClassificationAssertionExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   mathPrimeExp                                        #mathPrimaryExp
