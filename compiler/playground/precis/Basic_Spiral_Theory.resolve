@@ -21,6 +21,9 @@ Precis Basic_Spiral_Theory;
     Definition Outward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
         {p : Sp_Loc(k) | p ∉ Inward_Loc(b)};
 
+    Definition IA(f : (U : SSet) ⟶ (V : SSet), s : U, n : N) : V;
+
+
    /* Corollary Inw1: Forall k : N2, Forall m, n : N,
         SS(k)(Cen(k)) ∉ Inward_Loc(SS(k)(Cen(k))) iff m < n;
     */

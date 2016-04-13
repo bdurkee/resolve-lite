@@ -168,6 +168,7 @@ public class MathSymbolTable {
             globalScope.define(new MathSymbol(g, "or", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
+            globalScope.define(new MathSymbol(g, "conc", g.BOOLEAN));
 
             globalScope.define(new MathSymbol(g, "is_in",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));

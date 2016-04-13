@@ -424,9 +424,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             curTypeReprModelSymbol = symtab.getInnermostActiveScope()
                     .queryForOne(new NameQuery(null, ctx.name,
                             false)).toTypeModelSymbol();
+            int i;
+            i=0;
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
             //won't have a model.
+            int i;
+            i=3;
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());

@@ -5,26 +5,20 @@ Implementation Sp_Array_Impl for Spiral_Template;
         externally
           implemented by Array_Impl;
 
-    Type Spiral_Pos = Record
+    Type Spiral = Record
             Labl : Arry_Fac :: Ceramic_Array;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
         conventions
-            0 < S.Curr_Place ≤ S.Length ≤ Max_Length;
-        /*correspondence
-            conc.P.Trmnl_Loc = DI(SS(k)(Cen(k)), P.Length) and
-            conc.P.Curr_Loc = DI(SS(k)(Cen(k)), P.Curr_Place) and
-            conc.P.Lab =
-                lambda (q : Sp_Loc(k)).(
-                    {{P.Labl(SCD(q)) if SCD(q) + 1 <= P.Length;
-                                Label.base_point otherwise;}});
-        initialization
-            P.Length := 1;
-            P.Curr_Place := 1;
-        end;
+          0 < P.Curr_Place ≤ P.Length ≤ Max_Length
+             which_entails
+               P.Curr_Place, P.Length : N;
+        correspondence
+            conc.P.Trmnl_Loc =
+                    IA(SS(k), Cen(k), P.Length);
 
-    Procedure Lengthen (updates P : Spiral_Pos;
+ /*   Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
         P.Length := P.Length + 1;

@@ -102,7 +102,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
             ModuleScopeBuilder module =
                     repo.getModuleScope(sourceAsSyntacticScope
                             .getModuleIdentifier());
-            for (ModuleIdentifier i : module.getImports()) {
+            List<ModuleIdentifier> imps = module.getImports();
+            for (ModuleIdentifier i :imps) {
                 finished =
                         searchModule(searcher, repo.getModuleScope(i),
                                 repo, results, searchedScopes,
