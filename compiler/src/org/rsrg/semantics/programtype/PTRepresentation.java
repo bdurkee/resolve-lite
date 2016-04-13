@@ -20,14 +20,14 @@ import java.util.NoSuchElementException;
  */
 public class PTRepresentation extends ProgNamedType {
 
-    @NotNull private final ProgType baseType;
-    @NotNull private final String name;
+    private final ProgType baseType;
+    private final String name;
 
     /** This will be {@code null} for standalone representations (i.e. those that
      *  would appear in the context of a facility module.
      */
-    @Nullable private final TypeModelSymbol family;
-    @Nullable private ProgReprTypeSymbol repr;
+    private final TypeModelSymbol family;
+    private ProgReprTypeSymbol repr;
 
     public PTRepresentation(@NotNull DumbTypeGraph g, @NotNull ProgType baseType,
                             @NotNull String name,
@@ -67,6 +67,7 @@ public class PTRepresentation extends ProgNamedType {
     }
 
     @NotNull @Override public MathClassification toMath() {
+        if (baseType == null) return g.INVALID;
         return baseType.toMath();
     }
 

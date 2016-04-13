@@ -2,12 +2,11 @@ package org.rsrg.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathCartesianClassification;
 import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.symbol.FacilitySymbol;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class ProgRecordType extends ProgType {
 
@@ -18,15 +17,13 @@ public class ProgRecordType extends ProgType {
                           @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
-
-       /* Element[] elements = new Element[types.size()];
+        List<MathCartesianClassification.Element> eles = new ArrayList<>();
         int index = 0;
         for (Map.Entry<String, ProgType> field : types.entrySet()) {
-            elements[index] =
-                    new Element(field.getKey(), field.getValue().toMath());
-            index++;
+            eles.add(new MathCartesianClassification.Element(field.getKey(),
+                    field.getValue().toMath()));
         }
-        this.mathTypeAlterEgo = new MathCartesianClassification(g, elements);*/
+        this.mathTypeAlterEgo = new MathCartesianClassification(g, eles);
     }
 
     @NotNull public ProgType getFieldType(@NotNull String name)

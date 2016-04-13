@@ -33,12 +33,12 @@ grammar Resolve;
 moduleDecl
     :   precisModuleDecl
     |   precisExtModuleDecl
+    |   conceptExtModuleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
+    |   conceptExtImplModuleDecl
     |   facilityModuleDecl
     ;
-
-// precis
 
 precisModuleDecl
     :   'Precis' name=ID ('tagged_as' tag=ID)? ';'
@@ -47,16 +47,12 @@ precisModuleDecl
         'end' closename=ID ';' EOF
     ;
 
-// precis extensions
-
 precisExtModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
         precisBlock
         'end' closename=ID ';'
     ;
-
-// concepts
 
 conceptModuleDecl
     :   'Concept' name=ID specModuleParameterList? ';'
@@ -66,7 +62,13 @@ conceptModuleDecl
         'end' closename=ID ';'
     ;
 
-// concept impls
+conceptExtModuleDecl
+    :   'Concept' 'Extension' name=ID specModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
 
 conceptImplModuleDecl
     :   'Implementation' name=ID implModuleParameterList?
@@ -76,7 +78,13 @@ conceptImplModuleDecl
         'end' closename=ID ';'
     ;
 
-// facilities
+conceptExtImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' extension=ID 'of' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
 
 facilityModuleDecl
     :   'Facility' name=ID ';'
@@ -99,7 +107,7 @@ precisBlock
         | mathCategoricalDefnDecl
         | mathInductiveDefnDecl
         | mathTheoremDecl
-        | mathTypeTheoremDecl
+        | mathClassificationTheoremDecl
         )*
     ;
 
@@ -122,12 +130,9 @@ implBlock
 facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
-        //| typeRepresentationDecl
+        | typeRepresentationDecl
         )*
     ;
-
-//implBlock
-//  :
 
 // type refs & decls
 
@@ -150,7 +155,7 @@ typeRepresentationDecl
         (typeImplInit)?
     ;
 
-// classification initialization rules
+// type initialization rules
 
 specModuleInit
     :   'Facility_Init' (requiresClause)? (ensuresClause)?
@@ -164,16 +169,16 @@ typeImplInit
 
 // parameter and parameter-list related rules
 
-operationParameterList
-    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
-    ;
-
 specModuleParameterList
     :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
     ;
 
 implModuleParameterList
     :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+    ;
+
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
     ;
 
 specModuleParameterDecl
@@ -215,7 +220,25 @@ varDeclGroup
     :   'Var' ID (',' ID)* ':' type ';'?
     ;
 
-// functions
+// facility decls
+
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    ;
+
+extensionPairing
+    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)?
+    ;
+
+moduleArgumentList
+    :   '(' progExp (',' progExp)* ')'
+    ;
+
+// operations & procedures
 
 operationDecl
     :   'Operation' name=ID operationParameterList (':' type)? ';'
@@ -236,26 +259,70 @@ procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
         (varDeclGroup)*
-        //(stmt)*
+        (stmt)*
         'end' closename=ID ';'
     ;
 
-// facility decls
+// statements
 
-facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+stmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
+    |   whileStmt
+    |   ifStmt
     ;
 
-extensionPairing
-    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)?
+assignStmt : left=progExp ':=' right=progExp ';' ;
+swapStmt : left=progExp ':=:' right=progExp ';' ;
+callStmt : progParamExp ';' ;
+
+whileStmt
+    :   'While' progExp
+        changingClause? maintainingClause? decreasingClause?
+        'do' stmt* 'end' ';'
     ;
 
-moduleArgumentList
-    :   '(' progExp (',' progExp)* ')'
+ifStmt : 'If' progExp 'then' stmt* elseStmt? 'end' ';' ;
+elseStmt : 'else' stmt* ;
+
+// program expressions
+
+progExp
+    :   progPrimary                                     #progPrimaryExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op=('and'|'or') progExp                 #progInfixExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNamedExp
+    ;
+
+//operations are first class citizens with respect to a certain class of
+//parameterized resolve implementation-modules. So we
+//represent the name portion as its own (potentially qualified) expression,
+//once again this makes building our function application AST node much easier.
+progParamExp
+    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNamedExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
     ;
 
 // math constructs
@@ -264,7 +331,7 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-mathTypeTheoremDecl
+mathClassificationTheoremDecl
     :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
     ;
 
@@ -339,9 +406,9 @@ ensuresClause : 'ensures' mathAssertionExp ';';
 constraintsClause : ('constraints') mathAssertionExp ';';
 conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
-//changingClause : 'changing' ExpArgumentList ';';
-//MaintainingClause ::= 'maintaining' MathAssertionExp ';' {pin=1}
-//DecreasingClause ::= 'decreasing' MathAssertionExp ';' {pin=1}
+changingClause : 'changing' mathExp (',' mathExp)* ';' ;
+maintainingClause : 'maintaining' mathAssertionExp ';' ;
+decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
 
 // mathematical expressions
 
@@ -449,48 +516,6 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-// program expressions
-
-//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
-//we could really use some unit tests to perhaps check precendence so that in the future when
-//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
-progExp
-    :   progPrimary                                     #progPrimaryExp
-    |   '(' progExp ')'                                 #progNestedExp
-    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
-    |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
-    |   progExp op=('+'|'-') progExp                    #progInfixExp
-    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
-    |   progExp op=('='|'/=') progExp                   #progInfixExp
-    |   progExp op=('and'|'or') progExp                 #progInfixExp
-    ;
-
-progPrimary
-    :   progLiteralExp
-    |   progParamExp
-    |   progNamedExp
-    ;
-
-//operations are first class citizens with respect to a certain class of
-//parameterized resolve implementation-modules. So we
-//represent the name portion as its own (potentially qualified) expression,
-//once again this makes building our function application AST node much easier.
-progParamExp
-    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
-    ;
-
-progNamedExp
-    :   (qualifier=ID '::')? name=ID
-    ;
-
-progLiteralExp
-    :   ('true'|'false')    #progBooleanLiteralExp
-    |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
-    |   STRING              #progStringLiteralExp
-    ;
-
 NOT : 'not' ;
 EQUALS : '=' ;
 NEQUALS : '/=' ;
@@ -512,7 +537,6 @@ FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
-
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;

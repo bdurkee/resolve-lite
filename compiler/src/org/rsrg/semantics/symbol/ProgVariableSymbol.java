@@ -3,6 +3,8 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.MathClassification;
+import org.rsrg.semantics.MathNamedClassification;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.Quantification;
 import org.rsrg.semantics.programtype.ProgType;
@@ -20,9 +22,12 @@ public class ProgVariableSymbol extends Symbol {
                               @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.type = type;
+        MathClassification m = type.toMath();
         this.mathSymbolAlterEgo =
                 new MathSymbol(type.getTypeGraph(), name, Quantification.NONE,
-                        type.toMath(), definingTree, moduleIdentifier);
+                        new MathNamedClassification(type.getTypeGraph(),
+                                name, m.typeRefDepth-1, m), definingTree,
+                        moduleIdentifier);
     }
 
     @NotNull public ProgType getProgramType() {
