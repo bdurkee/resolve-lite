@@ -70,7 +70,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return (T) repo.get(t);
     }
 
-    @Override public void exitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
+    @Override public void exitMathClssftnExp(
+            ResolveParser.MathClssftnExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
@@ -128,7 +129,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
             quantifiedVars.remove(term.getText());
             declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
-                    getMathClssfctn(ctx.mathVarDeclGroup().mathTypeExp())));
+                    getMathClssfctn(ctx.mathVarDeclGroup().mathClssftnExp())));
         }
         PQuantified q = new PQuantified(repo.get(ctx.mathAssertionExp()),
                 getQuantificationMode(ctx.q), declaredVars);

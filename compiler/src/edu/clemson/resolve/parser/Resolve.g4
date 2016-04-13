@@ -142,7 +142,7 @@ type
     ;
 
 typeModelDecl
-    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathClssftnExp ';'?
         'exemplar' exemplar=ID ';'?
         (constraintsClause)?
         (initializationClause)?
@@ -345,7 +345,7 @@ mathDefnSig
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
                 mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
-                ':' mathTypeExp
+                ':' mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -355,16 +355,16 @@ mathPrefixDefnSigs
 
 mathInfixDefnSig
     :   '(' mathVarDecl ')' name=mathSymbolName
-        '(' mathVarDecl ')' ':' mathTypeExp
+        '(' mathVarDecl ')' ':' mathClssftnExp
     ;
 
 mathOutfixDefnSig
     :   leftSym=('|'|'||'|'<'|'⎝'|'⟨') mathVarDecl
-        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathTypeExp
+        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathClssftnExp
     ;
 
 mathPostfixDefnSig
-    :   '('mathVarDecl')' lop='[' mathVarDecl rop=']' ':' mathTypeExp
+    :   '('mathVarDecl')' lop='[' mathVarDecl rop=']' ':' mathClssftnExp
     ;
 
 mathSymbolName
@@ -390,21 +390,20 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   ID (',' ID)* ':' mathTypeExp
+    :   ID (',' ID)* ':' mathClssftnExp
     ;
 
 mathVarDecl
-    :   ID ':' mathTypeExp
+    :   ID ':' mathClssftnExp
     ;
 
 // mathematical clauses
 
 initializationClause : 'initialization' (ensuresClause);
-entailsClause : 'which_entails' mathExp (',' mathExp)*;
-requiresClause : 'requires' mathAssertionExp (entailsClause)? ';';
+requiresClause : 'requires' mathAssertionExp ';';
 ensuresClause : 'ensures' mathAssertionExp ';';
 constraintsClause : ('constraints') mathAssertionExp ';';
-conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
+conventionsClause : 'conventions' mathAssertionExp ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
@@ -412,7 +411,7 @@ decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
 
 // mathematical expressions
 
-mathTypeExp
+mathClssftnExp
     :   mathExp
     ;
 
@@ -439,6 +438,7 @@ mathExp
     |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
+    |   mathExp 'which_entails' mathExp (',' mathExp)* ':' mathExp #mathEntailsExp
     |   ID ':' mathExp                                      #mathClassificationAssertionExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   mathPrimeExp                                        #mathPrimaryExp

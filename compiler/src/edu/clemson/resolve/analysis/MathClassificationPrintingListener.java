@@ -16,13 +16,13 @@ public class MathClassificationPrintingListener extends ResolveBaseListener {
         this.types = types;
     }
 
-    @Override public void enterMathTypeExp(
-            ResolveParser.MathTypeExpContext ctx) {
+    @Override public void enterMathClssftnExp(
+            ResolveParser.MathClssftnExpContext ctx) {
         System.out.println("----------[enterMathTypeExp]");
     }
 
-    @Override public void exitMathTypeExp(
-            ResolveParser.MathTypeExpContext ctx) {
+    @Override public void exitMathClssftnExp(
+            ResolveParser.MathClssftnExpContext ctx) {
         System.out.println("----------[exitMathTypeExp]");
     }
 

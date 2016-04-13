@@ -373,10 +373,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitTypeModelDecl(
             ResolveParser.TypeModelDeclContext ctx) {
         symtab.startScope(ctx);
-        this.visit(ctx.mathTypeExp());
+        this.visit(ctx.mathClssftnExp());
         MathSymbol exemplarSymbol = null;
         MathClassification modelType =
-                exactNamedMathClssftns.get(ctx.mathTypeExp());
+                exactNamedMathClssftns.get(ctx.mathClssftnExp());
         MathNamedClassification exemplarMathType =
                 new MathNamedClassification(g, ctx.exemplar.getText(),
                 modelType.getTypeRefDepth() - 1,
@@ -424,13 +424,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             curTypeReprModelSymbol = symtab.getInnermostActiveScope()
                     .queryForOne(new NameQuery(null, ctx.name,
                             false)).toTypeModelSymbol();
-            int i;
-            i=0;
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
             //won't have a model.
-            int i;
-            i=3;
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.name, ctx.name.getText());
@@ -633,7 +629,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathInfixDefnSig(
             ResolveParser.MathInfixDefnSigContext ctx) {
         try {
-            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathTypeExp(),
+            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathClssftnExp(),
                     ctx.name.getStart());
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
@@ -645,7 +641,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathPrefixDefnSig(
             ResolveParser.MathPrefixDefnSigContext ctx) {
         try {
-            insertMathDefnSignature(ctx, ctx.mathVarDeclGroup(), ctx.mathTypeExp(),
+            insertMathDefnSignature(ctx, ctx.mathVarDeclGroup(),
+                    ctx.mathClssftnExp(),
                     Utils.apply(ctx.mathSymbolName(),
                             ParserRuleContext::getStart));
         } catch (DuplicateSymbolException e) {
@@ -660,8 +657,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             CommonToken name = new CommonToken(ctx.lop);
             name.setText(ctx.lop.getText()+".."+ctx.rop.getText());
-            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathTypeExp(),
-                    name);
+            insertMathDefnSignature(ctx, ctx.mathVarDecl(),
+                    ctx.mathClssftnExp(), name);
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), e.getOffendingSymbol().getName());
@@ -671,7 +668,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
-                                         @NotNull ResolveParser.MathTypeExpContext type,
+                                         @NotNull ResolveParser.MathClssftnExpContext type,
                                          @NotNull Token ... names)
             throws DuplicateSymbolException {
         insertMathDefnSignature(ctx, formals, type, Arrays.asList(names));
@@ -679,7 +676,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
-                                         @NotNull ResolveParser.MathTypeExpContext type,
+                                         @NotNull ResolveParser.MathClssftnExpContext type,
                                          @NotNull List<? extends Token> names)
             throws DuplicateSymbolException {
         //first visit the formal params
@@ -704,7 +701,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ResolveParser.MathVarDeclGroupContext grp =
                                 (ResolveParser.MathVarDeclGroupContext) formal;
                         for (TerminalNode t : grp.ID()) {
-                            MathClassification ty = exactNamedMathClssftns.get(grp.mathTypeExp());
+                            MathClassification ty =
+                                    exactNamedMathClssftns.get(grp.mathClssftnExp());
                             paramTypes.add(ty);
                             paramNames.add(t.getText());
                         }
@@ -712,7 +710,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     catch (ClassCastException cce) {
                         ResolveParser.MathVarDeclContext singularDecl =
                                 (ResolveParser.MathVarDeclContext) formal;
-                            MathClassification ty = exactNamedMathClssftns.get(singularDecl.mathTypeExp());
+                            MathClassification ty = exactNamedMathClssftns.get(
+                                    singularDecl.mathClssftnExp());
                             paramTypes.add(ty);
                             paramNames.add(singularDecl.ID().getText());
                     }
@@ -744,27 +743,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathVarDeclGroup(
             ResolveParser.MathVarDeclGroupContext ctx) {
-        insertMathVarDecls(ctx, ctx.mathTypeExp(), ctx.ID());
+        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
         return null;
     }
 
     @Override public Void visitMathVarDecl(
             ResolveParser.MathVarDeclContext ctx) {
-        insertMathVarDecls(ctx, ctx.mathTypeExp(), ctx.ID());
+        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
         return null;
     }
 
     private void insertMathVarDecls(@NotNull ParserRuleContext ctx,
-                                    @NotNull ResolveParser.MathTypeExpContext t,
+                                    @NotNull ResolveParser.MathClssftnExpContext t,
                                     @NotNull TerminalNode... terms) {
         insertMathVarDecls(ctx, t, Arrays.asList(terms));
     }
 
     private void insertMathVarDecls(@NotNull ParserRuleContext ctx,
-                                    @NotNull ResolveParser.MathTypeExpContext t,
+                                    @NotNull ResolveParser.MathClssftnExpContext t,
                                     @NotNull List<TerminalNode> terms) {
         String x = ctx.getText();
-        this.visitMathTypeExp(t);
+        this.visitMathClssftnExp(t);
         MathClassification rhsColonType = exactNamedMathClssftns.get(t);
         for (TerminalNode term : terms) {
             MathClassification ty = new MathNamedClassification(g, term.getText(),
@@ -783,8 +782,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override public Void visitMathTypeExp(
-            ResolveParser.MathTypeExpContext ctx) {
+    @Override public Void visitMathClssftnExp(
+            ResolveParser.MathClssftnExpContext ctx) {
         walkingType = true;
         this.visit(ctx.mathExp());
         walkingType = false;
@@ -800,6 +799,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitMathEntailsExp(
+            ResolveParser.MathEntailsExpContext ctx) {
+        //this.visit(ctx.m)
+        return null;
+    }
+
+    //boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
+    //        ctx, ResolveParser.EntailsClauseContext.class) != null;
     @Override public Void visitMathClassificationAssertionExp(
             ResolveParser.MathClassificationAssertionExpContext ctx) {
         this.visit(ctx.mathExp());
@@ -808,21 +815,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClassification ty =
                 new MathNamedClassification(g, ctx.ID().getText(),
                         rhsColonType.typeRefDepth - 1, rhsColonType);
-        boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
-                ctx, ResolveParser.EntailsClauseContext.class) != null;
-        if (walkingEntailsClause) {
-            MathSymbol s = getIntendedMathSymbol(null, ctx.ID().getText(), ctx);
-            if (s != null) s.setClassification(ty);
-        }
-        else {
-            ty.identifiesSchematicType = true;
-            try {
-                symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, ctx.ID().getText(), ty));
-            } catch (DuplicateSymbolException e) {
-                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                        ctx.getStart(), e.getOffendingSymbol().getName());
-            }
+        ty.identifiesSchematicType = true;
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new MathSymbol(g, ctx.ID().getText(), ty));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), e.getOffendingSymbol().getName());
         }
 
         //defnSchematicTypes.put(ctx.ID().getText(), ty);
@@ -1113,7 +1112,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 .mathVarDeclGroup()) {
             MathClassification grpType =
                     exactNamedMathClssftns
-                            .get(grp.mathTypeExp());
+                            .get(grp.mathClssftnExp());
             for (TerminalNode label : grp.ID()) {
                 fields.add(new Element(label.getText(), grpType));
             }
@@ -1131,7 +1130,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClassification t =
                 g.POWERSET_FUNCTION.getApplicationType("Powerset",
                         exactNamedMathClssftns.get(
-                                ctx.mathVarDecl().mathTypeExp()));
+                                ctx.mathVarDecl().mathClssftnExp()));
         exactNamedMathClssftns.put(ctx, t);
         tr.mathClssftns.put(ctx, t);
         return null;
@@ -1168,7 +1167,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MathClassification bodyClss = tr.mathClssftns.get(ctx.mathExp());
         MathClassification varClss = exactNamedMathClssftns.get(
-                ctx.mathVarDecl().mathTypeExp());
+                ctx.mathVarDecl().mathClssftnExp());
         tr.mathClssftns.put(ctx, new MathFunctionClassification(
                 g, bodyClss, varClss));
         return null;
