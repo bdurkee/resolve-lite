@@ -483,16 +483,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
         Map<String, ProgType> fields = new LinkedHashMap<>();
+        List<MathSymbol> mathSyms = new ArrayList<>();
+        //TODO: Maybe instead of fields just use the ProgVariableSymbols...
         for (ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx
                 .recordVarDeclGroup()) {
             this.visit(fieldGrp);
             ProgType grpType = tr.progTypes.get(fieldGrp.type());
             for (TerminalNode t : fieldGrp.ID()) {
                 fields.put(t.getText(), grpType);
+                //mathSyms.add()
             }
         }
         ProgRecordType record = new ProgRecordType(g, fields);
-        tr.mathClssftns.put(ctx, record.toMath());
+
+        MathCartesianClassification mathVer =
+                (MathCartesianClassification) record.toMath();
+        tr.mathClssftns.put(ctx, mathVer);
+
         tr.progTypes.put(ctx, record);
         return null;
     }
@@ -543,8 +550,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     // math constructs
 
-    @Override public Void visitMathClassificationTheoremDecl(
-            ResolveParser.MathClassificationTheoremDeclContext ctx) {
+    @Override public Void visitMathClssftnTheoremDecl(
+            ResolveParser.MathClssftnTheoremDeclContext ctx) {
         ctx.mathExp().forEach(this::visit);
         MathClassification x = exactNamedMathClssftns.get(ctx.mathExp(0));
         MathClassification y = exactNamedMathClssftns.get(ctx.mathExp(1));
@@ -785,15 +792,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
-        this.visit(ctx.entailsClause());
+        if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
         return null;
     }
 
     private MathClassification entailsRetype = null;
     @Override public Void visitEntailsClause(
             ResolveParser.EntailsClauseContext ctx) {
-        for (ResolveParser.EntailsClssftnsContext clfsGrp :
-                ctx.entailsClssftns()) {
+
+        for (ResolveParser.MathEntailsListContext clfsGrp :
+                ctx.mathEntailsList()) {
+            System.out.println("Reclassifying : "+clfsGrp.getText());
             this.visit(clfsGrp.mathClssftnExp());
             entailsRetype = exactNamedMathClssftns.get(clfsGrp.mathClssftnExp());
             clfsGrp.mathExp().forEach(this::visit);
@@ -832,13 +841,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.mathExp());
         MathClassification rhsColonType =
                 exactNamedMathClssftns.get(ctx.mathExp());
-        boolean walkingEntails =
-                Utils.getFirstAncestorOfType(ctx,
-                        ResolveParser.EntailsClauseContext.class) != null;
-
-        if (walkingEntails) {
-
-        }
+        MathClassification ty =
+                new MathNamedClassification(g, ctx.ID().getText(),
+                        rhsColonType.typeRefDepth - 1, rhsColonType);
 
         ty.identifiesSchematicType = true;
         try {
@@ -1131,17 +1136,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
-        ctx.mathVarDeclGroup().forEach(this::visit);
-        List<MathSymbol> fieldSyms = new ArrayList<>();
-        for (ResolveParser.MathVarDeclGroupContext grp :
+        //ctx.mathVarDeclGroup().forEach(this::visit);
+        //List<MathSymbol> fieldSyms = new ArrayList<>();
+        /*for (ResolveParser.MathVarDeclGroupContext grp :
                 ctx.mathVarDeclGroup()) {
             for (TerminalNode t : grp.ID()) {
                 fieldSyms.add(getIntendedMathSymbol(null, t.getText(), grp));
             }
-        }
-        List<Element> fields= new ArrayList<>();
+        }*/
+        List<Element> fields = new ArrayList<>();
         for (ResolveParser.MathVarDeclGroupContext grp : ctx
                 .mathVarDeclGroup()) {
+            this.visit(grp.mathClssftnExp());
             MathClassification grpType =
                     exactNamedMathClssftns
                             .get(grp.mathClssftnExp());
@@ -1151,12 +1157,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         MathCartesianClassification cartClssftn =
                 new MathCartesianClassification(g, fields);
-        for (MathSymbol fieldSym : fieldSyms) {
+        /*for (MathSymbol fieldSym : fieldSyms) {
             cartClssftn.syms.put(fieldSym.getName(), fieldSym);
-        }
-        tr.mathClssftns.put(ctx, new MathCartesianClassification(g, fields));
-        exactNamedMathClssftns.put(ctx,
-                new MathCartesianClassification(g, fields));
+        }*/
+        tr.mathClssftns.put(ctx,cartClssftn);
+        exactNamedMathClssftns.put(ctx,cartClssftn);
         return null;
     }
 
@@ -1245,8 +1250,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
+        MathClassification tempEntailsRetype = entailsRetype;
+        entailsRetype = null;
         this.visit(ctx.lhs);
         prevSelectorAccess = ctx.lhs;
+
+        entailsRetype = tempEntailsRetype;
         this.visit(ctx.rhs);
         prevSelectorAccess = null;
 
@@ -1278,8 +1287,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MathCartesianClassification typeCartesian =
                     (MathCartesianClassification) prevMathAccessType;
             if (entailsRetype != null) {
-                MathSymbol x = typeCartesian.syms.get(symbolName);
-                if (x != null) x.setClassification(entailsRetype);
+                Element x = typeCartesian.getElementUnder(symbolName);
+                if (x != null) {
+                    x.clssfcn = entailsRetype;
+                }
+                //if (x != null) typeCartesian.tagsToElements.put(symbolName, x);
             }
             type = typeCartesian.getFactor(symbolName);
         }

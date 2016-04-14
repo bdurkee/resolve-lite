@@ -6,9 +6,9 @@ Concept Spiral_Template (type Label;
          Basic_Integer_Theory,
          Basic_Spiral_Theory;
     requires 2 ≤ k and 1 ≤ Max_Length
-                    which_entails k : N2, Max_Length : N2;
+                    which_entails (k : N2);
 
-  /*  Type family Spiral
+    Type family Spiral
           is modeled by Cart_Prod
             Lab : Sp_Loc(k) ⟶ Label;
             Curr_Loc,
@@ -31,8 +31,4 @@ Concept Spiral_Template (type Label;
                         {{@e if q = @P.Trmnl_Loc;
                           @P.Lab(q) otherwise;}};
 
-    Operation Spiral_Out(updates P : Spiral);
-        requires SS(k)(P.Curr_Loc) ∈ Inward_Loc(P.Trmnl_Loc);
-        ensures P.Curr_Loc = SS(k)(@P.Curr_Loc);
-*/
 end Spiral_Template;

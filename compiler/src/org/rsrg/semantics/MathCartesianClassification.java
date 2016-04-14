@@ -10,10 +10,8 @@ import java.util.*;
 public class MathCartesianClassification extends MathClassification {
 
     private final List<Element> elements = new ArrayList<>();
-    private final List<MathClassification> elementClssfctns =
-            new ArrayList<>();
     public final Map<String, MathSymbol> syms = new LinkedHashMap<>();
-    private final Map<String, Element> tagsToElements =
+    public final Map<String, Element> tagsToElements =
             new LinkedHashMap<>();
 
     public MathCartesianClassification(DumbTypeGraph g, Element ... e) {
@@ -24,15 +22,17 @@ public class MathCartesianClassification extends MathClassification {
                                        List<Element> elements) {
         super(g, g.CLS);
         this.elements.addAll(elements);
-        this.elementClssfctns.addAll(
-                Utils.apply(elements, Element::getClassification));
         for (Element e : elements) {
             tagsToElements.put(e.getTag(), e);
         }
     }
 
     @Override public List<MathClassification> getComponentTypes() {
-        return elementClssfctns;
+        List<MathClassification> result = new ArrayList<>();
+        for (Element e : elements) {
+            result.add(e.clssfcn);
+        }
+        return result;
     }
 
     @Override public int getTypeRefDepth() {
@@ -44,7 +44,7 @@ public class MathCartesianClassification extends MathClassification {
         List<Element> newElements = new ArrayList<>();
         for (Element element : elements) {
             newElements.add(
-                    new Element(element.getTag(), element.getClassification()
+                    new Element(element.getTag(), element.clssfcn
                             .withVariablesSubstituted(substitutions)));
         }
         return new MathCartesianClassification(g, newElements);
@@ -55,11 +55,15 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     public MathClassification getFactor(int i) {
-        return elements.get(i).getClassification();
+        return elements.get(i).clssfcn;
     }
 
     @Nullable public MathClassification getFactor(String tag) {
         return tagsToElements.get(tag).clssfcn;
+    }
+
+    @Nullable public Element getElementUnder(String tag) {
+        return tagsToElements.get(tag);
     }
 
     @Override public String toString() {
@@ -68,7 +72,7 @@ public class MathCartesianClassification extends MathClassification {
 
     public static class Element {
         private final String tag;
-        private final MathClassification clssfcn;
+        public MathClassification clssfcn;
 
         public Element(@Nullable String tag, @NotNull MathClassification c) {
             this.tag = tag;
@@ -81,10 +85,6 @@ public class MathCartesianClassification extends MathClassification {
 
         @Nullable public String getTag() {
             return tag;
-        }
-
-        @NotNull public MathClassification getClassification() {
-            return clssfcn;
         }
 
         @Override public String toString() {

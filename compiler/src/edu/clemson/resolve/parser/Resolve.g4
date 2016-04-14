@@ -107,7 +107,7 @@ precisBlock
         | mathCategoricalDefnDecl
         | mathInductiveDefnDecl
         | mathTheoremDecl
-        | mathClassificationTheoremDecl
+        | mathClssftnTheoremDecl
         )*
     ;
 
@@ -331,7 +331,7 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-mathClassificationTheoremDecl
+mathClssftnTheoremDecl
     :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
     ;
 
@@ -403,7 +403,7 @@ initializationClause : 'initialization' (ensuresClause);
 requiresClause : 'requires' mathAssertionExp (entailsClause)? ';';
 ensuresClause : 'ensures' mathAssertionExp ';';
 constraintsClause : ('constraints') mathAssertionExp ';';
-conventionsClause : 'conventions' mathAssertionExp ';';
+conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;

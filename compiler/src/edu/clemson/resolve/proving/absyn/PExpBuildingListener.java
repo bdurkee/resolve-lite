@@ -80,8 +80,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
-    @Override public void exitMathClassificationAssertionExp(
-            ResolveParser.MathClassificationAssertionExpContext ctx) {
+    @Override public void exitMathClssftnAssertionExp(
+            ResolveParser.MathClssftnAssertionExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
