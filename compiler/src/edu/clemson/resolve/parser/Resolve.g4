@@ -408,7 +408,10 @@ correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
-entailsClause : 'which_entails' mathEntailsList ('and' mathEntailsList)* ;
+entailsClause : 'which_entails' mathExp* ;
+mathEntailsList
+    :    '(' mathExp (',' mathExp)* ':' mathClssftnExp ')'
+    ;
 
 // mathematical expressions
 
@@ -425,7 +428,6 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
-//TODO: Add rest of alts
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
@@ -473,10 +475,6 @@ mathPrimeExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
-    ;
-
-mathEntailsList
-    :    '(' mathExp (',' mathExp)* ':' mathClssftnExp ')'
     ;
 
 mathLiteralExp

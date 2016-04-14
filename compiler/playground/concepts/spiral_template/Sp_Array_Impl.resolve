@@ -1,5 +1,6 @@
 Implementation Sp_Array_Impl for Spiral_Template;
 
+
     Facility Arry_Fac is Bdd_Ceramic_Array_Template
             (Label, 0, Max_Length - 1)
         externally
@@ -11,11 +12,13 @@ Implementation Sp_Array_Impl for Spiral_Template;
                 Std_Ints :: Integer;
         end;
         conventions
-          0 < P.Curr_Place ≤ P.Length ≤ Max_Length
+          0 ≤ P.Curr_Place ≤ P.Length ≤ Max_Length
              which_entails
-               (P.Curr_Place, P.Length : N2);
+               P.Curr_Place : N and P.Length : N;
         correspondence
-            P.Length = P.Length;
+          conc.P.Trmnl_Loc = IA(SS(k), Cen(k), P.Length);
+
+
  /*   Procedure Lengthen (updates P : Spiral_Pos;
                         alters e : Label);
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);

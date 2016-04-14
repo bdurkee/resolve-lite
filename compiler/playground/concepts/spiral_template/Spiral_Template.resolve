@@ -4,9 +4,10 @@ Concept Spiral_Template (type Label;
     uses Standard_Booleans, Standard_Integers,
          Set_App_Op_Ext,
          Basic_Integer_Theory,
+         Basic_Natural_Number_Theory,
          Basic_Spiral_Theory;
     requires 2 ≤ k and 1 ≤ Max_Length
-                    which_entails (k : N2);
+                        which_entails (k : N2);
 
     Type family Spiral
           is modeled by Cart_Prod
