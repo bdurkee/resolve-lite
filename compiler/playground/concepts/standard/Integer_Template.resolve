@@ -15,8 +15,8 @@ Concept Integer_Template;
     Operation Sum
             (evaluates i, j : Integer)
                 : Integer;
-        //requires min_int ≤ i + j ≤ max_int;
-        //ensures Sum = (i + j);
+        requires min_int ≤ i + j ≤ max_int;
+        ensures Sum = (i + j);
 
     Operation Difference
             (evaluates i, j : Integer)

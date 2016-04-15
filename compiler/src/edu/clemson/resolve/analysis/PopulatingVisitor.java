@@ -209,9 +209,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
         if (ctx.type() != null) {
             this.visit(ctx.type());
+            MathClassification x = tr.mathClssftns.get(ctx.type());
             try {
                 symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
-                        ctx.getParent(), exactNamedMathClssftns.get(ctx.type()));
+                        ctx.getParent(), new MathNamedClassification(
+                                g, ctx.name.getText(), x.typeRefDepth-1, x));
             } catch (DuplicateSymbolException e) {
                 //This shouldn't be possible--the operation declaration has a
                 //scope all its own and we're the first ones to get to
@@ -252,8 +254,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
 
         ctx.varDeclGroup().forEach(this::visit);
-        //ctx.stmt().forEach(this::visit);
-        //sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
+        ctx.stmt().forEach(this::visit);
+        sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
 
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
@@ -335,9 +337,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             } else {
                 returnType = tr.progTypes.get(type);
             }
-
-            PExp requiresExp = getPExpFor(requires);
-           PExp ensuresExp = getPExpFor(ensures);
+            PExp requiresExp = g.getTrueExp();
+            PExp ensuresExp = g.getTrueExp();
+            if (requires != null) requiresExp = getPExpFor(requires.mathAssertionExp());
+            if (ensures != null) ensuresExp = getPExpFor(ensures.mathAssertionExp());
             //TODO: this will need to be wrapped in a ModuleParameterSymbol
             //if we're walking a specmodule param list
             symtab.getInnermostActiveScope().define(
@@ -418,6 +421,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             tr.progTypes.put(ctx, type.getProgramType());
             tr.mathClssftns.put(ctx, type.getModelType());
+            //MathClassification x = type.getModelType();
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),

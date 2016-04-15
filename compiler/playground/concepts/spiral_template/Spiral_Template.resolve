@@ -27,12 +27,14 @@ Concept Spiral_Template (type Label;
                        alters e : Label);
         requires SCD(P.Trmnl_Loc) < Max_Length;
         ensures P.Trmnl_Loc =
-                    SS(k)(@P.Trmnl_Loc) and
-                P.Lab = λ q : Sp_Loc(k),
-                        {{@e if q = @P.Trmnl_Loc;
-                          @P.Lab(q) otherwise;}};
+            SS(k)(@P.Trmnl_Loc) and
+        P.Lab = λ q : Sp_Loc(k),
+                {{@e if q = @P.Trmnl_Loc;
+                  @P.Lab(q) otherwise;}};
 
     Operation Spiral_Out (updates P : Spiral);
-        requires P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc);
-        ensures true;
+        requires
+          P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc);
+        ensures P.Curr_Loc =
+                    SS(k)(@P.Curr_Loc);
 end Spiral_Template;

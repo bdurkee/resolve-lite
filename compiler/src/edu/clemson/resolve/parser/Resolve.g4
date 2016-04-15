@@ -251,7 +251,7 @@ operationProcedureDecl
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
         (varDeclGroup)*
-        //(stmt)*
+        (stmt)*
         'end' closename=ID ';'
     ;
 
