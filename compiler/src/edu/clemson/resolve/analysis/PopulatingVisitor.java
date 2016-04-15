@@ -3,8 +3,10 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
@@ -19,13 +21,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.rsrg.semantics.MathCartesianClassification.Element;
+import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
 import org.rsrg.semantics.programtype.*;
 import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
+import org.rsrg.semantics.query.OperationQuery;
 import org.rsrg.semantics.symbol.*;
 
-import javax.rmi.CORBA.Util;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -254,6 +258,65 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.endScope();
         insertFunction(ctx.name, ctx.type(),
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        return null;
+    }
+
+
+    @Override public Void visitProcedureDecl(
+            ResolveParser.ProcedureDeclContext ctx) {
+        OperationSymbol correspondingOp = null;
+        try {
+            correspondingOp =
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .toOperationSymbol();
+        } catch (NoSuchSymbolException nse) {
+            compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE,
+                    ctx.getStart(), ctx.name.getText());
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "an operation", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        symtab.startScope(ctx);
+        this.visit(ctx.operationParameterList());
+        ProgType returnType = null;
+        if (ctx.type() != null) {
+            this.visit(ctx.type());
+            returnType = tr.progTypes.get(ctx.type());
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new ProgVariableSymbol(ctx.name.getText(), ctx,
+                                returnType, getRootModuleIdentifier()));
+            }
+            catch (DuplicateSymbolException dse) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name,
+                        ctx.name.getText());
+            }
+        }
+        else {
+            returnType = ProgVoidType.getInstance(g);
+        }
+        ctx.varDeclGroup().forEach(this::visit);
+        ctx.stmt().forEach(this::visit);
+        sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
+        symtab.endScope();
+        if (correspondingOp == null) { //backout
+            return null;
+        }
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new ProcedureSymbol(ctx.name.getText(), ctx,
+                            getRootModuleIdentifier(), correspondingOp));
+        } catch (DuplicateSymbolException dse) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.name.getText());
+        }
         return null;
     }
 
@@ -549,6 +612,292 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    // prog exprs
+
+    //---------------------------------------------------
+    // P R O G    E X P    T Y P I N G
+    //---------------------------------------------------
+
+    @Override public Void visitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
+        this.visit(ctx.progExp());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progExp()));
+        tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.progExp()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimaryExp(
+            ResolveParser.ProgPrimaryExpContext ctx) {
+        this.visit(ctx.progPrimary());
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.progPrimary()));
+        tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.progPrimary()));
+        return null;
+    }
+
+    @Override public Void visitProgPrimary(ResolveParser.ProgPrimaryContext ctx) {
+        this.visit(ctx.getChild(0));
+        tr.progTypes.put(ctx, tr.progTypes.get(ctx.getChild(0)));
+        tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.getChild(0)));
+        return null;
+    }
+
+    @Override public Void visitProgNamedExp(
+            ResolveParser.ProgNamedExpContext ctx) {
+        if (prevSelectorAccess != null) {
+            typeProgSelectorAccessExp(ctx, prevSelectorAccess,
+                    ctx.name.getText());
+            return null;
+        }
+        try {
+            //definition, operation, type, parameter, module param, or just some variable.
+            Symbol namedSymbol =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new NameQuery(ctx.qualifier, ctx.name,
+                                    true));
+            ProgType programType = ProgInvalidType.getInstance(g);
+            ParserRuleContext parentFacilityArgListCtx =
+                    Utils.getFirstAncestorOfType(ctx,
+                            ResolveParser.ModuleArgumentListContext.class);
+            if (namedSymbol instanceof ProgVariableSymbol) {
+                programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
+            }
+            else if (namedSymbol instanceof ProgParameterSymbol) {
+                programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
+            }
+            else if (namedSymbol instanceof ProgTypeSymbol) {
+                programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
+
+                if (parentFacilityArgListCtx != null) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
+                }
+            }
+            //special case (don't want to adapt "mathVariableQuery" to coerce
+            //OperationSymbols, so in the meantime
+            else if (namedSymbol instanceof OperationSymbol) {
+                ProgType returnType = ((OperationSymbol) namedSymbol).getReturnType();
+                tr.progTypes.put(ctx, returnType);
+                tr.mathClssftns.put(ctx, returnType.toMath());
+                return null;
+            }
+            else if (namedSymbol instanceof ModuleParameterSymbol) {
+                programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+                if (parentFacilityArgListCtx != null &&
+                        ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
+                    actualGenericTypesPerFacilitySpecArgs.get(
+                            (ResolveParser.ModuleArgumentListContext)
+                                    parentFacilityArgListCtx).add(
+                            namedSymbol.toProgTypeSymbol());
+                }
+            }
+            tr.progTypes.put(ctx, programType);
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+            return null;
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "a variable", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
+        tr.mathClssftns.put(ctx, g.INVALID);
+        return null;
+    }
+
+    private void typeProgSelectorAccessExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull ParserRuleContext previousAccess,
+                                           @NotNull String fieldName) {
+        ProgType prevAccessType = tr.progTypes.get(previousAccess);
+        ProgType type = ProgInvalidType.getInstance(g);
+        if (prevAccessType instanceof PTRepresentation) {
+            ProgType baseType = ((PTRepresentation) prevAccessType).getBaseType();
+            try {
+                ProgRecordType record = (ProgRecordType) baseType;
+                type = record.getFieldType(fieldName);
+            } catch (ClassCastException | NoSuchElementException cce) {
+                //todo: Error shhould be something like, either previousAccess wasn't record, or field not there
+                compiler.errMgr.semanticError(
+                        ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                        previousAccess.getText(), fieldName);
+            }
+        }
+        else if (prevAccessType instanceof ProgRecordType) {
+            try {
+                type = ((ProgRecordType) prevAccessType).getFieldType(fieldName);
+            }
+            catch (NoSuchElementException nse) {
+                //remember ctx here (should) be the context of the rightmost/current field access
+                compiler.errMgr.semanticError(
+                        ErrorKind.NO_SUCH_SYMBOL, ctx.getStart(),
+                        ctx.getText());
+            }
+        }
+        else {
+            //TODO: Maybe change this one to something like: Not a record at all..
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
+                    previousAccess.getText(), fieldName);
+        }
+        tr.mathClssftns.put(ctx, type.toMath());
+        tr.progTypes.put(ctx, type);
+    }
+
+    @Override public Void visitProgSelectorExp(
+            ResolveParser.ProgSelectorExpContext ctx) {
+        this.visit(ctx.lhs);
+        prevSelectorAccess = ctx.lhs;
+        this.visit(ctx.rhs);
+        prevSelectorAccess = null;
+
+        ProgType finalType = tr.progTypes.get(ctx.rhs);
+        MathClassification finalMathType = tr.mathClssftns.get(ctx.rhs);
+        //compiler.info("prog expression: " + ctx.getText() + " of type " + finalType);
+        tr.progTypes.put(ctx, finalType);
+        tr.mathClssftns.put(ctx, finalMathType);
+        return null;
+    }
+
+    @Override public Void visitProgInfixExp(
+            ResolveParser.ProgInfixExpContext ctx) {
+        ctx.progExp().forEach(this::visit);
+        List<ProgType> argTypes = ctx.progExp().stream()
+                .map(tr.progTypes::get).collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes attr =
+                HardCodedProgOps.convert(ctx.op, argTypes);
+        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        return null;
+    }
+
+   /* @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+        this.visit(ctx.progExp());
+        if (ctx.NOT() != null) {
+            HardCodedProgOps.BuiltInOpAttributes attr =
+                    HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
+            typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        }
+        else {
+            //minus is overloaded WITHIN integer template, so for now we'll just handle it this way.
+            Token qualifier =  Utils.createTokenFrom(ctx.getStart(), "Std_Integer_Fac");
+            Token name =  Utils.createTokenFrom(ctx.getStart(), "Negate");
+            typeOperationRefExp(ctx, qualifier, name, ctx.progExp());
+        }
+        return null;
+    }*/
+
+    @Override public Void visitProgParamExp(
+            ResolveParser.ProgParamExpContext ctx) {
+        this.visit(ctx.progNamedExp());
+        ctx.progExp().forEach(this::visit);
+        typeOperationRefExp(ctx, ctx.progNamedExp(), ctx.progExp());
+        return null;
+    }
+
+    @Override public Void visitProgBooleanLiteralExp(
+            ResolveParser.ProgBooleanLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Bools", "Boolean");
+    }
+
+    @Override public Void visitProgIntegerLiteralExp(
+            ResolveParser.ProgIntegerLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Ints", "Integer");
+    }
+
+    /*@Override public Void visitProgCharacterLiteralExp(
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
+    }
+    @Override public Void visitProgStringLiteralExp(
+            ResolveParser.ProgStringLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
+    }*/
+
+    private Void typeProgLiteralExp(ParserRuleContext ctx,
+                                    String typeQualifier, String typeName) {
+        ProgTypeSymbol p =
+                getProgTypeSymbol(ctx, typeQualifier, typeName);
+        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
+                ProgInvalidType.getInstance(g));
+        tr.mathClssftns.put(ctx, p != null ? p.getModelType() :
+                g.INVALID);
+        return null;
+    }
+
+    private ProgTypeSymbol getProgTypeSymbol(ParserRuleContext ctx,
+                                             String typeQualifier, String typeName) {
+        CommonToken qualifierToken = new CommonToken(ctx.getStart());
+        qualifierToken.setText(typeQualifier);
+        qualifierToken.setType(ResolveLexer.ID);
+
+        CommonToken nameToken = new CommonToken(ctx.getStart());
+        nameToken.setText(typeName);
+        nameToken.setType(ResolveLexer.ID);
+
+        ProgTypeSymbol result = null;
+        try {
+            result = symtab.getInnermostActiveScope().queryForOne(
+                    new NameQuery(qualifierToken, nameToken,false))
+                    .toProgTypeSymbol();
+        }
+        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(e.getErrorKind(),
+                    ctx.getStart(), typeName);
+        } catch (UnexpectedSymbolException e) {
+            e.printStackTrace();
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        return result;
+    }
+
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull ResolveParser.ProgExpContext ... args) {
+        typeOperationRefExp(ctx, name, Arrays.asList(args));
+    }
+
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull List<ResolveParser.ProgExpContext> args) {
+        typeOperationRefExp(ctx, name.qualifier, name.name, args);
+    }
+
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
+                                       @Nullable Token qualifier,
+                                       @NotNull Token name,
+                                       @NotNull List<ResolveParser.ProgExpContext> args) {
+        List<ProgType> argTypes = args.stream().map(tr.progTypes::get)
+                .collect(Collectors.toList());
+        //every other call
+        try {
+            OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
+                    new OperationQuery(qualifier, name, argTypes,
+                            FacilityStrategy.FACILITY_INSTANTIATE,
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED));
+
+            tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
+            return;
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
+            List<String> argStrList = args.stream()
+                    .map(ResolveParser.ProgExpContext::getText)
+                    .collect(Collectors.toList());
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
+                    ctx.getStart(), name.getText(), argStrList, argTypes);
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), "an operation", name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException nsme) {
+            noSuchModule(nsme);
+        }
+        tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
+        tr.mathClssftns.put(ctx, g.INVALID);
+    }
+
     // math constructs
 
     @Override public Void visitMathClssftnTheoremDecl(
@@ -826,6 +1175,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             entailsRetype = rhsColonType;
             this.visit(ctx.mathExp(0));
             entailsRetype = null;
+            tr.mathClssftns.put(ctx, g.BOOLEAN);
+            //type this guy bool so we can say which_entails x : N AND y : Z
         }
         else if (ctx.mathExp(0).getChild(0).getChild(0)
                 instanceof ResolveParser.MathSymbolExpContext) {
@@ -833,6 +1184,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new MathNamedClassification(g,
                             ctx.mathExp().get(0).getText(),
                             rhsColonType.typeRefDepth - 1, rhsColonType);
+            //TODO TODO
+            tr.mathClssftns.put(ctx.mathExp(0), ty.enclosingClassification);
+            tr.mathClssftns.put(ctx.mathExp(0).getChild(0), ty.enclosingClassification);
+            tr.mathClssftns.put(ctx.mathExp(0).getChild(0).getChild(0), ty.enclosingClassification);
 
             ty.identifiesSchematicType = true;
             try {
@@ -1394,6 +1749,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         PExpBuildingListener l = new PExpBuildingListener(g, tr);
         ParseTreeWalker.DEFAULT.walk(l, ctx);
         return l.getBuiltPExp(ctx);
+    }
+
+    private void sanityCheckStmtsForReturn(@NotNull Token operationName,
+                                           @Nullable ParserRuleContext type,
+                                           @NotNull List<ResolveParser.StmtContext> stmts) {
+        boolean missingReturn = false;
+        if (type == null) return;
+        if (stmts.size() == 0) missingReturn = true;
+        if (stmts.size() > 0) {
+            ResolveParser.StmtContext lastStmt = stmts.get(stmts.size() - 1);
+            if (lastStmt.getChild(0) instanceof ResolveParser.AssignStmtContext) {
+                ResolveParser.AssignStmtContext lastAsAssign =
+                        (ResolveParser.AssignStmtContext)lastStmt.getChild(0);
+                if (!lastAsAssign.left.getText().equals(operationName.getText())) {
+                    missingReturn = true;
+                }
+            }
+        }
+        if (missingReturn) {
+            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT,
+                    operationName, operationName.getText());
+        }
     }
 
     private ModuleIdentifier getRootModuleIdentifier() {

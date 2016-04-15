@@ -59,6 +59,7 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     @Nullable public MathClassification getFactor(String tag) {
+        if (tagsToElements.get(tag) == null) throw new NoSuchElementException(tag);
         return tagsToElements.get(tag).clssfcn;
     }
 

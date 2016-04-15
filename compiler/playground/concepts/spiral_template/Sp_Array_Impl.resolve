@@ -1,13 +1,12 @@
 Implementation Sp_Array_Impl for Spiral_Template;
 
-
-    Facility Arry_Fac is Bdd_Ceramic_Array_Template
+    Facility Arr_Fac is Bdd_Ceramic_Array_Template
             (Label, 0, Max_Length - 1)
         externally
           implemented by Array_Impl;
 
     Type Spiral = Record
-            Labl : Arry_Fac :: Ceramic_Array;
+            Labl : Arr_Fac :: Ceramic_Array;
             Length, Curr_Place :
                 Std_Ints :: Integer;
         end;
@@ -16,15 +15,21 @@ Implementation Sp_Array_Impl for Spiral_Template;
              which_entails
                P.Curr_Place : N and P.Length : N;
         correspondence
-          conc.P.Trmnl_Loc = IA(SS(k), Cen(k), P.Length);
+          conc.P.Trmnl_Loc = IA(
+            SS(k), Cen(k), P.Length) and
+          conc.P.Curr_Loc = IA(
+            SS(k), Cen(k), P.Curr_Place) and
+          conc.P.Lab =
+            λ q : Sp_Loc(k),
+              {{P.Labl(SCD(q)) if SCD(q) ≤ P.Length;
+                Label.base_point otherwise;}};
 
-
- /*   Procedure Lengthen (updates P : Spiral_Pos;
+    Procedure Lengthen (updates P : Spiral;
                         alters e : Label);
-        Arry_Fac :: Swap_Entry(P.Labl, e, P.Length);
+        Arr_Fac :: Swap_Entry(P.Labl, e, P.Length);
         P.Length := P.Length + 1;
     end Lengthen;
-*/
+
 /*    Procedure Spiral_Out (updates P : Spiral_Pos);
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
