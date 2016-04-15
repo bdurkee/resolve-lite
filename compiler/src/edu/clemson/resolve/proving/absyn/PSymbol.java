@@ -4,10 +4,10 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.TypeGraph;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class PSymbol extends PExp {
      */
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.name), builder.mathType,
-                builder.mathTypeValue, builder.progType, builder.progTypeValue);
+                builder.progType);
         this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -113,7 +113,7 @@ public class PSymbol extends PExp {
 
     @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        TypeGraph g = getMathType().getTypeGraph();
+        DumbTypeGraph g = getMathType().getTypeGraph();
         result.add(g.formImplies(assumptions, this));
         return result;
     }
@@ -219,8 +219,8 @@ public class PSymbol extends PExp {
         protected boolean incoming = false;
         protected boolean literal = false;
         protected Quantification quantification = Quantification.NONE;
-        protected MTType mathType, mathTypeValue;
-        protected PTType progType, progTypeValue;
+        protected MathClassification mathType, mathTypeValue;
+        protected ProgType progType, progTypeValue;
 
         public PSymbolBuilder(PSymbol existingPSymbol) {
             this.name = existingPSymbol.getName();
@@ -232,9 +232,7 @@ public class PSymbol extends PExp {
             this.quantification = existingPSymbol.getQuantification();
 
             this.mathType = existingPSymbol.getMathType();
-            this.mathTypeValue = existingPSymbol.getMathTypeValue();
             this.progType = existingPSymbol.getProgType();
-            this.progTypeValue = existingPSymbol.getProgTypeValue();
         }
 
         public PSymbolBuilder(PSymbol existingPSymbol, String newName) {
@@ -247,9 +245,7 @@ public class PSymbol extends PExp {
             this.quantification = existingPSymbol.getQuantification();
 
             this.mathType = existingPSymbol.getMathType();
-            this.mathTypeValue = existingPSymbol.getMathTypeValue();
             this.progType = existingPSymbol.getProgType();
-            this.progTypeValue = existingPSymbol.getProgTypeValue();
         }
 
         public PSymbolBuilder(String name) {
@@ -288,22 +284,17 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathType(MTType e) {
+        public PSymbolBuilder mathType(MathClassification e) {
             this.mathType = e;
             return this;
         }
 
-        public PSymbolBuilder mathTypeValue(MTType e) {
-            this.mathTypeValue = e;
-            return this;
-        }
-
-        public PSymbolBuilder progType(PTType e) {
+        public PSymbolBuilder progType(ProgType e) {
             this.progType = e;
             return this;
         }
 
-        public PSymbolBuilder progTypeValue(PTType e) {
+        public PSymbolBuilder progTypeValue(ProgType e) {
             this.progTypeValue = e;
             return this;
         }

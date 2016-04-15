@@ -10,9 +10,9 @@ The proceeding discussion requires a certain level of knowledge and familiarity 
 
 The sorts of files our translator will be taking as input are all *executable* RESOLVE modules. In practice, this includes everything from facility modules to concept and enhancement modules. Just about the only thing that we don't want to produce code for are RESOLVE's mathematical precis modules. This makes the scheme for our source to source translator pretty straightforward: For each input module, we need to produce exactly one Java output class that faithfully models the original input/source module.
 
-To give a flavor as to the type of code we'll be generating, the following is an abridged version of a stack concept specification
+To give a flavor as to the classification of code we'll be generating, the following is an abridged version of a stack concept specification
 ```
-Concept Stack_Template(type T; 
+Concept Stack_Template(classification T;
         evaluates Max_Depth :
               Std_Integer_Fac :: Integer)
     uses Standard_Integers,
@@ -71,8 +71,8 @@ resolveFile
 ##Relevant Constructs: Translation to Java
 
 One thing to note when looking at the example above is that the specification portions within our modules (e.g. the `requires`, `ensures` clauses) are not included -- as they have no executable meaning. So the only things we really need to worry about are program expressions, statements, and declarations, where relevant declarations include:
-* type models
-* type representations
+* classification models
+* classification representations
 * functions (operation decls, operation impls)
 * facilities
 
@@ -82,7 +82,7 @@ The rest of this section is dedicated to a more detailed discussion of individua
 
 ###Types
 
-Every type in RESOLVE from the 'primitive' ones such as `Boolean` and `Integer` to `Stack`s, `Queue`s and `List`s are introduced via a mathematical model found within a concept or enhancement. These models, in order to be used in any programmatic capacity, must first be given a concrete, programmatic representation inside an implementation module. Each of these constructs (introduced in separate modules) carries a distinct Java translation.
+Every classification in RESOLVE from the 'primitive' ones such as `Boolean` and `Integer` to `Stack`s, `Queue`s and `List`s are introduced via a mathematical model found within a concept or enhancement. These models, in order to be used in any programmatic capacity, must first be given a concrete, programmatic representation inside an implementation module. Each of these constructs (introduced in separate modules) carries a distinct Java translation.
 
 #####Models
 
@@ -90,11 +90,11 @@ Type models such as the `Type Family Stack is modeled by...` portion of `Bdd_Sta
 ```java
 interface Stack extends RType { }
 ```
-Here, and everywhere else it appears, the predefined type object `RType` can be roughly equated to "the type of all translated resolve program types". That is, anywhere a type appears as part of a declaration, we simply mask whatever the original reference was by `RType`, which we can safely do as it's assumed a previous phase of compilation has already assigned and checked program types.
+Here, and everywhere else it appears, the predefined classification object `RType` can be roughly equated to "the classification of all translated resolve program types". That is, anywhere a classification appears as part of a declaration, we simply mask whatever the original reference was by `RType`, which we can safely do as it's assumed a previous phase of compilation has already assigned and checked program types.
 
 #####Representations
 
-Given our interface-based translation of a type model, one can then think of the translation of a RESOLVE type representation as the implementation of some type model interface. For example, a representation of the `Stack` model in RESOLVE might look like the following:
+Given our interface-based translation of a classification model, one can then think of the translation of a RESOLVE classification representation as the implementation of some classification model interface. For example, a representation of the `Stack` model in RESOLVE might look like the following:
 
 ```
 Type Stack = Record
@@ -157,9 +157,9 @@ class Stack_Rep {
     }
 }
 ```
-Notice that a large bulk of the code included above is fairly boilerplate as it consists mainly of accessor methods and initialization assignments for fields contained within the aggregate (record) type `Stack`.
+Notice that a large bulk of the code included above is fairly boilerplate as it consists mainly of accessor methods and initialization assignments for fields contained within the aggregate (record) classification `Stack`.
 
-While on the topic of type representation, its worth mentioning that RESOLVE also supports the use of 'model-less representation types' which, like the name suggests, are simply representations lacking a concept (or enhancement) defined type model. A trivial example of such a type is the following:
+While on the topic of classification representation, its worth mentioning that RESOLVE also supports the use of 'model-less representation types' which, like the name suggests, are simply representations lacking a concept (or enhancement) defined classification model. A trivial example of such a classification is the following:
 
 ```
 Facility Cartesian_Grid_Fac
@@ -186,11 +186,11 @@ method of our generated `Point_Rep` class.
 
 ### Operations
 
-Translation of operations is made a great deal simpler by draping all specific type references with a general reference to `RType`. For example, translation of `Push` from `Bdd_Stack_Template` becomes:
+Translation of operations is made a great deal simpler by draping all specific classification references with a general reference to `RType`. For example, translation of `Push` from `Bdd_Stack_Template` becomes:
 ```java
 public void Push(RType e, RType S);
 ```
-Since there's no return type on `Push`, this simply translates to a Java's `void` type.
+Since there's no return classification on `Push`, this simply translates to a Java's `void` classification.
 
 ### Facilities
 
@@ -213,10 +213,10 @@ and its usage in a variable declaration:
 ```Java
 RType S = ((Bdd_Stack_Template)SF).initStack();
 ```
-Clearly the facility from which a fresh `Stack` is obtained is important since each facility declaration can be parameterized by any number of specific values. For example, facility `SF` produces `Stack`s of maximum length 5 of type `Integer`. Further, it's best not to think of the type object `Stack` providing access to available operations, but rather, the facility `SF` itself. For instance in RESOLVE we make the call `SF :: Push(S, x)` not `S.Push(x)`. Thus for an `SF`-qualified call to `Push`, the `S` argument had better be a `Stack` drawn from `SF`.
+Clearly the facility from which a fresh `Stack` is obtained is important since each facility declaration can be parameterized by any number of specific values. For example, facility `SF` produces `Stack`s of maximum length 5 of classification `Integer`. Further, it's best not to think of the classification object `Stack` providing access to available operations, but rather, the facility `SF` itself. For instance in RESOLVE we make the call `SF :: Push(S, x)` not `S.Push(x)`. Thus for an `SF`-qualified call to `Push`, the `S` argument had better be a `Stack` drawn from `SF`.
 
 #####Standard Facilities
-Moving away from `Stack`s for the moment, this brings us to retrieval and translation of 'primitive' types such as `Boolean`s, `Integer`s, `Character`s, and `Character_Str`s. As expected, there are facilities pairing specifications and implementations for each of these core notions, though it's important to realize that only a single facility declaration should perform this task (for each). That is, every time a user declares a new variable of type `Integer` the following 'standard' short facility should be referenced:
+Moving away from `Stack`s for the moment, this brings us to retrieval and translation of 'primitive' types such as `Boolean`s, `Integer`s, `Character`s, and `Character_Str`s. As expected, there are facilities pairing specifications and implementations for each of these core notions, though it's important to realize that only a single facility declaration should perform this task (for each). That is, every time a user declares a new variable of classification `Integer` the following 'standard' short facility should be referenced:
 
 ```
 Facility Std_Integer_Fac is Integer_Template
@@ -251,7 +251,7 @@ Since facilities are RESOLVE's mechanism of specializing modules with actual val
 
 ##### 1. Types
 
-Translation of type arguments follows pretty much exactly the same as it does in the context of a variable declaration. For instance, in `Facility SF is Bdd_Stack_Template<Std_Integer_Fac :: Integer>(5) ...` the integer type between the angled braces simply translates to an initialization of `Integer`, which is consequently same thing we'd do in the context of a variable decl:
+Translation of classification arguments follows pretty much exactly the same as it does in the context of a variable declaration. For instance, in `Facility SF is Bdd_Stack_Template<Std_Integer_Fac :: Integer>(5) ...` the integer classification between the angled braces simply translates to an initialization of `Integer`, which is consequently same thing we'd do in the context of a variable decl:
 ```
 ((Integer_Template)Standard_Integers.INSTANCE).initInteger()
 ```
@@ -308,7 +308,7 @@ public class Stk_Do_Nothing_Impl
 }
 ```
 
-Unsurprisingly, our translation of the `Do_Nothing_Capability` specification closely mirrors the way we translate concept specifications: as an interface housing primary (or, in this case, secondary) operation signatures. However, the key distinction here is that our enhancement interface `extends Bdd_Stack_Template`, effectively giving anything of Java type `Do_Nothing_Capability` access to *all* available operations (including `Do_Nothing`).
+Unsurprisingly, our translation of the `Do_Nothing_Capability` specification closely mirrors the way we translate concept specifications: as an interface housing primary (or, in this case, secondary) operation signatures. However, the key distinction here is that our enhancement interface `extends Bdd_Stack_Template`, effectively giving anything of Java classification `Do_Nothing_Capability` access to *all* available operations (including `Do_Nothing`).
 
 In thinking then about how to best handle translation of enhanced facility declarations, it's tempting to turn to the [decorator design pattern](https://en.wikipedia.org/wiki/Decorator_pattern), which, according to Wikipedia:
 ".. allows behavior to be added to an individual object, either statically or dynamically, without affecting the behavior of other objects from the same class".
@@ -332,13 +332,13 @@ For example, if the above declaration of `SF` simply became `Do_Nothing_Capabili
 
 ```
 facilityDecl
-    :    'Facility' ID 'is' ID ('<' type (',' type)* '>')?
+    :    'Facility' ID 'is' ID ('<' classification (',' classification)* '>')?
          (moduleArgumentList)? 'implemented' 'by' ID
          (moduleArgumentList)? (enhancementPair)* ';'
     ;
 
 enhancementPair
-    :    'enhanced' 'by' ID ('<' type (',' type)* '>')?
+    :    'enhanced' 'by' ID ('<' classification (',' classification)* '>')?
          (moduleArgumentList)? 'implemented' 'by' ID
          (moduleArgumentList)?
     ;
@@ -383,7 +383,7 @@ The `Cartesian_Grid_Fac` facility -- which appears above in the 'Types' section 
 
 ![translation input](https://github.com/Welchd1/resolve-lite/blob/master/doc/images/translationinput.png)
 
-You'll notice this representation of the tree has been overlaid with information about `PTType`s (program types) and scopes for clarity. It's the phase of compilation preceding codegen that is responsible for building the scopes delineated above, filling them, and annotating all expression nodes and references within the tree with appropriate `PTType` (program-type) information.
+You'll notice this representation of the tree has been overlaid with information about `PTType`s (program types) and scopes for clarity. It's the phase of compilation preceding codegen that is responsible for building the scopes delineated above, filling them, and annotating all expression nodes and references within the tree with appropriate `PTType` (program-classification) information.
 
 More information on RESOLVEs current approach to symbol table construction and entry population should be forthcoming in a separate document that I hope (read: will eventually!) link to here.
 
@@ -452,7 +452,7 @@ Let's work though an example involving usage of the `ModuleFile` template. Below
 @ModelElement public Module module;
 ```
 
-The annotation indicates to the `ModelConverter` that it should create a template associated with the model object referenced by that field, and inject the resulting template as a parameter to the template associated with the enclosing object (a `ModelFile` object). [`Module`](https://github.com/Welchd1/resolve-lite/blob/master/compiler/src/edu/clemson/resolve/codegen/model/Module.java), the type of the `module` field, references an *abstract* model object, whose concrete subclasses each have corresponding templates. For example, `Concept` is model object subclassing `Module`, and here is its corresponding template:
+The annotation indicates to the `ModelConverter` that it should create a template associated with the model object referenced by that field, and inject the resulting template as a parameter to the template associated with the enclosing object (a `ModelFile` object). [`Module`](https://github.com/Welchd1/resolve-lite/blob/master/compiler/src/edu/clemson/resolve/codegen/model/Module.java), the classification of the `module` field, references an *abstract* model object, whose concrete subclasses each have corresponding templates. For example, `Concept` is model object subclassing `Module`, and here is its corresponding template:
 ```
 Concept(concept, types, funcs) ::= <<
 public interface <concept.name> {

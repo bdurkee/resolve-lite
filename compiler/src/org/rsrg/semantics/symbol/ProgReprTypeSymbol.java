@@ -5,11 +5,11 @@ import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.DumbTypeGraph;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.rsrg.semantics.programtype.PTRepresentation;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
@@ -26,10 +26,10 @@ public class ProgReprTypeSymbol extends Symbol {
      */
     @NotNull protected final PExp convention, correspondence;
 
-    @NotNull protected final TypeGraph typeGraph;
+    @NotNull protected final DumbTypeGraph typeGraph;
     @NotNull protected final PTRepresentation representation;
 
-    public ProgReprTypeSymbol(@NotNull TypeGraph g,
+    public ProgReprTypeSymbol(@NotNull DumbTypeGraph g,
                               @NotNull String name,
                               @Nullable ParserRuleContext definingElement,
                               @NotNull ModuleIdentifier moduleIdentifier,
@@ -105,7 +105,7 @@ public class ProgReprTypeSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         //type representations are an internal implementation detail of

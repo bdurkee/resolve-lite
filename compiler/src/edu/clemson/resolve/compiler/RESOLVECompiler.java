@@ -1,13 +1,11 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -230,15 +228,15 @@ public  class RESOLVECompiler {
         List<AnnotatedModule> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
+        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        //VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
-        codegenPipe.process();
-        vcsPipe.process();
+        //codegenPipe.process();
+        //vcsPipe.process();
     }
 
     @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {

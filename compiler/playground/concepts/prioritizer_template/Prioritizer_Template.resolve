@@ -1,17 +1,16 @@
-Concept Prioritizer_Template(type Entry;
+Concept Prioritizer_Template(classification Entry;
             evaluates Max_Capacity : Std_Ints :: Integer;
-            Definition LEQV(x, y : Entry) : B;);
+            Definition ≼(x, y : Entry) : B;);
         uses Standard_Booleans, Standard_Integers,
             Basic_Integer_Theory, Basic_Natural_Number_Theory;
-
         requires Max_Capacity > 0
             which_entails Max_Capacity : N;
 
-    Definition Total_Entry_Ct(K : Entry -> N) : N;
+    Definition Total_Entry_Ct(K : Entry ⟶ N) : N;
 
     Type family Entry_Keeper
                 is modeled by Cart_Prod
-                    Entry_Count : Entry -> N;
+                    Entry_Count : Entry ⟶ N;
                     Accepting : B;
         end;
         exemplar K;

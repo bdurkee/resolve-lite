@@ -2,16 +2,15 @@ Precis Basic_Spiral_Theory;
     uses Basic_Natural_Number_Theory,
          Basic_Function_Properties;
 
-    Definition N2 : Powerset(N) is {n : N | n >= 2};
+    Definition N2 : Powerset(N) is {n : N | n ≥ 2};
 
     Definition Is_k_Spiral_Like(sp_loc : (k : N2) -> SSet,
-        center : N2 -> SSet,
-            ss, rs : N2 -> (sp_loc(k) -> sp_loc(k))) : B;
+        center : N2 ⟶ sp_loc(k),
+            ss, rs : N2 ⟶ (sp_loc(k) ⟶ sp_loc(k))) : B;
 
     Categorical Definition for Sp_Loc(k : N2) : SSet,
-            SS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
-            RS(k : N2) : (Sp_Loc(k) -> Sp_Loc(k)),
-            Cen(k : N2) : Sp_Loc(k)
+            Cen : (k : N2) ⟶ Sp_Loc(k),
+            SS, RS : (k : N2) ⟶ (Sp_Loc(k) ⟶ Sp_Loc(k))
         is Is_k_Spiral_Like(Sp_Loc, Cen, SS, RS);
 
     Implicit Definition SCD(p : Sp_Loc(k : N2)) : N;
@@ -19,7 +18,13 @@ Precis Basic_Spiral_Theory;
     Definition Inward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
         {p : Sp_Loc(k) | SCD(p) < SCD(b)};
 
-    Corollary Inw1: Forall k : N2, Forall m, n : N,
-        SS(k)(Cen(k)) is_in Inward_Loc(SS(k)(Cen(k))) iff m < n;
+    Definition Outward_Loc(b : Sp_Loc(k : N2)) : Powerset(Sp_Loc(k)) is
+        {p : Sp_Loc(k) | p ∉ Inward_Loc(b)};
 
+    Definition IA(f : (U : SSet) ⟶ (V : SSet), s : U, n : N) : V;
+
+
+   /* Corollary Inw1: Forall k : N2, Forall m, n : N,
+        SS(k)(Cen(k)) ∉ Inward_Loc(SS(k)(Cen(k))) iff m < n;
+    */
 end Basic_Spiral_Theory;

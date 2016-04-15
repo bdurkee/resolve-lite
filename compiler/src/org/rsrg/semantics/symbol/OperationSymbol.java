@@ -5,7 +5,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
+import org.rsrg.semantics.programtype.ProgVoidType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class OperationSymbol extends Symbol {
 
-    private final PTType returnType;
+    private final ProgType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
     @NotNull private final PExp requires, ensures;
@@ -21,7 +22,7 @@ public class OperationSymbol extends Symbol {
     public OperationSymbol(@NotNull String name,
                            @Nullable ParserRuleContext definingTree,
                            @NotNull PExp requires, @NotNull PExp ensures,
-                           @NotNull PTType type,
+                           @NotNull ProgType type,
                            @NotNull ModuleIdentifier moduleIdentifier,
                            @NotNull List<ProgParameterSymbol> params) {
         super(name, definingTree, moduleIdentifier);
@@ -45,11 +46,11 @@ public class OperationSymbol extends Symbol {
 
     /** Get the return type of this operation. Note that in the cases where
      *  there isn't something returned, this should always return an instance
-     *  of {@link org.rsrg.semantics.programtype.PTVoid}.
+     *  of {@link ProgVoidType}.
      *
-     *  @return the return {@link PTType}.
+     *  @return the return {@link ProgType}.
      */
-    @NotNull public PTType getReturnType() {
+    @NotNull public ProgType getReturnType() {
         return returnType;
     }
 
@@ -71,7 +72,7 @@ public class OperationSymbol extends Symbol {
     }
 
     @NotNull @Override public OperationSymbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         InstantiationFunction f =
@@ -88,14 +89,14 @@ public class OperationSymbol extends Symbol {
             implements
                 Function<ProgParameterSymbol, ProgParameterSymbol> {
 
-        @NotNull private final Map<String, PTType> genericInstantiations;
+        @NotNull private final Map<String, ProgType> genericInstantiations;
         @NotNull private final FacilitySymbol instantiatingFacility;
 
         public InstantiationFunction(
-                @NotNull Map<String, PTType> instantiations,
+                @NotNull Map<String, ProgType> instantiations,
                 @NotNull FacilitySymbol instantiatingFacility) {
             this.genericInstantiations =
-                    new HashMap<String, PTType>(instantiations);
+                    new HashMap<String, ProgType>(instantiations);
             this.instantiatingFacility = instantiatingFacility;
         }
 

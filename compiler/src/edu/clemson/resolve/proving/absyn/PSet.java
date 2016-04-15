@@ -2,10 +2,9 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathClassification;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PSet extends PExp {
 
@@ -13,8 +12,8 @@ public class PSet extends PExp {
     private final List<PExp> elements = new ArrayList<>();
 
     //TODO: Give me a real HashDuple (one based on my actual elements!)
-    public PSet(MTType type, MTType typeValue, List<PExp> elements) {
-        super(new HashDuple(0, 56), type, typeValue);
+    public PSet(MathClassification type, List<PExp> elements) {
+        super(new HashDuple(0, 56), type);
         this.elements.addAll(elements);
     }
 
@@ -37,7 +36,7 @@ public class PSet extends PExp {
     }
 
     @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        return new PSet(getMathType(), getMathTypeValue(),
+        return new PSet(getMathType(),
                 Utils.apply(elements, u -> u.substitute(substitutions)));
     }
 
@@ -81,7 +80,7 @@ public class PSet extends PExp {
     @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {}
 
     @NotNull @Override public PExp withIncomingSignsErased() {
-        return new PSet(getMathType(), getMathTypeValue(),
+        return new PSet(getMathType(),
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 

@@ -1,7 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
 import java.util.ArrayList;
-
 import java.util.List;
 
 public class DecoratedFacilityInstantiation extends OutputModelObject {

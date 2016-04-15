@@ -2,8 +2,6 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTType;
 import org.rsrg.semantics.Quantification;
 
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public class PQuantified extends PExp {
                        @NotNull Quantification quantificationType,
                        @NotNull List<PLambda.MathSymbolDeclaration> symDecls) {
         super(assertion.structureHash, assertion.valueHash,
-                assertion.getMathType(), assertion.getMathTypeValue());
+                assertion.getMathType());
         this.quantificationType = quantificationType;
         this.assertion = assertion;
         this.declaredSymbols.addAll(symDecls);
@@ -102,7 +100,7 @@ public class PQuantified extends PExp {
         List<String> symNames = declaredSymbols.stream()
                 .map(d -> d.name).collect(Collectors.toList());
         String qType = quantificationType == Quantification.UNIVERSAL ?
-                "Forall" : "Exists";
+                "∀" : "∃";
         return qType + " " + Utils.join(symNames, ", ") + ":" +
                 declaredSymbols.get(0).type + " " + assertion.toString();
     }

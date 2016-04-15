@@ -42,6 +42,8 @@ public class ErrorManager extends BaseErrorListener {
         errorCount = 0;
     }
 
+    public void info(String msg) { compiler.info(msg); }
+
     public ST getMessageTemplate(RESOLVEMessage msg) {
         ST messageST = msg.getMessageTemplate(compiler.longMessages);
         ST locationST = getLocationFormat();

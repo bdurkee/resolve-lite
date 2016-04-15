@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.programtype.PTGeneric;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgGenericType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,17 +84,17 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     private final ParameterMode mode;
-    private final PTType declaredType;
-    private final TypeGraph typeGraph;
+    private final ProgType declaredType;
+    private final DumbTypeGraph typeGraph;
 
-    private final MathSymbol mathSymbolAlterEgo;
+    private MathSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
 
     @Nullable private String typeQualifier;
 
-    public ProgParameterSymbol(@NotNull TypeGraph g, @NotNull String name,
+    public ProgParameterSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                                @NotNull ParameterMode mode,
-                               @NotNull PTType type,
+                               @NotNull ProgType type,
                                @Nullable ParserRuleContext definingTree,
                                @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
@@ -102,17 +102,20 @@ public class ProgParameterSymbol extends Symbol {
         this.declaredType = type;
         this.mode = mode;
 
-        MTType typeValue = null;
+        this.mathSymbolAlterEgo = null;
         if (mode == ParameterMode.TYPE) {
-            typeValue = new PTGeneric(type.getTypeGraph(), name).toMath();
+            this.mathSymbolAlterEgo =
+                    new MathSymbol(g, name, Quantification.NONE, type.toMath(),
+                            definingTree, moduleIdentifier);
         }
-
-        //TODO: Probably need to recajigger this to correctly account for any
-        //      generics in the defining context
-        this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, type.toMath(),
-                        typeValue, definingTree, moduleIdentifier);
-
+        else {
+            int level = type.toMath().getTypeRefDepth();
+            this.mathSymbolAlterEgo =
+                    new MathSymbol(g, name, Quantification.NONE,
+                            new MathNamedClassification(g, name, level,
+                            type.toMath()),
+                            definingTree, moduleIdentifier);
+        }
         this.progVariableAlterEgo =
                 new ProgVariableSymbol(getName(), getDefiningTree(),
                         declaredType, getModuleIdentifier());
@@ -126,7 +129,7 @@ public class ProgParameterSymbol extends Symbol {
         return typeQualifier;
     }
 
-    @NotNull public PTType getDeclaredType() {
+    @NotNull public ProgType getDeclaredType() {
         return declaredType;
     }
 
@@ -148,7 +151,7 @@ public class ProgParameterSymbol extends Symbol {
 
     @NotNull @Override public ProgTypeSymbol toProgTypeSymbol()
             throws UnexpectedSymbolException {
-        ProgTypeSymbol result;
+        ProgTypeSymbol result = null;
 
         if (!mode.equals(ParameterMode.TYPE)) {
             //This will throw an appropriate error
@@ -156,8 +159,9 @@ public class ProgParameterSymbol extends Symbol {
         }
         else {
             result =
-                    new ProgTypeSymbol(typeGraph, getName(), new PTGeneric(
-                            typeGraph, getName()), new MTNamed(typeGraph, getName()),
+                    new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
+                            typeGraph, getName()),
+                            mathSymbolAlterEgo.getClassification(),
                             getDefiningTree(), getModuleIdentifier());
         }
         return result;
@@ -174,7 +178,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,

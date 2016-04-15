@@ -31,9 +31,14 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                             defSymsAndScopes.getTypeGraph(), unit);
             SanityCheckingListener sanityChecker =
                     new SanityCheckingListener(compiler, unit);
-            walker.walk(pexpAnnotator, unit.getRoot());
+//            walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
+
+            MathClassificationPrintingListener pl =
+                    new MathClassificationPrintingListener(unit.mathClssftns);
+            ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
+
         }
     }
 }

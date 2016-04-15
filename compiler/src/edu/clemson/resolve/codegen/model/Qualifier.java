@@ -1,7 +1,5 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.FacilitySymbol;
-
 public abstract class Qualifier extends OutputModelObject {
 
     public static class FacilityQualifier extends Qualifier {

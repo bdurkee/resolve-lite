@@ -1,4 +1,4 @@
-Concept Bdd_Stack_Template(type Entry;
+Concept Bdd_Stack_Template(classification Entry;
         evaluates Max_Depth :
                 Std_Ints :: Integer);
     uses General_String_Theory, Basic_Natural_Number_Theory,

@@ -1,14 +1,13 @@
 package org.rsrg.semantics.symbol;
 
 import edu.clemson.resolve.parser.ResolveParser;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.MathSymbolTable;
 import org.rsrg.semantics.ModuleIdentifier;
 import org.rsrg.semantics.ModuleParameterization;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +70,7 @@ public class FacilitySymbol extends Symbol {
         }*/
 
         //These are realized by individual extension implementations
-        for (ResolveParser.ExtensionPairingContext extension :
+        /*for (ResolveParser.ExtensionPairingContext extension :
                 facility.extensionPairing()) {
             specGenericArgs = actualGenerics.get(extension.specArgs);
             spec = new ModuleParameterization(new ModuleIdentifier(extension.spec),
@@ -84,7 +83,7 @@ public class FacilitySymbol extends Symbol {
                     new ArrayList<>(), this, scopeRepo);
             enhancements.add(spec);
             enhancementImplementations.put(spec, impl);
-        }
+        }*/
     }
 
     @NotNull public List<ModuleParameterization> getEnhancements() {
@@ -108,7 +107,7 @@ public class FacilitySymbol extends Symbol {
     }
 
     @NotNull @Override public FacilitySymbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         //TODO : This is probably wrong.  One of the parameters to a module
         //       used in the facility could be a generic, in which case it

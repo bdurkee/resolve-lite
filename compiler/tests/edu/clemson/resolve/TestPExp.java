@@ -9,7 +9,9 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.TypeGraph;
+import org.junit.Before;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathInvalidClassification;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -29,7 +31,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class TestPExp extends BaseTest {
 
-    private final TypeGraph g = new TypeGraph();
+    private final DumbTypeGraph g = new DumbTypeGraph();
 
     @Test public void testGetSubExpressions() throws Exception {
         PExp result = parseMathAssertionExp(g, "x + y");
@@ -102,9 +104,9 @@ public class TestPExp extends BaseTest {
                             "{{a if b = (c and f); b otherwise;}}")));
 
         Assert.assertEquals(true, parseMathAssertionExp(g,
-                "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")
+                "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")
                     .equals(parseMathAssertionExp(g,
-                            "{{lambda (j : Z).(true) if b = (c and f); b otherwise;}}")));
+                            "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")));
     }
 
     //TODO: PSet needs finishing first -- this will probably be awhile
@@ -179,9 +181,9 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{a if b = (c and f); b otherwise;}}").containsName("c"));
         Assert.assertEquals(true, parseMathAssertionExp(g,
-                "lambda (x : Z).({{x = r if j; false otherwise;}})").containsName("r"));
+                "λ x : Z,{{x = r if j; false otherwise;}}").containsName("r"));
         Assert.assertEquals(true, parseMathAssertionExp(g,
-                "lambda (v : Z).({{x = r if j; false otherwise;}})").containsName("v"));
+                "λ v : Z,{{x = r if j; false otherwise;}}").containsName("v"));
     }
 
     @Test public void testIsVariable() {
@@ -195,13 +197,13 @@ public class TestPExp extends BaseTest {
 
     @Test public void testSplitIntoConjuncts() {
         PExp result = parseMathAssertionExp(g,
-                "x and y = 2 and P.Lab = lambda(q : Z).(true)");
+                "x and y = 2 and P.Lab = λ q : Z,(true)");
         List<PExp> conjuncts = result.splitIntoConjuncts();
         //Assert.assertEquals(2, conjuncts.size());
         Iterator<? extends PExp> exps = conjuncts.iterator();
         Assert.assertEquals(exps.next().toString(), "x");
         Assert.assertEquals(exps.next().toString(), "(y = 2)");
-        Assert.assertEquals(exps.next().toString(), "(P.Lab = lambda(q:Inv).(true))");
+        Assert.assertEquals(exps.next().toString(), "(P.Lab = λ q:Inv,true)");
 
         result = parseMathAssertionExp(g, "f(p and (q and z))");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
@@ -297,7 +299,7 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp( g,
                         "Forall x, y, z : Z, Exists u, v, w : N," +
                                 "@g(@u) + (h(@z, @w, @f(@u))) + " +
-                        "lambda (q : Z).({{@x if g(x); @b(@k) otherwise;}})");
+                        "λ q : Z,{{@x if g(x); @b(@k) otherwise;}}");
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
@@ -331,48 +333,11 @@ public class TestPExp extends BaseTest {
         Set<String> foundNames = result.getSymbolNames();
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
-
-      /*  result = parseMathAssertionExp(g, "v + y - (Reverse(s)) + x(z, v)");
-        foundNames = result.getSymbolNames();
-        expectedNames = Arrays.asList("v", "y", "Reverse", "s", "x", "z", "+", "-").stream()
-                .collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
-
-        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
-        foundNames = result.getSymbolNames(false, true);
-        expectedNames = Arrays.asList("v", "Reverse", "x", "z", "+", "-").stream()
-                .collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
-
-        result = parseMathAssertionExp(g, "5 + 1 - (Reverse(4)) + x(z, v)");
-        foundNames = result.getSymbolNames(false, false);
-        expectedNames =
-                Arrays.asList("5", "1", "4", "v", "Reverse", "x", "z", "+", "-")
-                        .stream().collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));
-
-        //This one's pretty good because it has PLambda's and PAlternatives
-        //inside. So it tests the implementation of getSymbolNames() in those
-        //classes..
-        result = parseMathAssertionExp(g, "((((SCD(k, conc.P.Trmnl_Loc)) <= Max_Length) and " +
-                "(conc.P.Curr_Loc is_in (Inward_Loc(conc.P.Trmnl_Loc)))) and " +
-                "({{(P.Labl((SCD(k, conc.P.Trmnl_Loc)))) if (((SCD(k, conc.P.Trmnl_Loc)) + 1) <= P.Length);" +
-                "   T.Base_Point otherwise;}} = T.Base_Point))");
-        foundNames = result.getSymbolNames(true, true);
-        expectedNames =
-                Arrays.asList("k", "conc.P.Trmnl_Loc", "conc.P.Curr_Loc",
-                        "P.Length", "T.Base_Point", "Max_Length")
-                        .stream().collect(Collectors.toSet());
-        Assert.assertEquals(expectedNames.size(), foundNames.size());
-        Assert.assertEquals(true, foundNames.containsAll(expectedNames));*/
     }
 
     @Test public void testGetSymbolNames2() {
         PExp result =
-                parseMathAssertionExp(g, "(lambda(q:Inv).({{P.Labl(SCD(q)) " +
+                parseMathAssertionExp(g, "(λ q:Inv,({{P.Labl(SCD(q)) " +
                 "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
         Set<String> expectedNames =
                 Arrays.asList("q", "Label.base_point", "P.Length").stream()
@@ -400,10 +365,10 @@ public class TestPExp extends BaseTest {
     }
 
     @Test public void testSubstituteOnLambda() {
-        PExp result = parseMathAssertionExp(g, "X = lambda(q : Inv).({{@e if j = i; @e(q) otherwise;}})")
+        PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{@e if j = i; @e(q) otherwise;}}")
                 .substitute(parseMathAssertionExp(g, "@e"),
                         parseMathAssertionExp(g, "Y"));
-        Assert.assertEquals("(X = lambda(q:Inv).({{Y if (j = i);Y(q) otherwise;}}))", result.toString());
+        Assert.assertEquals("(X = λ q:Inv,{{Y if (j = i);Y(q) otherwise;}})", result.toString());
     }
 
     @Test public void testSplitIntoSequents() {
@@ -432,39 +397,6 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(2, partitions.size());
         Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
         Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
-
-      /*  e = parseMathAssertionExp(g, "P");
-        partitions = e.splitIntoSequents();
-        Assert.assertEquals(1, partitions.size());
-        Assert.assertEquals("(true implies P)", partitions.get(0).toString());
-
-        e = parseMathAssertionExp(g, "(A and (P implies Q))");
-        partitions = e.splitIntoSequents();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(true implies A)", partitions.get(0).toString());
-        Assert.assertEquals("(P implies Q)", partitions.get(1).toString());
-
-        e = parseMathAssertionExp(g, "(A implies (B implies (C implies (D and (E and (F and G))))))");
-        partitions = e.splitIntoSequents();
-        Assert.assertEquals(4, partitions.size());
-        Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
-        Assert.assertEquals("(((A and B) and C) implies E)", partitions.get(1).toString());
-        Assert.assertEquals("(((A and B) and C) implies F)", partitions.get(2).toString());
-        Assert.assertEquals("(((A and B) and C) implies G)", partitions.get(3).toString());
-
-        e = parseMathAssertionExp(g, "((A implies (B implies (C implies D))) and (E implies (F implies (G implies (H implies I)))))");
-        //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
-        partitions = e.splitIntoSequents();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
-        Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());*/
-
-        //e = parseMathAssertionExp(g, "(((0 <= 0) and  ((1 <= max_int) implies  ((min_int <= 0) implies  ((Max_Depth <= max_int) implies  ((min_int <= Max_Depth) implies  ((1 <= Max_Depth) implies  (0 <= Max_Depth))))))) and  (Array_Is_Initial_in_Range(S.Contents, Lower_Bound, Upper_Bound) implies      Reverse(Iterated_Concatenation(1, 0, lambda ( i : Z ).(<S.Contents(i)>))) = Empty_String))");
-        //e = parseMathAssertionExp(g, "(((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (Temp = Empty_String implies      S = (Reverse(Temp) o S)))) and  ((1 <= Max_Depth) implies  ((|S| <= Max_Depth) implies  (S = (Reverse(Temp') o S_p) implies  (not((1 <= |S_p|)) implies      Temp_p = Reverse(S))))))");
-        //partitions = e.splitIntoSequents();
-        //Assert.assertEquals(2, partitions.size());
-        //Assert.assertEquals("(((A and B) and C) implies D)", partitions.get(0).toString());
-        //Assert.assertEquals("((((E and F) and G) and H) implies I)", partitions.get(1).toString());
     }
 
     protected static ParseTree getTree(String input) {
@@ -493,21 +425,21 @@ public class TestPExp extends BaseTest {
      *  return a dummy {@code true} expr; never just {@code null}.
      *
      *  <p>Also: Building even moderately sized {@link PExp}s is a pain; building one
-     *  with real type information is an even bigger pain. Thus, for returnEnsuresArgSubstitutions methods
+     *  with real type information is an even bigger pain. Thus, for test methods
      *  where this function is used, know that we don't care about types so much
      *  as we do about correct expression structure and quantifier
      *  distribution. So instead of real type information we typically just use
-     *  {@link org.rsrg.semantics.MTInvalid}.</p>
+     *  {@link MathInvalidClassification}.</p>
      *
-     *  <p>If you <em>want</em> to returnEnsuresArgSubstitutions something math type related, just
+     *  <p>If you <em>want</em> to test something math type related, just
      *  construct smaller exprs manually using {@link PSymbol.PSymbolBuilder}
      *  or {@link PApply.PApplyBuilder}; otherwise parse the larger expr
      *  using this method.</p>
      *
-     * @param input The input to parse.
-     * @return The dummy-typed {@link PExp} representation of {@code input}.
+     * @param input the input to parse
+     * @return the dummy-typed {@link PExp} representation of {@code input}
      */
-    @NotNull public static PExp parseMathAssertionExp(@NotNull TypeGraph g,
+    @NotNull public static PExp parseMathAssertionExp(@NotNull DumbTypeGraph g,
                                                       @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule fakeModule =

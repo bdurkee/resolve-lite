@@ -3,11 +3,11 @@ package org.rsrg.semantics.symbol;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.programtype.PTFamily;
+import org.rsrg.semantics.programtype.ProgFamilyType;
 
 /** Describes a "Type family .." introduction as would be found in an
  *  {@link ResolveParser.ConceptModuleDeclContext} or
@@ -17,9 +17,9 @@ public class TypeModelSymbol extends ProgTypeSymbol {
 
     @NotNull private final MathSymbol exemplar;
 
-    public TypeModelSymbol(@NotNull TypeGraph g, @NotNull String name,
-                           @NotNull MTType modelType,
-                           @NotNull PTFamily programType,
+    public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+                           @NotNull MathClassification modelType,
+                           @NotNull ProgFamilyType programType,
                            @NotNull MathSymbol exemplar,
                            @Nullable ParserRuleContext definingTree,
                            @NotNull ModuleIdentifier moduleIdentifier) {
@@ -31,8 +31,8 @@ public class TypeModelSymbol extends ProgTypeSymbol {
         return exemplar;
     }
 
-    @NotNull @Override public PTFamily getProgramType() {
-        return (PTFamily) super.getProgramType();
+    @NotNull @Override public ProgFamilyType getProgramType() {
+        return (ProgFamilyType) super.getProgramType();
     }
 
     @NotNull @Override public TypeModelSymbol toTypeModelSymbol() {

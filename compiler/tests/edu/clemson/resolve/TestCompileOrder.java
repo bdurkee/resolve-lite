@@ -38,21 +38,6 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test public void testFlawedOrdering() throws Exception {
-        String[] modules = new String[] {
-                "Precis U;\n uses X;\n end U;",
-                "Precis X;\n uses Y, V;\n end U;",
-                "Precis V;\n uses U;\n end V;"
-        };
-        String[] pairs = new String[] {
-                "Precis Flawed;\n uses U;\n end Flawed;",
-                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "): X.resolve:2:6: module X was unable to find the file corresponding to uses reference 'Y'" + "\n"+
-                "error(" + ErrorKind.CIRCULAR_DEPENDENCY.code + "): V.resolve:2:6: circular dependency: V depends on U, but U also depends on V"
-        };
-        writeModules(modules, "U", "X", "V");
-        super.testErrors(pairs, "Flawed");
-    }
-
     //Todo: When facilities, enhancements, and other constructs are
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.

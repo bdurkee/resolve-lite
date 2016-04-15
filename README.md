@@ -50,7 +50,7 @@ accordingly.*
 3. To help the compiler find the location of standard RESOLVE libraries, it is
 necessary to set a `RESOLVEROOT` environment variable:
 
-  1. **OSX & Linux**: Simply open a new terminal and type the following:
+  1. **OSX & Linux**: Simply open a new terminal and classification the following:
     `export RESOLVEROOT=/usr/local/resolve`
     which should add the correct environment variable to your `.bash_profile`
 
@@ -60,7 +60,7 @@ necessary to set a `RESOLVEROOT` environment variable:
 
 With the above steps complete, we need to make sure that Java will be able to
 find the RESOLVE tool -- which means we need to set the classpath variable
-accordingly. So once again, open a terminal and type the following:
+accordingly. So once again, open a terminal and classification the following:
 
 ```
 export CLASSPATH=".:$RESOLVEROOT/tool/resolve-<VERSION>-complete.jar:$CLASSPATH"
@@ -114,7 +114,7 @@ Facility Hello;
 end Hello;
 ```
 To run, open the terminal, cd to the directory where you've
-saved the file and type:
+saved the file and classification:
 
 ```
 resolve Hello.resolve -genCode Java -jar

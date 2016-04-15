@@ -1,7 +1,7 @@
 package org.rsrg.semantics;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
@@ -22,11 +22,11 @@ public class InstantiatedScope extends AbstractScope {
 
     private final Scope baseScope;
     private final FacilitySymbol instantiatingFacility;
-    private final Map<String, PTType> additionalGenericInstantiations =
+    private final Map<String, ProgType> additionalGenericInstantiations =
             new HashMap<>();
 
     public InstantiatedScope(Scope baseScope,
-                             Map<String, PTType> genericInstantiations,
+                             Map<String, ProgType> genericInstantiations,
                              FacilitySymbol instantiatingFacility) {
         this.baseScope = baseScope;
         additionalGenericInstantiations.putAll(genericInstantiations);
@@ -50,7 +50,7 @@ public class InstantiatedScope extends AbstractScope {
     @Override public <E extends Symbol> boolean
             addMatches(@NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
                     @NotNull Set<Scope> searchedScopes,
-                    @NotNull Map<String, PTType> genericInstantiations,
+                    @NotNull Map<String, ProgType> genericInstantiations,
                     FacilitySymbol facilityInstantiation,
                     @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException {

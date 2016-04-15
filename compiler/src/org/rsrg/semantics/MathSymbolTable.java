@@ -1,17 +1,18 @@
 package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.misc.HardCoded;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.FacilitySymbol;
+import org.rsrg.semantics.symbol.MathSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
@@ -143,21 +144,66 @@ public class MathSymbolTable {
     @NotNull private final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
     @Nullable private ModuleScopeBuilder curModuleScope = null;
-    @NotNull private final TypeGraph typeGraph;
+    @NotNull private final DumbTypeGraph typeGraph;
 
     public MathSymbolTable() {
-        this.typeGraph = new TypeGraph();
+        this.typeGraph = new DumbTypeGraph();
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope =
                 new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
                         ModuleIdentifier.GLOBAL);
-
-        HardCoded.addBuiltInSymbols(typeGraph, globalScope);
+        initializeMathTypeSystem(typeGraph, globalScope);
         lexicalScopeStack.push(globalScope);
     }
 
-    @NotNull public TypeGraph getTypeGraph() {
+    private void initializeMathTypeSystem(@NotNull DumbTypeGraph g,
+                                          @NotNull ScopeBuilder globalScope) {
+        try {
+            globalScope.define(new MathSymbol(g, "B", g.BOOLEAN));
+            globalScope.define(new MathSymbol(g, "SSet", g.SSET));
+            globalScope.define(new MathSymbol(g, "Cls", g.CLS));
+
+            globalScope.define(new MathSymbol(g, "and", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathSymbol(g, "or", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
+            globalScope.define(new MathSymbol(g, "conc", g.BOOLEAN));
+
+            globalScope.define(new MathSymbol(g, "is_in",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+            globalScope.define(new MathSymbol(g, "∈",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathSymbol(g, "is_not_in",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+            globalScope.define(new MathSymbol(g, "∉",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathSymbol(g, "~",
+                    new MathFunctionClassification(g, g.SSET, g.SSET, g.SSET)));
+
+            globalScope.define(new MathSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+
+            globalScope.define(new MathSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
+            globalScope.define(new MathSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));
+
+            //aliases for our 'arrow type'
+            globalScope.define(new MathSymbol(g, "⟶", g.ARROW_FUNCTION));
+            globalScope.define(new MathSymbol(g, "->", g.ARROW_FUNCTION));
+
+            globalScope.define(new MathSymbol(g, "*", g.CROSS_PROD_FUNCTION));
+            globalScope.define(new MathSymbol(g, "=",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+            globalScope.define(new MathSymbol(g, "/=",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+        } catch (DuplicateSymbolException e) {
+            throw new RuntimeException("duplicate builtin symbol");
+        }
+    }
+
+    @NotNull public DumbTypeGraph getTypeGraph() {
         return typeGraph;
     }
 
@@ -189,6 +235,11 @@ public class MathSymbolTable {
 
         addScope(s, parent);
         return s;
+    }
+
+    public void addTag(ModuleIdentifier e) {
+        checkScopeOpen();
+        moduleScopes.put(e, curModuleScope);
     }
 
     /**
@@ -264,7 +315,7 @@ public class MathSymbolTable {
                 @NotNull TableSearcher<E> searcher,
                 @NotNull List<E> matches,
                 @NotNull Set<Scope> searchedScopes,
-                @NotNull Map<String, PTType> genericInstantiations,
+                @NotNull Map<String, ProgType> genericInstantiations,
                 FacilitySymbol instantiatingFacility,
                 @NotNull TableSearcher.SearchContext l)
                 throws DuplicateSymbolException {

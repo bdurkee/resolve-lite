@@ -18,14 +18,14 @@ import java.util.List;
 public class ScopeBuilder extends SyntacticScope {
 
     @NotNull protected final List<ScopeBuilder> children = new ArrayList<>();
-    @NotNull private final TypeGraph typeGraph;
+    @NotNull private final DumbTypeGraph typeGraph;
 
     //We definitely want a linkedHashMap here for the bindings to preserve the order
     //in which entries were added to the table. Though it shouldn't necessarily
     //matter. It just does currently because of the way we grab lists of
     //formal parameters (from scope) for functions before we insert the
     //completed sym into the table.
-    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull TypeGraph g,
+    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull DumbTypeGraph g,
                  @Nullable ParserRuleContext definingTree,
                  @NotNull Scope parent,
                  @NotNull ModuleIdentifier moduleIdentifier) {
@@ -47,30 +47,29 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public MathSymbol addBinding(String name, Quantification q,
-            ParserRuleContext definingTree, MTType type, MTType typeValue)
+                                 ParserRuleContext definingTree, MathClassification type, MathClassification typeValue)
             throws DuplicateSymbolException {
 
         MathSymbol entry =
-                new MathSymbol(typeGraph, name, q, type, typeValue,
-                        definingTree, moduleIdentifier);
+                new MathSymbol(typeGraph, name, q, type, definingTree, moduleIdentifier);
         symbols.put(name, entry);
         return entry;
     }
 
     public MathSymbol addBinding(String name, Quantification q,
-                                 ParserRuleContext definingTree, MTType type)
+                                 ParserRuleContext definingTree, MathClassification type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
     public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-            MTType type, MTType typeValue) throws DuplicateSymbolException {
+                                 MathClassification type, MathClassification typeValue) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
     }
 
     public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-            MTType type) throws DuplicateSymbolException {
+            MathClassification type) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type);
     }
 }

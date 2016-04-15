@@ -5,20 +5,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Map;
 
 public class ProgTypeSymbol extends Symbol {
 
-    @NotNull protected final MTType modelType;
-    @NotNull protected final PTType type;
+    @NotNull protected final MathClassification modelType;
+    @NotNull protected final ProgType type;
     @NotNull protected final MathSymbol mathTypeAlterEgo;
-    @NotNull protected final TypeGraph g;
+    @NotNull protected final DumbTypeGraph g;
 
-    public ProgTypeSymbol(@NotNull TypeGraph g, @NotNull String name,
-                          @NotNull PTType progType,
-                          @Nullable MTType modelType,
+    public ProgTypeSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+                          @NotNull ProgType progType,
+                          @Nullable MathClassification modelType,
                           @Nullable ParserRuleContext definingTree,
                           @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
@@ -26,15 +26,15 @@ public class ProgTypeSymbol extends Symbol {
         this.g = g;
         this.modelType = modelType == null ? g.INVALID : modelType;
         this.mathTypeAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, g.SSET, modelType,
+                new MathSymbol(g, name, Quantification.NONE, modelType,
                         definingTree, moduleIdentifier);
     }
 
-    @NotNull public PTType getProgramType() {
+    @NotNull public ProgType getProgramType() {
         return type;
     }
 
-    @NotNull public MTType getModelType() {
+    @NotNull public MathClassification getModelType() {
         return modelType;
     }
 
@@ -60,19 +60,20 @@ public class ProgTypeSymbol extends Symbol {
     }
 
     @NotNull @Override public ProgTypeSymbol instantiateGenerics(
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
-        Map<String, MTType> genericMathematicalInstantiations =
+        Map<String, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
-        VariableReplacingVisitor typeSubstitutor =
+        /*VariableReplacingVisitor typeSubstitutor =
                 new VariableReplacingVisitor(genericMathematicalInstantiations);
         if (modelType != null) {
             modelType.accept(typeSubstitutor);
         }
         return new ProgTypeSymbol(type.getTypeGraph(), getName(),
                 getProgramType(), typeSubstitutor.getFinalExpression(),
-                getDefiningTree(), getModuleIdentifier());
+                getDefiningTree(), getModuleIdentifier());*/
+        return null;
     }
 }

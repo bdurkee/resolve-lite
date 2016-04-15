@@ -1,0 +1,40 @@
+Concept Spiral_Template (type Label;
+        evaluates k, Max_Length :
+                        Std_Ints :: Integer);
+    uses Standard_Booleans, Standard_Integers,
+         Set_App_Op_Ext,
+         Basic_Integer_Theory,
+         Basic_Natural_Number_Theory,
+         Basic_Spiral_Theory;
+    requires 2 ≤ k and 1 ≤ Max_Length
+                        which_entails k : N2;
+
+    Type family Spiral
+          is modeled by Cart_Prod
+            Lab : Sp_Loc(k) ⟶ Label;
+            Curr_Loc,
+            Trmnl_Loc : Sp_Loc(k);
+    end;
+    exemplar P;
+    constraints
+      SCD(P.Trmnl_Loc) ≤ Max_Length and
+      P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc) and
+      P.Lab(P.Trmnl_Loc) = Label.base_point and
+      P.Lab[Outward_Loc(P.Trmnl_Loc)] =
+                      {Label.base_point};
+
+    Operation Lengthen(updates P : Spiral;
+                       alters e : Label);
+        requires SCD(P.Trmnl_Loc) < Max_Length;
+        ensures P.Trmnl_Loc =
+            SS(k)(@P.Trmnl_Loc) and
+        P.Lab = λ q : Sp_Loc(k),
+                {{@e if q = @P.Trmnl_Loc;
+                  @P.Lab(q) otherwise;}};
+
+    Operation Spiral_Out (updates P : Spiral);
+        requires
+          P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc);
+        ensures P.Curr_Loc =
+                    SS(k)(@P.Curr_Loc);
+end Spiral_Template;

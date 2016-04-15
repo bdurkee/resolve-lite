@@ -2,18 +2,12 @@ package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.NoSuchModuleException;
-import org.stringtemplate.v4.*;
-
-import java.io.File;
-import java.io.IOException;
+import org.stringtemplate.v4.ST;
 
 class JavaCodeGenerator extends AbstractCodeGenerator {
 

@@ -1,0 +1,9 @@
+Precis T;
+
+    Definition N : SSet;
+
+	Definition Sp_Loc(x : SSet) : Powerset(N);
+    Definition App_Op(x : Powerset(N)) : B;
+
+	Definition y : B is App_Op(Sp_Loc(N));
+end T;

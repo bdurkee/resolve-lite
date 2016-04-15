@@ -1,12 +1,8 @@
 package edu.clemson.resolve.proving.absyn;
 
-import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTType;
 
 import java.util.*;
-import java.util.function.Function;
 
 /** Represents a tree-like {@code .}-segmented list of field accesses */
 //TODO: Determine if (somehow) this should just be folded into {@link PApply}.
@@ -16,8 +12,7 @@ public class PSelector extends PExp {
 
     public PSelector(@NotNull PExp left, @NotNull PExp right) {
         super(left.structureHash * 72, right.structureHash * 36,
-                right.getMathType(), right.getMathTypeValue(),
-                right.getProgType(), right.getProgTypeValue());
+                right.getMathType(), right.getProgType());
         this.left = left;
         this.right = right;
     }

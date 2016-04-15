@@ -2,13 +2,12 @@ package org.rsrg.semantics;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.searchers.TableSearcher.SearchContext;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.List;
@@ -28,7 +27,7 @@ public interface Scope {
     public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher,
             @NotNull List<E> matches, @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, PTType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;

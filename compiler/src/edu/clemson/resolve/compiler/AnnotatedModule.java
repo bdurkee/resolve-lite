@@ -1,18 +1,16 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.rsrg.semantics.DumbTypeGraph;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.rsrg.semantics.MTType;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
 
@@ -24,13 +22,9 @@ import java.util.*;
  */
 public class AnnotatedModule {
 
-    public ParseTreeProperty<MTType> mathTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<MTType> mathTypeValues = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progTypes = new ParseTreeProperty<>();
-    public ParseTreeProperty<PTType> progTypeValues = new ParseTreeProperty<>();
-
-    public ParseTreeProperty<PExp> mathPExps = new ParseTreeProperty<>();
-
+    public ParseTreeProperty<MathClassification> mathClssftns = new ParseTreeProperty<>();
+    public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
+    public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
@@ -42,14 +36,6 @@ public class AnnotatedModule {
      *  orderings, etc. Think of these strings the refs the symboltable will see.
      *  We don't want implementations of facilities showing up in this set.
      */
-    //UPDATE: Can't really remember why the hell I made a separate set for this.
-    //need to think about it some more, likely in trying to delete I'll remember,
-    //but let me try to remember why I thought it was necessary (several months ago)
-    //UPDATE2: Ok, now i remember, like the comment says, we need to consider
-            //facility impls when coming up with module compile ordering, but
-            //we don't want to include them in the set of available things the
-            //symboltable machinery will search through when going through imports. I think
-            //that was it anyways.
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
 
@@ -81,9 +67,9 @@ public class AnnotatedModule {
         }
     }
 
-    @NotNull public PExp getPExpFor(@NotNull TypeGraph g,
-                                    @NotNull ParserRuleContext ctx) {
-        PExp result = mathPExps.get(ctx);
+    @NotNull public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
+                                          @NotNull ParserRuleContext ctx) {
+        PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
 
@@ -105,7 +91,7 @@ public class AnnotatedModule {
 
     @Override public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
-        if ( result ) {
+        if (result) {
             result = this.name.getText()
                     .equals(((AnnotatedModule) o).name.getText());
         }

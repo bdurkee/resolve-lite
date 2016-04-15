@@ -1,11 +1,9 @@
 package edu.clemson.resolve.codegen.model;
 
 import org.rsrg.semantics.symbol.ModuleParameterSymbol;
-import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class Module extends OutputModelObject {
     public String name;

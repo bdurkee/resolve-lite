@@ -1,14 +1,18 @@
 Precis Basic_Natural_Number_Theory;
         uses Monogenerator_Theory;
 
-    Categorical Definition for N : SSet, 0 : N, suc : N -> N is
+    Categorical Definition for N : SSet, 0 : N, suc : N ⟶ N is
         Is_Monogeneric_for(N, 0, suc);
 
     Inductive Definition (m : N) + (n : N) : N is
-        (i.)    m + 0 = m;
-        (ii.)   m + suc(n) = suc(m + n);
+        (i.)  m + 0 = 0;
+        (ii.) m + suc(n) = suc(m + n);
 
-    Definition (m : N) >= (n : N) : B;
+    Theorem N3: ∀ m, n : N, suc(m) + n = suc(m + n);
+
+    Theorem N6: ∀ n : N, n = 0 or (∃ p : N, n = suc(p));
+
+    Definition (m : N) ≥ (n : N) : B;
     Definition (m : N) <= (n : N) : B;
     Definition (m : N) > (n : N) : B;
     Definition (m : N) < (n : N) : B;

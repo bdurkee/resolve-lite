@@ -16,8 +16,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgNamedType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.query.SymbolTypeQuery;
 import org.rsrg.semantics.query.UnqualifiedNameQuery;
@@ -28,8 +28,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static edu.clemson.resolve.codegen.model.AccessRef.*;
-import static edu.clemson.resolve.codegen.model.Qualifier.*;
+import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefLeft;
+import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefRight;
+import static edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
+import static edu.clemson.resolve.codegen.model.Qualifier.NormalQualifier;
 import static edu.clemson.resolve.codegen.model.Stat.*;
 
 public class ModelBuilder extends ResolveBaseListener {
@@ -87,7 +89,7 @@ public class ModelBuilder extends ResolveBaseListener {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
-                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                                .parameterDeclGroup(), ctx.varDeclGroup(),
                         ctx.stmt());
         built.put(ctx, f);
     }
@@ -97,7 +99,7 @@ public class ModelBuilder extends ResolveBaseListener {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
                         ctx.type(), ctx.operationParameterList()
-                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                                .parameterDeclGroup(), ctx.varDeclGroup(),
                         ctx.stmt());
         f.implementsOper = true;
         built.put(ctx, f);
@@ -106,7 +108,7 @@ public class ModelBuilder extends ResolveBaseListener {
     protected FunctionImpl buildFunctionImpl(@NotNull String name,
                                              @Nullable ResolveParser.TypeContext type,
                                              @NotNull List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
-                                             @NotNull List<ResolveParser.VariableDeclGroupContext> variableGroupings,
+                                             @NotNull List<ResolveParser.VarDeclGroupContext> variableGroupings,
                                              @NotNull List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
@@ -114,7 +116,7 @@ public class ModelBuilder extends ResolveBaseListener {
         for (ResolveParser.ParameterDeclGroupContext grp : paramGroupings) {
             f.params.addAll(Utils.collect(ParameterDef.class, grp.ID(), built));
         }
-        for (ResolveParser.VariableDeclGroupContext grp : variableGroupings) {
+        for (ResolveParser.VarDeclGroupContext grp : variableGroupings) {
             f.vars.addAll(Utils.collect(VariableDef.class, grp.ID(), built));
         }
         for (ResolveParser.StmtContext s : stats) {
@@ -179,8 +181,8 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override public void exitVariableDeclGroup(
-            ResolveParser.VariableDeclGroupContext ctx) {
+    @Override public void exitVarDeclGroup(
+            ResolveParser.VarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -188,8 +190,8 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitRecordVariableDeclGroup(
-            ResolveParser.RecordVariableDeclGroupContext ctx) {
+    @Override public void exitRecordVarDeclGroup(
+            ResolveParser.RecordVarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -213,7 +215,7 @@ public class ModelBuilder extends ResolveBaseListener {
                             new UnqualifiedNameQuery(ctx.name.getText()))
                             .toProgReprTypeSymbol();
             exemplarName =
-                    ((PTNamed) x.toProgTypeSymbol().getProgramType())
+                    ((ProgNamedType) x.toProgTypeSymbol().getProgramType())
                             .getExemplarName();
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             exemplarName = ctx.name.getText().substring(0, 1); //default name
@@ -229,8 +231,8 @@ public class ModelBuilder extends ResolveBaseListener {
         if (ctx.type() instanceof ResolveParser.RecordTypeContext) {
             ResolveParser.RecordTypeContext typeAsRecord =
                     (ResolveParser.RecordTypeContext) ctx.type();
-            for (ResolveParser.RecordVariableDeclGroupContext grp :
-                    typeAsRecord.recordVariableDeclGroup()) {
+            for (ResolveParser.RecordVarDeclGroupContext grp :
+                    typeAsRecord.recordVarDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.ID(), built));
             }
@@ -239,14 +241,14 @@ public class ModelBuilder extends ResolveBaseListener {
             //representationClass.initVars.addAll(Utils.collect(
             //        VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
             //        built));
-            for (ResolveParser.VariableDeclGroupContext grp :
-                    ctx.typeImplInit().variableDeclGroup()) {
+            for (ResolveParser.VarDeclGroupContext grp :
+                    ctx.typeImplInit().varDeclGroup()) {
                 for (TerminalNode t : grp.ID()) {
                     representationClass.initVars.add((VariableDef) built.get(t));
                 }
             }
-            representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
-                    .typeImplInit().stmt(), built));
+            //representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
+            //        .typeImplInit().stmt(), built));
         }
         built.put(ctx, representationClass);
     }
@@ -345,7 +347,7 @@ public class ModelBuilder extends ResolveBaseListener {
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
                                            @NotNull Token op,
                                            @NotNull List<? extends ParseTree> args) {
-        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
+        List<ProgType> argTypes = args.stream().map(tr.progTypes::get)
                 .collect(Collectors.toList());
         HardCodedProgOps.BuiltInOpAttributes o =
                 HardCodedProgOps.convert(op, argTypes);
@@ -368,8 +370,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override public void exitProgSelectorExp(
             ResolveParser.ProgSelectorExpContext ctx) {
-        PTType leftType = tr.progTypes.get(ctx.lhs);
-        Expr left = new LeafAccessRefLeft(((PTNamed)leftType).getName(),
+        ProgType leftType = tr.progTypes.get(ctx.lhs);
+        Expr left = new LeafAccessRefLeft(((ProgNamedType)leftType).getName(),
                 (Expr) built.get(ctx.lhs));
         Expr right = new LeafAccessRefRight((Expr) built.get(ctx.rhs));
         AccessRef ref = new AccessRef(left, right);
@@ -497,7 +499,7 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             spec.addGettersAndMembersForModuleParameterSyms(moduleScope
                     .query(new SymbolTypeQuery<>(ModuleParameterSymbol.class)));
-        } catch (NoSuchModuleException|UnexpectedSymbolException e) {
+        } catch (NoSuchModuleException |UnexpectedSymbolException e) {
         }
         file.module = spec;
         built.put(ctx, file);
@@ -663,7 +665,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 return new NormalQualifier("this");
             }
             return new NormalQualifier(refQualifier.getText());
-        } catch (UnexpectedSymbolException|NoSuchModuleException e) {
+        } catch (UnexpectedSymbolException |NoSuchModuleException e) {
             throw new RuntimeException();//populator should've tripped it.
         }
     }

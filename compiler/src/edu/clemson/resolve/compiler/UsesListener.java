@@ -18,12 +18,6 @@ public class UsesListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    @Override public void enterConceptImplModuleDecl(
-            ResolveParser.ConceptImplModuleDeclContext ctx) {
-        tr.uses.add(new ModuleIdentifier(ctx.concept));
-        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
-    }
-
     @Override public void enterPrecisExtModuleDecl(
             ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
@@ -42,13 +36,21 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
-    @Override public void enterConceptExtModuleDecl(
-            ResolveParser.ConceptExtModuleDeclContext ctx) {
+    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
+        for (TerminalNode t : ctx.ID()) {
+            ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
+            tr.uses.add(id);
+            tr.semanticallyRelevantUses.add(id);
+        }
+    }
+
+    @Override public void enterConceptImplModuleDecl(
+            ResolveParser.ConceptImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void enterConceptExtImplModuleDecl(
+    /*@Override public void enterConceptExtImplModuleDecl(
             ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.extension));
         tr.uses.add(new ModuleIdentifier(ctx.concept));
@@ -56,13 +58,11 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        for (TerminalNode t : ctx.ID()) {
-            tr.uses.add(new ModuleIdentifier(t.getSymbol()));
-            tr.semanticallyRelevantUses.add(
-                    new ModuleIdentifier(t.getSymbol()));
-        }
-    }
+    @Override public void enterConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
+        tr.uses.add(new ModuleIdentifier(ctx.concept));
+        tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
+    }*/
 
     @Override public void exitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {

@@ -1,7 +1,7 @@
 package org.rsrg.semantics;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.Symbol;
 
@@ -15,7 +15,7 @@ public abstract class AbstractScope implements Scope {
             throws DuplicateSymbolException, UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
-        Map<String, PTType> genericInstantiations = new HashMap<>();
+        Map<String, ProgType> genericInstantiations = new HashMap<>();
         addMatches(searcher, result, searchedScopes,
                 genericInstantiations, null, l);
         return result;

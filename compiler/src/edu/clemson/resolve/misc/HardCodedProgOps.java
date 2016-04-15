@@ -3,26 +3,26 @@ package edu.clemson.resolve.misc;
 import edu.clemson.resolve.parser.ResolveLexer;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgNamedType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class HardCodedProgOps {
 
-    public static BuiltInOpAttributes convert(Token op, PTType ... args) {
+    public static BuiltInOpAttributes convert(Token op, ProgType... args) {
         return convert(op, Arrays.asList(args));
     }
 
-    public static BuiltInOpAttributes convert(Token op, List<PTType> args) {
+    public static BuiltInOpAttributes convert(Token op, List<ProgType> args) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
 
         if (args.isEmpty()) {
             return convertBooleanProgramOp(op); //only (pseudo hardcoded) thing we could possibly match currently that has no arguments is true or false
         }
-        if (!(args.get(0) instanceof PTNamed)) return result;
-        PTNamed firstArgType = (PTNamed)args.get(0);
+        if (!(args.get(0) instanceof ProgNamedType)) return result;
+        ProgNamedType firstArgType = (ProgNamedType)args.get(0);
 
         if ( firstArgType.getName().equals("Boolean") ) {
             result = convertBooleanProgramOp(op);

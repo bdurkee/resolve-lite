@@ -1,7 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
 import org.rsrg.semantics.symbol.ModuleParameterSymbol;
-import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;

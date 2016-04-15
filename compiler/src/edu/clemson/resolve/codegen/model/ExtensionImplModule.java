@@ -1,7 +1,9 @@
 package edu.clemson.resolve.codegen.model;
 
 import org.rsrg.semantics.programtype.PTVoid;
-import org.rsrg.semantics.symbol.*;
+import org.rsrg.semantics.symbol.OperationSymbol;
+import org.rsrg.semantics.symbol.Symbol;
+import org.rsrg.semantics.symbol.TypeModelSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class ExtensionImplModule extends AbstractSpecImplModule {
 
     public void addDelegateMethods(List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof OperationSymbol ) {
+            if ( s instanceof OperationSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod((OperationSymbol)s));
             }

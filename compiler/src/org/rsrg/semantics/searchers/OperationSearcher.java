@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.DuplicateSymbolException;
 import org.rsrg.semantics.UnexpectedSymbolException;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 import org.rsrg.semantics.symbol.Symbol;
@@ -17,15 +17,15 @@ import java.util.Map;
 public class OperationSearcher implements TableSearcher<OperationSymbol> {
 
     @NotNull private final String queryName;
-    @NotNull private final List<PTType> actualArgTypes;
+    @NotNull private final List<ProgType> actualArgTypes;
 
     public OperationSearcher(@NotNull Token name,
-                             @NotNull List<PTType> argumentTypes) {
+                             @NotNull List<ProgType> argumentTypes) {
         this(name.getText(), argumentTypes);
     }
 
     public OperationSearcher(@NotNull String name,
-                             @NotNull List<PTType> argumentTypes) {
+                             @NotNull List<ProgType> argumentTypes) {
         this.queryName = name;
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
@@ -61,9 +61,9 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
         if (result) {
             Iterator<ProgParameterSymbol> formalParametersIter =
                     formalParameters.iterator();
-            Iterator<PTType> actualArgumentTypeIter = actualArgTypes.iterator();
+            Iterator<ProgType> actualArgumentTypeIter = actualArgTypes.iterator();
 
-            PTType actualArgumentType, formalParameterType;
+            ProgType actualArgumentType, formalParameterType;
             while (result && formalParametersIter.hasNext()) {
                 actualArgumentType = actualArgumentTypeIter.next();
                 formalParameterType =

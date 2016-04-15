@@ -1,7 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathClassification;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,11 +15,10 @@ public class PAlternatives extends PExp {
     private final PExp otherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
-                 PExp otherwiseClauseResult, MTType type, MTType typeValue) {
+                         PExp otherwiseClauseResult, MathClassification type) {
         super(calculateStructureHash(conditions, results,
                         otherwiseClauseResult), calculateStructureHash(
-                        conditions, results, otherwiseClauseResult), type,
-                typeValue);
+                        conditions, results, otherwiseClauseResult), type);
 
         this.alternatives = new ArrayList<>();
         sanityCheckConditions(conditions);
@@ -118,8 +117,7 @@ public class PAlternatives extends PExp {
             results.add(alt.result.withIncomingSignsErased());
         }
         PExp otherwise = otherwiseClauseResult.withIncomingSignsErased();
-        return new PAlternatives(conditions, results, otherwise, getMathType(),
-                getMathTypeValue());
+        return new PAlternatives(conditions, results, otherwise, getMathType());
     }
 
     @NotNull @Override public PExp withQuantifiersFlipped() {
@@ -156,7 +154,7 @@ public class PAlternatives extends PExp {
             }
             retval = new PAlternatives(substitutedConditions,
                     substitutedResults, substitutedOtherwiseResult,
-                    getMathType(), getMathTypeValue());
+                    getMathType());
         }
         return retval;
     }

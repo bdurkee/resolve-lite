@@ -2,9 +2,9 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MTFunction;
-import org.rsrg.semantics.MTInvalid;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathFunctionClassification;
+import org.rsrg.semantics.MathClassification;
+import org.rsrg.semantics.MathInvalidClassification;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,13 +17,12 @@ public class PLambda extends PExp {
     private final List<MathSymbolDeclaration> parameters = new ArrayList<>();
     @NotNull private final PExp body;
 
-    public PLambda(@NotNull List<MathSymbolDeclaration> parameters, @NotNull PExp body) {
+    public PLambda(@NotNull List<MathSymbolDeclaration> parameters,
+                   @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MTFunction.MTFunctionBuilder(body.getMathType()
-                        .getTypeGraph(), body.getMathType())
-                        .paramTypes(parameters.stream()
-                                .map(p ->p.type).collect(Collectors.toList()))
-                        .build(), null);
+                new MathFunctionClassification(body.getMathType()
+                        .getTypeGraph(), body.getMathType(),parameters.stream()
+                        .map(p ->p.type).collect(Collectors.toList())), null);
         this.parameters.addAll(parameters);
         this.body = body;
     }
@@ -136,9 +135,9 @@ public class PLambda extends PExp {
 
     public static class MathSymbolDeclaration {
         public final String name;
-        public final MTType type;
+        public final MathClassification type;
 
-        public MathSymbolDeclaration(String name, MTType type) {
+        public MathSymbolDeclaration(String name, MathClassification type) {
             //Todo: Again, I think this should probably be checked before now
             if ( name == null ) {
                 throw new IllegalArgumentException("name==null");
@@ -164,7 +163,7 @@ public class PLambda extends PExp {
         }
 
         @Override public String toString() {
-            return name + ":" + (type instanceof MTInvalid ? "Inv" : type);
+            return name + ":" + (type instanceof MathInvalidClassification ? "Inv" : type);
         }
     }
 
@@ -180,6 +179,6 @@ public class PLambda extends PExp {
     }
 
     @Override public String toString() {
-        return "lambda(" + Utils.join(parameters, ", ") + ").(" + body + ")";
+        return "λ " + parameters.get(0) + "," + body;
     }
 }

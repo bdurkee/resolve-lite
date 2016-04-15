@@ -1,5 +1,15 @@
 Precis Extension Set_App_Op_Ext for Basic_Function_Properties;
-    Definition App_Op(f : (D : SSet) -> (R : SSet),
-                      S : Powerset(D)) : Powerset(R) is
-                            {y : R | (Exists x : S, f(x) = y)};
+
+    //TODO: Before the body of this can pass classification checking,
+    //the following judgement needs adding:
+    //E1 : Powerset(E2)
+    //E3 : E1
+    //----------------------
+    //E3 : E2
+    //because here x : S is not acceptable f, (where D is expected), but look
+    //at the type of S, clearly it should be...
+    Definition (f : (D : SSet) ⟶ (R : SSet))
+                           [S : Powerset(D)] : Powerset(R);// is
+                //{y : R | (∃ x : S, f(x) = y)};
+
 end Set_App_Op_Ext;

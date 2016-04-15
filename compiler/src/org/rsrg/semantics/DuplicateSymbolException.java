@@ -7,19 +7,19 @@ import org.rsrg.semantics.symbol.Symbol;
 @SuppressWarnings("serial")
 public class DuplicateSymbolException extends SymbolTableException {
 
-    private Symbol existingSymbol;
+    private Symbol offendingSymbol;
 
-    public DuplicateSymbolException(@Nullable Symbol existingSym) {
+    public DuplicateSymbolException(@Nullable Symbol offendingSymbol) {
         super(ErrorKind.DUP_SYMBOL);
-        this.existingSymbol = existingSym;
+        this.offendingSymbol = offendingSymbol;
     }
 
     public DuplicateSymbolException() {
         this(null);
     }
 
-    public Symbol getExistingSymbol() {
-        return existingSymbol;
+    public Symbol getOffendingSymbol() {
+        return offendingSymbol;
     }
 
 }

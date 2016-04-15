@@ -16,7 +16,7 @@ public class MethodCall extends Expr {
     @ModelElement public List<Expr> args = new ArrayList<>();
     @ModelElement public Qualifier q;
 
-    public MethodCall(Qualifier qualifier, String name, Expr ... args) {
+    public MethodCall(Qualifier qualifier, String name, Expr... args) {
         this(qualifier, name, Arrays.asList(args));
     }
 

@@ -14,7 +14,8 @@ public class AnonOpParameterClassInstance extends Expr {
     public String name;
     public boolean hasReturn = false;
     public List<ProgParameterSymbol> params = new ArrayList<>();
-    @ModelElement public Qualifier q;
+    @ModelElement
+    public Qualifier q;
 
     public AnonOpParameterClassInstance(Qualifier wrappedFunctionQualifier,
                                         OperationSymbol f) {

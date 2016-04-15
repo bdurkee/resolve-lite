@@ -1,12 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rsrg.semantics.*;
-import org.rsrg.semantics.MTFunction.MTFunctionBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,8 +34,14 @@ public class PApply extends PExp {
         /** Traditional prefix style applications of the form: {@code F(x)} */
         PREFIX {
             @Override protected String toString(PApply s) {
-                return s.functionPortion.toString() +
-                        "(" + Utils.join(s.arguments, ", ") + ")";
+                if (s.isBracketBasedApp) {
+                    return s.arguments.get(0) +
+                            "[" + s.arguments.get(1) + "]";
+                }
+                else {
+                    return s.functionPortion.toString() +
+                            "(" + Utils.join(s.arguments, ", ") + ")";
+                }
             }
 
             @Override protected void beginAccept(PExpListener v, PApply s) {
@@ -151,19 +154,21 @@ public class PApply extends PExp {
      *  {@link PSymbol}, realize that it could also be something more 'exotic'
      *  such as a {@link PLambda} or even another {@code PApply}.</p>
      */
-    @NotNull private final PExp functionPortion;
-    @NotNull private final List<PExp> arguments = new ArrayList<>();
-    @NotNull private final DisplayStyle displayStyle;
+    private final PExp functionPortion;
+    private final List<PExp> arguments = new ArrayList<>();
+    private final DisplayStyle displayStyle;
+
+    private final boolean isBracketBasedApp;
 
     private PApply(@NotNull PApplyBuilder builder) {
         super(calculateHashes(builder.functionPortion,
                         builder.arguments.iterator()), builder.applicationType,
         //no; builder.applicationType won't be null; this is checked in PApply:build()
-                builder.applicationTypeValue,
-                builder.functionPortion.getProgType(), null);
+                builder.functionPortion.getProgType());
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
         this.displayStyle = builder.displayStyle;
+        this.isBracketBasedApp = builder.bracketApp;
     }
 
     @NotNull public PExp getFunctionPortion() {
@@ -263,7 +268,7 @@ public class PApply extends PExp {
 
     @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        TypeGraph g = getMathType().getTypeGraph();
+        DumbTypeGraph g = getMathType().getTypeGraph();
         if (getCanonicalName().equals("and")) {
             arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
         }
@@ -287,7 +292,6 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
                 .applicationType(getMathType())
-                .applicationTypeValue(getMathTypeValue())
                 .style(displayStyle).build();
     }
 
@@ -295,7 +299,6 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
                 .applicationType(getMathType())
-                .applicationTypeValue(getMathTypeValue())
                 .style(displayStyle).build();
     }
 
@@ -410,28 +413,34 @@ public class PApply extends PExp {
      */
     public static class PApplyBuilder implements Utils.Builder<PApply> {
 
-        @NotNull protected final PExp functionPortion;
-        @NotNull protected final List<PExp> arguments = new ArrayList<>();
+        protected final PExp functionPortion;
+        protected final List<PExp> arguments = new ArrayList<>();
 
-        @Nullable protected MTType applicationType, applicationTypeValue;
-        @NotNull protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
+        protected MathClassification applicationType;
+        protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
+        protected boolean bracketApp = false;
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
             this.functionPortion = functionPortion;
         }
 
         public PApplyBuilder style(@NotNull DisplayStyle s) {
+            return style(s, false);
+        }
+
+        /** The {@code isBracketBasedApp} parameter tells the display
+         *  style to use square brackets when rendering a prefix function app,
+         *  rather than the traditional parens (which is default)
+         */
+        public PApplyBuilder style(@NotNull DisplayStyle s,
+                                   boolean isBracketBasedApp) {
             this.displayStyle = s;
+            this.bracketApp = isBracketBasedApp;
             return this;
         }
 
-        public PApplyBuilder applicationType(@Nullable MTType type) {
+        public PApplyBuilder applicationType(@Nullable MathClassification type) {
             this.applicationType = type;
-            return this;
-        }
-
-        public PApplyBuilder applicationTypeValue(@Nullable MTType typeValue) {
-            this.applicationTypeValue = typeValue;
             return this;
         }
 
@@ -448,7 +457,7 @@ public class PApply extends PExp {
         @Override @NotNull public PApply build() {
             if (applicationType == null) {
                 throw new IllegalStateException("can't build PApply " +
-                        "with mathApplicationType==null");
+                        "with mathAppClssfctn==null");
             }
             return new PApply(this);
         }

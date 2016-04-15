@@ -1,28 +1,28 @@
 Precis Basic_Binary_Relation_Properties;
 
-    Definition Is_Reflexive(p : (D : SSet) * D -> B) : B is
-        Forall x : D, p(x, x);
+    Definition Is_Reflexive(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x : D, p(x, x);
 
-    Definition Is_Transitive(p : (D : SSet) * D -> B) : B is
-        Forall x, y, z : D, p(x, y) and p(y, z) implies p(x, z);
+    Definition Is_Transitive(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x, y, z : D, p(x, y) and p(y, z) implies p(x, z);
 
-    Definition Is_Symmetric(p : (D : SSet) * D -> B) : B is
-        Forall x, y : D, p(x, y) implies p(y, x);
+    Definition Is_Symmetric(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x, y : D, p(x, y) implies p(y, x);
 
-    Definition Is_Antisymmetric(p : (D : SSet) * D -> B) : B is
-        Forall x, y : D, p(x, y) and p(y, x) implies x = y;
+    Definition Is_Antisymmetric(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x, y : D, p(x, y) and p(y, x) implies x = y;
 
-    Definition Is_Asymmetric(p : (D : SSet) * D -> B) : B is
-        Forall x, y : D, p(x, y) implies not(p(y, x));
+    Definition Is_Asymmetric(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x, y : D, p(x, y) implies ⌐(p(y, x));
 
-    Definition Is_Irreflexive(p : (D : SSet) * D -> B) : B is
-        Forall x : D, not(p(x, x));
+    /*Definition Is_Irreflexive(p : (D : SSet) * D ⟶ B) : B is
+        ∀ x : D, ⌐(p(x, x));
 
-    Theorem R1n1: Forall D : SSet, Forall p : D * D -> B,
+    Theorem R1n1: ∀ D : SSet, ∀ p : D * D -> B,
         Is_Transitive(p) implies
             (Is_Irreflexive(p) iff Is_Asymmetric(p));
 
     Definition Is_Total(p : (D : SSet) * D -> B) : B is
-        Forall x, y : D, p(x, y) or p(y, x) or x = y;
-
+        ∀ x, y : D, p(x, y) or p(y, x) or x = y;
+*/
 end Basic_Binary_Relation_Properties;

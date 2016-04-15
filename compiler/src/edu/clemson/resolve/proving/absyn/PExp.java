@@ -1,11 +1,12 @@
+
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MTType;
+import org.rsrg.semantics.MathClassification;
 import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.*;
 
@@ -24,11 +25,8 @@ public abstract class PExp {
     public final int structureHash;
     public final int valueHash;
 
-    /** These are the backing fields for {@link #getMathType()} and
-     *  {@link #getMathTypeValue()}, respectively.
-     */
-    private final MTType type;
-    private final MTType typeValue;
+    /** Backing field for {@link #getMathType()} */
+    private final MathClassification type;
 
     /** Since the removal of the Exp hierarchy, the role of {@code PExps} has
      *  expanded considerably.
@@ -37,37 +35,29 @@ public abstract class PExp {
      *  programmatic expression (for vcgen), program type info should be
      *  present, if not, then these should/will be {@code null}.</p>
      */
-    private final PTType progType, progTypeValue;
+    private final ProgType progType;
 
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MTType type,
-                @Nullable MTType typeValue) {
-        this(hashes.structureHash, hashes.valueHash, type, typeValue, null,
-                null);
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type) {
+        this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MTType type,
-                @Nullable MTType typeValue, @Nullable PTType progType,
-                @Nullable PTType progTypeValue) {
-        this(hashes.structureHash, hashes.valueHash, type, typeValue, progType,
-                progTypeValue);
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type,
+                @Nullable ProgType progType) {
+        this(hashes.structureHash, hashes.valueHash, type, progType);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MTType type,
-                @Nullable MTType typeValue) {
-        this(structureHash, valueHash, type, typeValue, null, null);
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type) {
+        this(structureHash, valueHash, type, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MTType type,
-                @Nullable MTType typeValue, @Nullable PTType progType,
-                @Nullable PTType progTypeValue) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
+                @Nullable ProgType progType) {
         this.type = type;
-        this.typeValue = typeValue;
         this.progType = progType;
-        this.progTypeValue = progTypeValue;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
     }
@@ -76,20 +66,12 @@ public abstract class PExp {
         return valueHash;
     }
 
-    @Nullable public final PTType getProgType() {
+    @Nullable public final ProgType getProgType() {
         return progType;
     }
 
-    @Nullable public final PTType getProgTypeValue() {
-        return progTypeValue;
-    }
-
-    @NotNull public final MTType getMathType() {
+    @NotNull public final MathClassification getMathType() {
         return type;
-    }
-
-    @Nullable public final MTType getMathTypeValue() {
-        return typeValue;
     }
 
     @NotNull public PExp substitute(List<PExp> currents, PExp repl) {
@@ -141,18 +123,18 @@ public abstract class PExp {
         return substitute(e);
     }
 
-    /** Returns true if the {@link MTType} of this expression matches
+    /** Returns true if the {@link MathClassification} of this expression matches
      *  (or is a subtype) of {@code other}; {@code false} otherwise.
-     *  @param other some {@code MTType}.
+     *  @param other some {@code MathClassification}.
      *
      *  @return whether or not the math types of this or {@code other} matches
      */
-    public boolean typeMatches(MTType other) {
-        //return other.isSubtypeOf(getMathType());
+    public boolean typeMatches(MathClassification other) {
+        //return other.isSubtypeOf(getClassification());
         return true;
     }
 
-    /** @see PExp#typeMatches(MTType) */
+    /** @see PExp#typeMatches(MathClassification) */
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getMathType());
     }
@@ -303,7 +285,7 @@ public abstract class PExp {
 
     /** Returns a new version of this {@code PExp} where all occurences of the
      *  '@' marker are erased; useful in applying the 'remember' vcgen rule.
-     * 
+     *
      *  @return A '@-clean' version of this {@code PExp}.
      */
     @NotNull public abstract PExp withIncomingSignsErased();
