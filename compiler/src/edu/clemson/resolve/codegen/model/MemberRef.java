@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.programtype.PTNamed;
-import org.rsrg.semantics.programtype.PTType;
+import org.rsrg.semantics.programtype.ProgNamedType;
+import org.rsrg.semantics.programtype.ProgType;
 
 public class MemberRef extends Expr {
     public String name;
@@ -18,8 +18,8 @@ public class MemberRef extends Expr {
         this.isBaseRef = isBaseRef;
     }
 
-    public MemberRef(String name, PTType t) {
-        this(name, ((PTNamed) t).getName(), ((PTNamed) t)
+    public MemberRef(String name, ProgType t) {
+        this(name, ((ProgNamedType) t).getName(), ((ProgNamedType) t)
                 .getModuleIdentifier().getNameToken().getText());
     }
 }
