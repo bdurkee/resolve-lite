@@ -24,6 +24,7 @@ import org.rsrg.semantics.query.MathSymbolQuery;
 import org.rsrg.semantics.query.NameQuery;
 import org.rsrg.semantics.symbol.*;
 
+import javax.rmi.CORBA.Util;
 import java.util.*;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
@@ -796,21 +797,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    private MathClassification entailsRetype = null;
-    @Override public Void visitEntailsClause(
-            ResolveParser.EntailsClauseContext ctx) {
-
-        for (ResolveParser.MathEntailsListContext clfsGrp :
-                ctx.mathEntailsList()) {
-            System.out.println("Reclassifying : "+clfsGrp.getText());
-            this.visit(clfsGrp.mathClssftnExp());
-            entailsRetype = exactNamedMathClssftns.get(clfsGrp.mathClssftnExp());
-            clfsGrp.mathExp().forEach(this::visit);
-            entailsRetype = null;
-        }
-        return null;
-    }
-
     @Override public Void visitMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
         walkingType = true;
@@ -828,35 +814,44 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    /*@Override public Void visitMathEntailsExp(
-            ResolveParser.MathEntailsExpContext ctx) {
-        //this.visit(ctx.m)
-        return null;
-    }*/
-
-    //boolean walkingEntailsClause = Utils.getFirstAncestorOfType(
-    //        ctx, ResolveParser.EntailsClauseContext.class) != null;
+    private MathClassification entailsRetype = null;
     @Override public Void visitMathClssftnAssertionExp(
             ResolveParser.MathClssftnAssertionExpContext ctx) {
-        this.visit(ctx.mathExp());
+        this.visit(ctx.mathExp(1)); //visit the asserted clssfctn
         MathClassification rhsColonType =
-                exactNamedMathClssftns.get(ctx.mathExp());
-        MathClassification ty =
-                new MathNamedClassification(g, ctx.ID().getText(),
-                        rhsColonType.typeRefDepth - 1, rhsColonType);
-
-        ty.identifiesSchematicType = true;
-        try {
-            symtab.getInnermostActiveScope().define(
-                    new MathSymbol(g, ctx.ID().getText(), ty));
-        } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), e.getOffendingSymbol().getName());
+                exactNamedMathClssftns.get(ctx.mathExp(1));
+        boolean walkingEntails = Utils.getFirstAncestorOfType(
+                ctx, ResolveParser.EntailsClauseContext.class) != null;
+        if (walkingEntails) {
+            entailsRetype = rhsColonType;
+            this.visit(ctx.mathExp(0));
+            entailsRetype = null;
         }
+        else if (ctx.mathExp(0).getChild(0).getChild(0)
+                instanceof ResolveParser.MathSymbolExpContext) {
+            MathClassification ty =
+                    new MathNamedClassification(g,
+                            ctx.mathExp().get(0).getText(),
+                            rhsColonType.typeRefDepth - 1, rhsColonType);
 
-        //defnSchematicTypes.put(ctx.ID().getText(), ty);
-        exactNamedMathClssftns.put(ctx, ty);
-        tr.mathClssftns.put(ctx, ty);
+            ty.identifiesSchematicType = true;
+            try {
+                symtab.getInnermostActiveScope().define(
+                        new MathSymbol(g, ctx.mathExp().get(0).getText(), ty));
+            } catch (DuplicateSymbolException e) {
+                compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                        ctx.getStart(), e.getOffendingSymbol().getName());
+            }
+
+            //defnSchematicTypes.put(ctx.ID().getText(), ty);
+            exactNamedMathClssftns.put(ctx, ty);
+            tr.mathClssftns.put(ctx, ty);
+        }
+        else {
+            System.out.println("Illegl implicit type parameter: "+ctx.getText());
+            exactNamedMathClssftns.put(ctx, g.INVALID);
+            tr.mathClssftns.put(ctx, g.INVALID);
+        }
         return null;
     }
 

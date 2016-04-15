@@ -408,10 +408,7 @@ correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
-entailsClause : 'which_entails' mathExp* ;
-mathEntailsList
-    :    '(' mathExp (',' mathExp)* ':' mathClssftnExp ')'
-    ;
+entailsClause : 'which_entails' mathExp ;
 
 // mathematical expressions
 
@@ -438,11 +435,10 @@ mathExp
     |   mathExp mathSetContainmentOpExp mathExp             #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
+    |   mathExp ':' mathExp                                      #mathClssftnAssertionExp
     |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
-    |   ID ':' mathExp                                      #mathClssftnAssertionExp
-//    |   mathExp 'which_entails' '(' mathExp (',' mathExp)* ':' mathClssftnExp ')' #mathEntailsExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   mathPrimeExp                                        #mathPrimaryExp
     ;

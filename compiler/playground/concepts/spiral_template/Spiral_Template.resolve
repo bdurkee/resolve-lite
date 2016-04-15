@@ -7,8 +7,8 @@ Concept Spiral_Template (type Label;
          Basic_Natural_Number_Theory,
          Basic_Spiral_Theory;
     requires 2 ≤ k and 1 ≤ Max_Length
-                        which_entails (k : N2);
-
+                        which_entails k : N2;
+/*
     Type family Spiral
           is modeled by Cart_Prod
             Lab : Sp_Loc(k) ⟶ Label;
@@ -30,6 +30,5 @@ Concept Spiral_Template (type Label;
                     SS(k)(@P.Trmnl_Loc) and
                 P.Lab = λ q : Sp_Loc(k),
                         {{@e if q = @P.Trmnl_Loc;
-                          @P.Lab(q) otherwise;}};
-
+                          @P.Lab(q) otherwise;}};*/
 end Spiral_Template;
