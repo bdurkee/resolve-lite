@@ -33,12 +33,12 @@ Implementation Sp_Array_Impl for Spiral_Template;
     Procedure Spiral_Out (updates P : Spiral);
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
-/*
+
     Procedure Spiral_In (updates P : Spiral_Pos);
         P.Curr_Place := P.Curr_Place - 1;
     end Spiral_In;
 
-    Procedure Swap_Label (updates P : Spiral_Pos;
+/*    Procedure Swap_Label (updates P : Spiral_Pos;
                           updates e : Label);
         Arry_Fac :: Swap_Entry(P.Labl, e, P.Curr_Place);
     end Swap_Label;
