@@ -31,4 +31,8 @@ Concept Spiral_Template (type Label;
                 P.Lab = λ q : Sp_Loc(k),
                         {{@e if q = @P.Trmnl_Loc;
                           @P.Lab(q) otherwise;}};
+
+    Operation Spiral_Out (updates P : Spiral);
+        requires P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc);
+        ensures true;
 end Spiral_Template;

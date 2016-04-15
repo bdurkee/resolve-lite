@@ -16,9 +16,9 @@ Implementation Sp_Array_Impl for Spiral_Template;
                P.Curr_Place : N and P.Length : N;
         correspondence
           conc.P.Trmnl_Loc = IA(
-            SS(k), Cen(k), P.Length) and
+                SS(k), Cen(k), P.Length) and
           conc.P.Curr_Loc = IA(
-            SS(k), Cen(k), P.Curr_Place) and
+                SS(k), Cen(k), P.Curr_Place) and
           conc.P.Lab =
             λ q : Sp_Loc(k),
               {{P.Labl(SCD(q)) if SCD(q) ≤ P.Length;
@@ -30,10 +30,10 @@ Implementation Sp_Array_Impl for Spiral_Template;
         P.Length := P.Length + 1;
     end Lengthen;
 
-/*    Procedure Spiral_Out (updates P : Spiral_Pos);
+    Procedure Spiral_Out (updates P : Spiral);
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
-
+/*
     Procedure Spiral_In (updates P : Spiral_Pos);
         P.Curr_Place := P.Curr_Place - 1;
     end Spiral_In;
