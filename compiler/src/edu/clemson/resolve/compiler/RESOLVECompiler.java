@@ -7,6 +7,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
+import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -230,14 +231,14 @@ public  class RESOLVECompiler {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        //VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
+        VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
         codegenPipe.process();
-        //vcsPipe.process();
+        vcsPipe.process();
     }
 
     @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
