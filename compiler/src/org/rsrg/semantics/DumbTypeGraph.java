@@ -99,8 +99,7 @@ public class DumbTypeGraph {
             else if (foundRelationship != null && foundRelationship.equals(supertype)) {
                 result = true;
             }
-            else if (subtypesEnclosingType != null &&
-                    subtypesEnclosingType.equals(supertype)) {
+            else if (supertype == SSET && subtype.enclosingClassification == SSET) {
                 result = true;
             }
             else if (subtype instanceof MathFunctionApplicationClassification &&

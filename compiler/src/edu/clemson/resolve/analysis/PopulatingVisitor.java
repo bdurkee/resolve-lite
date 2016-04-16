@@ -1239,6 +1239,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //activeQuantifications.pop();
         symtab.endScope();
         tr.mathClssftns.put(ctx, g.BOOLEAN);
+        exactNamedMathClssftns.put(ctx,
+                exactNamedMathClssftns.get(ctx.mathAssertionExp()));
         return null;
     }
 
@@ -1297,7 +1299,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
-
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClassification t = exactNamedMathClssftns.get(nameExp);
@@ -1369,10 +1370,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MathClassification actual = actualsIter.next();
             //MathClassification actualValue = actualValuesIter.next();
             MathClassification formal = formalsIter.next();
+            MathClassification actualVal = actualValuesIter.next();
+
             if (!g.isSubtype(actual, formal)) {
                     System.err.println("for function application: " +
                             ctx.getText() + "; arg type: " + actual +
                             " not acceptable where: " + formal + " was expected");
+            }
+            if (actualVal.typeRefDepth == 0 && formal.typeRefDepth >= 2) {
+                System.err.println("for function application: " +
+                        ctx.getText() + "; arg: '" + actualVal +
+                        "' not acceptable where a set is expected");
             }
         }
 

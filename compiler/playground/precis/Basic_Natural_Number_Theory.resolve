@@ -4,6 +4,20 @@ Precis Basic_Natural_Number_Theory;
     Categorical Definition for N : SSet, 0 : N, suc : N ⟶ N is
         Is_Monogeneric_for(N, 0, suc);
 
+    Inductive Definition (m : N) + (n : N) : N is
+        (i.)  m + 0 = 0;
+        (ii.) m + suc(n) = suc(m + n);
 
+    Theorem N3: ∀ m, n : N, suc(m) + n = suc(m + n);
+
+    Theorem N6: ∀ n : N, n = 0 or (∃ p : N, n = suc(p));
+
+    Definition (m : N) ≥ (n : N) : B;
+    Definition (m : N) <= (n : N) : B;
+    Definition (m : N) > (n : N) : B;
+    Definition (m : N) < (n : N) : B;
+
+    Definition 1 : N; //is suc(0);
+    Definition 2 : N;// is suc(1);
 
 end Basic_Natural_Number_Theory;
