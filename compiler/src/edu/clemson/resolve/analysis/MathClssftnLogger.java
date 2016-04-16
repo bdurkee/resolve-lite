@@ -1,5 +1,6 @@
 package edu.clemson.resolve.analysis;
 
+import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -7,85 +8,87 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.rsrg.semantics.MathClassification;
 
-public class MathClassificationPrintingListener extends ResolveBaseListener {
+public class MathClssftnLogger extends ResolveBaseListener {
 
-    @NotNull private final ParseTreeProperty<MathClassification> types;
+    private final ParseTreeProperty<MathClassification> types;
+    private final RESOLVECompiler compiler;
 
-    public MathClassificationPrintingListener(
+    public MathClssftnLogger(@NotNull RESOLVECompiler rc,
             @NotNull ParseTreeProperty<MathClassification> types) {
         this.types = types;
+        this.compiler = rc;
     }
 
     @Override public void enterMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
-        System.out.println("----------[enterMathTypeExp]");
+        compiler.log("----------[exitMathTypeExp]");
     }
 
     @Override public void exitMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
-        System.out.println("----------[exitMathTypeExp]");
+        compiler.log("----------[exitMathTypeExp]");
     }
 
     @Override public void exitMathPrefixAppExp(
             ResolveParser.MathPrefixAppExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathInfixAppExp(
             ResolveParser.MathInfixAppExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathSetRestrictionExp(
             ResolveParser.MathSetRestrictionExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
     @Override public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
-        printClassification(ctx);
+        logClssftn(ctx);
     }
 
-    private void printClassification(@NotNull ParserRuleContext ctx) {
+    private void logClssftn(@NotNull ParserRuleContext ctx) {
         MathClassification t = types.get(ctx);
         if ( t == null ) {
-            System.out.println("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");
+            compiler.log("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");
             return;
         }
         String colonOp = " : ";
-        if (t == t.getTypeGraph().CLS) {
+        if ( t == t.getTypeGraph().CLS ) {
             colonOp = " ː ";
         }
-        System.out.println("["+ctx.getClass().getSimpleName()+"]"+
+        compiler.log("["+ctx.getClass().getSimpleName()+"]"+
                 ctx.getText()+colonOp+t+"  <"+t.getClass().getSimpleName()+">");
     }
 }

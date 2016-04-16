@@ -229,14 +229,14 @@ public  class RESOLVECompiler {
         List<AnnotatedModule> targets = sortTargetModulesByUsesReferences();
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
+        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
         //VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
-        //codegenPipe.process();
+        codegenPipe.process();
         //vcsPipe.process();
     }
 

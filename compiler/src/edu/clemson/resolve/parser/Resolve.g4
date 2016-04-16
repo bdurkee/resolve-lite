@@ -435,9 +435,10 @@ mathExp
     |   mathExp mathSetContainmentOpExp mathExp             #mathInfixAppExp
     |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
-    |   mathExp ':' mathExp                                      #mathClssftnAssertionExp
-    |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
+
+    |   mathExp ':' mathExp                                 #mathClssftnAssertionExp
+    |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   mathPrimeExp                                        #mathPrimaryExp

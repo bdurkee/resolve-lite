@@ -139,6 +139,24 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override public Void visitConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
+        try {
+            //implementations implicitly gain the parenting concept's useslist
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(
+                    new ModuleIdentifier(ctx.concept));
+            moduleScope.addImports(conceptScope.getImports());
+
+            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
+        } catch (NoSuchModuleException e) {
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE,
+                    ctx.concept, ctx.concept.getText());
+        }
+        super.visitChildren(ctx);
+        return null;
+    }
+
+
     @Override public Void visitParameterDeclGroup(
             ResolveParser.ParameterDeclGroupContext ctx) {
         this.visit(ctx.type());
@@ -262,7 +280,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 ctx.requiresClause(), ctx.ensuresClause(), ctx);
         return null;
     }
-
 
     @Override public Void visitProcedureDecl(
             ResolveParser.ProcedureDeclContext ctx) {
@@ -1207,7 +1224,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, ty);
         }
         else {
-            System.out.println("Illegl implicit type parameter: "+ctx.getText());
+            compiler.errMgr.semanticError(
+                    ErrorKind.ILLEGAL_IMPLICIT_CLSSFTN_PARAM,
+                    ctx.getStart(), ctx.getText());
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
         }
@@ -1308,8 +1327,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             t = ((MathNamedClassification) t).enclosingClassification;
         }
         if (!(t instanceof MathFunctionClassification)) {
-            compiler.errMgr.semanticError(ErrorKind.APPLYING_NON_FUNCTION,
-                    nameExp.getStart(), nameExp.getText());
+            if (t != g.INVALID && t.enclosingClassification != g.INVALID) { //only tell users if its a meaning 'non-function' classification
+                compiler.errMgr.semanticError(ErrorKind.APPLYING_NON_FUNCTION,
+                        nameExp.getStart(), nameExp.getText());
+            }
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
@@ -1348,11 +1369,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             expectedFuncType = (MathFunctionClassification)
                     expectedFuncType.deschematize(actualArgumentTypes);
             if (!oldExpectedFuncType.toString().equals(expectedFuncType.toString())) {
-                compiler.errMgr.info("expected function type: "+oldExpectedFuncType);
-                compiler.errMgr.info("   deschematizes to: "+expectedFuncType);
+                compiler.log("expected function type: "+oldExpectedFuncType);
+                compiler.log("   deschematizes to: "+expectedFuncType);
             }
         } catch (BindingException e) {
-            System.out.println("formal params in: '" + asString +
+            compiler.log("formal params in: '" + asString +
                     "' don't bind against the actual arg types");
         }
         //we have to redo this since deschematize above might've changed the
@@ -1377,10 +1398,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
 
             MathClassification actualVal = actualValuesIter.next();
-            //if someone tries to pass a literal (say, 'true') for something
-            //where SSET is expected...
-            if (actualVal != null && actualVal.typeRefDepth == 0 &&
-                        formal.typeRefDepth >= 2) {
+            //if someone tries to pass a literal (say, 'true') for some
+            //formal x : SSET ... we need a notion of 'value' to check this.
+            //the if below is where this happens.
+            if (actualVal != null && actualVal != g.INVALID
+                    && actualVal.typeRefDepth == 0
+                    && formal.typeRefDepth >= 2) {
                 //its ok if we're a schematic type whose enclosing classification is a set
                 if (actualVal.identifiesSchematicType &&
                         actualVal.enclosingClassification.typeRefDepth >= 1) {
@@ -1567,7 +1590,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
-        compiler.errMgr.info("lambda exp: " + ctx.getText());
+        compiler.log("lambda exp: " + ctx.getText());
 
         walkingDefnParams = true;
         //activeQuantifications.push(Quantification.UNIVERSAL);

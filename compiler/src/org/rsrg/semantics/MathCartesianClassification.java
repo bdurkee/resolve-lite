@@ -22,6 +22,7 @@ public class MathCartesianClassification extends MathClassification {
                                        List<Element> elements) {
         super(g, g.CLS);
         this.elements.addAll(elements);
+        this.typeRefDepth = 1;
         for (Element e : elements) {
             tagsToElements.put(e.getTag(), e);
         }

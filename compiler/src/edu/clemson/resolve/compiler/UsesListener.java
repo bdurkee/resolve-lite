@@ -50,7 +50,7 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    /*@Override public void enterConceptExtImplModuleDecl(
+    @Override public void enterConceptExtImplModuleDecl(
             ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.extension));
         tr.uses.add(new ModuleIdentifier(ctx.concept));
@@ -62,7 +62,7 @@ public class UsesListener extends ResolveBaseListener {
             ResolveParser.ConceptExtModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
-    }*/
+    }
 
     @Override public void exitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {

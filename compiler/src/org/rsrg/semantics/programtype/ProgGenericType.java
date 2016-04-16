@@ -31,8 +31,8 @@ public class ProgGenericType extends ProgType {
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
-        if ( genericInstantiations.containsKey(this) ) {
-            result = genericInstantiations.get(this);
+        if ( genericInstantiations.containsKey(this.name) ) {
+            result = genericInstantiations.get(this.name);
         }
         return result;
     }
