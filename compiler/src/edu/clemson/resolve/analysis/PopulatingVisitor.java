@@ -1368,19 +1368,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //SUBTYPE AND EQUALITY CHECK FOR ARGS HAPPENS HERE
         while (actualsIter.hasNext()) {
             MathClassification actual = actualsIter.next();
-            //MathClassification actualValue = actualValuesIter.next();
             MathClassification formal = formalsIter.next();
-            MathClassification actualVal = actualValuesIter.next();
 
             if (!g.isSubtype(actual, formal)) {
                     System.err.println("for function application: " +
                             ctx.getText() + "; arg type: " + actual +
                             " not acceptable where: " + formal + " was expected");
             }
-            if (actualVal.typeRefDepth == 0 && formal.typeRefDepth >= 2) {
+
+            MathClassification actualVal = actualValuesIter.next();
+            //if someone tries to pass a literal (say, 'true') for something
+            //where SSET is expected...
+            if (actualVal != null && actualVal.typeRefDepth == 0 &&
+                        formal.typeRefDepth >= 2) {
+                //its ok if we're a schematic type whose enclosing classification is a set
+                if (actualVal.identifiesSchematicType &&
+                        actualVal.enclosingClassification.typeRefDepth >= 1) {
+                    continue;
+                }
                 System.err.println("for function application: " +
                         ctx.getText() + "; arg: '" + actualVal +
                         "' not acceptable where a set is expected");
+
             }
         }
 
@@ -1605,8 +1614,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             expectType(ctx.condition, g.BOOLEAN);
         }
         tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.result));
-        //tr.mathTypes.put(ctx, tr.mathTypes.get(ctx.result));
-        //tr.mathTypeValues.put(ctx, tr.mathTypeValues.get(ctx.result));
         return null;
     }
 

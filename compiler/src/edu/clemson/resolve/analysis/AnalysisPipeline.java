@@ -35,10 +35,10 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
 
-            MathClassificationPrintingListener pl =
+           /* MathClassificationPrintingListener pl =
                     new MathClassificationPrintingListener(unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
-
+*/
         }
     }
 }

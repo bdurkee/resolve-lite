@@ -449,14 +449,6 @@ public  class RESOLVECompiler {
         return outputDir;
     }
 
-    public void log(@Nullable String component, @NotNull String msg) {
-        logMgr.log(component, msg);
-    }
-
-    public void log(@NotNull String msg) {
-        log(null, msg);
-    }
-
     public void addListener(@Nullable RESOLVECompilerListener cl) {
         if ( cl!=null ) listeners.add(cl);
     }
@@ -485,6 +477,14 @@ public  class RESOLVECompiler {
             String s = String.format(" %-19s %s", name, o.description);
             info(s);
         }
+    }
+
+    public void log(@Nullable String component, @NotNull String msg) {
+        logMgr.log(component, msg);
+    }
+
+    public void log(@NotNull String msg) {
+        log(null, msg);
     }
 
     public void info(@NotNull String msg) {
