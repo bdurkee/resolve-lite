@@ -110,17 +110,17 @@ public abstract class Symbol {
     }
 
     @NotNull public abstract Symbol instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility);
 
-    @NotNull public static Map<MathClassification, MathClassification> buildMathTypeGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations) {
+    @NotNull public static Map<String, MathClassification> buildMathTypeGenerics(
+            @NotNull Map<String, ProgType> genericInstantiations) {
 
-        Map<MathClassification, MathClassification> genericMathematicalInstantiations = new HashMap<>();
+        Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();
 
-        for (Map.Entry<ProgType, ProgType> instantiation : genericInstantiations
+        for (Map.Entry<String, ProgType> instantiation : genericInstantiations
                 .entrySet()) {
-            genericMathematicalInstantiations.put(instantiation.getKey().toMath(),
+            genericMathematicalInstantiations.put(instantiation.getKey(),
                     instantiation.getValue().toMath());
         }
         return genericMathematicalInstantiations;

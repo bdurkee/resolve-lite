@@ -15,7 +15,7 @@ public abstract class AbstractScope implements Scope {
             throws DuplicateSymbolException, UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
-        Map<ProgType, ProgType> genericInstantiations = new HashMap<>();
+        Map<String, ProgType> genericInstantiations = new HashMap<>();
         addMatches(searcher, result, searchedScopes,
                 genericInstantiations, null, l);
         return result;

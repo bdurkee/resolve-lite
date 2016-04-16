@@ -61,13 +61,13 @@ public class MathClssftnWrappingSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         /*for (String schematicType : mySchematicTypes.keySet()) {
             genericInstantiations.remove(schematicType);
         }*/
 
-        Map<MathClassification, MathClassification> genericMathematicalInstantiations =
+        Map<String, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
         if (genericInstantiations.isEmpty()) return this;

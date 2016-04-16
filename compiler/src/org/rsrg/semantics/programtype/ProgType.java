@@ -30,7 +30,7 @@ public abstract class ProgType {
     }
 
     @NotNull public abstract ProgType instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility);
 
     /** Returns {@code true} <strong>iff</strong> a value of this type

@@ -47,10 +47,10 @@ public class ProgFamilyType extends ProgNamedType {
     }
 
     @NotNull @Override public ProgType instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
 
-        Map<MathClassification, MathClassification> mathTypeToMathType =
+        Map<String, MathClassification> mathTypeToMathType =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
       /*  @SuppressWarnings("unchecked") Map<MathClassification, MathClassification> mathTypeToMathType =

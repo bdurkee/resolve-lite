@@ -22,11 +22,11 @@ public class InstantiatedScope extends AbstractScope {
 
     private final Scope baseScope;
     private final FacilitySymbol instantiatingFacility;
-    private final Map<ProgType, ProgType> additionalGenericInstantiations =
+    private final Map<String, ProgType> additionalGenericInstantiations =
             new HashMap<>();
 
     public InstantiatedScope(Scope baseScope,
-                             Map<ProgType, ProgType> genericInstantiations,
+                             Map<String, ProgType> genericInstantiations,
                              FacilitySymbol instantiatingFacility) {
         this.baseScope = baseScope;
         additionalGenericInstantiations.putAll(genericInstantiations);
@@ -50,7 +50,7 @@ public class InstantiatedScope extends AbstractScope {
     @Override public <E extends Symbol> boolean
             addMatches(@NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
                     @NotNull Set<Scope> searchedScopes,
-                    @NotNull Map<ProgType, ProgType> genericInstantiations,
+                    @NotNull Map<String, ProgType> genericInstantiations,
                     FacilitySymbol facilityInstantiation,
                     @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException {

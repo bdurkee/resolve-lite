@@ -56,7 +56,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         Set<Scope> searchedScopes = new HashSet<>();
-        Map<ProgType, ProgType> genericInstantiations = new HashMap<>();
+        Map<String, ProgType> genericInstantiations = new HashMap<>();
 
         searchModule(searcher, source, repo, result, searchedScopes,
                 genericInstantiations, null, importStrategy, 0);
@@ -68,7 +68,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo,  @NotNull List<E> results,
             @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull ImportStrategy importStrategy, int depth)
             throws DuplicateSymbolException,
@@ -120,7 +120,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     public <E extends Symbol> boolean searchFacilities(
             @NotNull TableSearcher<E> searcher, @NotNull List<E> result,
             @NotNull Scope source,
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull Set<Scope> searchedScopes, MathSymbolTable repo)
             throws DuplicateSymbolException, NoSuchModuleException,
             UnexpectedSymbolException {
@@ -145,7 +145,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
             finished =
                     facilityScope.addMatches(searcher, result, searchedScopes,
-                            new HashMap<ProgType, ProgType>(), null,
+                            new HashMap<String, ProgType>(), null,
                             SearchContext.FACILITY);
 
             // YS Edits

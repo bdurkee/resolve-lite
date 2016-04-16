@@ -314,7 +314,7 @@ public class MathSymbolTable {
                 @NotNull TableSearcher<E> searcher,
                 @NotNull List<E> matches,
                 @NotNull Set<Scope> searchedScopes,
-                @NotNull Map<ProgType, ProgType> genericInstantiations,
+                @NotNull Map<String, ProgType> genericInstantiations,
                 FacilitySymbol instantiatingFacility,
                 @NotNull TableSearcher.SearchContext l)
                 throws DuplicateSymbolException {

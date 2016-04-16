@@ -89,7 +89,7 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
             @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException,
@@ -138,7 +138,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull private Map<String, Symbol> updateSymbols(
             @NotNull Map<String, Symbol> currentBindings,
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
 

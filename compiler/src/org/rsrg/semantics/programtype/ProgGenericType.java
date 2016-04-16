@@ -28,7 +28,7 @@ public class ProgGenericType extends ProgType {
     }
 
     @NotNull @Override public ProgType instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
         if ( genericInstantiations.containsKey(this) ) {

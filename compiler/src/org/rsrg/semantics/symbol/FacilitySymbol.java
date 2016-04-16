@@ -107,7 +107,7 @@ public class FacilitySymbol extends Symbol {
     }
 
     @NotNull @Override public FacilitySymbol instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         //TODO : This is probably wrong.  One of the parameters to a module
         //       used in the facility could be a generic, in which case it

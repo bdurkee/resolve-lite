@@ -32,7 +32,7 @@ public class ModuleParameterization {
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
-            Map<ProgType, ProgType> genericInstantiations =
+            Map<String, ProgType> genericInstantiations =
                     getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
                         genericInstantiations, instantiatingFacility);
@@ -53,10 +53,10 @@ public class ModuleParameterization {
     }*/
 
     //TODO: Annotate actualArguments as not null!
-    private Map<ProgType, ProgType> getGenericInstantiations(
+    private Map<String, ProgType> getGenericInstantiations(
             @NotNull ModuleScopeBuilder moduleScope,
             List<ResolveParser.ProgExpContext> actualArguments) {
-        Map<ProgType, ProgType> result = new HashMap<>();
+        Map<String, ProgType> result = new HashMap<>();
 
         List<ModuleParameterSymbol> moduleParams =
                 moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
@@ -87,7 +87,7 @@ public class ModuleParameterization {
         Iterator<ProgTypeSymbol> suppliedGenericIter =
                 actualGenerics.iterator();
         for (ProgParameterSymbol formalGeneric : formalGenerics) {
-            result.put(formalGeneric.getDeclaredType(), suppliedGenericIter
+            result.put(formalGeneric.getName(), suppliedGenericIter
                     .next().getProgramType());
         }
         return result;

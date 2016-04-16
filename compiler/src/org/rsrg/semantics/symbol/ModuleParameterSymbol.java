@@ -99,7 +99,7 @@ public class ModuleParameterSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<ProgType, ProgType> genericInstantiations,
+            @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         return wrappedParamSymbol.instantiateGenerics(
                 genericInstantiations, instantiatingFacility);
