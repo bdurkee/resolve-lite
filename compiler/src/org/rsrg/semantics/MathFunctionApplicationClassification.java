@@ -42,7 +42,7 @@ public class MathFunctionApplicationClassification extends MathClassification {
     }
 
     @Override public MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions) {
+            Map<String, MathClassification> substitutions) {
         MathFunctionClassification newNameType =
                 (MathFunctionClassification)function
                         .withVariablesSubstituted(substitutions);

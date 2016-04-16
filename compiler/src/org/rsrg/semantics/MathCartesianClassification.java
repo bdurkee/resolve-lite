@@ -40,7 +40,7 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     @Override public MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions) {
+            Map<String, MathClassification> substitutions) {
         List<Element> newElements = new ArrayList<>();
         for (Element element : elements) {
             newElements.add(

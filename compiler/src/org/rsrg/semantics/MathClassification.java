@@ -112,6 +112,6 @@ public abstract class MathClassification {
     //indicate this is just for names; would also be more in line with the name
     //of this method...
     public abstract MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions);
+            Map<String, MathClassification> substitutions);
 
 }
