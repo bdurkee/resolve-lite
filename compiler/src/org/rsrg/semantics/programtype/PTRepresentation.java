@@ -84,7 +84,7 @@ public class PTRepresentation extends ProgNamedType {
     }
 
     @NotNull @Override public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         throw new UnsupportedOperationException(this.getClass() + " cannot "
                 + "be instantiated.");

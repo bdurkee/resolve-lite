@@ -34,7 +34,7 @@ Implementation Sp_Array_Impl for Spiral_Template;
         P.Curr_Place := P.Curr_Place + 1;
     end Spiral_Out;
 
-    Procedure Spiral_In (updates P : Spiral_Pos);
+    Procedure Spiral_In (updates P : Spiral);
         P.Curr_Place := P.Curr_Place - 1;
     end Spiral_In;
 

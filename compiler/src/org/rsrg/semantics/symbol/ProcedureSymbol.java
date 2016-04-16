@@ -29,7 +29,7 @@ public class ProcedureSymbol extends Symbol {
     }
 
     @NotNull @Override public ProcedureSymbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProcedureSymbol(getName(), getDefiningTree(), getModuleIdentifier(),

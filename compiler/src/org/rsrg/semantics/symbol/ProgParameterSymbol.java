@@ -87,7 +87,7 @@ public class ProgParameterSymbol extends Symbol {
     private final ProgType declaredType;
     private final DumbTypeGraph typeGraph;
 
-    private MathSymbol mathSymbolAlterEgo;
+    private MathClssftnWrappingSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
 
     @Nullable private String typeQualifier;
@@ -105,13 +105,13 @@ public class ProgParameterSymbol extends Symbol {
         this.mathSymbolAlterEgo = null;
         if (mode == ParameterMode.TYPE) {
             this.mathSymbolAlterEgo =
-                    new MathSymbol(g, name, Quantification.NONE, type.toMath(),
+                    new MathClssftnWrappingSymbol(g, name, Quantification.NONE, type.toMath(),
                             definingTree, moduleIdentifier);
         }
         else {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
-                    new MathSymbol(g, name, Quantification.NONE,
+                    new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
                             new MathNamedClassification(g, name, level,
                             type.toMath()),
                             definingTree, moduleIdentifier);
@@ -137,7 +137,7 @@ public class ProgParameterSymbol extends Symbol {
         return mode;
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
@@ -178,7 +178,7 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,

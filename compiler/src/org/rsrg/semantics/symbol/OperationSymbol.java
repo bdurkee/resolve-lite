@@ -72,7 +72,7 @@ public class OperationSymbol extends Symbol {
     }
 
     @NotNull @Override public OperationSymbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         InstantiationFunction f =
@@ -89,14 +89,14 @@ public class OperationSymbol extends Symbol {
             implements
                 Function<ProgParameterSymbol, ProgParameterSymbol> {
 
-        @NotNull private final Map<String, ProgType> genericInstantiations;
+        @NotNull private final Map<ProgType, ProgType> genericInstantiations;
         @NotNull private final FacilitySymbol instantiatingFacility;
 
         public InstantiationFunction(
-                @NotNull Map<String, ProgType> instantiations,
+                @NotNull Map<ProgType, ProgType> instantiations,
                 @NotNull FacilitySymbol instantiatingFacility) {
             this.genericInstantiations =
-                    new HashMap<String, ProgType>(instantiations);
+                    new HashMap<ProgType, ProgType>(instantiations);
             this.instantiatingFacility = instantiatingFacility;
         }
 

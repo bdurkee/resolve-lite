@@ -15,19 +15,19 @@ import org.rsrg.semantics.programtype.ProgFamilyType;
  */
 public class TypeModelSymbol extends ProgTypeSymbol {
 
-    @NotNull private final MathSymbol exemplar;
+    @NotNull private final MathClssftnWrappingSymbol exemplar;
 
     public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                            @NotNull MathClassification modelType,
                            @NotNull ProgFamilyType programType,
-                           @NotNull MathSymbol exemplar,
+                           @NotNull MathClssftnWrappingSymbol exemplar,
                            @Nullable ParserRuleContext definingTree,
                            @NotNull ModuleIdentifier moduleIdentifier) {
         super(g, name, programType, modelType, definingTree, moduleIdentifier);
         this.exemplar = exemplar;
     }
 
-    @NotNull public MathSymbol getExemplar() {
+    @NotNull public MathClssftnWrappingSymbol getExemplar() {
         return exemplar;
     }
 

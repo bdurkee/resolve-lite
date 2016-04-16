@@ -13,7 +13,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull protected final MathClassification modelType;
     @NotNull protected final ProgType type;
-    @NotNull protected final MathSymbol mathTypeAlterEgo;
+    @NotNull protected final MathClssftnWrappingSymbol mathTypeAlterEgo;
     @NotNull protected final DumbTypeGraph g;
 
     public ProgTypeSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
@@ -26,7 +26,7 @@ public class ProgTypeSymbol extends Symbol {
         this.g = g;
         this.modelType = modelType == null ? g.INVALID : modelType;
         this.mathTypeAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, modelType,
+                new MathClssftnWrappingSymbol(g, name, Quantification.NONE, modelType,
                         definingTree, moduleIdentifier);
     }
 
@@ -38,7 +38,7 @@ public class ProgTypeSymbol extends Symbol {
         return modelType;
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return mathTypeAlterEgo;
     }
 
@@ -60,20 +60,27 @@ public class ProgTypeSymbol extends Symbol {
     }
 
     @NotNull @Override public ProgTypeSymbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
-        Map<String, MathClassification> genericMathematicalInstantiations =
+        Map<MathClassification, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
-
+        if (genericMathematicalInstantiations.isEmpty()) return this;
+        MathClassification instModelEncClssftn =
+                modelType.enclosingClassification
+                        .withVariablesSubstituted(
+                                genericMathematicalInstantiations);
+        MathClassification instModelClssftn = modelType
+                .withVariablesSubstituted(
+                        genericMathematicalInstantiations);
+        instModelClssftn.enclosingClassification = instModelEncClssftn;
         /*VariableReplacingVisitor typeSubstitutor =
                 new VariableReplacingVisitor(genericMathematicalInstantiations);
         if (modelType != null) {
             modelType.accept(typeSubstitutor);
-        }
+        }*/
         return new ProgTypeSymbol(type.getTypeGraph(), getName(),
-                getProgramType(), typeSubstitutor.getFinalExpression(),
-                getDefiningTree(), getModuleIdentifier());*/
-        return null;
+                getProgramType(), instModelClssftn,
+                getDefiningTree(), getModuleIdentifier());
     }
 }

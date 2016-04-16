@@ -2,7 +2,6 @@ package org.rsrg.semantics;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,7 @@ import org.rsrg.semantics.query.MultimatchSymbolQuery;
 import org.rsrg.semantics.query.SymbolQuery;
 import org.rsrg.semantics.searchers.TableSearcher;
 import org.rsrg.semantics.symbol.FacilitySymbol;
-import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.MathClssftnWrappingSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 
 import java.util.*;
@@ -160,43 +159,43 @@ public class MathSymbolTable {
     private void initializeMathTypeSystem(@NotNull DumbTypeGraph g,
                                           @NotNull ScopeBuilder globalScope) {
         try {
-            globalScope.define(new MathSymbol(g, "B", g.BOOLEAN));
-            globalScope.define(new MathSymbol(g, "SSet", g.SSET));
-            globalScope.define(new MathSymbol(g, "Cls", g.CLS));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "Cls", g.CLS));
 
-            globalScope.define(new MathSymbol(g, "and", g.BOOLEAN_FUNCTION));
-            globalScope.define(new MathSymbol(g, "or", g.BOOLEAN_FUNCTION));
-            globalScope.define(new MathSymbol(g, "implies", g.BOOLEAN_FUNCTION));
-            globalScope.define(new MathSymbol(g, "Powerset", g.POWERSET_FUNCTION));
-            globalScope.define(new MathSymbol(g, "conc", g.BOOLEAN));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "and", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "or", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "implies", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "Powerset", g.POWERSET_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "conc", g.BOOLEAN));
 
-            globalScope.define(new MathSymbol(g, "is_in",
+            globalScope.define(new MathClssftnWrappingSymbol(g, "is_in",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
-            globalScope.define(new MathSymbol(g, "∈",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
-
-            globalScope.define(new MathSymbol(g, "is_not_in",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
-            globalScope.define(new MathSymbol(g, "∉",
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∈",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
 
-            globalScope.define(new MathSymbol(g, "~",
+            globalScope.define(new MathClssftnWrappingSymbol(g, "is_not_in",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∉",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathClssftnWrappingSymbol(g, "~",
                     new MathFunctionClassification(g, g.SSET, g.SSET, g.SSET)));
 
-            globalScope.define(new MathSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
-            globalScope.define(new MathSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
 
-            globalScope.define(new MathSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
-            globalScope.define(new MathSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));
 
             //aliases for our 'arrow type'
-            globalScope.define(new MathSymbol(g, "⟶", g.ARROW_FUNCTION));
-            globalScope.define(new MathSymbol(g, "->", g.ARROW_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "⟶", g.ARROW_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "->", g.ARROW_FUNCTION));
 
-            globalScope.define(new MathSymbol(g, "*", g.CROSS_PROD_FUNCTION));
-            globalScope.define(new MathSymbol(g, "=",
+            globalScope.define(new MathClssftnWrappingSymbol(g, "*", g.CROSS_PROD_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "=",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
-            globalScope.define(new MathSymbol(g, "/=",
+            globalScope.define(new MathClssftnWrappingSymbol(g, "/=",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate builtin symbol");
@@ -315,7 +314,7 @@ public class MathSymbolTable {
                 @NotNull TableSearcher<E> searcher,
                 @NotNull List<E> matches,
                 @NotNull Set<Scope> searchedScopes,
-                @NotNull Map<String, ProgType> genericInstantiations,
+                @NotNull Map<ProgType, ProgType> genericInstantiations,
                 FacilitySymbol instantiatingFacility,
                 @NotNull TableSearcher.SearchContext l)
                 throws DuplicateSymbolException {

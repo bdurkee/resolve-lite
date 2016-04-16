@@ -3,14 +3,14 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.MathClssftnWrappingSymbol;
 
 import java.util.*;
 
 public class MathCartesianClassification extends MathClassification {
 
     private final List<Element> elements = new ArrayList<>();
-    public final Map<String, MathSymbol> syms = new LinkedHashMap<>();
+    public final Map<String, MathClssftnWrappingSymbol> syms = new LinkedHashMap<>();
     public final Map<String, Element> tagsToElements =
             new LinkedHashMap<>();
 

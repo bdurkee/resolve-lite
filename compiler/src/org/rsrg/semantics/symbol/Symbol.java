@@ -3,10 +3,7 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathClassification;
-import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.SyntacticScope;
-import org.rsrg.semantics.UnexpectedSymbolException;
+import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.HashMap;
@@ -57,7 +54,7 @@ public abstract class Symbol {
 
     @NotNull public abstract String getSymbolDescription();
 
-    @NotNull public MathSymbol toMathSymbol()
+    @NotNull public MathClssftnWrappingSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
@@ -113,17 +110,17 @@ public abstract class Symbol {
     }
 
     @NotNull public abstract Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility);
 
-    @NotNull public static Map<String, MathClassification> buildMathTypeGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations) {
+    @NotNull public static Map<MathClassification, MathClassification> buildMathTypeGenerics(
+            @NotNull Map<ProgType, ProgType> genericInstantiations) {
 
-        Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();
+        Map<MathClassification, MathClassification> genericMathematicalInstantiations = new HashMap<>();
 
-        for (Map.Entry<String, ProgType> instantiation : genericInstantiations
+        for (Map.Entry<ProgType, ProgType> instantiation : genericInstantiations
                 .entrySet()) {
-            genericMathematicalInstantiations.put(instantiation.getKey(),
+            genericMathematicalInstantiations.put(instantiation.getKey().toMath(),
                     instantiation.getValue().toMath());
         }
         return genericMathematicalInstantiations;

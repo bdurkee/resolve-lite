@@ -10,7 +10,7 @@ public abstract class MathClassification {
 
     protected final DumbTypeGraph g;
     public int typeRefDepth = 0;
-    public final MathClassification enclosingClassification;
+    public MathClassification enclosingClassification;
 
     /** Really this should only apply to instances of {@link MathNamedClassification}s,
      *  as those are what represent the holes that can be filled in an arbitrary

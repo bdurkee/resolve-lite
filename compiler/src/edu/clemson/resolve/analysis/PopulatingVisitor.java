@@ -442,7 +442,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.TypeModelDeclContext ctx) {
         symtab.startScope(ctx);
         this.visit(ctx.mathClssftnExp());
-        MathSymbol exemplarSymbol = null;
+        MathClssftnWrappingSymbol exemplarSymbol = null;
         MathClassification modelType =
                 exactNamedMathClssftns.get(ctx.mathClssftnExp());
         MathNamedClassification exemplarMathType =
@@ -551,7 +551,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
         Map<String, ProgType> fields = new LinkedHashMap<>();
-        List<MathSymbol> mathSyms = new ArrayList<>();
+        List<MathClssftnWrappingSymbol> mathSyms = new ArrayList<>();
         //TODO: Maybe instead of fields just use the ProgVariableSymbols...
         for (ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx
                 .recordVarDeclGroup()) {
@@ -1084,20 +1084,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, defnType);
                     defnEnclosingScope
-                            .define(new MathSymbol(g, t.getText(), asNamed));
+                            .define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
                 }
             } else {
                 for (Token t : names) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
                     defnEnclosingScope
-                            .define(new MathSymbol(g, t.getText(), defnType));
+                            .define(new MathClssftnWrappingSymbol(g, t.getText(), defnType));
                 }
             }
         } else {
             for (Token t : names) {
                 defnEnclosingScope
-                        .define(new MathSymbol(g, t.getText(), g.INVALID));
+                        .define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
             }
         }
     }
@@ -1135,7 +1135,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     rhsColonType instanceof MathPowersetApplicationClassification);
             try {
                 symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, term.getText(), ty));
+                        new MathClssftnWrappingSymbol(g, term.getText(), ty));
             } catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.getStart(), e.getOffendingSymbol().getName());
@@ -1196,7 +1196,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ty.identifiesSchematicType = true;
             try {
                 symtab.getInnermostActiveScope().define(
-                        new MathSymbol(g, ctx.mathExp().get(0).getText(), ty));
+                        new MathClssftnWrappingSymbol(g, ctx.mathExp().get(0).getText(), ty));
             } catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.getStart(), e.getOffendingSymbol().getName());
@@ -1666,7 +1666,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                 @NotNull String name) {
         String here = ctx.getText();
 
-        MathSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
+        MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
         if (s == null || s.getClassification() == null) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
@@ -1687,7 +1687,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Nullable private MathSymbol getIntendedMathSymbol(
+    @Nullable private MathClssftnWrappingSymbol getIntendedMathSymbol(
             @Nullable Token qualifier, @NotNull String symbolName,
             @NotNull ParserRuleContext ctx) {
         try {

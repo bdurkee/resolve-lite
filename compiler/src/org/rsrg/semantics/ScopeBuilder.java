@@ -3,7 +3,7 @@ package org.rsrg.semantics;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.MathClssftnWrappingSymbol;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,30 +46,30 @@ public class ScopeBuilder extends SyntacticScope {
         return new ArrayList<>(children);
     }
 
-    public MathSymbol addBinding(String name, Quantification q,
-                                 ParserRuleContext definingTree, MathClassification type, MathClassification typeValue)
+    public MathClssftnWrappingSymbol addBinding(String name, Quantification q,
+                                                ParserRuleContext definingTree, MathClassification type, MathClassification typeValue)
             throws DuplicateSymbolException {
 
-        MathSymbol entry =
-                new MathSymbol(typeGraph, name, q, type, definingTree, moduleIdentifier);
+        MathClssftnWrappingSymbol entry =
+                new MathClssftnWrappingSymbol(typeGraph, name, q, type, definingTree, moduleIdentifier);
         symbols.put(name, entry);
         return entry;
     }
 
-    public MathSymbol addBinding(String name, Quantification q,
-                                 ParserRuleContext definingTree, MathClassification type)
+    public MathClssftnWrappingSymbol addBinding(String name, Quantification q,
+                                                ParserRuleContext definingTree, MathClassification type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
-    public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-                                 MathClassification type, MathClassification typeValue) throws DuplicateSymbolException {
+    public MathClssftnWrappingSymbol addBinding(String name, ParserRuleContext definingTree,
+                                                MathClassification type, MathClassification typeValue) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
     }
 
-    public MathSymbol addBinding(String name, ParserRuleContext definingTree,
-            MathClassification type) throws DuplicateSymbolException {
+    public MathClssftnWrappingSymbol addBinding(String name, ParserRuleContext definingTree,
+                                                MathClassification type) throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type);
     }
 }

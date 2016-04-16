@@ -88,7 +88,7 @@ public class ProgReprTypeSymbol extends Symbol {
                 getDefiningTree(), getModuleIdentifier());
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return toProgTypeSymbol().toMathSymbol();
     }
 
@@ -105,7 +105,7 @@ public class ProgReprTypeSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
         //type representations are an internal implementation detail of

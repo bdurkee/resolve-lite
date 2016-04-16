@@ -12,7 +12,7 @@ import org.rsrg.semantics.programtype.ProgType;
 import java.util.Map;
 
 /** A wrapper for a 'parameter-like symbol' such as an {@link OperationSymbol},
- *  {@link ProgParameterSymbol}, or {@link MathSymbol} that happens to be
+ *  {@link ProgParameterSymbol}, or {@link MathClssftnWrappingSymbol} that happens to be
  *  functioning as a formal parameter for a module when declared.
  */
 public class ModuleParameterSymbol extends Symbol {
@@ -30,7 +30,7 @@ public class ModuleParameterSymbol extends Symbol {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
-    public ModuleParameterSymbol(MathSymbol p) {
+    public ModuleParameterSymbol(MathClssftnWrappingSymbol p) {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
 
@@ -74,7 +74,7 @@ public class ModuleParameterSymbol extends Symbol {
     /** Handle these toXXXX methods strategically, meaning only those that a
      *  conceivably module parameterizable {@link Symbol} might need.
      */
-    @NotNull @Override public MathSymbol toMathSymbol()
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         return wrappedParamSymbol.toMathSymbol();
     }
@@ -99,7 +99,7 @@ public class ModuleParameterSymbol extends Symbol {
     }
 
     @NotNull @Override public Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         return wrappedParamSymbol.instantiateGenerics(
                 genericInstantiations, instantiatingFacility);

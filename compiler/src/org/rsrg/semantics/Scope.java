@@ -27,7 +27,7 @@ public interface Scope {
     public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher,
             @NotNull List<E> matches, @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
             @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;

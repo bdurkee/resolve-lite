@@ -28,13 +28,17 @@ public class ProgGenericType extends ProgType {
     }
 
     @NotNull @Override public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
-        if ( genericInstantiations.containsKey(name) ) {
-            result = genericInstantiations.get(name);
+        if ( genericInstantiations.containsKey(this) ) {
+            result = genericInstantiations.get(this);
         }
         return result;
+    }
+
+    @Override public int hashCode() {
+        return name.hashCode();
     }
 
     @Override public boolean equals(@Nullable Object o) {

@@ -35,7 +35,7 @@ public class ProgInvalidType extends ProgType {
     }
 
     @NotNull @Override public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
+            @NotNull Map<ProgType, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }
