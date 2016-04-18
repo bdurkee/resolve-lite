@@ -1383,6 +1383,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         List<MathClassification> actualValues =
                 Utils.apply(args, exactNamedMathClssftns::get);
+
+        Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
         Iterator<MathClassification> actualsIter = actualArgumentTypes.iterator();
         Iterator<MathClassification> formalsIter = formalParameterTypes.iterator();
         Iterator<MathClassification> actualValuesIter = actualValues.iterator();
@@ -1391,11 +1393,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         while (actualsIter.hasNext()) {
             MathClassification actual = actualsIter.next();
             MathClassification formal = formalsIter.next();
+            ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
 
             if (!g.isSubtype(actual, formal)) {
-                    System.err.println("for function application: " +
-                            ctx.getText() + "; arg type: " + actual +
-                            " not acceptable where: " + formal + " was expected");
+                    compiler.errMgr.semanticError(
+                            ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
+                            actual.toString(), formal.toString());
             }
 
             MathClassification actualVal = actualValuesIter.next();
@@ -1410,10 +1413,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         actualVal.enclosingClassification.typeRefDepth >= 1) {
                     continue;
                 }
-                System.err.println("for function application: " +
-                        ctx.getText() + "; arg: '" + actualVal +
-                        "' not acceptable where a set is expected");
-
+                compiler.errMgr.semanticError(
+                        ErrorKind.INVALID_APPLICATION_ARG2, argCtx.getStart(),
+                        actualVal.toString());
             }
         }
 

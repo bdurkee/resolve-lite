@@ -1,5 +1,6 @@
 Precis Monogenerator_Theory;
+    uses Basic_Function_Properties;
 
     Definition Is_Monogeneric_for
             (D : SSet, b : D, g : D ⟶ D) : B;
-end Monogenerator_Theory;
+end Monogenerator_Theor;

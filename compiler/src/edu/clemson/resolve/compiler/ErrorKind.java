@@ -257,7 +257,13 @@ public enum ErrorKind {
 
     ILLEGAL_PRIMARY_OPERATION_CALL(62, "procedure '<arg>' references another " +
             "primary operation with: <arg2>; primary operations shouldn't " +
-            "reference each other", ErrorSeverity.ERROR);
+            "reference each other", ErrorSeverity.ERROR),
+
+    INVALID_APPLICATION_ARG(63, "arg of classification: <arg> is not " +
+            "acceptable where <arg2> is required", ErrorSeverity.ERROR),
+
+    INVALID_APPLICATION_ARG2(64, "<arg> is not acceptable where a " +
+            "set is required", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

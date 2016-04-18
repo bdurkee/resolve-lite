@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  *
  *  @since 0.0.1
  */
-public  class RESOLVECompiler {
+public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 

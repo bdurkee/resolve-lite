@@ -4,7 +4,7 @@ Precis Basic_Spiral_Theory;
 
     Definition N2 : Powerset(N) is {n : N | n ≥ 2};
 
-    Definition Is_k_Spiral_Like(sp_loc : (k : N2) -> SSet,
+    Definition Is_k_Spiral_Like(sp_loc : (k : N2) ⟶ SSet,
         center : N2 ⟶ sp_loc(k),
             ss, rs : N2 ⟶ (sp_loc(k) ⟶ sp_loc(k))) : B;
 
@@ -23,7 +23,8 @@ Precis Basic_Spiral_Theory;
 
     Definition IA(f : (U : SSet) ⟶ (V : SSet), s : U, n : N) : V;
 
-    //Corollary Inw1: ∀ k : N2, ∀ m, n : N,
-    //    IA(SS(k),Cen(k), m) ∉ Inward_Loc(  IA(SS(k),Cen(k), n)  ) iff m < n;
+    Corollary Inw1: ∀ k : N2, ∀ m, n : N,
+        IA(SS(k),Cen(k), m) ∉ Inward_Loc(  IA(SS(k),Cen(k), n)  )
+                implies m < n;
 
 end Basic_Spiral_Theory;

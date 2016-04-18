@@ -1,7 +1,7 @@
 Concept Spiral_Template (type Label;
         evaluates k, Max_Length :
                         Std_Ints :: Integer);
-    uses Standard_Booleans, Standard_Integers,
+    /*uses Standard_Booleans, Standard_Integers,
          Set_App_Op_Ext,
          Basic_Integer_Theory,
          Basic_Natural_Number_Theory,
@@ -42,4 +42,5 @@ Concept Spiral_Template (type Label;
         requires P.Curr_Loc /= Cen(k);
         ensures P.Curr_Loc =
                     SS(k)(@P.Curr_Loc);
+                    */
 end Spiral_Template;

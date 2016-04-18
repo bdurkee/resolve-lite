@@ -2,12 +2,6 @@ Precis Extension Str_Relativization_Ext for General_String_Theory;
 
     Definition Str(T : Cls) : Powerset(SStr);
 
-    Corollary SRE1: Forall T : Cls, Empty_String : Str(T);
 
-    Inductive Definition Ag(a : Str(T : Cls), f : T * T -> T, I : T) : T is
-        (i.)  Ag(Empty_String, f, I) = I;
-        (ii.) true;
-
-    Definition Reverse(S : SStr) : SStr;
 
 end Str_Relativization_Ext;
