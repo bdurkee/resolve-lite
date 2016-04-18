@@ -2,7 +2,7 @@ package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;

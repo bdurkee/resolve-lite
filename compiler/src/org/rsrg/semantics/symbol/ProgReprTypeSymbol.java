@@ -88,7 +88,7 @@ public class ProgReprTypeSymbol extends Symbol {
                 getDefiningTree(), getModuleIdentifier());
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return toProgTypeSymbol().toMathSymbol();
     }
 

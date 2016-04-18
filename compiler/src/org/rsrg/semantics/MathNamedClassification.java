@@ -27,8 +27,8 @@ public class MathNamedClassification extends MathClassification {
     }
 
     @Override public MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions) {
-        MathClassification result = substitutions.get(this);
+            Map<String, MathClassification> substitutions) {
+        MathClassification result = substitutions.get(this.tag);
         return result == null ? this : result;
     }
 

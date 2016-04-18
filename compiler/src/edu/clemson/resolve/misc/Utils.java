@@ -155,7 +155,6 @@ public class Utils {
         if (ctx instanceof ResolveParser.ModuleDeclContext) {
             ctx = ctx.getChild(0);
         }
-
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext ) {
             return ((ResolveParser.PrecisModuleDeclContext) ctx).name;
         }

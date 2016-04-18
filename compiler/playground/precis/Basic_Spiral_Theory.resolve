@@ -23,8 +23,7 @@ Precis Basic_Spiral_Theory;
 
     Definition IA(f : (U : SSet) ⟶ (V : SSet), s : U, n : N) : V;
 
+    //Corollary Inw1: ∀ k : N2, ∀ m, n : N,
+    //    IA(SS(k),Cen(k), m) ∉ Inward_Loc(  IA(SS(k),Cen(k), n)  ) iff m < n;
 
-   /* Corollary Inw1: Forall k : N2, Forall m, n : N,
-        SS(k)(Cen(k)) ∉ Inward_Loc(SS(k)(Cen(k))) iff m < n;
-    */
 end Basic_Spiral_Theory;

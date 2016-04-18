@@ -2,7 +2,7 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -18,10 +18,15 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
     }
 
     @Override public void process() {
-        if (compiler.errMgr.getErrorCount() > 0) return;
+        //if (compiler.errMgr.getErrorCount() > 0) return;
         for (AnnotatedModule unit : compilationUnits) {
             compiler.info("populating: " + unit.getNameToken().getText());
             ParseTreeWalker walker = new ParseTreeWalker();
+
+
+            BasicSanityCheckingVisitor initialSanityChecks =
+                    new BasicSanityCheckingVisitor(compiler, unit);
+            initialSanityChecks.visit(unit.getRoot());
             PopulatingVisitor defSymsAndScopes =
                     new PopulatingVisitor(compiler, compiler.symbolTable,
                             unit);
@@ -31,12 +36,12 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
                             defSymsAndScopes.getTypeGraph(), unit);
             SanityCheckingListener sanityChecker =
                     new SanityCheckingListener(compiler, unit);
-//            walker.walk(pexpAnnotator, unit.getRoot());
+            walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
             if ( compiler.errMgr.getErrorCount() > 0 ) return;
 
-            MathClassificationPrintingListener pl =
-                    new MathClassificationPrintingListener(unit.mathClssftns);
+           MathClssftnLogger pl =
+                    new MathClssftnLogger(compiler, unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
 
         }

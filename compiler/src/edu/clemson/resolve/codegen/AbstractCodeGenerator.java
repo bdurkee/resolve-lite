@@ -3,7 +3,7 @@ package edu.clemson.resolve.codegen;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;

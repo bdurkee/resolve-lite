@@ -1,15 +1,3 @@
 Facility Boo;
-    uses Standard_Integers;
-
-    Operation Main ();
-        Procedure
-            Var x, y : Std_Ints :: Integer;
-
-    end Main;
-
-    Operation foo ();
-        Procedure
-
-    end foo;
 
 end Boo;

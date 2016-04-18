@@ -1,6 +1,5 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.compiler.RESOLVECompilerListener;
 import edu.clemson.resolve.compiler.RESOLVEMessage;
 import edu.clemson.resolve.misc.Utils;

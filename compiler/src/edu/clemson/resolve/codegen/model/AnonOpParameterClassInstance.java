@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.programtype.PTVoid;
+import org.rsrg.semantics.programtype.ProgVoidType;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.ProgParameterSymbol;
 
@@ -21,7 +21,7 @@ public class AnonOpParameterClassInstance extends Expr {
                                         OperationSymbol f) {
         this.name = f.getName();
         this.q = wrappedFunctionQualifier;
-        this.hasReturn = !(f.getReturnType() instanceof PTVoid);
+        this.hasReturn = !(f.getReturnType() instanceof ProgVoidType);
         this.params = f.getParameters();
     }
 }

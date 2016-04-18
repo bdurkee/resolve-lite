@@ -14,7 +14,7 @@ import java.util.Map;
 public class ProgVariableSymbol extends Symbol {
 
     private final ProgType type;
-    @NotNull private final MathSymbol mathSymbolAlterEgo;
+    @NotNull private final MathClssftnWrappingSymbol mathSymbolAlterEgo;
 
     public ProgVariableSymbol(@NotNull String name,
                               @Nullable ParserRuleContext definingTree,
@@ -24,7 +24,7 @@ public class ProgVariableSymbol extends Symbol {
         this.type = type;
         MathClassification m = type.toMath();
         this.mathSymbolAlterEgo =
-                new MathSymbol(type.getTypeGraph(), name, Quantification.NONE,
+                new MathClssftnWrappingSymbol(type.getTypeGraph(), name, Quantification.NONE,
                         new MathNamedClassification(type.getTypeGraph(),
                                 name, m.typeRefDepth-1, m), definingTree,
                         moduleIdentifier);
@@ -42,7 +42,7 @@ public class ProgVariableSymbol extends Symbol {
         return this;
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 

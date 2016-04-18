@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.programtype.PTVoid;
+import org.rsrg.semantics.programtype.ProgVoidType;
 import org.rsrg.semantics.symbol.OperationSymbol;
 import org.rsrg.semantics.symbol.Symbol;
 import org.rsrg.semantics.symbol.TypeModelSymbol;
@@ -48,9 +48,10 @@ public class ExtensionImplModule extends AbstractSpecImplModule {
         public List<String> parameters = new ArrayList<>();
 
         public ConceptDelegateMethod(OperationSymbol s) {
-            this(s.getName(), !s.getReturnType().getClass().equals(PTVoid.class),
-                    s.getParameters().stream().map(Symbol::getName)
-                            .collect(Collectors.toList()));
+            this(s.getName(), !s.getReturnType().getClass()
+                    .equals(ProgVoidType.class), s.getParameters()
+                    .stream().map(Symbol::getName)
+                    .collect(Collectors.toList()));
         }
 
         public ConceptDelegateMethod(String name, boolean hasReturn) {

@@ -1,7 +1,5 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

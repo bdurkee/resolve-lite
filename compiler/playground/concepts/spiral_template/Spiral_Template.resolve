@@ -37,4 +37,9 @@ Concept Spiral_Template (type Label;
           P.Curr_Loc ∈ Inward_Loc(P.Trmnl_Loc);
         ensures P.Curr_Loc =
                     SS(k)(@P.Curr_Loc);
+
+    Operation Spiral_In (updates P : Spiral);
+        requires P.Curr_Loc /= Cen(k);
+        ensures P.Curr_Loc =
+                    SS(k)(@P.Curr_Loc);
 end Spiral_Template;

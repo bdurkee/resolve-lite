@@ -3,10 +3,7 @@ package org.rsrg.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathClassification;
-import org.rsrg.semantics.ModuleIdentifier;
-import org.rsrg.semantics.SyntacticScope;
-import org.rsrg.semantics.UnexpectedSymbolException;
+import org.rsrg.semantics.*;
 import org.rsrg.semantics.programtype.ProgType;
 
 import java.util.HashMap;
@@ -57,7 +54,7 @@ public abstract class Symbol {
 
     @NotNull public abstract String getSymbolDescription();
 
-    @NotNull public MathSymbol toMathSymbol()
+    @NotNull public MathClssftnWrappingSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }

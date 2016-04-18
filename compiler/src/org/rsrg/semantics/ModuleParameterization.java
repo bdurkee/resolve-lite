@@ -32,8 +32,7 @@ public class ModuleParameterization {
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if ( instantiated ) {
-            Map<String, ProgType> genericInstantiations;
-            genericInstantiations =
+            Map<String, ProgType> genericInstantiations =
                     getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
                         genericInstantiations, instantiatingFacility);
@@ -63,6 +62,9 @@ public class ModuleParameterization {
                 moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
         List<ProgParameterSymbol> formalGenerics = new ArrayList<>();
 
+        //TODO :Here instead of building a map from String -> ProgType,
+        //I want a map from ProgType->ProgType (specifically two progtypes representing generics), then
+        //I can pull out the MathNamedType and do substitutions, etc
         for (ModuleParameterSymbol param : moduleParams) {
             try {
                 ProgParameterSymbol p = param.toProgParameterSymbol();

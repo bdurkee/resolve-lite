@@ -18,7 +18,7 @@ import java.util.Map;
 public class TheoremSymbol extends Symbol {
 
     @NotNull private PExp assertion;
-    @NotNull private MathSymbol mathSymbolAlterEgo;
+    @NotNull private MathClssftnWrappingSymbol mathSymbolAlterEgo;
 
     public TheoremSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                          @NotNull PExp theoremAssertion,
@@ -28,7 +28,7 @@ public class TheoremSymbol extends Symbol {
 
         this.assertion = theoremAssertion;
         this.mathSymbolAlterEgo =
-                new MathSymbol(g, name, Quantification.NONE, g.BOOLEAN,
+                new MathClssftnWrappingSymbol(g, name, Quantification.NONE, g.BOOLEAN,
                         definingTree, moduleIdentifier);
     }
 
@@ -44,7 +44,7 @@ public class TheoremSymbol extends Symbol {
         return "a theorem symbol";
     }
 
-    @NotNull @Override public MathSymbol toMathSymbol() {
+    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 

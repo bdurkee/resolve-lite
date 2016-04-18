@@ -3,14 +3,14 @@ package org.rsrg.semantics;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.symbol.MathSymbol;
+import org.rsrg.semantics.symbol.MathClssftnWrappingSymbol;
 
 import java.util.*;
 
 public class MathCartesianClassification extends MathClassification {
 
     private final List<Element> elements = new ArrayList<>();
-    public final Map<String, MathSymbol> syms = new LinkedHashMap<>();
+    public final Map<String, MathClssftnWrappingSymbol> syms = new LinkedHashMap<>();
     public final Map<String, Element> tagsToElements =
             new LinkedHashMap<>();
 
@@ -22,6 +22,7 @@ public class MathCartesianClassification extends MathClassification {
                                        List<Element> elements) {
         super(g, g.CLS);
         this.elements.addAll(elements);
+        this.typeRefDepth = 1;
         for (Element e : elements) {
             tagsToElements.put(e.getTag(), e);
         }
@@ -40,7 +41,7 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     @Override public MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions) {
+            Map<String, MathClassification> substitutions) {
         List<Element> newElements = new ArrayList<>();
         for (Element element : elements) {
             newElements.add(

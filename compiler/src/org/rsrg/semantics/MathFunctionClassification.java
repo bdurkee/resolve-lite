@@ -146,7 +146,7 @@ public class MathFunctionClassification extends MathClassification {
     }
 
     @Override public MathClassification withVariablesSubstituted(
-            Map<MathClassification, MathClassification> substitutions) {
+            Map<String, MathClassification> substitutions) {
         return new MathFunctionClassification(g, applicationFactory,
                 resultType.withVariablesSubstituted(substitutions),
                 domainType.withVariablesSubstituted(substitutions));
@@ -155,7 +155,7 @@ public class MathFunctionClassification extends MathClassification {
     public MathClassification deschematize(@NotNull List<MathClassification> argTypes)
             throws BindingException {
         //for each supplied actual type
-        Map<MathClassification, MathClassification> bindingsSoFar = new HashMap<>();
+        Map<String, MathClassification> bindingsSoFar = new HashMap<>();
         Iterator<MathClassification> argTypeIter = argTypes.iterator();
 
         for (MathClassification formalParameterType : paramTypes) {
@@ -169,7 +169,7 @@ public class MathFunctionClassification extends MathClassification {
 
             if (formalParameterType.containsSchematicType()) {
 
-                Map<MathClassification, MathClassification> iterationBindings =
+                Map<String, MathClassification> iterationBindings =
                         new HashMap<>();
                 try {
                     bind(argumentType, formalParameterType, iterationBindings);
@@ -190,15 +190,15 @@ public class MathFunctionClassification extends MathClassification {
     //we no longer need a map from the name of the schematic type (in this 'D')
     //to SSet -- as this is now encoded in {@code t2}.
     public void bind(@NotNull MathClassification t1, @NotNull MathClassification t2,
-                     @NotNull Map<MathClassification, MathClassification> bindingsAccumulator)
+                     @NotNull Map<String, MathClassification> bindingsAccumulator)
             throws BindingException {
 
         if (t2.identifiesSchematicType) {
             //attempt to bind concrete t1 to template type t2
             if (g.isSubtype(t1, t2.getEnclosingClassification())) {
                 if (t2 instanceof MathNamedClassification &&
-                        !bindingsAccumulator.containsKey(t1)) {
-                    bindingsAccumulator.put(t2, t1);
+                        !containsBinding(t1, bindingsAccumulator)) {
+                    bindingsAccumulator.put(((MathNamedClassification) t2).tag, t1);
                 }
             }
         }
@@ -211,6 +211,15 @@ public class MathFunctionClassification extends MathClassification {
         while ( t1Iter.hasNext() ) {
             bind(t1Iter.next(), t2Iter.next(), bindingsAccumulator);
         }
+    }
+
+    /** Returns {@code true} if {@code currentBindings} contains e;
+     *  {@code false} otherwise.
+     */
+    private boolean containsBinding(MathClassification e,
+                                 Map<String, MathClassification> currentBindings) {
+        return e instanceof MathNamedClassification &&
+                currentBindings.containsKey(((MathNamedClassification) e).tag);
     }
 
     //really only care about the type ref depth of the result.

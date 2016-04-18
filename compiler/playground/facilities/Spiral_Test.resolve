@@ -7,15 +7,4 @@ Facility Spiral_Test;
         implemented by
             Sp_Array_Impl;
 
-    Type Point = Record
-            x, y : Std_Ints :: Integer;
-        end;
-
-    Operation Main ();
-        Procedure
-            Var x : Std_Ints :: Integer;
-            Var S : Sp_Fac :: Spiral;
-            Var p : Point;
-
-    end Main;
 end Spiral_Test;

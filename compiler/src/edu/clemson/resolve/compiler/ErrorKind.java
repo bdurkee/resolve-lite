@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.antlr.v4.tool.ErrorSeverity;
 
 public enum ErrorKind {
@@ -99,8 +100,12 @@ public enum ErrorKind {
     APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
             " application, but it isn't a function", ErrorSeverity.ERROR),
 
-    INCORRECT_FUNCTION_ARG_COUNT(16, "no such math function: <arg>" +
+    INCORRECT_FUNCTION_ARG_COUNT(17, "no such math function: <arg>" +
             "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
+
+    ILLEGAL_IMPLICIT_CLSSFTN_PARAM(62, "the implicit classification parameter" +
+            " <arg> is not well formed (colon-lhs should be just an ID)",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
@@ -204,6 +209,9 @@ public enum ErrorKind {
      */
     GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
             ErrorSeverity.ERROR),
+
+    MODULE_AND_FILE_NAME_DIFFER(39, "module name <arg> and file name " +
+            "<arg2> differ", ErrorSeverity.ERROR),
 
     UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
             "unmarked recursive procedure: '<arg2>'; should be: " +
