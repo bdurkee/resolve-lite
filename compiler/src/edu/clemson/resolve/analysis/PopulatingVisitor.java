@@ -2,7 +2,7 @@ package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.misc.HardCodedProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
@@ -1175,6 +1175,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MathClassification type = exactNamedMathClssftns.get(ctx.mathExp());
         if (type == g.INVALID || type == null || type.getTypeRefDepth() == 0 ) {
+
             compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
             type = g.INVALID;

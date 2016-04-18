@@ -39,9 +39,9 @@ public class AnnotatedModule {
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
 
-    @NotNull private final String fileName;
-    @NotNull private final Token name;
-    @NotNull private final ParseTree root;
+    public String fileName;
+    private final Token name;
+    private final ParseTree root;
     public boolean hasErrors;
 
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {

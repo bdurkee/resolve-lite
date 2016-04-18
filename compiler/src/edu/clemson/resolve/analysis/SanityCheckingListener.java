@@ -1,7 +1,7 @@
 package edu.clemson.resolve.analysis;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.misc.Predicate;

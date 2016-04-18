@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.antlr.v4.tool.ErrorSeverity;
 
 public enum ErrorKind {

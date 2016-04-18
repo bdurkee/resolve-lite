@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen.model;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 
 public class ModuleFile extends OutputModelObject {
     public String RESOLVEVersion;

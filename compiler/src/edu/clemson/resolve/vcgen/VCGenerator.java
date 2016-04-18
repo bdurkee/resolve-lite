@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.codegen.AbstractCodeGenerator;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;

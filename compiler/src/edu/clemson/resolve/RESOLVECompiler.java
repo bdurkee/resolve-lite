@@ -1,6 +1,7 @@
-package edu.clemson.resolve.compiler;
+package edu.clemson.resolve;
 
 import edu.clemson.resolve.codegen.CodeGenPipeline;
+import edu.clemson.resolve.compiler.*;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
@@ -27,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /** The main entrypoint for the compiler. All input flows into here and this is
  *  also where we manage flags for commandline args which are encapsulated via
@@ -228,39 +230,61 @@ public  class RESOLVECompiler {
 
     public void processCommandLineTargets() {
         List<AnnotatedModule> targets = sortTargetModulesByUsesReferences();
+        processCommandLineTargets(targets);
+    }
+
+    public void processCommandLineTargets(AnnotatedModule ... module) {
+        processCommandLineTargets(sortTargetModulesByUsesReferences(module));
+    }
+
+    public void processCommandLineTargets(List<AnnotatedModule> modules) {
         int initialErrCt = errMgr.getErrorCount();
-        AnalysisPipeline analysisPipe = new AnalysisPipeline(this, targets);
-        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, targets);
-        VerifierPipeline vcsPipe = new VerifierPipeline(this, targets);
+        AnalysisPipeline analysisPipe = new AnalysisPipeline(this, modules);
+        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, modules);
+        //VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
 
         analysisPipe.process();
         if ( errMgr.getErrorCount() > initialErrCt ) {
             return;
         }
-        codegenPipe.process();
-        vcsPipe.process();
+       // codegenPipe.process();
+       // vcsPipe.process();
     }
 
     @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
-        Map<String, AnnotatedModule> roots = new HashMap<>();
-        for (String fileName : targetFiles) {
-            AnnotatedModule t = parseModule(fileName);
-            if ( t == null || t.hasErrors ) {
-                continue;
-            }
-            roots.put(t.getNameToken().getText(), t);
+        List<AnnotatedModule> modules = new ArrayList<>();
+        for (String e : targetFiles) {
+            modules.add(parseModule(e));
         }
+        return sortTargetModulesByUsesReferences(modules);
+    }
+
+    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+            @NotNull AnnotatedModule ... m) {
+        return sortTargetModulesByUsesReferences(Arrays.asList(m));
+    }
+
+    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+            @NotNull List<AnnotatedModule> modules) {
+        Map<String, AnnotatedModule> roots = new HashMap<>();
+        for (AnnotatedModule module : modules) {
+            roots.put(module.getNameToken().getText(), module);
+        }
+        return sortTargetModulesByUsesReferences(roots);
+    }
+
+    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+            @NotNull Map<String, AnnotatedModule> modules) {
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
-
-        for (AnnotatedModule t : Collections.unmodifiableCollection(roots.values())) {
+        for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
             g.addVertex(t.getNameToken().getText());
-            findDependencies(g, t, roots);
+            findDependencies(g, t, modules);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
         List<String> intermediateOrdering = getCompileOrder(g);
         for (String s : getCompileOrder(g)) {
-            AnnotatedModule m = roots.get(s);
+            AnnotatedModule m = modules.get(s);
             if ( m.hasErrors ) {
                 finalOrdering.clear();
                 break;
@@ -359,7 +383,20 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    @Nullable private AnnotatedModule parseModule(@NotNull String fileName) {
+    @Nullable public AnnotatedModule parseModule(CharStream input) {
+        ResolveLexer lexer = new ResolveLexer(input);
+        TokenStream tokens = new CommonTokenStream(lexer);
+        ResolveParser parser = new ResolveParser(tokens);
+        parser.removeErrorListeners();
+        parser.addErrorListener(errMgr);
+        ParserRuleContext start = parser.moduleDecl();
+        String fileName = parser.getSourceName();
+        return new AnnotatedModule(start, Utils.getModuleName(start),
+                parser.getSourceName(),
+                parser.getNumberOfSyntaxErrors() > 0);
+    }
+
+    @Nullable public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
             if ( !file.isAbsolute() ) {
@@ -367,12 +404,16 @@ public  class RESOLVECompiler {
             }
             ANTLRInputStream input =
                     new ANTLRFileStream(file.getAbsolutePath());
+
+
             ResolveLexer lexer = new ResolveLexer(input);
             TokenStream tokens = new CommonTokenStream(lexer);
             ResolveParser parser = new ResolveParser(tokens);
             parser.removeErrorListeners();
             parser.addErrorListener(errMgr);
             ParserRuleContext start = parser.moduleDecl();
+            String fileName2 = parser.getSourceName();
+
             return new AnnotatedModule(start, Utils.getModuleName(start),
                     parser.getSourceName(),
                     parser.getNumberOfSyntaxErrors() > 0);

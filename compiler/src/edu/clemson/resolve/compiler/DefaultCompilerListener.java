@@ -30,6 +30,7 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 

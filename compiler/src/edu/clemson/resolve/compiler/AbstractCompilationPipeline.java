@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

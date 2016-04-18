@@ -1,6 +1,6 @@
 package edu.clemson.resolve.analysis;
 
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;

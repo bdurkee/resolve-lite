@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;

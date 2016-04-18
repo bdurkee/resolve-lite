@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.stringtemplate.v4.ST;
 

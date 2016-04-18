@@ -31,13 +31,14 @@
 grammar Resolve;
 
 moduleDecl
-    :   precisModuleDecl
+    :   (precisModuleDecl
     |   precisExtModuleDecl
     |   conceptExtModuleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
     |   conceptExtImplModuleDecl
-    |   facilityModuleDecl
+    |   facilityModuleDecl) EOF
+
     ;
 
 precisModuleDecl
