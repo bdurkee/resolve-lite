@@ -72,7 +72,6 @@ public  class RESOLVECompiler {
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
-    public boolean jar = false;
     public String workingDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
@@ -80,7 +79,6 @@ public  class RESOLVECompiler {
     public boolean longMessages = false;
     public String genCode;
     public String genPackage = null;
-    public String workspaceDir;
     public boolean log = false;
 
     public static Option[] optionDefs = {
@@ -254,7 +252,10 @@ public  class RESOLVECompiler {
     @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
         List<AnnotatedModule> modules = new ArrayList<>();
         for (String e : targetFiles) {
-            modules.add(parseModule(e));
+            AnnotatedModule m = parseModule(e);
+            if (m != null) {
+                modules.add(parseModule(e));
+            }
         }
         return sortTargetModulesByUsesReferences(modules);
     }
@@ -315,7 +316,8 @@ public  class RESOLVECompiler {
                         importRequest.getNameToken(), root.getNameToken().getText(),
                         importRequest.getNameToken().getText());
                 //mark the current root as erroneous
-                root.hasErrors = true;
+                root.semanticallyRelevantUses.remove(
+                        new ModuleIdentifier(importRequest.getNameToken()));
                 continue;
             }
             if (module != null) {
@@ -349,7 +351,8 @@ public  class RESOLVECompiler {
     }
 
     protected boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                                 @NotNull String src,  @NotNull String dest) {
+                                 @NotNull String src,
+                                 @NotNull String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
         if (!g.containsVertex(src)) {
@@ -383,6 +386,20 @@ public  class RESOLVECompiler {
         return result;
     }
 
+    @Nullable public AnnotatedModule parseModule(@NotNull String fileName) {
+        try {
+            File file = new File(fileName);
+            if ( !file.isAbsolute() ) {
+                file = new File(workingDirectory, fileName);
+            }
+            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
+        }
+        catch (IOException ioe) {
+            errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
+        }
+        return null;
+    }
+
     @Nullable public AnnotatedModule parseModule(CharStream input) {
         ResolveLexer lexer = new ResolveLexer(input);
         TokenStream tokens = new CommonTokenStream(lexer);
@@ -390,38 +407,15 @@ public  class RESOLVECompiler {
         parser.removeErrorListeners();
         parser.addErrorListener(errMgr);
         ParserRuleContext start = parser.moduleDecl();
-        String fileName = parser.getSourceName();
-        return new AnnotatedModule(start, Utils.getModuleName(start),
+        Token moduleNameTok = null;
+        try {
+            moduleNameTok = Utils.getModuleName(start);
+        } catch(IllegalArgumentException iae) {
+            return null;
+        }
+        return new AnnotatedModule(start, moduleNameTok,
                 parser.getSourceName(),
                 parser.getNumberOfSyntaxErrors() > 0);
-    }
-
-    @Nullable public AnnotatedModule parseModule(@NotNull String fileName) {
-        try {
-            File file = new File(fileName);
-            if ( !file.isAbsolute() ) {
-                file = new File(workingDirectory, fileName);
-            }
-            ANTLRInputStream input =
-                    new ANTLRFileStream(file.getAbsolutePath());
-
-
-            ResolveLexer lexer = new ResolveLexer(input);
-            TokenStream tokens = new CommonTokenStream(lexer);
-            ResolveParser parser = new ResolveParser(tokens);
-            parser.removeErrorListeners();
-            parser.addErrorListener(errMgr);
-            ParserRuleContext start = parser.moduleDecl();
-            String fileName2 = parser.getSourceName();
-
-            return new AnnotatedModule(start, Utils.getModuleName(start),
-                    parser.getSourceName(),
-                    parser.getNumberOfSyntaxErrors() > 0);
-        }
-        catch (IOException ioe) {
-            errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
-        }
-        return null;
     }
 
     @NotNull public static String getCoreLibraryDirectory() {

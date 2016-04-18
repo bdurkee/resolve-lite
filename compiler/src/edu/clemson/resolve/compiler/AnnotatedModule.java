@@ -39,7 +39,7 @@ public class AnnotatedModule {
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
 
-    public String fileName;
+    private final String fileName;
     private final Token name;
     private final ParseTree root;
     public boolean hasErrors;

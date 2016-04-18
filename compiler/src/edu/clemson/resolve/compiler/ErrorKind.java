@@ -210,6 +210,9 @@ public enum ErrorKind {
     GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
             ErrorSeverity.ERROR),
 
+    MODULE_AND_FILE_NAME_DIFFER(39, "module name <arg> and file name " +
+            "<arg2> differ", ErrorSeverity.ERROR),
+
     UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
             "unmarked recursive procedure: '<arg2>'; should be: " +
             "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
