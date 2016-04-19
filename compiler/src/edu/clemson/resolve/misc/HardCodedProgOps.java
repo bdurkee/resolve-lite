@@ -3,8 +3,8 @@ package edu.clemson.resolve.misc;
 import edu.clemson.resolve.parser.ResolveLexer;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.programtype.ProgNamedType;
-import org.rsrg.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.programtype.ProgNamedType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.Arrays;
 import java.util.List;

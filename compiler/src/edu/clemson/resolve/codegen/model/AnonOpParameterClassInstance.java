@@ -1,8 +1,8 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.programtype.ProgVoidType;
-import org.rsrg.semantics.symbol.OperationSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
+import edu.clemson.resolve.semantics.programtype.ProgVoidType;
+import edu.clemson.resolve.semantics.symbol.OperationSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
 import java.util.ArrayList;
 import java.util.List;

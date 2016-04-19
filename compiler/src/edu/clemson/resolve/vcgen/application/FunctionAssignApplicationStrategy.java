@@ -8,8 +8,8 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.symbol.OperationSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
+import edu.clemson.resolve.semantics.symbol.OperationSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
 import java.util.Collections;
 import java.util.List;

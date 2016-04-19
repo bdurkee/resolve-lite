@@ -1,6 +1,5 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.*;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
@@ -8,7 +7,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +17,8 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.ModuleIdentifier;
+import edu.clemson.resolve.semantics.MathSymbolTable;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -28,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /** The main entrypoint for the compiler. All input flows into here and this is
  *  also where we manage flags for commandline args which are encapsulated via

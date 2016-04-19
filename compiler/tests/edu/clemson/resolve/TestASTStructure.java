@@ -6,7 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExpListener;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
-import org.rsrg.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
 
 public class TestASTStructure extends BaseTest {
 

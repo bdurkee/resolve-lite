@@ -14,11 +14,11 @@ import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.Scope;
-import org.rsrg.semantics.SymbolTableException;
-import org.rsrg.semantics.query.OperationQuery;
-import org.rsrg.semantics.symbol.OperationSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
+import edu.clemson.resolve.semantics.Scope;
+import edu.clemson.resolve.semantics.SymbolTableException;
+import edu.clemson.resolve.semantics.query.OperationQuery;
+import edu.clemson.resolve.semantics.symbol.OperationSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
 import java.util.*;
 

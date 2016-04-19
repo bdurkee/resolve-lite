@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.Symbol;
+import edu.clemson.resolve.semantics.symbol.Symbol;
 
 import java.util.List;
 

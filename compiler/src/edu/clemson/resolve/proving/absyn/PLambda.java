@@ -1,10 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
-import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathFunctionClassification;
-import org.rsrg.semantics.MathClassification;
-import org.rsrg.semantics.MathInvalidClassification;
+import edu.clemson.resolve.semantics.MathFunctionClassification;
+import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathInvalidClassification;
 
 import java.util.*;
 import java.util.stream.Collectors;
