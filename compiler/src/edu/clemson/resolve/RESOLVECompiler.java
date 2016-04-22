@@ -430,7 +430,7 @@ public class RESOLVECompiler {
         if (rootDir == null) {
             return ".";
         }
-        return rootDir + File.separator + getCoreLibraryName();
+        return rootDir;
     }
 
     @NotNull
