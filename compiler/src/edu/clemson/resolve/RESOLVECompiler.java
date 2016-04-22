@@ -1,6 +1,5 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.*;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
@@ -8,7 +7,6 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
-import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +17,8 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.rsrg.semantics.MathSymbolTable;
-import org.rsrg.semantics.ModuleIdentifier;
+import edu.clemson.resolve.semantics.MathSymbolTable;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -28,19 +26,19 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
-/** The main entrypoint for the compiler. All input flows into here and this is
- *  also where we manage flags for commandline args which are encapsulated via
- *  instances of the {@link Option} class (which also resides here).
- *  <p>
- *  The structure and much of the code appearing here has been adapted to our
- *  compiler's needs from the frontend of the ANTLRv4 tool, publically
- *  available here: {@code https://github.com/antlr/antlr4}.</p>
+/**
+ * The main entrypoint for the compiler. All input flows into here and this is
+ * also where we manage flags for commandline args which are encapsulated via
+ * instances of the {@link Option} class (which also resides here).
+ * <p>
+ * The structure and much of the code appearing here has been adapted to our
+ * compiler's needs from the frontend of the ANTLRv4 tool, publically
+ * available here: {@code https://github.com/antlr/antlr4}.</p>
  *
- *  @since 0.0.1
+ * @since 0.0.1
  */
-public  class RESOLVECompiler {
+public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
@@ -51,7 +49,8 @@ public  class RESOLVECompiler {
     public static final List<String> NON_NATIVE_EXTENSION =
             Collections.unmodifiableList(Collections.singletonList(".java"));
 
-    public static enum OptionArgType { NONE, STRING } // NONE implies boolean
+    public static enum OptionArgType {NONE, STRING} // NONE implies boolean
+
     public static class Option {
         String fieldName;
         String name;
@@ -61,6 +60,7 @@ public  class RESOLVECompiler {
         public Option(String fieldName, String name, String description) {
             this(fieldName, name, OptionArgType.NONE, description);
         }
+
         public Option(String fieldName, String name, OptionArgType argType, String description) {
             this.fieldName = fieldName;
             this.name = name;
@@ -82,29 +82,34 @@ public  class RESOLVECompiler {
     public boolean log = false;
 
     public static Option[] optionDefs = {
-            new Option("outputDirectory",   "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
-            new Option("longMessages",      "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("workingDirectory",  "-lib", OptionArgType.STRING, "specify location of resolve source files"),
-            new Option("genCode",           "-genCode", OptionArgType.STRING, "generate code"),
-            new Option("genPackage",		"-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
-            new Option("vcs",               "-vcs", "generate verification conditions (VCs)"),
-            new Option("log",               "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
+            new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
+            new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
+            new Option("workingDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
+            new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
+            new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
+            new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
-    /** Track separately so if someone adds a listener, it's the only one
-     *  instead of it and the default stderr listener.
+    /**
+     * Track separately so if someone adds a listener, it's the only one
+     * instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     public final MathSymbolTable symbolTable = new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    @NotNull public final ErrorManager errMgr;
-    @NotNull public LogManager logMgr = new LogManager();
+    @NotNull
+    public final ErrorManager errMgr;
+    @NotNull
+    public LogManager logMgr = new LogManager();
 
-    public RESOLVECompiler() { this(null); }
+    public RESOLVECompiler() {
+        this(null);
+    }
 
     public RESOLVECompiler(@Nullable String[] args) {
         this.errMgr = new ErrorManager(this);
@@ -163,64 +168,60 @@ public  class RESOLVECompiler {
                 errMgr.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
             }
         }
-        if ( outputDirectory != null ) {
-            if ( outputDirectory.endsWith("/")
-                    || outputDirectory.endsWith("\\") ) {
+        if (outputDirectory != null) {
+            if (outputDirectory.endsWith("/")
+                    || outputDirectory.endsWith("\\")) {
                 outputDirectory =
                         outputDirectory.substring(0,
                                 outputDirectory.length() - 1);
             }
             File outDir = new File(outputDirectory);
             haveOutputDir = true;
-            if ( outDir.exists() && !outDir.isDirectory() ) {
+            if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
                         outputDirectory);
                 workingDirectory = ".";
             }
-        }
-        else {
+        } else {
             outputDirectory = ".";
         }
-        if ( workingDirectory != null ) {
-            if ( workingDirectory.endsWith("/") || workingDirectory.endsWith("\\") ) {
+        if (workingDirectory != null) {
+            if (workingDirectory.endsWith("/") || workingDirectory.endsWith("\\")) {
                 workingDirectory =
                         workingDirectory
                                 .substring(0, workingDirectory.length() - 1);
             }
             File outDir = new File(workingDirectory);
-            if ( !outDir.exists() ) {
+            if (!outDir.exists()) {
                 errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
                         workingDirectory);
                 workingDirectory = ".";
             }
-        }
-        else {
+        } else {
             workingDirectory = ".";
         }
     }
 
     public static void main(String[] args) {
         RESOLVECompiler resolve = new RESOLVECompiler(args);
-        if ( args.length == 0 ) {
+        if (args.length == 0) {
             resolve.help();
             resolve.exit(0);
         }
         resolve.version();
         try {
             resolve.processCommandLineTargets();
-        }
-        finally {
-            if ( resolve.log ) {
+        } finally {
+            if (resolve.log) {
                 try {
                     String logname = resolve.logMgr.save();
                     System.out.println("wrote " + logname);
-                }
-                catch (IOException ioe) {
+                } catch (IOException ioe) {
                     resolve.errMgr.toolError(ErrorKind.INTERNAL_ERROR, ioe);
                 }
             }
         }
-        if ( resolve.errMgr.getErrorCount() > 0 ) {
+        if (resolve.errMgr.getErrorCount() > 0) {
             resolve.exit(1);
         }
         resolve.exit(0);
@@ -231,7 +232,7 @@ public  class RESOLVECompiler {
         processCommandLineTargets(targets);
     }
 
-    public void processCommandLineTargets(AnnotatedModule ... module) {
+    public void processCommandLineTargets(AnnotatedModule... module) {
         processCommandLineTargets(sortTargetModulesByUsesReferences(module));
     }
 
@@ -242,14 +243,15 @@ public  class RESOLVECompiler {
         //VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
 
         analysisPipe.process();
-        if ( errMgr.getErrorCount() > initialErrCt ) {
+        if (errMgr.getErrorCount() > initialErrCt) {
             return;
         }
-       // codegenPipe.process();
-       // vcsPipe.process();
+        // codegenPipe.process();
+        // vcsPipe.process();
     }
 
-    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
+    @NotNull
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
         List<AnnotatedModule> modules = new ArrayList<>();
         for (String e : targetFiles) {
             AnnotatedModule m = parseModule(e);
@@ -260,12 +262,14 @@ public  class RESOLVECompiler {
         return sortTargetModulesByUsesReferences(modules);
     }
 
-    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
-            @NotNull AnnotatedModule ... m) {
+    @NotNull
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+            @NotNull AnnotatedModule... m) {
         return sortTargetModulesByUsesReferences(Arrays.asList(m));
     }
 
-    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+    @NotNull
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
             @NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (AnnotatedModule module : modules) {
@@ -274,7 +278,8 @@ public  class RESOLVECompiler {
         return sortTargetModulesByUsesReferences(roots);
     }
 
-    @NotNull public List<AnnotatedModule> sortTargetModulesByUsesReferences(
+    @NotNull
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
             @NotNull Map<String, AnnotatedModule> modules) {
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
@@ -286,7 +291,7 @@ public  class RESOLVECompiler {
         List<String> intermediateOrdering = getCompileOrder(g);
         for (String s : getCompileOrder(g)) {
             AnnotatedModule m = modules.get(s);
-            if ( m.hasErrors ) {
+            if (m.hasErrors) {
                 finalOrdering.clear();
                 break;
             }
@@ -304,14 +309,13 @@ public  class RESOLVECompiler {
             try {
                 File file = findResolveFile(importRequest
                         .getNameToken().getText());
-                if ( module == null ) {
+                if (module == null) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
                         roots.put(module.getNameToken().getText(), module);
                     }
                 }
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
                         importRequest.getNameToken(), root.getNameToken().getText(),
                         importRequest.getNameToken().getText());
@@ -370,7 +374,8 @@ public  class RESOLVECompiler {
         return false;
     }
 
-    @NotNull private File findResolveFile(@NotNull String fileName)
+    @NotNull
+    private File findResolveFile(@NotNull String fileName)
             throws IOException {
         FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
@@ -386,21 +391,22 @@ public  class RESOLVECompiler {
         return result;
     }
 
-    @Nullable public AnnotatedModule parseModule(@NotNull String fileName) {
+    @Nullable
+    public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
-            if ( !file.isAbsolute() ) {
+            if (!file.isAbsolute()) {
                 file = new File(workingDirectory, fileName);
             }
             return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
         return null;
     }
 
-    @Nullable public AnnotatedModule parseModule(CharStream input) {
+    @Nullable
+    public AnnotatedModule parseModule(CharStream input) {
         ResolveLexer lexer = new ResolveLexer(input);
         TokenStream tokens = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokens);
@@ -410,7 +416,7 @@ public  class RESOLVECompiler {
         Token moduleNameTok = null;
         try {
             moduleNameTok = Utils.getModuleName(start);
-        } catch(IllegalArgumentException iae) {
+        } catch (IllegalArgumentException iae) {
             return null;
         }
         return new AnnotatedModule(start, moduleNameTok,
@@ -418,29 +424,32 @@ public  class RESOLVECompiler {
                 parser.getNumberOfSyntaxErrors() > 0);
     }
 
-    @NotNull public static String getCoreLibraryDirectory() {
+    @NotNull
+    public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
         if (rootDir == null) {
             return ".";
         }
-        return rootDir + File.separator + getCoreLibraryName();
+        return rootDir;
     }
 
-    @NotNull public static String getCoreLibraryName() {
+    @NotNull
+    public static String getCoreLibraryName() {
         return "src";
     }
 
-    /** Used primarily by codegen to create new output files.
-     *  If {@code outputDirectory} (set by -o) isn't present it will be created.
-     *  The final filename is sensitive to the output directory and
-     *  the directory where the soure file was found in.  If -o is /tmp
-     *  and the original source file was foo/t.resolve then output files
-     *  go in /tmp/foo.
-     *  <p>
-     *  If no -o is specified, then just write to the directory where the
-     *  sourcefile was found.</p>
-     *
-     *  If {@code outputDirectory==null} then write a String.
+    /**
+     * Used primarily by codegen to create new output files.
+     * If {@code outputDirectory} (set by -o) isn't present it will be created.
+     * The final filename is sensitive to the output directory and
+     * the directory where the soure file was found in.  If -o is /tmp
+     * and the original source file was foo/t.resolve then output files
+     * go in /tmp/foo.
+     * <p>
+     * If no -o is specified, then just write to the directory where the
+     * sourcefile was found.</p>
+     * <p>
+     * If {@code outputDirectory==null} then write a String.
      */
     public Writer getOutputFileWriter(@NotNull String fileName)
             throws IOException {
@@ -465,28 +474,25 @@ public  class RESOLVECompiler {
 
         if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
             fileDirectory = ".";
-        }
-        else {
+        } else {
             fileDirectory = fileNameWithPath.substring(0,
                     fileNameWithPath.lastIndexOf(File.separatorChar));
         }
-        if ( haveOutputDir ) {
+        if (haveOutputDir) {
             if ((new File(fileDirectory).isAbsolute() ||
-                            fileDirectory.startsWith("~"))) {
+                    fileDirectory.startsWith("~"))) {
                 outputDir = new File(outputDirectory);
-            }
-            else {
+            } else {
                 outputDir = new File(outputDirectory, fileDirectory);
             }
-        }
-        else {
+        } else {
             outputDir = new File(fileDirectory);
         }
         return outputDir;
     }
 
     public void addListener(@Nullable RESOLVECompilerListener cl) {
-        if ( cl!=null ) listeners.add(cl);
+        if (cl != null) listeners.add(cl);
     }
 
     public void removeListener(@Nullable RESOLVECompilerListener tl) {
@@ -497,7 +503,8 @@ public  class RESOLVECompiler {
         listeners.clear();
     }
 
-    @NotNull public List<RESOLVECompilerListener> getListeners() {
+    @NotNull
+    public List<RESOLVECompilerListener> getListeners() {
         return listeners;
     }
 
@@ -542,8 +549,7 @@ public  class RESOLVECompiler {
     public void warning(@NotNull RESOLVEMessage msg) {
         if (listeners.isEmpty()) {
             defaultListener.warning(msg);
-        }
-        else {
+        } else {
             for (RESOLVECompilerListener l : listeners) l.warning(msg);
         }
     }

@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
 import java.util.ArrayList;
 import java.util.List;

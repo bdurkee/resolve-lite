@@ -4,9 +4,9 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.MathClassification;
-import org.rsrg.semantics.Quantification;
-import org.rsrg.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.Quantification;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
 

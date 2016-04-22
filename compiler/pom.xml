@@ -90,6 +90,10 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <!--NOTE: the line below is responsible for generating
+                        'resolve-x.x.x-complete' to the '/compiler/' directory;
+                        otherwise it would go into the 'target' directory-->
+                    <outputDirectory>${dir}</outputDirectory>
                     <finalName>resolve-${resolve.version}-complete</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>

@@ -10,14 +10,14 @@ import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.symbol.OperationSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol;
-import org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode;
+import edu.clemson.resolve.semantics.symbol.OperationSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
-import static org.rsrg.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
+import static edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
 
 public class GeneralCallApplicationStrategy
         implements

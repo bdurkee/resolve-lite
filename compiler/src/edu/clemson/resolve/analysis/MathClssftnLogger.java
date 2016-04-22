@@ -6,7 +6,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClassification;
 
 public class MathClssftnLogger extends ResolveBaseListener {
 

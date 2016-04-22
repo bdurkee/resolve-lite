@@ -4,28 +4,5 @@ Precis General_String_Theory;
     Definition Is_String_Former(SStr : Cls, Empty_String : SStr,
             ext : SStr * El -> (SStr ~ {Empty_String})) : B;
 
-    Categorical Definition for SStr : Cls, Empty_String : SStr,
-            ext : (SStr * El) -> (SStr ~ {Empty_String}) is
-        Is_String_Former(SStr, Empty_String, ext);
-
-    Implicit Definition Indcd_Fn(T, U : Cls, b : T -> U,
-            s : T * U * SStr * El -> (SStr ~ {Empty_String})) : T * SStr -> U is
-        Is_String_Former(SStr, Empty_String, ext);
-
-    Corollary Cor_Length1:
-        Forall a : SStr, |a| = 0 iff a = Empty_String;
-
-    Inductive Definition (a : SStr) o (b : SStr) : SStr is
-        (i.)  a o Empty_String = a;
-        (ii.) Forall x : El, a o ext(b, x) = ext(a o b, x);
-
-    Inductive Definition Prt_btwn(m : N, n : N, a : SStr) : SStr is
-        (i.)  Prt_btwn(m, n, Empty_String) = Empty_String;
-        (ii.) Forall a : SStr, Forall x : El,
-            Prt_btwn(m, n, ext(a, x)) =
-                {{ext(Prt_btwn(m, n, a), x) if m <= |a| < n;
-                  Prt_btwn(m, n, a) otherwise;}};
-
-    Definition Stringify(x : El) : SStr;
 
 end General_String_Theory;

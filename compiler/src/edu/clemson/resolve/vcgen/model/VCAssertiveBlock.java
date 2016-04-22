@@ -5,8 +5,8 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.Scope;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.Scope;
 
 import java.util.*;
 

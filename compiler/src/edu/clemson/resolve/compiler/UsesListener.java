@@ -4,9 +4,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.rsrg.semantics.ModuleIdentifier;
-
-import static edu.clemson.resolve.compiler.AnnotatedModule.*;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 /** Updates the containers tracking uses reference info by visiting the
  *  various {@link ParseTree} nodes that include references to other modules.

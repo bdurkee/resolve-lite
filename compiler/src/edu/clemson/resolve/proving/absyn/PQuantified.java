@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.Quantification;
+import edu.clemson.resolve.semantics.Quantification;
 
 import java.util.ArrayList;
 import java.util.List;

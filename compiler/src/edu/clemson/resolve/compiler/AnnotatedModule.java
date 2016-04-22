@@ -3,14 +3,14 @@ package edu.clemson.resolve.compiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathClassification;
-import org.rsrg.semantics.ModuleIdentifier;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.rsrg.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
 

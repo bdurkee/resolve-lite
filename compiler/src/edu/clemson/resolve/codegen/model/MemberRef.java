@@ -1,7 +1,7 @@
 package edu.clemson.resolve.codegen.model;
 
-import org.rsrg.semantics.programtype.ProgNamedType;
-import org.rsrg.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.programtype.ProgNamedType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 
 public class MemberRef extends Expr {
     public String name;

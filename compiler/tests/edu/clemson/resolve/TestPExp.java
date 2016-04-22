@@ -9,9 +9,8 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.rsrg.semantics.DumbTypeGraph;
-import org.rsrg.semantics.MathInvalidClassification;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.MathInvalidClassification;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -25,7 +24,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.rsrg.semantics.Quantification.*;
+import static edu.clemson.resolve.semantics.Quantification.*;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 

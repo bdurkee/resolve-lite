@@ -1,9 +1,11 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.*;
 
 import java.util.*;
 import java.util.stream.Collectors;

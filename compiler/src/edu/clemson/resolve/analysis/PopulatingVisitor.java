@@ -10,6 +10,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
+import edu.clemson.resolve.semantics.*;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -19,14 +20,13 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.*;
-import org.rsrg.semantics.MathCartesianClassification.Element;
-import org.rsrg.semantics.MathSymbolTable.FacilityStrategy;
-import org.rsrg.semantics.programtype.*;
-import org.rsrg.semantics.query.MathSymbolQuery;
-import org.rsrg.semantics.query.NameQuery;
-import org.rsrg.semantics.query.OperationQuery;
-import org.rsrg.semantics.symbol.*;
+import edu.clemson.resolve.semantics.MathCartesianClassification.Element;
+import edu.clemson.resolve.semantics.MathSymbolTable.FacilityStrategy;
+import edu.clemson.resolve.semantics.programtype.*;
+import edu.clemson.resolve.semantics.query.MathSymbolQuery;
+import edu.clemson.resolve.semantics.query.NameQuery;
+import edu.clemson.resolve.semantics.query.OperationQuery;
+import edu.clemson.resolve.semantics.symbol.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1383,6 +1383,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         List<MathClassification> actualValues =
                 Utils.apply(args, exactNamedMathClssftns::get);
+
+        Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
         Iterator<MathClassification> actualsIter = actualArgumentTypes.iterator();
         Iterator<MathClassification> formalsIter = formalParameterTypes.iterator();
         Iterator<MathClassification> actualValuesIter = actualValues.iterator();
@@ -1391,11 +1393,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         while (actualsIter.hasNext()) {
             MathClassification actual = actualsIter.next();
             MathClassification formal = formalsIter.next();
+            ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
 
             if (!g.isSubtype(actual, formal)) {
-                    System.err.println("for function application: " +
-                            ctx.getText() + "; arg type: " + actual +
-                            " not acceptable where: " + formal + " was expected");
+                    compiler.errMgr.semanticError(
+                            ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
+                            actual.toString(), formal.toString());
             }
 
             MathClassification actualVal = actualValuesIter.next();
@@ -1410,10 +1413,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         actualVal.enclosingClassification.typeRefDepth >= 1) {
                     continue;
                 }
-                System.err.println("for function application: " +
-                        ctx.getText() + "; arg: '" + actualVal +
-                        "' not acceptable where a set is expected");
-
+                compiler.errMgr.semanticError(
+                        ErrorKind.INVALID_APPLICATION_ARG2, argCtx.getStart(),
+                        actualVal.toString());
             }
         }
 

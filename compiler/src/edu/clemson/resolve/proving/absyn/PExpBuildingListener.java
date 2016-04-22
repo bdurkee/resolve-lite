@@ -4,9 +4,11 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.proving.absyn.PApply.DisplayStyle;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
+import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -15,8 +17,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.rsrg.semantics.*;
-import org.rsrg.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
 

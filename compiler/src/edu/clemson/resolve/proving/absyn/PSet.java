@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.rsrg.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClassification;
 
 import java.util.*;
 
