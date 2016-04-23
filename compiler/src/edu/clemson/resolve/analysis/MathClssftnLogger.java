@@ -8,13 +8,13 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.MathClassification;
 
-public class MathClssftnLogger extends ResolveBaseListener {
+class MathClssftnLogger extends ResolveBaseListener {
 
     private final ParseTreeProperty<MathClassification> types;
     private final RESOLVECompiler compiler;
 
-    public MathClssftnLogger(@NotNull RESOLVECompiler rc,
-            @NotNull ParseTreeProperty<MathClassification> types) {
+    MathClssftnLogger(@NotNull RESOLVECompiler rc,
+                      @NotNull ParseTreeProperty<MathClassification> types) {
         this.types = types;
         this.compiler = rc;
     }
