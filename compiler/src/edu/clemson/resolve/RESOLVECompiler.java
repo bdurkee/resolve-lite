@@ -1,5 +1,6 @@
 package edu.clemson.resolve;
 
+import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.*;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
@@ -239,14 +240,14 @@ public class RESOLVECompiler {
     public void processCommandLineTargets(List<AnnotatedModule> modules) {
         int initialErrCt = errMgr.getErrorCount();
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, modules);
-        //CodeGenPipeline codegenPipe = new CodeGenPipeline(this, modules);
+        CodeGenPipeline codegenPipe = new CodeGenPipeline(this, modules);
         //VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
 
         analysisPipe.process();
         if (errMgr.getErrorCount() > initialErrCt) {
             return;
         }
-        // codegenPipe.process();
+        codegenPipe.process();
         // vcsPipe.process();
     }
 

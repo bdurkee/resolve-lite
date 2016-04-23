@@ -4,19 +4,18 @@ import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
-public class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
+class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
     private final RESOLVECompiler compiler;
     private final AnnotatedModule tr;
 
-    public BasicSanityCheckingVisitor(@NotNull RESOLVECompiler compiler,
-                                      @NotNull AnnotatedModule tr) {
+    BasicSanityCheckingVisitor(@NotNull RESOLVECompiler compiler,
+                               @NotNull AnnotatedModule tr) {
         this.compiler = compiler;
         this.tr = tr;
     }
@@ -26,6 +25,7 @@ public class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
         Token moduleNameToken = tr.getNameToken();
         String groomedFileName = Utils.groomFileName(tr.getFileName());
         String extlessFileName = Utils.stripFileExtension(groomedFileName);
+
         if (!moduleNameToken.getText().equals(extlessFileName)) {
             compiler.errMgr.semanticError(ErrorKind.MODULE_AND_FILE_NAME_DIFFER,
                     moduleNameToken, moduleNameToken.getText(),
@@ -43,6 +43,36 @@ public class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override public Void visitPrecisExtModuleDecl(
             ResolveParser.PrecisExtModuleDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
+    @Override public Void visitFacilityModuleDecl(
+            ResolveParser.FacilityModuleDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
+    @Override public Void visitConceptModuleDecl(
+            ResolveParser.ConceptModuleDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
+    @Override public Void visitConceptExtModuleDecl(
+            ResolveParser.ConceptExtModuleDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
+    @Override public Void visitConceptExtImplModuleDecl(
+            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
+    @Override public Void visitConceptImplModuleDecl(
+            ResolveParser.ConceptImplModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }

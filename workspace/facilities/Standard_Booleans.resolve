@@ -1,4 +1,5 @@
 Facility Standard_Booleans;
     Facility Std_Bools is Boolean_Template
-        externally implemented by Standard_Boolean_Impl;
+        externally
+            implemented by Standard_Boolean_Impl;
 end Standard_Booleans;
