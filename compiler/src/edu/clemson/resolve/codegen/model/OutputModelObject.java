@@ -30,4 +30,5 @@
  */
 package edu.clemson.resolve.codegen.model;
 
-public abstract class OutputModelObject {}
+public abstract class OutputModelObject {
+}

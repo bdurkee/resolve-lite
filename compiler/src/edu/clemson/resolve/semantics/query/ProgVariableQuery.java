@@ -15,7 +15,7 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
  */
 public class ProgVariableQuery
         extends
-            ResultProcessingQuery<Symbol, ProgVariableSymbol> {
+        ResultProcessingQuery<Symbol, ProgVariableSymbol> {
 
     public ProgVariableQuery(@Nullable Token qualifier, @NotNull Token name,
                              boolean b) throws UnexpectedSymbolException {

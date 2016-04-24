@@ -22,18 +22,21 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
 import java.util.*;
 
-/** An explicit call application is for calls to ops with
- *  1. no return
- *  2. whose ensure's clause consists of only equality exprs whose lhs is a
- *     variable referencing a parameter having mode updates
- *  See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
- *  more info on what consitutes a call as 'simple' or explicit.
+/**
+ * An explicit call application is for calls to ops with
+ * 1. no return
+ * 2. whose ensure's clause consists of only equality exprs whose lhs is a
+ * variable referencing a parameter having mode updates
+ * See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
+ * more info on what consitutes a call as 'simple' or explicit.
  */
 public class ExplicitCallApplicationStrategy
         implements
-            StatRuleApplicationStrategy<VCRuleBackedStat> {
+        StatRuleApplicationStrategy<VCRuleBackedStat> {
 
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
@@ -51,19 +54,20 @@ public class ExplicitCallApplicationStrategy
                 .snapshot();
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "explicit call rule application";
     }
 
     public static OperationSymbol getOperation(Scope s, PApply app) {
-        PSymbol name = (PSymbol)app.getFunctionPortion();
+        PSymbol name = (PSymbol) app.getFunctionPortion();
         Token qualifier = (name.getQualifier() != null) ?
                 new CommonToken(ResolveLexer.ID, name.getQualifier()) : null;
         try {
             return s.queryForOne(new OperationQuery(qualifier, name.getName(),
                     Utils.apply(app.getArguments(), PExp::getProgType)));
-        }
-        catch (SymbolTableException e) {
+        } catch (SymbolTableException e) {
             //shouldn't happen; well, depends on s.
             throw new RuntimeException(e);
         }
@@ -83,7 +87,8 @@ public class ExplicitCallApplicationStrategy
             return block.finalConfirm.getConfirmExp();
         }
 
-        @Override public void endPApply(@NotNull PApply e) {
+        @Override
+        public void endPApply(@NotNull PApply e) {
             PSymbol name = (PSymbol) e.getFunctionPortion();
             returnEnsuresArgSubstitutions.clear(); //TODO: hmmmm..
             List<PExp> actuals = e.getArguments();

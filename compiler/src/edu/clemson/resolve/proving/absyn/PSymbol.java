@@ -11,28 +11,34 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
 
-/** Represents a reference to a named element such as a variable, constant, or
- *  function.
- *  <p>
- *  Specifically, if this refers to a <em>name</em> of a funtion, then this
- *  instance represents a typed -- possibly qualified -- first-class reference
- *  to some function, independent of any supplied arguments.</p>
+/**
+ * Represents a reference to a named element such as a variable, constant, or
+ * function.
+ * <p>
+ * Specifically, if this refers to a <em>name</em> of a funtion, then this
+ * instance represents a typed -- possibly qualified -- first-class reference
+ * to some function, independent of any supplied arguments.</p>
  */
 public class PSymbol extends PExp {
 
-    @NotNull private final Quantification quantification;
-    @NotNull private final List<String> nameComponents = new ArrayList<>();
+    @NotNull
+    private final Quantification quantification;
+    @NotNull
+    private final List<String> nameComponents = new ArrayList<>();
 
-    @NotNull private final String name;
-    @Nullable private final String qualifier, leftPrint, rightPrint;
+    @NotNull
+    private final String name;
+    @Nullable
+    private final String qualifier, leftPrint, rightPrint;
 
     private final boolean literalFlag, incomingFlag;
 
-    /** Constructs a new {@code PSymbol}. Note that this is specifically made
-     *  private; thus clients should instead go through {@link PSymbolBuilder}
-     *  to construct new instances.
+    /**
+     * Constructs a new {@code PSymbol}. Note that this is specifically made
+     * private; thus clients should instead go through {@link PSymbolBuilder}
+     * to construct new instances.
      *
-     *  @param builder a 'buildable' version of {@code PSymbol}
+     * @param builder a 'buildable' version of {@code PSymbol}
      */
     private PSymbol(PSymbolBuilder builder) {
         super(calculateHashes(builder.name), builder.mathType,
@@ -53,47 +59,60 @@ public class PSymbol extends PExp {
         return new HashDuple(0, valueHash);
     }
 
-    @NotNull public String getName() {
+    @NotNull
+    public String getName() {
         return name;
     }
 
-    @Nullable public String getLeftPrint() {
+    @Nullable
+    public String getLeftPrint() {
         return leftPrint;
     }
 
-    @Nullable public String getRightPrint() {
+    @Nullable
+    public String getRightPrint() {
         return rightPrint;
     }
 
-    @Nullable public String getQualifier() {
+    @Nullable
+    public String getQualifier() {
         return qualifier;
     }
 
-    @NotNull public Quantification getQuantification() {
+    @NotNull
+    public Quantification getQuantification() {
         return quantification;
     }
 
-    @Override public boolean isIncoming() {
+    @Override
+    public boolean isIncoming() {
         return incomingFlag;
     }
 
-    @NotNull @Override public String getCanonicalName() {
+    @NotNull
+    @Override
+    public String getCanonicalName() {
         return getName();
     }
 
-    @Override public boolean isLiteralFalse() {
+    @Override
+    public boolean isLiteralFalse() {
         return name.equalsIgnoreCase("false");
     }
 
-    @Override public boolean isVariable() {
+    @Override
+    public boolean isVariable() {
         return !isLiteral();
     }
 
-    @Override public boolean isLiteral() {
+    @Override
+    public boolean isLiteral() {
         return literalFlag;
     }
 
-    @NotNull @Override public PExp substitute(
+    @NotNull
+    @Override
+    public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
         if (result == null) {
@@ -103,30 +122,37 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override public boolean isObviouslyTrue() {
+    @Override
+    public boolean isObviouslyTrue() {
         return name.equalsIgnoreCase("true");
     }
 
-    @Override public boolean containsName(String name) {
+    @Override
+    public boolean containsName(String name) {
         return this.name.equals(name);
     }
 
-    @NotNull public List<PExp> splitIntoSequents(PExp assumptions) {
+    @NotNull
+    public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbTypeGraph g = getMathType().getTypeGraph();
         result.add(g.formImplies(assumptions, this));
         return result;
     }
 
-    @NotNull @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull
+    @Override
+    public List<? extends PExp> getSubExpressions() {
         return new ArrayList<>();
     }
 
-    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+    @Override
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @Override public void accept(PExpListener v) {
+    @Override
+    public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
 
@@ -137,17 +163,23 @@ public class PSymbol extends PExp {
         v.endPExp(this);
     }
 
-    @NotNull @Override public PExp withIncomingSignsErased() {
+    @NotNull
+    @Override
+    public PExp withIncomingSignsErased() {
         return new PSymbolBuilder(this).incoming(false).build();
     }
 
-    @NotNull @Override public PExp withQuantifiersFlipped() {
+    @NotNull
+    @Override
+    public PExp withQuantifiersFlipped() {
         return new PSymbolBuilder(this)
                 .quantification(quantification.flipped())
                 .build();
     }
 
-    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         if (incomingFlag) {
             result.add(this);
@@ -155,7 +187,9 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
         if (quantification != Quantification.NONE) {
             result.add(this);
@@ -163,27 +197,33 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @NotNull @Override protected Set<String> getSymbolNamesNoCache(
+    @NotNull
+    @Override
+    protected Set<String> getSymbolNamesNoCache(
             boolean excludeApplications,
             boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
         if (!(excludeApplications && isFunctionApplication()) &&
                 !(excludeLiterals && isLiteral()) &&
-                quantification == Quantification.NONE ) {
+                quantification == Quantification.NONE) {
             result.add(getCanonicalName());
         }
         return result;
     }
 
-    /** This class represents an atomic {@code PExp}. As such, we'll never have
-     *  any sub-expressions; and hence are guaranteed to contain no
-     *  applications.
+    /**
+     * This class represents an atomic {@code PExp}. As such, we'll never have
+     * any sub-expressions; and hence are guaranteed to contain no
+     * applications.
      */
-    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull
+    @Override
+    public List<PExp> getFunctionApplicationsNoCache() {
         return new LinkedList<>();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
         if (result) {
             PSymbol oAsPSymbol = (PSymbol) o;
@@ -198,7 +238,8 @@ public class PSymbol extends PExp {
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         String result = "";
         if (incomingFlag) result += "@";
         if (leftPrint != null && rightPrint != null) {
@@ -207,10 +248,11 @@ public class PSymbol extends PExp {
         return result += name;
     }
 
-    /** A builder for {@code PSymbol}s.
-     *  <p>
-     *  As usual, a final, immutable instance of {@link PSymbol} can be obtained
-     *  through a call to {@link PSymbolBuilder#build()}.</p>
+    /**
+     * A builder for {@code PSymbol}s.
+     * <p>
+     * As usual, a final, immutable instance of {@link PSymbol} can be obtained
+     * through a call to {@link PSymbolBuilder#build()}.</p>
      */
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
         protected String name, lprint, rprint;
@@ -253,7 +295,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder(String lprint, String rprint) {
-            if (rprint == null ) {
+            if (rprint == null) {
                 if (lprint == null) {
                     throw new IllegalStateException("null name; all psymbols "
                             + "must be named.");
@@ -312,7 +354,9 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        @Override @NotNull public PSymbol build() {
+        @Override
+        @NotNull
+        public PSymbol build() {
             if (this.mathType == null) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");

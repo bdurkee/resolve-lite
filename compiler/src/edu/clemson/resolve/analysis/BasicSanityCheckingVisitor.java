@@ -3,11 +3,17 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 
 class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -20,7 +26,8 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
         this.tr = tr;
     }
 
-    @Override public Void visitModuleDecl(
+    @Override
+    public Void visitModuleDecl(
             ResolveParser.ModuleDeclContext ctx) {
         Token moduleNameToken = tr.getNameToken();
         String groomedFileName = Utils.groomFileName(tr.getFileName());
@@ -35,50 +42,65 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override public Void visitPrecisModuleDecl(
+    @Override
+    public Void visitPrecisModuleDecl(
             ResolveParser.PrecisModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitPrecisExtModuleDecl(
+    @Override
+    public Void visitPrecisExtModuleDecl(
             ResolveParser.PrecisExtModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitFacilityModuleDecl(
+    @Override
+    public Void visitFacilityModuleDecl(
             ResolveParser.FacilityModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitConceptModuleDecl(
+    @Override
+    public Void visitConceptModuleDecl(
             ResolveParser.ConceptModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitConceptExtModuleDecl(
+    @Override
+    public Void visitConceptExtModuleDecl(
             ResolveParser.ConceptExtModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitConceptExtImplModuleDecl(
+    @Override
+    public Void visitConceptExtImplModuleDecl(
             ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    @Override public Void visitConceptImplModuleDecl(
+    @Override
+    public Void visitConceptImplModuleDecl(
             ResolveParser.ConceptImplModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
-    /** Checks to ensure the name {@link Token}s bookending some scoped block
-     *  are the same -- meaning they have the same text.
+    @Override
+    public Void visitFacilityDecl(
+            ResolveParser.FacilityDeclContext ctx) {
+        if (ctx.externally != null) sanityCheckExternalFileRef(ctx.externally);
+        return null;
+    }
+
+    /**
+     * Checks to ensure the name {@link Token}s bookending some scoped block
+     * are the same -- meaning they have the same text.
      */
     private void sanityCheckBlockEnds(@NotNull Token topName,
                                       @NotNull Token bottomName) {
@@ -86,6 +108,33 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(
                     ErrorKind.MISMATCHED_BLOCK_END_NAMES, bottomName,
                     topName.getText(), bottomName.getText());
+        }
+    }
+
+    private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
+        FileLocator l = new FileLocator(externalNameRef.getText(),
+                RESOLVECompiler.NON_NATIVE_EXTENSION);
+        File result = null;
+        try {
+            //an external file is likely going to appear in the core lib
+            //so we search there first..
+            Files.walkFileTree(new File(RESOLVECompiler
+                    .getCoreLibraryDirectory()).toPath(), l);
+            result = l.getFile();
+        } catch (NoSuchFileException nsfe) {
+            //ok, maybe they defined an external file in their own workspace?
+            try {
+                Files.walkFileTree(new File(compiler.workingDirectory)
+                        .toPath(), l);
+                result = l.getFile();
+            } catch (NoSuchFileException nsfe2) {
+                compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE,
+                        externalNameRef, externalNameRef.getText());
+            } catch (IOException e2) {
+                throw new RuntimeException(e2.getCause());
+            }
+        } catch (IOException e1) {
+            throw new RuntimeException(e1.getCause());
         }
     }
 }

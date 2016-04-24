@@ -14,10 +14,14 @@ import java.util.Map;
 
 public class ProgTypeSymbol extends Symbol {
 
-    @NotNull protected final MathClassification modelType;
-    @NotNull protected final ProgType type;
-    @NotNull protected final MathClssftnWrappingSymbol mathTypeAlterEgo;
-    @NotNull protected final DumbTypeGraph g;
+    @NotNull
+    protected final MathClassification modelType;
+    @NotNull
+    protected final ProgType type;
+    @NotNull
+    protected final MathClssftnWrappingSymbol mathTypeAlterEgo;
+    @NotNull
+    protected final DumbTypeGraph g;
 
     public ProgTypeSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                           @NotNull ProgType progType,
@@ -33,36 +37,49 @@ public class ProgTypeSymbol extends Symbol {
                         definingTree, moduleIdentifier);
     }
 
-    @NotNull public ProgType getProgramType() {
+    @NotNull
+    public ProgType getProgramType() {
         return type;
     }
 
-    @NotNull public MathClassification getModelType() {
+    @NotNull
+    public MathClassification getModelType() {
         return modelType;
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return mathTypeAlterEgo;
     }
 
-    @NotNull @Override public String toString() {
+    @NotNull
+    @Override
+    public String toString() {
         return getName();
     }
 
-    @NotNull public PSymbol asPSymbol() {
+    @NotNull
+    public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName()).mathType(getModelType())
                 .build();
     }
 
-    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @NotNull
+    @Override
+    public ProgTypeSymbol toProgTypeSymbol() {
         return this;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a program type";
     }
 
-    @NotNull @Override public ProgTypeSymbol instantiateGenerics(
+    @NotNull
+    @Override
+    public ProgTypeSymbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 

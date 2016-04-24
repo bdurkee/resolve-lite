@@ -11,14 +11,17 @@ import java.util.Map;
 
 public class GenericSearcher
         implements
-            MultimatchTableSearcher<ProgTypeSymbol> {
+        MultimatchTableSearcher<ProgTypeSymbol> {
 
     public static final GenericSearcher INSTANCE = new GenericSearcher();
-    private GenericSearcher() {}
 
-    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
-                                        @NotNull List<ProgTypeSymbol> matches,
-                                        @NotNull SearchContext l)
+    private GenericSearcher() {
+    }
+
+    @Override
+    public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                              @NotNull List<ProgTypeSymbol> matches,
+                              @NotNull SearchContext l)
             throws UnexpectedSymbolException {
         for (Symbol s : entries.values()) {
             if (s instanceof ProgParameterSymbol) {

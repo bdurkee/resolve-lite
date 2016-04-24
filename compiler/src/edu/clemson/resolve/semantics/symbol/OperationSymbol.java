@@ -17,7 +17,8 @@ public class OperationSymbol extends Symbol {
     private final ProgType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
-    @NotNull private final PExp requires, ensures;
+    @NotNull
+    private final PExp requires, ensures;
 
     public OperationSymbol(@NotNull String name,
                            @Nullable ParserRuleContext definingTree,
@@ -32,46 +33,61 @@ public class OperationSymbol extends Symbol {
         this.ensures = ensures;
     }
 
-    @NotNull public PExp getRequires() {
+    @NotNull
+    public PExp getRequires() {
         return requires;
     }
 
-    @NotNull public PExp getEnsures() {
+    @NotNull
+    public PExp getEnsures() {
         return ensures;
     }
 
-    @NotNull public List<ProgParameterSymbol> getParameters() {
+    @NotNull
+    public List<ProgParameterSymbol> getParameters() {
         return parameters;
     }
 
-    /** Get the return type of this operation. Note that in the cases where
-     *  there isn't something returned, this should always return an instance
-     *  of {@link ProgVoidType}.
+    /**
+     * Get the return type of this operation. Note that in the cases where
+     * there isn't something returned, this should always return an instance
+     * of {@link ProgVoidType}.
      *
-     *  @return the return {@link ProgType}.
+     * @return the return {@link ProgType}.
      */
-    @NotNull public ProgType getReturnType() {
+    @NotNull
+    public ProgType getReturnType() {
         return returnType;
     }
 
-    @NotNull @Override public OperationSymbol toOperationSymbol() {
+    @NotNull
+    @Override
+    public OperationSymbol toOperationSymbol() {
         return this;
     }
 
-    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull
+    @Override
+    public ProgVariableSymbol toProgVariableSymbol() {
         return new ProgVariableSymbol(name, definingTree, returnType,
                 moduleIdentifier);
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "an operation";
     }
 
-    @NotNull @Override public String toString() {
+    @NotNull
+    @Override
+    public String toString() {
         return getName() + ":" + parameters;
     }
 
-    @NotNull @Override public OperationSymbol instantiateGenerics(
+    @NotNull
+    @Override
+    public OperationSymbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
@@ -82,15 +98,17 @@ public class OperationSymbol extends Symbol {
                 .map(f::apply).collect(Collectors.toList());
         return new OperationSymbol(getName(), getDefiningTree(), requires,
                 ensures, returnType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), getModuleIdentifier(), newParams);
+                instantiatingFacility), getModuleIdentifier(), newParams);
     }
 
     private static class InstantiationFunction
             implements
-                Function<ProgParameterSymbol, ProgParameterSymbol> {
+            Function<ProgParameterSymbol, ProgParameterSymbol> {
 
-        @NotNull private final Map<String, ProgType> genericInstantiations;
-        @NotNull private final FacilitySymbol instantiatingFacility;
+        @NotNull
+        private final Map<String, ProgType> genericInstantiations;
+        @NotNull
+        private final FacilitySymbol instantiatingFacility;
 
         public InstantiationFunction(
                 @NotNull Map<String, ProgType> instantiations,
@@ -100,7 +118,8 @@ public class OperationSymbol extends Symbol {
             this.instantiatingFacility = instantiatingFacility;
         }
 
-        @Override public ProgParameterSymbol apply(
+        @Override
+        public ProgParameterSymbol apply(
                 @NotNull ProgParameterSymbol input) {
             return (ProgParameterSymbol) input.instantiateGenerics(
                     genericInstantiations, instantiatingFacility);

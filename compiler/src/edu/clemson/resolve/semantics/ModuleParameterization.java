@@ -25,17 +25,18 @@ public class ModuleParameterization {
         this.moduleIdentifier = moduleIdentifier;
     }
 
-    @NotNull public Scope getScope(boolean instantiated)
+    @NotNull
+    public Scope getScope(boolean instantiated)
             throws NoSuchModuleException {
         ModuleScopeBuilder originalScope =
                 scopeRepo.getModuleScope(moduleIdentifier);
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
-        if ( instantiated ) {
+        if (instantiated) {
             Map<String, ProgType> genericInstantiations =
                     getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
-                        genericInstantiations, instantiatingFacility);
+                    genericInstantiations, instantiatingFacility);
         }
         return result;
     }
@@ -75,7 +76,7 @@ public class ModuleParameterization {
                 //no problem, we wont add it.
             }
         }
-        if ( formalGenerics.size() != actualGenerics.size() ) {
+        if (formalGenerics.size() != actualGenerics.size()) {
             //we shouldn't have to do this in here I don't think. Can't really
             //give a nice error (no pointer to errMgr here), and we can't throw
             // an exception to be caught
@@ -93,7 +94,8 @@ public class ModuleParameterization {
         return result;
     }
 
-    @NotNull public ModuleIdentifier getModuleIdentifier() {
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
 }

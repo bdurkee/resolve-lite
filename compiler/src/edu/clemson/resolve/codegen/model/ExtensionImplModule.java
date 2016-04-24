@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ExtensionImplModule extends AbstractSpecImplModule {
-    @ModelElement public List<ConceptDelegateMethod> delegateMethods =
+    @ModelElement
+    public List<ConceptDelegateMethod> delegateMethods =
             new ArrayList<>();
     public final String enhancement;
 
@@ -22,13 +23,12 @@ public class ExtensionImplModule extends AbstractSpecImplModule {
 
     public void addDelegateMethods(List<? extends Symbol> symbols) {
         for (Symbol s : symbols) {
-            if ( s instanceof OperationSymbol) {
+            if (s instanceof OperationSymbol) {
                 delegateMethods.add(
-                        new ConceptDelegateMethod((OperationSymbol)s));
-            }
-            else if ( s instanceof TypeModelSymbol) {
+                        new ConceptDelegateMethod((OperationSymbol) s));
+            } else if (s instanceof TypeModelSymbol) {
                 delegateMethods.add(
-                        new ConceptDelegateMethod("init"+s.getName(), true));
+                        new ConceptDelegateMethod("init" + s.getName(), true));
             }
         }
     }

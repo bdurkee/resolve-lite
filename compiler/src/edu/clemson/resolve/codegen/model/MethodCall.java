@@ -13,8 +13,10 @@ import java.util.List;
  */
 public class MethodCall extends Expr {
     public String name;
-    @ModelElement public List<Expr> args = new ArrayList<>();
-    @ModelElement public Qualifier q;
+    @ModelElement
+    public List<Expr> args = new ArrayList<>();
+    @ModelElement
+    public Qualifier q;
 
     public MethodCall(Qualifier qualifier, String name, Expr... args) {
         this(qualifier, name, Arrays.asList(args));
@@ -42,7 +44,9 @@ public class MethodCall extends Expr {
     //i.e.: ((OperationParameter) Read_Element).op(Next);
     public static class OperationParameterMethodCall extends Expr {
         public String name;
-        @ModelElement public List<Expr> args = new ArrayList<>();
+        @ModelElement
+        public List<Expr> args = new ArrayList<>();
+
         public OperationParameterMethodCall(String name, List<Expr> args) {
             this.name = name;
             this.args.addAll(args);

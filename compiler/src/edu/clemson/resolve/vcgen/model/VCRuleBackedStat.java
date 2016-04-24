@@ -29,7 +29,7 @@ public class VCRuleBackedStat extends OutputModelObject {
     }
 
     public String getText() {
-        if ( definingCtx != null ) return Utils.getRawText(definingCtx);
+        if (definingCtx != null) return Utils.getRawText(definingCtx);
         return "";
     }
 
@@ -37,7 +37,8 @@ public class VCRuleBackedStat extends OutputModelObject {
         return statComponents;
     }
 
-    @SuppressWarnings("unchecked") public AssertiveBlock reduce() {
+    @SuppressWarnings("unchecked")
+    public AssertiveBlock reduce() {
         return applicationStrategy.applyRule(enclosingBlock, this);
     }
 

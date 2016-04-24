@@ -20,15 +20,16 @@ public class MathSymbolTable {
 
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
-    /** When starting a search from a particular scope, specifies how any
-     *  available facilities should be searched.
-     * 
-     *  Available facilities are those facilities defined in a module searched by
-     *  the search's {@link ImportStrategy} (which necessarily always includes
-     *  the source module).
-     * 
-     *  Note that facilities cannot be recursively searched. Imports and
-     *  facilities appearing in available facilities will not be searched.
+    /**
+     * When starting a search from a particular scope, specifies how any
+     * available facilities should be searched.
+     * <p>
+     * Available facilities are those facilities defined in a module searched by
+     * the search's {@link ImportStrategy} (which necessarily always includes
+     * the source module).
+     * <p>
+     * Note that facilities cannot be recursively searched. Imports and
+     * facilities appearing in available facilities will not be searched.
      */
     public static enum FacilityStrategy {
 
@@ -59,7 +60,7 @@ public class MathSymbolTable {
     /**
      * When starting a search from a particular scope, specifies which
      * additional modules should be searched, based on any imported modules.
-     * 
+     * <p>
      * Imported modules are those listed in the {@code uses} clause of the
      * source module scope in which the scope is introduced. For searches
      * originating directly in a module scope, the source module scope is the
@@ -77,7 +78,6 @@ public class MathSymbolTable {
          * default strategy.
          */
         IMPORT_NONE {
-
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
@@ -92,7 +92,6 @@ public class MathSymbolTable {
          * source module should be searched.
          */
         IMPORT_NAMED {
-
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
             }
@@ -107,7 +106,6 @@ public class MathSymbolTable {
          * all imports and their own imports.
          */
         IMPORT_RECURSIVE {
-
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_RECURSIVE;
             }
@@ -120,30 +118,35 @@ public class MathSymbolTable {
         /**
          * Returns the strategy that should be used to recursively search
          * any imported modules.
-         * 
+         *
          * @return The strategy that should be used to recursively search any
-         *         imported modules.
+         * imported modules.
          */
         public abstract ImportStrategy cascadingStrategy();
 
         /**
          * Returns {@code true} <strong>iff</strong> this strategy
          * requires searching directly imported modules.
-         * 
+         *
          * @return {@code true} <strong>iff</strong> this strategy
-         *         requires searching directly imported modules.
+         * requires searching directly imported modules.
          */
         public abstract boolean considerImports();
     }
 
-    @NotNull private final Deque<ScopeBuilder> lexicalScopeStack =
+    @NotNull
+    private final Deque<ScopeBuilder> lexicalScopeStack =
             new LinkedList<>();
-    @NotNull private final Map<ModuleIdentifier, ModuleScopeBuilder> moduleScopes =
+    @NotNull
+    private final Map<ModuleIdentifier, ModuleScopeBuilder> moduleScopes =
             new HashMap<>();
-    @NotNull private final ParseTreeProperty<ScopeBuilder> scopes =
+    @NotNull
+    private final ParseTreeProperty<ScopeBuilder> scopes =
             new ParseTreeProperty<>();
-    @Nullable private ModuleScopeBuilder curModuleScope = null;
-    @NotNull private final DumbTypeGraph typeGraph;
+    @Nullable
+    private ModuleScopeBuilder curModuleScope = null;
+    @NotNull
+    private final DumbTypeGraph typeGraph;
 
     public MathSymbolTable() {
         this.typeGraph = new DumbTypeGraph();
@@ -202,11 +205,13 @@ public class MathSymbolTable {
         }
     }
 
-    @NotNull public DumbTypeGraph getTypeGraph() {
+    @NotNull
+    public DumbTypeGraph getTypeGraph() {
         return typeGraph;
     }
 
-    @NotNull public ModuleScopeBuilder startModuleScope(
+    @NotNull
+    public ModuleScopeBuilder startModuleScope(
             @NotNull AnnotatedModule module) {
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
@@ -215,14 +220,15 @@ public class MathSymbolTable {
 
         ScopeBuilder parent = lexicalScopeStack.peek();
         ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                module.getNameToken(), (ParserRuleContext)contextTree, parent, this);
+                module.getNameToken(), (ParserRuleContext) contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleIdentifier(), s);
         return s;
     }
 
-    @NotNull public ScopeBuilder startScope(
+    @NotNull
+    public ScopeBuilder startScope(
             @NotNull ParserRuleContext definingTree) {
         if (curModuleScope == null) {
             throw new IllegalStateException("no open module scope");
@@ -246,18 +252,18 @@ public class MathSymbolTable {
      * those opened with {@link #startModuleScope(AnnotatedModule)}.
      *
      * @return The new innermost active scope after the former one was closed
-     *         by this call. If the scope that was closed was the module scope,
-     *         then returns {@code null}
+     * by this call. If the scope that was closed was the module scope,
+     * then returns {@code null}
      */
-    @Nullable public ScopeBuilder endScope() {
+    @Nullable
+    public ScopeBuilder endScope() {
         checkScopeOpen();
         lexicalScopeStack.pop();
         ScopeBuilder result;
         if (lexicalScopeStack.size() == 1) {
             result = null;
             curModuleScope = null;
-        }
-        else {
+        } else {
             result = lexicalScopeStack.peek();
         }
         return result;
@@ -269,7 +275,7 @@ public class MathSymbolTable {
     }
 
     private void checkScopeOpen() {
-        if ( lexicalScopeStack.size() == 1 ) {
+        if (lexicalScopeStack.size() == 1) {
             throw new IllegalStateException("no open scope");
         }
     }
@@ -280,14 +286,16 @@ public class MathSymbolTable {
         scopes.put(s.getDefiningTree(), s);
     }
 
-    @NotNull public ScopeBuilder getScope(@NotNull ParserRuleContext e) {
+    @NotNull
+    public ScopeBuilder getScope(@NotNull ParserRuleContext e) {
         if (scopes.get(e) == null) {
             throw new IllegalArgumentException("no such scope: " + e.getText());
         }
         return scopes.get(e);
     }
 
-    @NotNull public ModuleScopeBuilder getModuleScope(
+    @NotNull
+    public ModuleScopeBuilder getModuleScope(
             @Nullable ModuleIdentifier identifier)
             throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
@@ -299,18 +307,23 @@ public class MathSymbolTable {
 
     protected static class DummyIdentifierResolver extends AbstractScope {
 
-        @Override @NotNull public <E extends Symbol> List<E> query(
+        @Override
+        @NotNull
+        public <E extends Symbol> List<E> query(
                 @NotNull MultimatchSymbolQuery<E> query) {
             return new ArrayList<>();
         }
 
-        @Override @NotNull public <E extends Symbol> E queryForOne(
+        @Override
+        @NotNull
+        public <E extends Symbol> E queryForOne(
                 @NotNull SymbolQuery<E> query)
                 throws NoSuchSymbolException, DuplicateSymbolException {
             throw new NoSuchSymbolException();
         }
 
-        @Override public <E extends Symbol> boolean addMatches(
+        @Override
+        public <E extends Symbol> boolean addMatches(
                 @NotNull TableSearcher<E> searcher,
                 @NotNull List<E> matches,
                 @NotNull Set<Scope> searchedScopes,
@@ -321,17 +334,23 @@ public class MathSymbolTable {
             return false;
         }
 
-        @Override @NotNull public Symbol define(@NotNull Symbol s)
+        @Override
+        @NotNull
+        public Symbol define(@NotNull Symbol s)
                 throws DuplicateSymbolException {
             return s;
         }
 
-        @Override @NotNull public <T extends Symbol> List<T> getSymbolsOfType(
+        @Override
+        @NotNull
+        public <T extends Symbol> List<T> getSymbolsOfType(
                 @NotNull Class<T> type) {
             return new ArrayList<>();
         }
 
-        @Override @NotNull public List<Symbol> getSymbolsOfType(
+        @Override
+        @NotNull
+        public List<Symbol> getSymbolsOfType(
                 @NotNull Class<?>... type) {
             return new ArrayList<>();
         }

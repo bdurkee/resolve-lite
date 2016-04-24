@@ -15,12 +15,17 @@ import java.util.stream.Collectors;
 
 public abstract class SyntacticScope extends AbstractScope {
 
-    @NotNull protected final Map<String, Symbol> symbols;
-    @NotNull private final MathSymbolTable symtab;
+    @NotNull
+    protected final Map<String, Symbol> symbols;
+    @NotNull
+    private final MathSymbolTable symtab;
 
-    @NotNull protected Scope parent;
-    @NotNull protected final ModuleIdentifier moduleIdentifier;
-    @Nullable protected ParserRuleContext definingTree;
+    @NotNull
+    protected Scope parent;
+    @NotNull
+    protected final ModuleIdentifier moduleIdentifier;
+    @Nullable
+    protected ParserRuleContext definingTree;
 
     SyntacticScope(@NotNull MathSymbolTable scopeRepo,
                    @Nullable ParserRuleContext definingTree,
@@ -34,15 +39,19 @@ public abstract class SyntacticScope extends AbstractScope {
         this.definingTree = definingTree;
     }
 
-    @Nullable public ParserRuleContext getDefiningTree() {
+    @Nullable
+    public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
 
-    @NotNull public ModuleIdentifier getModuleIdentifier() {
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
 
-    @NotNull @Override public Symbol define(@NotNull Symbol s)
+    @NotNull
+    @Override
+    public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException {
         if (symbols.containsKey(s.getName())) {
             throw new DuplicateSymbolException(s);
@@ -60,13 +69,17 @@ public abstract class SyntacticScope extends AbstractScope {
         return s;
     }
 
-    @NotNull @Override public <E extends Symbol> List<E> query(
+    @NotNull
+    @Override
+    public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException {
         return query.searchFromContext(this, symtab);
     }
 
-    @NotNull @Override public <E extends Symbol> E queryForOne(
+    @NotNull
+    @Override
+    public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query)
             throws NoSuchSymbolException,
             DuplicateSymbolException,
@@ -78,7 +91,9 @@ public abstract class SyntacticScope extends AbstractScope {
         return results.get(0);
     }
 
-    @NotNull @Override public String toString() {
+    @NotNull
+    @Override
+    public String toString() {
         String s = "";
         if (definingTree != null) {
             s = definingTree.getClass().getSimpleName();
@@ -86,7 +101,8 @@ public abstract class SyntacticScope extends AbstractScope {
         return s + symbols.keySet() + "";
     }
 
-    @Override public <E extends Symbol> boolean addMatches(
+    @Override
+    public <E extends Symbol> boolean addMatches(
             @NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
             @NotNull Set<Scope> searchedScopes,
             @NotNull Map<String, ProgType> genericInstantiations,
@@ -118,7 +134,9 @@ public abstract class SyntacticScope extends AbstractScope {
         return finished;
     }
 
-    @NotNull @Override public <T extends Symbol> List<T> getSymbolsOfType(
+    @NotNull
+    @Override
+    public <T extends Symbol> List<T> getSymbolsOfType(
             @NotNull Class<T> type) {
         return symbols.values().stream()
                 .filter(type::isInstance)
@@ -126,7 +144,8 @@ public abstract class SyntacticScope extends AbstractScope {
                 .collect(Collectors.toList());
     }
 
-    @NotNull public List<Symbol> getSymbolsOfType(@NotNull Class<?> ... types) {
+    @NotNull
+    public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types) {
         List<Symbol> result = new ArrayList<>();
         for (Symbol s : symbols.values()) {
             for (Class<?> t : types) {
@@ -136,7 +155,8 @@ public abstract class SyntacticScope extends AbstractScope {
         return result;
     }
 
-    @NotNull private Map<String, Symbol> updateSymbols(
+    @NotNull
+    private Map<String, Symbol> updateSymbols(
             @NotNull Map<String, Symbol> currentBindings,
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {

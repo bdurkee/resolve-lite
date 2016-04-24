@@ -9,7 +9,8 @@ public class FunctionDef extends OutputModelObject {
     public boolean hasReturn = false;
     public boolean isStatic = false;
     public String containingModuleName, name;
-    @ModelElement public List<ParameterDef> params = new ArrayList<>();
+    @ModelElement
+    public List<ParameterDef> params = new ArrayList<>();
 
     public FunctionDef(String name) {
         this.name = name;

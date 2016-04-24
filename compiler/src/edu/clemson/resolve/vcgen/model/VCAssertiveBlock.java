@@ -19,7 +19,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
     public static class VCAssertiveBlockBuilder
             implements
-                Utils.Builder<VCAssertiveBlock> {
+            Utils.Builder<VCAssertiveBlock> {
         public final DumbTypeGraph g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
@@ -45,7 +45,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if (s == null) {
                 throw new IllegalArgumentException(
                         "passed null scope to vc assertive " +
-                                "block for: "+description);
+                                "block for: " + description);
             }
             this.g = g;
             this.definingTree = ctx;
@@ -66,7 +66,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
-            if ( assume == null ) {
+            if (assume == null) {
                 return this;
             }
             //stats.add(new VCAssume(this,
@@ -87,7 +87,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder confirm(PExp confirm) {
-            if ( confirm == null ) {
+            if (confirm == null) {
                 confirm = g.getTrueExp();
             }
             stats.add(new VCConfirm(this, confirm));
@@ -95,7 +95,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
-            if ( confirm == null ) {
+            if (confirm == null) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
             this.finalConfirm = new VCConfirm(this, confirm);
@@ -104,7 +104,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {
             for (VCRuleBackedStat stat : e) {
-                if ( stat == null ) {
+                if (stat == null) {
                     throw new IllegalArgumentException("null rule app stat");
                 }
                 stats.add(stat);
@@ -117,18 +117,22 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        /** Same as {@link #build()}, but this one doesn't automatically apply
-         *  proof rules to the stats within this block.
+        /**
+         * Same as {@link #build()}, but this one doesn't automatically apply
+         * proof rules to the stats within this block.
          */
         public VCAssertiveBlock snapshot() {
             return new VCAssertiveBlock(this);
         }
 
-        /** Applies the appropriate rule to each stat within this builder. In
-         *  other words, a call to this will fully develop the final confirm
-         *  for this particular block of assertive code.
+        /**
+         * Applies the appropriate rule to each stat within this builder. In
+         * other words, a call to this will fully develop the final confirm
+         * for this particular block of assertive code.
          */
-        @NotNull @Override public VCAssertiveBlock build() {
+        @NotNull
+        @Override
+        public VCAssertiveBlock build() {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();

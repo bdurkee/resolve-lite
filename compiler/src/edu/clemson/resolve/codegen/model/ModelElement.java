@@ -38,4 +38,5 @@ import java.lang.annotation.RetentionPolicy;
  * constructing a hierarchy of {@link org.stringtemplate.v4.ST}s.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ModelElement {}
+public @interface ModelElement {
+}

@@ -8,20 +8,22 @@ import edu.clemson.resolve.semantics.MathInvalidClassification;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** An anonymous (lambda) function consisting of one or more typed bound
- *  variables and a body.
+/**
+ * An anonymous (lambda) function consisting of one or more typed bound
+ * variables and a body.
  */
 public class PLambda extends PExp {
 
     private final List<MathSymbolDeclaration> parameters = new ArrayList<>();
-    @NotNull private final PExp body;
+    @NotNull
+    private final PExp body;
 
     public PLambda(@NotNull List<MathSymbolDeclaration> parameters,
                    @NotNull PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
                 new MathFunctionClassification(body.getMathType()
-                        .getTypeGraph(), body.getMathType(),parameters.stream()
-                        .map(p ->p.type).collect(Collectors.toList())), null);
+                        .getTypeGraph(), body.getMathType(), parameters.stream()
+                        .map(p -> p.type).collect(Collectors.toList())), null);
         this.parameters.addAll(parameters);
         this.body = body;
     }
@@ -35,7 +37,8 @@ public class PLambda extends PExp {
         return hash;
     }
 
-    @Override public void accept(PExpListener v) {
+    @Override
+    public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPLambda(this);
 
@@ -47,18 +50,20 @@ public class PLambda extends PExp {
         v.endPExp(this);
     }
 
-    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+    @NotNull
+    @Override
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result;
-        if ( substitutions.containsKey(this) ) {
+        if (substitutions.containsKey(this)) {
             result = substitutions.get(this);
-        }
-        else {
+        } else {
             result = new PLambda(parameters, body.substitute(substitutions));
         }
         return result;
     }
 
-    @Override public boolean containsName(String name) {
+    @Override
+    public boolean containsName(String name) {
         boolean result = false;
         Iterator<MathSymbolDeclaration> parameterIter = parameters.iterator();
         while (!result && parameterIter.hasNext()) {
@@ -67,11 +72,14 @@ public class PLambda extends PExp {
         return result || body.containsName(name);
     }
 
-    @NotNull @Override public List<PExp> getSubExpressions() {
+    @NotNull
+    @Override
+    public List<PExp> getSubExpressions() {
         return Collections.singletonList(body);
     }
 
-    @Override public boolean isObviouslyTrue() {
+    @Override
+    public boolean isObviouslyTrue() {
         return body.isObviouslyTrue();
     }
 
@@ -88,31 +96,42 @@ public class PLambda extends PExp {
         return body;
     }
 
-    @Override public boolean isLiteralFalse() {
+    @Override
+    public boolean isLiteralFalse() {
         return body.isLiteralFalse();
     }
 
-    @NotNull @Override public String getCanonicalName() {
+    @NotNull
+    @Override
+    public String getCanonicalName() {
         return "\\lambda";
     }
 
-    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+    @Override
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @NotNull @Override public PExp withIncomingSignsErased() {
+    @NotNull
+    @Override
+    public PExp withIncomingSignsErased() {
         return new PLambda(parameters, body.withIncomingSignsErased());
     }
 
-    @NotNull @Override public PExp withQuantifiersFlipped() {
+    @NotNull
+    @Override
+    public PExp withQuantifiersFlipped() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getIncomingVariablesNoCache() {
         return body.getIncomingVariablesNoCache();
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(
+    @Override
+    public Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
         Set<String> bodyNames =
                 new HashSet<>(body.getSymbolNames(excludeApplications, excludeLiterals));
@@ -120,11 +139,15 @@ public class PLambda extends PExp {
         return bodyNames;
     }
 
-    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return body.getQuantifiedVariables();
     }
 
-    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull
+    @Override
+    public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions =
                 new LinkedList<>(body.getFunctionApplications());
         bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(
@@ -138,10 +161,10 @@ public class PLambda extends PExp {
 
         public MathSymbolDeclaration(String name, MathClassification type) {
             //Todo: Again, I think this should probably be checked before now
-            if ( name == null ) {
+            if (name == null) {
                 throw new IllegalArgumentException("name==null");
             }
-            if ( type == null ) {
+            if (type == null) {
                 throw new IllegalArgumentException("type==null");
             }
             this.name = name;
@@ -152,32 +175,36 @@ public class PLambda extends PExp {
             return new PSymbol.PSymbolBuilder(name).mathType(type).build();
         }
 
-        @Override public boolean equals(Object o) {
+        @Override
+        public boolean equals(Object o) {
             boolean result = o instanceof MathSymbolDeclaration;
-            if ( result ) {
-                result = this.name.equals(((MathSymbolDeclaration)o).name) &&
-                        this.type.equals(((MathSymbolDeclaration)o).type);
+            if (result) {
+                result = this.name.equals(((MathSymbolDeclaration) o).name) &&
+                        this.type.equals(((MathSymbolDeclaration) o).type);
             }
             return result;
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return name + ":" + (type instanceof MathInvalidClassification ? "Inv" : type);
         }
     }
 
     //only checks extremely strict equality. No bound variable naming
     //differences allowed.
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof PLambda);
-        if ( result ) {
-            result = parameters.size() == ((PLambda)o).parameters.size() &&
-                    body.equals(((PLambda)o).body);
+        if (result) {
+            result = parameters.size() == ((PLambda) o).parameters.size() &&
+                    body.equals(((PLambda) o).body);
         }
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "λ " + parameters.get(0) + "," + body;
     }
 }

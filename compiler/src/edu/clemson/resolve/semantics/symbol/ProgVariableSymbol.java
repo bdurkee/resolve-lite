@@ -14,7 +14,8 @@ import java.util.Map;
 public class ProgVariableSymbol extends Symbol {
 
     private final ProgType type;
-    @NotNull private final MathClssftnWrappingSymbol mathSymbolAlterEgo;
+    @NotNull
+    private final MathClssftnWrappingSymbol mathSymbolAlterEgo;
 
     public ProgVariableSymbol(@NotNull String name,
                               @Nullable ParserRuleContext definingTree,
@@ -26,27 +27,36 @@ public class ProgVariableSymbol extends Symbol {
         this.mathSymbolAlterEgo =
                 new MathClssftnWrappingSymbol(type.getTypeGraph(), name, Quantification.NONE,
                         new MathNamedClassification(type.getTypeGraph(),
-                                name, m.typeRefDepth-1, m), definingTree,
+                                name, m.typeRefDepth - 1, m), definingTree,
                         moduleIdentifier);
     }
 
-    @NotNull public ProgType getProgramType() {
+    @NotNull
+    public ProgType getProgramType() {
         return type;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a program variable";
     }
 
-    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull
+    @Override
+    public ProgVariableSymbol toProgVariableSymbol() {
         return this;
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @NotNull @Override public Symbol instantiateGenerics(
+    @NotNull
+    @Override
+    public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
@@ -55,12 +65,11 @@ public class ProgVariableSymbol extends Symbol {
                 type.instantiateGenerics(genericInstantiations,
                         instantiatingFacility);
 
-        if ( instantiatedType != type ) {
+        if (instantiatedType != type) {
             result =
                     new ProgVariableSymbol(getName(), getDefiningTree(),
                             instantiatedType, getModuleIdentifier());
-        }
-        else {
+        } else {
             result = this;
         }
         return result;

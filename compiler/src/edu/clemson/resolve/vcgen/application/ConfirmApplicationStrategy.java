@@ -8,9 +8,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class ConfirmApplicationStrategy
         implements
-            StatRuleApplicationStrategy<VCConfirm> {
+        StatRuleApplicationStrategy<VCConfirm> {
 
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCConfirm stat) {
         PExp e = block.g.formConjunct(stat.getStatComponents().get(0),
@@ -19,7 +21,9 @@ public class ConfirmApplicationStrategy
         return block.snapshot();
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "confirm rule application";
     }
 }

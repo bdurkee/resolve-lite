@@ -10,19 +10,22 @@ import java.util.WeakHashMap;
 
 public class ProgVoidType extends ProgType {
 
-    @NotNull private static WeakHashMap<DumbTypeGraph, ProgVoidType> instances =
+    @NotNull
+    private static WeakHashMap<DumbTypeGraph, ProgVoidType> instances =
             new WeakHashMap<>();
 
-    @NotNull public static ProgVoidType getInstance(@NotNull DumbTypeGraph g) {
+    @NotNull
+    public static ProgVoidType getInstance(@NotNull DumbTypeGraph g) {
         ProgVoidType result = instances.get(g);
-        if ( result == null ) {
+        if (result == null) {
             result = new ProgVoidType(g);
             instances.put(g, result);
         }
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Void";
     }
 
@@ -30,16 +33,21 @@ public class ProgVoidType extends ProgType {
         super(g);
     }
 
-    @NotNull @Override public MathClassification toMath() {
+    @NotNull
+    @Override
+    public MathClassification toMath() {
         return getTypeGraph().VOID;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         //We override this simply to show that we've given it some thought
         return super.equals(o);
     }
 
-    @NotNull @Override public ProgType instantiateGenerics(
+    @NotNull
+    @Override
+    public ProgType instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         return this;

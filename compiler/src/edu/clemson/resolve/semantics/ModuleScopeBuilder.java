@@ -11,7 +11,9 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final List<ModuleIdentifier> importedModules = new ArrayList<>();
 
-    /** The set of all modules {@code this} either extends or inherits from. */
+    /**
+     * The set of all modules {@code this} either extends or inherits from.
+     */
     private final Set<ModuleIdentifier> locallyInheritedModules =
             new LinkedHashSet<>();
 
@@ -22,17 +24,20 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         super(symbolTable, g, definingTree, parent, new ModuleIdentifier(name));
     }
 
-    @NotNull public ModuleIdentifier getModuleIdentifier() {
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
 
-    @NotNull public ModuleScopeBuilder addInheritedModules(
-            @NotNull ModuleIdentifier ... i) {
+    @NotNull
+    public ModuleScopeBuilder addInheritedModules(
+            @NotNull ModuleIdentifier... i) {
         locallyInheritedModules.addAll(Arrays.asList(i));
         return this;
     }
 
-    @NotNull public ModuleScopeBuilder addImports(
+    @NotNull
+    public ModuleScopeBuilder addImports(
             @Nullable Collection<ModuleIdentifier> imports) {
         if (imports != null) {
             importedModules.addAll(imports);
@@ -45,11 +50,14 @@ public class ModuleScopeBuilder extends ScopeBuilder {
                 importedModules.contains(i);
     }
 
-    @NotNull public List<ModuleIdentifier> getImports() {
+    @NotNull
+    public List<ModuleIdentifier> getImports() {
         return new ArrayList<>(importedModules);
     }
 
-    @NotNull @Override public String toString() {
+    @NotNull
+    @Override
+    public String toString() {
         return moduleIdentifier + ":" + symbols.keySet();
     }
 

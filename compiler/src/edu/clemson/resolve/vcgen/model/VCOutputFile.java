@@ -46,7 +46,7 @@ public class VCOutputFile extends OutputModelObject {
      * the same set of free variables.  This method adds each {@code VC} to the
      * final list.
      *
-     * @param batch the set of {@code VC}s in context.
+     * @param batch         the set of {@code VC}s in context.
      * @param sectionNumber The batch number so that we can mirror the numbering
      *                      used by the Verifier. (Ideally, we should eventually
      *                      embed the name of each {@code VC} from the Verifier

@@ -12,22 +12,27 @@ public class DummyIterator<T> implements Iterator<T> {
 
     }
 
-    @SuppressWarnings("unchecked") public static <T> Iterator<T> getInstance(Iterator<T> i) {
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> getInstance(Iterator<T> i) {
         return (Iterator<T>) INSTANCE;
     }
 
-    @SuppressWarnings("unchecked") public static <T> Iterator<T> getInstance() {
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> getInstance() {
         return (Iterator<T>) INSTANCE;
     }
 
-    @Override public boolean hasNext() {
+    @Override
+    public boolean hasNext() {
         return false;
     }
 
-    @Override public T next() {
+    @Override
+    public T next() {
         throw new NoSuchElementException();
     }
 
-    @Override public void remove() {
+    @Override
+    public void remove() {
     }
 }

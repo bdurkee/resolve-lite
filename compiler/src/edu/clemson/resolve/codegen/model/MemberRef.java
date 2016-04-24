@@ -6,7 +6,8 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 public class MemberRef extends Expr {
     public String name;
 
-    @ModelElement public Expr child;
+    @ModelElement
+    public Expr child;
     public String typeName, typeQualifier;
     public boolean isBaseRef = false;
     public boolean isLastRef = false;

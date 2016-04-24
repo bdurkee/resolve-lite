@@ -7,7 +7,8 @@ import java.util.List;
 public class FacilityDef extends OutputModelObject {
     public boolean isStatic = false;
     public String name, concept;
-    @ModelElement public DecoratedFacilityInstantiation root;
+    @ModelElement
+    public DecoratedFacilityInstantiation root;
 
     public FacilityDef(String name, String concept) {
         this.name = name;
@@ -15,5 +16,6 @@ public class FacilityDef extends OutputModelObject {
     }
 
     public void addGettersForGenericsAndNamedVariableArguments(
-            List<? extends Symbol> symbols) {}
+            List<? extends Symbol> symbols) {
+    }
 }

@@ -13,32 +13,35 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 
 import java.util.*;
 
-/** Defines the search path used when a symbol is referenced in an
- *  unqualified way, along with some parameters for tweaking how the search is
- *  accomplished. In general, the path is as follows:
- *  <ol>
- *  <li>Search the local scope.</li>
- *  <li>Search any facilities declared in the local scope.</li>
- *  <li>Search any imports in a depth-first manner, skipping any already-searched
- *  scopes.</li>
- *  <ul>
- *  <li>For each searched import, search any facilities declared inside.</li>
- *  </ul>
- *  </ol>
- *  <p>
- *  Instances of this class can be parameterized to search only direct imports or
- *  to exclude all imports, as well as to exclude searching facilities, or change
- *  how generics are handled when searching facilities.</p>
- *  <p>
- *  Additionally, by setting the {@code localPriority} flag, the search can be
- *  made to stop without considering imports (regardless of the import strategy)
- *  if at least one local match is found. Note that any local facilities will
- *  still be searched if the facility strategy requires it.</p>
+/**
+ * Defines the search path used when a symbol is referenced in an
+ * unqualified way, along with some parameters for tweaking how the search is
+ * accomplished. In general, the path is as follows:
+ * <ol>
+ * <li>Search the local scope.</li>
+ * <li>Search any facilities declared in the local scope.</li>
+ * <li>Search any imports in a depth-first manner, skipping any already-searched
+ * scopes.</li>
+ * <ul>
+ * <li>For each searched import, search any facilities declared inside.</li>
+ * </ul>
+ * </ol>
+ * <p>
+ * Instances of this class can be parameterized to search only direct imports or
+ * to exclude all imports, as well as to exclude searching facilities, or change
+ * how generics are handled when searching facilities.</p>
+ * <p>
+ * Additionally, by setting the {@code localPriority} flag, the search can be
+ * made to stop without considering imports (regardless of the import strategy)
+ * if at least one local match is found. Note that any local facilities will
+ * still be searched if the facility strategy requires it.</p>
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
-    @NotNull private final ImportStrategy importStrategy;
-    @NotNull private final FacilityStrategy facilityStrategy;
+    @NotNull
+    private final ImportStrategy importStrategy;
+    @NotNull
+    private final FacilityStrategy facilityStrategy;
     private final boolean localPriority;
 
     public UnqualifiedPath(@NotNull ImportStrategy imports,
@@ -49,7 +52,9 @@ public class UnqualifiedPath implements ScopeSearchPath {
         this.localPriority = localPriority;
     }
 
-    @NotNull @Override public <E extends Symbol> List<E> searchFromContext(
+    @NotNull
+    @Override
+    public <E extends Symbol> List<E> searchFromContext(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo)
             throws DuplicateSymbolException, NoSuchModuleException,
@@ -66,7 +71,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
     private <E extends Symbol> boolean searchModule(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
-            @NotNull MathSymbolTable repo,  @NotNull List<E> results,
+            @NotNull MathSymbolTable repo, @NotNull List<E> results,
             @NotNull Set<Scope> searchedScopes,
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility,
@@ -103,7 +108,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                     repo.getModuleScope(sourceAsSyntacticScope
                             .getModuleIdentifier());
             List<ModuleIdentifier> imps = module.getImports();
-            for (ModuleIdentifier i :imps) {
+            for (ModuleIdentifier i : imps) {
                 finished =
                         searchModule(searcher, repo.getModuleScope(i),
                                 repo, results, searchedScopes,

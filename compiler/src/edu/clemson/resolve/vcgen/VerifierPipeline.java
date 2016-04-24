@@ -15,10 +15,11 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
         super(rc, compilationUnits);
     }
 
-    @Override public void process() {
+    @Override
+    public void process() {
         for (AnnotatedModule unit : compilationUnits) {
-            if ( compiler.targetNames.contains(
-                    unit.getNameToken().getText()) && compiler.vcs ) {
+            if (compiler.targetNames.contains(
+                    unit.getNameToken().getText()) && compiler.vcs) {
                 if (unit.getRoot().getChild(0) instanceof
                         ResolveParser.PrecisModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof
@@ -33,8 +34,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 //List<VC> vcs = gen.getProverInput();
                 System.out.println(x.render());
                 //TODO: Hook up conguence class prover.
-              //  ModelBuilderProto2 vv = new ModelBuilderProto2();
-              //  ParseTreeWalker.DEFAULT.walk(vv, unit.getRoot());
+                //  ModelBuilderProto2 vv = new ModelBuilderProto2();
+                //  ParseTreeWalker.DEFAULT.walk(vv, unit.getRoot());
             }
         }
     }

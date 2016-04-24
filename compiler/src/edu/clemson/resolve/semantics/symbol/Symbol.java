@@ -14,18 +14,24 @@ import java.util.Map;
 
 public abstract class Symbol {
 
-    @NotNull protected final String name;
+    @NotNull
+    protected final String name;
 
-    /** Identifies the particular module in which this {@code Symbol} lives. */
-    @NotNull protected final ModuleIdentifier moduleIdentifier;
+    /**
+     * Identifies the particular module in which this {@code Symbol} lives.
+     */
+    @NotNull
+    protected final ModuleIdentifier moduleIdentifier;
 
-    /** The parse tree context this symbol was derived from. Note that it can
-     *  be {@code null}. Note that contexts that <em>define</em> scopes keep
-     *  track of this as well.
+    /**
+     * The parse tree context this symbol was derived from. Note that it can
+     * be {@code null}. Note that contexts that <em>define</em> scopes keep
+     * track of this as well.
      *
      * @see {@link SyntacticScope#getDefiningTree()}
      */
-    @Nullable protected final ParserRuleContext definingTree;
+    @Nullable
+    protected final ParserRuleContext definingTree;
 
     public Symbol(@NotNull String name,
                   @Nullable ParserRuleContext definingTree,
@@ -35,15 +41,18 @@ public abstract class Symbol {
         this.moduleIdentifier = moduleIdentifier;
     }
 
-    @NotNull public ModuleIdentifier getModuleIdentifier() {
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
 
-    @NotNull public String getName() {
+    @NotNull
+    public String getName() {
         return name;
     }
 
-    @Nullable public ParserRuleContext getDefiningTree() {
+    @Nullable
+    public ParserRuleContext getDefiningTree() {
         return definingTree;
     }
 
@@ -55,68 +64,82 @@ public abstract class Symbol {
         return false;
     }
 
-    @NotNull public abstract String getSymbolDescription();
+    @NotNull
+    public abstract String getSymbolDescription();
 
-    @NotNull public MathClssftnWrappingSymbol toMathSymbol()
+    @NotNull
+    public MathClssftnWrappingSymbol toMathSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProgTypeSymbol toProgTypeSymbol()
+    @NotNull
+    public ProgTypeSymbol toProgTypeSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public TypeModelSymbol toTypeModelSymbol()
+    @NotNull
+    public TypeModelSymbol toTypeModelSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProgParameterSymbol toProgParameterSymbol()
+    @NotNull
+    public ProgParameterSymbol toProgParameterSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public OperationSymbol toOperationSymbol()
+    @NotNull
+    public OperationSymbol toOperationSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public FacilitySymbol toFacilitySymbol()
+    @NotNull
+    public FacilitySymbol toFacilitySymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProgReprTypeSymbol toProgReprTypeSymbol()
+    @NotNull
+    public ProgReprTypeSymbol toProgReprTypeSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProgVariableSymbol toProgVariableSymbol()
+    @NotNull
+    public ProgVariableSymbol toProgVariableSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
+    @NotNull
+    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public ProcedureSymbol toProcedureSymbol()
+    @NotNull
+    public ProcedureSymbol toProcedureSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public TheoremSymbol toTheoremSymbol()
+    @NotNull
+    public TheoremSymbol toTheoremSymbol()
             throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
-    @NotNull public abstract Symbol instantiateGenerics(
+    @NotNull
+    public abstract Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility);
 
-    @NotNull public static Map<String, MathClassification> buildMathTypeGenerics(
+    @NotNull
+    public static Map<String, MathClassification> buildMathTypeGenerics(
             @NotNull Map<String, ProgType> genericInstantiations) {
 
         Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();

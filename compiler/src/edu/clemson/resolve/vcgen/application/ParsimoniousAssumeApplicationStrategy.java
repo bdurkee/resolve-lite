@@ -12,7 +12,9 @@ public class ParsimoniousAssumeApplicationStrategy
         implements
         StatRuleApplicationStrategy<VCAssume> {
 
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
@@ -50,14 +52,15 @@ public class ParsimoniousAssumeApplicationStrategy
         if (!parsimoniousAssumeConjuncts.isEmpty()) {
             assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
             block.finalConfirm(block.g.formImplies(assumeExp, RP));
-        }
-        else {
+        } else {
             block.finalConfirm(RP);
         }
         return block.snapshot();
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "parsimonious assume application";
     }
 }

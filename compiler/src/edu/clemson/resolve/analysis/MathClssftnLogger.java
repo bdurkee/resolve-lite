@@ -19,76 +19,88 @@ class MathClssftnLogger extends ResolveBaseListener {
         this.compiler = rc;
     }
 
-    @Override public void enterMathClssftnExp(
+    @Override
+    public void enterMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
         compiler.log("----------[exitMathTypeExp]");
     }
 
-    @Override public void exitMathClssftnExp(
+    @Override
+    public void exitMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
         compiler.log("----------[exitMathTypeExp]");
     }
 
-    @Override public void exitMathPrefixAppExp(
+    @Override
+    public void exitMathPrefixAppExp(
             ResolveParser.MathPrefixAppExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathInfixAppExp(
+    @Override
+    public void exitMathInfixAppExp(
             ResolveParser.MathInfixAppExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathSymbolExp(
+    @Override
+    public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathBooleanLiteralExp(
+    @Override
+    public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathIntegerLiteralExp(
+    @Override
+    public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathQuantifiedExp(
+    @Override
+    public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathSetRestrictionExp(
+    @Override
+    public void exitMathSetRestrictionExp(
             ResolveParser.MathSetRestrictionExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
+    @Override
+    public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathCartProdExp(
+    @Override
+    public void exitMathCartProdExp(
             ResolveParser.MathCartProdExpContext ctx) {
         logClssftn(ctx);
     }
 
-    @Override public void exitMathSelectorExp(
+    @Override
+    public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
         logClssftn(ctx);
     }
 
     private void logClssftn(@NotNull ParserRuleContext ctx) {
         MathClassification t = types.get(ctx);
-        if ( t == null ) {
-            compiler.log("["+ctx.getClass().getSimpleName()+"]"+ctx.getText() + " : null");
+        if (t == null) {
+            compiler.log("[" + ctx.getClass().getSimpleName() + "]" + ctx.getText() + " : null");
             return;
         }
         String colonOp = " : ";
-        if ( t == t.getTypeGraph().CLS ) {
+        if (t == t.getTypeGraph().CLS) {
             colonOp = " ː ";
         }
-        compiler.log("["+ctx.getClass().getSimpleName()+"]"+
-                ctx.getText()+colonOp+t+"  <"+t.getClass().getSimpleName()+">");
+        compiler.log("[" + ctx.getClass().getSimpleName() + "]" +
+                ctx.getText() + colonOp + t + "  <" + t.getClass().getSimpleName() + ">");
     }
 }

@@ -16,46 +16,55 @@ public class ProgParameterSymbol extends Symbol {
 
     public static enum ParameterMode {
         ALTERS {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { ALTERS, CLEARS };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{ALTERS, CLEARS};
             }
         },
         UPDATES {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { UPDATES, CLEARS, RESTORES,
-                        PRESERVES };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{UPDATES, CLEARS, RESTORES,
+                        PRESERVES};
             }
         },
         REPLACES {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { REPLACES, CLEARS };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{REPLACES, CLEARS};
             }
         },
         CLEARS {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { CLEARS };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{CLEARS};
             }
         },
         RESTORES {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { RESTORES, PRESERVES };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{RESTORES, PRESERVES};
             }
         },
         PRESERVES {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { PRESERVES };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{PRESERVES};
             }
         },
         EVALUATES {
-            @Override public ParameterMode[] getValidImplementationModes() {
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
                 return new ParameterMode[]{EVALUATES};
             }
         },
         TYPE {
-            @Override public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[] { TYPE };
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{TYPE};
             }
         };
+
         public boolean canBeImplementedWith(ParameterMode o) {
             return contains(getValidImplementationModes(), o);
         }
@@ -90,7 +99,8 @@ public class ProgParameterSymbol extends Symbol {
     private MathClssftnWrappingSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
 
-    @Nullable private String typeQualifier;
+    @Nullable
+    private String typeQualifier;
 
     public ProgParameterSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                                @NotNull ParameterMode mode,
@@ -107,13 +117,12 @@ public class ProgParameterSymbol extends Symbol {
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE, type.toMath(),
                             definingTree, moduleIdentifier);
-        }
-        else {
+        } else {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
                             new MathNamedClassification(g, name, level,
-                            type.toMath()),
+                                    type.toMath()),
                             definingTree, moduleIdentifier);
         }
         this.progVariableAlterEgo =
@@ -125,39 +134,49 @@ public class ProgParameterSymbol extends Symbol {
         this.typeQualifier = typeQualifier;
     }
 
-    @Nullable public String getTypeQualifier() {
+    @Nullable
+    public String getTypeQualifier() {
         return typeQualifier;
     }
 
-    @NotNull public ProgType getDeclaredType() {
+    @NotNull
+    public ProgType getDeclaredType() {
         return declaredType;
     }
 
-    @NotNull public ParameterMode getMode() {
+    @NotNull
+    public ParameterMode getMode() {
         return mode;
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @NotNull @Override public ProgVariableSymbol toProgVariableSymbol() {
+    @NotNull
+    @Override
+    public ProgVariableSymbol toProgVariableSymbol() {
         return progVariableAlterEgo;
     }
 
-    @NotNull @Override public ProgParameterSymbol toProgParameterSymbol() {
+    @NotNull
+    @Override
+    public ProgParameterSymbol toProgParameterSymbol() {
         return this;
     }
 
-    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol()
+    @NotNull
+    @Override
+    public ProgTypeSymbol toProgTypeSymbol()
             throws UnexpectedSymbolException {
         ProgTypeSymbol result = null;
 
         if (!mode.equals(ParameterMode.TYPE)) {
             //This will throw an appropriate error
             result = super.toProgTypeSymbol();
-        }
-        else {
+        } else {
             result =
                     new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
                             typeGraph, getName()),
@@ -167,17 +186,22 @@ public class ProgParameterSymbol extends Symbol {
         return result;
     }
 
-    @NotNull public PSymbol asPSymbol() {
+    @NotNull
+    public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
                 .mathType(declaredType.toMath()).build();
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a parameter";
     }
 
-    @NotNull @Override public Symbol instantiateGenerics(
+    @NotNull
+    @Override
+    public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
@@ -187,7 +211,8 @@ public class ProgParameterSymbol extends Symbol {
                 getModuleIdentifier());
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "<" + mode.toString().toLowerCase() + ">" + getName();
     }
 }

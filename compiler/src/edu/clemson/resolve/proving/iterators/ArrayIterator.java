@@ -21,23 +21,25 @@ public class ArrayIterator<E> implements Iterator<E> {
         myFirstUnincludedIndex = myCursor + length;
     }
 
-    @Override public boolean hasNext() {
+    @Override
+    public boolean hasNext() {
         return myCursor < myFirstUnincludedIndex;
     }
 
-    @Override public E next() {
+    @Override
+    public E next() {
         E retval;
         try {
             retval = myArray[myCursor];
-        }
-        catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             throw new NoSuchElementException();
         }
         myCursor++;
         return retval;
     }
 
-    @Override public void remove() {
+    @Override
+    public void remove() {
         throw new UnsupportedOperationException();
     }
 

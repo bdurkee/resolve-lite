@@ -11,16 +11,19 @@ public class SingletonIterator<T> implements Iterator<T> {
         myElement = element;
     }
 
-    @Override public boolean hasNext() {
+    @Override
+    public boolean hasNext() {
         return !myReturnedFlag;
     }
 
-    @Override public T next() {
+    @Override
+    public T next() {
         myReturnedFlag = true;
         return myElement;
     }
 
-    @Override public void remove() {
+    @Override
+    public void remove() {
         throw new UnsupportedOperationException();
     }
 

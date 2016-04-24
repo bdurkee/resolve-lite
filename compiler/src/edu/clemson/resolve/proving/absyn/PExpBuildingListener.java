@@ -23,9 +23,10 @@ import java.util.*;
 
 import static edu.clemson.resolve.proving.absyn.PApply.DisplayStyle.*;
 
-/** Converts parse tree math exprs to an equivalent abstract-syntax form,
- *  represented by the {@link PExp} hierarchy. Get the final,
- *  built {@link PExp} via a call to {@link #getBuiltPExp(ParseTree)}.
+/**
+ * Converts parse tree math exprs to an equivalent abstract-syntax form,
+ * represented by the {@link PExp} hierarchy. Get the final,
+ * built {@link PExp} via a call to {@link #getBuiltPExp(ParseTree)}.
  */
 public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
@@ -37,24 +38,26 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     private final boolean skipDummyQuantifierNodes;
     private final DumbTypeGraph g;
 
-    /** Constructs a new {@code PExpBuildingListener} given an
-     *  {@link AnnotatedModule} with it's associated expression tree mappings.
+    /**
+     * Constructs a new {@code PExpBuildingListener} given an
+     * {@link AnnotatedModule} with it's associated expression tree mappings.
      *
-     *  @param g a typegraph
-     *  @param annotations annotations to be used for constructing expressions
+     * @param g           a typegraph
+     * @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull DumbTypeGraph g,
                                 @NotNull AnnotatedModule annotations) {
         this(g, annotations, false);
     }
 
-    /** Constructs a new {@code PExpBuildingListener} given an instance of
-     *  {@link DumbTypeGraph}, some module {@code annotations} and a boolean flag
-     *  {@code skipDummyQuantifiedNodes} indicating whether or not to construct
-     *  special, explicit syntactic node representing existential or universal
-     *  quantifiers.
+    /**
+     * Constructs a new {@code PExpBuildingListener} given an instance of
+     * {@link DumbTypeGraph}, some module {@code annotations} and a boolean flag
+     * {@code skipDummyQuantifiedNodes} indicating whether or not to construct
+     * special, explicit syntactic node representing existential or universal
+     * quantifiers.
      *
-     *  @param annotations annotations to be used for constructing expressions
+     * @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull DumbTypeGraph g,
                                 @NotNull AnnotatedModule annotations,
@@ -65,43 +68,53 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.repo = annotations.mathASTs;
     }
 
-    /** Retrive the final built expr from concrete node {@code t}. */
+    /**
+     * Retrive the final built expr from concrete node {@code t}.
+     */
     @SuppressWarnings("unchecked")
-    @Nullable public T getBuiltPExp(ParseTree t) {
+    @Nullable
+    public T getBuiltPExp(ParseTree t) {
         return (T) repo.get(t);
     }
 
-    @Override public void exitMathClssftnExp(
+    @Override
+    public void exitMathClssftnExp(
             ResolveParser.MathClssftnExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp()));
     }
 
-    @Override public void exitMathAssertionExp(
+    @Override
+    public void exitMathAssertionExp(
             ResolveParser.MathAssertionExpContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
-    @Override public void exitMathClssftnAssertionExp(
+    @Override
+    public void exitMathClssftnAssertionExp(
             ResolveParser.MathClssftnAssertionExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathExp(0)));
     }
 
-    @Override public void exitMathNestedExp(
+    @Override
+    public void exitMathNestedExp(
             ResolveParser.MathNestedExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitMathPrimeExp(
+    @Override
+    public void exitMathPrimeExp(
             ResolveParser.MathPrimeExpContext ctx) {
         repo.put(ctx, repo.get(ctx.getChild(0)));
     }
 
-    @Override public void exitMathPrimaryExp(
+    @Override
+    public void exitMathPrimaryExp(
             ResolveParser.MathPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.mathPrimeExp()));
     }
 
-    @Override public void enterMathQuantifiedExp(
+    @Override
+    public void enterMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
         for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
             String quantifier = ctx.q.getText();
@@ -123,7 +136,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result;
     }
 
-    @Override public void exitMathQuantifiedExp(
+    @Override
+    public void exitMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> declaredVars =
                 new ArrayList<>();
@@ -136,13 +150,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 getQuantificationMode(ctx.q), declaredVars);
         if (skipDummyQuantifierNodes) {
             repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-        }
-        else {
+        } else {
             repo.put(ctx, q);
         }
     }
 
-    @Override public void exitMathPrefixAppExp(
+    @Override
+    public void exitMathPrefixAppExp(
             ResolveParser.MathPrefixAppExpContext ctx) {
         List<? extends ParseTree> args = ctx.mathExp()
                 .subList(1, ctx.mathExp().size());
@@ -154,7 +168,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitMathInfixAppExp(
+    @Override
+    public void exitMathInfixAppExp(
             ResolveParser.MathInfixAppExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
@@ -164,7 +179,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitMathOutfixAppExp(
+    @Override
+    public void exitMathOutfixAppExp(
             ResolveParser.MathOutfixAppExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
@@ -174,7 +190,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitMathBracketAppExp(
+    @Override
+    public void exitMathBracketAppExp(
             ResolveParser.MathBracketAppExpContext ctx) {
         PApplyBuilder result =
                 new PApplyBuilder((PSymbol) repo.get(ctx.mathSqBrOpExp()))
@@ -183,50 +200,71 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
     }
-/*
-    mathSqBrOpExp : op='[' ;
-    mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
-    mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
-    mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
-    mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
-    mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
-    mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
-    mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
-    mathImpliesOpExp : (qualifier=ID '::')? op='implies';
-    mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
-*/
-    @Override public void exitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
+
+    /*
+        mathSqBrOpExp : op='[' ;
+        mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
+        mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
+        mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
+        mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
+        mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
+        mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
+        mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
+        mathImpliesOpExp : (qualifier=ID '::')? op='implies';
+        mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
+    */
+    @Override
+    public void exitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
         CommonToken t = new CommonToken(ctx.op);
         t.setText("[..]");
         repo.put(ctx, buildOperatorPSymbol(ctx, null, t));
     }
-    @Override public void exitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
+
+    @Override
+    public void exitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
+
+    @Override
+    public void exitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
+
+    @Override
+    public void exitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathArrowOpExp(ResolveParser.MathArrowOpExpContext ctx) {
+
+    @Override
+    public void exitMathArrowOpExp(ResolveParser.MathArrowOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathRelationalOpExp(ResolveParser.MathRelationalOpExpContext ctx) {
+
+    @Override
+    public void exitMathRelationalOpExp(ResolveParser.MathRelationalOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathEqualityOpExp(ResolveParser.MathEqualityOpExpContext ctx) {
+
+    @Override
+    public void exitMathEqualityOpExp(ResolveParser.MathEqualityOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathSetContainmentOpExp(ResolveParser.MathSetContainmentOpExpContext ctx) {
+
+    @Override
+    public void exitMathSetContainmentOpExp(ResolveParser.MathSetContainmentOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathImpliesOpExp(ResolveParser.MathImpliesOpExpContext ctx) {
+
+    @Override
+    public void exitMathImpliesOpExp(ResolveParser.MathImpliesOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
-    @Override public void exitMathBooleanOpExp(ResolveParser.MathBooleanOpExpContext ctx) {
+
+    @Override
+    public void exitMathBooleanOpExp(ResolveParser.MathBooleanOpExpContext ctx) {
         repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
     }
+
     private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
                                          @Nullable Token qualifier,
                                          @NotNull Token operator) {
@@ -237,19 +275,21 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .build();
     }
 
-    @Override public void exitMathSymbolExp(
+    @Override
+    public void exitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
         MathClassification t = getMathClssfctn(ctx);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
-                    .qualifier(ctx.qualifier)
-                    .incoming(ctx.incoming != null)
-                    .quantification(quantifiedVars.get(ctx.name.getText()))
-                    .mathType(getMathClssfctn(ctx));
+                        .qualifier(ctx.qualifier)
+                        .incoming(ctx.incoming != null)
+                        .quantification(quantifiedVars.get(ctx.name.getText()))
+                        .mathType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitMathLambdaExp(
+    @Override
+    public void exitMathLambdaExp(
             ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
         parameters.add(new PLambda.MathSymbolDeclaration(
@@ -257,7 +297,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 
-    @Override public void exitMathAlternativeExp(
+    @Override
+    public void exitMathAlternativeExp(
             ResolveParser.MathAlternativeExpContext ctx) {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
@@ -268,8 +309,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
-            }
-            else {
+            } else {
                 otherwiseResult = repo.get(alt.result);
             }
         }
@@ -280,17 +320,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result);
     }
 
-    @Override public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
+    @Override
+    public void exitMathSetExp(ResolveParser.MathSetExpContext ctx) {
         repo.put(ctx, new PSet(annotations.mathClssftns.get(ctx),
                 Utils.collect(PExp.class, ctx.mathExp(), repo)));
     }
 
-    @Override public void exitMathSelectorExp(
+    @Override
+    public void exitMathSelectorExp(
             ResolveParser.MathSelectorExpContext ctx) {
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
     }
 
-    @Override public void exitMathBooleanLiteralExp(
+    @Override
+    public void exitMathBooleanLiteralExp(
             ResolveParser.MathBooleanLiteralExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
@@ -299,7 +342,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitMathIntegerLiteralExp(
+    @Override
+    public void exitMathIntegerLiteralExp(
             ResolveParser.MathIntegerLiteralExpContext ctx) {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.getText())
@@ -404,7 +448,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 getMathTypeValue(ctx), annotations.progTypes.get(ctx)));
     }*/
 
-    @NotNull private PExp buildLiteral(@NotNull String literalText,
+    @NotNull
+    private PExp buildLiteral(@NotNull String literalText,
                               @NotNull MathClassification type,
                               @Nullable ProgType progType) {
         PSymbolBuilder result =

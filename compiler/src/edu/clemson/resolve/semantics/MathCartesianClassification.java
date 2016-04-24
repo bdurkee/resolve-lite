@@ -14,7 +14,7 @@ public class MathCartesianClassification extends MathClassification {
     public final Map<String, Element> tagsToElements =
             new LinkedHashMap<>();
 
-    public MathCartesianClassification(DumbTypeGraph g, Element ... e) {
+    public MathCartesianClassification(DumbTypeGraph g, Element... e) {
         this(g, Arrays.asList(e));
     }
 
@@ -28,7 +28,8 @@ public class MathCartesianClassification extends MathClassification {
         }
     }
 
-    @Override public List<MathClassification> getComponentTypes() {
+    @Override
+    public List<MathClassification> getComponentTypes() {
         List<MathClassification> result = new ArrayList<>();
         for (Element e : elements) {
             result.add(e.clssfcn);
@@ -36,11 +37,13 @@ public class MathCartesianClassification extends MathClassification {
         return result;
     }
 
-    @Override public int getTypeRefDepth() {
+    @Override
+    public int getTypeRefDepth() {
         return 1;
     }
 
-    @Override public MathClassification withVariablesSubstituted(
+    @Override
+    public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         List<Element> newElements = new ArrayList<>();
         for (Element element : elements) {
@@ -59,16 +62,20 @@ public class MathCartesianClassification extends MathClassification {
         return elements.get(i).clssfcn;
     }
 
-    @Nullable public MathClassification getFactor(String tag) {
-        if (tagsToElements.get(tag) == null) throw new NoSuchElementException(tag);
+    @Nullable
+    public MathClassification getFactor(String tag) {
+        if (tagsToElements.get(tag) == null)
+            throw new NoSuchElementException(tag);
         return tagsToElements.get(tag).clssfcn;
     }
 
-    @Nullable public Element getElementUnder(String tag) {
+    @Nullable
+    public Element getElementUnder(String tag) {
         return tagsToElements.get(tag);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "(" + Utils.join(elements, " * ") + ")";
     }
 
@@ -85,16 +92,18 @@ public class MathCartesianClassification extends MathClassification {
             this(null, c);
         }
 
-        @Nullable public String getTag() {
+        @Nullable
+        public String getTag() {
             return tag;
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             String result = clssfcn.toString();
             if (tag != null && !tag.equals("")) {
                 String colonOp = " : ";
                 if (clssfcn == clssfcn.getTypeGraph().CLS) colonOp = " ː ";
-                result = "("+tag+colonOp+clssfcn+")";
+                result = "(" + tag + colonOp + clssfcn + ")";
             }
             return result;
         }

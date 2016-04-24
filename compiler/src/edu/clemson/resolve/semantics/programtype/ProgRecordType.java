@@ -10,8 +10,10 @@ import java.util.*;
 
 public class ProgRecordType extends ProgType {
 
-    @NotNull private final Map<String, ProgType> fields = new HashMap<>();
-    @NotNull private MathClassification mathTypeAlterEgo;
+    @NotNull
+    private final Map<String, ProgType> fields = new HashMap<>();
+    @NotNull
+    private MathClassification mathTypeAlterEgo;
 
     public ProgRecordType(@NotNull DumbTypeGraph g,
                           @NotNull Map<String, ProgType> types) {
@@ -26,7 +28,8 @@ public class ProgRecordType extends ProgType {
         this.mathTypeAlterEgo = new MathCartesianClassification(g, eles);
     }
 
-    @NotNull public ProgType getFieldType(@NotNull String name)
+    @NotNull
+    public ProgType getFieldType(@NotNull String name)
             throws NoSuchElementException {
         ProgType result = fields.get(name);
         if (result == null) {
@@ -35,19 +38,25 @@ public class ProgRecordType extends ProgType {
         return result;
     }
 
-    @Override public boolean isAggregateType() {
+    @Override
+    public boolean isAggregateType() {
         return true;
     }
 
-    @NotNull @Override public MathClassification toMath() {
+    @NotNull
+    @Override
+    public MathClassification toMath() {
         return mathTypeAlterEgo;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "record " + fields;
     }
 
-    @NotNull @Override public ProgType instantiateGenerics(
+    @NotNull
+    @Override
+    public ProgType instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
 

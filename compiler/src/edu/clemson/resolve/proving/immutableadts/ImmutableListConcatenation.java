@@ -15,7 +15,7 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     private final int myTotalSize;
 
     public ImmutableListConcatenation(ImmutableList<E> firstList,
-            ImmutableList<E> secondList) {
+                                      ImmutableList<E> secondList) {
 
         myFirstList = firstList;
         myFirstListSize = myFirstList.size();
@@ -26,23 +26,23 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         myTotalSize = myFirstListSize + mySecondListSize;
     }
 
-    @Override public E get(int index) {
+    @Override
+    public E get(int index) {
         E retval;
         if (index < myFirstListSize) {
             retval = myFirstList.get(index);
-        }
-        else {
+        } else {
             retval = mySecondList.get(index - myFirstListSize);
         }
         return retval;
     }
 
-    @Override public ImmutableList<E> head(int length) {
+    @Override
+    public ImmutableList<E> head(int length) {
         ImmutableList<E> retval;
         if (length <= myFirstListSize) {
             retval = myFirstList.head(length);
-        }
-        else {
+        } else {
             retval =
                     new ImmutableListConcatenation<E>(myFirstList, mySecondList
                             .head(length - myFirstListSize));
@@ -50,28 +50,31 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         return retval;
     }
 
-    @Override public Iterator<E> iterator() {
+    @Override
+    public Iterator<E> iterator() {
         return new ChainingIterator<E>(myFirstList.iterator(), mySecondList
                 .iterator());
     }
 
-    @Override public int size() {
+    @Override
+    public int size() {
         return myTotalSize;
     }
 
-    @Override public ImmutableList<E> subList(int startIndex, int length) {
+    @Override
+    public ImmutableList<E> subList(int startIndex, int length) {
         return tail(startIndex).head(length);
     }
 
-    @Override public ImmutableList<E> tail(int startIndex) {
+    @Override
+    public ImmutableList<E> tail(int startIndex) {
         ImmutableList<E> retval;
 
         if (startIndex < myFirstListSize) {
             retval =
                     new ImmutableListConcatenation<E>(myFirstList
                             .tail(startIndex), mySecondList);
-        }
-        else {
+        } else {
             retval = mySecondList.tail(startIndex - myFirstListSize);
         }
         return retval;

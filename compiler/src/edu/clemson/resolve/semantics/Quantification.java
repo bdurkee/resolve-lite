@@ -1,8 +1,9 @@
 package edu.clemson.resolve.semantics;
 
-/** A general representation of mathematical quantification.
- *  This enum should be used for anything that is capable of being quantified
- *  (e.g. {@link edu.clemson.resolve.proving.absyn.PExp}s).
+/**
+ * A general representation of mathematical quantification.
+ * This enum should be used for anything that is capable of being quantified
+ * (e.g. {@link edu.clemson.resolve.proving.absyn.PExp}s).
  */
 public enum Quantification {
 

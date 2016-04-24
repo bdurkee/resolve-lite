@@ -29,74 +29,98 @@ public class PQuantified extends PExp {
         this.declaredSymbols.addAll(symDecls);
     }
 
-    @NotNull public Quantification getQuantificationType() {
+    @NotNull
+    public Quantification getQuantificationType() {
         return quantificationType;
     }
 
-    @NotNull public PExp getAssertion() {
+    @NotNull
+    public PExp getAssertion() {
         return assertion;
     }
 
-    @NotNull public List<PLambda.MathSymbolDeclaration> getDeclaredSymbols() {
+    @NotNull
+    public List<PLambda.MathSymbolDeclaration> getDeclaredSymbols() {
         return declaredSymbols;
     }
 
-    @Override public void accept(PExpListener v) {
+    @Override
+    public void accept(PExpListener v) {
 
     }
 
-    @NotNull @Override public PExp substitute(
+    @NotNull
+    @Override
+    public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
         return new PQuantified(assertion.substitute(substitutions),
                 quantificationType, declaredSymbols);
     }
 
-    @Override public boolean containsName(String name) {
+    @Override
+    public boolean containsName(String name) {
         return assertion.containsName(name);
     }
 
-    @NotNull @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull
+    @Override
+    public List<? extends PExp> getSubExpressions() {
         List<PExp> result = new ArrayList<>();
         result.add(assertion);
         return result;
     }
 
-    @NotNull @Override protected String getCanonicalName() {
+    @NotNull
+    @Override
+    protected String getCanonicalName() {
         return "Quantified exp";
     }
 
-    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+    @Override
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @NotNull @Override public PExp withIncomingSignsErased() {
+    @NotNull
+    @Override
+    public PExp withIncomingSignsErased() {
         return new PQuantified(assertion.withIncomingSignsErased(),
                 quantificationType, declaredSymbols);
     }
 
-    @NotNull @Override public PExp withQuantifiersFlipped() {
+    @NotNull
+    @Override
+    public PExp withQuantifiersFlipped() {
         return new PQuantified(assertion.withQuantifiersFlipped(),
                 quantificationType.flipped(), declaredSymbols);
     }
 
-    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getIncomingVariablesNoCache() {
         return assertion.getIncomingVariables();
     }
 
-    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return assertion.getQuantifiedVariables();
     }
 
-    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull
+    @Override
+    public List<PExp> getFunctionApplicationsNoCache() {
         return assertion.getFunctionApplications();
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(
+    @Override
+    protected Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
         return assertion.getSymbolNames(excludeApplications, excludeLiterals);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         List<String> symNames = declaredSymbols.stream()
                 .map(d -> d.name).collect(Collectors.toList());
         String qType = quantificationType == Quantification.UNIVERSAL ?
@@ -105,7 +129,8 @@ public class PQuantified extends PExp {
                 declaredSymbols.get(0).type + " " + assertion.toString();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof PQuantified);
         if (result) {
             result = assertion.equals(o);

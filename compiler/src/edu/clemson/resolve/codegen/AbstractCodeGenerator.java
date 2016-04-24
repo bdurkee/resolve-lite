@@ -11,10 +11,11 @@ import org.stringtemplate.v4.misc.STMessage;
 import java.io.IOException;
 import java.io.Writer;
 
-/** A general base class for anything in the compiler that requires us to
- *  produce a 'significant' amount of structured code/output/text. This includes
- *  our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
- *  from {@link edu.clemson.resolve.vcgen.VCGenerator}.
+/**
+ * A general base class for anything in the compiler that requires us to
+ * produce a 'significant' amount of structured code/output/text. This includes
+ * our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
+ * from {@link edu.clemson.resolve.vcgen.VCGenerator}.
  */
 public abstract class AbstractCodeGenerator {
 
@@ -35,25 +36,30 @@ public abstract class AbstractCodeGenerator {
         this.templates = loadTemplates();
     }
 
-    @NotNull public AnnotatedModule getModule() {
+    @NotNull
+    public AnnotatedModule getModule() {
         return module;
     }
 
-    @NotNull public RESOLVECompiler getCompiler() {
+    @NotNull
+    public RESOLVECompiler getCompiler() {
         return compiler;
     }
 
-    @NotNull protected ST walk(@NotNull OutputModelObject outputModel) {
+    @NotNull
+    protected ST walk(@NotNull OutputModelObject outputModel) {
         ModelConverter walker = new ModelConverter(compiler, templates);
         return walker.walk(outputModel);
     }
 
-    @NotNull public String getFileName() {
+    @NotNull
+    public String getFileName() {
         String moduleName = module.getNameToken().getText();
         return moduleName + getFileExtension();
     }
 
-    @NotNull protected String getFileExtension() {
+    @NotNull
+    protected String getFileExtension() {
         ST extST = templates.getInstanceOf("fileExtension");
         if (extST == null) {
             throw new IllegalStateException("forgot to define template for" +
@@ -72,8 +78,7 @@ public abstract class AbstractCodeGenerator {
             code.write(wr);
             w.close();
 //			long stop = System.currentTimeMillis();
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
                     ioe,
                     fileName);
@@ -90,8 +95,7 @@ public abstract class AbstractCodeGenerator {
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);
-        }
-        catch (IllegalArgumentException iae) {
+        } catch (IllegalArgumentException iae) {
             compiler.errMgr.toolError(
                     ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, "Java");
         }
@@ -102,19 +106,23 @@ public abstract class AbstractCodeGenerator {
         result.registerRenderer(String.class, new StringRenderer());
         result.setListener(new STErrorListener() {
 
-            @Override public void compileTimeError(STMessage msg) {
+            @Override
+            public void compileTimeError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override public void runTimeError(STMessage msg) {
+            @Override
+            public void runTimeError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override public void IOError(STMessage msg) {
+            @Override
+            public void IOError(STMessage msg) {
                 reportError(msg);
             }
 
-            @Override public void internalError(STMessage msg) {
+            @Override
+            public void internalError(STMessage msg) {
                 reportError(msg);
             }
 

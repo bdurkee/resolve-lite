@@ -23,21 +23,23 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
         myMapper = mapper;
     }
 
-    @Override public boolean hasNext() {
+    @Override
+    public boolean hasNext() {
         return mySource.hasNext();
     }
 
-    @Override public O next() {
+    @Override
+    public O next() {
         try {
             return myMapper.apply(mySource.next());
-        }
-        catch (ConcurrentModificationException cme) {
+        } catch (ConcurrentModificationException cme) {
             int i = 5;
             throw new RuntimeException(cme);
         }
     }
 
-    @Override public void remove() {
+    @Override
+    public void remove() {
         mySource.remove();
     }
 }

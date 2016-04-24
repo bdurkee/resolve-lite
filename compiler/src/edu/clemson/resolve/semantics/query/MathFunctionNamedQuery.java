@@ -15,9 +15,10 @@ import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPOR
 
 public class MathFunctionNamedQuery
         implements
-            MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
+        MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
 
-   @NotNull private final SymbolQuery<Symbol> nameQuery;
+    @NotNull
+    private final SymbolQuery<Symbol> nameQuery;
 
     public MathFunctionNamedQuery(@Nullable Token qualifier,
                                   @NotNull Token name) {
@@ -26,14 +27,14 @@ public class MathFunctionNamedQuery
                         IMPORT_RECURSIVE, FACILITY_IGNORE, false);
     }
 
-    @Override public List<MathClssftnWrappingSymbol> searchFromContext(@NotNull Scope source,
-                                                                       @NotNull MathSymbolTable repo)
+    @Override
+    public List<MathClssftnWrappingSymbol> searchFromContext(@NotNull Scope source,
+                                                             @NotNull MathSymbolTable repo)
             throws NoSuchModuleException, UnexpectedSymbolException {
         List<Symbol> intermediateList;
         try {
             intermediateList = nameQuery.searchFromContext(source, repo);
-        }
-        catch (DuplicateSymbolException dse) {
+        } catch (DuplicateSymbolException dse) {
             //Shouldn't be possible
             throw new RuntimeException(dse);
         }

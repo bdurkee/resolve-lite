@@ -43,7 +43,9 @@ public class ErrorManager extends BaseErrorListener {
         errorCount = 0;
     }
 
-    public void info(String msg) { compiler.info(msg); }
+    public void info(String msg) {
+        compiler.info(msg);
+    }
 
     public ST getMessageTemplate(RESOLVEMessage msg) {
         ST messageST = msg.getMessageTemplate(compiler.longMessages);
@@ -52,19 +54,19 @@ public class ErrorManager extends BaseErrorListener {
         ST messageFormatST = getMessageFormat();
 
         boolean locationValid = false;
-        if ( msg.line != -1 ) {
+        if (msg.line != -1) {
             locationST.add("line", msg.line);
             locationValid = true;
         }
-        if ( msg.charPosition != -1 ) {
+        if (msg.charPosition != -1) {
             locationST.add("column", msg.charPosition);
             locationValid = true;
         }
-        if ( msg.fileName != null ) {
+        if (msg.fileName != null) {
             File f = new File(msg.fileName);
             // Don't show path to file in edu.clemson.cs.r2jt.templates.messages; too long.
             String displayFileName = msg.fileName;
-            if ( f.exists() ) {
+            if (f.exists()) {
                 displayFileName = f.getName();
             }
             locationST.add("file", displayFileName);
@@ -73,7 +75,7 @@ public class ErrorManager extends BaseErrorListener {
         messageFormatST.add("id", msg.getErrorType().code);
         messageFormatST.add("text", messageST);
 
-        if ( locationValid ) reportST.add("location", locationST);
+        if (locationValid) reportST.add("location", locationST);
         reportST.add("message", messageFormatST);
 
         return reportST;
@@ -93,9 +95,10 @@ public class ErrorManager extends BaseErrorListener {
         return st;
     }
 
-    @Override public void syntaxError(Recognizer<?, ?> recognizer,
-                                      Object offendingSymbol, int line, int charPositionInLine,
-                                      String msg, RecognitionException e) {
+    @Override
+    public void syntaxError(Recognizer<?, ?> recognizer,
+                            Object offendingSymbol, int line, int charPositionInLine,
+                            String msg, RecognitionException e) {
         RESOLVEMessage m =
                 new LanguageSyntaxMessage(ErrorKind.SYNTAX_ERROR,
                         (Token) offendingSymbol, e, msg);
@@ -109,11 +112,12 @@ public class ErrorManager extends BaseErrorListener {
         emit(etype, msg);
     }
 
-    /** Raise a predefined message with some number of paramters for the
-     *  StringTemplate but for which there is no location information possible.
+    /**
+     * Raise a predefined message with some number of paramters for the
+     * StringTemplate but for which there is no location information possible.
      *
-     *  @param errorType The Message Descriptor
-     *  @param args The arguments to pass to the StringTemplate
+     * @param errorType The Message Descriptor
+     * @param args      The arguments to pass to the StringTemplate
      */
     public void toolError(ErrorKind errorType, Object... args) {
         toolError(errorType, null, args);
@@ -150,7 +154,7 @@ public class ErrorManager extends BaseErrorListener {
         int i = 0;
         for (; i < stack.length; i++) {
             StackTraceElement t = stack[i];
-            if ( !t.toString().contains("ErrorManager") ) {
+            if (!t.toString().contains("ErrorManager")) {
                 break;
             }
         }
@@ -163,22 +167,23 @@ public class ErrorManager extends BaseErrorListener {
                 .equals("true");
     }
 
-    @SuppressWarnings("fallthrough") public void emit(ErrorKind kind, RESOLVEMessage msg) {
+    @SuppressWarnings("fallthrough")
+    public void emit(ErrorKind kind, RESOLVEMessage msg) {
         switch (kind.severity) {
             case WARNING_ONE_OFF:
-                if ( errorTypes.contains(kind) ) {
+                if (errorTypes.contains(kind)) {
                     break;
                 }
-            // fall thru
+                // fall thru
             case WARNING:
                 warningCount++;
                 compiler.warning(msg);
                 break;
             case ERROR_ONE_OFF:
-                if ( errorTypes.contains(kind) ) {
+                if (errorTypes.contains(kind)) {
                     break;
                 }
-            // fall thru
+                // fall thru
             case ERROR:
                 errorCount++;
                 compiler.error(msg);

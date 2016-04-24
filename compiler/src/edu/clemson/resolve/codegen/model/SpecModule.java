@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SpecModule extends Module {
-    @ModelElement public List<TypeInterfaceDef> types = new ArrayList<>();
-    @ModelElement public List<FunctionDef> funcs = new ArrayList<>();
+    @ModelElement
+    public List<TypeInterfaceDef> types = new ArrayList<>();
+    @ModelElement
+    public List<FunctionDef> funcs = new ArrayList<>();
 
     public SpecModule(String name, ModuleFile file) {
         super(name, file);
@@ -28,15 +30,18 @@ public abstract class SpecModule extends Module {
         }
     }
 
-    @Override public void addGettersAndMembersForModuleParameterSyms(
+    @Override
+    public void addGettersAndMembersForModuleParameterSyms(
             List<ModuleParameterSymbol> symbols) {
         for (ModuleParameterSymbol p : symbols) {
             funcs.add(buildGetterSignature(p.getName()));
         }
     }
 
-    @Override public void addOperationParameterModelObjects(
-            FunctionDef wrappedFunction) {}
+    @Override
+    public void addOperationParameterModelObjects(
+            FunctionDef wrappedFunction) {
+    }
 
     private FunctionDef buildGetterSignature(String name) {
         FunctionDef getterFunc = new FunctionDef("get" + name);

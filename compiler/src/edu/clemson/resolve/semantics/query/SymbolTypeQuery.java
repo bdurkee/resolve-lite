@@ -11,14 +11,14 @@ import static edu.clemson.resolve.semantics.MathSymbolTable.FacilityStrategy.FAC
 import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPORT_NAMED;
 
 /**
- *
  * @author hamptos
  */
 public class SymbolTypeQuery<T extends Symbol>
         extends
-            BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
+        BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
 
-    @SuppressWarnings("unchecked") public SymbolTypeQuery(
+    @SuppressWarnings("unchecked")
+    public SymbolTypeQuery(
             @NotNull Class<? extends Symbol> entryType,
             @NotNull ImportStrategy importStrategy,
             @NotNull FacilityStrategy facilityStrategy) {

@@ -14,12 +14,13 @@ import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPOR
 
 public class UniversalVariableQuery
         implements
-            MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
+        MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
 
     public static final MultimatchSymbolQuery<MathClssftnWrappingSymbol> INSTANCE =
             (MultimatchSymbolQuery<MathClssftnWrappingSymbol>) new UniversalVariableQuery();
 
-    @NotNull private final BaseSymbolQuery<MathClssftnWrappingSymbol> baseQuery;
+    @NotNull
+    private final BaseSymbolQuery<MathClssftnWrappingSymbol> baseQuery;
 
     private UniversalVariableQuery() {
         this.baseQuery =
@@ -28,14 +29,14 @@ public class UniversalVariableQuery
                         new UniversalVariableSearcher());
     }
 
-    @Override public List<MathClssftnWrappingSymbol> searchFromContext(@NotNull Scope source,
-                                                                       @NotNull MathSymbolTable repo)
+    @Override
+    public List<MathClssftnWrappingSymbol> searchFromContext(@NotNull Scope source,
+                                                             @NotNull MathSymbolTable repo)
             throws NoSuchModuleException, UnexpectedSymbolException {
         List<MathClssftnWrappingSymbol> result;
         try {
             result = baseQuery.searchFromContext(source, repo);
-        }
-        catch (DuplicateSymbolException dse) {
+        } catch (DuplicateSymbolException dse) {
             //Can't happen--our base query is a name matcher
             throw new RuntimeException(dse);
         }
@@ -44,9 +45,10 @@ public class UniversalVariableQuery
 
     private static class UniversalVariableSearcher
             implements
-                MultimatchTableSearcher<MathClssftnWrappingSymbol> {
+            MultimatchTableSearcher<MathClssftnWrappingSymbol> {
 
-        @Override public boolean addMatches(
+        @Override
+        public boolean addMatches(
                 @NotNull Map<String, Symbol> entries,
                 @NotNull List<MathClssftnWrappingSymbol> matches,
                 @NotNull SearchContext l) throws UnexpectedSymbolException {

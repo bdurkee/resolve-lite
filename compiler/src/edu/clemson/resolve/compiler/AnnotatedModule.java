@@ -14,11 +14,12 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
 
-/** Represents a collection of information to be associated with a top level
- *  {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
- *  <p>
- *  We use this approach over {@code returns} clauses in the grammar to help
- *  us keep our grammar as general as possible.</p>
+/**
+ * Represents a collection of information to be associated with a top level
+ * {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
+ * <p>
+ * We use this approach over {@code returns} clauses in the grammar to help
+ * us keep our grammar as general as possible.</p>
  */
 public class AnnotatedModule {
 
@@ -32,9 +33,10 @@ public class AnnotatedModule {
     //an external impl
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
 
-    /** Think of the {@code uses} set as refs useful for coming up with module
-     *  orderings, etc. Think of these strings the refs the symboltable will see.
-     *  We don't want implementations of facilities showing up in this set.
+    /**
+     * Think of the {@code uses} set as refs useful for coming up with module
+     * orderings, etc. Think of these strings the refs the symboltable will see.
+     * We don't want implementations of facilities showing up in this set.
      */
     public final Set<ModuleIdentifier> semanticallyRelevantUses =
             new LinkedHashSet<>();
@@ -67,29 +69,35 @@ public class AnnotatedModule {
         }
     }
 
-    @NotNull public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
-                                          @NotNull ParserRuleContext ctx) {
+    @NotNull
+    public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
+                                 @NotNull ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
 
-    @NotNull public Token getNameToken() {
+    @NotNull
+    public Token getNameToken() {
         return name;
     }
 
-    @NotNull public String getFileName() {
+    @NotNull
+    public String getFileName() {
         return fileName;
     }
 
-    @NotNull public ParseTree getRoot() {
+    @NotNull
+    public ParseTree getRoot() {
         return root;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return name.hashCode();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
         if (result) {
             result = this.name.getText()
@@ -98,7 +106,8 @@ public class AnnotatedModule {
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return name.getText();
     }
 

@@ -17,7 +17,8 @@ public class PSet extends PExp {
         this.elements.addAll(elements);
     }
 
-    @Override public void accept(PExpListener v) {
+    @Override
+    public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSet(this);
         v.beginChildren(this);
@@ -35,12 +36,15 @@ public class PSet extends PExp {
         v.endPExp(this);
     }
 
-    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+    @NotNull
+    @Override
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         return new PSet(getMathType(),
                 Utils.apply(elements, u -> u.substitute(substitutions)));
     }
 
-    @Override public boolean containsName(String name) {
+    @Override
+    public boolean containsName(String name) {
         for (PExp e : elements) {
             if (e.containsName(name)) {
                 return true;
@@ -49,66 +53,90 @@ public class PSet extends PExp {
         return false;
     }
 
-    @NotNull @Override public List<? extends PExp> getSubExpressions() {
+    @NotNull
+    @Override
+    public List<? extends PExp> getSubExpressions() {
         return elements;
     }
 
-    @Override public boolean isObviouslyTrue() {
+    @Override
+    public boolean isObviouslyTrue() {
         return false;
     }
 
-    @Override public boolean isLiteralFalse() {
+    @Override
+    public boolean isLiteralFalse() {
         return false;
     }
 
-    @Override public boolean isVariable() {
+    @Override
+    public boolean isVariable() {
         return false;
     }
 
-    @NotNull @Override protected String getCanonicalName() {
+    @NotNull
+    @Override
+    protected String getCanonicalName() {
         return "{ PSet }";
     }
 
-    @Override public boolean isLiteral() {
+    @Override
+    public boolean isLiteral() {
         return false;
     }
 
-    @Override public boolean isFunctionApplication() {
+    @Override
+    public boolean isFunctionApplication() {
         return false;
     }
 
-    @Override protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {}
+    @Override
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+    }
 
-    @NotNull @Override public PExp withIncomingSignsErased() {
+    @NotNull
+    @Override
+    public PExp withIncomingSignsErased() {
         return new PSet(getMathType(),
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
-    @NotNull @Override public PExp withQuantifiersFlipped() {
+    @NotNull
+    @Override
+    public PExp withQuantifiersFlipped() {
         return null;
     }
 
-    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getIncomingVariablesNoCache() {
         return new LinkedHashSet<>();
     }
 
-    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getQuantifiedVariablesNoCache() {
         return new HashSet<>();
     }
 
-    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull
+    @Override
+    public List<PExp> getFunctionApplicationsNoCache() {
         return new ArrayList<>();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         return false;
     }
 
-    @Override protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
+    @Override
+    protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         return new HashSet<>();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "{" + Utils.join(elements, ", ") + "}";
     }
 }

@@ -21,9 +21,11 @@ import static edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.Parameter
 
 public class GeneralCallApplicationStrategy
         implements
-            StatRuleApplicationStrategy<VCRuleBackedStat> {
+        StatRuleApplicationStrategy<VCRuleBackedStat> {
 
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
@@ -45,16 +47,18 @@ public class GeneralCallApplicationStrategy
             this.block = block;
         }
 
-        @NotNull public PExp getCompletedExp() {
+        @NotNull
+        public PExp getCompletedExp() {
             return block.finalConfirm.getConfirmExp();
         }
 
-        @Override public void endPApply(@NotNull PApply e) {
+        @Override
+        public void endPApply(@NotNull PApply e) {
             OperationSymbol op = getOperation(block.scope, e);
             final Set<ParameterMode> distinguishedModes =
                     new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
 
-            PSymbol functionName = (PSymbol)e.getFunctionPortion();
+            PSymbol functionName = (PSymbol) e.getFunctionPortion();
 
             PExp newAssume = op.getEnsures();
             List<PExp> formalExps = Utils.apply(op.getParameters(),
@@ -111,8 +115,7 @@ public class GeneralCallApplicationStrategy
                     newAssumeSubtitutions.put(
                             new PSymbolBuilder(curFormal.asPSymbol())
                                     .incoming(true).build(), curActual);
-                }
-                else {
+                } else {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
                 }
             }
@@ -151,17 +154,19 @@ public class GeneralCallApplicationStrategy
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
                     confirmSubstitutions.put(actualArg,
-                            NQV(RP, (PSymbol)actualArg));
+                            NQV(RP, (PSymbol) actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
         }
     }
 
-    /** "Next Question-mark Variable" */
+    /**
+     * "Next Question-mark Variable"
+     */
     public static PSymbol NQV(PExp RP, PSymbol oldSym) {
         // Add an extra question mark to the front of oldSym
-        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?"+oldSym.getName())
+        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName())
                 .build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
@@ -171,8 +176,7 @@ public class GeneralCallApplicationStrategy
         // Don't need to apply the question mark here.
         else if (RP.containsName(newOldSym.getName())) {
             return NQV(RP, newOldSym);
-        }
-        else {
+        } else {
             // Return the new variable expression with the question mark
             if (oldSym.getName().charAt(0) != '?') {
                 return newOldSym;
@@ -181,7 +185,9 @@ public class GeneralCallApplicationStrategy
         return oldSym;
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "general call rule application";
     }
 }

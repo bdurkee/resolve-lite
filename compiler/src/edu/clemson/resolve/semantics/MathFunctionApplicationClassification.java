@@ -41,10 +41,11 @@ public class MathFunctionApplicationClassification extends MathClassification {
         return result;
     }
 
-    @Override public MathClassification withVariablesSubstituted(
+    @Override
+    public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         MathFunctionClassification newNameType =
-                (MathFunctionClassification)function
+                (MathFunctionClassification) function
                         .withVariablesSubstituted(substitutions);
         List<MathClassification> newArgs = new ArrayList<>();
         for (MathClassification t : arguments) {
@@ -53,7 +54,8 @@ public class MathFunctionApplicationClassification extends MathClassification {
         return new MathFunctionApplicationClassification(g, newNameType, name, newArgs);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return name + "(" + Utils.join(arguments, ", ") + ")";
     }
 

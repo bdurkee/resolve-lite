@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Implementations of specifications (concepts, enhancements) require
- *  constructor(s) (ctor) -- this class represents its definition.
+/**
+ * Implementations of specifications (concepts, enhancements) require
+ * constructor(s) (ctor) -- this class represents its definition.
  */
 public class CtorDef extends OutputModelObject {
 
     public String name, delegateInterface;
     public List<String> members = new ArrayList<>();
-    @ModelElement public List<FacilityDef> facMems = new ArrayList<>();
+    @ModelElement
+    public List<FacilityDef> facMems = new ArrayList<>();
 
     public CtorDef(String name, String delegateInterface,
                    List<FacilityDef> facilityVars,

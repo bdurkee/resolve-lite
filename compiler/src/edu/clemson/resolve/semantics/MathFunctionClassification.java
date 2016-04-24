@@ -67,8 +67,7 @@ public class MathFunctionClassification extends MathClassification {
 
         if (applyFactory == null) {
             this.applicationFactory = DEFAULT_FACTORY;
-        }
-        else {
+        } else {
             this.applicationFactory = applyFactory;
         }
         this.typeRefDepth = range.typeRefDepth;
@@ -120,8 +119,7 @@ public class MathFunctionClassification extends MathClassification {
             for (int i = 0; i < size; i++) {
                 result.add(domainAsMTCartesian.getFactor(i));
             }
-        }
-        else {
+        } else {
             if (!t.equals(t.getTypeGraph().VOID)) {
                 result.add(t);
             }
@@ -129,7 +127,8 @@ public class MathFunctionClassification extends MathClassification {
         return result;
     }
 
-    @Override public MathClassification getEnclosingClassification() {
+    @Override
+    public MathClassification getEnclosingClassification() {
         return this;
     }
 
@@ -138,14 +137,16 @@ public class MathFunctionClassification extends MathClassification {
         return original.stream().map(t -> "").collect(Collectors.toList());
     }
 
-    @Override public List<MathClassification> getComponentTypes() {
+    @Override
+    public List<MathClassification> getComponentTypes() {
         List<MathClassification> result = new ArrayList<>();
         result.add(domainType);
         result.add(resultType);
         return result;
     }
 
-    @Override public MathClassification withVariablesSubstituted(
+    @Override
+    public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         return new MathFunctionClassification(g, applicationFactory,
                 resultType.withVariablesSubstituted(substitutions),
@@ -204,20 +205,22 @@ public class MathFunctionClassification extends MathClassification {
         }
         List<MathClassification> t1Components = t1.getComponentTypes();
         List<MathClassification> t2Components = t2.getComponentTypes();
-        if ( t1Components.size() != t2Components.size() ) return;//throw new BindingException(t1, t2);
+        if (t1Components.size() != t2Components.size())
+            return;//throw new BindingException(t1, t2);
 
         Iterator<MathClassification> t1Iter = t1Components.iterator();
         Iterator<MathClassification> t2Iter = t2Components.iterator();
-        while ( t1Iter.hasNext() ) {
+        while (t1Iter.hasNext()) {
             bind(t1Iter.next(), t2Iter.next(), bindingsAccumulator);
         }
     }
 
-    /** Returns {@code true} if {@code currentBindings} contains e;
-     *  {@code false} otherwise.
+    /**
+     * Returns {@code true} if {@code currentBindings} contains e;
+     * {@code false} otherwise.
      */
     private boolean containsBinding(MathClassification e,
-                                 Map<String, MathClassification> currentBindings) {
+                                    Map<String, MathClassification> currentBindings) {
         return e instanceof MathNamedClassification &&
                 currentBindings.containsKey(((MathNamedClassification) e).tag);
     }
@@ -250,15 +253,17 @@ public class MathFunctionClassification extends MathClassification {
                 g, this, calledAsName, arguments);
     }
 
-    @Override public String toString() {
-        return "("+domainType+" ⟶ "+resultType+")";
+    @Override
+    public String toString() {
+        return "(" + domainType + " ⟶ " + resultType + ")";
     }
 
     private static class VanillaFunctionApplicationFactory
             implements
             FunctionApplicationFactory {
 
-        @Override public MathClassification buildFunctionApplication(
+        @Override
+        public MathClassification buildFunctionApplication(
                 @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {

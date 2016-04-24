@@ -9,7 +9,9 @@ import java.util.*;
 
 public abstract class AbstractScope implements Scope {
 
-    @NotNull @Override public final <E extends Symbol> List<E> getMatches(
+    @NotNull
+    @Override
+    public final <E extends Symbol> List<E> getMatches(
             @NotNull TableSearcher<E> searcher,
             @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException {

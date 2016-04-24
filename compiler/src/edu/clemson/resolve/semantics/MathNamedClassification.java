@@ -5,9 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-/** Represents a type that is simply a named reference to some bound variable.
- *  For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
- *  named type.
+/**
+ * Represents a type that is simply a named reference to some bound variable.
+ * For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
+ * named type.
  */
 public class MathNamedClassification extends MathClassification {
 
@@ -22,17 +23,20 @@ public class MathNamedClassification extends MathClassification {
         this.identifiesSchematicType = false;
     }
 
-    @Override public boolean containsSchematicType() {
+    @Override
+    public boolean containsSchematicType() {
         return identifiesSchematicType;
     }
 
-    @Override public MathClassification withVariablesSubstituted(
+    @Override
+    public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         MathClassification result = substitutions.get(this.tag);
         return result == null ? this : result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return tag;
     }
 

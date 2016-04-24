@@ -43,26 +43,28 @@ public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
-    public static final String FILE_EXTENSION = ".resolve";
+    static final String FILE_EXTENSION = ".resolve";
 
-    public static final List<String> NATIVE_EXTENSION =
+    private static final List<String> NATIVE_EXTENSION =
             Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
     public static final List<String> NON_NATIVE_EXTENSION =
             Collections.unmodifiableList(Collections.singletonList(".java"));
 
-    public static enum OptionArgType {NONE, STRING} // NONE implies boolean
+    private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
-    public static class Option {
+    private static class Option {
         String fieldName;
         String name;
         OptionArgType argType;
         String description;
 
-        public Option(String fieldName, String name, String description) {
+        Option(@NotNull String fieldName, @NotNull String name,
+               @NotNull String description) {
             this(fieldName, name, OptionArgType.NONE, description);
         }
 
-        public Option(String fieldName, String name, OptionArgType argType, String description) {
+        Option(@NotNull String fieldName, @NotNull String name,
+               @NotNull OptionArgType argType, @NotNull String description) {
             this.fieldName = fieldName;
             this.name = name;
             this.argType = argType;

@@ -11,37 +11,45 @@ import java.util.Map;
 
 public class ProgGenericType extends ProgType {
 
-    @NotNull private final String name;
+    @NotNull
+    private final String name;
 
     public ProgGenericType(@NotNull DumbTypeGraph g, @NotNull String name) {
         super(g);
         this.name = name;
     }
 
-    @NotNull public String getName() {
+    @NotNull
+    public String getName() {
         return name;
     }
 
-    @NotNull @Override public MathClassification toMath() {
+    @NotNull
+    @Override
+    public MathClassification toMath() {
         return new MathNamedClassification(getTypeGraph(), name,
                 g.SSET.typeRefDepth - 1, g.SSET);
     }
 
-    @NotNull @Override public ProgType instantiateGenerics(
+    @NotNull
+    @Override
+    public ProgType instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
-        if ( genericInstantiations.containsKey(this.name) ) {
+        if (genericInstantiations.containsKey(this.name)) {
             result = genericInstantiations.get(this.name);
         }
         return result;
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return name.hashCode();
     }
 
-    @Override public boolean equals(@Nullable Object o) {
+    @Override
+    public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof ProgGenericType);
 
         if (result) {
@@ -51,7 +59,8 @@ public class ProgGenericType extends ProgType {
         return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return name;
     }
 

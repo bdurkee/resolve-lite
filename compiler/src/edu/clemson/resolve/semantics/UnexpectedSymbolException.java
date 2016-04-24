@@ -5,14 +5,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class UnexpectedSymbolException extends SymbolTableException {
 
-    @NotNull private final String actualSymbolDescription;
+    @NotNull
+    private final String actualSymbolDescription;
 
     public UnexpectedSymbolException(@NotNull String actualSymbolDescription) {
         super(ErrorKind.UNEXPECTED_SYMBOL);
         this.actualSymbolDescription = actualSymbolDescription;
     }
 
-    @NotNull public String getTheUnexpectedSymbolDescription() {
+    @NotNull
+    public String getTheUnexpectedSymbolDescription() {
         return actualSymbolDescription;
     }
 }

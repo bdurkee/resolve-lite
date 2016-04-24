@@ -9,16 +9,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-/** A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
- *  <p>
- *  Note that {@code ScopeBuilder} has no public constructor. Instances of this
- *  class can be acquired through calls to some of the methods of
- *  {@link MathSymbolTable}.</p>
+/**
+ * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
+ * <p>
+ * Note that {@code ScopeBuilder} has no public constructor. Instances of this
+ * class can be acquired through calls to some of the methods of
+ * {@link MathSymbolTable}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
-    @NotNull protected final List<ScopeBuilder> children = new ArrayList<>();
-    @NotNull private final DumbTypeGraph typeGraph;
+    @NotNull
+    protected final List<ScopeBuilder> children = new ArrayList<>();
+    @NotNull
+    private final DumbTypeGraph typeGraph;
 
     //We definitely want a linkedHashMap here for the bindings to preserve the order
     //in which entries were added to the table. Though it shouldn't necessarily
@@ -42,7 +45,8 @@ public class ScopeBuilder extends SyntacticScope {
         children.add(b);
     }
 
-    @NotNull public List<ScopeBuilder> getChildren() {
+    @NotNull
+    public List<ScopeBuilder> getChildren() {
         return new ArrayList<>(children);
     }
 

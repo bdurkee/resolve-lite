@@ -6,8 +6,9 @@ import edu.clemson.resolve.semantics.MathClassification;
 import java.util.*;
 import java.util.function.Function;
 
-/** A container for a piecewise collection of conditional functions followed by
- *  a default, otherwise clause.
+/**
+ * A container for a piecewise collection of conditional functions followed by
+ * a default, otherwise clause.
  */
 public class PAlternatives extends PExp {
 
@@ -17,13 +18,13 @@ public class PAlternatives extends PExp {
     public PAlternatives(List<PExp> conditions, List<PExp> results,
                          PExp otherwiseClauseResult, MathClassification type) {
         super(calculateStructureHash(conditions, results,
-                        otherwiseClauseResult), calculateStructureHash(
-                        conditions, results, otherwiseClauseResult), type);
+                otherwiseClauseResult), calculateStructureHash(
+                conditions, results, otherwiseClauseResult), type);
 
         this.alternatives = new ArrayList<>();
         sanityCheckConditions(conditions);
 
-        if ( conditions.size() != results.size() ) {
+        if (conditions.size() != results.size()) {
             throw new IllegalArgumentException("conditions.size() must equal "
                     + "results.size()");
         }
@@ -59,8 +60,8 @@ public class PAlternatives extends PExp {
 
     private void sanityCheckConditions(List<PExp> conditions) {
         for (PExp condition : conditions) {
-            if ( !condition
-                    .typeMatches(condition.getMathType().getTypeGraph().BOOLEAN) ) {
+            if (!condition
+                    .typeMatches(condition.getMathType().getTypeGraph().BOOLEAN)) {
                 throw new IllegalArgumentException("AlternativeExps with "
                         + "non-boolean-typed conditions are not accepted "
                         + "by the prover. \n\t" + condition + " has type "
@@ -84,7 +85,9 @@ public class PAlternatives extends PExp {
         return hash;
     }
 
-    @NotNull @Override public List<PExp> getSubExpressions() {
+    @NotNull
+    @Override
+    public List<PExp> getSubExpressions() {
         List<PExp> exps = new LinkedList<>();
 
         for (Alternative a : alternatives) {
@@ -95,7 +98,8 @@ public class PAlternatives extends PExp {
         return new ArrayList<>(exps);
     }
 
-    @Override public boolean isObviouslyTrue() {
+    @Override
+    public boolean isObviouslyTrue() {
         boolean result = true;
 
         for (Alternative a : alternatives) {
@@ -104,12 +108,15 @@ public class PAlternatives extends PExp {
         return result && otherwiseClauseResult.isObviouslyTrue();
     }
 
-    @Override protected void splitIntoConjuncts(
+    @Override
+    protected void splitIntoConjuncts(
             @NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
-    @NotNull @Override public PExp withIncomingSignsErased() {
+    @NotNull
+    @Override
+    public PExp withIncomingSignsErased() {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
         for (Alternative alt : alternatives) {
@@ -120,12 +127,16 @@ public class PAlternatives extends PExp {
         return new PAlternatives(conditions, results, otherwise, getMathType());
     }
 
-    @NotNull @Override public PExp withQuantifiersFlipped() {
+    @NotNull
+    @Override
+    public PExp withQuantifiersFlipped() {
         throw new UnsupportedOperationException("This method has not yet "
                 + "been implemented.");
     }
 
-    @NotNull @Override public Set<PSymbol> getIncomingVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
 
         for (Alternative a : alternatives) {
@@ -136,13 +147,14 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @NotNull @Override public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+    @NotNull
+    @Override
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp retval;
 
-        if ( substitutions.containsKey(this) ) {
+        if (substitutions.containsKey(this)) {
             retval = substitutions.get(this);
-        }
-        else {
+        } else {
             List<PExp> substitutedConditions = new ArrayList<>();
             List<PExp> substitutedResults = new ArrayList<>();
             PExp substitutedOtherwiseResult =
@@ -159,7 +171,8 @@ public class PAlternatives extends PExp {
         return retval;
     }
 
-    @Override public boolean containsName(String name) {
+    @Override
+    public boolean containsName(String name) {
         boolean result = false;
 
         for (Alternative a : alternatives) {
@@ -170,7 +183,8 @@ public class PAlternatives extends PExp {
         return result || otherwiseClauseResult.containsName(name);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{{");
         for (Alternative alternative : alternatives) {
@@ -181,16 +195,17 @@ public class PAlternatives extends PExp {
         return sb.toString();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = o instanceof PAlternatives;
-        if ( result ) {
-            result = otherwiseClauseResult.equals(((PAlternatives)o)
-                            .otherwiseClauseResult);
+        if (result) {
+            result = otherwiseClauseResult.equals(((PAlternatives) o)
+                    .otherwiseClauseResult);
             result &= alternatives.size() ==
-                    ((PAlternatives)o).alternatives.size();
+                    ((PAlternatives) o).alternatives.size();
             //now compare the actual alternatives exps
             Iterator<Alternative> thisAltIter = alternatives.iterator();
-            Iterator<Alternative> oAltIter = ((PAlternatives)o).alternatives.iterator();
+            Iterator<Alternative> oAltIter = ((PAlternatives) o).alternatives.iterator();
             while (result && thisAltIter.hasNext()) {
                 Alternative oAlt = oAltIter.next();
                 Alternative thisAlt = thisAltIter.next();
@@ -201,7 +216,8 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @Override public Set<String> getSymbolNamesNoCache(
+    @Override
+    public Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
@@ -213,7 +229,9 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @NotNull @Override public Set<PSymbol> getQuantifiedVariablesNoCache() {
+    @NotNull
+    @Override
+    public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>(); //i'd like to preserve first found order
 
         for (Alternative a : alternatives) {
@@ -224,7 +242,9 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @NotNull @Override public List<PExp> getFunctionApplicationsNoCache() {
+    @NotNull
+    @Override
+    public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new LinkedList<>();
 
         for (Alternative a : alternatives) {
@@ -236,14 +256,17 @@ public class PAlternatives extends PExp {
         return result;
     }
 
-    @NotNull @Override protected String getCanonicalName() {
+    @NotNull
+    @Override
+    protected String getCanonicalName() {
         return "{{ PAlternatives }}";
     }
 
     private static class UnboxResult implements Function<Alternative, PExp> {
         public final static UnboxResult INSTANCE = new UnboxResult();
 
-        @Override public PExp apply(Alternative alternative) {
+        @Override
+        public PExp apply(Alternative alternative) {
             return alternative.result;
         }
     }
@@ -251,7 +274,8 @@ public class PAlternatives extends PExp {
     private static class UnboxCondition implements Function<Alternative, PExp> {
         public final static UnboxCondition INSTANCE = new UnboxCondition();
 
-        @Override public PExp apply(Alternative alternative) {
+        @Override
+        public PExp apply(Alternative alternative) {
             return alternative.condition;
         }
     }

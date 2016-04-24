@@ -12,13 +12,14 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 import java.util.Map;
 
 /**
- *
  * @author hamptos
  */
 public class TheoremSymbol extends Symbol {
 
-    @NotNull private PExp assertion;
-    @NotNull private MathClssftnWrappingSymbol mathSymbolAlterEgo;
+    @NotNull
+    private PExp assertion;
+    @NotNull
+    private MathClssftnWrappingSymbol mathSymbolAlterEgo;
 
     public TheoremSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                          @NotNull PExp theoremAssertion,
@@ -32,23 +33,32 @@ public class TheoremSymbol extends Symbol {
                         definingTree, moduleIdentifier);
     }
 
-    @NotNull public PExp getAssertion() {
+    @NotNull
+    public PExp getAssertion() {
         return assertion;
     }
 
-    @NotNull @Override public TheoremSymbol toTheoremSymbol() {
+    @NotNull
+    @Override
+    public TheoremSymbol toTheoremSymbol() {
         return this;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a theorem symbol";
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return mathSymbolAlterEgo;
     }
 
-    @NotNull @Override public Symbol instantiateGenerics(
+    @NotNull
+    @Override
+    public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         throw new UnsupportedOperationException("Not supported yet.");

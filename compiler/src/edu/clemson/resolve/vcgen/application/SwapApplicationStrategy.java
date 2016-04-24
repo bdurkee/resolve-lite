@@ -7,10 +7,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class SwapApplicationStrategy
         implements
-            StatRuleApplicationStrategy<VCRuleBackedStat> {
+        StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Todo, maybe make vcswapStat, vcwh
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
        /* PExp workingConfirm = block.finalConfirm.getConfirmExp();
@@ -26,7 +28,9 @@ public class SwapApplicationStrategy
         return block.snapshot();
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "swap rule application";
     }
 }

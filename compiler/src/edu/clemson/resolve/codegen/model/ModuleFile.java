@@ -6,7 +6,8 @@ import edu.clemson.resolve.RESOLVECompiler;
 public class ModuleFile extends OutputModelObject {
     public String RESOLVEVersion;
     public String resolveFileName;
-    @ModelElement public Module module;
+    @ModelElement
+    public Module module;
     public String genPackage; // from -package cmd-line
 
     public ModuleFile(AnnotatedModule e, String resolveFileName, String pkg) {

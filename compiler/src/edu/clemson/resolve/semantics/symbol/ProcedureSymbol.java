@@ -10,7 +10,8 @@ import java.util.Map;
 
 public class ProcedureSymbol extends Symbol {
 
-    @NotNull private final OperationSymbol correspondingOperation;
+    @NotNull
+    private final OperationSymbol correspondingOperation;
 
     public ProcedureSymbol(@NotNull String name,
                            @Nullable ParserRuleContext definingTree,
@@ -20,15 +21,20 @@ public class ProcedureSymbol extends Symbol {
         this.correspondingOperation = correspondingOperation;
     }
 
-    @NotNull public OperationSymbol getCorrespondingOperation() {
+    @NotNull
+    public OperationSymbol getCorrespondingOperation() {
         return correspondingOperation;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a procedure";
     }
 
-    @NotNull @Override public ProcedureSymbol instantiateGenerics(
+    @NotNull
+    @Override
+    public ProcedureSymbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
@@ -37,7 +43,9 @@ public class ProcedureSymbol extends Symbol {
                         genericInstantiations, instantiatingFacility));
     }
 
-    @NotNull @Override public ProcedureSymbol toProcedureSymbol() {
+    @NotNull
+    @Override
+    public ProcedureSymbol toProcedureSymbol() {
         return this;
     }
 }

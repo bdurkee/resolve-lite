@@ -9,7 +9,8 @@ import java.util.Map;
 
 public class NameSearcher implements MultimatchTableSearcher<Symbol> {
 
-    @NotNull private final String searchString;
+    @NotNull
+    private final String searchString;
     private final boolean stopAfterFirst;
 
     public NameSearcher(@NotNull String searchString, boolean stopAfterFirst) {
@@ -21,9 +22,10 @@ public class NameSearcher implements MultimatchTableSearcher<Symbol> {
         this(searchString, true);
     }
 
-    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
-                                        @NotNull List<Symbol> matches,
-                                        @NotNull SearchContext l) {
+    @Override
+    public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                              @NotNull List<Symbol> matches,
+                              @NotNull SearchContext l) {
 
         boolean result = entries.containsKey(searchString);
         if (result) {

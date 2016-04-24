@@ -10,20 +10,22 @@ import java.util.stream.Collectors;
 
 public class SymbolTypeSearcher<E extends Symbol>
         implements
-            MultimatchTableSearcher<E> {
+        MultimatchTableSearcher<E> {
 
     public static final SymbolTypeSearcher<FacilitySymbol> FACILITY_SEARCHER =
             new SymbolTypeSearcher<>(FacilitySymbol.class);
 
-    @NotNull private final Class<E> targetClass;
+    @NotNull
+    private final Class<E> targetClass;
 
     public SymbolTypeSearcher(@NotNull Class<E> targetClass) {
         this.targetClass = targetClass;
     }
 
-    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
-                                        @NotNull List<E> matches,
-                                        @NotNull SearchContext l) {
+    @Override
+    public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                              @NotNull List<E> matches,
+                              @NotNull SearchContext l) {
         matches.addAll(entries.values().stream().filter(targetClass::isInstance)
                 .map(targetClass::cast)
                 .collect(Collectors.toList()));

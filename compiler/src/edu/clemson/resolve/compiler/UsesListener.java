@@ -1,13 +1,25 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
+import org.jetbrains.annotations.NotNull;
 
-/** Updates the containers tracking uses reference info by visiting the
- *  various {@link ParseTree} nodes that include references to other modules.
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+
+import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
+
+/**
+ * Updates the containers tracking uses reference info by visiting the
+ * various {@link ParseTree} nodes that include references to other modules.
  */
 public class UsesListener extends ResolveBaseListener {
     private final AnnotatedModule tr;
@@ -16,7 +28,8 @@ public class UsesListener extends ResolveBaseListener {
         this.tr = tr;
     }
 
-    @Override public void enterPrecisExtModuleDecl(
+    @Override
+    public void enterPrecisExtModuleDecl(
             ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
         tr.uses.add(precisRef);
@@ -34,7 +47,8 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitUsesList(ResolveParser.UsesListContext ctx) {
+    @Override
+    public void exitUsesList(ResolveParser.UsesListContext ctx) {
         for (TerminalNode t : ctx.ID()) {
             ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
             tr.uses.add(id);
@@ -42,13 +56,15 @@ public class UsesListener extends ResolveBaseListener {
         }
     }
 
-    @Override public void enterConceptImplModuleDecl(
+    @Override
+    public void enterConceptImplModuleDecl(
             ResolveParser.ConceptImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void enterConceptExtImplModuleDecl(
+    @Override
+    public void enterConceptExtImplModuleDecl(
             ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.extension));
         tr.uses.add(new ModuleIdentifier(ctx.concept));
@@ -56,33 +72,35 @@ public class UsesListener extends ResolveBaseListener {
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void enterConceptExtModuleDecl(
+    @Override
+    public void enterConceptExtModuleDecl(
             ResolveParser.ConceptExtModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
-    @Override public void exitFacilityDecl(
+    @Override
+    public void exitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
         //tr.semanticallyRelevantUses.add(ctx.spec.getText());
-        if ( ctx.externally != null ) {
+        if (ctx.externally != null) {
             tr.externalUses.put(ctx.impl.getText(),
                     new ModuleIdentifier(ctx.impl));
-        }
-        else {
+        } else {
             tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
     }
 
-    @Override public void exitExtensionPairing(
+    @Override
+    public void exitExtensionPairing(
             ResolveParser.ExtensionPairingContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
-        if ( ctx.externally != null ) {
+        if (ctx.externally != null) {
+
             tr.externalUses.put(ctx.impl.getText(),
                     new ModuleIdentifier(ctx.impl));
-        }
-        else {
+        } else {
             tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
     }

@@ -9,13 +9,15 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import edu.clemson.resolve.semantics.programtype.ProgFamilyType;
 
-/** Describes a "Type family .." introduction as would be found in an
- *  {@link ResolveParser.ConceptModuleDeclContext} or
- *  {@link ResolveParser.ConceptExtensionModuleDeclContext}
+/**
+ * Describes a "Type family .." introduction as would be found in an
+ * {@link ResolveParser.ConceptModuleDeclContext} or
+ * {@link ResolveParser.ConceptExtensionModuleDeclContext}
  */
 public class TypeModelSymbol extends ProgTypeSymbol {
 
-    @NotNull private final MathClssftnWrappingSymbol exemplar;
+    @NotNull
+    private final MathClssftnWrappingSymbol exemplar;
 
     public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
                            @NotNull MathClassification modelType,
@@ -27,15 +29,20 @@ public class TypeModelSymbol extends ProgTypeSymbol {
         this.exemplar = exemplar;
     }
 
-    @NotNull public MathClssftnWrappingSymbol getExemplar() {
+    @NotNull
+    public MathClssftnWrappingSymbol getExemplar() {
         return exemplar;
     }
 
-    @NotNull @Override public ProgFamilyType getProgramType() {
+    @NotNull
+    @Override
+    public ProgFamilyType getProgramType() {
         return (ProgFamilyType) super.getProgramType();
     }
 
-    @NotNull @Override public TypeModelSymbol toTypeModelSymbol() {
+    @NotNull
+    @Override
+    public TypeModelSymbol toTypeModelSymbol() {
         return this;
     }
 }

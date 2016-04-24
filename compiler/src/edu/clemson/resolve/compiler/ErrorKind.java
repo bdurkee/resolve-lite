@@ -38,8 +38,8 @@ public enum ErrorKind {
      * Compiler Error 6: internal error: <em>message</em>.
      */
     INTERNAL_ERROR(6, "internal error: <arg> <arg2><if(exception&&verbose)>: "
-                           + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
-                   ErrorSeverity.ERROR),
+            + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 7: syntax error: <em>errormsg</em>.
@@ -90,7 +90,7 @@ public enum ErrorKind {
      * Compiler Error 14: <em>typename</em> is not known to be a type.
      */
     INVALID_MATH_TYPE(14, "'<arg>' is not known to be a type",
-                      ErrorSeverity.ERROR),
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 15: no such function: <em>name</em>.
@@ -216,11 +216,11 @@ public enum ErrorKind {
     UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
             "unmarked recursive procedure: '<arg2>'; should be: " +
             "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
-                         ErrorSeverity.WARNING),
+            ErrorSeverity.WARNING),
 
     MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: " +
             "'<arg>' != '<arg2>'",
-                            ErrorSeverity.WARNING),
+            ErrorSeverity.WARNING),
 
     LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked 'Recursive', " +
             "but contains no recursive calls",
@@ -263,7 +263,10 @@ public enum ErrorKind {
             "acceptable where <arg2> is required", ErrorSeverity.ERROR),
 
     INVALID_APPLICATION_ARG2(64, "<arg> is not acceptable where a " +
-            "set is required", ErrorSeverity.ERROR);
+            "set is required", ErrorSeverity.ERROR),
+
+    MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>",
+            ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

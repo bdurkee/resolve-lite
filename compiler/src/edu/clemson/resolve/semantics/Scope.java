@@ -16,11 +16,13 @@ import java.util.Set;
 
 public interface Scope {
 
-    @NotNull public <E extends Symbol> List<E> query(
+    @NotNull
+    public <E extends Symbol> List<E> query(
             @NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException;
 
-    @NotNull public <E extends Symbol> E queryForOne(
+    @NotNull
+    public <E extends Symbol> E queryForOne(
             @NotNull SymbolQuery<E> query) throws NoSuchSymbolException,
             DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException;
 
@@ -32,16 +34,20 @@ public interface Scope {
             @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;
 
-    @NotNull public <E extends Symbol> List<E> getMatches(
+    @NotNull
+    public <E extends Symbol> List<E> getMatches(
             @NotNull TableSearcher<E> searcher, @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;
 
-    @NotNull public Symbol define(@NotNull Symbol s)
+    @NotNull
+    public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException;
 
-    @NotNull public <T extends Symbol> List<T> getSymbolsOfType(
+    @NotNull
+    public <T extends Symbol> List<T> getSymbolsOfType(
             @NotNull Class<T> type);
 
-    @NotNull public List<Symbol> getSymbolsOfType(@NotNull Class<?> ... types);
+    @NotNull
+    public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types);
 
 }

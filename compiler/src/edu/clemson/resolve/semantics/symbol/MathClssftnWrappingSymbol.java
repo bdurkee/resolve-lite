@@ -54,15 +54,21 @@ public class MathClssftnWrappingSymbol extends Symbol {
         return q;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a math symbol";
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return this;
     }
 
-    @NotNull @Override public Symbol instantiateGenerics(
+    @NotNull
+    @Override
+    public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
         /*for (String schematicType : mySchematicTypes.keySet()) {
@@ -83,7 +89,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
                                 genericMathematicalInstantiations);
         instClssftn.enclosingClassification = instEncClssftn;
         int i;
-        i=0;
+        i = 0;
      /*   VariableReplacingVisitor typeSubstitutor =
                 new VariableReplacingVisitor(genericMathematicalInstantiations);
         type.accept(typeSubstitutor);

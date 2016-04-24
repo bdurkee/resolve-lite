@@ -52,7 +52,8 @@ public class LogManager {
             location = new Throwable().getStackTrace()[0];
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             StringBuilder buf = new StringBuilder();
             buf.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS")
                     .format(new Date(timestamp)));
@@ -74,7 +75,7 @@ public class LogManager {
         Record r = new Record();
         r.component = component;
         r.msg = msg;
-        if ( records == null ) {
+        if (records == null) {
             records = new ArrayList<Record>();
         }
         records.add(r);
@@ -89,8 +90,7 @@ public class LogManager {
         BufferedWriter bw = new BufferedWriter(fw);
         try {
             bw.write(toString());
-        }
-        finally {
+        } finally {
             bw.close();
         }
     }
@@ -107,8 +107,9 @@ public class LogManager {
         return defaultFilename;
     }
 
-    @Override public String toString() {
-        if ( records == null ) return "";
+    @Override
+    public String toString() {
+        if (records == null) return "";
         String nl = System.getProperty("line.separator");
         StringBuilder buf = new StringBuilder();
         for (Record r : records) {

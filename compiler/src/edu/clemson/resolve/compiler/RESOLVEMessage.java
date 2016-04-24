@@ -41,7 +41,7 @@ public class RESOLVEMessage {
     }
 
     public Object[] getArgs() {
-        if ( args == null ) {
+        if (args == null) {
             return EMPTY_ARGS;
         }
         return args;
@@ -55,20 +55,19 @@ public class RESOLVEMessage {
         Object[] args = getArgs();
         for (int i = 0; i < args.length; i++) {
             String attr = "arg";
-            if ( i > 0 ) {
+            if (i > 0) {
                 attr += i + 1;
             }
             messageST.add(attr, args[i]);
         }
-        if ( args.length < 2 ) {
+        if (args.length < 2) {
             messageST.add("arg2", null);
         }
         Throwable cause = getCause();
-        if ( cause != null ) {
+        if (cause != null) {
             messageST.add("exception", cause);
             messageST.add("stackTrace", cause.getStackTrace());
-        }
-        else {
+        } else {
             messageST.add("exception", null); // avoid ST error msg
             messageST.add("stackTrace", null);
         }
@@ -79,7 +78,8 @@ public class RESOLVEMessage {
         return e;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Message{"
                 + "errorType=" + getErrorType()
                 + ", args=" + Arrays.asList(getArgs())

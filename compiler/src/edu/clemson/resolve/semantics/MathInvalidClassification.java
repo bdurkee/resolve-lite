@@ -10,7 +10,7 @@ public class MathInvalidClassification extends MathClassification {
 
     public static MathInvalidClassification getInstance(DumbTypeGraph g) {
         MathInvalidClassification result = instances.get(g);
-        if ( result == null ) {
+        if (result == null) {
             result = new MathInvalidClassification(g);
             instances.put(g, result);
         }
@@ -25,16 +25,19 @@ public class MathInvalidClassification extends MathClassification {
         super(g, null);
     }
 
-    @Override public MathClassification getEnclosingClassification() {
+    @Override
+    public MathClassification getEnclosingClassification() {
         return g.INVALID;
     }
 
-    @Override public MathClassification withVariablesSubstituted(
+    @Override
+    public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         return this;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "INVD_MATH_TYPE";
     }
 

@@ -14,7 +14,8 @@ import java.util.List;
 
 public class QualifiedPath implements ScopeSearchPath {
 
-    @NotNull private final Token qualifier;
+    @NotNull
+    private final Token qualifier;
     private final boolean instantiateGenerics;
 
     public QualifiedPath(@NotNull Token qualifier,
@@ -24,7 +25,9 @@ public class QualifiedPath implements ScopeSearchPath {
         this.qualifier = qualifier;
     }
 
-    @Override @NotNull public <E extends Symbol> List<E> searchFromContext(
+    @Override
+    @NotNull
+    public <E extends Symbol> List<E> searchFromContext(
             @NotNull TableSearcher<E> searcher, @NotNull Scope source,
             @NotNull MathSymbolTable repo)
             throws DuplicateSymbolException, NoSuchModuleException,
@@ -45,8 +48,7 @@ public class QualifiedPath implements ScopeSearchPath {
                 result.addAll(enhScope.getMatches(searcher,
                         SearchContext.FACILITY));
             }
-        }
-        catch (NoSuchSymbolException |ClassCastException e) {
+        } catch (NoSuchSymbolException | ClassCastException e) {
             //then perhaps it identifies a module..
             ModuleScopeBuilder moduleScope =
                     repo.getModuleScope(new ModuleIdentifier(qualifier));

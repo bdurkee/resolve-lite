@@ -12,13 +12,16 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
  */
 public abstract class ProgNamedType extends ProgType {
 
-    @NotNull private final String name;
-    @NotNull protected final PExp initEnsures;
+    @NotNull
+    private final String name;
+    @NotNull
+    protected final PExp initEnsures;
 
     /**
      * Which module does this {@code ProgType}s reference appear in?
      */
-    @NotNull private final ModuleIdentifier moduleIdentifier;
+    @NotNull
+    private final ModuleIdentifier moduleIdentifier;
 
     public ProgNamedType(@NotNull DumbTypeGraph g, @NotNull String name,
                          @NotNull PExp initEnsures,
@@ -29,26 +32,32 @@ public abstract class ProgNamedType extends ProgType {
         this.moduleIdentifier = moduleIdentifier;
     }
 
-    @NotNull public ModuleIdentifier getModuleIdentifier() {
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
 
-    @NotNull public String getName() {
+    @NotNull
+    public String getName() {
         return name;
     }
 
-    @NotNull public abstract String getExemplarName();
+    @NotNull
+    public abstract String getExemplarName();
 
-    @NotNull public PSymbol getExemplarAsPSymbol() {
+    @NotNull
+    public PSymbol getExemplarAsPSymbol() {
         return new PSymbol.PSymbolBuilder(getExemplarName())
                 .mathType(toMath()).build();
     }
 
-    @NotNull public PExp getInitializationEnsures() {
+    @NotNull
+    public PExp getInitializationEnsures() {
         return initEnsures;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return name;
     }
 

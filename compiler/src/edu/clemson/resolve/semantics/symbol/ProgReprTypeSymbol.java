@@ -15,19 +15,25 @@ import java.util.Map;
 
 public class ProgReprTypeSymbol extends Symbol {
 
-    /** A backing field for our (type model) {@code definition} parameter. This
-     *  might be {@code null} in the case where we represent a facility bound
-     *  type representation.
+    /**
+     * A backing field for our (type model) {@code definition} parameter. This
+     * might be {@code null} in the case where we represent a facility bound
+     * type representation.
      */
-    @Nullable protected final TypeModelSymbol definition;
+    @Nullable
+    protected final TypeModelSymbol definition;
 
-    /** These annotation exprs should never be {@code null}; use just
-     *  {@code true} instead.
+    /**
+     * These annotation exprs should never be {@code null}; use just
+     * {@code true} instead.
      */
-    @NotNull protected final PExp convention, correspondence;
+    @NotNull
+    protected final PExp convention, correspondence;
 
-    @NotNull protected final DumbTypeGraph typeGraph;
-    @NotNull protected final PTRepresentation representation;
+    @NotNull
+    protected final DumbTypeGraph typeGraph;
+    @NotNull
+    protected final PTRepresentation representation;
 
     public ProgReprTypeSymbol(@NotNull DumbTypeGraph g,
                               @NotNull String name,
@@ -45,16 +51,19 @@ public class ProgReprTypeSymbol extends Symbol {
         this.typeGraph = g;
     }
 
-    @NotNull public PSymbol exemplarAsPSymbol(boolean incoming) {
+    @NotNull
+    public PSymbol exemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
                 .mathType(representation.toMath()).incoming(incoming).build();
     }
 
-    @NotNull public PSymbol exemplarAsPSymbol() {
+    @NotNull
+    public PSymbol exemplarAsPSymbol() {
         return exemplarAsPSymbol(false);
     }
 
-    @NotNull public PSelector conceptualExemplarAsPSymbol(boolean incoming) {
+    @NotNull
+    public PSelector conceptualExemplarAsPSymbol(boolean incoming) {
         return new PSelector(
                 new PSymbol.PSymbolBuilder("conc").mathType(typeGraph.BOOLEAN)
                         .incoming(incoming).build(),
@@ -62,49 +71,65 @@ public class ProgReprTypeSymbol extends Symbol {
                         .mathType(representation.toMath()).build());
     }
 
-    @NotNull public PSelector conceptualExemplarAsPSymbol() {
+    @NotNull
+    public PSelector conceptualExemplarAsPSymbol() {
         return conceptualExemplarAsPSymbol(false);
     }
 
-    @NotNull public PTRepresentation getRepresentationType() {
+    @NotNull
+    public PTRepresentation getRepresentationType() {
         return representation;
     }
 
-    @Nullable public TypeModelSymbol getDefinition() {
+    @Nullable
+    public TypeModelSymbol getDefinition() {
         return definition;
     }
 
-    @NotNull public PExp getConvention() {
+    @NotNull
+    public PExp getConvention() {
         return convention;
     }
 
-    @NotNull public PExp getCorrespondence() {
+    @NotNull
+    public PExp getCorrespondence() {
         return correspondence;
     }
 
-    @NotNull @Override public ProgTypeSymbol toProgTypeSymbol() {
+    @NotNull
+    @Override
+    public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), representation,
                 (definition == null) ? null : definition.modelType,
                 getDefiningTree(), getModuleIdentifier());
     }
 
-    @NotNull @Override public MathClssftnWrappingSymbol toMathSymbol() {
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
         return toProgTypeSymbol().toMathSymbol();
     }
 
-    @NotNull @Override public ProgReprTypeSymbol toProgReprTypeSymbol() {
+    @NotNull
+    @Override
+    public ProgReprTypeSymbol toProgReprTypeSymbol() {
         return this;
     }
 
-    @NotNull @Override public String getSymbolDescription() {
+    @NotNull
+    @Override
+    public String getSymbolDescription() {
         return "a program type representation definition";
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return getName();
     }
 
-    @NotNull @Override public Symbol instantiateGenerics(
+    @NotNull
+    @Override
+    public Symbol instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 

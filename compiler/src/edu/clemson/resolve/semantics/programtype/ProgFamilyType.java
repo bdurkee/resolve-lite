@@ -11,9 +11,12 @@ import java.util.Map;
 
 public class ProgFamilyType extends ProgNamedType {
 
-    @NotNull private final MathClassification model;
-    @NotNull private final String name, exemplarName;
-    @NotNull private final PExp constraint;
+    @NotNull
+    private final MathClassification model;
+    @NotNull
+    private final String name, exemplarName;
+    @NotNull
+    private final PExp constraint;
 
     public ProgFamilyType(@NotNull MathClassification model, @NotNull String name,
                           @NotNull String exemplarName, @NotNull PExp constraint,
@@ -26,27 +29,35 @@ public class ProgFamilyType extends ProgNamedType {
         this.constraint = constraint;
     }
 
-    @NotNull public String getName() {
+    @NotNull
+    public String getName() {
         return name;
     }
 
-    @NotNull public String getExemplarName() {
+    @NotNull
+    public String getExemplarName() {
         return exemplarName;
     }
 
-    @NotNull public PExp getConstraint() {
+    @NotNull
+    public PExp getConstraint() {
         return constraint;
     }
 
-    @NotNull @Override public MathClassification toMath() {
+    @NotNull
+    @Override
+    public MathClassification toMath() {
         return model;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return name;
     }
 
-    @NotNull @Override public ProgType instantiateGenerics(
+    @NotNull
+    @Override
+    public ProgType instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
 
@@ -72,10 +83,11 @@ public class ProgFamilyType extends ProgNamedType {
                 getModuleIdentifier());
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof ProgFamilyType);
 
-        if ( result ) {
+        if (result) {
             ProgFamilyType oAsPTFamily = (ProgFamilyType) o;
             //Todo
             result =

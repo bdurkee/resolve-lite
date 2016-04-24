@@ -14,27 +14,32 @@ public class Consequent extends ImmutableConjuncts {
         super(i);
     }
 
-    @Override public Consequent substitute(Map<PExp, PExp> mapping) {
+    @Override
+    public Consequent substitute(Map<PExp, PExp> mapping) {
         ImmutableConjuncts genericRetval = super.substitute(mapping);
         return new Consequent(genericRetval);
     }
 
-    @Override public Consequent appended(Iterable<PExp> i) {
+    @Override
+    public Consequent appended(Iterable<PExp> i) {
         ImmutableConjuncts genericRetval = super.appended(i);
         return new Consequent(genericRetval);
     }
 
-    @Override public Consequent eliminateObviousConjuncts() {
+    @Override
+    public Consequent eliminateObviousConjuncts() {
         ImmutableConjuncts genericRetval = super.eliminateObviousConjuncts();
         return new Consequent(genericRetval);
     }
 
-    @Override public Consequent removed(int index) {
+    @Override
+    public Consequent removed(int index) {
         ImmutableConjuncts genericRetval = super.removed(index);
         return new Consequent(genericRetval);
     }
 
-    @Override public Consequent eliminateRedundantConjuncts() {
+    @Override
+    public Consequent eliminateRedundantConjuncts() {
         ImmutableConjuncts genericRetval = super.eliminateRedundantConjuncts();
         return new Consequent(genericRetval);
     }

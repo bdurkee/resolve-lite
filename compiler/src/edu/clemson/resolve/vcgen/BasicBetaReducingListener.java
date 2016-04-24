@@ -9,12 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** A visitor that replaces lambda bound variables with their corresponding
- *  supplied actuals.
- *  <p>
- *  Note: This listener will therefore only mutate parts of an expression where
- *  the first class name portion of some {@link PApply} is an instance of
- *  {@link PLambda}.</p>
+/**
+ * A visitor that replaces lambda bound variables with their corresponding
+ * supplied actuals.
+ * <p>
+ * Note: This listener will therefore only mutate parts of an expression where
+ * the first class name portion of some {@link PApply} is an instance of
+ * {@link PLambda}.</p>
  */
 public class BasicBetaReducingListener extends PExpListener {
 
@@ -24,14 +25,16 @@ public class BasicBetaReducingListener extends PExpListener {
         this.reducedExp = start;
     }
 
-    @NotNull public PExp getReducedExp() {
+    @NotNull
+    public PExp getReducedExp() {
         return reducedExp;
     }
 
-    @Override public void endPApply(@NotNull PApply e) {
+    @Override
+    public void endPApply(@NotNull PApply e) {
         PExp name = e.getFunctionPortion();
         if (name instanceof PLambda) {
-            PLambda asPLambda = (PLambda)name;
+            PLambda asPLambda = (PLambda) name;
             List<PExp> boundVars = asPLambda.getParameters().stream()
                     .map(PLambda.MathSymbolDeclaration::asPSymbol)
                     .collect(Collectors.toList());

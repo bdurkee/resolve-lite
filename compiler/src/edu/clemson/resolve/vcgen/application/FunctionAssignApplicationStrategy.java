@@ -16,16 +16,18 @@ import java.util.List;
 
 public class FunctionAssignApplicationStrategy
         implements
-            StatRuleApplicationStrategy<VCRuleBackedStat> {
+        StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
-    @NotNull @Override public AssertiveBlock applyRule(
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull VCRuleBackedStat stat) {
         PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
-        if ( !(rightReplacer.isFunctionApplication()) ) {
+        if (!(rightReplacer.isFunctionApplication())) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
             block.finalConfirm(workingConfirm.substitute(leftReplacee,
                     rightReplacer));
@@ -47,7 +49,7 @@ public class FunctionAssignApplicationStrategy
          */
         PExp opRequires = op.getRequires().substitute(
                 block.getSpecializationsForFacility(
-                        ((PSymbol)call.getFunctionPortion()).getQualifier()));
+                        ((PSymbol) call.getFunctionPortion()).getQualifier()));
         block.confirm(opRequires.substitute(formals, actuals));
 
         PExp opEnsures = op.getEnsures();
@@ -74,7 +76,9 @@ public class FunctionAssignApplicationStrategy
         return block.snapshot();
     }
 
-    @NotNull @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "function assignment rule application";
     }
 }

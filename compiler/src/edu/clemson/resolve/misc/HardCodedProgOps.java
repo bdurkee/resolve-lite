@@ -22,15 +22,13 @@ public class HardCodedProgOps {
             return convertBooleanProgramOp(op); //only (pseudo hardcoded) thing we could possibly match currently that has no arguments is true or false
         }
         if (!(args.get(0) instanceof ProgNamedType)) return result;
-        ProgNamedType firstArgType = (ProgNamedType)args.get(0);
+        ProgNamedType firstArgType = (ProgNamedType) args.get(0);
 
-        if ( firstArgType.getName().equals("Boolean") ) {
+        if (firstArgType.getName().equals("Boolean")) {
             result = convertBooleanProgramOp(op);
-        }
-        else if ( firstArgType.getName().equals("Integer") ) {
+        } else if (firstArgType.getName().equals("Integer")) {
             result = convertIntegerProgramOp(op);
-        }
-        else if ( firstArgType.getName().equals("Char_Str") ) {
+        } else if (firstArgType.getName().equals("Char_Str")) {
             result = convertCharStrProgramOp(op);
         }
         return result;

@@ -7,9 +7,11 @@ import org.jetbrains.annotations.NotNull;
 
 public interface StatRuleApplicationStrategy<T extends VCRuleBackedStat> {
 
-    @NotNull public AssertiveBlock applyRule(
+    @NotNull
+    public AssertiveBlock applyRule(
             @NotNull VCAssertiveBlockBuilder block,
             @NotNull T stat);
 
-    @NotNull public String getDescription();
+    @NotNull
+    public String getDescription();
 }

@@ -10,7 +10,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
     private final int myFirstAfterIndex;
 
     public ImmutableListSubview(ArrayBackedImmutableList<E> baseList,
-            int start, int length) {
+                                int start, int length) {
 
         //TODO : These defensive checks can be taken out for efficiency once
         //       we're satisfied that ImmutableLists works correctly.
@@ -32,7 +32,8 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         myFirstAfterIndex = mySubviewStart + mySubviewLength;
     }
 
-    @Override public E get(int index) {
+    @Override
+    public E get(int index) {
         if (index < 0 || index >= myFirstAfterIndex) {
             throw new IndexOutOfBoundsException();
         }
@@ -40,7 +41,8 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         return myBaseList.get(index + mySubviewStart);
     }
 
-    @Override public ImmutableList<E> head(int length) {
+    @Override
+    public ImmutableList<E> head(int length) {
         if (length > mySubviewLength) {
             throw new IndexOutOfBoundsException();
         }
@@ -48,15 +50,18 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
         return new ImmutableListSubview<E>(myBaseList, mySubviewStart, length);
     }
 
-    @Override public Iterator<E> iterator() {
+    @Override
+    public Iterator<E> iterator() {
         return myBaseList.subsequenceIterator(mySubviewStart, mySubviewLength);
     }
 
-    @Override public int size() {
+    @Override
+    public int size() {
         return mySubviewLength;
     }
 
-    @Override public ImmutableList<E> tail(int startIndex) {
+    @Override
+    public ImmutableList<E> tail(int startIndex) {
         if (startIndex < 0 || startIndex > mySubviewLength) {
             throw new IndexOutOfBoundsException();
         }

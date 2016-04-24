@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class NoSuchModuleException extends SymbolTableException {
 
-    @NotNull private final Token requestedModule;
+    @NotNull
+    private final Token requestedModule;
 
     public NoSuchModuleException(@NotNull ModuleIdentifier requestedModule) {
         this(requestedModule.getNameToken());
@@ -17,7 +18,8 @@ public class NoSuchModuleException extends SymbolTableException {
         this.requestedModule = requestedModule;
     }
 
-    @NotNull public Token getRequestedModule() {
+    @NotNull
+    public Token getRequestedModule() {
         return requestedModule;
     }
 }

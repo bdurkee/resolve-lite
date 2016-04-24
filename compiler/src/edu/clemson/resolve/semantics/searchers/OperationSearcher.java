@@ -16,8 +16,10 @@ import java.util.Map;
 
 public class OperationSearcher implements TableSearcher<OperationSymbol> {
 
-    @NotNull private final String queryName;
-    @NotNull private final List<ProgType> actualArgTypes;
+    @NotNull
+    private final String queryName;
+    @NotNull
+    private final List<ProgType> actualArgTypes;
 
     public OperationSearcher(@NotNull Token name,
                              @NotNull List<ProgType> argumentTypes) {
@@ -30,9 +32,10 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
 
-    @Override public boolean addMatches(@NotNull Map<String, Symbol> entries,
-                                        @NotNull List<OperationSymbol> matches,
-                                        @NotNull SearchContext l)
+    @Override
+    public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                              @NotNull List<OperationSymbol> matches,
+                              @NotNull SearchContext l)
             throws DuplicateSymbolException {
 
         if (entries.containsKey(queryName)) {
@@ -40,15 +43,15 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
                 OperationSymbol operation =
                         entries.get(queryName).toOperationSymbol();
 
-                if ( argumentsMatch(operation.getParameters()) ) {
+                if (argumentsMatch(operation.getParameters())) {
                     //We have a match at this point
                     if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
                     matches.add(operation);
                 }
+            } catch (UnexpectedSymbolException use) {
             }
-            catch (UnexpectedSymbolException use) {}
         }
         return false;
     }

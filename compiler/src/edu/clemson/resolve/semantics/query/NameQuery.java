@@ -18,7 +18,7 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
  */
 public class NameQuery extends BaseMultimatchSymbolQuery<Symbol>
         implements
-            MultimatchSymbolQuery<Symbol> {
+        MultimatchSymbolQuery<Symbol> {
 
     public NameQuery(@Nullable Token qualifier, @NotNull String name,
                      @NotNull ImportStrategy importStrategy,
