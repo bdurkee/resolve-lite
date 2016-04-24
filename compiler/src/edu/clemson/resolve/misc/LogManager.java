@@ -40,12 +40,16 @@ import java.util.List;
 
 public class LogManager {
 
-    protected static class Record {
+    public static class Record {
 
         long timestamp;
         StackTraceElement location;
         String component;
         String msg;
+
+        public String getMsg() {
+            return msg;
+        }
 
         public Record() {
             timestamp = System.currentTimeMillis();
@@ -69,7 +73,7 @@ public class LogManager {
         }
     }
 
-    protected List<Record> records;
+    private List<Record> records;
 
     public void log(String component, String msg) {
         Record r = new Record();
@@ -79,6 +83,10 @@ public class LogManager {
             records = new ArrayList<Record>();
         }
         records.add(r);
+    }
+
+    public List<Record> getRecords() {
+        return records;
     }
 
     public void log(String msg) {

@@ -479,11 +479,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PApply callExp = (PApply) tr.mathASTs.get(ctx.progParamExp());
         OperationSymbol op = getOperation(moduleScope, callExp);
         if (inSimpleForm(op.getEnsures(), op.getParameters())) {
-            gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
+            //TODO: Use log instead!
+            //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     EXPLICIT_CALL_APPLICATION, callExp);
         } else {
-            gen.getCompiler().info("APPLYING GENERAL CALL RULE");
+            //TODO: Use log instead!
+            //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     GENERAL_CALL_APPLICATION, callExp);
         }

@@ -1,6 +1,10 @@
 package edu.clemson.resolve;
 
+import edu.clemson.resolve.misc.LogManager;
+import edu.clemson.resolve.misc.Utils;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,7 +44,10 @@ public class TestCompileOrder extends BaseTest {
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.
     private void testOrdering(String expected, String root) {
-        ErrorQueue e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
-        assertEquals(expected, e.toInfoString());
+        ErrorQueue e = resolve(root + RESOLVECompiler.FILE_EXTENSION, false);
+        LogManager l = e.compiler.logMgr;
+        List<String> msgs = Utils.apply(l.getRecords(), LogManager.Record::getMsg);
+        String actual = Utils.join(msgs, "\n");
+        assertEquals(expected, actual);
     }
 }
