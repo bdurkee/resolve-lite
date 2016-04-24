@@ -6,6 +6,7 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.misc.FileLocator;
+import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
@@ -36,26 +37,29 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         return builder.built.get(root);
     }
 
-    @NotNull
-    private ST generateModule(@NotNull Module module) {
-        return walk(module);
-    }
-
     ST generateModule() {
         return walk(buildModuleOutputModel());
     }
 
     void writeReferencedExternalFiles() {
-        //we're sure these exist, we've already checked
+        //these *should* exist;
+        //we've already checked in BasicSanityCheckingVisitor..
         for (ModuleIdentifier e : module.externalUses.values()) {
             String fileName = e.getNameString() + getFileExtension();
-            ModuleFile moduleFile = new ModuleFile(
-                    null, fileName, compiler.genPackage);
-            ST hardcodedExternal =
-                    templates.getInstanceOf("ModuleFile").add("pkg",
-                            compiler.genPackage != null ?
-                                    compiler.genPackage : null);
-            write(hardcodedExternal, e.getNameString() + getFileExtension());
+            ModuleFile moduleFile =
+                    new ModuleFile(null, fileName, compiler.genPackage);
+            File externalFile =
+                    Utils.getExternalFile(compiler, e.getNameString());
+            if (externalFile == null) continue;
+            String contents = null;
+            try {
+                contents = Utils.readFile(externalFile.getPath());
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException(ioe.getCause());
+            }
+            ST result = walk(moduleFile).add("module", contents);
+            write(result, fileName);
         }
     }
 }

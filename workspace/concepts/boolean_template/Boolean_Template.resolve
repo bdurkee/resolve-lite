@@ -16,7 +16,7 @@ Concept Boolean_Template;
       ensures And = (a and b);
 
     Operation Or
-        (evaluates a, b : Boolean)
+        (evalates a, b : Boolean)
                 : Boolean;
       ensures Or = (a and b);
 
@@ -31,8 +31,8 @@ Concept Boolean_Template;
       ensures Are_Equal = (a = b);
 
     Operation Are_Not_Equal
-        (evaluates a, b : Boolean)
-                : Boolean;
+        (evaluates a, b : Booean)
+                : Boolan;
       ensures Are_Not_Equal = (a /= b);
 
     Operation Read

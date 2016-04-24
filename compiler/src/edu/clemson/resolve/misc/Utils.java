@@ -30,6 +30,8 @@
  */
 package edu.clemson.resolve.misc;
 
+import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
@@ -45,6 +47,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -265,6 +269,35 @@ public class Utils {
             t = t.getParent();
         }
         return null;
+    }
+
+    /**
+     * Given an extensionless {@code name} and a compiler instance; searches
+     * for and returns an external file of name {@code name}.
+     */
+    @Nullable public static File getExternalFile(@NotNull RESOLVECompiler e,
+                                                 @Nullable String name) {
+        if (name == null) return null;
+        FileLocator l = new FileLocator(name,
+                RESOLVECompiler.NON_NATIVE_EXTENSION);
+        File result = null;
+        try {
+            //an external file is likely going to appear in the core lib
+            //so we search there first..
+            Files.walkFileTree(new File(RESOLVECompiler
+                    .getCoreLibraryDirectory()).toPath(), l);
+            result = l.getFile();
+        } catch (NoSuchFileException nsfe) {
+            //ok, maybe they defined an external file in their own workspace?
+            try {
+                Files.walkFileTree(new File(e.workingDirectory)
+                        .toPath(), l);
+                result = l.getFile();
+            } catch (IOException ignored) {
+            }
+        } catch (IOException ignored) {
+        }
+        return result;
     }
 
     /**

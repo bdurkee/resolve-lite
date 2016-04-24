@@ -6,7 +6,7 @@ Concept Boolean_Template;
         initialization
                 ensures b = true;
 
-    /*Operation True () : Boolean;
+    Operation True () : Boolean;
 
     Operation False () : Boolean;
 
@@ -42,5 +42,5 @@ Concept Boolean_Template;
             (evaluates a : Boolean);
 
     Operation Write_Line
-            (evaluates a : Boolean);*/
+            (evaluates a : Boolean);
 end Boolean_Template;

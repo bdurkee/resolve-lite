@@ -100,7 +100,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
     /**
      * Checks to ensure the name {@link Token}s bookending some scoped block
-     * are the same -- meaning they have the same text.
+     * are the same -- meaning they contain the same text.
      */
     private void sanityCheckBlockEnds(@NotNull Token topName,
                                       @NotNull Token bottomName) {
@@ -112,29 +112,11 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
-        FileLocator l = new FileLocator(externalNameRef.getText(),
-                RESOLVECompiler.NON_NATIVE_EXTENSION);
-        File result = null;
-        try {
-            //an external file is likely going to appear in the core lib
-            //so we search there first..
-            Files.walkFileTree(new File(RESOLVECompiler
-                    .getCoreLibraryDirectory()).toPath(), l);
-            result = l.getFile();
-        } catch (NoSuchFileException nsfe) {
-            //ok, maybe they defined an external file in their own workspace?
-            try {
-                Files.walkFileTree(new File(compiler.workingDirectory)
-                        .toPath(), l);
-                result = l.getFile();
-            } catch (NoSuchFileException nsfe2) {
-                compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE,
-                        externalNameRef, externalNameRef.getText());
-            } catch (IOException e2) {
-                throw new RuntimeException(e2.getCause());
-            }
-        } catch (IOException e1) {
-            throw new RuntimeException(e1.getCause());
+        File externalFile =
+                Utils.getExternalFile(compiler, externalNameRef.getText());
+        if (externalFile == null) {
+            compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE,
+                    externalNameRef, externalNameRef.getText());
         }
     }
 }

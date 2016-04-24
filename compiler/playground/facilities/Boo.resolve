@@ -1,11 +1,8 @@
 Facility Boo;
-    uses Standard_Integers, Standard_Booleans;
+    uses Standard_Booleans;
 
     Operation Main ();
         Procedure
-            Var x : Std_Ints :: Integer;
             Var y : Std_Bools :: Boolean;
-
-
     end Main;
 end Boo;
