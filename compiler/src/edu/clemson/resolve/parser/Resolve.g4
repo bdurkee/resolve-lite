@@ -98,8 +98,10 @@ facilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'
+    :   'uses' (usesSpec | '(' usesSpec (',' usesSpec)* ')') ';'
     ;
+
+usesSpec : STRING ;
 
 // module blocks & items
 

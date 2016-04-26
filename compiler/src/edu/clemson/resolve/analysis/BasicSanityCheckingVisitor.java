@@ -33,7 +33,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
         String groomedFileName = Utils.groomFileName(tr.getFileName());
         String extlessFileName = Utils.stripFileExtension(groomedFileName);
 
-        if (!moduleNameToken.getText().equals(extlessFileName)) {
+        if ( !moduleNameToken.getText().equals(extlessFileName) ) {
             compiler.errMgr.semanticError(ErrorKind.MODULE_AND_FILE_NAME_DIFFER,
                     moduleNameToken, moduleNameToken.getText(),
                     groomedFileName);
@@ -94,17 +94,16 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-        if (ctx.externally != null) sanityCheckExternalFileRef(ctx.externally);
+        if ( ctx.externally!=null ) sanityCheckExternalFileRef(ctx.externally);
         return null;
     }
 
-    /**
-     * Checks to ensure the name {@link Token}s bookending some scoped block
-     * are the same -- meaning they contain the same text.
+    /** Checks to ensure the name {@link Token}s bookending some scoped block
+     *  are the same -- meaning they contain the same text.
      */
     private void sanityCheckBlockEnds(@NotNull Token topName,
                                       @NotNull Token bottomName) {
-        if (!topName.getText().equals(bottomName.getText())) {
+        if ( !topName.getText().equals(bottomName.getText()) ) {
             compiler.errMgr.semanticError(
                     ErrorKind.MISMATCHED_BLOCK_END_NAMES, bottomName,
                     topName.getText(), bottomName.getText());
@@ -114,7 +113,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
         File externalFile =
                 Utils.getExternalFile(compiler, externalNameRef.getText());
-        if (externalFile == null) {
+        if ( externalFile==null ) {
             compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE,
                     externalNameRef, externalNameRef.getText());
         }
