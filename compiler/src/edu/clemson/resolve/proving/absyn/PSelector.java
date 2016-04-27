@@ -38,7 +38,7 @@ public class PSelector extends PExp {
     public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
         PExp result;
-        if (substitutions.containsKey(this)) {
+        if ( substitutions.containsKey(this) ) {
             result = substitutions.get(this);
         } else {
             result = new PSelector(left.substitute(substitutions),
@@ -152,7 +152,7 @@ public class PSelector extends PExp {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PSelector);
-        if (result) {
+        if ( result ) {
             result = left.equals(((PSelector) o).left) &&
                     right.equals(((PSelector) o).right);
         }

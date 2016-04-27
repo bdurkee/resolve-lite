@@ -44,7 +44,7 @@ public class VC extends OutputModelObject {
 
     public String getName() {
         String result = name;
-        if (derived) result += " (modified)";
+        if ( derived ) result += " (modified)";
         return result;
     }
 

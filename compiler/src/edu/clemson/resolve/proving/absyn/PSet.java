@@ -24,8 +24,8 @@ public class PSet extends PExp {
         v.beginChildren(this);
         boolean first = true;
 
-        for (PExp e : elements) {
-            if (!first) {
+        for ( PExp e : elements ) {
+            if ( !first ) {
                 v.fencepostPSet(this);
             }
             first = false;
@@ -45,8 +45,8 @@ public class PSet extends PExp {
 
     @Override
     public boolean containsName(String name) {
-        for (PExp e : elements) {
-            if (e.containsName(name)) {
+        for ( PExp e : elements ) {
+            if ( e.containsName(name) ) {
                 return true;
             }
         }

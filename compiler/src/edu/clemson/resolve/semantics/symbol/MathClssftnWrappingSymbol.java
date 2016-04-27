@@ -78,7 +78,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
         Map<String, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
-        if (genericInstantiations.isEmpty()) return this;
+        if ( genericInstantiations.isEmpty() ) return this;
         MathClassification instEncClssftn =
                 classification.enclosingClassification
                         .withVariablesSubstituted(

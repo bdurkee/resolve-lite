@@ -58,7 +58,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof ModuleIdentifier);
 
-        if (result) {
+        if ( result ) {
             result = ((ModuleIdentifier) o).name.getText()
                     .equals(name.getText());
         }

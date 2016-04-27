@@ -43,7 +43,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      */
     public ImmutableConjuncts(Iterable<PExp> exps) {
 
-        if (exps instanceof ImmutableConjuncts) {
+        if ( exps instanceof ImmutableConjuncts ) {
             //Performance hack: if exps is an ImmutableConjuncts, we can safely
             //just steal it's internal list of conjuncts--after all, that list
             //is immutable.
@@ -105,10 +105,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         int curIndex = 0;
         PExp curExp;
-        for (PExp myConjunct : conjuncts) {
+        for ( PExp myConjunct : conjuncts ) {
             curExp = myConjunct;
 
-            if (!curExp.isObviouslyTrue()) {
+            if ( !curExp.isObviouslyTrue() ) {
                 workingSpace[curIndex] = curExp;
                 curIndex++;
             }
@@ -132,12 +132,12 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         Iterator<PExp> conjunctsIter = conjuncts.iterator();
         PExp curConjunct;
         boolean unique;
-        while (conjunctsIter.hasNext()) {
+        while ( conjunctsIter.hasNext() ) {
             curConjunct = conjunctsIter.next();
 
             unique = hashedConjuncts.add(curConjunct);
 
-            if (unique) {
+            if ( unique ) {
                 runLength++;
             } else {
                 newConjuncts =
@@ -184,7 +184,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         Iterator<PExp> elements = conjuncts.iterator();
         Iterator<PExp> otherElements = otherConjuncts.iterator();
-        while (retval && elements.hasNext() && otherElements.hasNext()) {
+        while ( retval && elements.hasNext() && otherElements.hasNext() ) {
             retval = elements.next().equals(otherElements.next());
         }
         return retval && !elements.hasNext() && !otherElements.hasNext();
@@ -200,7 +200,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     public boolean equals(Object o) {
         boolean retval = (o instanceof Iterable<?>);
 
-        if (retval) {
+        if ( retval ) {
             Iterable<?> conjuncts = (Iterable<?>) o;
 
             retval =
@@ -214,7 +214,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         List<PExp> retval = new ArrayList<>();
         Iterator<PExp> conjuncts = this.conjuncts.iterator();
         PExp e;
-        while (conjuncts.hasNext()) {
+        while ( conjuncts.hasNext() ) {
             e = conjuncts.next();
             retval.add(e);
         }
@@ -235,7 +235,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         Iterator<?> queryIterator = query.iterator();
 
         Object curQueryExp;
-        while (retval && queryIterator.hasNext()) {
+        while ( retval && queryIterator.hasNext() ) {
             curQueryExp = queryIterator.next();
             retval = containsEqual(base, curQueryExp);
         }
@@ -245,7 +245,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     private static boolean containsEqual(Iterable<?> source, Object e) {
         boolean retval = false;
         Iterator<?> sourceIterator = source.iterator();
-        while (!retval && sourceIterator.hasNext()) {
+        while ( !retval && sourceIterator.hasNext() ) {
             retval = sourceIterator.next().equals(e);
         }
         return retval;
@@ -268,26 +268,26 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         String retval = "";
 
         boolean first = true;
-        for (PExp e : this) {
-            if (!first) retval += " and \n";
+        for ( PExp e : this ) {
+            if ( !first ) retval += " and \n";
             retval += (e.toString());
             first = false;
         }
-        if (retval.equals("")) retval = "True";
+        if ( retval.equals("") ) retval = "True";
         return retval;
     }
 
     public void processStringRepresentation(PExpListener visitor, Appendable a) {
         try {
             boolean first = true;
-            for (PExp e : this) {
-                if (!first) {
+            for ( PExp e : this ) {
+                if ( !first ) {
                     a.append(" and \n");
                 }
                 //e.processStringRepresentation(visitor, a);
                 first = false;
             }
-            if (first) {
+            if ( first ) {
                 a.append("True");
             }
             a.append("\n");
@@ -314,7 +314,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         List<PExp> retvalConjuncts = new LinkedList<PExp>();
         Iterator<PExp> conjuncts = this.conjuncts.iterator();
         PExp c;
-        while (conjuncts.hasNext()) {
+        while ( conjuncts.hasNext() ) {
             c = conjuncts.next();
             retvalConjuncts.add(c.substitute(mapping));
         }
@@ -356,11 +356,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         //TODO: This is dangerous if we change the implementation of
         //       ImmutableConjuncts to a list of lists
-        if (i instanceof ImmutableConjuncts) {
+        if ( i instanceof ImmutableConjuncts ) {
             ImmutableList<PExp> iConjuncts =
                     ((ImmutableConjuncts) i).conjuncts;
 
-            if (iConjuncts.size() == 0) {
+            if ( iConjuncts.size()==0 ) {
                 retval = this;
             } else {
                 //Performance hack: if i is an ImmutableConjuncts, we can safely
@@ -373,7 +373,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         } else {
             Iterator<PExp> iIterator = i.iterator();
 
-            if (iIterator.hasNext()) {
+            if ( iIterator.hasNext() ) {
                 retval = new ImmutableConjuncts(i);
             } else {
                 retval = this;
@@ -421,10 +421,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         //conjuncts.subList is less forgiving than we are, so adjust our
         //parameters to get the desired results without an
         //IndexOutOfBoundsException
-        if (start > conjunctsSize) {
+        if ( start>conjunctsSize ) {
             start = conjunctsSize;
         }
-        if (start + length > conjunctsSize) {
+        if ( start + length>conjunctsSize ) {
             length = conjunctsSize - start;
         }
         return new ImmutableConjuncts(conjuncts.subList(start, length));
@@ -460,14 +460,14 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         Iterator<PExp> conjunctIter = conjuncts.iterator();
         PExp curConjunct;
 
-        while (conjunctIter.hasNext()) {
+        while ( conjunctIter.hasNext() ) {
             curConjunct = conjunctIter.next();
             workingSpace[curIndex] = curConjunct.withQuantifiersFlipped();
-            conjunctChanged |= (workingSpace[curIndex] != curConjunct);
+            conjunctChanged |= (workingSpace[curIndex]!=curConjunct);
             curIndex++;
         }
 
-        if (conjunctChanged) {
+        if ( conjunctChanged ) {
             retval = new ImmutableConjuncts(workingSpace, conjunctsSize);
         } else {
             retval = this;
@@ -483,10 +483,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     public Set<PSymbol> getQuantifiedVariables() {
-        if (cachedQuantifiedVariableNames == null) {
+        if ( cachedQuantifiedVariableNames==null ) {
             cachedQuantifiedVariableNames = new HashSet<>();
 
-            for (PExp myConjunct : conjuncts) {
+            for ( PExp myConjunct : conjuncts ) {
                 cachedQuantifiedVariableNames.addAll(myConjunct
                         .getQuantifiedVariables());
             }
@@ -496,10 +496,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     public List<PExp> getFunctionApplications() {
-        if (cachedFunctionApplications == null) {
+        if ( cachedFunctionApplications==null ) {
             cachedFunctionApplications = new LinkedList<PExp>();
 
-            for (PExp myConjunct : conjuncts) {
+            for ( PExp myConjunct : conjuncts ) {
                 cachedFunctionApplications.addAll(myConjunct
                         .getFunctionApplications());
             }
@@ -508,9 +508,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     public Set<String> getSymbolNames() {
-        if (cachedSymbolNames == null) {
+        if ( cachedSymbolNames==null ) {
             cachedSymbolNames = new HashSet<>();
-            for (PExp myConjunct : conjuncts) {
+            for ( PExp myConjunct : conjuncts ) {
                 cachedSymbolNames.addAll(myConjunct
                         .getSymbolNames());
             }

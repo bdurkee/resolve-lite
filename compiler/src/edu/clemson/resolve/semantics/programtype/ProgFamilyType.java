@@ -87,7 +87,7 @@ public class ProgFamilyType extends ProgNamedType {
     public boolean equals(Object o) {
         boolean result = (o instanceof ProgFamilyType);
 
-        if (result) {
+        if ( result ) {
             ProgFamilyType oAsPTFamily = (ProgFamilyType) o;
             //Todo
             result =

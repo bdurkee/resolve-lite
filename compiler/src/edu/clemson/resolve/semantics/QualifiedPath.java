@@ -21,7 +21,7 @@ public class QualifiedPath implements ScopeSearchPath {
     public QualifiedPath(@NotNull Token qualifier,
                          @NotNull FacilityStrategy facilityStrategy) {
         this.instantiateGenerics =
-                facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
+                facilityStrategy==FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
     }
 
@@ -43,7 +43,7 @@ public class QualifiedPath implements ScopeSearchPath {
                     .getScope(instantiateGenerics);
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
             //Dtw returnEnsuresArgSubstitutions:
-            for (ModuleParameterization enh : facility.getEnhancements()) {
+            for ( ModuleParameterization enh : facility.getEnhancements() ) {
                 Scope enhScope = enh.getScope(instantiateGenerics);
                 result.addAll(enhScope.getMatches(searcher,
                         SearchContext.FACILITY));

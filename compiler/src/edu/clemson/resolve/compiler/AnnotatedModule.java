@@ -63,7 +63,7 @@ public class AnnotatedModule {
         this.fileName = fileName;
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
-        if (!hasErrors) {
+        if ( !hasErrors ) {
             UsesListener l = new UsesListener(this);
             ParseTreeWalker.DEFAULT.walk(l, root);
         }
@@ -73,7 +73,7 @@ public class AnnotatedModule {
     public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
                                  @NotNull ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
-        return result != null ? result : g.getTrueExp();
+        return result!=null ? result : g.getTrueExp();
     }
 
     @NotNull
@@ -99,7 +99,7 @@ public class AnnotatedModule {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
-        if (result) {
+        if ( result ) {
             result = this.name.getText()
                     .equals(((AnnotatedModule) o).name.getText());
         }

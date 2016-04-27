@@ -17,7 +17,7 @@ public class ProgVoidType extends ProgType {
     @NotNull
     public static ProgVoidType getInstance(@NotNull DumbTypeGraph g) {
         ProgVoidType result = instances.get(g);
-        if (result == null) {
+        if ( result==null ) {
             result = new ProgVoidType(g);
             instances.put(g, result);
         }

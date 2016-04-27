@@ -91,24 +91,24 @@ public class UnqualifiedPath implements ScopeSearchPath {
         //
         // TODO: ^^ Ideally we wouldn't change anything in here, but instead just fix the queries themselves with a facility ignore
         //so we wouldn't even have to touch this class. This way we could just keep symbolTypeQuery w/ Facility_Instantiate, or Facility_Generic.
-        if (searcher instanceof SymbolTypeSearcher && !finished &&
-                facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
+        if ( searcher instanceof SymbolTypeSearcher && !finished &&
+                facilityStrategy!=FacilityStrategy.FACILITY_IGNORE ) {
             finished =
                     searchFacilities(searcher, results, source,
                             genericInstantiations, searchedScopes, repo);
         }
 
         //Finally, if requested, we search imports
-        if ((results.isEmpty() || !localPriority)
+        if ( (results.isEmpty() || !localPriority)
                 && source instanceof SyntacticScope
-                && importStrategy != ImportStrategy.IMPORT_NONE) {
+                && importStrategy!=ImportStrategy.IMPORT_NONE ) {
 
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;
             ModuleScopeBuilder module =
                     repo.getModuleScope(sourceAsSyntacticScope
                             .getModuleIdentifier());
             List<ModuleIdentifier> imps = module.getImports();
-            for (ModuleIdentifier i : imps) {
+            for ( ModuleIdentifier i : imps ) {
                 finished =
                         searchModule(searcher, repo.getModuleScope(i),
                                 repo, results, searchedScopes,
@@ -116,7 +116,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                                 instantiatingFacility,
                                 importStrategy.cascadingStrategy(),
                                 depth + 1);
-                if (finished) break;
+                if ( finished ) break;
             }
         }
         return finished;
@@ -140,7 +140,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
         Iterator<FacilitySymbol> facilitiesIter = facilities.iterator();
         ModuleParameterization facilityConcept;
         Scope facilityScope;
-        while (!finished && facilitiesIter.hasNext()) {
+        while ( !finished && facilitiesIter.hasNext() ) {
             facility = facilitiesIter.next();
             facilityConcept = facility.getFacility().getSpecification();
 

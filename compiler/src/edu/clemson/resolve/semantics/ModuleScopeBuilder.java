@@ -39,14 +39,14 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     @NotNull
     public ModuleScopeBuilder addImports(
             @Nullable Collection<ModuleIdentifier> imports) {
-        if (imports != null) {
+        if ( imports!=null ) {
             importedModules.addAll(imports);
         }
         return this;
     }
 
     public boolean imports(@Nullable ModuleIdentifier i) {
-        return i != null && i.equals(getModuleIdentifier()) ||
+        return i!=null && i.equals(getModuleIdentifier()) ||
                 importedModules.contains(i);
     }
 

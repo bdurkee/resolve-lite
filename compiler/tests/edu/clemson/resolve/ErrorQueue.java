@@ -24,21 +24,25 @@ public class ErrorQueue implements RESOLVECompilerListener {
         this.compiler = rc;
     }
 
-    @Override public void info(String msg) {
+    @Override
+    public void info(String msg) {
         infos.add(msg);
     }
 
-    @Override public void error(RESOLVEMessage msg) {
+    @Override
+    public void error(RESOLVEMessage msg) {
         errors.add(msg);
         all.add(msg);
     }
 
-    @Override public void warning(RESOLVEMessage msg) {
+    @Override
+    public void warning(RESOLVEMessage msg) {
         warnings.add(msg);
         all.add(msg);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return toString(false);
     }
 
@@ -47,18 +51,18 @@ public class ErrorQueue implements RESOLVECompilerListener {
     }
 
     public String toString(boolean rendered) {
-        if (!rendered) {
+        if ( !rendered ) {
             return Utils.join(all, "\n");
         }
 
-        if (compiler == null) {
+        if ( compiler==null ) {
             throw new IllegalStateException(String.format("no %s instance is available.",
                     RESOLVECompiler.class.getName()));
         }
 
         StringBuilder buf = new StringBuilder();
         List<String> result = new ArrayList<>();
-        for (RESOLVEMessage m : all) {
+        for ( RESOLVEMessage m : all ) {
             ST st = compiler.errMgr.getMessageTemplate(m);
             result.add(st.render());
         }

@@ -1,11 +1,14 @@
 Concept Spiral_Template (type Label;
         evaluates k, Max_Length :
                         Std_Ints :: Integer);
-    /*uses Standard_Booleans, Standard_Integers,
-         Set_App_Op_Ext,
-         Basic_Integer_Theory,
-         Basic_Natural_Number_Theory,
-         Basic_Spiral_Theory;
+//  uses (
+//      "facility_modules",
+//      "precis_modules/num_like",
+//      "Basic_Spiral_Theory"
+//  )
+    uses facilities, precis::basic::num,
+        Basic_Spiral_Theory;
+
     requires 2 ≤ k and 1 ≤ Max_Length
                         which_entails k : N2;
 

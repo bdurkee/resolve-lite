@@ -35,12 +35,12 @@ public class UsesListener extends ResolveBaseListener {
         tr.uses.add(precisRef);
         tr.semanticallyRelevantUses.add(precisRef);
 
-        if (ctx.precisExt != null) {
+        if ( ctx.precisExt!=null ) {
             ModuleIdentifier withExtRef = new ModuleIdentifier(ctx.precisExt);
             tr.uses.add(withExtRef);
             tr.semanticallyRelevantUses.add(withExtRef);
         }
-        if (ctx.precisExt != null) {
+        if ( ctx.precisExt!=null ) {
             ModuleIdentifier precisExtRef = new ModuleIdentifier(ctx.precisExt);
             tr.uses.add(precisExtRef);
             tr.semanticallyRelevantUses.add(precisExtRef);
@@ -49,7 +49,7 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        for (TerminalNode t : ctx.ID()) {
+        for ( TerminalNode t : ctx.ID() ) {
             ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
             tr.uses.add(id);
             tr.semanticallyRelevantUses.add(id);
@@ -84,7 +84,7 @@ public class UsesListener extends ResolveBaseListener {
             ResolveParser.FacilityDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
         //tr.semanticallyRelevantUses.add(ctx.spec.getText());
-        if (ctx.externally != null) {
+        if ( ctx.externally!=null ) {
             tr.externalUses.put(ctx.impl.getText(),
                     new ModuleIdentifier(ctx.impl));
         } else {
@@ -96,7 +96,7 @@ public class UsesListener extends ResolveBaseListener {
     public void exitExtensionPairing(
             ResolveParser.ExtensionPairingContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
-        if (ctx.externally != null) {
+        if ( ctx.externally!=null ) {
 
             tr.externalUses.put(ctx.impl.getText(),
                     new ModuleIdentifier(ctx.impl));

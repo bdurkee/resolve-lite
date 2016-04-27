@@ -61,7 +61,7 @@ public class InstantiatedScope extends AbstractScope {
                @NotNull TableSearcher.SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException {
 
-        if (facilityInstantiation != null) {
+        if ( facilityInstantiation!=null ) {
             //It's unclear how this could happen or what it would mean, so we
             //fail fast.  If an example triggers this, we need to think
             //carefully about what it would mean.

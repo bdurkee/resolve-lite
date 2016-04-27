@@ -29,7 +29,7 @@ public class VCRuleBackedStat extends OutputModelObject {
     }
 
     public String getText() {
-        if (definingCtx != null) return Utils.getRawText(definingCtx);
+        if ( definingCtx!=null ) return Utils.getRawText(definingCtx);
         return "";
     }
 

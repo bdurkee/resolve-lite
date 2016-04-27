@@ -78,7 +78,7 @@ public class Utils {
     public static <T, R> void apply(@NotNull Collection<T> input,
                                     @NotNull Collection<R> accumulator,
                                     @NotNull Function<T, Collection<R>> f) {
-        for (T t : input) {
+        for ( T t : input ) {
             accumulator.addAll(f.apply(t));
         }
     }
@@ -103,9 +103,9 @@ public class Utils {
                                   @NotNull String left, String right) {
         StringBuilder buf = new StringBuilder();
 
-        while (iter.hasNext()) {
+        while ( iter.hasNext() ) {
             buf.append(iter.next());
-            if (iter.hasNext()) {
+            if ( iter.hasNext() ) {
                 buf.append(separator);
             }
         }
@@ -117,9 +117,9 @@ public class Utils {
                                   @NotNull String separator) {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < array.length; ++i) {
+        for ( int i = 0; i<array.length; ++i ) {
             builder.append(array[i]);
-            if (i < array.length - 1) {
+            if ( i<array.length - 1 ) {
                 builder.append(separator);
             }
         }
@@ -130,13 +130,13 @@ public class Utils {
     public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
                                        @NotNull List<R> l2)
             throws IllegalArgumentException {
-        if (l1.size() != l2.size()) {
+        if ( l1.size()!=l2.size() ) {
             throw new IllegalArgumentException("attempt to zip differently " +
                     "sized lists");
         }
         Map<T, R> result = new LinkedHashMap<>();
         Iterator<R> l2iter = l2.iterator();
-        for (T t : l1) {
+        for ( T t : l1 ) {
             result.put(t, l2iter.next());
         }
         return result;
@@ -168,22 +168,22 @@ public class Utils {
 
     @NotNull
     public static Token getModuleName(@NotNull ParseTree ctx) {
-        if (ctx instanceof ResolveParser.ModuleDeclContext) {
+        if ( ctx instanceof ResolveParser.ModuleDeclContext ) {
             ctx = ctx.getChild(0);
         }
-        if (ctx instanceof ResolveParser.PrecisModuleDeclContext) {
+        if ( ctx instanceof ResolveParser.PrecisModuleDeclContext ) {
             return ((ResolveParser.PrecisModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.PrecisExtModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.PrecisExtModuleDeclContext ) {
             return ((ResolveParser.PrecisExtModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.FacilityModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.FacilityModuleDeclContext ) {
             return ((ResolveParser.FacilityModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.ConceptModuleDeclContext ) {
             return ((ResolveParser.ConceptModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptImplModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.ConceptImplModuleDeclContext ) {
             return ((ResolveParser.ConceptImplModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptExtModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.ConceptExtModuleDeclContext ) {
             return ((ResolveParser.ConceptExtModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
+        } else if ( ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext ) {
             return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
         } else {
             throw new IllegalArgumentException("unrecognized module");
@@ -225,7 +225,7 @@ public class Utils {
     public static CommonToken createTokenFrom(@NotNull Token t,
                                               @Nullable String desiredText) {
         CommonToken result = new CommonToken(t);
-        if (desiredText != null) {
+        if ( desiredText!=null ) {
             result.setText(desiredText);
         }
         return result;
@@ -242,7 +242,7 @@ public class Utils {
     @Deprecated
     @NotNull
     public static String getRawText(@Nullable ParserRuleContext ctx) {
-        if (ctx == null) return "";
+        if ( ctx==null ) return "";
         Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
         return ctx.start.getInputStream().getText(interval);
     }
@@ -260,9 +260,9 @@ public class Utils {
     @Nullable
     public static ParserRuleContext getFirstAncestorOfType(
             @Nullable ParserRuleContext t, @NotNull List<Class<?>> clazzes) {
-        while (t != null) {
-            for (Class<?> clazz : clazzes) {
-                if (t.getClass() == clazz) {
+        while ( t!=null ) {
+            for ( Class<?> clazz : clazzes ) {
+                if ( t.getClass()==clazz ) {
                     return t;
                 }
             }
@@ -275,9 +275,10 @@ public class Utils {
      * Given an extensionless {@code name} and a compiler instance; searches
      * for and returns an external file of name {@code name}.
      */
-    @Nullable public static File getExternalFile(@NotNull RESOLVECompiler e,
-                                                 @Nullable String name) {
-        if (name == null) return null;
+    @Nullable
+    public static File getExternalFile(@NotNull RESOLVECompiler e,
+                                       @Nullable String name) {
+        if ( name==null ) return null;
         FileLocator l = new FileLocator(name,
                 RESOLVECompiler.NON_NATIVE_EXTENSION);
         File result = null;
@@ -312,7 +313,7 @@ public class Utils {
     @NotNull
     public static String groomFileName(@NotNull String name) {
         int start = name.lastIndexOf("/");
-        if (start == -1) {
+        if ( start==-1 ) {
             return name;
         }
         return name.substring(start + 1, name.length());
@@ -320,9 +321,9 @@ public class Utils {
 
     @Nullable
     public static String stripFileExtension(@Nullable String name) {
-        if (name == null) return null;
+        if ( name==null ) return null;
         int lastDot = name.lastIndexOf('.');
-        if (lastDot < 0) return name;
+        if ( lastDot<0 ) return name;
         return name.substring(0, lastDot);
     }
 
@@ -334,7 +335,7 @@ public class Utils {
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
         String ls = System.getProperty("line.separator");
-        while ((line = reader.readLine()) != null) {
+        while ( (line = reader.readLine())!=null ) {
             stringBuilder.append(line);
             stringBuilder.append(ls);
         }

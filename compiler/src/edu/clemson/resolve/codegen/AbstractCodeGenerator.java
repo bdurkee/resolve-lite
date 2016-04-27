@@ -61,7 +61,7 @@ public abstract class AbstractCodeGenerator {
     @NotNull
     protected String getFileExtension() {
         ST extST = templates.getInstanceOf("fileExtension");
-        if (extST == null) {
+        if ( extST==null ) {
             throw new IllegalStateException("forgot to define template for" +
                     "language file extension " +
                     "(for example: fileExtension() ::= '.java'))");
@@ -99,7 +99,7 @@ public abstract class AbstractCodeGenerator {
             compiler.errMgr.toolError(
                     ErrorKind.MISSING_CODE_GEN_TEMPLATES, iae, "Java");
         }
-        if (result == null) {
+        if ( result==null ) {
             return null;
         }
         result.registerRenderer(Integer.class, new NumberRenderer());

@@ -42,9 +42,9 @@ public class ModuleParameterSymbol extends Symbol {
     @Nullable
     public ProgType getProgramType() {
         ProgType progType = null;
-        if (wrappedParamSymbol instanceof OperationSymbol) {
+        if ( wrappedParamSymbol instanceof OperationSymbol ) {
             progType = ((OperationSymbol) wrappedParamSymbol).getReturnType();
-        } else if (wrappedParamSymbol instanceof ProgParameterSymbol) {
+        } else if ( wrappedParamSymbol instanceof ProgParameterSymbol ) {
             progType = ((ProgParameterSymbol) wrappedParamSymbol).getDeclaredType();
         }
         return progType;
@@ -53,8 +53,8 @@ public class ModuleParameterSymbol extends Symbol {
     @Override
     public boolean isModuleTypeParameter() {
         boolean result = (wrappedParamSymbol instanceof ProgParameterSymbol);
-        if (result) {
-            result = ((ProgParameterSymbol) wrappedParamSymbol).getMode() ==
+        if ( result ) {
+            result = ((ProgParameterSymbol) wrappedParamSymbol).getMode()==
                     ProgParameterSymbol.ParameterMode.TYPE;
         }
         return result;
@@ -62,7 +62,7 @@ public class ModuleParameterSymbol extends Symbol {
 
     @Nullable
     public PExp asPSymbol() {
-        if (!(wrappedParamSymbol instanceof ProgParameterSymbol)) return null;
+        if ( !(wrappedParamSymbol instanceof ProgParameterSymbol) ) return null;
         return new PSymbol.PSymbolBuilder(
                 ((ProgParameterSymbol) wrappedParamSymbol).asPSymbol()).build();
     }

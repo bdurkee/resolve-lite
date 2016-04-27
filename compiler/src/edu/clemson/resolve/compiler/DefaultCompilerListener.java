@@ -54,7 +54,7 @@ public class DefaultCompilerListener implements RESOLVECompilerListener {
     public void error(@NotNull RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
-        if (compiler.errMgr.formatWantsSingleLineMessage()) {
+        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
             outputMsg = outputMsg.replace('\n', ' ');
         }
         System.err.println(outputMsg);
@@ -62,7 +62,7 @@ public class DefaultCompilerListener implements RESOLVECompilerListener {
 
     @Override
     public void info(@NotNull String msg) {
-        if (compiler.errMgr.formatWantsSingleLineMessage()) {
+        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
             msg = msg.replace('\n', ' ');
         }
         System.out.println(msg);
@@ -72,7 +72,7 @@ public class DefaultCompilerListener implements RESOLVECompilerListener {
     public void warning(@NotNull RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
-        if (compiler.errMgr.formatWantsSingleLineMessage()) {
+        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
             outputMsg = outputMsg.replace('\n', ' ');
         }
         System.err.println(outputMsg);

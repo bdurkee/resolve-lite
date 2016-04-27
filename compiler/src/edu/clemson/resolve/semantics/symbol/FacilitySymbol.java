@@ -50,7 +50,7 @@ public class FacilitySymbol extends Symbol {
 
         ModuleParameterization spec = new ModuleParameterization(
                 new ModuleIdentifier(facility.spec),
-                specGenericArgs == null ?
+                specGenericArgs==null ?
                         new ArrayList<>() : specGenericArgs, this, scopeRepo);
 
         ModuleParameterization impl = new ModuleParameterization(

@@ -100,7 +100,7 @@ public class ProgReprTypeSymbol extends Symbol {
     @Override
     public ProgTypeSymbol toProgTypeSymbol() {
         return new ProgTypeSymbol(typeGraph, getName(), representation,
-                (definition == null) ? null : definition.modelType,
+                (definition==null) ? null : definition.modelType,
                 getDefiningTree(), getModuleIdentifier());
     }
 

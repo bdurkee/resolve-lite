@@ -48,7 +48,7 @@ public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
     @Override
     public R get(int index) {
         R result = myMappedCache[index];
-        if (result == null) {
+        if ( result==null ) {
             result = myMapping.apply(myOriginalList.get(index));
             myMappedCache[index] = result;
         }
@@ -79,7 +79,7 @@ public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
         public R next() {
             R result = myMappedCache[myIndex];
             T nextOriginalElement = myOriginalIterator.next();
-            if (result == null) {
+            if ( result==null ) {
                 result = myMapping.apply(nextOriginalElement);
                 myMappedCache[myIndex] = result;
             }

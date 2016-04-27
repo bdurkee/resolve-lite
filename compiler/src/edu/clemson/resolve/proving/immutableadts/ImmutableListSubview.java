@@ -14,15 +14,15 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
 
         //TODO : These defensive checks can be taken out for efficiency once
         //       we're satisfied that ImmutableLists works correctly.
-        if (start + length > baseList.size()) {
+        if ( start + length>baseList.size() ) {
             throw new IllegalArgumentException("View exceeds source bounds.");
         }
 
-        if (length < 0) {
+        if ( length<0 ) {
             throw new IllegalArgumentException("Negative length.");
         }
 
-        if (start < 0) {
+        if ( start<0 ) {
             throw new IllegalArgumentException("Negative start.");
         }
 
@@ -34,7 +34,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
 
     @Override
     public E get(int index) {
-        if (index < 0 || index >= myFirstAfterIndex) {
+        if ( index<0 || index>=myFirstAfterIndex ) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -43,7 +43,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
 
     @Override
     public ImmutableList<E> head(int length) {
-        if (length > mySubviewLength) {
+        if ( length>mySubviewLength ) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -62,7 +62,7 @@ public class ImmutableListSubview<E> extends AbstractImmutableList<E> {
 
     @Override
     public ImmutableList<E> tail(int startIndex) {
-        if (startIndex < 0 || startIndex > mySubviewLength) {
+        if ( startIndex<0 || startIndex>mySubviewLength ) {
             throw new IndexOutOfBoundsException();
         }
 

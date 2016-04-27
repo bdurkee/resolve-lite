@@ -11,7 +11,8 @@ import java.util.List;
 
 public class TestArrayBackedImmutableList extends BaseTest {
 
-    @Test public void testAppended() throws Exception {
+    @Test
+    public void testAppended() throws Exception {
         List<String> mList = new ArrayList<>();
         mList.add("cat");
         mList.add("dog");
@@ -47,7 +48,8 @@ public class TestArrayBackedImmutableList extends BaseTest {
                 " fish, box, foo, null]", l2.toString()); //better be the same
     }
 
-    @Test public void testSet() throws Exception {
+    @Test
+    public void testSet() throws Exception {
         List<String> mList = new ArrayList<>();
         mList.add("x");
         mList.add("y");
@@ -63,7 +65,8 @@ public class TestArrayBackedImmutableList extends BaseTest {
         Assert.assertEquals(l.size(), 2);
     }
 
-    @Test public void testSublist() throws Exception {
+    @Test
+    public void testSublist() throws Exception {
         List<String> mList = new ArrayList<>();
         mList.add("x");
         mList.add("y");
@@ -83,7 +86,8 @@ public class TestArrayBackedImmutableList extends BaseTest {
 
     }
 
-    @Test public void testHead() throws Exception {
+    @Test
+    public void testHead() throws Exception {
         List<String> mList = new ArrayList<>();
         mList.add("x");
         mList.add("y");
@@ -95,7 +99,8 @@ public class TestArrayBackedImmutableList extends BaseTest {
         Assert.assertEquals("[x, y, z]", l.head(3).toString());
     }
 
-    @Test public void testFirst() throws Exception {
+    @Test
+    public void testFirst() throws Exception {
         List<String> mList = new ArrayList<>();
         mList.add("x");
         mList.add("y");

@@ -43,7 +43,7 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
                     .map(mapping::apply)
                     .collect(Collectors.toList()));
         } catch (RuntimeException re) {
-            if (re.getCause() instanceof UnexpectedSymbolException) {
+            if ( re.getCause() instanceof UnexpectedSymbolException ) {
                 String symDesc = ((UnexpectedSymbolException) re.getCause())
                         .getTheUnexpectedSymbolDescription();
                 throw new UnexpectedSymbolException(symDesc);

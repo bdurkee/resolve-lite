@@ -115,7 +115,7 @@ public class PSymbol extends PExp {
     public PExp substitute(
             @NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
-        if (result == null) {
+        if ( result==null ) {
             String newLeft = leftPrint, newRight = rightPrint;
             result = new PSymbolBuilder(this).build();
         }
@@ -181,7 +181,7 @@ public class PSymbol extends PExp {
     @Override
     public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
-        if (incomingFlag) {
+        if ( incomingFlag ) {
             result.add(this);
         }
         return result;
@@ -191,7 +191,7 @@ public class PSymbol extends PExp {
     @Override
     public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
-        if (quantification != Quantification.NONE) {
+        if ( quantification!=Quantification.NONE ) {
             result.add(this);
         }
         return result;
@@ -203,9 +203,9 @@ public class PSymbol extends PExp {
             boolean excludeApplications,
             boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
-        if (!(excludeApplications && isFunctionApplication()) &&
+        if ( !(excludeApplications && isFunctionApplication()) &&
                 !(excludeLiterals && isLiteral()) &&
-                quantification == Quantification.NONE) {
+                quantification==Quantification.NONE ) {
             result.add(getCanonicalName());
         }
         return result;
@@ -225,14 +225,14 @@ public class PSymbol extends PExp {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
-        if (result) {
+        if ( result ) {
             PSymbol oAsPSymbol = (PSymbol) o;
 
             result =
-                    (oAsPSymbol.valueHash == valueHash)
+                    (oAsPSymbol.valueHash==valueHash)
                             && name.equals(oAsPSymbol.name)
-                            && literalFlag == oAsPSymbol.literalFlag
-                            && incomingFlag == oAsPSymbol.incomingFlag
+                            && literalFlag==oAsPSymbol.literalFlag
+                            && incomingFlag==oAsPSymbol.incomingFlag
                             && Objects.equals(qualifier, oAsPSymbol.qualifier);
         }
         return result;
@@ -241,8 +241,8 @@ public class PSymbol extends PExp {
     @Override
     public String toString() {
         String result = "";
-        if (incomingFlag) result += "@";
-        if (leftPrint != null && rightPrint != null) {
+        if ( incomingFlag ) result += "@";
+        if ( leftPrint!=null && rightPrint!=null ) {
             result = leftPrint + result + rightPrint;
         }
         return result += name;
@@ -295,8 +295,8 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder(String lprint, String rprint) {
-            if (rprint == null) {
-                if (lprint == null) {
+            if ( rprint==null ) {
+                if ( lprint==null ) {
                     throw new IllegalStateException("null name; all psymbols "
                             + "must be named.");
                 }
@@ -308,7 +308,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder qualifier(Token q) {
-            return qualifier(q != null ? q.getText() : null);
+            return qualifier(q!=null ? q.getText() : null);
         }
 
         public PSymbolBuilder qualifier(String q) {
@@ -342,7 +342,7 @@ public class PSymbol extends PExp {
         }
 
         public PSymbolBuilder quantification(Quantification q) {
-            if (q == null) {
+            if ( q==null ) {
                 q = Quantification.NONE;
             }
             this.quantification = q;
@@ -357,7 +357,7 @@ public class PSymbol extends PExp {
         @Override
         @NotNull
         public PSymbol build() {
-            if (this.mathType == null) {
+            if ( this.mathType==null ) {
                 throw new IllegalStateException("mathtype == null; cannot "
                         + "build PExp with null mathtype");
             }

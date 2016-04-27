@@ -53,10 +53,10 @@ public class UniversalVariableQuery
                 @NotNull List<MathClssftnWrappingSymbol> matches,
                 @NotNull SearchContext l) throws UnexpectedSymbolException {
 
-            for (Symbol symbol : entries.values()) {
-                if (symbol instanceof MathClssftnWrappingSymbol &&
-                        ((MathClssftnWrappingSymbol) symbol).getQuantification() ==
-                                Quantification.UNIVERSAL) {
+            for ( Symbol symbol : entries.values() ) {
+                if ( symbol instanceof MathClssftnWrappingSymbol &&
+                        ((MathClssftnWrappingSymbol) symbol).getQuantification()==
+                                Quantification.UNIVERSAL ) {
                     matches.add(symbol.toMathSymbol());
                 }
             }

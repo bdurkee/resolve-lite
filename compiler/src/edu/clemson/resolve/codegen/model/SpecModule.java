@@ -33,7 +33,7 @@ public abstract class SpecModule extends Module {
     @Override
     public void addGettersAndMembersForModuleParameterSyms(
             List<ModuleParameterSymbol> symbols) {
-        for (ModuleParameterSymbol p : symbols) {
+        for ( ModuleParameterSymbol p : symbols ) {
             funcs.add(buildGetterSignature(p.getName()));
         }
     }

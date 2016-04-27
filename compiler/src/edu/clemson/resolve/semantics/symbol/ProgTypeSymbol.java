@@ -31,7 +31,7 @@ public class ProgTypeSymbol extends Symbol {
         super(name, definingTree, moduleIdentifier);
         this.type = progType;
         this.g = g;
-        this.modelType = modelType == null ? g.INVALID : modelType;
+        this.modelType = modelType==null ? g.INVALID : modelType;
         this.mathTypeAlterEgo =
                 new MathClssftnWrappingSymbol(g, name, Quantification.NONE, modelType,
                         definingTree, moduleIdentifier);
@@ -85,7 +85,7 @@ public class ProgTypeSymbol extends Symbol {
 
         Map<String, MathClassification> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
-        if (genericMathematicalInstantiations.isEmpty()) return this;
+        if ( genericMathematicalInstantiations.isEmpty() ) return this;
         MathClassification instModelEncClssftn =
                 modelType.enclosingClassification
                         .withVariablesSubstituted(

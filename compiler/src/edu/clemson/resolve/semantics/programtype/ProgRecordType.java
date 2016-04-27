@@ -21,7 +21,7 @@ public class ProgRecordType extends ProgType {
         this.fields.putAll(types);
         List<MathCartesianClassification.Element> eles = new ArrayList<>();
         int index = 0;
-        for (Map.Entry<String, ProgType> field : types.entrySet()) {
+        for ( Map.Entry<String, ProgType> field : types.entrySet() ) {
             eles.add(new MathCartesianClassification.Element(field.getKey(),
                     field.getValue().toMath()));
         }
@@ -32,7 +32,7 @@ public class ProgRecordType extends ProgType {
     public ProgType getFieldType(@NotNull String name)
             throws NoSuchElementException {
         ProgType result = fields.get(name);
-        if (result == null) {
+        if ( result==null ) {
             throw new NoSuchElementException();
         }
         return result;
@@ -61,7 +61,7 @@ public class ProgRecordType extends ProgType {
             @NotNull FacilitySymbol instantiatingFacility) {
 
         Map<String, ProgType> newFields = new HashMap<>();
-        for (Map.Entry<String, ProgType> type : fields.entrySet()) {
+        for ( Map.Entry<String, ProgType> type : fields.entrySet() ) {
             newFields.put(
                     type.getKey(),
                     type.getValue().instantiateGenerics(genericInstantiations,

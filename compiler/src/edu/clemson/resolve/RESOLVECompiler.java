@@ -28,14 +28,13 @@ import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * The main entrypoint for the compiler. All input flows into here and this is
- * also where we manage flags for commandline args which are encapsulated via
- * instances of the {@link Option} class (which also resides here).
- * <p>
- * The structure and much of the code appearing here has been adapted to our
- * compiler's needs from the frontend of the ANTLRv4 tool, publically
- * available here: {@code https://github.com/antlr/antlr4}.</p>
+/** The main entrypoint for the compiler. All input flows into here and this is
+ *  also where we manage flags for commandline args which are encapsulated via
+ *  instances of the {@link Option} class (which also resides here).
+ *  <p>
+ *  The structure and much of the code appearing here has been adapted to our
+ *  compiler's needs from the frontend of the ANTLRv4 tool, publically
+ *  available here: {@code https://github.com/antlr/antlr4}.</p>
  *
  * @since 0.0.1
  */
@@ -96,17 +95,18 @@ public class RESOLVECompiler {
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Track separately so if someone adds a listener, it's the only one
-     * instead of it and the default stderr listener.
+    /** Track separately so if someone adds a listener, it's the only one
+     *  instead of it and the default stderr listener.
      */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     public final MathSymbolTable symbolTable = new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    @NotNull public final ErrorManager errMgr;
-    @NotNull public LogManager logMgr = new LogManager();
+    @NotNull
+    public final ErrorManager errMgr;
+    @NotNull
+    public LogManager logMgr = new LogManager();
 
     public RESOLVECompiler() {
         this(null);
@@ -120,19 +120,19 @@ public class RESOLVECompiler {
 
     public void handleArgs() {
         int i = 0;
-        while (args != null && i < args.length) {
+        while ( args!=null && i<args.length ) {
             String arg = args[i];
             i++;
-            if (arg.charAt(0) != '-') { // file name
-                if (!arg.endsWith(FILE_EXTENSION)) {
+            if ( arg.charAt(0)!='-' ) { // file name
+                if ( !arg.endsWith(FILE_EXTENSION) ) {
                     errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, arg);
                     continue;
                 }
-                if (!targetFiles.contains(arg)) {
+                if ( !targetFiles.contains(arg) ) {
                     targetFiles.add(arg);
                     String name = Utils.groomFileName(arg);
                     int dotIdx = name.indexOf(".");
-                    if (dotIdx != -1) {
+                    if ( dotIdx!=-1 ) {
                         name = name.substring(0, dotIdx);
                     }
                     targetNames.add(name);
@@ -140,11 +140,11 @@ public class RESOLVECompiler {
                 continue;
             }
             boolean found = false;
-            for (Option o : optionDefs) {
-                if (arg.equals(o.name)) {
+            for ( Option o : optionDefs ) {
+                if ( arg.equals(o.name) ) {
                     found = true;
                     String argValue = null;
-                    if (o.argType == OptionArgType.STRING) {
+                    if ( o.argType==OptionArgType.STRING ) {
                         argValue = args[i];
                         i++;
                     }
@@ -152,8 +152,8 @@ public class RESOLVECompiler {
                     Class<? extends RESOLVECompiler> c = this.getClass();
                     try {
                         Field f = c.getField(o.fieldName);
-                        if (argValue == null) {
-                            if (arg.startsWith("-no-"))
+                        if ( argValue==null ) {
+                            if ( arg.startsWith("-no-") )
                                 f.setBoolean(this, false);
                             else
                                 f.setBoolean(this, true);
@@ -165,20 +165,20 @@ public class RESOLVECompiler {
                     }
                 }
             }
-            if (!found) {
+            if ( !found ) {
                 errMgr.toolError(ErrorKind.INVALID_CMDLINE_ARG, arg);
             }
         }
-        if (outputDirectory != null) {
-            if (outputDirectory.endsWith("/")
-                    || outputDirectory.endsWith("\\")) {
+        if ( outputDirectory!=null ) {
+            if ( outputDirectory.endsWith("/")
+                    || outputDirectory.endsWith("\\") ) {
                 outputDirectory =
                         outputDirectory.substring(0,
                                 outputDirectory.length() - 1);
             }
             File outDir = new File(outputDirectory);
             haveOutputDir = true;
-            if (outDir.exists() && !outDir.isDirectory()) {
+            if ( outDir.exists() && !outDir.isDirectory() ) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
                         outputDirectory);
                 workingDirectory = ".";
@@ -186,14 +186,14 @@ public class RESOLVECompiler {
         } else {
             outputDirectory = ".";
         }
-        if (workingDirectory != null) {
-            if (workingDirectory.endsWith("/") || workingDirectory.endsWith("\\")) {
+        if ( workingDirectory!=null ) {
+            if ( workingDirectory.endsWith("/") || workingDirectory.endsWith("\\") ) {
                 workingDirectory =
                         workingDirectory
                                 .substring(0, workingDirectory.length() - 1);
             }
             File outDir = new File(workingDirectory);
-            if (!outDir.exists()) {
+            if ( !outDir.exists() ) {
                 errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
                         workingDirectory);
                 workingDirectory = ".";
@@ -205,7 +205,7 @@ public class RESOLVECompiler {
 
     public static void main(String[] args) {
         RESOLVECompiler resolve = new RESOLVECompiler(args);
-        if (args.length == 0) {
+        if ( args.length==0 ) {
             resolve.help();
             resolve.exit(0);
         }
@@ -213,7 +213,7 @@ public class RESOLVECompiler {
         try {
             resolve.processCommandLineTargets();
         } finally {
-            if (resolve.log) {
+            if ( resolve.log ) {
                 try {
                     String logname = resolve.logMgr.save();
                     System.out.println("wrote " + logname);
@@ -222,7 +222,7 @@ public class RESOLVECompiler {
                 }
             }
         }
-        if (resolve.errMgr.getErrorCount() > 0) {
+        if ( resolve.errMgr.getErrorCount()>0 ) {
             resolve.exit(1);
         }
         resolve.exit(0);
@@ -244,7 +244,7 @@ public class RESOLVECompiler {
         //VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
 
         analysisPipe.process();
-        if (errMgr.getErrorCount() > initialErrCt) {
+        if ( errMgr.getErrorCount()>initialErrCt ) {
             return;
         }
         codegenPipe.process();
@@ -254,9 +254,9 @@ public class RESOLVECompiler {
     @NotNull
     public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
         List<AnnotatedModule> modules = new ArrayList<>();
-        for (String e : targetFiles) {
+        for ( String e : targetFiles ) {
             AnnotatedModule m = parseModule(e);
-            if (m != null) {
+            if ( m!=null ) {
                 modules.add(parseModule(e));
             }
         }
@@ -273,7 +273,7 @@ public class RESOLVECompiler {
     public List<AnnotatedModule> sortTargetModulesByUsesReferences(
             @NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
-        for (AnnotatedModule module : modules) {
+        for ( AnnotatedModule module : modules ) {
             roots.put(module.getNameToken().getText(), module);
         }
         return sortTargetModulesByUsesReferences(roots);
@@ -284,15 +284,15 @@ public class RESOLVECompiler {
             @NotNull Map<String, AnnotatedModule> modules) {
         DefaultDirectedGraph<String, DefaultEdge> g =
                 new DefaultDirectedGraph<>(DefaultEdge.class);
-        for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
+        for ( AnnotatedModule t : Collections.unmodifiableCollection(modules.values()) ) {
             g.addVertex(t.getNameToken().getText());
             findDependencies(g, t, modules);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
         List<String> intermediateOrdering = getCompileOrder(g);
-        for (String s : getCompileOrder(g)) {
+        for ( String s : getCompileOrder(g) ) {
             AnnotatedModule m = modules.get(s);
-            if (m.hasErrors) {
+            if ( m.hasErrors ) {
                 finalOrdering.clear();
                 break;
             }
@@ -304,15 +304,15 @@ public class RESOLVECompiler {
     private void findDependencies(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
-        for (ModuleIdentifier importRequest : root.uses) {
+        for ( ModuleIdentifier importRequest : root.uses ) {
             AnnotatedModule module =
                     roots.get(importRequest.getNameToken().getText());
             try {
                 File file = findResolveFile(importRequest
                         .getNameToken().getText());
-                if (module == null) {
+                if ( module==null ) {
                     module = parseModule(file.getAbsolutePath());
-                    if (module != null) {
+                    if ( module!=null ) {
                         roots.put(module.getNameToken().getText(), module);
                     }
                 }
@@ -325,9 +325,9 @@ public class RESOLVECompiler {
                         new ModuleIdentifier(importRequest.getNameToken()));
                 continue;
             }
-            if (module != null) {
-                if (pathExists(g, module.getNameToken().getText(),
-                        root.getNameToken().getText())) {
+            if ( module!=null ) {
+                if ( pathExists(g, module.getNameToken().getText(),
+                        root.getNameToken().getText()) ) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
                             importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
@@ -340,7 +340,7 @@ public class RESOLVECompiler {
         }
     }
 
-    protected List<String> getCompileOrder(
+    private List<String> getCompileOrder(
             DefaultDirectedGraph<String, DefaultEdge> g) {
         List<String> result = new ArrayList<>();
 
@@ -349,26 +349,26 @@ public class RESOLVECompiler {
 
         TopologicalOrderIterator<String, DefaultEdge> dependencies =
                 new TopologicalOrderIterator<>(reversed);
-        while (dependencies.hasNext()) {
+        while ( dependencies.hasNext() ) {
             result.add(dependencies.next());
         }
         return result;
     }
 
-    protected boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                                 @NotNull String src,
-                                 @NotNull String dest) {
+    private boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                               @NotNull String src,
+                               @NotNull String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if (!g.containsVertex(src)) {
+        if ( !g.containsVertex(src) ) {
             return false;
         }
         GraphIterator<String, DefaultEdge> iterator =
                 new DepthFirstIterator<>(g, src);
-        while (iterator.hasNext()) {
+        while ( iterator.hasNext() ) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if (next.equals(dest)) {
+            if ( next.equals(dest) ) {
                 return true;
             }
         }
@@ -396,7 +396,7 @@ public class RESOLVECompiler {
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
-            if (!file.isAbsolute()) {
+            if ( !file.isAbsolute() ) {
                 file = new File(workingDirectory, fileName);
             }
             return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
@@ -422,13 +422,13 @@ public class RESOLVECompiler {
         }
         return new AnnotatedModule(start, moduleNameTok,
                 parser.getSourceName(),
-                parser.getNumberOfSyntaxErrors() > 0);
+                parser.getNumberOfSyntaxErrors()>0);
     }
 
     @NotNull
     public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
-        if (rootDir == null) {
+        if ( rootDir==null ) {
             return ".";
         }
         return rootDir;
@@ -439,22 +439,21 @@ public class RESOLVECompiler {
         return "src";
     }
 
-    /**
-     * Used primarily by codegen to create new output files.
-     * If {@code outputDirectory} (set by -o) isn't present it will be created.
-     * The final filename is sensitive to the output directory and
-     * the directory where the soure file was found in.  If -o is /tmp
-     * and the original source file was foo/t.resolve then output files
-     * go in /tmp/foo.
-     * <p>
-     * If no -o is specified, then just write to the directory where the
-     * sourcefile was found.</p>
-     * <p>
-     * If {@code outputDirectory==null} then write a String.
+    /** Used primarily by codegen to create new output files.
+     *  If {@code outputDirectory} (set by -o) isn't present it will be created.
+     *  The final filename is sensitive to the output directory and
+     *  the directory where the soure file was found in.  If -o is /tmp
+     *  and the original source file was foo/t.resolve then output files
+     *  go in /tmp/foo.
+     *  <p>
+     *  If no -o is specified, then just write to the directory where the
+     *  sourcefile was found.</p>
+     *  <p>
+     *  If {@code outputDirectory==null} then write a String.
      */
     public Writer getOutputFileWriter(@NotNull String fileName)
             throws IOException {
-        if (outputDirectory == null) {
+        if ( outputDirectory==null ) {
             return new StringWriter();
         }
         // output directory is a function of where the source file lives
@@ -462,7 +461,7 @@ public class RESOLVECompiler {
         File outputDir = getOutputDirectory(fileName);
         File outputFile = new File(outputDir, fileName);
 
-        if (!outputDir.exists()) {
+        if ( !outputDir.exists() ) {
             outputDir.mkdirs();
         }
         FileOutputStream fos = new FileOutputStream(outputFile);
@@ -473,15 +472,15 @@ public class RESOLVECompiler {
         File outputDir;
         String fileDirectory;
 
-        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
+        if ( fileNameWithPath.lastIndexOf(File.separatorChar)==-1 ) {
             fileDirectory = ".";
         } else {
             fileDirectory = fileNameWithPath.substring(0,
                     fileNameWithPath.lastIndexOf(File.separatorChar));
         }
-        if (haveOutputDir) {
-            if ((new File(fileDirectory).isAbsolute() ||
-                    fileDirectory.startsWith("~"))) {
+        if ( haveOutputDir ) {
+            if ( (new File(fileDirectory).isAbsolute() ||
+                    fileDirectory.startsWith("~")) ) {
                 outputDir = new File(outputDirectory);
             } else {
                 outputDir = new File(outputDirectory, fileDirectory);
@@ -493,7 +492,7 @@ public class RESOLVECompiler {
     }
 
     public void addListener(@Nullable RESOLVECompilerListener cl) {
-        if (cl != null) listeners.add(cl);
+        if ( cl!=null ) listeners.add(cl);
     }
 
     public void removeListener(@Nullable RESOLVECompilerListener tl) {
@@ -515,9 +514,9 @@ public class RESOLVECompiler {
 
     public void help() {
         version();
-        for (Option o : optionDefs) {
+        for ( Option o : optionDefs ) {
             String name =
-                    o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
+                    o.name + (o.argType!=OptionArgType.NONE ? " ___" : "");
             String s = String.format(" %-19s %s", name, o.description);
             info(s);
         }
@@ -532,26 +531,26 @@ public class RESOLVECompiler {
     }
 
     public void info(@NotNull String msg) {
-        if (listeners.isEmpty()) {
+        if ( listeners.isEmpty() ) {
             defaultListener.info(msg);
             return;
         }
-        for (RESOLVECompilerListener l : listeners) l.info(msg);
+        for ( RESOLVECompilerListener l : listeners ) l.info(msg);
     }
 
     public void error(@NotNull RESOLVEMessage msg) {
-        if (listeners.isEmpty()) {
+        if ( listeners.isEmpty() ) {
             defaultListener.error(msg);
             return;
         }
-        for (RESOLVECompilerListener l : listeners) l.error(msg);
+        for ( RESOLVECompilerListener l : listeners ) l.error(msg);
     }
 
     public void warning(@NotNull RESOLVEMessage msg) {
-        if (listeners.isEmpty()) {
+        if ( listeners.isEmpty() ) {
             defaultListener.warning(msg);
         } else {
-            for (RESOLVECompilerListener l : listeners) l.warning(msg);
+            for ( RESOLVECompilerListener l : listeners ) l.warning(msg);
         }
     }
 

@@ -107,7 +107,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitPrecisModuleDecl(
             ResolveParser.PrecisModuleDeclContext ctx) {
-        if (ctx.tag != null) {
+        if ( ctx.tag!=null ) {
             symtab.addTag(new ModuleIdentifier(ctx.tag));
         }
         super.visitChildren(ctx);
@@ -174,7 +174,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.type());
         ProgType groupType = tr.progTypes.get(ctx.type());
 
-        for (TerminalNode term : ctx.ID()) {
+        for ( TerminalNode term : ctx.ID() ) {
             try {
                 ProgParameterSymbol.ParameterMode mode =
                         ProgParameterSymbol.getModeMapping().get(
@@ -183,16 +183,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         new ProgParameterSymbol(symtab.getTypeGraph(), term
                                 .getText(), mode, groupType,
                                 ctx, getRootModuleIdentifier());
-                if (ctx.type() instanceof ResolveParser.NamedTypeContext) {
+                if ( ctx.type() instanceof ResolveParser.NamedTypeContext ) {
                     ResolveParser.NamedTypeContext asNamedType =
                             (ResolveParser.NamedTypeContext) ctx.type();
-                    p.setTypeQualifierString(asNamedType.qualifier == null ? null :
+                    p.setTypeQualifierString(asNamedType.qualifier==null ? null :
                             asNamedType.qualifier.getText());
                 }
                 boolean walkingModuleParamList = Utils.getFirstAncestorOfType(
                         ctx, ResolveParser.SpecModuleParameterListContext.class,
-                        ResolveParser.ImplModuleParameterListContext.class) != null;
-                if (walkingModuleParamList) {
+                        ResolveParser.ImplModuleParameterListContext.class)!=null;
+                if ( walkingModuleParamList ) {
                     symtab.getInnermostActiveScope()
                             .define(new ModuleParameterSymbol(p));
                 } else {
@@ -213,8 +213,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         initializeAndSanityCheckInfo(ctx);
         //now visit all supplied actual arg exprs
         ctx.moduleArgumentList().forEach(this::visit);
-        for (ResolveParser.ExtensionPairingContext extension :
-                ctx.extensionPairing()) {
+        for ( ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing() ) {
             extension.moduleArgumentList().forEach(this::visit);
         }
         try {
@@ -238,7 +238,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
-        if (ctx.type() != null) {
+        if ( ctx.type()!=null ) {
             this.visit(ctx.type());
             MathClassification x = tr.mathClssftns.get(ctx.type());
             try {
@@ -253,8 +253,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ctx.getStart(), ctx.getText());
             }
         }
-        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
-        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        if ( ctx.requiresClause()!=null ) this.visit(ctx.requiresClause());
+        if ( ctx.ensuresClause()!=null ) this.visit(ctx.ensuresClause());
         symtab.endScope();
 
         insertFunction(ctx.name, ctx.type(),
@@ -267,7 +267,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ResolveParser.OperationProcedureDeclContext ctx) {
         symtab.startScope(ctx);
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
-        if (ctx.type() != null) {
+        if ( ctx.type()!=null ) {
             this.visit(ctx.type());
             try {
                 symtab.getInnermostActiveScope().define(
@@ -282,8 +282,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ctx.getStart(), ctx.getText());
             }
         }
-        if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
-        if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
+        if ( ctx.requiresClause()!=null ) this.visit(ctx.requiresClause());
+        if ( ctx.ensuresClause()!=null ) this.visit(ctx.ensuresClause());
 
         ctx.varDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
@@ -320,7 +320,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.startScope(ctx);
         this.visit(ctx.operationParameterList());
         ProgType returnType = null;
-        if (ctx.type() != null) {
+        if ( ctx.type()!=null ) {
             this.visit(ctx.type());
             returnType = tr.progTypes.get(ctx.type());
             try {
@@ -338,7 +338,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
         symtab.endScope();
-        if (correspondingOp == null) { //backout
+        if ( correspondingOp==null ) { //backout
             return null;
         }
         try {
@@ -362,16 +362,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     symtab.getScope(ctx).getSymbolsOfType(
                             ProgParameterSymbol.class);
             ProgType returnType;
-            if (type == null) {
+            if ( type==null ) {
                 returnType = ProgVoidType.getInstance(g);
             } else {
                 returnType = tr.progTypes.get(type);
             }
             PExp requiresExp = g.getTrueExp();
             PExp ensuresExp = g.getTrueExp();
-            if (requires != null)
+            if ( requires!=null )
                 requiresExp = getPExpFor(requires.mathAssertionExp());
-            if (ensures != null)
+            if ( ensures!=null )
                 ensuresExp = getPExpFor(ensures.mathAssertionExp());
             //TODO: this will need to be wrapped in a ModuleParameterSymbol
             //if we're walking a specmodule param list
@@ -401,10 +401,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleScopeBuilder module = symtab.getModuleScope(i);
             List<ModuleParameterSymbol> formals =
                     module.getSymbolsOfType(ModuleParameterSymbol.class);
-            for (ResolveParser.ProgExpContext arg : actuals) {
+            for ( ResolveParser.ProgExpContext arg : actuals ) {
                 argTypes.add(tr.progTypes.get(arg));
             }
-            if (argTypes.size() != formals.size()) {
+            if ( argTypes.size()!=formals.size() ) {
                 //ERROR
             }
             //now make sure the top level type params (at least) match up...
@@ -426,19 +426,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void initializeAndSanityCheckInfo(
             @NotNull ResolveParser.FacilityDeclContext ctx) {
 
-        if (ctx.specArgs != null) {
+        if ( ctx.specArgs!=null ) {
             sanityCheckParameterizationArgs(ctx.specArgs.progExp(),
                     new ModuleIdentifier(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs
                     .put(ctx.specArgs, new ArrayList<>());
         }
-        if (ctx.implArgs != null) {
+        if ( ctx.implArgs!=null ) {
             sanityCheckParameterizationArgs(ctx.implArgs.progExp(),
                     new ModuleIdentifier(ctx.impl));
         }
-        for (ResolveParser.ExtensionPairingContext extension :
-                ctx.extensionPairing()) {
-            if (extension.specArgs != null) {
+        for ( ResolveParser.ExtensionPairingContext extension :
+                ctx.extensionPairing() ) {
+            if ( extension.specArgs!=null ) {
                 actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
             }
         }
@@ -495,9 +495,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), ctx.getText());
         }
-        if (ctx.constraintsClause() != null)
+        if ( ctx.constraintsClause()!=null )
             this.visit(ctx.constraintsClause());
-        if (ctx.initializationClause() != null)
+        if ( ctx.initializationClause()!=null )
             this.visit(ctx.initializationClause());
         symtab.endScope();
         try {
@@ -548,7 +548,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ctx.name.getText(), curTypeReprModelSymbol,
                         getRootModuleIdentifier());
         try {
-            String exemplarName = curTypeReprModelSymbol != null ?
+            String exemplarName = curTypeReprModelSymbol!=null ?
                     curTypeReprModelSymbol.getExemplar().getName() :
                     ctx.name.getText().substring(0, 1).toUpperCase();
             symtab.getInnermostActiveScope().define(new ProgVariableSymbol(
@@ -562,15 +562,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         PExp convention = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
-        if (ctx.conventionsClause() != null) {
+        if ( ctx.conventionsClause()!=null ) {
             this.visit(ctx.conventionsClause());
             convention = getPExpFor(ctx.conventionsClause().mathAssertionExp());
         }
-        if (ctx.correspondenceClause() != null) {
+        if ( ctx.correspondenceClause()!=null ) {
             this.visit(ctx.correspondenceClause());
             correspondence = getPExpFor(ctx.correspondenceClause().mathAssertionExp());
         }
-        if (ctx.typeImplInit() != null) this.visit(ctx.typeImplInit());
+        if ( ctx.typeImplInit()!=null ) this.visit(ctx.typeImplInit());
         symtab.endScope();
         try {
             ProgReprTypeSymbol rep = new ProgReprTypeSymbol(g,
@@ -592,11 +592,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         Map<String, ProgType> fields = new LinkedHashMap<>();
         List<MathClssftnWrappingSymbol> mathSyms = new ArrayList<>();
         //TODO: Maybe instead of fields just use the ProgVariableSymbols...
-        for (ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx
-                .recordVarDeclGroup()) {
+        for ( ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx
+                .recordVarDeclGroup() ) {
             this.visit(fieldGrp);
             ProgType grpType = tr.progTypes.get(fieldGrp.type());
-            for (TerminalNode t : fieldGrp.ID()) {
+            for ( TerminalNode t : fieldGrp.ID() ) {
                 fields.put(t.getText(), grpType);
                 //mathSyms.add()
             }
@@ -643,7 +643,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                  @NotNull List<TerminalNode> terminalGroup,
                                  @NotNull ResolveParser.TypeContext type) {
         ProgType progType = tr.progTypes.get(type);
-        for (TerminalNode t : terminalGroup) {
+        for ( TerminalNode t : terminalGroup ) {
             try {
                 ProgVariableSymbol vs =
                         new ProgVariableSymbol(t.getText(), ctx, progType,
@@ -690,7 +690,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
-        if (prevSelectorAccess != null) {
+        if ( prevSelectorAccess!=null ) {
             typeProgSelectorAccessExp(ctx, prevSelectorAccess,
                     ctx.name.getText());
             return null;
@@ -705,14 +705,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx,
                             ResolveParser.ModuleArgumentListContext.class);
-            if (namedSymbol instanceof ProgVariableSymbol) {
+            if ( namedSymbol instanceof ProgVariableSymbol ) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
-            } else if (namedSymbol instanceof ProgParameterSymbol) {
+            } else if ( namedSymbol instanceof ProgParameterSymbol ) {
                 programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
-            } else if (namedSymbol instanceof ProgTypeSymbol) {
+            } else if ( namedSymbol instanceof ProgTypeSymbol ) {
                 programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
 
-                if (parentFacilityArgListCtx != null) {
+                if ( parentFacilityArgListCtx!=null ) {
                     actualGenericTypesPerFacilitySpecArgs.get(
                             (ResolveParser.ModuleArgumentListContext)
                                     parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
@@ -720,15 +720,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             //special case (don't want to adapt "mathVariableQuery" to coerce
             //OperationSymbols, so in the meantime
-            else if (namedSymbol instanceof OperationSymbol) {
+            else if ( namedSymbol instanceof OperationSymbol ) {
                 ProgType returnType = ((OperationSymbol) namedSymbol).getReturnType();
                 tr.progTypes.put(ctx, returnType);
                 tr.mathClssftns.put(ctx, returnType.toMath());
                 return null;
-            } else if (namedSymbol instanceof ModuleParameterSymbol) {
+            } else if ( namedSymbol instanceof ModuleParameterSymbol ) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
-                if (parentFacilityArgListCtx != null &&
-                        ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
+                if ( parentFacilityArgListCtx!=null &&
+                        ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter() ) {
                     actualGenericTypesPerFacilitySpecArgs.get(
                             (ResolveParser.ModuleArgumentListContext)
                                     parentFacilityArgListCtx).add(
@@ -758,7 +758,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull String fieldName) {
         ProgType prevAccessType = tr.progTypes.get(previousAccess);
         ProgType type = ProgInvalidType.getInstance(g);
-        if (prevAccessType instanceof PTRepresentation) {
+        if ( prevAccessType instanceof PTRepresentation ) {
             ProgType baseType = ((PTRepresentation) prevAccessType).getBaseType();
             try {
                 ProgRecordType record = (ProgRecordType) baseType;
@@ -769,7 +769,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ErrorKind.ILLEGAL_MEMBER_ACCESS, previousAccess.getStart(),
                         previousAccess.getText(), fieldName);
             }
-        } else if (prevAccessType instanceof ProgRecordType) {
+        } else if ( prevAccessType instanceof ProgRecordType ) {
             try {
                 type = ((ProgRecordType) prevAccessType).getFieldType(fieldName);
             } catch (NoSuchElementException nse) {
@@ -866,9 +866,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     String typeQualifier, String typeName) {
         ProgTypeSymbol p =
                 getProgTypeSymbol(ctx, typeQualifier, typeName);
-        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
+        tr.progTypes.put(ctx, p!=null ? p.getProgramType() :
                 ProgInvalidType.getInstance(g));
-        tr.mathClssftns.put(ctx, p != null ? p.getModelType() :
+        tr.mathClssftns.put(ctx, p!=null ? p.getModelType() :
                 g.INVALID);
         return null;
     }
@@ -979,8 +979,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathCategoricalDefnDecl(
             ResolveParser.MathCategoricalDefnDeclContext ctx) {
-        for (ResolveParser.MathPrefixDefnSigContext sig :
-                ctx.mathPrefixDefnSigs().mathPrefixDefnSig()) {
+        for ( ResolveParser.MathPrefixDefnSigContext sig :
+                ctx.mathPrefixDefnSigs().mathPrefixDefnSig() ) {
             defnEnclosingScope = symtab.getInnermostActiveScope();
             symtab.startScope(ctx);
             this.visit(sig);
@@ -1022,7 +1022,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         defnEnclosingScope = symtab.getInnermostActiveScope();
         symtab.startScope(ctx);
         this.visit(ctx.mathDefnSig());
-        if (ctx.body != null) this.visit(ctx.body);
+        if ( ctx.body!=null ) this.visit(ctx.body);
         symtab.endScope();
         defnEnclosingScope = null;
         return null;
@@ -1102,17 +1102,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 exactNamedMathClssftns.get(type);
 
         MathClassification defnType = null;
-        if (colonRhsType.typeRefDepth > 0) {
+        if ( colonRhsType.typeRefDepth>0 ) {
             int newTypeDepth = colonRhsType.typeRefDepth - 1;
             List<MathClassification> paramTypes = new ArrayList<>();
             List<String> paramNames = new ArrayList<>();
 
-            if (!formals.isEmpty()) {
-                for (ParseTree formal : formals) {
+            if ( !formals.isEmpty() ) {
+                for ( ParseTree formal : formals ) {
                     try {
                         ResolveParser.MathVarDeclGroupContext grp =
                                 (ResolveParser.MathVarDeclGroupContext) formal;
-                        for (TerminalNode t : grp.ID()) {
+                        for ( TerminalNode t : grp.ID() ) {
                             MathClassification ty =
                                     exactNamedMathClssftns.get(grp.mathClssftnExp());
                             paramTypes.add(ty);
@@ -1130,14 +1130,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 defnType = new MathFunctionClassification(
                         g, colonRhsType, paramNames, paramTypes);
 
-                for (Token t : names) {
+                for ( Token t : names ) {
                     MathClassification asNamed = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, defnType);
                     defnEnclosingScope
                             .define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
                 }
             } else {
-                for (Token t : names) {
+                for ( Token t : names ) {
                     defnType = new MathNamedClassification(g, t.getText(),
                             newTypeDepth, colonRhsType);
                     defnEnclosingScope
@@ -1145,7 +1145,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
         } else {
-            for (Token t : names) {
+            for ( Token t : names ) {
                 defnEnclosingScope
                         .define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
             }
@@ -1178,12 +1178,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String x = ctx.getText();
         this.visitMathClssftnExp(t);
         MathClassification rhsColonType = exactNamedMathClssftns.get(t);
-        for (TerminalNode term : terms) {
+        for ( TerminalNode term : terms ) {
             MathClassification ty = new MathNamedClassification(g, term.getText(),
                     rhsColonType.typeRefDepth - 1, rhsColonType);
 
             ty.identifiesSchematicType = walkingDefnParams &&
-                    (rhsColonType == g.SSET || rhsColonType == g.CLS ||
+                    (rhsColonType==g.SSET || rhsColonType==g.CLS ||
                             rhsColonType instanceof MathPowersetApplicationClassification);
             try {
                 symtab.getInnermostActiveScope().define(
@@ -1199,7 +1199,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitRequiresClause(
             ResolveParser.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
-        if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
+        if ( ctx.entailsClause()!=null ) this.visit(ctx.entailsClause());
         return null;
     }
 
@@ -1211,7 +1211,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         walkingType = false;
 
         MathClassification type = exactNamedMathClssftns.get(ctx.mathExp());
-        if (type == g.INVALID || type == null || type.getTypeRefDepth() == 0) {
+        if ( type==g.INVALID || type==null || type.getTypeRefDepth()==0 ) {
 
             compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE,
                     ctx.getStart(), ctx.mathExp().getText());
@@ -1231,15 +1231,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClassification rhsColonType =
                 exactNamedMathClssftns.get(ctx.mathExp(1));
         boolean walkingEntails = Utils.getFirstAncestorOfType(
-                ctx, ResolveParser.EntailsClauseContext.class) != null;
-        if (walkingEntails) {
+                ctx, ResolveParser.EntailsClauseContext.class)!=null;
+        if ( walkingEntails ) {
             entailsRetype = rhsColonType;
             this.visit(ctx.mathExp(0));
             entailsRetype = null;
             tr.mathClssftns.put(ctx, g.BOOLEAN);
             //type this guy bool so we can say which_entails x : N AND y : Z
-        } else if (ctx.mathExp(0).getChild(0).getChild(0)
-                instanceof ResolveParser.MathSymbolExpContext) {
+        } else if ( ctx.mathExp(0).getChild(0).getChild(0)
+                instanceof ResolveParser.MathSymbolExpContext ) {
             MathClassification ty =
                     new MathNamedClassification(g,
                             ctx.mathExp().get(0).getText(),
@@ -1368,12 +1368,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String asString = ctx.getText();
         MathClassification t = exactNamedMathClssftns.get(nameExp);
         //if we're a name identifying a function, get our function type.
-        if (t instanceof MathNamedClassification &&
-                t.getEnclosingClassification() instanceof MathFunctionClassification) {
+        if ( t instanceof MathNamedClassification &&
+                t.getEnclosingClassification() instanceof MathFunctionClassification ) {
             t = ((MathNamedClassification) t).enclosingClassification;
         }
-        if (!(t instanceof MathFunctionClassification)) {
-            if (t != g.INVALID && t.enclosingClassification != g.INVALID) { //only tell users if its a meaning 'non-function' classification
+        if ( !(t instanceof MathFunctionClassification) ) {
+            if ( t!=g.INVALID && t.enclosingClassification!=g.INVALID ) { //only tell users if its a meaning 'non-function' classification
                 compiler.errMgr.semanticError(ErrorKind.APPLYING_NON_FUNCTION,
                         nameExp.getStart(), nameExp.getText());
             }
@@ -1389,20 +1389,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 expectedFuncType.getParamTypes();
         //ugly hook to handle chained operator applications like 0 <= i <= j or
         //j >= i >= 0
-        if ((nameExp.getText().equals("<=") || nameExp.getText().equals("<") || nameExp.getText().equals("≤")) &&
-                args.size() == 2 &&
-                args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
+        if ( (nameExp.getText().equals("<=") || nameExp.getText().equals("<") || nameExp.getText().equals("≤")) &&
+                args.size()==2 &&
+                args.get(0) instanceof ResolveParser.MathInfixAppExpContext ) {
             ResolveParser.MathInfixAppExpContext argAsInfixApp =
                     (ResolveParser.MathInfixAppExpContext) args.get(0);
-            if (argAsInfixApp.getChild(1).getText().equals("<=") ||
+            if ( argAsInfixApp.getChild(1).getText().equals("<=") ||
                     argAsInfixApp.getChild(1).getText().equals("≤") ||
-                    argAsInfixApp.getChild(1).getText().equals("<")) {
+                    argAsInfixApp.getChild(1).getText().equals("<") ) {
                 MathClassification x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
                 actualArgumentTypes.set(0, x);
             }
         } //end ugly hook.
         //TODO: Factor this out to a helper, get it out of my face.
-        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
+        if ( formalParameterTypes.size()!=actualArgumentTypes.size() ) {
             compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT,
                     ctx.getStart(), ctx.getText());
             exactNamedMathClssftns.put(ctx, g.INVALID);
@@ -1414,7 +1414,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             expectedFuncType = (MathFunctionClassification)
                     expectedFuncType.deschematize(actualArgumentTypes);
-            if (!oldExpectedFuncType.toString().equals(expectedFuncType.toString())) {
+            if ( !oldExpectedFuncType.toString().equals(expectedFuncType.toString()) ) {
                 compiler.log("expected function type: " + oldExpectedFuncType);
                 compiler.log("   deschematizes to: " + expectedFuncType);
             }
@@ -1435,12 +1435,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         Iterator<MathClassification> actualValuesIter = actualValues.iterator();
 
         //SUBTYPE AND EQUALITY CHECK FOR ARGS HAPPENS HERE
-        while (actualsIter.hasNext()) {
+        while ( actualsIter.hasNext() ) {
             MathClassification actual = actualsIter.next();
             MathClassification formal = formalsIter.next();
             ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
 
-            if (!g.isSubtype(actual, formal)) {
+            if ( !g.isSubtype(actual, formal) ) {
                 compiler.errMgr.semanticError(
                         ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
                         actual.toString(), formal.toString());
@@ -1450,12 +1450,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //if someone tries to pass a literal (say, 'true') for some
             //formal x : SSET ... we need a notion of 'value' to check this.
             //the if below is where this happens.
-            if (actualVal != null && actualVal != g.INVALID
-                    && actualVal.typeRefDepth == 0
-                    && formal.typeRefDepth >= 2) {
+            if ( actualVal!=null && actualVal!=g.INVALID
+                    && actualVal.typeRefDepth==0
+                    && formal.typeRefDepth>=2 ) {
                 //its ok if we're a schematic type whose enclosing classification is a set
-                if (actualVal.identifiesSchematicType &&
-                        actualVal.enclosingClassification.typeRefDepth >= 1) {
+                if ( actualVal.identifiesSchematicType &&
+                        actualVal.enclosingClassification.typeRefDepth>=1 ) {
                     continue;
                 }
                 compiler.errMgr.semanticError(
@@ -1467,10 +1467,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //If we're describing a type, then the range (as a result of the function is too broad),
         //so we'll annotate the type of this application with its (verbose) application type.
         //but it's enclosing type will of course still be the range.
-        if (walkingType && expectedFuncType.getResultType().getTypeRefDepth() <= 1) {
+        if ( walkingType && expectedFuncType.getResultType().getTypeRefDepth()<=1 ) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
-        } else if (walkingType) {
+        } else if ( walkingType ) {
             List<MathClassification> actualNamedArgumentTypes =
                     Utils.apply(args, exactNamedMathClssftns::get);
             MathClassification appType =
@@ -1590,7 +1590,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathSymbolExp(
             ResolveParser.MathSymbolExpContext ctx) {
-        if (prevSelectorAccess != null) {
+        if ( prevSelectorAccess!=null ) {
             typeMathSelectorAccessExp(ctx, prevSelectorAccess,
                     ctx.name.getText());
         } else {
@@ -1611,13 +1611,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }*/
         List<Element> fields = new ArrayList<>();
-        for (ResolveParser.MathVarDeclGroupContext grp : ctx
-                .mathVarDeclGroup()) {
+        for ( ResolveParser.MathVarDeclGroupContext grp : ctx
+                .mathVarDeclGroup() ) {
             this.visit(grp.mathClssftnExp());
             MathClassification grpType =
                     exactNamedMathClssftns
                             .get(grp.mathClssftnExp());
-            for (TerminalNode label : grp.ID()) {
+            for ( TerminalNode label : grp.ID() ) {
                 fields.add(new Element(label.getText(), grpType));
             }
         }
@@ -1648,7 +1648,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathSetExp(ResolveParser.MathSetExpContext ctx) {
         ctx.mathExp().forEach(this::visit);
-        if (ctx.mathExp().isEmpty()) {
+        if ( ctx.mathExp().isEmpty() ) {
             tr.mathClssftns.put(ctx, g.EMPTY_SET);
         } else {
             MathClassification t =
@@ -1689,11 +1689,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         MathClassification establishedType = null;
         MathClassification establishedTypeValue = null;
-        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
-                .mathAlternativeItemExp()) {
+        for ( ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp() ) {
             this.visit(alt.result);
-            if (alt.condition != null) this.visit(alt.condition);
-            if (establishedType == null) {
+            if ( alt.condition!=null ) this.visit(alt.condition);
+            if ( establishedType==null ) {
                 establishedType = tr.mathClssftns.get(alt.result);
             }
             //else {
@@ -1709,7 +1709,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathAlternativeItemExp(
             ResolveParser.MathAlternativeItemExpContext ctx) {
-        if (ctx.condition != null) {
+        if ( ctx.condition!=null ) {
             expectType(ctx.condition, g.BOOLEAN);
         }
         tr.mathClssftns.put(ctx, tr.mathClssftns.get(ctx.result));
@@ -1743,8 +1743,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 tr.mathClssftns.get(prevAccessExp);
         //Todo: This can't go into {@link #getMetaFieldType()} since
         //it starts the access chain, rather than, say, terminating it.
-        if (prevAccessExp.getText().equals("conc")) {
-            if (curTypeReprModelSymbol == null) {
+        if ( prevAccessExp.getText().equals("conc") ) {
+            if ( curTypeReprModelSymbol==null ) {
                 compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR,
                         ctx.getStart(), symbolName);
                 tr.mathClssftns.put(ctx, g.INVALID);
@@ -1756,9 +1756,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             MathCartesianClassification typeCartesian =
                     (MathCartesianClassification) prevMathAccessType;
-            if (entailsRetype != null) {
+            if ( entailsRetype!=null ) {
                 Element x = typeCartesian.getElementUnder(symbolName);
-                if (x != null) {
+                if ( x!=null ) {
                     x.clssfcn = entailsRetype;
                 }
                 //if (x != null) typeCartesian.tagsToElements.put(symbolName, x);
@@ -1766,7 +1766,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             type = typeCartesian.getFactor(symbolName);
         } catch (ClassCastException | NoSuchElementException cce) {
             type = getMetaFieldType(g, symbolName);
-            if (type == null) {
+            if ( type==null ) {
                 compiler.errMgr.semanticError(
                         ErrorKind.NO_SUCH_FACTOR, ctx.getStart(),
                         symbolName);
@@ -1782,18 +1782,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String here = ctx.getText();
 
         MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
-        if (s == null || s.getClassification() == null) {
+        if ( s==null || s.getClassification()==null ) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
         }
-        if (entailsRetype != null) {
+        if ( entailsRetype!=null ) {
             s.setClassification(
                     new MathNamedClassification(g, name,
                             entailsRetype.typeRefDepth - 1, entailsRetype));
         }
         exactNamedMathClssftns.put(ctx, s.getClassification());
-        if (s.getClassification().identifiesSchematicType) {
+        if ( s.getClassification().identifiesSchematicType ) {
             tr.mathClssftns.put(ctx, s.getClassification());
         } else {
             tr.mathClssftns.put(ctx, s.getClassification()
@@ -1828,9 +1828,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             @NotNull DumbTypeGraph g, @NotNull String metaSegment) {
         MathClassification result = null;
 
-        if (metaSegment.equals("Is_Initial")) {
+        if ( metaSegment.equals("Is_Initial") ) {
             result = new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY);
-        } else if (metaSegment.equals("base_point")) {
+        } else if ( metaSegment.equals("base_point") ) {
             result = g.ENTITY;
         }
         return result;
@@ -1838,7 +1838,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void expectType(ParserRuleContext ctx, MathClassification expected) {
         MathClassification foundType = tr.mathClssftns.get(ctx);
-        if (!g.isSubtype(foundType, expected)) {
+        if ( !g.isSubtype(foundType, expected) ) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
                     ctx.getStart(), expected, foundType);
         }
@@ -1862,7 +1862,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private PExp getPExpFor(@Nullable ParserRuleContext ctx) {
-        if (ctx == null) {
+        if ( ctx==null ) {
             return g.getTrueExp();
         }
         PExpBuildingListener l = new PExpBuildingListener(g, tr);
@@ -1874,19 +1874,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @Nullable ParserRuleContext type,
                                            @NotNull List<ResolveParser.StmtContext> stmts) {
         boolean missingReturn = false;
-        if (type == null) return;
-        if (stmts.size() == 0) missingReturn = true;
-        if (stmts.size() > 0) {
+        if ( type==null ) return;
+        if ( stmts.size()==0 ) missingReturn = true;
+        if ( stmts.size()>0 ) {
             ResolveParser.StmtContext lastStmt = stmts.get(stmts.size() - 1);
-            if (lastStmt.getChild(0) instanceof ResolveParser.AssignStmtContext) {
+            if ( lastStmt.getChild(0) instanceof ResolveParser.AssignStmtContext ) {
                 ResolveParser.AssignStmtContext lastAsAssign =
                         (ResolveParser.AssignStmtContext) lastStmt.getChild(0);
-                if (!lastAsAssign.left.getText().equals(operationName.getText())) {
+                if ( !lastAsAssign.left.getText().equals(operationName.getText()) ) {
                     missingReturn = true;
                 }
             }
         }
-        if (missingReturn) {
+        if ( missingReturn ) {
             compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT,
                     operationName, operationName.getText());
         }

@@ -10,7 +10,7 @@ public class MathInvalidClassification extends MathClassification {
 
     public static MathInvalidClassification getInstance(DumbTypeGraph g) {
         MathInvalidClassification result = instances.get(g);
-        if (result == null) {
+        if ( result==null ) {
             result = new MathInvalidClassification(g);
             instances.put(g, result);
         }

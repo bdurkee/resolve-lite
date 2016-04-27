@@ -65,7 +65,7 @@ public class ProgVariableSymbol extends Symbol {
                 type.instantiateGenerics(genericInstantiations,
                         instantiatingFacility);
 
-        if (instantiatedType != type) {
+        if ( instantiatedType!=type ) {
             result =
                     new ProgVariableSymbol(getName(), getDefiningTree(),
                             instantiatedType, getModuleIdentifier());

@@ -16,7 +16,7 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
 
     @Override
     public E get(int index) {
-        if (index != 0) {
+        if ( index!=0 ) {
             throw new IndexOutOfBoundsException();
         }
 

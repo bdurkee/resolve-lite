@@ -40,14 +40,14 @@ public class LanguageSyntaxMessage extends RESOLVEMessage {
                                  Object... args) {
         super(etype, antlrException, offendingToken, args);
         this.offendingToken = offendingToken;
-        if (offendingToken != null) {
+        if ( offendingToken!=null ) {
             this.fileName = offendingToken.getTokenSource().getSourceName();
             this.line = offendingToken.getLine();
             this.charPosition = offendingToken.getCharPositionInLine();
         }
     }
 
-    @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
+    @SuppressWarnings({ "ThrowableResultOfMethodCallIgnored" })
     @Override
     public RecognitionException getCause() {
         return (RecognitionException) super.getCause();

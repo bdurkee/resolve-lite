@@ -213,7 +213,7 @@ public class MathSymbolTable {
     @NotNull
     public ModuleScopeBuilder startModuleScope(
             @NotNull AnnotatedModule module) {
-        if (curModuleScope != null) {
+        if ( curModuleScope!=null ) {
             throw new IllegalStateException("module scope already open");
         }
         ParseTree contextTree = module.getRoot();
@@ -230,7 +230,7 @@ public class MathSymbolTable {
     @NotNull
     public ScopeBuilder startScope(
             @NotNull ParserRuleContext definingTree) {
-        if (curModuleScope == null) {
+        if ( curModuleScope==null ) {
             throw new IllegalStateException("no open module scope");
         }
         ScopeBuilder parent = lexicalScopeStack.peek();
@@ -260,7 +260,7 @@ public class MathSymbolTable {
         checkScopeOpen();
         lexicalScopeStack.pop();
         ScopeBuilder result;
-        if (lexicalScopeStack.size() == 1) {
+        if ( lexicalScopeStack.size()==1 ) {
             result = null;
             curModuleScope = null;
         } else {
@@ -275,7 +275,7 @@ public class MathSymbolTable {
     }
 
     private void checkScopeOpen() {
-        if (lexicalScopeStack.size() == 1) {
+        if ( lexicalScopeStack.size()==1 ) {
             throw new IllegalStateException("no open scope");
         }
     }
@@ -288,7 +288,7 @@ public class MathSymbolTable {
 
     @NotNull
     public ScopeBuilder getScope(@NotNull ParserRuleContext e) {
-        if (scopes.get(e) == null) {
+        if ( scopes.get(e)==null ) {
             throw new IllegalArgumentException("no such scope: " + e.getText());
         }
         return scopes.get(e);
@@ -299,7 +299,7 @@ public class MathSymbolTable {
             @Nullable ModuleIdentifier identifier)
             throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
-        if (module == null) {
+        if ( module==null ) {
             throw new NoSuchModuleException(identifier);
         }
         return module;

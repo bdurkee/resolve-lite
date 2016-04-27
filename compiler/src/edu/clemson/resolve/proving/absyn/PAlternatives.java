@@ -24,13 +24,13 @@ public class PAlternatives extends PExp {
         this.alternatives = new ArrayList<>();
         sanityCheckConditions(conditions);
 
-        if (conditions.size() != results.size()) {
+        if ( conditions.size()!=results.size() ) {
             throw new IllegalArgumentException("conditions.size() must equal "
                     + "results.size()");
         }
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = results.iterator();
-        while (conditionIter.hasNext()) {
+        while ( conditionIter.hasNext() ) {
             alternatives.add(new Alternative(conditionIter.next(), resultIter
                     .next()));
         }
@@ -43,8 +43,8 @@ public class PAlternatives extends PExp {
         v.beginChildren(this);
 
         boolean first = true;
-        for (Alternative alt : alternatives) {
-            if (!first) {
+        for ( Alternative alt : alternatives ) {
+            if ( !first ) {
                 v.fencepostPAlternatives(this);
             }
             first = false;
@@ -59,9 +59,9 @@ public class PAlternatives extends PExp {
     }
 
     private void sanityCheckConditions(List<PExp> conditions) {
-        for (PExp condition : conditions) {
-            if (!condition
-                    .typeMatches(condition.getMathType().getTypeGraph().BOOLEAN)) {
+        for ( PExp condition : conditions ) {
+            if ( !condition
+                    .typeMatches(condition.getMathType().getTypeGraph().BOOLEAN) ) {
                 throw new IllegalArgumentException("AlternativeExps with "
                         + "non-boolean-typed conditions are not accepted "
                         + "by the prover. \n\t" + condition + " has type "
@@ -76,7 +76,7 @@ public class PAlternatives extends PExp {
         int hash = 0;
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = conditions.iterator();
-        while (conditionIter.hasNext()) {
+        while ( conditionIter.hasNext() ) {
             hash *= 31;
             hash += conditionIter.next().structureHash;
             hash *= 34;
@@ -90,7 +90,7 @@ public class PAlternatives extends PExp {
     public List<PExp> getSubExpressions() {
         List<PExp> exps = new LinkedList<>();
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             exps.add(a.result);
             exps.add(a.condition);
         }
@@ -102,7 +102,7 @@ public class PAlternatives extends PExp {
     public boolean isObviouslyTrue() {
         boolean result = true;
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result &= a.result.isObviouslyTrue();
         }
         return result && otherwiseClauseResult.isObviouslyTrue();
@@ -119,7 +119,7 @@ public class PAlternatives extends PExp {
     public PExp withIncomingSignsErased() {
         List<PExp> conditions = new ArrayList<>();
         List<PExp> results = new ArrayList<>();
-        for (Alternative alt : alternatives) {
+        for ( Alternative alt : alternatives ) {
             conditions.add(alt.condition.withIncomingSignsErased());
             results.add(alt.result.withIncomingSignsErased());
         }
@@ -139,7 +139,7 @@ public class PAlternatives extends PExp {
     public Set<PSymbol> getIncomingVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>();
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result.addAll(a.condition.getIncomingVariables());
             result.addAll(a.result.getIncomingVariables());
         }
@@ -152,7 +152,7 @@ public class PAlternatives extends PExp {
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp retval;
 
-        if (substitutions.containsKey(this)) {
+        if ( substitutions.containsKey(this) ) {
             retval = substitutions.get(this);
         } else {
             List<PExp> substitutedConditions = new ArrayList<>();
@@ -160,7 +160,7 @@ public class PAlternatives extends PExp {
             PExp substitutedOtherwiseResult =
                     otherwiseClauseResult.substitute(substitutions);
 
-            for (Alternative alt : alternatives) {
+            for ( Alternative alt : alternatives ) {
                 substitutedConditions.add(alt.condition.substitute(substitutions));
                 substitutedResults.add(alt.result.substitute(substitutions));
             }
@@ -175,7 +175,7 @@ public class PAlternatives extends PExp {
     public boolean containsName(String name) {
         boolean result = false;
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result |=
                     a.condition.containsName(name)
                             || a.result.containsName(name);
@@ -187,7 +187,7 @@ public class PAlternatives extends PExp {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{{");
-        for (Alternative alternative : alternatives) {
+        for ( Alternative alternative : alternatives ) {
             sb.append(alternative.toString());
         }
         sb.append(otherwiseClauseResult).append(" otherwise;");
@@ -198,15 +198,15 @@ public class PAlternatives extends PExp {
     @Override
     public boolean equals(Object o) {
         boolean result = o instanceof PAlternatives;
-        if (result) {
+        if ( result ) {
             result = otherwiseClauseResult.equals(((PAlternatives) o)
                     .otherwiseClauseResult);
-            result &= alternatives.size() ==
+            result &= alternatives.size()==
                     ((PAlternatives) o).alternatives.size();
             //now compare the actual alternatives exps
             Iterator<Alternative> thisAltIter = alternatives.iterator();
             Iterator<Alternative> oAltIter = ((PAlternatives) o).alternatives.iterator();
-            while (result && thisAltIter.hasNext()) {
+            while ( result && thisAltIter.hasNext() ) {
                 Alternative oAlt = oAltIter.next();
                 Alternative thisAlt = thisAltIter.next();
                 result = oAlt.condition.equals(thisAlt.condition) &&
@@ -221,7 +221,7 @@ public class PAlternatives extends PExp {
             boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result.addAll(a.condition.getSymbolNames(excludeApplications, excludeLiterals));
             result.addAll(a.result.getSymbolNames(excludeApplications, excludeLiterals));
         }
@@ -234,7 +234,7 @@ public class PAlternatives extends PExp {
     public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new LinkedHashSet<>(); //i'd like to preserve first found order
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result.addAll(a.condition.getQuantifiedVariables());
             result.addAll(a.result.getQuantifiedVariables());
         }
@@ -247,7 +247,7 @@ public class PAlternatives extends PExp {
     public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> result = new LinkedList<>();
 
-        for (Alternative a : alternatives) {
+        for ( Alternative a : alternatives ) {
             result.addAll(a.condition.getFunctionApplications());
             result.addAll(a.result.getFunctionApplications());
         }

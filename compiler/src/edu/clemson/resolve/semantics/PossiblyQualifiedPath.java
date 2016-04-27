@@ -55,7 +55,7 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
             @NotNull FacilityStrategy facilityStrategy,
             boolean localPriority) {
         ScopeSearchPath result;
-        if (qualifier == null) {
+        if ( qualifier==null ) {
             result =
                     new UnqualifiedPath(importStrategy, facilityStrategy,
                             localPriority);

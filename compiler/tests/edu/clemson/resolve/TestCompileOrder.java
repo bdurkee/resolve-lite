@@ -10,8 +10,9 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCompileOrder extends BaseTest {
 
-    @Test public void testBasicLinearOrdering() throws Exception {
-        String[] modules = new String[] {
+    @Test
+    public void testBasicLinearOrdering() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n uses V;\n end U;",
                 "Precis V;\n end V;"
@@ -21,8 +22,9 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test public void testTrivialOrdering() throws Exception {
-        String[] modules = new String[] {
+    @Test
+    public void testTrivialOrdering() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n end T;",
         };
         String expected = "populating: T";
@@ -30,8 +32,9 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test public void testTrivialOrdering2() throws Exception {
-        String[] modules = new String[] {
+    @Test
+    public void testTrivialOrdering2() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n end U;",
         };

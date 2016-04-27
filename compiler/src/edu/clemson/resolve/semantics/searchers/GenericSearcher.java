@@ -23,10 +23,10 @@ public class GenericSearcher
                               @NotNull List<ProgTypeSymbol> matches,
                               @NotNull SearchContext l)
             throws UnexpectedSymbolException {
-        for (Symbol s : entries.values()) {
-            if (s instanceof ProgParameterSymbol) {
-                if (((ProgParameterSymbol) s).getMode() ==
-                        ProgParameterSymbol.ParameterMode.TYPE) {
+        for ( Symbol s : entries.values() ) {
+            if ( s instanceof ProgParameterSymbol ) {
+                if ( ((ProgParameterSymbol) s).getMode()==
+                        ProgParameterSymbol.ParameterMode.TYPE ) {
                     matches.add(s.toProgTypeSymbol());
                 }
             }

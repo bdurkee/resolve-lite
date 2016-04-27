@@ -12,39 +12,44 @@ public class TestASTStructure extends BaseTest {
 
     private static class TestListener extends PExpListener {
         public String trace = "";
-        @Override public void beginChildren(@NotNull PExp e) {
-            trace += "<"+getClassStr(e)+":"+"begin>:"+e+"\n";
+
+        @Override
+        public void beginChildren(@NotNull PExp e) {
+            trace += "<" + getClassStr(e) + ":" + "begin>:" + e + "\n";
         }
-        @Override public void endChildren(@NotNull PExp e) {
-            trace += "<"+getClassStr(e)+":"+"end>:"+e+"\n";
+
+        @Override
+        public void endChildren(@NotNull PExp e) {
+            trace += "<" + getClassStr(e) + ":" + "end>:" + e + "\n";
         }
     }
 
     private static String getClassStr(PExp exp) {
         String className = exp.getClass().getSimpleName();
-        if (!(exp instanceof PApply)) return className;
-        return className+":"+
+        if ( !(exp instanceof PApply) ) return className;
+        return className + ":" +
                 (((PApply) exp).getDisplayStyle()).toString()
-                        .toLowerCase()+className;
+                        .toLowerCase() + className;
     }
 
-    @Test public void testPSymbolStructure() {
+    @Test
+    public void testPSymbolStructure() {
         DumbTypeGraph g = new DumbTypeGraph();
         String[] expected = {
-            "<PApply:infixPApply:begin>:(x + (1 * y))\n" +
-            "<PSymbol:begin>:+\n" +
-            "<PSymbol:end>:+\n" +
-            "<PSymbol:begin>:x\n" +
-            "<PSymbol:end>:x\n" +
-            "<PApply:infixPApply:begin>:(1 * y)\n" +
-            "<PSymbol:begin>:*\n" +
-            "<PSymbol:end>:*\n" +
-            "<PSymbol:begin>:1\n" +
-            "<PSymbol:end>:1\n" +
-            "<PSymbol:begin>:y\n" +
-            "<PSymbol:end>:y\n" +
-            "<PApply:infixPApply:end>:(1 * y)\n" +
-            "<PApply:infixPApply:end>:(x + (1 * y))\n"
+                "<PApply:infixPApply:begin>:(x + (1 * y))\n" +
+                        "<PSymbol:begin>:+\n" +
+                        "<PSymbol:end>:+\n" +
+                        "<PSymbol:begin>:x\n" +
+                        "<PSymbol:end>:x\n" +
+                        "<PApply:infixPApply:begin>:(1 * y)\n" +
+                        "<PSymbol:begin>:*\n" +
+                        "<PSymbol:end>:*\n" +
+                        "<PSymbol:begin>:1\n" +
+                        "<PSymbol:end>:1\n" +
+                        "<PSymbol:begin>:y\n" +
+                        "<PSymbol:end>:y\n" +
+                        "<PApply:infixPApply:end>:(1 * y)\n" +
+                        "<PApply:infixPApply:end>:(x + (1 * y))\n"
         };
         PExp tree = TestPExp.parseMathAssertionExp(g, "x + 1 * y");
         TestListener v = new TestListener();
@@ -89,7 +94,8 @@ public class TestASTStructure extends BaseTest {
         Assert.assertEquals(expected[0], v.trace);
     }*/
 
-    @Test public void testPSetStructure() {
+    @Test
+    public void testPSetStructure() {
 
     }
 

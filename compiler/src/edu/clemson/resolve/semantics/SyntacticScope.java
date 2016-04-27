@@ -53,7 +53,7 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override
     public Symbol define(@NotNull Symbol s)
             throws DuplicateSymbolException {
-        if (symbols.containsKey(s.getName())) {
+        if ( symbols.containsKey(s.getName()) ) {
             throw new DuplicateSymbolException(s);
         }
         //TODO: bubble me over to the populator so I can be nicely printed.
@@ -86,8 +86,8 @@ public abstract class SyntacticScope extends AbstractScope {
             NoSuchModuleException,
             UnexpectedSymbolException {
         List<E> results = query.searchFromContext(this, symtab);
-        if (results.isEmpty()) throw new NoSuchSymbolException();
-        else if (results.size() > 1) throw new DuplicateSymbolException();
+        if ( results.isEmpty() ) throw new NoSuchSymbolException();
+        else if ( results.size()>1 ) throw new DuplicateSymbolException();
         return results.get(0);
     }
 
@@ -95,7 +95,7 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override
     public String toString() {
         String s = "";
-        if (definingTree != null) {
+        if ( definingTree!=null ) {
             s = definingTree.getClass().getSimpleName();
         }
         return s + symbols.keySet() + "";
@@ -112,11 +112,11 @@ public abstract class SyntacticScope extends AbstractScope {
             UnexpectedSymbolException {
         boolean finished = false;
 
-        if (!searchedScopes.contains(this)) {
+        if ( !searchedScopes.contains(this) ) {
             searchedScopes.add(this);
 
             Map<String, Symbol> symbolTableView = symbols;
-            if (instantiatingFacility != null) {
+            if ( instantiatingFacility!=null ) {
 
                 symbolTableView =
                         updateSymbols(symbols, genericInstantiations,
@@ -125,7 +125,7 @@ public abstract class SyntacticScope extends AbstractScope {
             }
             finished = searcher.addMatches(symbolTableView, matches, l);
 
-            if (!finished) {
+            if ( !finished ) {
                 finished =
                         parent.addMatches(searcher, matches, searchedScopes,
                                 genericInstantiations, instantiatingFacility, l);
@@ -147,9 +147,9 @@ public abstract class SyntacticScope extends AbstractScope {
     @NotNull
     public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types) {
         List<Symbol> result = new ArrayList<>();
-        for (Symbol s : symbols.values()) {
-            for (Class<?> t : types) {
-                if (t.isInstance(s)) result.add(s);
+        for ( Symbol s : symbols.values() ) {
+            for ( Class<?> t : types ) {
+                if ( t.isInstance(s) ) result.add(s);
             }
         }
         return result;
@@ -162,7 +162,7 @@ public abstract class SyntacticScope extends AbstractScope {
             @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
 
-        for (Symbol s : currentBindings.values()) {
+        for ( Symbol s : currentBindings.values() ) {
             instantiatedBindings.put(s.getName(), s.instantiateGenerics(
                     genericInstantiations, instantiatingFacility));
         }

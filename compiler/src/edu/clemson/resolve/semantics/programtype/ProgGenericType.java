@@ -37,7 +37,7 @@ public class ProgGenericType extends ProgType {
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
-        if (genericInstantiations.containsKey(this.name)) {
+        if ( genericInstantiations.containsKey(this.name) ) {
             result = genericInstantiations.get(this.name);
         }
         return result;
@@ -52,7 +52,7 @@ public class ProgGenericType extends ProgType {
     public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof ProgGenericType);
 
-        if (result) {
+        if ( result ) {
             ProgGenericType oAsPTGeneric = (ProgGenericType) o;
             result = name.equals(oAsPTGeneric.getName());
         }

@@ -79,7 +79,7 @@ public class LogManager {
         Record r = new Record();
         r.component = component;
         r.msg = msg;
-        if (records == null) {
+        if ( records==null ) {
             records = new ArrayList<Record>();
         }
         records.add(r);
@@ -117,10 +117,10 @@ public class LogManager {
 
     @Override
     public String toString() {
-        if (records == null) return "";
+        if ( records==null ) return "";
         String nl = System.getProperty("line.separator");
         StringBuilder buf = new StringBuilder();
-        for (Record r : records) {
+        for ( Record r : records ) {
             buf.append(r);
             buf.append(nl);
         }

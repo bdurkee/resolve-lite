@@ -96,29 +96,29 @@ public class DumbTypeGraph {
 
     public boolean isSubtype(@NotNull MathClassification subtype,
                              @NotNull MathClassification supertype) {
-        boolean result = (supertype == ENTITY || supertype == CLS);
-        if (!result) {
+        boolean result = (supertype==ENTITY || supertype==CLS);
+        if ( !result ) {
             MathClassification subtypesEnclosingType = subtype.enclosingClassification;
             MathClassification foundRelationship = relationships.get(subtype);
             //if we're equal, we're a trivial subtype
-            if (subtype.equals(supertype)) result = true;
-            else if (foundRelationship != null && foundRelationship.equals(supertype)) {
+            if ( subtype.equals(supertype) ) result = true;
+            else if ( foundRelationship!=null && foundRelationship.equals(supertype) ) {
                 result = true;
             }
             //not too sure about the two below..
             //1
-            else if (supertype == SSET && subtype.enclosingClassification == SSET) {
+            else if ( supertype==SSET && subtype.enclosingClassification==SSET ) {
                 result = true;
             }
             //2
-            else if (subtype.enclosingClassification == supertype) {
+            else if ( subtype.enclosingClassification==supertype ) {
                 result = true;
-            } else if (subtype instanceof MathFunctionApplicationClassification &&
-                    supertype instanceof MathFunctionApplicationClassification) {
+            } else if ( subtype instanceof MathFunctionApplicationClassification &&
+                    supertype instanceof MathFunctionApplicationClassification ) {
                 result = isSubtype(subtype.getEnclosingClassification(),
                         supertype.getEnclosingClassification());
-            } else if (subtype instanceof MathFunctionClassification &&
-                    supertype instanceof MathFunctionClassification) {
+            } else if ( subtype instanceof MathFunctionClassification &&
+                    supertype instanceof MathFunctionClassification ) {
                 result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
                         ((MathFunctionClassification) supertype).getDomainType())
                         && isSubtype(((MathFunctionClassification) subtype).getResultType(),
@@ -135,16 +135,16 @@ public class DumbTypeGraph {
 
     @Nullable
     public PExp formConjuncts(List<PExp> e) {
-        if (e == null) {
+        if ( e==null ) {
             throw new IllegalArgumentException("can't conjunct a null list");
         }
-        if (e.isEmpty()) return null;
+        if ( e.isEmpty() ) return null;
         Iterator<PExp> segsIter = e.iterator();
         PExp result = segsIter.next();
-        if (e.size() == 1) {
+        if ( e.size()==1 ) {
             return e.get(0);
         }
-        while (segsIter.hasNext()) {
+        while ( segsIter.hasNext() ) {
             result = formConjunct(result, segsIter.next());
         }
         return result;

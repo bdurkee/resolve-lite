@@ -16,8 +16,8 @@ public class TestMathSymbolTable extends BaseTest {
 
     //@Test(expected=NoSuchModuleException.class)
     public void testFreshMathSymbolTable1() {
-      //  MathSymbolTable b = new MathSymbolTable();
-      //  b.getModuleScope("NonExistent");
+        //  MathSymbolTable b = new MathSymbolTable();
+        //  b.getModuleScope("NonExistent");
     }
 
     /*@Test(expected=IllegalArgumentException.class)

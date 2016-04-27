@@ -22,17 +22,17 @@ public class ParsimoniousAssumeApplicationStrategy
 
         Map<PExp, PExp> concEqualitySubstitutions = new LinkedHashMap<>();
         List<PExp> assumeConjunctsWithoutConcEqualities = new LinkedList<>();
-        for (PExp assume : assumeExp.splitIntoConjuncts()) {
+        for ( PExp assume : assumeExp.splitIntoConjuncts() ) {
             boolean isConceptual = false;
-            if (assume.isEquality()) {
+            if ( assume.isEquality() ) {
                 PExp lhs = assume.getSubExpressions().get(1);
                 PExp rhs = assume.getSubExpressions().get(2);
-                if (lhs.isVariable() && lhs.containsName("conc")) {
+                if ( lhs.isVariable() && lhs.containsName("conc") ) {
                     concEqualitySubstitutions.put(lhs, rhs);
                     isConceptual = true;
                 }
             }
-            if (!isConceptual) {
+            if ( !isConceptual ) {
                 assumeConjunctsWithoutConcEqualities.add(assume);
             }
         }
@@ -41,15 +41,15 @@ public class ParsimoniousAssumeApplicationStrategy
         //beta reduce any lambdas present now...
 
         List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
-        for (PExp assume : assumeConjunctsWithoutConcEqualities) {
+        for ( PExp assume : assumeConjunctsWithoutConcEqualities ) {
             Set<String> intersection = assumeExp.getSymbolNames(true, true);
             intersection.retainAll(RP.getSymbolNames(true, true));
-            if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
+            if ( !intersection.isEmpty() && !assume.isObviouslyTrue() ) {
                 parsimoniousAssumeConjuncts.add(assume);
             }
         }
         //this will be the pruned assume expr
-        if (!parsimoniousAssumeConjuncts.isEmpty()) {
+        if ( !parsimoniousAssumeConjuncts.isEmpty() ) {
             assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
             block.finalConfirm(block.g.formImplies(assumeExp, RP));
         } else {

@@ -84,7 +84,7 @@ public abstract class PExp {
     @NotNull
     public PExp substitute(List<PExp> currents, PExp repl) {
         Map<PExp, PExp> substitutions = new HashMap<>();
-        for (PExp current : currents) {
+        for ( PExp current : currents ) {
             substitutions.put(current, repl);
         }
         return substitute(substitutions);
@@ -103,7 +103,7 @@ public abstract class PExp {
     @NotNull
     public PExp substitute(@NotNull List<PExp> currents,
                            @NotNull List<PExp> repls) {
-        if (currents.size() != repls.size()) {
+        if ( currents.size()!=repls.size() ) {
             throw new IllegalArgumentException("substitution lists must be"
                     + "the same length");
         }
@@ -335,7 +335,7 @@ public abstract class PExp {
      */
     @NotNull
     public final Set<PSymbol> getIncomingVariables() {
-        if (cachedIncomingVariables == null) {
+        if ( cachedIncomingVariables==null ) {
             cachedIncomingVariables = Collections.unmodifiableSet(
                     getIncomingVariablesNoCache());
         }
@@ -347,7 +347,7 @@ public abstract class PExp {
 
     @NotNull
     public final Set<PSymbol> getQuantifiedVariables() {
-        if (cachedQuantifiedVariables == null) {
+        if ( cachedQuantifiedVariables==null ) {
             //We're immutable, so only do this once
             cachedQuantifiedVariables =
                     Collections
@@ -363,7 +363,7 @@ public abstract class PExp {
     //that a function application? Just a nameless function application?
     @NotNull
     public final List<PExp> getFunctionApplications() {
-        if (cachedFunctionApplications == null) {
+        if ( cachedFunctionApplications==null ) {
             //We're immutable, so only do this once
             cachedFunctionApplications = getFunctionApplicationsNoCache();
         }
@@ -407,9 +407,9 @@ public abstract class PExp {
      */
     public Map<String, PExp> getTopLevelVariableEqualities() {
         Map<String, PExp> result = new HashMap<>();
-        for (PExp v : this.splitIntoConjuncts()) {
-            if (v.isEquality() &&
-                    v.getSubExpressions().get(1).isVariable()) {
+        for ( PExp v : this.splitIntoConjuncts() ) {
+            if ( v.isEquality() &&
+                    v.getSubExpressions().get(1).isVariable() ) {
                 result.put(v.getSubExpressions().get(1).getCanonicalName(),
                         v.getSubExpressions().get(2));
             }
