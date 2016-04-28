@@ -1,6 +1,6 @@
 ## Thoughts on RESOLVE `uses` clauses and project organization
 
-### some high level prostelytizing
+### some high level proselytizing
 Uses clauses in RESOLVE should be *simple*, **dead** *simple*. Towards this end, they should flow naturally from what
 users typically will want to do while not getting in their way (e.g. you want to access things
 from a module `X`? Then type `uses X`). The root of this drive for simplicity is due in no small part to the fact that
