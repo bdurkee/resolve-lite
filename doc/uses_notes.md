@@ -2,20 +2,25 @@
 
 ### some high level proselytizing
 Uses clauses in RESOLVE should be *simple*, **dead** *simple*. Towards this end, they should flow naturally from what
-users typically will want to do while not getting in their way (e.g. you want to access things
-from a module `X`? Then type `uses X`). The root of this drive for simplicity is due in no small part to the fact that
+users typically will want to do while not getting in their way. For example, if you want to access exported
+declarations from modules `X` and `Y`, then simply type:
+
+```
+uses X, Y
+```
+The root of this drive for simplicity is due in no small part to the fact that
 we are already asking a lot of our hypothetical users: and would ideally like them to save most of their time
 (not to mention brainpower and effort) towards understanding existing concepts available, and engineering
-formal contracts around these--much less hopefully verifying any resultant implementation-level code.
+formal contracts around these--much less verifying their implementations.
 
 With this being said, what follows are several 'shoulds' and 'shouldn'ts' with regards to
 any prospective `uses` system:
 (*note: this list only contains my thoughts, and as such is likely far from complete--so add to it at will..*)
 
-(a) **should** be tailored specifically around the design and organizational characteristics of RESOLVE.
+1. **should** be tailored specifically around the design and organizational characteristics of RESOLVE.
 In other words, none of this: 'lets just rip out Java's package system out and use it verbatim.' We want to encourage
 (enforce?) a *concept-based* organizational structure. Meaning any unit housing some reusable component
-should be logically organized in the following manner:
+should be logically organized in the following manner (e.g. preferably around some concept):
 ```
 Stack_Template.resolve
 impls/
@@ -29,12 +34,12 @@ enhancements/
   .  .  Recursive_Impl.resolve
 *various precis/precis exts*
 ```
-There is an emphasis
-on interfaces and abstraction in the language Indeed, the organization of the code in those languages  Files and enclosing projects in our language are not the same or even organized around the same things.
+2.  **should** be designed around referencing *modules*; as opposed to say, directories or packages.
 
-* **should** be designed around referencing *modules*; as opposed to say, directories or packages.
+3. **should** allow one to easily name and use modules in other (separate) reusable component libraries.
 
-* **should
+### Current version
 
+With this in mind, here are some examples.
 
-It's clear given the design of the language and the high level of abstraction intended tha
+*todo
