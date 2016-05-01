@@ -1,6 +1,8 @@
 Concept Spiral_Template (type Label;
         evaluates k, Max_Length :
                         Std_Ints :: Integer);
+    uses Std_Facilities, Basic_Spiral_Theory,  Natural_Number_Theory;
+
 //  uses (
 //      "facility_modules",
 //      "precis_modules/num_like",
