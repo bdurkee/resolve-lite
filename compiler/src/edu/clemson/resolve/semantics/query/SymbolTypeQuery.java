@@ -13,17 +13,13 @@ import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPOR
 /**
  * @author hamptos
  */
-public class SymbolTypeQuery<T extends Symbol>
-        extends
-        BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
+public class SymbolTypeQuery<T extends Symbol> extends BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
 
     @SuppressWarnings("unchecked")
-    public SymbolTypeQuery(
-            @NotNull Class<? extends Symbol> entryType,
-            @NotNull ImportStrategy importStrategy,
-            @NotNull FacilityStrategy facilityStrategy) {
-        super(new UnqualifiedPath(importStrategy, facilityStrategy, false),
-                new SymbolTypeSearcher(entryType));
+    public SymbolTypeQuery(@NotNull Class<? extends Symbol> entryType,
+                           @NotNull ImportStrategy importStrategy,
+                           @NotNull FacilityStrategy facilityStrategy) {
+        super(new UnqualifiedPath(importStrategy, facilityStrategy, false), new SymbolTypeSearcher(entryType));
     }
 
     public SymbolTypeQuery(Class<? extends Symbol> entryType) {

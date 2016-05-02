@@ -23,7 +23,8 @@ public abstract class ProgNamedType extends ProgType {
     @NotNull
     private final ModuleIdentifier moduleIdentifier;
 
-    public ProgNamedType(@NotNull DumbTypeGraph g, @NotNull String name,
+    public ProgNamedType(@NotNull DumbTypeGraph g,
+                         @NotNull String name,
                          @NotNull PExp initEnsures,
                          @NotNull ModuleIdentifier moduleIdentifier) {
         super(g);
@@ -47,8 +48,7 @@ public abstract class ProgNamedType extends ProgType {
 
     @NotNull
     public PSymbol getExemplarAsPSymbol() {
-        return new PSymbol.PSymbolBuilder(getExemplarName())
-                .mathType(toMath()).build();
+        return new PSymbol.PSymbolBuilder(getExemplarName()).mathType(toMath()).build();
     }
 
     @NotNull

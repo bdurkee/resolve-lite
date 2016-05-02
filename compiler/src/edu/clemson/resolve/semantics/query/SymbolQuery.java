@@ -15,22 +15,19 @@ import java.util.List;
 public interface SymbolQuery<E extends Symbol> {
 
     /**
-     * Given a source {@link Scope Scope} and a {@link MathSymbolTable} containing
-     * any imports, from which {@code source} draws, searches them
-     * appropriately, returning a list of matching {@link Symbol}s
+     * Given a source {@link Scope Scope} and a {@link MathSymbolTable} containing any imports, from which
+     * {@code source} draws, searches them appropriately, returning a list of matching {@link Symbol}s
      * that are subtypes of {@code E}.
      * <p>
-     * If there are no matches, returns an empty list. If more than one match is
-     * found where no more than one was expected, throws a
-     * {@link DuplicateSymbolException}.
+     * If there are no matches, returns an empty list. If more than one match is found where no more than one was
+     * expected, throws a {@link DuplicateSymbolException}.
      *
      * @param source    The source scope from which the search was spawned.
      * @param scopeRepo A repository of any referenced modules.
      *
      * @return A list of matches.
      */
-    public List<E> searchFromContext(@NotNull Scope source,
-                                     @NotNull MathSymbolTable scopeRepo)
+    public List<E> searchFromContext(@NotNull Scope source, @NotNull MathSymbolTable scopeRepo)
             throws DuplicateSymbolException, NoSuchModuleException,
             UnexpectedSymbolException;
 }

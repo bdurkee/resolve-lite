@@ -13,19 +13,17 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.misc.Utils.apply;
 
 /**
- * This class represents exclusively (non-nullary) function applications,
- * meaning those with some non-zero number of arguments.
+ * This class represents exclusively (non-nullary) function applications, meaning those with some non-zero number
+ * of arguments.
  */
 public class PApply extends PExp {
 
     /**
-     * An enumerated type that provides additional information about how to
-     * display an instance of {@link PApply}, specifically whether it should be
-     * displayed as an infix, outfix, prefix, or postfix style application.
+     * An enumerated type that provides additional information about how to display an instance of {@link PApply},
+     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style application.
      * <p>
-     * Note that while this enum indeed stands-in for the four subclasses
-     * we'd otherwise need to represent the application styles mentioned, we
-     * still can get specific visitor methods for each style (even with an enum)
+     * Note that while this enum indeed stands-in for the four subclasses we'd otherwise need to represent the
+     * application styles mentioned, we still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
@@ -35,19 +33,15 @@ public class PApply extends PExp {
      */
     public static enum DisplayStyle {
 
-        /**
-         * Traditional prefix style applications of the form: {@code F(x)}
-         */
+        /** Traditional prefix style applications of the form: {@code F(x)} */
         PREFIX {
             @Override
             protected String toString(PApply s) {
                 if (s.isBracketBasedApp) {
-                    return s.arguments.get(0) +
-                            "[" + s.arguments.get(1) + "]";
+                    return s.arguments.get(0) + "[" + s.arguments.get(1) + "]";
                 }
                 else {
-                    return s.functionPortion.toString() +
-                            "(" + Utils.join(s.arguments, ", ") + ")";
+                    return s.functionPortion.toString() + "(" + Utils.join(s.arguments, ", ") + ")";
                 }
             }
 
@@ -66,15 +60,11 @@ public class PApply extends PExp {
                 v.endPrefixPApply(s);
             }
         },
-        /**
-         * Binary infix style applications where the arguments are on either
-         * side of the function: {@code x F y}
-         */
+        /** Binary infix style applications where the arguments are on either side of the function: {@code x F y} */
         INFIX {
             @Override
             protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " +
-                        s.functionPortion.getCanonicalName() + " ") + ")";
+                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getCanonicalName() + " ") + ")";
             }
 
             @Override
@@ -92,10 +82,7 @@ public class PApply extends PExp {
                 v.endInfixPApply(s);
             }
         },
-        /**
-         * Postfix style applications where the operator proceeds its
-         * argumemts: {@code x y F}
-         */
+        /** Postfix style applications where the operator proceeds its argumemts: {@code x y F} */
         POSTFIX {
             @Override
             protected String toString(PApply s) {
@@ -123,16 +110,15 @@ public class PApply extends PExp {
             }
         },
         /**
-         * Outfix style applications where the (single) argument is
-         * sandwitched between the left and rhs operator(s): {@code || F ||}
+         * Outfix style applications where the (single) argument is sandwitched between the left and
+         * rhs operator(s): {@code || F ||}
          */
         OUTFIX {
             @Override
             protected String toString(PApply s) {
                 assert s.functionPortion instanceof PSymbol;
                 PSymbol f = (PSymbol) s.functionPortion;
-                return f.getLeftPrint() + Utils.join(s.arguments, ", ") +
-                        f.getRightPrint();
+                return f.getLeftPrint() + Utils.join(s.arguments, ", ") + f.getRightPrint();
             }
 
             @Override
@@ -152,40 +138,30 @@ public class PApply extends PExp {
         };
 
         /**
-         * Returns a well formatted string representation of this application
-         * style.
+         * Returns a well formatted string representation of this application style.
          *
          * @param s some application
-         *
          * @return a string representation.
          */
         protected abstract String toString(PApply s);
 
-        /**
-         * Triggers a visit at the start when we first encounter {@code s}.
-         */
+        /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
 
-        /**
-         * Triggers a visit in the 'middle'; for internal nodes of {@code s}.
-         */
+        /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
         protected abstract void fencepostAccept(PExpListener v, PApply s);
 
-        /**
-         * Triggers at the 'end' when we're about to leave {@code s}.
-         */
+        /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 
     /**
-     * Represents the 'first class function' this application is referencing.
-     * Note that the type of {@code functionPortion} can be considered
-     * independent of the types of the formals
-     * (which are rightly embedded here in the argument {@code PExp}s).
+     * Represents the 'first class function' this application is referencing. Note that the type of
+     * {@code functionPortion} can be considered independent of the types of the formals (which are rightly
+     * embedded here in the argument {@code PExp}s).
      * <p>
-     * While this field in most cases will simply be an instance of
-     * {@link PSymbol}, realize that it could also be something more 'exotic'
-     * such as a {@link PLambda} or even another {@code PApply}.</p>
+     * While this exp in most cases will simply be an instance of {@link PSymbol}, realize that it could also be
+     * something more 'exotic' such as a {@link PLambda} or even another {@code PApply}.</p>
      */
     private final PExp functionPortion;
     private final List<PExp> arguments = new ArrayList<>();
@@ -194,8 +170,8 @@ public class PApply extends PExp {
     private final boolean isBracketBasedApp;
 
     private PApply(@NotNull PApplyBuilder builder) {
-        super(calculateHashes(builder.functionPortion,
-                builder.arguments.iterator()), builder.applicationType,
+        super(calculateHashes(builder.functionPortion, builder.arguments.iterator()),
+                builder.applicationType,
                 //no; builder.applicationType won't be null; this is checked in PApply:build()
                 builder.functionPortion.getProgType());
         this.functionPortion = builder.functionPortion;
@@ -240,8 +216,7 @@ public class PApply extends PExp {
      */
     @NotNull
     @Override
-    public PExp substitute(
-            @NotNull Map<PExp, PExp> substitutions) {
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result;
         if (substitutions.containsKey(this)) {
             result = substitutions.get(this);
@@ -280,14 +255,12 @@ public class PApply extends PExp {
 
     @Override
     public boolean isEquality() {
-        return arguments.size() == 2 &&
-                functionPortion.getCanonicalName().equals("=");
+        return arguments.size() == 2 && functionPortion.getCanonicalName().equals("=");
     }
 
     @Override
     public boolean isConjunct() {
-        return arguments.size() == 2 &&
-                functionPortion.getCanonicalName().equals("and");
+        return arguments.size() == 2 && functionPortion.getCanonicalName().equals("and");
     }
 
     @NotNull
@@ -307,10 +280,8 @@ public class PApply extends PExp {
     }
 
     @Override
-    protected void splitIntoConjuncts(
-            @NotNull List<PExp> accumulator) {
-        if (arguments.size() == 2 &&
-                functionPortion.getCanonicalName().equals("and")) {
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
+        if (arguments.size() == 2 && functionPortion.getCanonicalName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }
@@ -386,16 +357,13 @@ public class PApply extends PExp {
     }
 
     @Override
-    protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
         if (!excludeApplications) {
-            result.addAll(functionPortion
-                    .getSymbolNames(false, excludeLiterals));
+            result.addAll(functionPortion.getSymbolNames(false, excludeLiterals));
         }
         for (PExp argument : arguments) {
-            result.addAll(argument.getSymbolNames(excludeApplications,
-                    excludeLiterals));
+            result.addAll(argument.getSymbolNames(excludeApplications, excludeLiterals));
         }
         return result;
     }
@@ -424,8 +392,7 @@ public class PApply extends PExp {
         v.endPExp(this);
     }
 
-    protected static HashDuple calculateHashes(@NotNull PExp functionPortion,
-                                               @NotNull Iterator<PExp> args) {
+    protected static HashDuple calculateHashes(@NotNull PExp functionPortion, @NotNull Iterator<PExp> args) {
         int structureHash = 0;
         int valueHash = functionPortion.valueHash;
 
@@ -452,8 +419,7 @@ public class PApply extends PExp {
         boolean result = (o instanceof PApply);
         if (result) {
             PApply oAsPApply = (PApply) o;
-            result = (oAsPApply.valueHash == valueHash)
-                    && functionPortion.equals(oAsPApply.functionPortion);
+            result = (oAsPApply.valueHash == valueHash) && functionPortion.equals(oAsPApply.functionPortion);
 
             if (result) {
                 Iterator<PExp> localArgs = arguments.iterator();
@@ -476,11 +442,11 @@ public class PApply extends PExp {
     }
 
     /**
-     * A mutable, under-construction version of {@code PApply} capable of being
-     * incrementally built-up through chained calls to 'builder' methods.
+     * A mutable, under-construction version of {@code PApply} capable of being incrementally built-up through
+     * chained calls to 'builder' methods.
      * <p>
-     * When the building is complete, an immutable {@code PApply} instance can
-     * be obtained through a call to {@link PApplyBuilder#build()}.</p>
+     * When the building is complete, an immutable {@code PApply} instance can be obtained through a call to
+     * {@link PApplyBuilder#build()}.</p>
      */
     public static class PApplyBuilder implements Utils.Builder<PApply> {
 
@@ -500,12 +466,13 @@ public class PApply extends PExp {
         }
 
         /**
-         * The {@code isBracketBasedApp} parameter tells the display
-         * style to use square brackets when rendering a prefix function app,
-         * rather than the traditional parens (which is default)
+         * The {@code isBracketBasedApp} parameter tells the display style to use square brackets when rendering a
+         * prefix function app, rather than the traditional parens (which is default).
+         * <p>
+         * So, for example, the function {@code f} applied to {@code x} would read {@code f(x)} if
+         * {@code isBrackedBasedApp == false}; as opposed to {@code f[x]} otherwise.</p>
          */
-        public PApplyBuilder style(@NotNull DisplayStyle s,
-                                   boolean isBracketBasedApp) {
+        public PApplyBuilder style(@NotNull DisplayStyle s, boolean isBracketBasedApp) {
             this.displayStyle = s;
             this.bracketApp = isBracketBasedApp;
             return this;
@@ -530,8 +497,7 @@ public class PApply extends PExp {
         @NotNull
         public PApply build() {
             if (applicationType == null) {
-                throw new IllegalStateException("can't build PApply " +
-                        "with mathAppClssfctn==null");
+                throw new IllegalStateException("can't build PApply with mathAppClssfctn==null");
             }
             return new PApply(this);
         }

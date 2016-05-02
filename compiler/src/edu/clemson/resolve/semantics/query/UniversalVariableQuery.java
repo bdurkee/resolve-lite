@@ -12,9 +12,7 @@ import java.util.Map;
 import static edu.clemson.resolve.semantics.MathSymbolTable.FacilityStrategy.FACILITY_IGNORE;
 import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPORT_NONE;
 
-public class UniversalVariableQuery
-        implements
-        MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
+public class UniversalVariableQuery implements MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
 
     public static final MultimatchSymbolQuery<MathClssftnWrappingSymbol> INSTANCE =
             (MultimatchSymbolQuery<MathClssftnWrappingSymbol>) new UniversalVariableQuery();
@@ -23,10 +21,8 @@ public class UniversalVariableQuery
     private final BaseSymbolQuery<MathClssftnWrappingSymbol> baseQuery;
 
     private UniversalVariableQuery() {
-        this.baseQuery =
-                new BaseSymbolQuery<MathClssftnWrappingSymbol>(new UnqualifiedPath(
-                        IMPORT_NONE, FACILITY_IGNORE, false),
-                        new UniversalVariableSearcher());
+        this.baseQuery = new BaseSymbolQuery<MathClssftnWrappingSymbol>(
+                new UnqualifiedPath(IMPORT_NONE, FACILITY_IGNORE, false), new UniversalVariableSearcher());
     }
 
     @Override
@@ -43,20 +39,17 @@ public class UniversalVariableQuery
         return result;
     }
 
-    private static class UniversalVariableSearcher
-            implements
-            MultimatchTableSearcher<MathClssftnWrappingSymbol> {
+    private static class UniversalVariableSearcher implements MultimatchTableSearcher<MathClssftnWrappingSymbol> {
 
         @Override
-        public boolean addMatches(
-                @NotNull Map<String, Symbol> entries,
-                @NotNull List<MathClssftnWrappingSymbol> matches,
-                @NotNull SearchContext l) throws UnexpectedSymbolException {
+        public boolean addMatches(@NotNull Map<String, Symbol> entries,
+                                  @NotNull List<MathClssftnWrappingSymbol> matches,
+                                  @NotNull SearchContext l)
+                throws UnexpectedSymbolException {
 
             for (Symbol symbol : entries.values()) {
                 if (symbol instanceof MathClssftnWrappingSymbol &&
-                        ((MathClssftnWrappingSymbol) symbol).getQuantification() ==
-                                Quantification.UNIVERSAL) {
+                        ((MathClssftnWrappingSymbol) symbol).getQuantification() == Quantification.UNIVERSAL) {
                     matches.add(symbol.toMathSymbol());
                 }
             }

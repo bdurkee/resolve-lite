@@ -15,8 +15,7 @@ public class ProgRecordType extends ProgType {
     @NotNull
     private MathClassification mathTypeAlterEgo;
 
-    public ProgRecordType(@NotNull DumbTypeGraph g,
-                          @NotNull Map<String, ProgType> types) {
+    public ProgRecordType(@NotNull DumbTypeGraph g, @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
         List<MathCartesianClassification.Element> eles = new ArrayList<>();
@@ -56,16 +55,14 @@ public class ProgRecordType extends ProgType {
 
     @NotNull
     @Override
-    public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+    public ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                        @NotNull FacilitySymbol instantiatingFacility) {
 
         Map<String, ProgType> newFields = new HashMap<>();
         for (Map.Entry<String, ProgType> type : fields.entrySet()) {
             newFields.put(
                     type.getKey(),
-                    type.getValue().instantiateGenerics(genericInstantiations,
-                            instantiatingFacility));
+                    type.getValue().instantiateGenerics(genericInstantiations, instantiatingFacility));
         }
         return new ProgRecordType(getTypeGraph(), newFields);
     }

@@ -6,10 +6,7 @@ import edu.clemson.resolve.semantics.MathClassification;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * A container for a piecewise collection of conditional functions followed by
- * a default, otherwise clause.
- */
+/** A container for a piecewise collection of conditional functions followed by a default, otherwise clause. */
 public class PAlternatives extends PExp {
 
     private final List<Alternative> alternatives;
@@ -60,8 +57,7 @@ public class PAlternatives extends PExp {
 
     private void sanityCheckConditions(List<PExp> conditions) {
         for (PExp condition : conditions) {
-            if (!condition
-                    .typeMatches(condition.getMathType().getTypeGraph().BOOLEAN)) {
+            if (!condition.typeMatches(condition.getMathType().getTypeGraph().BOOLEAN)) {
                 throw new IllegalArgumentException("AlternativeExps with "
                         + "non-boolean-typed conditions are not accepted "
                         + "by the prover. \n\t" + condition + " has type "
@@ -109,8 +105,7 @@ public class PAlternatives extends PExp {
     }
 
     @Override
-    protected void splitIntoConjuncts(
-            @NotNull List<PExp> accumulator) {
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
     }
 
@@ -130,8 +125,7 @@ public class PAlternatives extends PExp {
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        throw new UnsupportedOperationException("This method has not yet "
-                + "been implemented.");
+        throw new UnsupportedOperationException("This method has not yet been implemented.");
     }
 
     @NotNull
@@ -158,9 +152,7 @@ public class PAlternatives extends PExp {
         else {
             List<PExp> substitutedConditions = new ArrayList<>();
             List<PExp> substitutedResults = new ArrayList<>();
-            PExp substitutedOtherwiseResult =
-                    otherwiseClauseResult.substitute(substitutions);
-
+            PExp substitutedOtherwiseResult = otherwiseClauseResult.substitute(substitutions);
             for (Alternative alt : alternatives) {
                 substitutedConditions.add(alt.condition.substitute(substitutions));
                 substitutedResults.add(alt.result.substitute(substitutions));
@@ -177,9 +169,7 @@ public class PAlternatives extends PExp {
         boolean result = false;
 
         for (Alternative a : alternatives) {
-            result |=
-                    a.condition.containsName(name)
-                            || a.result.containsName(name);
+            result |=  a.condition.containsName(name) || a.result.containsName(name);
         }
         return result || otherwiseClauseResult.containsName(name);
     }
@@ -200,26 +190,22 @@ public class PAlternatives extends PExp {
     public boolean equals(Object o) {
         boolean result = o instanceof PAlternatives;
         if (result) {
-            result = otherwiseClauseResult.equals(((PAlternatives) o)
-                    .otherwiseClauseResult);
-            result &= alternatives.size() ==
-                    ((PAlternatives) o).alternatives.size();
+            result = otherwiseClauseResult.equals(((PAlternatives) o).otherwiseClauseResult);
+            result &= alternatives.size() == ((PAlternatives) o).alternatives.size();
             //now compare the actual alternatives exps
             Iterator<Alternative> thisAltIter = alternatives.iterator();
             Iterator<Alternative> oAltIter = ((PAlternatives) o).alternatives.iterator();
             while (result && thisAltIter.hasNext()) {
                 Alternative oAlt = oAltIter.next();
                 Alternative thisAlt = thisAltIter.next();
-                result = oAlt.condition.equals(thisAlt.condition) &&
-                        oAlt.result.equals(thisAlt.result);
+                result = oAlt.condition.equals(thisAlt.condition) && oAlt.result.equals(thisAlt.result);
             }
         }
         return result;
     }
 
     @Override
-    public Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    public Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
 
         for (Alternative a : alternatives) {

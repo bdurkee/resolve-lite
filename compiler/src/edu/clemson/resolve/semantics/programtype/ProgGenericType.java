@@ -27,15 +27,13 @@ public class ProgGenericType extends ProgType {
     @NotNull
     @Override
     public MathClassification toMath() {
-        return new MathNamedClassification(getTypeGraph(), name,
-                g.SSET.typeRefDepth - 1, g.SSET);
+        return new MathNamedClassification(getTypeGraph(), name, g.SSET.typeRefDepth - 1, g.SSET);
     }
 
     @NotNull
     @Override
-    public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+    public ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                        @NotNull FacilitySymbol instantiatingFacility) {
         ProgType result = this;
         if (genericInstantiations.containsKey(this.name)) {
             result = genericInstantiations.get(this.name);
