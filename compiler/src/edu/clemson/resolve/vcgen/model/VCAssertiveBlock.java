@@ -35,14 +35,14 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
         public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
             Map<PExp, PExp> result = facilitySpecializations.get(facility);
-            if ( result==null ) result = new HashMap<>();
+            if (result == null) result = new HashMap<>();
             return result;
         }
 
         public VCAssertiveBlockBuilder(DumbTypeGraph g, Scope s,
                                        String description,
                                        ParserRuleContext ctx) {
-            if ( s==null ) {
+            if (s == null) {
                 throw new IllegalArgumentException(
                         "passed null scope to vc assertive " +
                                 "block for: " + description);
@@ -66,7 +66,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
-            if ( assume==null ) {
+            if (assume == null) {
                 return this;
             }
             //stats.add(new VCAssume(this,
@@ -87,7 +87,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder confirm(PExp confirm) {
-            if ( confirm==null ) {
+            if (confirm == null) {
                 confirm = g.getTrueExp();
             }
             stats.add(new VCConfirm(this, confirm));
@@ -95,7 +95,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
-            if ( confirm==null ) {
+            if (confirm == null) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
             this.finalConfirm = new VCConfirm(this, confirm);
@@ -103,8 +103,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {
-            for ( VCRuleBackedStat stat : e ) {
-                if ( stat==null ) {
+            for (VCRuleBackedStat stat : e) {
+                if (stat == null) {
                     throw new IllegalArgumentException("null rule app stat");
                 }
                 stats.add(stat);
@@ -134,7 +134,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         @Override
         public VCAssertiveBlock build() {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
-            while ( !stats.isEmpty() ) {
+            while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
                 applicationSteps.add(new RuleApplicationStep(currentStat
                         .reduce(), currentStat.getApplicationDescription()));

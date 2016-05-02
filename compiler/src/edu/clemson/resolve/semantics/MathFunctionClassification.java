@@ -65,9 +65,10 @@ public class MathFunctionClassification extends MathClassification {
         this.paramNames.addAll(paramNames);
         this.domainType = buildParameterType(g, paramNames, paramTypes);
 
-        if ( applyFactory==null ) {
+        if (applyFactory == null) {
             this.applicationFactory = DEFAULT_FACTORY;
-        } else {
+        }
+        else {
             this.applicationFactory = applyFactory;
         }
         this.typeRefDepth = range.typeRefDepth;
@@ -86,11 +87,11 @@ public class MathFunctionClassification extends MathClassification {
                 result = paramTypes.get(0);
                 break;
             default:
-                List<Element> elements = new LinkedList<Element>();
+                List<Element> elements = new LinkedList<>();
 
                 Iterator<String> namesIter = paramNames.iterator();
                 Iterator<MathClassification> typesIter = paramTypes.iterator();
-                while ( namesIter.hasNext() ) {
+                while (namesIter.hasNext()) {
                     elements.add(new Element(namesIter.next(), typesIter.next()));
                 }
                 result = new MathCartesianClassification(g, elements);
@@ -101,7 +102,7 @@ public class MathFunctionClassification extends MathClassification {
     private static List<MathClassification> expandAsNeeded(
             @NotNull List<MathClassification> t) {
         List<MathClassification> result = new ArrayList<>();
-        for ( MathClassification c : t ) {
+        for (MathClassification c : t) {
             result.addAll(expandAsNeeded(c));
         }
         return result;
@@ -111,16 +112,16 @@ public class MathFunctionClassification extends MathClassification {
             @NotNull MathClassification t) {
         List<MathClassification> result = new ArrayList<>();
 
-        if ( t instanceof MathCartesianClassification ) {
-            MathCartesianClassification domainAsMTCartesian =
-                    (MathCartesianClassification) t;
+        if (t instanceof MathCartesianClassification) {
+            MathCartesianClassification domainAsMTCartesian = (MathCartesianClassification) t;
 
             int size = domainAsMTCartesian.size();
-            for ( int i = 0; i<size; i++ ) {
+            for (int i = 0; i < size; i++) {
                 result.add(domainAsMTCartesian.getFactor(i));
             }
-        } else {
-            if ( !t.equals(t.getTypeGraph().VOID) ) {
+        }
+        else {
+            if (!t.equals(t.getTypeGraph().VOID)) {
                 result.add(t);
             }
         }
@@ -159,7 +160,7 @@ public class MathFunctionClassification extends MathClassification {
         Map<String, MathClassification> bindingsSoFar = new HashMap<>();
         Iterator<MathClassification> argTypeIter = argTypes.iterator();
 
-        for ( MathClassification formalParameterType : paramTypes ) {
+        for (MathClassification formalParameterType : paramTypes) {
             formalParameterType =
                     formalParameterType
                             .withVariablesSubstituted(bindingsSoFar);
@@ -168,7 +169,7 @@ public class MathFunctionClassification extends MathClassification {
             //length, see above
             MathClassification argumentType = argTypeIter.next();
 
-            if ( formalParameterType.containsSchematicType() ) {
+            if (formalParameterType.containsSchematicType()) {
 
                 Map<String, MathClassification> iterationBindings =
                         new HashMap<>();
@@ -194,23 +195,23 @@ public class MathFunctionClassification extends MathClassification {
                      @NotNull Map<String, MathClassification> bindingsAccumulator)
             throws BindingException {
 
-        if ( t2.identifiesSchematicType ) {
+        if (t2.identifiesSchematicType) {
             //attempt to bind concrete t1 to template type t2
-            if ( g.isSubtype(t1, t2.getEnclosingClassification()) ) {
-                if ( t2 instanceof MathNamedClassification &&
-                        !containsBinding(t1, bindingsAccumulator) ) {
+            if (g.isSubtype(t1, t2.getEnclosingClassification())) {
+                if (t2 instanceof MathNamedClassification &&
+                        !containsBinding(t1, bindingsAccumulator)) {
                     bindingsAccumulator.put(((MathNamedClassification) t2).tag, t1);
                 }
             }
         }
         List<MathClassification> t1Components = t1.getComponentTypes();
         List<MathClassification> t2Components = t2.getComponentTypes();
-        if ( t1Components.size()!=t2Components.size() )
+        if (t1Components.size() != t2Components.size())
             return;//throw new BindingException(t1, t2);
 
         Iterator<MathClassification> t1Iter = t1Components.iterator();
         Iterator<MathClassification> t2Iter = t2Components.iterator();
-        while ( t1Iter.hasNext() ) {
+        while (t1Iter.hasNext()) {
             bind(t1Iter.next(), t2Iter.next(), bindingsAccumulator);
         }
     }

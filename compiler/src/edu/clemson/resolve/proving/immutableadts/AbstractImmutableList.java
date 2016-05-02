@@ -28,11 +28,13 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     public ImmutableList<E> removed(int index) {
         ImmutableList<E> retval;
 
-        if ( index==0 ) {
+        if (index == 0) {
             retval = tail(1);
-        } else if ( index==size() - 1 ) {
+        }
+        else if (index == size() - 1) {
             retval = head(index);
-        } else {
+        }
+        else {
             retval =
                     new ImmutableListConcatenation<E>(head(index),
                             tail(index + 1));
@@ -46,13 +48,15 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         ImmutableList<E> first, second;
         ImmutableList<E> insertedList = new SingletonImmutableList<E>(e);
 
-        if ( index==0 ) {
+        if (index == 0) {
             first = insertedList;
             second = tail(1);
-        } else if ( index==size() - 1 ) {
+        }
+        else if (index == size() - 1) {
             first = head(index);
             second = insertedList;
-        } else {
+        }
+        else {
             first =
                     new ImmutableListConcatenation<E>(head(index), insertedList);
             second = tail(index + 1);
@@ -69,13 +73,15 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
     public ImmutableList<E> insert(int index, ImmutableList<E> l) {
         ImmutableList<E> first, second;
 
-        if ( index==0 ) {
+        if (index == 0) {
             first = l;
             second = this;
-        } else if ( index==size() ) {
+        }
+        else if (index == size()) {
             first = this;
             second = l;
-        } else {
+        }
+        else {
             first = new ImmutableListConcatenation<E>(head(index), l);
             second = tail(index);
         }
@@ -95,8 +101,8 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
 
         boolean first = true;
         Iterator<E> iterator = iterator();
-        while ( iterator.hasNext() ) {
-            if ( !first ) {
+        while (iterator.hasNext()) {
+            if (!first) {
                 buffer.append(", ");
             }
             buffer.append(iterator.next());
@@ -104,7 +110,7 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
             sizeSanityCheck++;
         }
         buffer.append("]");
-        if ( sizeSanityCheck!=size() ) {
+        if (sizeSanityCheck != size()) {
             throw new RuntimeException();
         }
         return buffer.toString();

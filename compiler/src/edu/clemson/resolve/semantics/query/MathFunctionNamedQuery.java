@@ -39,7 +39,7 @@ public class MathFunctionNamedQuery
             throw new RuntimeException(dse);
         }
         List<MathClssftnWrappingSymbol> resultingList = new ArrayList<>();
-        for ( Symbol sym : intermediateList ) {
+        for (Symbol sym : intermediateList) {
             resultingList.add(sym.toMathSymbol());
         }
         return resultingList;

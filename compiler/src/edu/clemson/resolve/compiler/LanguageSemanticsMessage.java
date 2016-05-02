@@ -43,7 +43,7 @@ public class LanguageSemanticsMessage extends RESOLVEMessage {
     public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken,
                                     Object... args) {
         super(etype, offendingToken, args);
-        if ( offendingToken!=null ) {
+        if (offendingToken != null) {
             this.fileName =
                     Utils.groomFileName(offendingToken.getTokenSource()
                             .getSourceName());

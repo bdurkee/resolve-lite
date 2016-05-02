@@ -27,7 +27,7 @@ public class FunctionAssignApplicationStrategy
         PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 
-        if ( !(rightReplacer.isFunctionApplication()) ) {
+        if (!(rightReplacer.isFunctionApplication())) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
             block.finalConfirm(workingConfirm.substitute(leftReplacee,
                     rightReplacer));
@@ -53,7 +53,7 @@ public class FunctionAssignApplicationStrategy
         block.confirm(opRequires.substitute(formals, actuals));
 
         PExp opEnsures = op.getEnsures();
-        if ( opEnsures.isObviouslyTrue() ) return block.snapshot();
+        if (opEnsures.isObviouslyTrue()) return block.snapshot();
 
         //TODO: We had better check the form of the ensures clauses on ops
         //that return something. Should just be an equality: <opname> = <expr>;
@@ -61,7 +61,7 @@ public class FunctionAssignApplicationStrategy
 
         //update our list of formal params to account for incoming-valued refs
         //to themselves in the ensures clause
-        for ( PSymbol f : ensuresRight.getIncomingVariables() ) {
+        for (PSymbol f : ensuresRight.getIncomingVariables()) {
             Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
         }
 

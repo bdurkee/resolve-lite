@@ -144,8 +144,8 @@ public abstract class Symbol {
 
         Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();
 
-        for ( Map.Entry<String, ProgType> instantiation : genericInstantiations
-                .entrySet() ) {
+        for (Map.Entry<String, ProgType> instantiation : genericInstantiations
+                .entrySet()) {
             genericMathematicalInstantiations.put(instantiation.getKey(),
                     instantiation.getValue().toMath());
         }

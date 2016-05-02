@@ -17,35 +17,30 @@ import java.util.Set;
 public interface Scope {
 
     @NotNull
-    public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query)
+    public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException;
 
     @NotNull
-    public <E extends Symbol> E queryForOne(
-            @NotNull SymbolQuery<E> query) throws NoSuchSymbolException,
+    public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query) throws NoSuchSymbolException,
             DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException;
 
-    public <E extends Symbol> boolean addMatches(
-            @NotNull TableSearcher<E> searcher,
-            @NotNull List<E> matches, @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility,
-            @NotNull SearchContext l)
+    public <E extends Symbol> boolean addMatches(@NotNull TableSearcher<E> searcher,
+                                                 @NotNull List<E> matches,
+                                                 @NotNull Set<Scope> searchedScopes,
+                                                 @NotNull Map<String, ProgType> genericInstantiations,
+                                                 @Nullable FacilitySymbol instantiatingFacility,
+                                                 @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;
 
     @NotNull
-    public <E extends Symbol> List<E> getMatches(
-            @NotNull TableSearcher<E> searcher, @NotNull SearchContext l)
+    public <E extends Symbol> List<E> getMatches(@NotNull TableSearcher<E> searcher, @NotNull SearchContext l)
             throws DuplicateSymbolException, UnexpectedSymbolException;
 
     @NotNull
-    public Symbol define(@NotNull Symbol s)
-            throws DuplicateSymbolException;
+    public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException;
 
     @NotNull
-    public <T extends Symbol> List<T> getSymbolsOfType(
-            @NotNull Class<T> type);
+    public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type);
 
     @NotNull
     public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types);

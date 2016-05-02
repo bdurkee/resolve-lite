@@ -57,7 +57,7 @@ public class PTRepresentation extends ProgNamedType {
 
     @Nullable
     public TypeModelSymbol getFamily() throws NoSuchElementException {
-        if ( family==null ) {
+        if (family == null) {
             throw new NoSuchElementException("no family found for this " +
                     "representation: " + toString());
         }
@@ -66,7 +66,7 @@ public class PTRepresentation extends ProgNamedType {
 
     @NotNull
     public String getExemplarName() {
-        if ( family!=null ) {
+        if (family != null) {
             return family.getExemplar().getName();
         }
         return name.substring(0, 1);
@@ -75,7 +75,7 @@ public class PTRepresentation extends ProgNamedType {
     @NotNull
     @Override
     public MathClassification toMath() {
-        if ( baseType==null ) return g.INVALID;
+        if (baseType == null) return g.INVALID;
         return baseType.toMath();
     }
 
@@ -87,7 +87,7 @@ public class PTRepresentation extends ProgNamedType {
     @Override
     public boolean acceptableFor(@NotNull ProgType t) {
         boolean result = super.acceptableFor(t);
-        if ( !result && family!=null ) {
+        if (!result && family != null) {
             result = family.getProgramType().acceptableFor(t);
         }
         return result;

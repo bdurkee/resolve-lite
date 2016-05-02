@@ -18,44 +18,36 @@ public class QualifiedPath implements ScopeSearchPath {
     private final Token qualifier;
     private final boolean instantiateGenerics;
 
-    public QualifiedPath(@NotNull Token qualifier,
-                         @NotNull FacilityStrategy facilityStrategy) {
-        this.instantiateGenerics =
-                facilityStrategy==FacilityStrategy.FACILITY_INSTANTIATE;
+    public QualifiedPath(@NotNull Token qualifier, @NotNull FacilityStrategy facilityStrategy) {
+        this.instantiateGenerics = facilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE;
         this.qualifier = qualifier;
     }
 
     @Override
     @NotNull
-    public <E extends Symbol> List<E> searchFromContext(
-            @NotNull TableSearcher<E> searcher, @NotNull Scope source,
-            @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException,
-            UnexpectedSymbolException {
+    public <E extends Symbol> List<E> searchFromContext(@NotNull TableSearcher<E> searcher,
+                                                        @NotNull Scope source,
+                                                        @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException {
         List<E> result = new ArrayList<>();
         try {
             FacilitySymbol facility =
-                    (FacilitySymbol) source
-                            .queryForOne(new UnqualifiedNameQuery(
-                                    qualifier.getText()));
+                    (FacilitySymbol) source.queryForOne(new UnqualifiedNameQuery(qualifier.getText()));
 
-            Scope facilityScope = facility.getFacility().getSpecification() //
+            Scope facilityScope = facility.getFacility()
+                    .getSpecification()
                     .getScope(instantiateGenerics);
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
             //Dtw returnEnsuresArgSubstitutions:
-            for ( ModuleParameterization enh : facility.getEnhancements() ) {
+            for (ModuleParameterization enh : facility.getEnhancements()) {
                 Scope enhScope = enh.getScope(instantiateGenerics);
                 result.addAll(enhScope.getMatches(searcher,
                         SearchContext.FACILITY));
             }
         } catch (NoSuchSymbolException | ClassCastException e) {
             //then perhaps it identifies a module..
-            ModuleScopeBuilder moduleScope =
-                    repo.getModuleScope(new ModuleIdentifier(qualifier));
-            result =
-                    moduleScope.getMatches(searcher,
-                            TableSearcher.SearchContext.IMPORT);
-
+            ModuleScopeBuilder moduleScope = repo.getModuleScope(new ModuleIdentifier(qualifier));
+            result = moduleScope.getMatches(searcher, TableSearcher.SearchContext.IMPORT);
         }
         return result;
     }

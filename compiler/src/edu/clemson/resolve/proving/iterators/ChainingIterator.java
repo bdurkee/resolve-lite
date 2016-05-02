@@ -12,7 +12,7 @@ public class ChainingIterator<T> implements Iterator<T> {
 
     public ChainingIterator(Iterator<T> start, Iterator<T> end) {
         //TODO : This can be removed to increase performance
-        if ( start==null || end==null ) {
+        if (start == null || end == null) {
             throw new IllegalArgumentException();
         }
         myStartIterator = start;
@@ -20,7 +20,7 @@ public class ChainingIterator<T> implements Iterator<T> {
     }
 
     public boolean hasNext() {
-        if ( myStartHasNext ) {
+        if (myStartHasNext) {
             myStartHasNext = myStartIterator.hasNext();
         }
         return (myStartHasNext || myEndIterator.hasNext());
@@ -28,13 +28,14 @@ public class ChainingIterator<T> implements Iterator<T> {
 
     public T next() {
         T retval;
-        if ( !hasNext() ) {
+        if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        if ( myStartHasNext ) {
+        if (myStartHasNext) {
             retval = myStartIterator.next();
             myLastFromStartFlag = true;
-        } else {
+        }
+        else {
             retval = myEndIterator.next();
             myLastFromStartFlag = false;
         }
@@ -42,9 +43,10 @@ public class ChainingIterator<T> implements Iterator<T> {
     }
 
     public void remove() {
-        if ( myLastFromStartFlag ) {
+        if (myLastFromStartFlag) {
             myStartIterator.remove();
-        } else {
+        }
+        else {
             myEndIterator.remove();
         }
     }

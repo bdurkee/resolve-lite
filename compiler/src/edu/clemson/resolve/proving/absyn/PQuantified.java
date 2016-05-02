@@ -123,7 +123,7 @@ public class PQuantified extends PExp {
     public String toString() {
         List<String> symNames = declaredSymbols.stream()
                 .map(d -> d.name).collect(Collectors.toList());
-        String qType = quantificationType==Quantification.UNIVERSAL ?
+        String qType = quantificationType == Quantification.UNIVERSAL ?
                 "∀" : "∃";
         return qType + " " + Utils.join(symNames, ", ") + ":" +
                 declaredSymbols.get(0).type + " " + assertion.toString();
@@ -132,7 +132,7 @@ public class PQuantified extends PExp {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PQuantified);
-        if ( result ) {
+        if (result) {
             result = assertion.equals(o);
         }
         return result;

@@ -18,50 +18,50 @@ public class ProgParameterSymbol extends Symbol {
         ALTERS {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ ALTERS, CLEARS };
+                return new ParameterMode[]{ALTERS, CLEARS};
             }
         },
         UPDATES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ UPDATES, CLEARS, RESTORES,
-                        PRESERVES };
+                return new ParameterMode[]{UPDATES, CLEARS, RESTORES,
+                        PRESERVES};
             }
         },
         REPLACES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ REPLACES, CLEARS };
+                return new ParameterMode[]{REPLACES, CLEARS};
             }
         },
         CLEARS {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ CLEARS };
+                return new ParameterMode[]{CLEARS};
             }
         },
         RESTORES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ RESTORES, PRESERVES };
+                return new ParameterMode[]{RESTORES, PRESERVES};
             }
         },
         PRESERVES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ PRESERVES };
+                return new ParameterMode[]{PRESERVES};
             }
         },
         EVALUATES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ EVALUATES };
+                return new ParameterMode[]{EVALUATES};
             }
         },
         TYPE {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{ TYPE };
+                return new ParameterMode[]{TYPE};
             }
         };
 
@@ -73,7 +73,7 @@ public class ProgParameterSymbol extends Symbol {
             boolean result = false;
             int i = 0;
             int osLength = os.length;
-            while ( !result && i<osLength ) {
+            while (!result && i < osLength) {
                 result = os[i].equals(o);
                 i++;
             }
@@ -86,7 +86,7 @@ public class ProgParameterSymbol extends Symbol {
     public static Map<String, ParameterMode> getModeMapping() {
         Map<String, ParameterMode> result = new HashMap<>();
         ParameterMode[] modes = ParameterMode.values();
-        for ( ParameterMode mode : modes ) {
+        for (ParameterMode mode : modes) {
             result.put(mode.toString().toLowerCase(), mode);
         }
         return Collections.unmodifiableMap(result);
@@ -113,11 +113,12 @@ public class ProgParameterSymbol extends Symbol {
         this.mode = mode;
 
         this.mathSymbolAlterEgo = null;
-        if ( mode==ParameterMode.TYPE ) {
+        if (mode == ParameterMode.TYPE) {
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE, type.toMath(),
                             definingTree, moduleIdentifier);
-        } else {
+        }
+        else {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
@@ -173,10 +174,11 @@ public class ProgParameterSymbol extends Symbol {
             throws UnexpectedSymbolException {
         ProgTypeSymbol result = null;
 
-        if ( !mode.equals(ParameterMode.TYPE) ) {
+        if (!mode.equals(ParameterMode.TYPE)) {
             //This will throw an appropriate error
             result = super.toProgTypeSymbol();
-        } else {
+        }
+        else {
             result =
                     new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
                             typeGraph, getName()),

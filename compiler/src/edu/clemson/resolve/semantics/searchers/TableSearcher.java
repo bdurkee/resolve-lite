@@ -42,6 +42,7 @@ public interface TableSearcher<E extends Symbol> {
      * @param entries The symbol table entries to consider.
      * @param matches A non-{@code null} accumulator of matches.
      * @param l       The context from which {@code entries} was drawn.
+     *
      * @return {@code true} if {@code matches} now represents a
      * final list of search results&mdash;i.e., no further symbol table
      * entries should be considered. {@code false} indicates that

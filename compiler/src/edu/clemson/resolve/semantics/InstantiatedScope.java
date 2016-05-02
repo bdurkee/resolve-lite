@@ -14,17 +14,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An {@code InstantiatedScope} decorates an existing {@link Scope Scope} such
- * that calls to {@link Scope#addMatches addMatches()}, the search method to
- * which all others defer, are augmented with an additional set of generic
- * instantiations and an instantiating facility.
+ * An {@code InstantiatedScope} decorates an existing {@link Scope Scope} such that calls to
+ * {@link Scope#addMatches addMatches()}, the search method to which all others defer, are augmented with an additional
+ * set of generic instantiations and an instantiating facility.
  */
 public class InstantiatedScope extends AbstractScope {
 
     private final Scope baseScope;
     private final FacilitySymbol instantiatingFacility;
-    private final Map<String, ProgType> additionalGenericInstantiations =
-            new HashMap<>();
+    private final Map<String, ProgType> additionalGenericInstantiations = new HashMap<>();
 
     public InstantiatedScope(Scope baseScope,
                              Map<String, ProgType> genericInstantiations,
@@ -36,32 +34,28 @@ public class InstantiatedScope extends AbstractScope {
 
     @NotNull
     @Override
-    public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query)
+    public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException {
         return baseScope.query(query);
     }
 
     @NotNull
     @Override
-    public <E extends Symbol> E queryForOne(
-            @NotNull SymbolQuery<E> query)
-            throws NoSuchSymbolException,
-            DuplicateSymbolException, NoSuchModuleException,
-            UnexpectedSymbolException {
+    public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query)
+            throws NoSuchSymbolException, DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException {
         return baseScope.queryForOne(query);
     }
 
     @Override
     public <E extends Symbol> boolean
-    addMatches(@NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
+    addMatches(@NotNull TableSearcher<E> searcher,
+               @NotNull List<E> matches,
                @NotNull Set<Scope> searchedScopes,
                @NotNull Map<String, ProgType> genericInstantiations,
                FacilitySymbol facilityInstantiation,
-               @NotNull TableSearcher.SearchContext l)
-            throws DuplicateSymbolException, UnexpectedSymbolException {
+               @NotNull TableSearcher.SearchContext l) throws DuplicateSymbolException, UnexpectedSymbolException {
 
-        if ( facilityInstantiation!=null ) {
+        if (facilityInstantiation != null) {
             //It's unclear how this could happen or what it would mean, so we
             //fail fast.  If an example triggers this, we need to think
             //carefully about what it would mean.
@@ -74,22 +68,19 @@ public class InstantiatedScope extends AbstractScope {
 
     @NotNull
     @Override
-    public <T extends Symbol> List<T> getSymbolsOfType(
-            @NotNull Class<T> type) {
+    public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type) {
         return baseScope.getSymbolsOfType(type);
     }
 
     @NotNull
     @Override
-    public List<Symbol> getSymbolsOfType(
-            @NotNull Class<?>... type) {
+    public List<Symbol> getSymbolsOfType(@NotNull Class<?>... type) {
         return baseScope.getSymbolsOfType(type);
     }
 
     @NotNull
     @Override
-    public Symbol define(@NotNull Symbol s)
-            throws DuplicateSymbolException {
+    public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException {
         return baseScope.define(s);
     }
 

@@ -15,8 +15,8 @@ public class FacilityImplModule extends Module {
     }
 
     public String getDefinedMain() {
-        for ( FunctionDef f : funcImpls ) {
-            if ( f.name.equalsIgnoreCase("main") ) {
+        for (FunctionDef f : funcImpls) {
+            if (f.name.equalsIgnoreCase("main")) {
                 return f.name;
             }
         }

@@ -38,14 +38,14 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
                               @NotNull SearchContext l)
             throws DuplicateSymbolException {
 
-        if ( entries.containsKey(queryName) ) {
+        if (entries.containsKey(queryName)) {
             try {
                 OperationSymbol operation =
                         entries.get(queryName).toOperationSymbol();
 
-                if ( argumentsMatch(operation.getParameters()) ) {
+                if (argumentsMatch(operation.getParameters())) {
                     //We have a match at this point
-                    if ( !matches.isEmpty() ) {
+                    if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
                     matches.add(operation);
@@ -59,15 +59,15 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
     private boolean argumentsMatch(
             @NotNull List<ProgParameterSymbol> formalParameters) {
 
-        boolean result = (formalParameters.size()==actualArgTypes.size());
+        boolean result = (formalParameters.size() == actualArgTypes.size());
 
-        if ( result ) {
+        if (result) {
             Iterator<ProgParameterSymbol> formalParametersIter =
                     formalParameters.iterator();
             Iterator<ProgType> actualArgumentTypeIter = actualArgTypes.iterator();
 
             ProgType actualArgumentType, formalParameterType;
-            while ( result && formalParametersIter.hasNext() ) {
+            while (result && formalParametersIter.hasNext()) {
                 actualArgumentType = actualArgumentTypeIter.next();
                 formalParameterType =
                         formalParametersIter.next().getDeclaredType();

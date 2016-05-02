@@ -26,13 +26,11 @@ public class ModuleParameterization {
     }
 
     @NotNull
-    public Scope getScope(boolean instantiated)
-            throws NoSuchModuleException {
-        ModuleScopeBuilder originalScope =
-                scopeRepo.getModuleScope(moduleIdentifier);
+    public Scope getScope(boolean instantiated) throws NoSuchModuleException {
+        ModuleScopeBuilder originalScope = scopeRepo.getModuleScope(moduleIdentifier);
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
-        if ( instantiated ) {
+        if (instantiated) {
             Map<String, ProgType> genericInstantiations =
                     getGenericInstantiations(originalScope, new ArrayList<>());
             result = new InstantiatedScope(originalScope,
@@ -66,17 +64,17 @@ public class ModuleParameterization {
         //TODO :Here instead of building a map from String -> ProgType,
         //I want a map from ProgType->ProgType (specifically two progtypes representing generics), then
         //I can pull out the MathNamedType and do substitutions, etc
-        for ( ModuleParameterSymbol param : moduleParams ) {
+        for (ModuleParameterSymbol param : moduleParams) {
             try {
                 ProgParameterSymbol p = param.toProgParameterSymbol();
-                if ( p.getMode()==ProgParameterSymbol.ParameterMode.TYPE ) {
+                if (p.getMode() == ProgParameterSymbol.ParameterMode.TYPE) {
                     formalGenerics.add(p);
                 }
             } catch (UnexpectedSymbolException e) {
                 //no problem, we wont add it.
             }
         }
-        if ( formalGenerics.size()!=actualGenerics.size() ) {
+        if (formalGenerics.size() != actualGenerics.size()) {
             //we shouldn't have to do this in here I don't think. Can't really
             //give a nice error (no pointer to errMgr here), and we can't throw
             // an exception to be caught
@@ -87,7 +85,7 @@ public class ModuleParameterization {
         }
         Iterator<ProgTypeSymbol> suppliedGenericIter =
                 actualGenerics.iterator();
-        for ( ProgParameterSymbol formalGeneric : formalGenerics ) {
+        for (ProgParameterSymbol formalGeneric : formalGenerics) {
             result.put(formalGeneric.getName(), suppliedGenericIter
                     .next().getProgramType());
         }

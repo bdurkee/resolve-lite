@@ -22,11 +22,12 @@ public class ExtensionImplModule extends AbstractSpecImplModule {
     }
 
     public void addDelegateMethods(List<? extends Symbol> symbols) {
-        for ( Symbol s : symbols ) {
-            if ( s instanceof OperationSymbol ) {
+        for (Symbol s : symbols) {
+            if (s instanceof OperationSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod((OperationSymbol) s));
-            } else if ( s instanceof TypeModelSymbol ) {
+            }
+            else if (s instanceof TypeModelSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod("init" + s.getName(), true));
             }

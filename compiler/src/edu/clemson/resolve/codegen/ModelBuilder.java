@@ -78,11 +78,11 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitOperationDecl(
             ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
-        f.hasReturn = ctx.type()!=null;
+        f.hasReturn = ctx.type() != null;
         f.isStatic = withinFacilityModule();
-        for ( ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup() ) {
-            for ( TerminalNode id : grp.ID() ) {
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            for (TerminalNode id : grp.ID()) {
                 f.params.add((ParameterDef) built.get(id));
             }
         }
@@ -118,21 +118,21 @@ public class ModelBuilder extends ResolveBaseListener {
                                              @NotNull List<ResolveParser.VarDeclGroupContext> variableGroupings,
                                              @NotNull List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
-        f.hasReturn = type!=null;
+        f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
-        for ( ResolveParser.ParameterDeclGroupContext grp : paramGroupings ) {
+        for (ResolveParser.ParameterDeclGroupContext grp : paramGroupings) {
             f.params.addAll(Utils.collect(ParameterDef.class, grp.ID(), built));
         }
-        for ( ResolveParser.VarDeclGroupContext grp : variableGroupings ) {
+        for (ResolveParser.VarDeclGroupContext grp : variableGroupings) {
             f.vars.addAll(Utils.collect(VariableDef.class, grp.ID(), built));
         }
-        for ( ResolveParser.StmtContext s : stats ) {
+        for (ResolveParser.StmtContext s : stats) {
             f.stats.add((Stat) built.get(s));
             //ResolveParser returns are buried in an assignment
             //(specifically those assignments whose lhs == funcname)
-            if ( s.assignStmt()!=null
+            if (s.assignStmt() != null
                     && s.assignStmt().left.getText().equals(name)
-                    && f.hasReturn ) {
+                    && f.hasReturn) {
                 Expr rhs = (Expr) built.get(s.assignStmt().right);
                 f.vars.add(new VariableDef(name, rhs));
                 f.stats.add(new ReturnStat(name));
@@ -153,22 +153,22 @@ public class ModelBuilder extends ResolveBaseListener {
                         ctx.impl.getText());
         basePtr.isProxied = false;
         List<Expr> specArgs =
-                ctx.specArgs==null ? new ArrayList<>() : Utils.collect(
+                ctx.specArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.specArgs.progExp(), built);
         List<Expr> implArgs =
-                ctx.implArgs==null ? new ArrayList<>() : Utils.collect(
+                ctx.implArgs == null ? new ArrayList<>() : Utils.collect(
                         Expr.class, ctx.implArgs.progExp(), built);
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
-        for ( ResolveParser.ExtensionPairingContext pair :
-                ctx.extensionPairing() ) {
+        for (ResolveParser.ExtensionPairingContext pair :
+                ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(),
                             pair.impl.getText());
-            specArgs = pair.specArgs==null ? new ArrayList<>() :
+            specArgs = pair.specArgs == null ? new ArrayList<>() :
                     Utils.collect(Expr.class, pair.specArgs.progExp(), built);
-            implArgs = pair.implArgs==null ? new ArrayList<>() :
+            implArgs = pair.implArgs == null ? new ArrayList<>() :
                     Utils.collect(Expr.class, pair.implArgs.progExp(), built);
             layer.args.addAll(basePtr.args); // always prefaced with the base facility args
             layer.args.addAll(specArgs);
@@ -176,11 +176,12 @@ public class ModelBuilder extends ResolveBaseListener {
             layers.add(layer);
         }
 
-        for ( int i = 0; i<layers.size(); i++ ) {
-            layers.get(i).isProxied = ctx.extensionPairing().size()>1;
-            if ( i + 1<layers.size() ) {
+        for (int i = 0; i < layers.size(); i++) {
+            layers.get(i).isProxied = ctx.extensionPairing().size() > 1;
+            if (i + 1 < layers.size()) {
                 layers.get(i).child = layers.get(i + 1);
-            } else {
+            }
+            else {
                 layers.get(i).child = basePtr;
             }
         }
@@ -192,7 +193,7 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitVarDeclGroup(
             ResolveParser.VarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
-        for ( TerminalNode t : ctx.ID() ) {
+        for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
             built.put(t, new VariableDef(t.getSymbol().getText(), init));
         }
@@ -202,7 +203,7 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitRecordVarDeclGroup(
             ResolveParser.RecordVarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
-        for ( TerminalNode t : ctx.ID() ) {
+        for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
             built.put(t, new VariableDef(t.getSymbol().getText(), init));
         }
@@ -239,22 +240,22 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
-        if ( ctx.type() instanceof ResolveParser.RecordTypeContext ) {
+        if (ctx.type() instanceof ResolveParser.RecordTypeContext) {
             ResolveParser.RecordTypeContext typeAsRecord =
                     (ResolveParser.RecordTypeContext) ctx.type();
-            for ( ResolveParser.RecordVarDeclGroupContext grp :
-                    typeAsRecord.recordVarDeclGroup() ) {
+            for (ResolveParser.RecordVarDeclGroupContext grp :
+                    typeAsRecord.recordVarDeclGroup()) {
                 representationClass.fields.addAll(Utils.collect(
                         VariableDef.class, grp.ID(), built));
             }
         }
-        if ( ctx.typeImplInit()!=null ) {
+        if (ctx.typeImplInit() != null) {
             //representationClass.initVars.addAll(Utils.collect(
             //        VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
             //        built));
-            for ( ResolveParser.VarDeclGroupContext grp :
-                    ctx.typeImplInit().varDeclGroup() ) {
-                for ( TerminalNode t : grp.ID() ) {
+            for (ResolveParser.VarDeclGroupContext grp :
+                    ctx.typeImplInit().varDeclGroup()) {
+                for (TerminalNode t : grp.ID()) {
                     representationClass.initVars.add((VariableDef) built.get(t));
                 }
             }
@@ -267,7 +268,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitParameterDeclGroup(
             ResolveParser.ParameterDeclGroupContext ctx) {
-        for ( TerminalNode t : ctx.ID() ) {
+        for (TerminalNode t : ctx.ID()) {
             built.put(t, new ParameterDef(t.getText()));
         }
     }
@@ -305,7 +306,7 @@ public class ModelBuilder extends ResolveBaseListener {
             ResolveParser.IfStmtContext ctx) {
         IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
         i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
-        if ( ctx.elseStmt()!=null ) {
+        if (ctx.elseStmt() != null) {
             i.elseStats.addAll(Utils.collect(Stat.class,
                     ctx.elseStmt().stmt(), built));
         }
@@ -334,10 +335,11 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitProgParamExp(
             ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        if ( referencesOperationParameter(ctx.progNamedExp().name.getText()) ) {
+        if (referencesOperationParameter(ctx.progNamedExp().name.getText())) {
             built.put(ctx, new MethodCall.OperationParameterMethodCall(
                     ctx.progNamedExp().name.getText(), args));
-        } else {
+        }
+        else {
             built.put(ctx, new MethodCall(buildQualifier(
                     ctx.progNamedExp().qualifier, ctx.progNamedExp().name),
                     ctx.progNamedExp().name.getText(), args));
@@ -347,8 +349,8 @@ public class ModelBuilder extends ResolveBaseListener {
     private boolean referencesOperationParameter(String name) {
         List<ModuleParameterSymbol> moduleParams =
                 moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
-        for ( ModuleParameterSymbol p : moduleParams ) {
-            if ( p.isModuleOperationParameter() && p.getName().equals(name) ) {
+        for (ModuleParameterSymbol p : moduleParams) {
+            if (p.isModuleOperationParameter() && p.getName().equals(name)) {
                 return true;
             }
         }
@@ -382,10 +384,11 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitProgNamedExp(
             ResolveParser.ProgNamedExpContext ctx) {
         //if we're within a module argument list:
-        if ( Utils.getFirstAncestorOfType(ctx,
-                ResolveParser.ModuleArgumentListContext.class)!=null ) {
+        if (Utils.getFirstAncestorOfType(ctx,
+                ResolveParser.ModuleArgumentListContext.class) != null) {
             built.put(ctx, createFacilityArgumentModel(ctx));
-        } else {
+        }
+        else {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"),
                     ctx.name.getText()));
         }
@@ -414,17 +417,20 @@ public class ModelBuilder extends ResolveBaseListener {
         try {
             Symbol s = moduleScope
                     .queryForOne(new NameQuery(ctx.qualifier, ctx.name, true));
-            if ( s instanceof OperationSymbol || s.isModuleOperationParameter() ) {
+            if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
                         ctx.qualifier, ctx.name), s.toOperationSymbol());
-            } else if ( s.isModuleTypeParameter() ) {
+            }
+            else if (s.isModuleTypeParameter()) {
                 //typeinit wrapped in a "get" call
                 result = new MethodCall(new TypeInit(buildQualifier(
                         ctx.qualifier, ctx.name), ctx.name.getText(), ""));
-            } else if ( s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol ) {
+            }
+            else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
                 result = new TypeInit(buildQualifier(
                         ctx.qualifier, ctx.name), ctx.name.getText(), "");
-            } else {
+            }
+            else {
                 result = new VarNameRef(new NormalQualifier("this"),
                         ctx.name.getText());
             }
@@ -469,7 +475,7 @@ public class ModelBuilder extends ResolveBaseListener {
         ConceptImplModule impl =
                 new ConceptImplModule(ctx.name.getText(),
                         ctx.concept.getText(), file);
-        if ( ctx.implBlock()!=null ) {
+        if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().procedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
@@ -502,7 +508,7 @@ public class ModelBuilder extends ResolveBaseListener {
         FacilityImplModule impl =
                 new FacilityImplModule(ctx.name.getText(), file);
 
-        if ( ctx.facilityBlock()!=null ) {
+        if (ctx.facilityBlock() != null) {
             impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx
                     .facilityBlock().facilityDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
@@ -520,7 +526,7 @@ public class ModelBuilder extends ResolveBaseListener {
         ModuleFile file = buildFile();
         SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
 
-        if ( ctx.conceptBlock()!=null ) {
+        if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
                     .conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
@@ -542,7 +548,7 @@ public class ModelBuilder extends ResolveBaseListener {
         SpecModule spec = new SpecModule.ExtensionModule(ctx.name.getText(),
                 ctx.concept.getText(), file);
 
-        if ( ctx.conceptBlock()!=null ) {
+        if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
                     .conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
@@ -572,7 +578,7 @@ public class ModelBuilder extends ResolveBaseListener {
                             TypeModelSymbol.class));
         } catch (NoSuchModuleException e) {
         }
-        if ( ctx.implBlock()!=null ) {
+        if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
                     .implBlock().operationProcedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
@@ -621,19 +627,21 @@ public class ModelBuilder extends ResolveBaseListener {
     protected boolean isJavaLocallyAccessibleSymbol(
             @NotNull ModuleIdentifier symbolModuleID) {
         //was s defined in the module we're translating?
-        if ( moduleScope.getModuleIdentifier().equals(symbolModuleID) ) {
+        if (moduleScope.getModuleIdentifier().equals(symbolModuleID)) {
             return true;
-        } else { //was s defined in our parent concept or enhancement?
+        }
+        else { //was s defined in our parent concept or enhancement?
             ParseTree thisTree = moduleScope.getDefiningTree();
-            if ( thisTree instanceof ResolveParser.ModuleDeclContext ) {
+            if (thisTree instanceof ResolveParser.ModuleDeclContext) {
                 thisTree = thisTree.getChild(0);
             }
-            if ( thisTree instanceof ResolveParser.ConceptImplModuleDeclContext ) {
+            if (thisTree instanceof ResolveParser.ConceptImplModuleDeclContext) {
                 ResolveParser.ConceptImplModuleDeclContext asConceptImpl =
                         (ResolveParser.ConceptImplModuleDeclContext) thisTree;
                 return symbolModuleID.getNameString()
                         .equals(asConceptImpl.concept.getText());
-            } else if ( thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext ) {
+            }
+            else if (thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
                 ResolveParser.ConceptExtImplModuleDeclContext asExtensionImpl =
                         (ResolveParser.ConceptExtImplModuleDeclContext) thisTree;
                 return symbolModuleID.getNameString()
@@ -655,20 +663,22 @@ public class ModelBuilder extends ResolveBaseListener {
                                        @NotNull Token refName) {
         try {
             Symbol corresondingSym = null;
-            if ( refQualifier==null ) {
+            if (refQualifier == null) {
                 corresondingSym =
                         moduleScope.queryForOne(new NameQuery(null,
                                 refName, true));
                 NormalQualifier q;
-                if ( isJavaLocallyAccessibleSymbol(corresondingSym) ) {
+                if (isJavaLocallyAccessibleSymbol(corresondingSym)) {
                     //this.<symName>
-                    if ( withinFacilityModule() ) {
+                    if (withinFacilityModule()) {
                         q = new NormalQualifier(
                                 moduleScope.getModuleIdentifier().getNameString());
-                    } else {
+                    }
+                    else {
                         q = new NormalQualifier("this");
                     }
-                } else { //something referenced from a facility module (to say another facility module)
+                }
+                else { //something referenced from a facility module (to say another facility module)
                     //Test_Fac.<symName>
                     q = new NormalQualifier(
                             corresondingSym.getModuleIdentifier().getNameString());
@@ -692,8 +702,8 @@ public class ModelBuilder extends ResolveBaseListener {
                     corresondingSym.getModuleIdentifier().getNameString(), s.getName());
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            assert refQualifier!=null;
-            if ( isJavaLocallyAccessibleSymbol(new ModuleIdentifier(refQualifier)) ) {
+            assert refQualifier != null;
+            if (isJavaLocallyAccessibleSymbol(new ModuleIdentifier(refQualifier))) {
                 return new NormalQualifier("this");
             }
             return new NormalQualifier(refQualifier.getText());

@@ -17,7 +17,7 @@ public class ProgInvalidType extends ProgType {
     @NotNull
     public static ProgInvalidType getInstance(@NotNull DumbTypeGraph g) {
         ProgInvalidType result = instances.get(g);
-        if ( result==null ) {
+        if (result == null) {
             result = new ProgInvalidType(g);
             instances.put(g, result);
         }

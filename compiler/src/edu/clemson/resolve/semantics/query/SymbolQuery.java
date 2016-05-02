@@ -27,6 +27,7 @@ public interface SymbolQuery<E extends Symbol> {
      *
      * @param source    The source scope from which the search was spawned.
      * @param scopeRepo A repository of any referenced modules.
+     *
      * @return A list of matches.
      */
     public List<E> searchFromContext(@NotNull Scope source,

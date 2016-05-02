@@ -58,9 +58,9 @@ public class VCOutputFile extends OutputModelObject {
                 .splitIntoSequents();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
-        for ( PExp vc : vcs ) {
+        for (PExp vc : vcs) {
             List<? extends PExp> args = vc.getSubExpressions();
-            if ( !(vc instanceof PApply) ) continue;
+            if (!(vc instanceof PApply)) continue;
             //args.get(0) would be the function name portion of the PApply;
             //so we actually do args.get(1) to get the first arg (lhs)
             VC curVC = new VC(sectionNumber + "_" + vcIndex,

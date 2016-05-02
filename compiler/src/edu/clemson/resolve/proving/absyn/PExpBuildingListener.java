@@ -116,7 +116,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void enterMathQuantifiedExp(
             ResolveParser.MathQuantifiedExpContext ctx) {
-        for ( TerminalNode term : ctx.mathVarDeclGroup().ID() ) {
+        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
             String quantifier = ctx.q.getText();
             quantifiedVars.put(term.getText(),
                     getQuantificationMode(ctx.q));
@@ -141,16 +141,17 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             ResolveParser.MathQuantifiedExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> declaredVars =
                 new ArrayList<>();
-        for ( TerminalNode term : ctx.mathVarDeclGroup().ID() ) {
+        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
             quantifiedVars.remove(term.getText());
             declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
                     getMathClssfctn(ctx.mathVarDeclGroup().mathClssftnExp())));
         }
         PQuantified q = new PQuantified(repo.get(ctx.mathAssertionExp()),
                 getQuantificationMode(ctx.q), declaredVars);
-        if ( skipDummyQuantifierNodes ) {
+        if (skipDummyQuantifierNodes) {
             repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-        } else {
+        }
+        else {
             repo.put(ctx, q);
         }
     }
@@ -282,7 +283,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
-                        .incoming(ctx.incoming!=null)
+                        .incoming(ctx.incoming != null)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
@@ -304,12 +305,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         List<PExp> results = new ArrayList<>();
         PExp otherwiseResult = null;
 
-        for ( ResolveParser.MathAlternativeItemExpContext alt : ctx
-                .mathAlternativeItemExp() ) {
-            if ( alt.condition!=null ) {
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
+                .mathAlternativeItemExp()) {
+            if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
-            } else {
+            }
+            else {
                 otherwiseResult = repo.get(alt.result);
             }
         }
@@ -460,7 +462,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     private MathClassification getMathClssfctn(ParseTree t) {
-        return annotations.mathClssftns.get(t)==null ? g.INVALID :
+        return annotations.mathClssftns.get(t) == null ? g.INVALID :
                 annotations.mathClssftns.get(t);
     }
 }

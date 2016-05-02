@@ -33,7 +33,7 @@ public class BasicBetaReducingListener extends PExpListener {
     @Override
     public void endPApply(@NotNull PApply e) {
         PExp name = e.getFunctionPortion();
-        if ( name instanceof PLambda ) {
+        if (name instanceof PLambda) {
             PLambda asPLambda = (PLambda) name;
             List<PExp> boundVars = asPLambda.getParameters().stream()
                     .map(PLambda.MathSymbolDeclaration::asPSymbol)

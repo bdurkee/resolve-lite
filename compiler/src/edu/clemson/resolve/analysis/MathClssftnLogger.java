@@ -92,12 +92,12 @@ class MathClssftnLogger extends ResolveBaseListener {
 
     private void logClssftn(@NotNull ParserRuleContext ctx) {
         MathClassification t = types.get(ctx);
-        if ( t==null ) {
+        if (t == null) {
             compiler.log("[" + ctx.getClass().getSimpleName() + "]" + ctx.getText() + " : null");
             return;
         }
         String colonOp = " : ";
-        if ( t==t.getTypeGraph().CLS ) {
+        if (t == t.getTypeGraph().CLS) {
             colonOp = " ː ";
         }
         compiler.log("[" + ctx.getClass().getSimpleName() + "]" +

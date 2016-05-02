@@ -18,7 +18,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     public ArrayBackedImmutableList(Iterable<E> i) {
         List<E> tempList = new ArrayList<E>();
 
-        for ( E e : i ) {
+        for (E e : i) {
             tempList.add(e);
         }
 
@@ -41,7 +41,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 
     private int calculateHashCode() {
         int result = 0;
-        for ( E e : myElements ) {
+        for (E e : myElements) {
             result += e.hashCode() * 74;
         }
         return result;
@@ -86,12 +86,12 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     public boolean equals(Object o) {
         boolean result = (o instanceof ArrayBackedImmutableList);
 
-        if ( result ) {
+        if (result) {
             ArrayBackedImmutableList oAsABIL = (ArrayBackedImmutableList) o;
-            result = (myElementsLength==oAsABIL.size());
-            if ( result ) {
+            result = (myElementsLength == oAsABIL.size());
+            if (result) {
                 int i = 0;
-                while ( i<myElementsLength && result ) {
+                while (i < myElementsLength && result) {
                     result = (myElements[i].equals(oAsABIL.get(i)));
                     i++;
                 }

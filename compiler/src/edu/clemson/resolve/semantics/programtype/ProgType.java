@@ -43,6 +43,7 @@ public abstract class ProgType {
      * would be acceptable where one of type {@code t} were required.
      *
      * @param t the required type
+     *
      * @return {@code true} <strong>iff</strong> an value of this type
      * would be acceptable where one of type {@code t} were
      * required

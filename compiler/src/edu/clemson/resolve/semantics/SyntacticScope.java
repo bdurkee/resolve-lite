@@ -51,9 +51,8 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull
     @Override
-    public Symbol define(@NotNull Symbol s)
-            throws DuplicateSymbolException {
-        if ( symbols.containsKey(s.getName()) ) {
+    public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException {
+        if (symbols.containsKey(s.getName())) {
             throw new DuplicateSymbolException(s);
         }
         //TODO: bubble me over to the populator so I can be nicely printed.
@@ -71,23 +70,19 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull
     @Override
-    public <E extends Symbol> List<E> query(
-            @NotNull MultimatchSymbolQuery<E> query)
+    public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException {
         return query.searchFromContext(this, symtab);
     }
 
     @NotNull
     @Override
-    public <E extends Symbol> E queryForOne(
-            @NotNull SymbolQuery<E> query)
-            throws NoSuchSymbolException,
-            DuplicateSymbolException,
-            NoSuchModuleException,
-            UnexpectedSymbolException {
+    public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query)
+            throws NoSuchSymbolException, DuplicateSymbolException,
+            NoSuchModuleException, UnexpectedSymbolException {
         List<E> results = query.searchFromContext(this, symtab);
-        if ( results.isEmpty() ) throw new NoSuchSymbolException();
-        else if ( results.size()>1 ) throw new DuplicateSymbolException();
+        if (results.isEmpty()) throw new NoSuchSymbolException();
+        else if (results.size() > 1) throw new DuplicateSymbolException();
         return results.get(0);
     }
 
@@ -95,40 +90,34 @@ public abstract class SyntacticScope extends AbstractScope {
     @Override
     public String toString() {
         String s = "";
-        if ( definingTree!=null ) {
+        if (definingTree != null) {
             s = definingTree.getClass().getSimpleName();
         }
         return s + symbols.keySet() + "";
     }
 
     @Override
-    public <E extends Symbol> boolean addMatches(
-            @NotNull TableSearcher<E> searcher, @NotNull List<E> matches,
-            @NotNull Set<Scope> searchedScopes,
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility,
-            @NotNull TableSearcher.SearchContext l)
-            throws DuplicateSymbolException,
-            UnexpectedSymbolException {
+    public <E extends Symbol> boolean addMatches(@NotNull TableSearcher<E> searcher,
+                                                 @NotNull List<E> matches,
+                                                 @NotNull Set<Scope> searchedScopes,
+                                                 @NotNull Map<String, ProgType> genericInstantiations,
+                                                 @Nullable FacilitySymbol instantiatingFacility,
+                                                 @NotNull TableSearcher.SearchContext l)
+            throws DuplicateSymbolException, UnexpectedSymbolException {
         boolean finished = false;
 
-        if ( !searchedScopes.contains(this) ) {
+        if (!searchedScopes.contains(this)) {
             searchedScopes.add(this);
 
             Map<String, Symbol> symbolTableView = symbols;
-            if ( instantiatingFacility!=null ) {
-
-                symbolTableView =
-                        updateSymbols(symbols, genericInstantiations,
-                                instantiatingFacility);
-
+            if (instantiatingFacility != null) {
+                symbolTableView = updateSymbols(symbols, genericInstantiations, instantiatingFacility);
             }
             finished = searcher.addMatches(symbolTableView, matches, l);
 
-            if ( !finished ) {
-                finished =
-                        parent.addMatches(searcher, matches, searchedScopes,
-                                genericInstantiations, instantiatingFacility, l);
+            if (!finished) {
+                finished = parent.addMatches(searcher, matches, searchedScopes,
+                        genericInstantiations, instantiatingFacility, l);
             }
         }
         return finished;
@@ -136,8 +125,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
     @NotNull
     @Override
-    public <T extends Symbol> List<T> getSymbolsOfType(
-            @NotNull Class<T> type) {
+    public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type) {
         return symbols.values().stream()
                 .filter(type::isInstance)
                 .map(type::cast)
@@ -147,24 +135,21 @@ public abstract class SyntacticScope extends AbstractScope {
     @NotNull
     public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types) {
         List<Symbol> result = new ArrayList<>();
-        for ( Symbol s : symbols.values() ) {
-            for ( Class<?> t : types ) {
-                if ( t.isInstance(s) ) result.add(s);
+        for (Symbol s : symbols.values()) {
+            for (Class<?> t : types) {
+                if (t.isInstance(s)) result.add(s);
             }
         }
         return result;
     }
 
     @NotNull
-    private Map<String, Symbol> updateSymbols(
-            @NotNull Map<String, Symbol> currentBindings,
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility) {
+    private Map<String, Symbol> updateSymbols(@NotNull Map<String, Symbol> currentBindings,
+                                              @NotNull Map<String, ProgType> genericInstantiations,
+                                              @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, Symbol> instantiatedBindings = new LinkedHashMap<>();
-
-        for ( Symbol s : currentBindings.values() ) {
-            instantiatedBindings.put(s.getName(), s.instantiateGenerics(
-                    genericInstantiations, instantiatingFacility));
+        for (Symbol s : currentBindings.values()) {
+            instantiatedBindings.put(s.getName(), s.instantiateGenerics(genericInstantiations, instantiatingFacility));
         }
         return instantiatedBindings;
     }

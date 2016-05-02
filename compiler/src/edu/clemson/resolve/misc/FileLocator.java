@@ -75,7 +75,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file,
                                      BasicFileAttributes attr) {
         Path name = file.getFileName();
-        if ( name!=null && matcher.matches(name) ) {
+        if (name != null && matcher.matches(name)) {
             matches.add(file.toFile());
         }
         return FileVisitResult.CONTINUE;
@@ -89,7 +89,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *                             not be found.
      */
     public File getFile() throws IOException {
-        if ( matches.size()==0 ) {
+        if (matches.size() == 0) {
             throw new NoSuchFileException("file matching name '" + pattern
                     + "' could not be found");
         }

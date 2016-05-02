@@ -84,7 +84,7 @@ public abstract class PExp {
     @NotNull
     public PExp substitute(List<PExp> currents, PExp repl) {
         Map<PExp, PExp> substitutions = new HashMap<>();
-        for ( PExp current : currents ) {
+        for (PExp current : currents) {
             substitutions.put(current, repl);
         }
         return substitute(substitutions);
@@ -98,12 +98,13 @@ public abstract class PExp {
      *
      * @param currents a list of sub-expressions to be substituted (replaced)
      * @param repls    a list of replacement {@code PExp}s.
+     *
      * @return the {@code PExp} with substitutions made
      */
     @NotNull
     public PExp substitute(@NotNull List<PExp> currents,
                            @NotNull List<PExp> repls) {
-        if ( currents.size()!=repls.size() ) {
+        if (currents.size() != repls.size()) {
             throw new IllegalArgumentException("substitution lists must be"
                     + "the same length");
         }
@@ -115,6 +116,7 @@ public abstract class PExp {
      * affect on {@code this} expression; {@code false} otherwise.
      *
      * @param substitutions substitutions to make
+     *
      * @return whether or not the substitutions given changes the expr
      */
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
@@ -139,6 +141,7 @@ public abstract class PExp {
      * (or is a subtype) of {@code other}; {@code false} otherwise.
      *
      * @param other some {@code MathClassification}.
+     *
      * @return whether or not the math types of this or {@code other} matches
      */
     public boolean typeMatches(MathClassification other) {
@@ -161,6 +164,7 @@ public abstract class PExp {
      * defined by the map, returning a new (substituted) {@code PExp}.
      *
      * @param substitutions map like {@code existing PExp -> replacement PExp}
+     *
      * @return a, new, substituted expression
      */
     @NotNull
@@ -172,6 +176,7 @@ public abstract class PExp {
      * 'name' field matches {@code name}; {@code false} otherwise.
      *
      * @param name some name
+     *
      * @return whether or not the name appears anywhere in {@code this}'s
      * subtree
      */
@@ -335,7 +340,7 @@ public abstract class PExp {
      */
     @NotNull
     public final Set<PSymbol> getIncomingVariables() {
-        if ( cachedIncomingVariables==null ) {
+        if (cachedIncomingVariables == null) {
             cachedIncomingVariables = Collections.unmodifiableSet(
                     getIncomingVariablesNoCache());
         }
@@ -347,7 +352,7 @@ public abstract class PExp {
 
     @NotNull
     public final Set<PSymbol> getQuantifiedVariables() {
-        if ( cachedQuantifiedVariables==null ) {
+        if (cachedQuantifiedVariables == null) {
             //We're immutable, so only do this once
             cachedQuantifiedVariables =
                     Collections
@@ -363,7 +368,7 @@ public abstract class PExp {
     //that a function application? Just a nameless function application?
     @NotNull
     public final List<PExp> getFunctionApplications() {
-        if ( cachedFunctionApplications==null ) {
+        if (cachedFunctionApplications == null) {
             //We're immutable, so only do this once
             cachedFunctionApplications = getFunctionApplicationsNoCache();
         }
@@ -393,6 +398,7 @@ public abstract class PExp {
      * names; {@code false} otherwise.
      *
      * @param o the expression to compare with {@code this}
+     *
      * @return whether {@code this} matches {@code o} with respect to structure
      * and variable naming
      */
@@ -407,9 +413,9 @@ public abstract class PExp {
      */
     public Map<String, PExp> getTopLevelVariableEqualities() {
         Map<String, PExp> result = new HashMap<>();
-        for ( PExp v : this.splitIntoConjuncts() ) {
-            if ( v.isEquality() &&
-                    v.getSubExpressions().get(1).isVariable() ) {
+        for (PExp v : this.splitIntoConjuncts()) {
+            if (v.isEquality() &&
+                    v.getSubExpressions().get(1).isVariable()) {
                 result.put(v.getSubExpressions().get(1).getCanonicalName(),
                         v.getSubExpressions().get(2));
             }

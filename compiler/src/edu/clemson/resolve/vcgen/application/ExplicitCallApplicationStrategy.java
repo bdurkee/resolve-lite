@@ -62,7 +62,7 @@ public class ExplicitCallApplicationStrategy
 
     public static OperationSymbol getOperation(Scope s, PApply app) {
         PSymbol name = (PSymbol) app.getFunctionPortion();
-        Token qualifier = (name.getQualifier()!=null) ?
+        Token qualifier = (name.getQualifier() != null) ?
                 new CommonToken(ResolveLexer.ID, name.getQualifier()) : null;
         try {
             return s.queryForOne(new OperationQuery(qualifier, name.getName(),
@@ -115,27 +115,27 @@ public class ExplicitCallApplicationStrategy
             //TODO: I don't think this will actually happen here. What we (were) worried about here is
             //what the FunctionAssign application is responsible for.
             //I think this 'if' (and its body) below should be erased.
-            if ( ensuresEqualities.containsKey(functionName.getName()) ) {
+            if (ensuresEqualities.containsKey(functionName.getName())) {
                 intermediateBindings.put(e,
                         ensuresEqualities.get(functionName.getName()));
             }
 
-            while ( formalParamIter.hasNext() ) {
+            while (formalParamIter.hasNext()) {
                 ProgParameterSymbol formal = formalParamIter.next();
                 PExp actual = actualParamIter.next();
-                if ( formal.getMode()==ProgParameterSymbol.ParameterMode.UPDATES ) {
-                    if ( !ensuresEqualities.containsKey(formal.getName()) ) {
+                if (formal.getMode() == ProgParameterSymbol.ParameterMode.UPDATES) {
+                    if (!ensuresEqualities.containsKey(formal.getName())) {
                         continue;
                     }
                     intermediateBindings.put(actual,
                             ensuresEqualities.get(formal.getName()));
                 }
             }
-            for ( Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet() ) {
+            for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {
                 //update our list of formal params to account for incoming-valued refs
                 //to themselves in the ensures clause
                 List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
-                for ( PSymbol f : exp.getValue().getIncomingVariables() ) {
+                for (PSymbol f : exp.getValue().getIncomingVariables()) {
                     Collections.replaceAll(varsToReplaceInEnsures,
                             f.withIncomingSignsErased(), f);
                 }

@@ -5,9 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * The parent class of all mathematical types.
- */
+/** The parent class of all mathematical classifications. */
 public abstract class MathClassification {
 
     protected final DumbTypeGraph g;
@@ -36,8 +34,8 @@ public abstract class MathClassification {
     }
 
     public boolean containsSchematicType() {
-        for ( MathClassification component : getComponentTypes() ) {
-            if ( component.containsSchematicType() ) return true;
+        for (MathClassification component : getComponentTypes()) {
+            if (component.containsSchematicType()) return true;
         }
         return false;
     }
@@ -45,7 +43,7 @@ public abstract class MathClassification {
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof MathClassification);
-        if ( result ) {
+        if (result) {
             try {
                 result = checkAlphaEquivalence(this, (MathClassification) o);
             } catch (TypeMismatchException tme) {
@@ -57,23 +55,23 @@ public abstract class MathClassification {
 
     public static boolean checkAlphaEquivalence(MathClassification t1, MathClassification t2)
             throws TypeMismatchException {
-        if ( t1==t2 || isEquivalentDependentType(t1, t2) ) return true;
+        if (t1 == t2 || isEquivalentDependentType(t1, t2)) return true;
         else {
-            if ( t1.getClass()!=t2.getClass() )
+            if (t1.getClass() != t2.getClass())
                 throw new TypeMismatchException();
 
             List<MathClassification> t1Components = t1.getComponentTypes();
             List<MathClassification> t2Components = t2.getComponentTypes();
-            if ( t1Components.size()!=t2Components.size() )
+            if (t1Components.size() != t2Components.size())
                 throw new TypeMismatchException();
 
             Iterator<MathClassification> t1Iter = t1Components.iterator();
             Iterator<MathClassification> t2Iter = t2Components.iterator();
             boolean result = false;
-            while ( t1Iter.hasNext() ) {
+            while (t1Iter.hasNext()) {
                 result = checkAlphaEquivalence(t1Iter.next(), t2Iter.next());
             }
-            if ( !result ) throw new TypeMismatchException();
+            if (!result) throw new TypeMismatchException();
             /*Set<MathNamedClassification> t1FV1 = t1.getFreeNamedTypes();
             Set<MathNamedClassification> t2FV1 = t2.getFreeNamedTypes();
             if ( t1FV1.size() != t2FV1.size() ) throw new TypeMismatchException();
@@ -94,11 +92,11 @@ public abstract class MathClassification {
     private static boolean isEquivalentDependentType(MathClassification t1, MathClassification t2) {
         boolean result = t1 instanceof MathNamedClassification &&
                 t2 instanceof MathNamedClassification;
-        if ( result ) {
+        if (result) {
             result = t1.identifiesSchematicType &&
-                    t1.typeRefDepth==0 &&
+                    t1.typeRefDepth == 0 &&
                     t2.identifiesSchematicType &&
-                    t2.typeRefDepth==0 &&
+                    t2.typeRefDepth == 0 &&
                     ((MathNamedClassification) t1).tag.equals(((MathNamedClassification) t2).tag);
         }
         return result;
@@ -116,7 +114,5 @@ public abstract class MathClassification {
     //TODO maybe change this map to MathNamedClassification -> MathNamedClassification, to
     //indicate this is just for names; would also be more in line with the name
     //of this method...
-    public abstract MathClassification withVariablesSubstituted(
-            Map<String, MathClassification> substitutions);
-
+    public abstract MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions);
 }

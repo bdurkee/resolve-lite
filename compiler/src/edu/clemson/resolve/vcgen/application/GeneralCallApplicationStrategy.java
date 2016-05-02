@@ -92,12 +92,12 @@ public class GeneralCallApplicationStrategy
                     op.getParameters().iterator();
             Iterator<PExp> argIter = e.getArguments().iterator();
 
-            while ( formalIter.hasNext() ) {
+            while (formalIter.hasNext()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 PExp curActual = (PExp) argIter.next();
 
                 //t ~> NQV(RP, a), @t ~> a
-                if ( curFormal.getMode()==UPDATES ) {
+                if (curFormal.getMode() == UPDATES) {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(),
                             NQV(RP, (PSymbol) curActual));
                     newAssumeSubtitutions.put(new PSymbolBuilder(curFormal
@@ -105,23 +105,24 @@ public class GeneralCallApplicationStrategy
                             (PSymbol) curActual);
                 }
                 //v ~> NQV(RP, b)
-                else if ( curFormal.getMode()==REPLACES ) {
+                else if (curFormal.getMode() == REPLACES) {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(),
                             NQV(RP, (PSymbol) curActual));
                 }
                 //@y ~> e, @z ~> f
-                else if ( curFormal.getMode()==ALTERS ||
-                        curFormal.getMode()==CLEARS ) {
+                else if (curFormal.getMode() == ALTERS ||
+                        curFormal.getMode() == CLEARS) {
                     newAssumeSubtitutions.put(
                             new PSymbolBuilder(curFormal.asPSymbol())
                                     .incoming(true).build(), curActual);
-                } else {
+                }
+                else {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
                 }
             }
 
             PExp r = newAssume.getTopLevelVariableEqualities().get(functionName.getName());
-            if ( r!=null ) {
+            if (r != null) {
                 returnEnsuresArgSubstitutions.put(e, r.substitute(newAssumeSubtitutions));
             }
 
@@ -150,9 +151,9 @@ public class GeneralCallApplicationStrategy
             formalIter = op.getParameters().iterator();
             argIter = e.getArguments().iterator();
             Map<PExp, PExp> confirmSubstitutions = new HashMap<>();
-            for ( PExp actualArg : e.getArguments() ) {
+            for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
-                if ( distinguishedModes.contains(curFormal.getMode()) ) {
+                if (distinguishedModes.contains(curFormal.getMode())) {
                     confirmSubstitutions.put(actualArg,
                             NQV(RP, (PSymbol) actualArg));
                 }
@@ -170,15 +171,16 @@ public class GeneralCallApplicationStrategy
                 .build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
-        if ( RP.containsName(oldSym.getName()) ) {
+        if (RP.containsName(oldSym.getName())) {
             return NQV(RP, newOldSym);
         }
         // Don't need to apply the question mark here.
-        else if ( RP.containsName(newOldSym.getName()) ) {
+        else if (RP.containsName(newOldSym.getName())) {
             return NQV(RP, newOldSym);
-        } else {
+        }
+        else {
             // Return the new variable expression with the question mark
-            if ( oldSym.getName().charAt(0)!='?' ) {
+            if (oldSym.getName().charAt(0) != '?') {
                 return newOldSym;
             }
         }

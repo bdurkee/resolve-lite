@@ -12,22 +12,18 @@ import java.util.Set;
 /**
  * Identifies a particular module unambiguously.
  * <p>
- * <strong>Note:</strong> Currently, we only permit one level of namespace.
- * But ultimately that will probably change (because, for example, at this
- * moment if there were two "Stack_Templates", we couldn't deal with that. A
- * java class-path-like solution seems inevitable.  For the moment however, this
- * is just a wrapper around the token based name of the module to facilitate
- * changing how we deal with modules later.</p>
+ * <strong>Note:</strong> Currently, we only permit one level of namespace. But ultimately that will probably change
+ * (because, for example, at this moment if there were two "Stack_Templates", we couldn't deal with that. A
+ * java class-path-like solution seems inevitable.  For the moment however, this is just a wrapper around the token
+ * based name of the module to facilitate changing how we deal with modules later.</p>
  * <p>
- * We use {@link Token}s internally here so we have position information
- * for the module we're identifying is readily available
- * (mostly for error rendering purposes).</p>
+ * We use {@link Token}s internally here so we have position information for the module we're identifying is readily
+ * available (mostly for error rendering purposes).</p>
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
-    public static final ModuleIdentifier GLOBAL =
-            new ModuleIdentifier();
+    public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
     public final Set<String> tagAliases = new HashSet<>();
     @NotNull
@@ -57,10 +53,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @Override
     public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof ModuleIdentifier);
-
-        if ( result ) {
-            result = ((ModuleIdentifier) o).name.getText()
-                    .equals(name.getText());
+        if (result) {
+            result = ((ModuleIdentifier) o).name.getText().equals(name.getText());
         }
         return result;
     }
@@ -80,8 +74,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     }
 
     @NotNull
-    public String fullyQualifiedRepresentation(
-            @Nullable String symbolName) {
+    public String fullyQualifiedRepresentation(@Nullable String symbolName) {
         return name.getText() + " :: " + symbolName;
     }
 }

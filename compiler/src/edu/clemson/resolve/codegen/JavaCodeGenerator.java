@@ -44,13 +44,13 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     void writeReferencedExternalFiles() {
         //these *should* exist;
         //we've already checked in BasicSanityCheckingVisitor..
-        for ( ModuleIdentifier e : module.externalUses.values() ) {
+        for (ModuleIdentifier e : module.externalUses.values()) {
             String fileName = e.getNameString() + getFileExtension();
             ModuleFile moduleFile =
                     new ModuleFile(null, fileName, compiler.genPackage);
             File externalFile =
                     Utils.getExternalFile(compiler, e.getNameString());
-            if ( externalFile==null ) continue;
+            if (externalFile == null) continue;
             String contents = null;
             try {
                 contents = Utils.readFile(externalFile.getPath());

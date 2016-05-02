@@ -23,7 +23,7 @@ public class ArrayIterator<E> implements Iterator<E> {
 
     @Override
     public boolean hasNext() {
-        return myCursor<myFirstUnincludedIndex;
+        return myCursor < myFirstUnincludedIndex;
     }
 
     @Override

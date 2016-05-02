@@ -15,7 +15,7 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
 
     @Override
     public ImmutableList<E> head(int length) {
-        if ( length!=0 ) {
+        if (length != 0) {
             throw new IndexOutOfBoundsException();
         }
         return this;
@@ -33,7 +33,7 @@ public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
 
     @Override
     public ImmutableList<E> tail(int startIndex) {
-        if ( startIndex!=0 ) {
+        if (startIndex != 0) {
             throw new IndexOutOfBoundsException();
         }
         return this;
