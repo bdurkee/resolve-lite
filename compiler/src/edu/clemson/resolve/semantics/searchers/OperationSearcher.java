@@ -21,13 +21,11 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
     @NotNull
     private final List<ProgType> actualArgTypes;
 
-    public OperationSearcher(@NotNull Token name,
-                             @NotNull List<ProgType> argumentTypes) {
+    public OperationSearcher(@NotNull Token name, @NotNull List<ProgType> argumentTypes) {
         this(name.getText(), argumentTypes);
     }
 
-    public OperationSearcher(@NotNull String name,
-                             @NotNull List<ProgType> argumentTypes) {
+    public OperationSearcher(@NotNull String name, @NotNull List<ProgType> argumentTypes) {
         this.queryName = name;
         this.actualArgTypes = new ArrayList<>(argumentTypes);
     }
@@ -40,8 +38,7 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
 
         if (entries.containsKey(queryName)) {
             try {
-                OperationSymbol operation =
-                        entries.get(queryName).toOperationSymbol();
+                OperationSymbol operation = entries.get(queryName).toOperationSymbol();
 
                 if (argumentsMatch(operation.getParameters())) {
                     //We have a match at this point
@@ -56,22 +53,18 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
         return false;
     }
 
-    private boolean argumentsMatch(
-            @NotNull List<ProgParameterSymbol> formalParameters) {
+    private boolean argumentsMatch(@NotNull List<ProgParameterSymbol> formalParameters) {
 
         boolean result = (formalParameters.size() == actualArgTypes.size());
 
         if (result) {
-            Iterator<ProgParameterSymbol> formalParametersIter =
-                    formalParameters.iterator();
+            Iterator<ProgParameterSymbol> formalParametersIter = formalParameters.iterator();
             Iterator<ProgType> actualArgumentTypeIter = actualArgTypes.iterator();
 
             ProgType actualArgumentType, formalParameterType;
             while (result && formalParametersIter.hasNext()) {
                 actualArgumentType = actualArgumentTypeIter.next();
-                formalParameterType =
-                        formalParametersIter.next().getDeclaredType();
-
+                formalParameterType = formalParametersIter.next().getDeclaredType();
                 result = actualArgumentType.acceptableFor(formalParameterType);
             }
         }

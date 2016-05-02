@@ -18,8 +18,8 @@ import java.nio.file.NoSuchFileException;
 import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 
 /**
- * Updates the containers tracking uses reference info by visiting the
- * various {@link ParseTree} nodes that include references to other modules.
+ * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
+ * references to other modules.
  */
 public class UsesListener extends ResolveBaseListener {
     private final AnnotatedModule tr;
@@ -85,8 +85,7 @@ public class UsesListener extends ResolveBaseListener {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
         //tr.semanticallyRelevantUses.add(ctx.spec.getText());
         if (ctx.externally != null) {
-            tr.externalUses.put(ctx.impl.getText(),
-                    new ModuleIdentifier(ctx.impl));
+            tr.externalUses.put(ctx.impl.getText(), new ModuleIdentifier(ctx.impl));
         }
         else {
             tr.uses.add(new ModuleIdentifier(ctx.impl));
@@ -98,9 +97,7 @@ public class UsesListener extends ResolveBaseListener {
             ResolveParser.ExtensionPairingContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.spec));
         if (ctx.externally != null) {
-
-            tr.externalUses.put(ctx.impl.getText(),
-                    new ModuleIdentifier(ctx.impl));
+            tr.externalUses.put(ctx.impl.getText(), new ModuleIdentifier(ctx.impl));
         }
         else {
             tr.uses.add(new ModuleIdentifier(ctx.impl));

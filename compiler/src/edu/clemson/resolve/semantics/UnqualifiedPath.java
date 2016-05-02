@@ -26,13 +26,11 @@ import java.util.*;
  * </ol>
  * <p>
  * Instances of this class can be parameterized to search only direct imports or to exclude all imports, as well as
- * to exclude searching facilities, or change
- * how generics are handled when searching facilities.</p>
+ * to exclude searching facilities, or change how generics are handled when searching facilities.</p>
  * <p>
- * Additionally, by setting the {@code localPriority} flag, the search can be
- * made to stop without considering imports (regardless of the import strategy)
- * if at least one local match is found. Note that any local facilities will
- * still be searched if the facility strategy requires it.</p>
+ * Additionally, by setting the {@code localPriority} flag, the search can be made to stop without considering imports
+ * (regardless of the import strategy) if at least one local match is found. Note that any local facilities will still
+ * be searched if the facility strategy requires it.</p>
  */
 public class UnqualifiedPath implements ScopeSearchPath {
 
@@ -78,18 +76,13 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 source.addMatches(searcher, results, searchedScopes, genericInstantiations, instantiatingFacility,
                         SearchContext.SOURCE_MODULE);
 
-        //Hws: Next, if requested, we search any local facilities.
-        //Dtw edit: added temporary first condition.. I want import recursive to search facilities even though normally we don't want to (unless the thing is qualified)
-        //
-        // TODO: ^^ Ideally we wouldn't change anything in here, but instead just fix the queries themselves with a facility ignore
-        //so we wouldn't even have to touch this class. This way we could just keep symbolTypeQuery w/ Facility_Instantiate, or Facility_Generic.
-        if (searcher instanceof SymbolTypeSearcher && !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
+        if (searcher instanceof SymbolTypeSearcher &&
+                !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
             finished = searchFacilities(searcher, results, source, genericInstantiations, searchedScopes, repo);
         }
 
         //Finally, if requested, we search imports
-        if ((results.isEmpty() || !localPriority) &&
-                source instanceof SyntacticScope &&
+        if ((results.isEmpty() || !localPriority) && source instanceof SyntacticScope &&
                 importStrategy != ImportStrategy.IMPORT_NONE) {
 
             SyntacticScope sourceAsSyntacticScope = (SyntacticScope) source;

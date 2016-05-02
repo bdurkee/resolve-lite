@@ -7,9 +7,8 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 import java.util.List;
 
 /**
- * A {@code SymbolQuery} defines a strategy for returning a list of
- * {@link Symbol}s that meet a certain set of search criteria starting from
- * some <em>source scope</em>.
+ * A {@code SymbolQuery} defines a strategy for returning a list of {@link Symbol}s that meet a certain set of search
+ * criteria starting from some <em>source scope</em>.
  *
  * @since 0.0.1
  */

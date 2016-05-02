@@ -23,13 +23,11 @@ public class RESOLVEMessage {
         this(errorKind, (Throwable) null, null);
     }
 
-    public RESOLVEMessage(ErrorKind errorType, Token offendingToken,
-                          Object... args) {
+    public RESOLVEMessage(ErrorKind errorType, Token offendingToken, Object... args) {
         this(errorType, null, offendingToken, args);
     }
 
-    public RESOLVEMessage(ErrorKind errorType, Throwable e,
-                          Token offendingToken, Object... args) {
+    public RESOLVEMessage(ErrorKind errorType, Throwable e, Token offendingToken, Object... args) {
         this.errorType = errorType;
         this.e = e;
         this.args = args;

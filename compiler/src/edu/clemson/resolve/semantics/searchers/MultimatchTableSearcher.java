@@ -9,17 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A simple refinement on {@link TableSearcher} that guarantees its method will
- * not throw a {@link DuplicateSymbolException}.
+ * A simple refinement on {@link TableSearcher} that guarantees its method will not throw a
+ * {@link DuplicateSymbolException}.
+ *
+ * @author hamptos
  */
-public interface MultimatchTableSearcher<E extends Symbol>
-        extends
-        TableSearcher<E> {
+public interface MultimatchTableSearcher<E extends Symbol> extends TableSearcher<E> {
 
     /**
-     * Refines {@link TableSearcher#addMatches} to guarantee that it will not
-     * throw a {@link DuplicateSymbolException}. Otherwise, behaves
-     * identically.
+     * Refines {@link TableSearcher#addMatches} to guarantee that it will not throw a {@link DuplicateSymbolException}.
+     * Otherwise, behaves identically.
      */
     @Override
     public boolean addMatches(@NotNull Map<String, Symbol> entries,

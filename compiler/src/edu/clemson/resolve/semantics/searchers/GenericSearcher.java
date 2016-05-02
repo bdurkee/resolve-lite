@@ -9,9 +9,7 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 import java.util.List;
 import java.util.Map;
 
-public class GenericSearcher
-        implements
-        MultimatchTableSearcher<ProgTypeSymbol> {
+public class GenericSearcher implements MultimatchTableSearcher<ProgTypeSymbol> {
 
     public static final GenericSearcher INSTANCE = new GenericSearcher();
 
@@ -25,8 +23,7 @@ public class GenericSearcher
             throws UnexpectedSymbolException {
         for (Symbol s : entries.values()) {
             if (s instanceof ProgParameterSymbol) {
-                if (((ProgParameterSymbol) s).getMode() ==
-                        ProgParameterSymbol.ParameterMode.TYPE) {
+                if (((ProgParameterSymbol) s).getMode() == ProgParameterSymbol.ParameterMode.TYPE) {
                     matches.add(s.toProgTypeSymbol());
                 }
             }

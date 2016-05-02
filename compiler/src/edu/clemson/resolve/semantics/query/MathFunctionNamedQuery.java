@@ -13,18 +13,13 @@ import java.util.List;
 import static edu.clemson.resolve.semantics.MathSymbolTable.FacilityStrategy.FACILITY_IGNORE;
 import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE;
 
-public class MathFunctionNamedQuery
-        implements
-        MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
+public class MathFunctionNamedQuery implements MultimatchSymbolQuery<MathClssftnWrappingSymbol> {
 
     @NotNull
     private final SymbolQuery<Symbol> nameQuery;
 
-    public MathFunctionNamedQuery(@Nullable Token qualifier,
-                                  @NotNull Token name) {
-        this.nameQuery =
-                new NameQuery(qualifier, name.getText(),
-                        IMPORT_RECURSIVE, FACILITY_IGNORE, false);
+    public MathFunctionNamedQuery(@Nullable Token qualifier, @NotNull Token name) {
+        this.nameQuery = new NameQuery(qualifier, name.getText(), IMPORT_RECURSIVE, FACILITY_IGNORE, false);
     }
 
     @Override

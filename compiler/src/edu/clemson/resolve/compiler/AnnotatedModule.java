@@ -18,8 +18,10 @@ import java.util.*;
  * Represents a collection of information to be associated with a top level
  * {@link edu.clemson.resolve.parser.ResolveParser.ModuleDeclContext}.
  * <p>
- * We use this approach over {@code returns} clauses in the grammar to help
- * us keep our grammar as general as possible.</p>
+ * We use this approach over {@code returns} clauses in the grammar to help us keep our grammar as general
+ * as possible.</p>
+ *
+ * @author dtwelch
  */
 public class AnnotatedModule {
 
@@ -34,12 +36,10 @@ public class AnnotatedModule {
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
 
     /**
-     * Think of the {@code uses} set as refs useful for coming up with module
-     * orderings, etc. Think of these strings the refs the symboltable will see.
-     * We don't want implementations of facilities showing up in this set.
+     * Think of the {@code uses} set as refs useful for coming up with module orderings, etc. Think of these strings
+     * the refs the symboltable will see. We don't want implementations of facilities showing up in this set.
      */
-    public final Set<ModuleIdentifier> semanticallyRelevantUses =
-            new LinkedHashSet<>();
+    public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
 
     private final String fileName;
     private final Token name;
@@ -50,13 +50,14 @@ public class AnnotatedModule {
         this(root, name, "", false);
     }
 
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name,
-                           @NotNull String fileName) {
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {
         this(root, name, fileName, false);
     }
 
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name,
-                           @NotNull String fileName, boolean hasErrors) {
+    public AnnotatedModule(@NotNull ParseTree root,
+                           @NotNull Token name,
+                           @NotNull String fileName,
+                           boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
@@ -100,8 +101,7 @@ public class AnnotatedModule {
     public boolean equals(Object o) {
         boolean result = (o instanceof AnnotatedModule);
         if (result) {
-            result = this.name.getText()
-                    .equals(((AnnotatedModule) o).name.getText());
+            result = this.name.getText().equals(((AnnotatedModule) o).name.getText());
         }
         return result;
     }
