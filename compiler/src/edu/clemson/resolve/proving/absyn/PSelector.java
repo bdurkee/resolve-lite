@@ -4,17 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-/**
- * Represents a tree-like {@code .}-segmented list of field accesses
- */
+/** Represents a tree-like {@code .}-segmented list of field accesses */
 //TODO: Determine if (somehow) this should just be folded into {@link PApply}.
 public class PSelector extends PExp {
 
     private final PExp left, right;
 
     public PSelector(@NotNull PExp left, @NotNull PExp right) {
-        super(left.structureHash * 72, right.structureHash * 36,
-                right.getMathType(), right.getProgType());
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathType(), right.getProgType());
         this.left = left;
         this.right = right;
     }

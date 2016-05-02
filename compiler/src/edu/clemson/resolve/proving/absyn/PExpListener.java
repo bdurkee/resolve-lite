@@ -3,9 +3,8 @@ package edu.clemson.resolve.proving.absyn;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This class provides a general, empty implementation of a listener for the
- * {@link PExp} hierarchy. This class can be extended to create a listener
- * which only needs to handle a subset of the available methods.
+ * This class provides a general, empty implementation of a listener for the {@link PExp} hierarchy. This class can
+ * be extended to create a listener which only needs to handle a subset of the available methods.
  */
 public abstract class PExpListener {
 

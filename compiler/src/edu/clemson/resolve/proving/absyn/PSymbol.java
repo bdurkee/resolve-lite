@@ -12,12 +12,10 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 import java.util.*;
 
 /**
- * Represents a reference to a named element such as a variable, constant, or
- * function.
+ * Represents a reference to a named element such as a variable, constant, or function.
  * <p>
- * Specifically, if this refers to a <em>name</em> of a funtion, then this
- * instance represents a typed -- possibly qualified -- first-class reference
- * to some function, independent of any supplied arguments.</p>
+ * Specifically, if this refers to a <em>name</em> of a funtion, then this instance represents a typed -- possibly
+ * qualified -- first-class reference to some function, independent of any supplied arguments.</p>
  */
 public class PSymbol extends PExp {
 
@@ -34,15 +32,13 @@ public class PSymbol extends PExp {
     private final boolean literalFlag, incomingFlag;
 
     /**
-     * Constructs a new {@code PSymbol}. Note that this is specifically made
-     * private; thus clients should instead go through {@link PSymbolBuilder}
-     * to construct new instances.
+     * Constructs a new {@code PSymbol}. Note that this is specifically made private; thus clients should instead
+     * go through {@link PSymbolBuilder} to construct new instances.
      *
      * @param builder a 'buildable' version of {@code PSymbol}
      */
     private PSymbol(PSymbolBuilder builder) {
-        super(calculateHashes(builder.name), builder.mathType,
-                builder.progType);
+        super(calculateHashes(builder.name), builder.mathType, builder.progType);
         this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -112,8 +108,7 @@ public class PSymbol extends PExp {
 
     @NotNull
     @Override
-    public PExp substitute(
-            @NotNull Map<PExp, PExp> substitutions) {
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result = substitutions.get(this);
         if (result == null) {
             String newLeft = leftPrint, newRight = rightPrint;
@@ -199,9 +194,7 @@ public class PSymbol extends PExp {
 
     @NotNull
     @Override
-    protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications,
-            boolean excludeLiterals) {
+    protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new HashSet<>();
         if (!(excludeApplications && isFunctionApplication()) &&
                 !(excludeLiterals && isLiteral()) &&
@@ -212,9 +205,8 @@ public class PSymbol extends PExp {
     }
 
     /**
-     * This class represents an atomic {@code PExp}. As such, we'll never have
-     * any sub-expressions; and hence are guaranteed to contain no
-     * applications.
+     * This class represents an atomic {@code PExp}. As such, we'll never have any sub-expressions; and hence are
+     * guaranteed to contain no applications.
      */
     @NotNull
     @Override
@@ -251,8 +243,8 @@ public class PSymbol extends PExp {
     /**
      * A builder for {@code PSymbol}s.
      * <p>
-     * As usual, a final, immutable instance of {@link PSymbol} can be obtained
-     * through a call to {@link PSymbolBuilder#build()}.</p>
+     * As usual, a final, immutable instance of {@link PSymbol} can be obtained through a call to
+     * {@link PSymbolBuilder#build()}.</p>
      */
     public static class PSymbolBuilder implements Utils.Builder<PSymbol> {
         protected String name, lprint, rprint;
@@ -297,8 +289,7 @@ public class PSymbol extends PExp {
         public PSymbolBuilder(String lprint, String rprint) {
             if (rprint == null) {
                 if (lprint == null) {
-                    throw new IllegalStateException("null name; all psymbols "
-                            + "must be named.");
+                    throw new IllegalStateException("null name; all psymbols must be named.");
                 }
                 rprint = lprint;
             }
@@ -358,8 +349,7 @@ public class PSymbol extends PExp {
         @NotNull
         public PSymbol build() {
             if (this.mathType == null) {
-                throw new IllegalStateException("mathtype == null; cannot "
-                        + "build PExp with null mathtype");
+                throw new IllegalStateException("mathtype == null; cannot build PExp with null mathtype");
             }
             //System.out.println("building PSymbol name="+name+",quantification="+quantification);
             return new PSymbol(this);

@@ -16,8 +16,7 @@ public class PQuantified extends PExp {
 
     private final Quantification quantificationType;
     private final PExp assertion;
-    private final List<PLambda.MathSymbolDeclaration> declaredSymbols =
-            new ArrayList<>();
+    private final List<PLambda.MathSymbolDeclaration> declaredSymbols = new ArrayList<>();
 
     public PQuantified(@NotNull PExp assertion,
                        @NotNull Quantification quantificationType,
@@ -51,10 +50,8 @@ public class PQuantified extends PExp {
 
     @NotNull
     @Override
-    public PExp substitute(
-            @NotNull Map<PExp, PExp> substitutions) {
-        return new PQuantified(assertion.substitute(substitutions),
-                quantificationType, declaredSymbols);
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
+        return new PQuantified(assertion.substitute(substitutions), quantificationType, declaredSymbols);
     }
 
     @Override
@@ -84,15 +81,13 @@ public class PQuantified extends PExp {
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PQuantified(assertion.withIncomingSignsErased(),
-                quantificationType, declaredSymbols);
+        return new PQuantified(assertion.withIncomingSignsErased(), quantificationType, declaredSymbols);
     }
 
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return new PQuantified(assertion.withQuantifiersFlipped(),
-                quantificationType.flipped(), declaredSymbols);
+        return new PQuantified(assertion.withQuantifiersFlipped(), quantificationType.flipped(), declaredSymbols);
     }
 
     @NotNull
@@ -114,17 +109,14 @@ public class PQuantified extends PExp {
     }
 
     @Override
-    protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         return assertion.getSymbolNames(excludeApplications, excludeLiterals);
     }
 
     @Override
     public String toString() {
-        List<String> symNames = declaredSymbols.stream()
-                .map(d -> d.name).collect(Collectors.toList());
-        String qType = quantificationType == Quantification.UNIVERSAL ?
-                "∀" : "∃";
+        List<String> symNames = declaredSymbols.stream().map(d -> d.name).collect(Collectors.toList());
+        String qType = quantificationType == Quantification.UNIVERSAL ? "∀" : "∃";
         return qType + " " + Utils.join(symNames, ", ") + ":" +
                 declaredSymbols.get(0).type + " " + assertion.toString();
     }
