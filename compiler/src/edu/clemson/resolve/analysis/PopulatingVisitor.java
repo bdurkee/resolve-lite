@@ -192,6 +192,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             extension.moduleArgumentList().forEach(this::visit);
         }
         try {
+            //these two lines will throw the appropriate exception (that is caught below)
+            //if the modules don't exist or aren't imported...
+            symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            if (ctx.externally == null) symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same
             FacilitySymbol facility = new FacilitySymbol(ctx, getRootModuleIdentifier(),
@@ -201,6 +206,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             // facility.getFacility().getSpecification().getArguments()
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
+        } catch (NoSuchModuleException e) {
+            noSuchModule(e);
         }
         return null;
     }

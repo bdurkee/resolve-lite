@@ -1,10 +1,10 @@
 Facility Boo;
-uses Standard_Booleans;
 
+    Facility Fc is Boolean_Template
+        externally implemented by impl;
 
-    Operation s ();
+    Operation Foo ();
         Procedure
-            Var x : Ss;
-
+            Var x : Fc :: x;
     end Foo;
 end Boo;
