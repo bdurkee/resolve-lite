@@ -41,7 +41,7 @@ public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
-    static final String FILE_EXTENSION = ".resolve";
+    public static final String FILE_EXTENSION = ".resolve";
 
     private static final List<String> NATIVE_EXTENSION =
             Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
@@ -373,7 +373,8 @@ public class RESOLVECompiler {
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
             //well, let's try the core libraries then
-            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
+            String stdSrcsPath = getStdSourcesPath();
+            Files.walkFileTree(new File(getStdSourcesPath()).toPath(), l);
             result = l.getFile();
         }
         return result;
@@ -419,6 +420,12 @@ public class RESOLVECompiler {
             return ".";
         }
         return rootDir;
+    }
+
+    @NotNull
+    public static String getStdSourcesPath() {
+        String rootDir = getCoreLibraryDirectory();
+        return getCoreLibraryDirectory() + getCoreLibraryName();
     }
 
     @NotNull

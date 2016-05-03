@@ -54,10 +54,7 @@ public class AnnotatedModule {
         this(root, name, fileName, false);
     }
 
-    public AnnotatedModule(@NotNull ParseTree root,
-                           @NotNull Token name,
-                           @NotNull String fileName,
-                           boolean hasErrors) {
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName, boolean hasErrors) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
@@ -71,8 +68,7 @@ public class AnnotatedModule {
     }
 
     @NotNull
-    public PExp getMathExpASTFor(@NotNull DumbTypeGraph g,
-                                 @NotNull ParserRuleContext ctx) {
+    public PExp getMathExpASTFor(@NotNull DumbTypeGraph g, @NotNull ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
