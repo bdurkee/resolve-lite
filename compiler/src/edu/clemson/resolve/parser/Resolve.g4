@@ -214,7 +214,9 @@ parameterMode
         | 'restores'
         | 'preserves'
         | 'replaces'
-        | 'evaluates' )
+        | 'evaluates'
+        | ID
+        )
     ;
 
 // prog variable decls
