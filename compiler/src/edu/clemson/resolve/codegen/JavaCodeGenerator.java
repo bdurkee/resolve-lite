@@ -54,8 +54,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
             String contents = null;
             try {
                 contents = Utils.readFile(externalFile.getPath());
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 throw new RuntimeException(ioe.getCause());
             }
             ST result = walk(moduleFile).add("module", contents);

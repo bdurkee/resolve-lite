@@ -44,7 +44,8 @@ public class ModuleParameterSymbol extends Symbol {
         ProgType progType = null;
         if (wrappedParamSymbol instanceof OperationSymbol) {
             progType = ((OperationSymbol) wrappedParamSymbol).getReturnType();
-        } else if (wrappedParamSymbol instanceof ProgParameterSymbol) {
+        }
+        else if (wrappedParamSymbol instanceof ProgParameterSymbol) {
             progType = ((ProgParameterSymbol) wrappedParamSymbol).getDeclaredType();
         }
         return progType;

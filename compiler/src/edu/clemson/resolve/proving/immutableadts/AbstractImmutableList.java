@@ -30,9 +30,11 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
 
         if (index == 0) {
             retval = tail(1);
-        } else if (index == size() - 1) {
+        }
+        else if (index == size() - 1) {
             retval = head(index);
-        } else {
+        }
+        else {
             retval =
                     new ImmutableListConcatenation<E>(head(index),
                             tail(index + 1));
@@ -49,10 +51,12 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         if (index == 0) {
             first = insertedList;
             second = tail(1);
-        } else if (index == size() - 1) {
+        }
+        else if (index == size() - 1) {
             first = head(index);
             second = insertedList;
-        } else {
+        }
+        else {
             first =
                     new ImmutableListConcatenation<E>(head(index), insertedList);
             second = tail(index + 1);
@@ -72,10 +76,12 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
         if (index == 0) {
             first = l;
             second = this;
-        } else if (index == size()) {
+        }
+        else if (index == size()) {
             first = this;
             second = l;
-        } else {
+        }
+        else {
             first = new ImmutableListConcatenation<E>(head(index), l);
             second = tail(index);
         }

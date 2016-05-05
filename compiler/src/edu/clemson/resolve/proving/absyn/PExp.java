@@ -98,6 +98,7 @@ public abstract class PExp {
      *
      * @param currents a list of sub-expressions to be substituted (replaced)
      * @param repls    a list of replacement {@code PExp}s.
+     *
      * @return the {@code PExp} with substitutions made
      */
     @NotNull
@@ -115,6 +116,7 @@ public abstract class PExp {
      * affect on {@code this} expression; {@code false} otherwise.
      *
      * @param substitutions substitutions to make
+     *
      * @return whether or not the substitutions given changes the expr
      */
     public boolean staysSameAfterSubstitution(Map<PExp, PExp> substitutions) {
@@ -139,6 +141,7 @@ public abstract class PExp {
      * (or is a subtype) of {@code other}; {@code false} otherwise.
      *
      * @param other some {@code MathClassification}.
+     *
      * @return whether or not the math types of this or {@code other} matches
      */
     public boolean typeMatches(MathClassification other) {
@@ -161,6 +164,7 @@ public abstract class PExp {
      * defined by the map, returning a new (substituted) {@code PExp}.
      *
      * @param substitutions map like {@code existing PExp -> replacement PExp}
+     *
      * @return a, new, substituted expression
      */
     @NotNull
@@ -172,6 +176,7 @@ public abstract class PExp {
      * 'name' field matches {@code name}; {@code false} otherwise.
      *
      * @param name some name
+     *
      * @return whether or not the name appears anywhere in {@code this}'s
      * subtree
      */
@@ -393,6 +398,7 @@ public abstract class PExp {
      * names; {@code false} otherwise.
      *
      * @param o the expression to compare with {@code this}
+     *
      * @return whether {@code this} matches {@code o} with respect to structure
      * and variable naming
      */

@@ -52,7 +52,8 @@ public class ParsimoniousAssumeApplicationStrategy
         if (!parsimoniousAssumeConjuncts.isEmpty()) {
             assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
             block.finalConfirm(block.g.formImplies(assumeExp, RP));
-        } else {
+        }
+        else {
             block.finalConfirm(RP);
         }
         return block.snapshot();

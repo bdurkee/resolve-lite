@@ -26,7 +26,8 @@ public class ExtensionImplModule extends AbstractSpecImplModule {
             if (s instanceof OperationSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod((OperationSymbol) s));
-            } else if (s instanceof TypeModelSymbol) {
+            }
+            else if (s instanceof TypeModelSymbol) {
                 delegateMethods.add(
                         new ConceptDelegateMethod("init" + s.getName(), true));
             }

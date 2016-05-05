@@ -11,8 +11,7 @@ import java.util.WeakHashMap;
 public class ProgInvalidType extends ProgType {
 
     @NotNull
-    private static WeakHashMap<DumbTypeGraph, ProgInvalidType> instances =
-            new WeakHashMap<>();
+    private static WeakHashMap<DumbTypeGraph, ProgInvalidType> instances = new WeakHashMap<>();
 
     @NotNull
     public static ProgInvalidType getInstance(@NotNull DumbTypeGraph g) {
@@ -41,9 +40,8 @@ public class ProgInvalidType extends ProgType {
 
     @NotNull
     @Override
-    public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+    public ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                        @NotNull FacilitySymbol instantiatingFacility) {
         return this;
     }
 

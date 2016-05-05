@@ -25,8 +25,8 @@ public abstract class ProgType {
     public abstract MathClassification toMath();
 
     /**
-     * Returns {@code true} if this program type is a 'typed container' of
-     * other program types. Basically makes it much easier for us to determine
+     * Returns {@code true} if this program type is a 'typed container' of other program types. Basically makes it
+     * much easier for us to determine
      * if objects typed with this have members capable of being accessed.
      */
     public boolean isAggregateType() {
@@ -34,18 +34,16 @@ public abstract class ProgType {
     }
 
     @NotNull
-    public abstract ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility);
+    public abstract ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                                 @NotNull FacilitySymbol instantiatingFacility);
 
     /**
-     * Returns {@code true} <strong>iff</strong> a value of this type
-     * would be acceptable where one of type {@code t} were required.
+     * Returns {@code true} <strong>iff</strong> a value of this type would be acceptable where one of type
+     * {@code t} were required.
      *
      * @param t the required type
-     * @return {@code true} <strong>iff</strong> an value of this type
-     * would be acceptable where one of type {@code t} were
-     * required
+     * @return {@code true} <strong>iff</strong> an value of this type would be acceptable where one of type
+     *      {@code t} were required
      */
     public boolean acceptableFor(@NotNull ProgType t) {
         return equals(t);

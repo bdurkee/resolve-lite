@@ -18,8 +18,10 @@ public class ProgFamilyType extends ProgNamedType {
     @NotNull
     private final PExp constraint;
 
-    public ProgFamilyType(@NotNull MathClassification model, @NotNull String name,
-                          @NotNull String exemplarName, @NotNull PExp constraint,
+    public ProgFamilyType(@NotNull MathClassification model,
+                          @NotNull String name,
+                          @NotNull String exemplarName,
+                          @NotNull PExp constraint,
                           @NotNull PExp initEnsures,
                           @NotNull ModuleIdentifier moduleIdentifier) {
         super(model.getTypeGraph(), name, initEnsures, moduleIdentifier);
@@ -57,12 +59,10 @@ public class ProgFamilyType extends ProgNamedType {
 
     @NotNull
     @Override
-    public ProgType instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @NotNull FacilitySymbol instantiatingFacility) {
+    public ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                        @NotNull FacilitySymbol instantiatingFacility) {
 
-        Map<String, MathClassification> mathTypeToMathType =
-                Symbol.buildMathTypeGenerics(genericInstantiations);
+        Map<String, MathClassification> mathTypeToMathType = Symbol.buildMathTypeGenerics(genericInstantiations);
 
       /*  @SuppressWarnings("unchecked") Map<MathClassification, MathClassification> mathTypeToMathType =
                 (Map<MathClassification, MathClassification>) (Map<?, MathClassification>) MathNamedClassification.toMTNamedMap(
@@ -79,8 +79,7 @@ public class ProgFamilyType extends ProgNamedType {
                 myInitializationEnsures
                         .withTypesSubstituted(mathTypeToMathType);*/
 
-        return new ProgFamilyType(model, name, exemplarName, constraint, initEnsures,
-                getModuleIdentifier());
+        return new ProgFamilyType(model, name, exemplarName, constraint, initEnsures, getModuleIdentifier());
     }
 
     @Override

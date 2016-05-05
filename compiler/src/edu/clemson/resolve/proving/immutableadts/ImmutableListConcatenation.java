@@ -31,7 +31,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         E retval;
         if (index < myFirstListSize) {
             retval = myFirstList.get(index);
-        } else {
+        }
+        else {
             retval = mySecondList.get(index - myFirstListSize);
         }
         return retval;
@@ -42,7 +43,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
         ImmutableList<E> retval;
         if (length <= myFirstListSize) {
             retval = myFirstList.head(length);
-        } else {
+        }
+        else {
             retval =
                     new ImmutableListConcatenation<E>(myFirstList, mySecondList
                             .head(length - myFirstListSize));
@@ -74,7 +76,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
             retval =
                     new ImmutableListConcatenation<E>(myFirstList
                             .tail(startIndex), mySecondList);
-        } else {
+        }
+        else {
             retval = mySecondList.tail(startIndex - myFirstListSize);
         }
         return retval;

@@ -14,7 +14,8 @@ public class MathNamedClassification extends MathClassification {
 
     public String tag;
 
-    public MathNamedClassification(@NotNull DumbTypeGraph g, String tag,
+    public MathNamedClassification(@NotNull DumbTypeGraph g,
+                                   String tag,
                                    int typeDepth,
                                    @Nullable MathClassification enclosingType) {
         super(g, enclosingType);
@@ -29,8 +30,7 @@ public class MathNamedClassification extends MathClassification {
     }
 
     @Override
-    public MathClassification withVariablesSubstituted(
-            Map<String, MathClassification> substitutions) {
+    public MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions) {
         MathClassification result = substitutions.get(this.tag);
         return result == null ? this : result;
     }

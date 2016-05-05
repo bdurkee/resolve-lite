@@ -180,7 +180,8 @@ public class ModelBuilder extends ResolveBaseListener {
             layers.get(i).isProxied = ctx.extensionPairing().size() > 1;
             if (i + 1 < layers.size()) {
                 layers.get(i).child = layers.get(i + 1);
-            } else {
+            }
+            else {
                 layers.get(i).child = basePtr;
             }
         }
@@ -337,7 +338,8 @@ public class ModelBuilder extends ResolveBaseListener {
         if (referencesOperationParameter(ctx.progNamedExp().name.getText())) {
             built.put(ctx, new MethodCall.OperationParameterMethodCall(
                     ctx.progNamedExp().name.getText(), args));
-        } else {
+        }
+        else {
             built.put(ctx, new MethodCall(buildQualifier(
                     ctx.progNamedExp().qualifier, ctx.progNamedExp().name),
                     ctx.progNamedExp().name.getText(), args));
@@ -385,7 +387,8 @@ public class ModelBuilder extends ResolveBaseListener {
         if (Utils.getFirstAncestorOfType(ctx,
                 ResolveParser.ModuleArgumentListContext.class) != null) {
             built.put(ctx, createFacilityArgumentModel(ctx));
-        } else {
+        }
+        else {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"),
                     ctx.name.getText()));
         }
@@ -417,14 +420,17 @@ public class ModelBuilder extends ResolveBaseListener {
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
                         ctx.qualifier, ctx.name), s.toOperationSymbol());
-            } else if (s.isModuleTypeParameter()) {
+            }
+            else if (s.isModuleTypeParameter()) {
                 //typeinit wrapped in a "get" call
                 result = new MethodCall(new TypeInit(buildQualifier(
                         ctx.qualifier, ctx.name), ctx.name.getText(), ""));
-            } else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
+            }
+            else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
                 result = new TypeInit(buildQualifier(
                         ctx.qualifier, ctx.name), ctx.name.getText(), "");
-            } else {
+            }
+            else {
                 result = new VarNameRef(new NormalQualifier("this"),
                         ctx.name.getText());
             }
@@ -623,7 +629,8 @@ public class ModelBuilder extends ResolveBaseListener {
         //was s defined in the module we're translating?
         if (moduleScope.getModuleIdentifier().equals(symbolModuleID)) {
             return true;
-        } else { //was s defined in our parent concept or enhancement?
+        }
+        else { //was s defined in our parent concept or enhancement?
             ParseTree thisTree = moduleScope.getDefiningTree();
             if (thisTree instanceof ResolveParser.ModuleDeclContext) {
                 thisTree = thisTree.getChild(0);
@@ -633,7 +640,8 @@ public class ModelBuilder extends ResolveBaseListener {
                         (ResolveParser.ConceptImplModuleDeclContext) thisTree;
                 return symbolModuleID.getNameString()
                         .equals(asConceptImpl.concept.getText());
-            } else if (thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
+            }
+            else if (thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
                 ResolveParser.ConceptExtImplModuleDeclContext asExtensionImpl =
                         (ResolveParser.ConceptExtImplModuleDeclContext) thisTree;
                 return symbolModuleID.getNameString()
@@ -665,10 +673,12 @@ public class ModelBuilder extends ResolveBaseListener {
                     if (withinFacilityModule()) {
                         q = new NormalQualifier(
                                 moduleScope.getModuleIdentifier().getNameString());
-                    } else {
+                    }
+                    else {
                         q = new NormalQualifier("this");
                     }
-                } else { //something referenced from a facility module (to say another facility module)
+                }
+                else { //something referenced from a facility module (to say another facility module)
                     //Test_Fac.<symName>
                     q = new NormalQualifier(
                             corresondingSym.getModuleIdentifier().getNameString());

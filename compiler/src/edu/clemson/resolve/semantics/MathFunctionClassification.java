@@ -67,7 +67,8 @@ public class MathFunctionClassification extends MathClassification {
 
         if (applyFactory == null) {
             this.applicationFactory = DEFAULT_FACTORY;
-        } else {
+        }
+        else {
             this.applicationFactory = applyFactory;
         }
         this.typeRefDepth = range.typeRefDepth;
@@ -86,7 +87,7 @@ public class MathFunctionClassification extends MathClassification {
                 result = paramTypes.get(0);
                 break;
             default:
-                List<Element> elements = new LinkedList<Element>();
+                List<Element> elements = new LinkedList<>();
 
                 Iterator<String> namesIter = paramNames.iterator();
                 Iterator<MathClassification> typesIter = paramTypes.iterator();
@@ -112,14 +113,14 @@ public class MathFunctionClassification extends MathClassification {
         List<MathClassification> result = new ArrayList<>();
 
         if (t instanceof MathCartesianClassification) {
-            MathCartesianClassification domainAsMTCartesian =
-                    (MathCartesianClassification) t;
+            MathCartesianClassification domainAsMTCartesian = (MathCartesianClassification) t;
 
             int size = domainAsMTCartesian.size();
             for (int i = 0; i < size; i++) {
                 result.add(domainAsMTCartesian.getFactor(i));
             }
-        } else {
+        }
+        else {
             if (!t.equals(t.getTypeGraph().VOID)) {
                 result.add(t);
             }

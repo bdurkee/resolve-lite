@@ -20,15 +20,13 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     private final RESOLVECompiler compiler;
     private final AnnotatedModule tr;
 
-    BasicSanityCheckingVisitor(@NotNull RESOLVECompiler compiler,
-                               @NotNull AnnotatedModule tr) {
+    BasicSanityCheckingVisitor(@NotNull RESOLVECompiler compiler, @NotNull AnnotatedModule tr) {
         this.compiler = compiler;
         this.tr = tr;
     }
 
     @Override
-    public Void visitModuleDecl(
-            ResolveParser.ModuleDeclContext ctx) {
+    public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         Token moduleNameToken = tr.getNameToken();
         String groomedFileName = Utils.groomFileName(tr.getFileName());
         String extlessFileName = Utils.stripFileExtension(groomedFileName);
@@ -43,80 +41,69 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitPrecisModuleDecl(
-            ResolveParser.PrecisModuleDeclContext ctx) {
+    public Void visitPrecisModuleDecl(ResolveParser.PrecisModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitPrecisExtModuleDecl(
-            ResolveParser.PrecisExtModuleDeclContext ctx) {
+    public Void visitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitFacilityModuleDecl(
-            ResolveParser.FacilityModuleDeclContext ctx) {
+    public Void visitFacilityModuleDecl(ResolveParser.FacilityModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptModuleDecl(
-            ResolveParser.ConceptModuleDeclContext ctx) {
+    public Void visitConceptModuleDecl(ResolveParser.ConceptModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptExtModuleDecl(
-            ResolveParser.ConceptExtModuleDeclContext ctx) {
+    public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptExtImplModuleDecl(
-            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public Void visitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptImplModuleDecl(
-            ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+    public Void visitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         if (ctx.externally != null) sanityCheckExternalFileRef(ctx.externally);
         return null;
     }
 
     /**
-     * Checks to ensure the name {@link Token}s bookending some scoped block
-     * are the same -- meaning they contain the same text.
+     * Checks to ensure the name {@link Token}s bookending some scoped block are the same --
+     * meaning they contain  the same text.
      */
-    private void sanityCheckBlockEnds(@NotNull Token topName,
-                                      @NotNull Token bottomName) {
+    private void sanityCheckBlockEnds(@NotNull Token topName, @NotNull Token bottomName) {
         if (!topName.getText().equals(bottomName.getText())) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.MISMATCHED_BLOCK_END_NAMES, bottomName,
+            compiler.errMgr.semanticError(ErrorKind.MISMATCHED_BLOCK_END_NAMES, bottomName,
                     topName.getText(), bottomName.getText());
         }
     }
 
     private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
-        File externalFile =
-                Utils.getExternalFile(compiler, externalNameRef.getText());
+        File externalFile = Utils.getExternalFile(compiler, externalNameRef.getText());
         if (externalFile == null) {
-            compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE,
-                    externalNameRef, externalNameRef.getText());
+            compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE, externalNameRef,
+                    externalNameRef.getText());
         }
     }
 }

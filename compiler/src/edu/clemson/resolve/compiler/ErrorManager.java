@@ -15,11 +15,9 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class ErrorManager extends BaseErrorListener {
-    public static final String FORMATS_DIR =
-            "edu/clemson/resolve/templates/messages/";
+    public static final String FORMATS_DIR = "edu/clemson/resolve/templates/messages/";
 
-    private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve"
-            + STGroup.GROUP_FILE_EXTENSION);
+    private final STGroup format = new STGroupFile(FORMATS_DIR + "resolve" + STGroup.GROUP_FILE_EXTENSION);
 
     private final RESOLVECompiler compiler;
     private int errorCount, warningCount;
@@ -107,8 +105,7 @@ public class ErrorManager extends BaseErrorListener {
 
     public void semanticError(ErrorKind etype, Token offendingSymbol,
                               Object... args) {
-        RESOLVEMessage msg =
-                new LanguageSemanticsMessage(etype, offendingSymbol, args);
+        RESOLVEMessage msg = new LanguageSemanticsMessage(etype, offendingSymbol, args);
         emit(etype, msg);
     }
 
@@ -139,8 +136,7 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     public static void internalError(String error) {
-        StackTraceElement location =
-                getLastNonErrorManagerCodeLocation(new Exception());
+        StackTraceElement location = getLastNonErrorManagerCodeLocation(new Exception());
         String msg = location + ": " + error;
         System.err.println("internal error: " + msg);
     }
@@ -148,8 +144,7 @@ public class ErrorManager extends BaseErrorListener {
     /**
      * Returns first non ErrorManager code location for generating messages.
      */
-    private static StackTraceElement getLastNonErrorManagerCodeLocation(
-            Throwable e) {
+    private static StackTraceElement getLastNonErrorManagerCodeLocation(Throwable e) {
         StackTraceElement[] stack = e.getStackTrace();
         int i = 0;
         for (; i < stack.length; i++) {
@@ -163,8 +158,7 @@ public class ErrorManager extends BaseErrorListener {
     }
 
     public boolean formatWantsSingleLineMessage() {
-        return format.getInstanceOf("wantsSingleLineMessage").render()
-                .equals("true");
+        return format.getInstanceOf("wantsSingleLineMessage").render().equals("true");
     }
 
     @SuppressWarnings("fallthrough")

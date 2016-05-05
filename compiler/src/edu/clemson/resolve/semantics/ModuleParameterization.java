@@ -26,10 +26,8 @@ public class ModuleParameterization {
     }
 
     @NotNull
-    public Scope getScope(boolean instantiated)
-            throws NoSuchModuleException {
-        ModuleScopeBuilder originalScope =
-                scopeRepo.getModuleScope(moduleIdentifier);
+    public Scope getScope(boolean instantiated) throws NoSuchModuleException {
+        ModuleScopeBuilder originalScope = scopeRepo.getModuleScope(moduleIdentifier);
         Scope result = originalScope;
         result = scopeRepo.getModuleScope(moduleIdentifier);
         if (instantiated) {

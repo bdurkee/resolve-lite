@@ -32,7 +32,8 @@ public class TestPExp extends BaseTest {
 
     private final DumbTypeGraph g = new DumbTypeGraph();
 
-    @Test public void testGetSubExpressions() throws Exception {
+    @Test
+    public void testGetSubExpressions() throws Exception {
         PExp result = parseMathAssertionExp(g, "x + y");
         List<? extends PExp> subexprs = result.getSubExpressions();
         Assert.assertEquals(3, subexprs.size());
@@ -59,7 +60,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("false", exps.next().toString());
     }
 
-    @Test public void testPSymbolAndPApplyEquals() throws Exception {
+    @Test
+    public void testPSymbolAndPApplyEquals() throws Exception {
         Assert.assertEquals(true, parseMathAssertionExp(g, "x")
                 .equals(parseMathAssertionExp(g, "x")));
         Assert.assertEquals(true, parseMathAssertionExp(g, "1")
@@ -96,23 +98,26 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(g, "||S||"));
     }
 
-    @Test public void testPAltAndPLambdaEquals() throws Exception {
+    @Test
+    public void testPAltAndPLambdaEquals() throws Exception {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{a if b = (c and f); b otherwise;}}")
-                    .equals(parseMathAssertionExp(g,
-                            "{{a if b = (c and f); b otherwise;}}")));
+                .equals(parseMathAssertionExp(g,
+                        "{{a if b = (c and f); b otherwise;}}")));
 
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")
-                    .equals(parseMathAssertionExp(g,
-                            "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")));
+                .equals(parseMathAssertionExp(g,
+                        "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")));
     }
 
     //TODO: PSet needs finishing first -- this will probably be awhile
-    @Test public void testPSetEquals() throws Exception {
+    @Test
+    public void testPSetEquals() throws Exception {
     }
 
-    @Test public void testIsObviouslyTrue() throws Exception {
+    @Test
+    public void testIsObviouslyTrue() throws Exception {
         Assert.assertEquals(false, parseMathAssertionExp(g,
                 "x + y = y + x").isObviouslyTrue());
         Assert.assertEquals(true, parseMathAssertionExp(g,
@@ -125,12 +130,14 @@ public class TestPExp extends BaseTest {
                 "+(x, y) = x + y").isObviouslyTrue());
     }
 
-    @Test public void testIsLiteralFalse() {
+    @Test
+    public void testIsLiteralFalse() {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "false").isLiteralFalse());
     }
 
-    @Test public void testIsEquality() throws Exception {
+    @Test
+    public void testIsEquality() throws Exception {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "y + x = y + x").isEquality());
         Assert.assertEquals(true, parseMathAssertionExp(g,
@@ -139,7 +146,8 @@ public class TestPExp extends BaseTest {
                 "1 and y + x").isEquality());
     }
 
-    @Test public void testQuantifierDistribution() {
+    @Test
+    public void testQuantifierDistribution() {
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         Assert.assertEquals(1, result.getQuantifiedVariables().size());
@@ -151,7 +159,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(NONE, exps.next().getQuantification());
     }
 
-    @Test public void testNestedQuantifierDistribution() {
+    @Test
+    public void testNestedQuantifierDistribution() {
         PExp result =
                 parseMathAssertionExp(g, "Forall x, y : Z, Exists v : Z, "
                         + "Forall f : Entity * Entity -> B, f(x, v)");
@@ -165,7 +174,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification());
     }
 
-    @Test public void testPSymbolAndPApplyContainsName() {
+    @Test
+    public void testPSymbolAndPApplyContainsName() {
         assertEquals(true, parseMathAssertionExp(g, "f").containsName("f"));
         PExp result = parseMathAssertionExp(g, "f(h(g(x)))");
         assertEquals(true, result.containsName("x"));
@@ -176,7 +186,8 @@ public class TestPExp extends BaseTest {
         assertEquals(false, result.containsName("z"));
     }
 
-    @Test public void testPAltAndPLambdaContainsName() {
+    @Test
+    public void testPAltAndPLambdaContainsName() {
         Assert.assertEquals(true, parseMathAssertionExp(g,
                 "{{a if b = (c and f); b otherwise;}}").containsName("c"));
         Assert.assertEquals(true, parseMathAssertionExp(g,
@@ -185,7 +196,8 @@ public class TestPExp extends BaseTest {
                 "λ v : Z,{{x = r if j; false otherwise;}}").containsName("v"));
     }
 
-    @Test public void testIsVariable() {
+    @Test
+    public void testIsVariable() {
         PExp result = parseMathAssertionExp(g, "a");
         assertEquals(true, result.isVariable());
         result = parseMathAssertionExp(g, "a(x)");
@@ -194,7 +206,8 @@ public class TestPExp extends BaseTest {
         assertEquals(false, result.isVariable());
     }
 
-    @Test public void testSplitIntoConjuncts() {
+    @Test
+    public void testSplitIntoConjuncts() {
         PExp result = parseMathAssertionExp(g,
                 "x and y = 2 and P.Lab = λ q : Z,(true)");
         List<PExp> conjuncts = result.splitIntoConjuncts();
@@ -214,7 +227,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
     }
 
-    @Test public void testWithQuantifiersFlipped1() {
+    @Test
+    public void testWithQuantifiersFlipped1() {
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         Assert.assertEquals(NONE, exps.next().getQuantification());
@@ -230,7 +244,8 @@ public class TestPExp extends BaseTest {
     }
 
     //nothing flipped.
-    @Test public void testWithQuantifiersFlipped2() {
+    @Test
+    public void testWithQuantifiersFlipped2() {
         PExp result = parseMathAssertionExp(g, "Forall x, y, z : Z, a = c");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
 
@@ -245,7 +260,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(NONE, exps.next().getQuantification());
     }
 
-    @Test public void testWithQuantifiersFlipped3() {
+    @Test
+    public void testWithQuantifiersFlipped3() {
         PExp result =
                 parseMathAssertionExp(g,
                         "Forall x, y : Z, x and (Exists x : N, x is_in S)");
@@ -253,7 +269,7 @@ public class TestPExp extends BaseTest {
         exps = result.getSubExpressions().iterator();
         Assert.assertEquals(NONE, exps.next().getQuantification()); //x and (Exists x : N, x is_in S)
         Assert.assertEquals(UNIVERSAL, exps.next().getQuantification()); //x
-        PApply is_in_application = (PApply)exps.next();
+        PApply is_in_application = (PApply) exps.next();
         Assert.assertEquals(NONE, is_in_application.getQuantification()); //(Exists x : N, x is_in S)
         Assert.assertEquals(EXISTENTIAL,
                 is_in_application.getArguments().get(0).getQuantification()); //x
@@ -264,7 +280,7 @@ public class TestPExp extends BaseTest {
         exps = result.getSubExpressions().iterator();
         Assert.assertEquals(NONE, exps.next().getQuantification()); //x and (Exists x : N, x is_in S)
         Assert.assertEquals(EXISTENTIAL, exps.next().getQuantification()); //x
-        is_in_application = (PApply)exps.next();
+        is_in_application = (PApply) exps.next();
         Assert.assertEquals(NONE, is_in_application.getQuantification()); //(Exists x : N, x is_in S)
         Assert.assertEquals(UNIVERSAL,
                 is_in_application.getArguments().get(0).getQuantification()); //x
@@ -272,43 +288,47 @@ public class TestPExp extends BaseTest {
                 is_in_application.getArguments().get(1).getQuantification()); //S
     }
 
-    @Test public void testWithIncomingSignsRemoved() {
+    @Test
+    public void testWithIncomingSignsRemoved() {
         PExp result = parseMathAssertionExp(g, "F(@I, J, @S.Top, @f(x)(y))");
         Assert.assertEquals(false, result.isIncoming());
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
-        boolean[] expected = {false, true, false, true, true};
-        for (boolean anExpected1 : expected) {
+        boolean[] expected = { false, true, false, true, true };
+        for ( boolean anExpected1 : expected ) {
             Assert.assertEquals(anExpected1, exps.next().isIncoming());
         }
         result = result.withIncomingSignsErased();
         exps = result.getSubExpressions().iterator();
-        for (boolean anExpected : expected) {
+        for ( boolean anExpected : expected ) {
             Assert.assertEquals(false, exps.next().isIncoming());
         }
     }
 
-    @Test public void testSelectorExpWithCall() {
+    @Test
+    public void testSelectorExpWithCall() {
         PExp result = parseMathAssertionExp(g, "P(z).Q.Lab(s)(Cen(k))");
         Assert.assertEquals(false, result.isIncoming());
 
     }
 
-    @Test public void testGetIncomingVariables() {
+    @Test
+    public void testGetIncomingVariables() {
         PExp result =
-                parseMathAssertionExp( g,
+                parseMathAssertionExp(g,
                         "Forall x, y, z : Z, Exists u, v, w : N," +
                                 "@g(@u) + (h(@z, @w, @f(@u))) + " +
-                        "λ q : Z,{{@x if g(x); @b(@k) otherwise;}}");
+                                "λ q : Z,{{@x if g(x); @b(@k) otherwise;}}");
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
                 Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream()
-                .collect(Collectors.toSet());
+                        .collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }
 
-    @Test public void testGetQuantifiedVariables() {
+    @Test
+    public void testGetQuantifiedVariables() {
         PExp result =
                 parseMathAssertionExp(
                         g,
@@ -316,16 +336,19 @@ public class TestPExp extends BaseTest {
                                 "Forall f, h : Z * Z -> B, "
                                 + "g(@u) + (h(@z, @w, f(@u)))");
         Set<String> quantifiedNames = result.getQuantifiedVariables().stream()
-                .map(e -> ((PSymbol)e).getName()).collect(Collectors.toSet());
+                .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames = Arrays.asList("u", "z", "f", "h").stream()
                 .collect(Collectors.toSet());
         Assert.assertEquals(4, quantifiedNames.size());
         Assert.assertEquals(true, quantifiedNames.containsAll(expectedNames));
     }
 
-    @Test public void testGetFunctionApplications() {}
+    @Test
+    public void testGetFunctionApplications() {
+    }
 
-    @Test public void testGetSymbolNames() {
+    @Test
+    public void testGetSymbolNames() {
         PExp result = parseMathAssertionExp(g, "x + y");
         Set<String> expectedNames = Arrays.asList("x", "+", "y").stream()
                 .collect(Collectors.toSet());
@@ -334,10 +357,11 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
     }
 
-    @Test public void testGetSymbolNames2() {
+    @Test
+    public void testGetSymbolNames2() {
         PExp result =
                 parseMathAssertionExp(g, "(λ q:Inv,({{P.Labl(SCD(q)) " +
-                "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
+                        "if ((SCD(q) + 1) <= P.Length);Label.base_point otherwise;}}))");
         Set<String> expectedNames =
                 Arrays.asList("q", "Label.base_point", "P.Length").stream()
                         .collect(Collectors.toSet());
@@ -356,21 +380,24 @@ public class TestPExp extends BaseTest {
 
     }
 
-    @Test public void testSubstituteOnSelector() {
+    @Test
+    public void testSubstituteOnSelector() {
         PExp result = parseMathAssertionExp(g, "conc.P.Lab(conc.P.Trmnl_Loc)")
                 .substitute(parseMathAssertionExp(g, "conc.P.Lab"),
-                            parseMathAssertionExp(g, "X"));
+                        parseMathAssertionExp(g, "X"));
         Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.toString());
     }
 
-    @Test public void testSubstituteOnLambda() {
+    @Test
+    public void testSubstituteOnLambda() {
         PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{@e if j = i; @e(q) otherwise;}}")
                 .substitute(parseMathAssertionExp(g, "@e"),
                         parseMathAssertionExp(g, "Y"));
         Assert.assertEquals("(X = λ q:Inv,{{Y if (j = i);Y(q) otherwise;}})", result.toString());
     }
 
-    @Test public void testSplitIntoSequents() {
+    @Test
+    public void testSplitIntoSequents() {
         PExp e = parseMathAssertionExp(g, "(Post implies (Q and R))");
         List<PExp> partitions = e.splitIntoSequents();
         Assert.assertEquals(2, partitions.size());
@@ -407,13 +434,12 @@ public class TestPExp extends BaseTest {
 
             //Todo: For some reason this never seems to be getting tripped atm,
             //even in the presence of errors.
-            if ( parser.getNumberOfSyntaxErrors() > 0 ) {
+            if ( parser.getNumberOfSyntaxErrors()>0 ) {
                 throw new IllegalArgumentException("input string: " + input
                         + " for PExp returnEnsuresArgSubstitutions contains syntax error");
             }
             return parser.mathAssertionExp();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -438,8 +464,9 @@ public class TestPExp extends BaseTest {
      * @param input the input to parse
      * @return the dummy-typed {@link PExp} representation of {@code input}
      */
-    @NotNull public static PExp parseMathAssertionExp(@NotNull DumbTypeGraph g,
-                                                      @NotNull String input) {
+    @NotNull
+    public static PExp parseMathAssertionExp(@NotNull DumbTypeGraph g,
+                                             @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule fakeModule =
                 new AnnotatedModule(t, new CommonToken(ResolveLexer.ID, "T"),
@@ -448,6 +475,6 @@ public class TestPExp extends BaseTest {
                 new PExpBuildingListener<>(g, fakeModule, true);
         ParseTreeWalker.DEFAULT.walk(l, t);
         PExp result = l.getBuiltPExp(t);
-        return result == null ? g.getTrueExp() : result ;
+        return result==null ? g.getTrueExp() : result;
     }
 }

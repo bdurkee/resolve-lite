@@ -5,8 +5,7 @@ import java.util.WeakHashMap;
 
 public class MathInvalidClassification extends MathClassification {
 
-    private static WeakHashMap<DumbTypeGraph, MathInvalidClassification> instances =
-            new WeakHashMap<>();
+    private static WeakHashMap<DumbTypeGraph, MathInvalidClassification> instances = new WeakHashMap<>();
 
     public static MathInvalidClassification getInstance(DumbTypeGraph g) {
         MathInvalidClassification result = instances.get(g);
@@ -31,8 +30,7 @@ public class MathInvalidClassification extends MathClassification {
     }
 
     @Override
-    public MathClassification withVariablesSubstituted(
-            Map<String, MathClassification> substitutions) {
+    public MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions) {
         return this;
     }
 

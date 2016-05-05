@@ -69,7 +69,8 @@ public class ProgVariableSymbol extends Symbol {
             result =
                     new ProgVariableSymbol(getName(), getDefiningTree(),
                             instantiatedType, getModuleIdentifier());
-        } else {
+        }
+        else {
             result = this;
         }
         return result;

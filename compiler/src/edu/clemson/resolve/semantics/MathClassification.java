@@ -5,9 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * The parent class of all mathematical types.
- */
+/** The parent class of all mathematical classifications. */
 public abstract class MathClassification {
 
     protected final DumbTypeGraph g;
@@ -116,7 +114,5 @@ public abstract class MathClassification {
     //TODO maybe change this map to MathNamedClassification -> MathNamedClassification, to
     //indicate this is just for names; would also be more in line with the name
     //of this method...
-    public abstract MathClassification withVariablesSubstituted(
-            Map<String, MathClassification> substitutions);
-
+    public abstract MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions);
 }

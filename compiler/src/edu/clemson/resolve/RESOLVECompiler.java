@@ -29,13 +29,11 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * The main entrypoint for the compiler. All input flows into here and this is
- * also where we manage flags for commandline args which are encapsulated via
- * instances of the {@link Option} class (which also resides here).
+ * The main entrypoint for the compiler. All input flows into here and this is also where we manage flags for
+ * commandline args which are encapsulated via instances of the {@link Option} class (which also resides here).
  * <p>
- * The structure and much of the code appearing here has been adapted to our
- * compiler's needs from the frontend of the ANTLRv4 tool, publically
- * available here: {@code https://github.com/antlr/antlr4}.</p>
+ * The structure and much of the code appearing here has been adapted to our compiler's needs from the frontend of the
+ * ANTLRv4 tool, publically available here: {@code https://github.com/antlr/antlr4}.</p>
  *
  * @since 0.0.1
  */
@@ -43,7 +41,7 @@ public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
-    static final String FILE_EXTENSION = ".resolve";
+    public static final String FILE_EXTENSION = ".resolve";
 
     private static final List<String> NATIVE_EXTENSION =
             Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
@@ -58,13 +56,14 @@ public class RESOLVECompiler {
         OptionArgType argType;
         String description;
 
-        Option(@NotNull String fieldName, @NotNull String name,
-               @NotNull String description) {
+        Option(@NotNull String fieldName, @NotNull String name, @NotNull String description) {
             this(fieldName, name, OptionArgType.NONE, description);
         }
 
-        Option(@NotNull String fieldName, @NotNull String name,
-               @NotNull OptionArgType argType, @NotNull String description) {
+        Option(@NotNull String fieldName,
+               @NotNull String name,
+               @NotNull OptionArgType argType,
+               @NotNull String description) {
             this.fieldName = fieldName;
             this.name = name;
             this.argType = argType;
@@ -96,17 +95,16 @@ public class RESOLVECompiler {
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Track separately so if someone adds a listener, it's the only one
-     * instead of it and the default stderr listener.
-     */
+    /** Track separately so if a listener is added, it's the only one (instead of it and default stderr listener). */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     public final MathSymbolTable symbolTable = new MathSymbolTable();
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    @NotNull public final ErrorManager errMgr;
-    @NotNull public LogManager logMgr = new LogManager();
+    @NotNull
+    public final ErrorManager errMgr;
+    @NotNull
+    public LogManager logMgr = new LogManager();
 
     public RESOLVECompiler() {
         this(null);
@@ -153,15 +151,17 @@ public class RESOLVECompiler {
                     try {
                         Field f = c.getField(o.fieldName);
                         if (argValue == null) {
-                            if (arg.startsWith("-no-"))
+                            if (arg.startsWith("-no-")) {
                                 f.setBoolean(this, false);
-                            else
+                            }
+                            else {
                                 f.setBoolean(this, true);
-                        } else
+                            }
+                        }
+                        else
                             f.set(this, argValue);
                     } catch (Exception e) {
-                        errMgr.toolError(ErrorKind.INTERNAL_ERROR,
-                                "can't access field " + o.fieldName);
+                        errMgr.toolError(ErrorKind.INTERNAL_ERROR, "can't access field " + o.fieldName);
                     }
                 }
             }
@@ -170,8 +170,7 @@ public class RESOLVECompiler {
             }
         }
         if (outputDirectory != null) {
-            if (outputDirectory.endsWith("/")
-                    || outputDirectory.endsWith("\\")) {
+            if (outputDirectory.endsWith("/") || outputDirectory.endsWith("\\")) {
                 outputDirectory =
                         outputDirectory.substring(0,
                                 outputDirectory.length() - 1);
@@ -179,26 +178,24 @@ public class RESOLVECompiler {
             File outDir = new File(outputDirectory);
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
-                errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE,
-                        outputDirectory);
+                errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
                 workingDirectory = ".";
             }
-        } else {
+        }
+        else {
             outputDirectory = ".";
         }
         if (workingDirectory != null) {
             if (workingDirectory.endsWith("/") || workingDirectory.endsWith("\\")) {
-                workingDirectory =
-                        workingDirectory
-                                .substring(0, workingDirectory.length() - 1);
+                workingDirectory = workingDirectory.substring(0, workingDirectory.length() - 1);
             }
             File outDir = new File(workingDirectory);
             if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND,
-                        workingDirectory);
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, workingDirectory);
                 workingDirectory = ".";
             }
-        } else {
+        }
+        else {
             workingDirectory = ".";
         }
     }
@@ -264,14 +261,12 @@ public class RESOLVECompiler {
     }
 
     @NotNull
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
-            @NotNull AnnotatedModule... m) {
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull AnnotatedModule... m) {
         return sortTargetModulesByUsesReferences(Arrays.asList(m));
     }
 
     @NotNull
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
-            @NotNull List<AnnotatedModule> modules) {
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (AnnotatedModule module : modules) {
             roots.put(module.getNameToken().getText(), module);
@@ -280,10 +275,9 @@ public class RESOLVECompiler {
     }
 
     @NotNull
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences(
-            @NotNull Map<String, AnnotatedModule> modules) {
-        DefaultDirectedGraph<String, DefaultEdge> g =
-                new DefaultDirectedGraph<>(DefaultEdge.class);
+    public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull Map<String, AnnotatedModule> modules) {
+        DefaultDirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+
         for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
             g.addVertex(t.getNameToken().getText());
             findDependencies(g, t, modules);
@@ -305,8 +299,7 @@ public class RESOLVECompiler {
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
         for (ModuleIdentifier importRequest : root.uses) {
-            AnnotatedModule module =
-                    roots.get(importRequest.getNameToken().getText());
+            AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
             try {
                 File file = findResolveFile(importRequest
                         .getNameToken().getText());
@@ -340,24 +333,19 @@ public class RESOLVECompiler {
         }
     }
 
-    protected List<String> getCompileOrder(
-            DefaultDirectedGraph<String, DefaultEdge> g) {
+    private List<String> getCompileOrder(DefaultDirectedGraph<String, DefaultEdge> g) {
         List<String> result = new ArrayList<>();
-
-        EdgeReversedGraph<String, DefaultEdge> reversed =
-                new EdgeReversedGraph<>(g);
-
-        TopologicalOrderIterator<String, DefaultEdge> dependencies =
-                new TopologicalOrderIterator<>(reversed);
+        EdgeReversedGraph<String, DefaultEdge> reversed = new EdgeReversedGraph<>(g);
+        TopologicalOrderIterator<String, DefaultEdge> dependencies = new TopologicalOrderIterator<>(reversed);
         while (dependencies.hasNext()) {
             result.add(dependencies.next());
         }
         return result;
     }
 
-    protected boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                                 @NotNull String src,
-                                 @NotNull String dest) {
+    private boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
+                               @NotNull String src,
+                               @NotNull String dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
         if (!g.containsVertex(src)) {
@@ -376,8 +364,7 @@ public class RESOLVECompiler {
     }
 
     @NotNull
-    private File findResolveFile(@NotNull String fileName)
-            throws IOException {
+    private File findResolveFile(@NotNull String fileName) throws IOException {
         FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
@@ -386,7 +373,8 @@ public class RESOLVECompiler {
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
             //well, let's try the core libraries then
-            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
+            String stdSrcsPath = getStdSourcesPath();
+            Files.walkFileTree(new File(getStdSourcesPath()).toPath(), l);
             result = l.getFile();
         }
         return result;
@@ -435,22 +423,23 @@ public class RESOLVECompiler {
     }
 
     @NotNull
+    public static String getStdSourcesPath() {
+        String rootDir = getCoreLibraryDirectory();
+        return getCoreLibraryDirectory() + getCoreLibraryName();
+    }
+
+    @NotNull
     public static String getCoreLibraryName() {
         return "src";
     }
 
     /**
-     * Used primarily by codegen to create new output files.
-     * If {@code outputDirectory} (set by -o) isn't present it will be created.
-     * The final filename is sensitive to the output directory and
-     * the directory where the soure file was found in.  If -o is /tmp
-     * and the original source file was foo/t.resolve then output files
-     * go in /tmp/foo.
+     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
+     * will be created. The final filename is sensitive to the output directory and the directory where the soure file
+     * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
-     * If no -o is specified, then just write to the directory where the
-     * sourcefile was found.</p>
-     * <p>
-     * If {@code outputDirectory==null} then write a String.
+     * If no -o is specified, then just write to the directory where the sourcefile was found; and if
+     * {@code outputDirectory==null} then write a String.
      */
     public Writer getOutputFileWriter(@NotNull String fileName)
             throws IOException {
@@ -475,18 +464,19 @@ public class RESOLVECompiler {
 
         if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
             fileDirectory = ".";
-        } else {
-            fileDirectory = fileNameWithPath.substring(0,
-                    fileNameWithPath.lastIndexOf(File.separatorChar));
+        }
+        else {
+            fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
         }
         if (haveOutputDir) {
-            if ((new File(fileDirectory).isAbsolute() ||
-                    fileDirectory.startsWith("~"))) {
+            if ((new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~"))) {
                 outputDir = new File(outputDirectory);
-            } else {
+            }
+            else {
                 outputDir = new File(outputDirectory, fileDirectory);
             }
-        } else {
+        }
+        else {
             outputDir = new File(fileDirectory);
         }
         return outputDir;
@@ -516,8 +506,7 @@ public class RESOLVECompiler {
     public void help() {
         version();
         for (Option o : optionDefs) {
-            String name =
-                    o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
+            String name = o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
             String s = String.format(" %-19s %s", name, o.description);
             info(s);
         }
@@ -550,7 +539,8 @@ public class RESOLVECompiler {
     public void warning(@NotNull RESOLVEMessage msg) {
         if (listeners.isEmpty()) {
             defaultListener.warning(msg);
-        } else {
+        }
+        else {
             for (RESOLVECompilerListener l : listeners) l.warning(msg);
         }
     }

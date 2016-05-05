@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SymbolTypeSearcher<E extends Symbol>
-        implements
-        MultimatchTableSearcher<E> {
+public class SymbolTypeSearcher<E extends Symbol> implements MultimatchTableSearcher<E> {
 
     public static final SymbolTypeSearcher<FacilitySymbol> FACILITY_SEARCHER =
             new SymbolTypeSearcher<>(FacilitySymbol.class);

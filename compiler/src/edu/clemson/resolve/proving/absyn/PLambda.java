@@ -8,10 +8,7 @@ import edu.clemson.resolve.semantics.MathInvalidClassification;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * An anonymous (lambda) function consisting of one or more typed bound
- * variables and a body.
- */
+/** An anonymous (lambda) function consisting of one or more typed bound variables and a body. */
 public class PLambda extends PExp {
 
     private final List<MathSymbolDeclaration> parameters = new ArrayList<>();
@@ -56,7 +53,8 @@ public class PLambda extends PExp {
         PExp result;
         if (substitutions.containsKey(this)) {
             result = substitutions.get(this);
-        } else {
+        }
+        else {
             result = new PLambda(parameters, body.substitute(substitutions));
         }
         return result;
@@ -133,8 +131,7 @@ public class PLambda extends PExp {
     @Override
     public Set<String> getSymbolNamesNoCache(
             boolean excludeApplications, boolean excludeLiterals) {
-        Set<String> bodyNames =
-                new HashSet<>(body.getSymbolNames(excludeApplications, excludeLiterals));
+        Set<String> bodyNames = new HashSet<>(body.getSymbolNames(excludeApplications, excludeLiterals));
         //bodyNames.add("lambda"); //not sure why the hell I was adding this...
         return bodyNames;
     }
@@ -148,10 +145,8 @@ public class PLambda extends PExp {
     @NotNull
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
-        List<PExp> bodyFunctions =
-                new LinkedList<>(body.getFunctionApplications());
-        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(
-                getMathType()).build());
+        List<PExp> bodyFunctions = new LinkedList<>(body.getFunctionApplications());
+        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(getMathType()).build());
         return bodyFunctions;
     }
 
@@ -197,8 +192,7 @@ public class PLambda extends PExp {
     public boolean equals(Object o) {
         boolean result = (o instanceof PLambda);
         if (result) {
-            result = parameters.size() == ((PLambda) o).parameters.size() &&
-                    body.equals(((PLambda) o).body);
+            result = parameters.size() == ((PLambda) o).parameters.size() && body.equals(((PLambda) o).body);
         }
         return result;
     }

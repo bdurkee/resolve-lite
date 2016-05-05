@@ -34,8 +34,7 @@ public class NameSearcher implements MultimatchTableSearcher<Symbol> {
             //TODO
             //Parameters of imported modules or facility instantiations ar not
             //exported and therefore should not be considered for results
-            if (l.equals(SearchContext.SOURCE_MODULE)
-                    || !(e instanceof ProgParameterSymbol)) {
+            if (l.equals(SearchContext.SOURCE_MODULE) || !(e instanceof ProgParameterSymbol)) {
                 matches.add(entries.get(searchString));
             }
         }

@@ -181,7 +181,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             if (arg.isFunctionApplication()) {
                 PExp e = applyCallRuleToExp(assertiveBlocks.peek(), arg);
                 result.add(e);
-            } else {
+            }
+            else {
                 result.add(arg);
             }
         }
@@ -460,11 +461,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
             List<PExp> args = ensuresAsPApply.getArguments();
             if (ensuresAsPApply.isEquality()) {
                 if (inSimpleForm(args.get(0), params)) simple = true;
-            } else if (ensuresAsPApply.isConjunct()) {
+            }
+            else if (ensuresAsPApply.isConjunct()) {
                 if (inSimpleForm(args.get(0), params) &&
                         inSimpleForm(args.get(1), params)) simple = true;
             }
-        } else if (ensures instanceof PSymbol) {
+        }
+        else if (ensures instanceof PSymbol) {
             for (ProgParameterSymbol p : params) {
                 if (p.getMode() == ParameterMode.UPDATES &&
                         p.asPSymbol().equals(ensures)) simple = true;
@@ -483,7 +486,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                     EXPLICIT_CALL_APPLICATION, callExp);
-        } else {
+        }
+        else {
             //TODO: Use log instead!
             //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
             s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
@@ -552,7 +556,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
                 */
-            } else if (declaredType instanceof PTRepresentation) {
+            }
+            else if (declaredType instanceof PTRepresentation) {
                 ProgReprTypeSymbol repr =
                         ((PTRepresentation) declaredType).getReprTypeSymbol();
                 PExp convention = repr.getConvention();
@@ -561,7 +566,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
             }
-        } else { //PTGeneric
+        }
+        else { //PTGeneric
             //    resultingAssumptions.add(g.formInitializationPredicate(
             //            p.getDeclaredType(), p.getName()));
         }
@@ -593,7 +599,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp);
                 result.add(equalsExp);
-            } else if (p.getMode() == ParameterMode.CLEARS) {
+            }
+            else if (p.getMode() == ParameterMode.CLEARS) {
                 PExp init = ((ProgNamedType) p.getDeclaredType())
                         .getInitializationEnsures()
                         .substitute(exemplar, paramExp);

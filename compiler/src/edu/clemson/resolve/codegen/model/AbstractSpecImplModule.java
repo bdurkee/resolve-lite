@@ -33,11 +33,13 @@ public abstract class AbstractSpecImplModule extends Module {
                 //do not have inits... they get assigned within ctor
                 //for this class (which is a separate model object)
                 memberVars.add(new VariableDef(s.getName(), null));
-            } else if (s.isModuleTypeParameter()) {
+            }
+            else if (s.isModuleTypeParameter()) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 funcImpls.add(buildInitMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));
-            } else if (s.isModuleOperationParameter()) {
+            }
+            else if (s.isModuleOperationParameter()) {
                 funcImpls.add(buildGetterMethod(s.getName()));
                 funcImpls.add(buildInitMethod(s.getName()));
                 memberVars.add(new VariableDef(s.getName(), null));

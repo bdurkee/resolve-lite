@@ -23,13 +23,11 @@ public class RESOLVEMessage {
         this(errorKind, (Throwable) null, null);
     }
 
-    public RESOLVEMessage(ErrorKind errorType, Token offendingToken,
-                          Object... args) {
+    public RESOLVEMessage(ErrorKind errorType, Token offendingToken, Object... args) {
         this(errorType, null, offendingToken, args);
     }
 
-    public RESOLVEMessage(ErrorKind errorType, Throwable e,
-                          Token offendingToken, Object... args) {
+    public RESOLVEMessage(ErrorKind errorType, Throwable e, Token offendingToken, Object... args) {
         this.errorType = errorType;
         this.e = e;
         this.args = args;
@@ -67,7 +65,8 @@ public class RESOLVEMessage {
         if (cause != null) {
             messageST.add("exception", cause);
             messageST.add("stackTrace", cause.getStackTrace());
-        } else {
+        }
+        else {
             messageST.add("exception", null); // avoid ST error msg
             messageST.add("stackTrace", null);
         }

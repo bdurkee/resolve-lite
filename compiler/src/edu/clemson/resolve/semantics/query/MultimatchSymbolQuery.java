@@ -6,16 +6,13 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 
 import java.util.List;
 
-public interface MultimatchSymbolQuery<E extends Symbol>
-        extends
-        SymbolQuery<E> {
+public interface MultimatchSymbolQuery<E extends Symbol> extends SymbolQuery<E> {
 
     /**
-     * Behaves just as {@link SymbolQuery#searchFromContext(Scope, MathSymbolTable)},
-     * except that it cannot throw a {@link DuplicateSymbolException}.
+     * Behaves just as {@link SymbolQuery#searchFromContext(Scope, MathSymbolTable)}, except that it cannot throw
+     * a {@link DuplicateSymbolException}.
      */
     @Override
-    public List<E> searchFromContext(@NotNull Scope source,
-                                     @NotNull MathSymbolTable repo)
+    public List<E> searchFromContext(@NotNull Scope source, @NotNull MathSymbolTable repo)
             throws NoSuchModuleException, UnexpectedSymbolException;
 }

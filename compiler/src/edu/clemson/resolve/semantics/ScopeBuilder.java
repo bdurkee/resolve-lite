@@ -12,9 +12,8 @@ import java.util.List;
 /**
  * A {@code ScopeBuilder} is a working, mutable realization of {@link Scope}.
  * <p>
- * Note that {@code ScopeBuilder} has no public constructor. Instances of this
- * class can be acquired through calls to some of the methods of
- * {@link MathSymbolTable}.</p>
+ * Note that {@code ScopeBuilder} has no public constructor. Instances of this class can be acquired through calls to
+ * some of the methods of {@link MathSymbolTable}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
@@ -50,8 +49,11 @@ public class ScopeBuilder extends SyntacticScope {
         return new ArrayList<>(children);
     }
 
-    public MathClssftnWrappingSymbol addBinding(String name, Quantification q,
-                                                ParserRuleContext definingTree, MathClassification type, MathClassification typeValue)
+    public MathClssftnWrappingSymbol addBinding(String name,
+                                                Quantification q,
+                                                ParserRuleContext definingTree,
+                                                MathClassification type,
+                                                MathClassification typeValue)
             throws DuplicateSymbolException {
 
         MathClssftnWrappingSymbol entry =
@@ -60,20 +62,27 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
-    public MathClssftnWrappingSymbol addBinding(String name, Quantification q,
-                                                ParserRuleContext definingTree, MathClassification type)
+    public MathClssftnWrappingSymbol addBinding(String name,
+                                                Quantification q,
+                                                ParserRuleContext definingTree,
+                                                MathClassification type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
-    public MathClssftnWrappingSymbol addBinding(String name, ParserRuleContext definingTree,
-                                                MathClassification type, MathClassification typeValue) throws DuplicateSymbolException {
+    public MathClssftnWrappingSymbol addBinding(String name,
+                                                ParserRuleContext definingTree,
+                                                MathClassification type,
+                                                MathClassification typeValue)
+            throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
     }
 
-    public MathClssftnWrappingSymbol addBinding(String name, ParserRuleContext definingTree,
-                                                MathClassification type) throws DuplicateSymbolException {
+    public MathClssftnWrappingSymbol addBinding(String name,
+                                                ParserRuleContext definingTree,
+                                                MathClassification type)
+            throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type);
     }
 }

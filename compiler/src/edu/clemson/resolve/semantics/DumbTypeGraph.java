@@ -43,22 +43,19 @@ public class DumbTypeGraph {
     public final MathFunctionClassification CROSS_PROD_FUNCTION =
             new MathFunctionClassification(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
 
-    private final static FunctionApplicationFactory CARTESIAN_APPLICATION =
-            new CartesianProductApplicationFactory();
-    private final static FunctionApplicationFactory POWERSET_APPLICATION =
-            new PowersetApplicationFactory();
-    private final static FunctionApplicationFactory ARROW_APPLICATION =
-            new ArrowApplicationFactory();
+    private final static FunctionApplicationFactory CARTESIAN_APPLICATION = new CartesianProductApplicationFactory();
+    private final static FunctionApplicationFactory POWERSET_APPLICATION = new PowersetApplicationFactory();
+    private final static FunctionApplicationFactory ARROW_APPLICATION = new ArrowApplicationFactory();
 
     private static class PowersetApplicationFactory
             implements
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
-                @NotNull String calledAsName,
-                @NotNull List<MathClassification> arguments) {
+        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+                                                           @NotNull MathFunctionClassification f,
+                                                           @NotNull String calledAsName,
+                                                           @NotNull List<MathClassification> arguments) {
             return new MathPowersetApplicationClassification(g, arguments.get(0));
         }
     }
@@ -68,10 +65,10 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
-                @NotNull String calledAsName,
-                @NotNull List<MathClassification> arguments) {
+        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+                                                           @NotNull MathFunctionClassification f,
+                                                           @NotNull String calledAsName,
+                                                           @NotNull List<MathClassification> arguments) {
             return new MathFunctionClassification(g, arguments.get(1), arguments.get(0));
         }
     }
@@ -81,21 +78,19 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
-                @NotNull String calledAsName,
-                @NotNull List<MathClassification> arguments) {
+        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+                                                           @NotNull MathFunctionClassification f,
+                                                           @NotNull String calledAsName,
+                                                           @NotNull List<MathClassification> arguments) {
             return new MathCartesianClassification(g,
                     new MathCartesianClassification.Element(arguments.get(0)),
                     new MathCartesianClassification.Element(arguments.get(1)));
         }
     }
 
-    public final Map<MathClassification, MathClassification> relationships =
-            new HashMap<>();
+    public final Map<MathClassification, MathClassification> relationships = new HashMap<>();
 
-    public boolean isSubtype(@NotNull MathClassification subtype,
-                             @NotNull MathClassification supertype) {
+    public boolean isSubtype(@NotNull MathClassification subtype, @NotNull MathClassification supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS);
         if (!result) {
             MathClassification subtypesEnclosingType = subtype.enclosingClassification;
@@ -113,11 +108,13 @@ public class DumbTypeGraph {
             //2
             else if (subtype.enclosingClassification == supertype) {
                 result = true;
-            } else if (subtype instanceof MathFunctionApplicationClassification &&
+            }
+            else if (subtype instanceof MathFunctionApplicationClassification &&
                     supertype instanceof MathFunctionApplicationClassification) {
                 result = isSubtype(subtype.getEnclosingClassification(),
                         supertype.getEnclosingClassification());
-            } else if (subtype instanceof MathFunctionClassification &&
+            }
+            else if (subtype instanceof MathFunctionClassification &&
                     supertype instanceof MathFunctionClassification) {
                 result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
                         ((MathFunctionClassification) supertype).getDomainType())
@@ -152,9 +149,8 @@ public class DumbTypeGraph {
 
     @NotNull
     public PApply formConjunct(@NotNull PExp left, @NotNull PExp right) {
-        PExp functionPortion = new PSymbolBuilder("and")
-                .mathType(BOOLEAN_FUNCTION).build();
-        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+        return new PApplyBuilder(new PSymbolBuilder("and").mathType(BOOLEAN_FUNCTION).build())
+                .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
                 .build();
@@ -162,9 +158,8 @@ public class DumbTypeGraph {
 
     @NotNull
     public PApply formDisjunct(PExp left, PExp right) {
-        PExp functionPortion = new PSymbolBuilder("or")
-                .mathType(BOOLEAN_FUNCTION).build();
-        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+        return new PApplyBuilder(new PSymbolBuilder("or").mathType(BOOLEAN_FUNCTION).build())
+                .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
                 .build();
@@ -172,21 +167,18 @@ public class DumbTypeGraph {
 
     @NotNull
     public final PSymbol getTrueExp() {
-        return new PSymbolBuilder("true").mathType(BOOLEAN).literal(true)
-                .build();
+        return new PSymbolBuilder("true").mathType(BOOLEAN).literal(true).build();
     }
 
     @NotNull
     public final PSymbol getFalseExp() {
-        return new PSymbolBuilder("false").mathType(BOOLEAN).literal(true)
-                .build();
+        return new PSymbolBuilder("false").mathType(BOOLEAN).literal(true).build();
     }
 
     @NotNull
     public final PApply formEquals(PExp left, PExp right) {
-        PExp functionPortion = new PSymbolBuilder("=")
-                .mathType(BOOLEAN_FUNCTION).build();
-        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+        return new PApplyBuilder(new PSymbolBuilder("=").mathType(BOOLEAN_FUNCTION).build())
+                .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
                 .build();
@@ -194,9 +186,8 @@ public class DumbTypeGraph {
 
     @NotNull
     public final PApply formImplies(PExp left, PExp right) {
-        PExp functionPortion = new PSymbolBuilder("implies")
-                .mathType(BOOLEAN_FUNCTION).build();
-        return new PApplyBuilder(functionPortion).applicationType(BOOLEAN)
+        return new PApplyBuilder(new PSymbolBuilder("implies").mathType(BOOLEAN_FUNCTION).build())
+                .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
                 .build();

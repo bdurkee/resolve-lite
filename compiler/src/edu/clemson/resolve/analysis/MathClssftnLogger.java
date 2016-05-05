@@ -13,63 +13,53 @@ class MathClssftnLogger extends ResolveBaseListener {
     private final ParseTreeProperty<MathClassification> types;
     private final RESOLVECompiler compiler;
 
-    MathClssftnLogger(@NotNull RESOLVECompiler rc,
-                      @NotNull ParseTreeProperty<MathClassification> types) {
+    MathClssftnLogger(@NotNull RESOLVECompiler rc, @NotNull ParseTreeProperty<MathClassification> types) {
         this.types = types;
         this.compiler = rc;
     }
 
     @Override
-    public void enterMathClssftnExp(
-            ResolveParser.MathClssftnExpContext ctx) {
+    public void enterMathClssftnExp(ResolveParser.MathClssftnExpContext ctx) {
         compiler.log("----------[exitMathTypeExp]");
     }
 
     @Override
-    public void exitMathClssftnExp(
-            ResolveParser.MathClssftnExpContext ctx) {
+    public void exitMathClssftnExp(ResolveParser.MathClssftnExpContext ctx) {
         compiler.log("----------[exitMathTypeExp]");
     }
 
     @Override
-    public void exitMathPrefixAppExp(
-            ResolveParser.MathPrefixAppExpContext ctx) {
+    public void exitMathPrefixAppExp(ResolveParser.MathPrefixAppExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathInfixAppExp(
-            ResolveParser.MathInfixAppExpContext ctx) {
+    public void exitMathInfixAppExp(ResolveParser.MathInfixAppExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathSymbolExp(
-            ResolveParser.MathSymbolExpContext ctx) {
+    public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathBooleanLiteralExp(
-            ResolveParser.MathBooleanLiteralExpContext ctx) {
+    public void exitMathBooleanLiteralExp(ResolveParser.MathBooleanLiteralExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathIntegerLiteralExp(
-            ResolveParser.MathIntegerLiteralExpContext ctx) {
+    public void exitMathIntegerLiteralExp(ResolveParser.MathIntegerLiteralExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathQuantifiedExp(
-            ResolveParser.MathQuantifiedExpContext ctx) {
+    public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathSetRestrictionExp(
-            ResolveParser.MathSetRestrictionExpContext ctx) {
+    public void exitMathSetRestrictionExp(ResolveParser.MathSetRestrictionExpContext ctx) {
         logClssftn(ctx);
     }
 
@@ -79,14 +69,12 @@ class MathClssftnLogger extends ResolveBaseListener {
     }
 
     @Override
-    public void exitMathCartProdExp(
-            ResolveParser.MathCartProdExpContext ctx) {
+    public void exitMathCartProdExp(ResolveParser.MathCartProdExpContext ctx) {
         logClssftn(ctx);
     }
 
     @Override
-    public void exitMathSelectorExp(
-            ResolveParser.MathSelectorExpContext ctx) {
+    public void exitMathSelectorExp(ResolveParser.MathSelectorExpContext ctx) {
         logClssftn(ctx);
     }
 

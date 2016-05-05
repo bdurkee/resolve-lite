@@ -13,14 +13,14 @@ import java.util.List;
 import static edu.clemson.resolve.semantics.MathSymbolTable.*;
 
 /**
- * An {@code OperationQuery} searches for a (possibly-qualified) operation.
- * If a qualifier is provided, the named facility or module is searched.
- * Otherwise, the operation is searched for in any directly imported modules and
+ * An {@code OperationQuery} searches for a (possibly-qualified) operation. If a qualifier is provided, the named
+ * facility or module is searched. Otherwise, the operation is searched for in any directly imported modules and
  * in instantiated versions of any available facilities.
  */
 public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
 
-    public OperationQuery(@Nullable Token qualifier, @NotNull Token name,
+    public OperationQuery(@Nullable Token qualifier,
+                          @NotNull Token name,
                           @NotNull List<ProgType> argumentTypes,
                           @NotNull FacilityStrategy facilityStrategy,
                           @NotNull ImportStrategy importStrategy) {
@@ -29,15 +29,15 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
                 argumentTypes));
     }
 
-    public OperationQuery(@Nullable Token qualifier, @NotNull String name,
+    public OperationQuery(@Nullable Token qualifier,
+                          @NotNull String name,
                           @NotNull List<ProgType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
                         FacilityStrategy.FACILITY_INSTANTIATE, false),
                 new OperationSearcher(name, argumentTypes));
     }
 
-    public OperationQuery(@Nullable Token qualifier, @NotNull Token name,
-                          @NotNull List<ProgType> argumentTypes) {
+    public OperationQuery(@Nullable Token qualifier, @NotNull Token name, @NotNull List<ProgType> argumentTypes) {
         this(qualifier, name.getText(), argumentTypes);
        /* super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_IGNORE, false),

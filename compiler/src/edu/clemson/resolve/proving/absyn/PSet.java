@@ -39,8 +39,7 @@ public class PSet extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        return new PSet(getMathType(),
-                Utils.apply(elements, u -> u.substitute(substitutions)));
+        return new PSet(getMathType(), Utils.apply(elements, u -> u.substitute(substitutions)));
     }
 
     @Override

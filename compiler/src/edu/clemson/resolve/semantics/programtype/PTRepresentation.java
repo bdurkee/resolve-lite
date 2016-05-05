@@ -31,7 +31,8 @@ public class PTRepresentation extends ProgNamedType {
     private final TypeModelSymbol family;
     private ProgReprTypeSymbol repr;
 
-    public PTRepresentation(@NotNull DumbTypeGraph g, @NotNull ProgType baseType,
+    public PTRepresentation(@NotNull DumbTypeGraph g,
+                            @NotNull ProgType baseType,
                             @NotNull String name,
                             @Nullable TypeModelSymbol family,
                             @NotNull ModuleIdentifier moduleIdentifier) {
@@ -58,8 +59,7 @@ public class PTRepresentation extends ProgNamedType {
     @Nullable
     public TypeModelSymbol getFamily() throws NoSuchElementException {
         if (family == null) {
-            throw new NoSuchElementException("no family found for this " +
-                    "representation: " + toString());
+            throw new NoSuchElementException("no family found for this representation: " + toString());
         }
         return family;
     }
@@ -98,8 +98,7 @@ public class PTRepresentation extends ProgNamedType {
     public ProgType instantiateGenerics(
             @NotNull Map<String, ProgType> genericInstantiations,
             @NotNull FacilitySymbol instantiatingFacility) {
-        throw new UnsupportedOperationException(this.getClass() + " cannot "
-                + "be instantiated.");
+        throw new UnsupportedOperationException(this.getClass() + " cannot be instantiated.");
     }
 
     @Override

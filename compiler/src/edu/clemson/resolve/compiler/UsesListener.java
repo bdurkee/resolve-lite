@@ -18,8 +18,8 @@ import java.nio.file.NoSuchFileException;
 import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 
 /**
- * Updates the containers tracking uses reference info by visiting the
- * various {@link ParseTree} nodes that include references to other modules.
+ * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
+ * references to other modules.
  */
 public class UsesListener extends ResolveBaseListener {
     private final AnnotatedModule tr;
@@ -29,8 +29,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Override
-    public void enterPrecisExtModuleDecl(
-            ResolveParser.PrecisExtModuleDeclContext ctx) {
+    public void enterPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
         tr.uses.add(precisRef);
         tr.semanticallyRelevantUses.add(precisRef);
@@ -49,23 +48,24 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        for (TerminalNode t : ctx.ID()) {
-            ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
-            tr.uses.add(id);
-            tr.semanticallyRelevantUses.add(id);
+        //TODO: Handle from clauses.
+        for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
+            for (TerminalNode t : u.ID()) {
+                ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
+                tr.uses.add(id);
+                tr.semanticallyRelevantUses.add(id);
+            }
         }
     }
 
     @Override
-    public void enterConceptImplModuleDecl(
-            ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public void enterConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.concept));
     }
 
     @Override
-    public void enterConceptExtImplModuleDecl(
-            ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public void enterConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         tr.uses.add(new ModuleIdentifier(ctx.extension));
         tr.uses.add(new ModuleIdentifier(ctx.concept));
         tr.semanticallyRelevantUses.add(new ModuleIdentifier(ctx.extension));
@@ -82,26 +82,25 @@ public class UsesListener extends ResolveBaseListener {
     @Override
     public void exitFacilityDecl(
             ResolveParser.FacilityDeclContext ctx) {
-        tr.uses.add(new ModuleIdentifier(ctx.spec));
+        //tr.uses.add(new ModuleIdentifier(ctx.spec));
         //tr.semanticallyRelevantUses.add(ctx.spec.getText());
         if (ctx.externally != null) {
-            tr.externalUses.put(ctx.impl.getText(),
-                    new ModuleIdentifier(ctx.impl));
-        } else {
-            tr.uses.add(new ModuleIdentifier(ctx.impl));
+            tr.externalUses.put(ctx.impl.getText(), new ModuleIdentifier(ctx.impl));
+        }
+        else {
+            //tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
     }
 
     @Override
     public void exitExtensionPairing(
             ResolveParser.ExtensionPairingContext ctx) {
-        tr.uses.add(new ModuleIdentifier(ctx.spec));
+        //tr.uses.add(new ModuleIdentifier(ctx.spec));
         if (ctx.externally != null) {
-
-            tr.externalUses.put(ctx.impl.getText(),
-                    new ModuleIdentifier(ctx.impl));
-        } else {
-            tr.uses.add(new ModuleIdentifier(ctx.impl));
+            tr.externalUses.put(ctx.impl.getText(), new ModuleIdentifier(ctx.impl));
+        }
+        else {
+            //tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
     }
 }

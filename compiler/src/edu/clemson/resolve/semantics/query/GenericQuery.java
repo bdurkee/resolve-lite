@@ -15,7 +15,6 @@ public class GenericQuery extends BaseMultimatchSymbolQuery<ProgTypeSymbol>
 
     private GenericQuery() {
         super(new UnqualifiedPath(MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true),
-                GenericSearcher.INSTANCE);
+                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE, true), GenericSearcher.INSTANCE);
     }
 }

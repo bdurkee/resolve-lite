@@ -17,10 +17,8 @@ public class MathSymbolQuery extends ResultProcessingQuery<Symbol, MathClssftnWr
         this(qualifier, name.getText(), name);
     }
 
-    public MathSymbolQuery(@Nullable Token qualifier, @NotNull String name,
-                           @NotNull Token l) {
+    public MathSymbolQuery(@Nullable Token qualifier, @NotNull String name, @NotNull Token l) {
         super(new BaseSymbolQuery<Symbol>(new PossiblyQualifiedPath(qualifier,
-                IMPORT_NAMED, FACILITY_IGNORE, true),
-                new NameSearcher(name, true)), Symbol::toMathSymbol);
+                IMPORT_NAMED, FACILITY_IGNORE, true), new NameSearcher(name, true)), Symbol::toMathSymbol);
     }
 }

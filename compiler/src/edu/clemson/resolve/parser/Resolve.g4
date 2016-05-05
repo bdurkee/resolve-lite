@@ -98,8 +98,14 @@ facilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'
+    :   'uses' (usesSpec | '(' usesSpec+ ')' ';')
     ;
+
+usesSpec
+    :   ID (',' ID)* fromSpec? ';'
+    ;
+
+fromSpec : 'from' ID ;
 
 // module blocks & items
 
@@ -208,7 +214,9 @@ parameterMode
         | 'restores'
         | 'preserves'
         | 'replaces'
-        | 'evaluates' )
+        | 'evaluates'
+        | ID
+        )
     ;
 
 // prog variable decls

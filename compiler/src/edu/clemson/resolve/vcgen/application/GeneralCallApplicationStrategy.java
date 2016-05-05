@@ -115,7 +115,8 @@ public class GeneralCallApplicationStrategy
                     newAssumeSubtitutions.put(
                             new PSymbolBuilder(curFormal.asPSymbol())
                                     .incoming(true).build(), curActual);
-                } else {
+                }
+                else {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
                 }
             }
@@ -176,7 +177,8 @@ public class GeneralCallApplicationStrategy
         // Don't need to apply the question mark here.
         else if (RP.containsName(newOldSym.getName())) {
             return NQV(RP, newOldSym);
-        } else {
+        }
+        else {
             // Return the new variable expression with the question mark
             if (oldSym.getName().charAt(0) != '?') {
                 return newOldSym;

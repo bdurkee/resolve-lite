@@ -12,13 +12,13 @@ public class UnqualifiedNameQuery extends BaseMultimatchSymbolQuery<Symbol> {
     public UnqualifiedNameQuery(@NotNull String searchString,
                                 @NotNull ImportStrategy importStrategy,
                                 @NotNull FacilityStrategy facilityStrategy,
-                                boolean stopAfterFirst, boolean localPriority) {
-        super(new UnqualifiedPath(importStrategy, facilityStrategy,
-                localPriority), new NameSearcher(searchString, stopAfterFirst));
+                                boolean stopAfterFirst,
+                                boolean localPriority) {
+        super(new UnqualifiedPath(importStrategy, facilityStrategy, localPriority),
+                new NameSearcher(searchString, stopAfterFirst));
     }
 
     public UnqualifiedNameQuery(@NotNull String searchString) {
-        this(searchString, ImportStrategy.IMPORT_NAMED,
-                FacilityStrategy.FACILITY_IGNORE, true, true);
+        this(searchString, ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE, true, true);
     }
 }

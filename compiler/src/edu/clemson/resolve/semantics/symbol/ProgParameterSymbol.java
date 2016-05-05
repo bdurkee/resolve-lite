@@ -117,7 +117,8 @@ public class ProgParameterSymbol extends Symbol {
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE, type.toMath(),
                             definingTree, moduleIdentifier);
-        } else {
+        }
+        else {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
@@ -176,7 +177,8 @@ public class ProgParameterSymbol extends Symbol {
         if (!mode.equals(ParameterMode.TYPE)) {
             //This will throw an appropriate error
             result = super.toProgTypeSymbol();
-        } else {
+        }
+        else {
             result =
                     new ProgTypeSymbol(typeGraph, getName(), new ProgGenericType(
                             typeGraph, getName()),

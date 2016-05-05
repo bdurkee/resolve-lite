@@ -10,16 +10,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * An implementation of {@link SymbolQuery SymbolQuery} that decorates an
- * existing {@link SymbolQuery}, post processing its results and returning
- * the processed set of results.
+ * An implementation of {@link SymbolQuery SymbolQuery} that decorates an existing {@link SymbolQuery}, post
+ * processing its results and returning the processed set of results.
  *
  * @param <T> The return type of the base {@link SymbolQuery}.
  * @param <R> The return type of the resultant, processed entries.
  */
-public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
-        implements
-        SymbolQuery<R> {
+public class ResultProcessingQuery<T extends Symbol, R extends Symbol> implements SymbolQuery<R> {
 
     @NotNull
     private final SymbolQuery<T> baseQuery;
@@ -33,10 +30,8 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
     }
 
     @Override
-    public List<R> searchFromContext(@NotNull Scope source,
-                                     @NotNull MathSymbolTable repo)
-            throws DuplicateSymbolException, NoSuchModuleException,
-            UnexpectedSymbolException {
+    public List<R> searchFromContext(@NotNull Scope source, @NotNull MathSymbolTable repo)
+            throws DuplicateSymbolException, NoSuchModuleException, UnexpectedSymbolException {
         List<R> result = new ArrayList<>();
         try {
             result.addAll(baseQuery.searchFromContext(source, repo).stream()
@@ -54,9 +49,7 @@ public class ResultProcessingQuery<T extends Symbol, R extends Symbol>
 
     //TODO: Unfuckingbelievable. "Google checked exception java 8 method ref" and have fun.
     @FunctionalInterface
-    public interface SymbolTransformerFunction<V extends Symbol, U extends Symbol>
-            extends
-            Function<V, U> {
+    public interface SymbolTransformerFunction<V extends Symbol, U extends Symbol> extends Function<V, U> {
 
         @Override
         default U apply(V t) {

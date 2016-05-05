@@ -126,7 +126,8 @@ public class ModelConverter {
                     ST nestedST = walk(nestedOmo);
                     //System.out.println("set ModelElement "+fieldName+"="+nestedST+" in "+templateName);
                     st.add(fieldName, nestedST);
-                } else if (o instanceof Collection
+                }
+                else if (o instanceof Collection
                         || o instanceof OutputModelObject[]) {
                     // LIST OF MODEL OBJECTS?
                     if (o instanceof OutputModelObject[]) {
@@ -141,7 +142,8 @@ public class ModelConverter {
                         //System.out.println("set ModelElement "+fieldName+"="+nestedST+" in "+templateName);
                         st.add(fieldName, nestedST);
                     }
-                } else if (o instanceof Map) {
+                }
+                else if (o instanceof Map) {
                     Map<?, ?> nestedOmoMap = (Map<?, ?>) o;
                     Map<Object, ST> m = new LinkedHashMap<>();
                     for (Map.Entry<?, ?> symbol : nestedOmoMap.entrySet()) {
@@ -152,7 +154,8 @@ public class ModelConverter {
                         m.put(symbol.getKey(), nestedST);
                     }
                     st.add(fieldName, m);
-                } else if (o != null) {
+                }
+                else if (o != null) {
                     compiler.errMgr.toolError(ErrorKind.INTERNAL_ERROR,
                             "unrecognized nested model element: " + fieldName);
                 }

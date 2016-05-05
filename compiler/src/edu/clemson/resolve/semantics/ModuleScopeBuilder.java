@@ -11,9 +11,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final List<ModuleIdentifier> importedModules = new ArrayList<>();
 
-    /**
-     * The set of all modules {@code this} either extends or inherits from.
-     */
+    /** The set of all modules {@code this} either extends or inherits from. */
     private final Set<ModuleIdentifier> locallyInheritedModules =
             new LinkedHashSet<>();
 
@@ -30,15 +28,13 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     @NotNull
-    public ModuleScopeBuilder addInheritedModules(
-            @NotNull ModuleIdentifier... i) {
+    public ModuleScopeBuilder addInheritedModules(@NotNull ModuleIdentifier... i) {
         locallyInheritedModules.addAll(Arrays.asList(i));
         return this;
     }
 
     @NotNull
-    public ModuleScopeBuilder addImports(
-            @Nullable Collection<ModuleIdentifier> imports) {
+    public ModuleScopeBuilder addImports(@Nullable Collection<ModuleIdentifier> imports) {
         if (imports != null) {
             importedModules.addAll(imports);
         }
@@ -46,8 +42,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     public boolean imports(@Nullable ModuleIdentifier i) {
-        return i != null && i.equals(getModuleIdentifier()) ||
-                importedModules.contains(i);
+        return i != null && i.equals(getModuleIdentifier()) || importedModules.contains(i);
     }
 
     @NotNull

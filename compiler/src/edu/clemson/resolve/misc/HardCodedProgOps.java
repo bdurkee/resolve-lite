@@ -26,9 +26,11 @@ public class HardCodedProgOps {
 
         if (firstArgType.getName().equals("Boolean")) {
             result = convertBooleanProgramOp(op);
-        } else if (firstArgType.getName().equals("Integer")) {
+        }
+        else if (firstArgType.getName().equals("Integer")) {
             result = convertIntegerProgramOp(op);
-        } else if (firstArgType.getName().equals("Char_Str")) {
+        }
+        else if (firstArgType.getName().equals("Char_Str")) {
             result = convertCharStrProgramOp(op);
         }
         return result;

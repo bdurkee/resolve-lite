@@ -18,7 +18,8 @@ public class Stat extends OutputModelObject {
             if (expr instanceof MethodCall.OperationParameterMethodCall ||
                     expr instanceof MethodCall) {
                 this.methodParamExp = expr;
-            } else {
+            }
+            else {
                 throw new IllegalArgumentException("expr doesn't describe a call");
             }
         }

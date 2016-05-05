@@ -21,62 +21,46 @@ public class MathSymbolTable {
     private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
     /**
-     * When starting a search from a particular scope, specifies how any
-     * available facilities should be searched.
+     * When starting a search from a particular scope, specifies how any available facilities should be searched.
      * <p>
-     * Available facilities are those facilities defined in a module searched by
-     * the search's {@link ImportStrategy} (which necessarily always includes
-     * the source module).
-     * <p>
-     * Note that facilities cannot be recursively searched. Imports and
-     * facilities appearing in available facilities will not be searched.
+     * Available facilities are those facilities defined in a module searched by the search's {@link ImportStrategy}
+     * (which necessarily always includes the source module). Note that facilities cannot be recursively searched.
+     * Imports and facilities appearing in available facilities will not be searched.
      */
     public static enum FacilityStrategy {
 
-        /**
-         * Indicates that available facilities should not be searched. The
-         * default strategy.
-         */
+        /** Indicates that available facilities should not be searched. The default strategy. */
         FACILITY_IGNORE,
 
         /**
-         * Indicates that available facilities should be searched with
-         * generic types instantiated. That is, any types used by symbols
-         * inside the facility should be updated to reflect the particular
-         * instantiation of the generic types.
+         * Indicates that available facilities should be searched with generic types instantiated. That is, any types
+         * used by symbols inside the facility should be updated to reflect the particular instantiation of the
+         * generic types.
          */
         FACILITY_INSTANTIATE,
 
         /**
-         * Indicates that available facilities should be searched with
-         * generic types intact. That is, any types used by symbols inside the
-         * facility will appear exactly as listed in the source file--including
-         * references to generics--even if we could use information from the
-         * facility to "fill them in."
+         * Indicates that available facilities should be searched with generic types intact. That is, any types used
+         * by symbols inside the facility will appear exactly as listed in the source file--including references to
+         * generics--even if we could use information from the facility to "fill them in."
          */
         FACILITY_GENERIC
     }
 
     /**
-     * When starting a search from a particular scope, specifies which
-     * additional modules should be searched, based on any imported modules.
+     * When starting a search from a particular scope, specifies which additional modules should be searched, based on
+     * any imported modules.
      * <p>
-     * Imported modules are those listed in the {@code uses} clause of the
-     * source module scope in which the scope is introduced. For searches
-     * originating directly in a module scope, the source module scope is the
-     * scope itself. In addition to those scopes directly imported in the
-     * <em>uses</em> clause, any modules implicitly imported will also be
-     * searched. Implicitly imported modules include the standard modules (
-     * {@code Std_Bools}, etc.), and any modules named in the header
-     * of the source module (e.g., an enhancement realization implicitly imports
-     * it's associate enhancement and concept.)
+     * Imported modules are those listed in the {@code uses} clause of the source module scope in which the scope is
+     * introduced. For searches originating directly in a module scope, the source module scope is the scope itself.
+     * In addition to those scopes directly imported in the <em>uses</em> clause, any modules implicitly imported will
+     * also be searched. Implicitly imported modules include the standard modules ({@code Std_Bools}, etc.), and any
+     * modules named in the header of the source module (e.g., an enhancement realization implicitly imports it's
+     * associate enhancement and concept.)
      */
     public static enum ImportStrategy {
 
-        /**
-         * Indicates that imported modules should not be searched. The
-         * default strategy.
-         */
+        /** Indicates that imported modules should not be searched. The default strategy. */
         IMPORT_NONE {
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
@@ -87,10 +71,7 @@ public class MathSymbolTable {
             }
         },
 
-        /**
-         * Indicates that only those modules imported directly from the
-         * source module should be searched.
-         */
+        /** Indicates that only those modules imported directly from the source module should be searched. */
         IMPORT_NAMED {
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_NONE;
@@ -101,10 +82,7 @@ public class MathSymbolTable {
             }
         },
 
-        /**
-         * Indicates that the search should recursively search the closure of
-         * all imports and their own imports.
-         */
+        /** Indicates that the search should recursively search the closure of all imports and their own imports. */
         IMPORT_RECURSIVE {
             public ImportStrategy cascadingStrategy() {
                 return IMPORT_RECURSIVE;
@@ -116,33 +94,26 @@ public class MathSymbolTable {
         };
 
         /**
-         * Returns the strategy that should be used to recursively search
-         * any imported modules.
+         * Returns the strategy that should be used to recursively search any imported modules.
          *
-         * @return The strategy that should be used to recursively search any
-         * imported modules.
+         * @return how we're going to search any imported modules (the strategy)
          */
         public abstract ImportStrategy cascadingStrategy();
 
         /**
-         * Returns {@code true} <strong>iff</strong> this strategy
-         * requires searching directly imported modules.
+         * Returns {@code true} <strong>iff</strong> this strategy requires searching directly imported modules.
          *
-         * @return {@code true} <strong>iff</strong> this strategy
-         * requires searching directly imported modules.
+         * @return whether or not we'll search imported modules
          */
         public abstract boolean considerImports();
     }
 
     @NotNull
-    private final Deque<ScopeBuilder> lexicalScopeStack =
-            new LinkedList<>();
+    private final Deque<ScopeBuilder> lexicalScopeStack = new LinkedList<>();
     @NotNull
-    private final Map<ModuleIdentifier, ModuleScopeBuilder> moduleScopes =
-            new HashMap<>();
+    private final Map<ModuleIdentifier, ModuleScopeBuilder> moduleScopes = new HashMap<>();
     @NotNull
-    private final ParseTreeProperty<ScopeBuilder> scopes =
-            new ParseTreeProperty<>();
+    private final ParseTreeProperty<ScopeBuilder> scopes = new ParseTreeProperty<>();
     @Nullable
     private ModuleScopeBuilder curModuleScope = null;
     @NotNull
@@ -152,15 +123,12 @@ public class MathSymbolTable {
         this.typeGraph = new DumbTypeGraph();
 
         //The only things in global scope are built-in things
-        ScopeBuilder globalScope =
-                new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER,
-                        ModuleIdentifier.GLOBAL);
+        ScopeBuilder globalScope = new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER, ModuleIdentifier.GLOBAL);
         initializeMathTypeSystem(typeGraph, globalScope);
         lexicalScopeStack.push(globalScope);
     }
 
-    private void initializeMathTypeSystem(@NotNull DumbTypeGraph g,
-                                          @NotNull ScopeBuilder globalScope) {
+    private void initializeMathTypeSystem(@NotNull DumbTypeGraph g, @NotNull ScopeBuilder globalScope) {
         try {
             globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
             globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
@@ -211,16 +179,15 @@ public class MathSymbolTable {
     }
 
     @NotNull
-    public ModuleScopeBuilder startModuleScope(
-            @NotNull AnnotatedModule module) {
+    public ModuleScopeBuilder startModuleScope(@NotNull AnnotatedModule module) {
         if (curModuleScope != null) {
             throw new IllegalStateException("module scope already open");
         }
         ParseTree contextTree = module.getRoot();
 
         ScopeBuilder parent = lexicalScopeStack.peek();
-        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph,
-                module.getNameToken(), (ParserRuleContext) contextTree, parent, this);
+        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph, module.getNameToken(),
+                (ParserRuleContext) contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
         moduleScopes.put(s.getModuleIdentifier(), s);
@@ -228,16 +195,12 @@ public class MathSymbolTable {
     }
 
     @NotNull
-    public ScopeBuilder startScope(
-            @NotNull ParserRuleContext definingTree) {
+    public ScopeBuilder startScope(@NotNull ParserRuleContext definingTree) {
         if (curModuleScope == null) {
             throw new IllegalStateException("no open module scope");
         }
         ScopeBuilder parent = lexicalScopeStack.peek();
-        ScopeBuilder s =
-                new ScopeBuilder(this, typeGraph, definingTree, parent,
-                        curModuleScope.getModuleIdentifier());
-
+        ScopeBuilder s = new ScopeBuilder(this, typeGraph, definingTree, parent, curModuleScope.getModuleIdentifier());
         addScope(s, parent);
         return s;
     }
@@ -248,12 +211,11 @@ public class MathSymbolTable {
     }
 
     /**
-     * Closes the most recently opened, unclosed working scope, including
-     * those opened with {@link #startModuleScope(AnnotatedModule)}.
+     * Closes the most recently opened, unclosed working scope, including those opened with
+     * {@link #startModuleScope(AnnotatedModule)}.
      *
-     * @return The new innermost active scope after the former one was closed
-     * by this call. If the scope that was closed was the module scope,
-     * then returns {@code null}
+     * @return The new innermost active scope after the former one was closed by this call. If the scope that was
+     * closed was the module scope, then returns {@code null}
      */
     @Nullable
     public ScopeBuilder endScope() {
@@ -263,7 +225,8 @@ public class MathSymbolTable {
         if (lexicalScopeStack.size() == 1) {
             result = null;
             curModuleScope = null;
-        } else {
+        }
+        else {
             result = lexicalScopeStack.peek();
         }
         return result;
@@ -280,8 +243,7 @@ public class MathSymbolTable {
         }
     }
 
-    private void addScope(@NotNull ScopeBuilder s,
-                          @NotNull ScopeBuilder parent) {
+    private void addScope(@NotNull ScopeBuilder s, @NotNull ScopeBuilder parent) {
         lexicalScopeStack.push(s);
         scopes.put(s.getDefiningTree(), s);
     }
@@ -295,9 +257,7 @@ public class MathSymbolTable {
     }
 
     @NotNull
-    public ModuleScopeBuilder getModuleScope(
-            @Nullable ModuleIdentifier identifier)
-            throws NoSuchModuleException {
+    public ModuleScopeBuilder getModuleScope(@Nullable ModuleIdentifier identifier) throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
         if (module == null) {
             throw new NoSuchModuleException(identifier);
@@ -309,49 +269,43 @@ public class MathSymbolTable {
 
         @Override
         @NotNull
-        public <E extends Symbol> List<E> query(
-                @NotNull MultimatchSymbolQuery<E> query) {
+        public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query) {
             return new ArrayList<>();
         }
 
         @Override
         @NotNull
-        public <E extends Symbol> E queryForOne(
-                @NotNull SymbolQuery<E> query)
+        public <E extends Symbol> E queryForOne(@NotNull SymbolQuery<E> query)
                 throws NoSuchSymbolException, DuplicateSymbolException {
             throw new NoSuchSymbolException();
         }
 
         @Override
-        public <E extends Symbol> boolean addMatches(
-                @NotNull TableSearcher<E> searcher,
-                @NotNull List<E> matches,
-                @NotNull Set<Scope> searchedScopes,
-                @NotNull Map<String, ProgType> genericInstantiations,
-                FacilitySymbol instantiatingFacility,
-                @NotNull TableSearcher.SearchContext l)
+        public <E extends Symbol> boolean addMatches(@NotNull TableSearcher<E> searcher,
+                                                     @NotNull List<E> matches,
+                                                     @NotNull Set<Scope> searchedScopes,
+                                                     @NotNull Map<String, ProgType> genericInstantiations,
+                                                     FacilitySymbol instantiatingFacility,
+                                                     @NotNull TableSearcher.SearchContext l)
                 throws DuplicateSymbolException {
             return false;
         }
 
         @Override
         @NotNull
-        public Symbol define(@NotNull Symbol s)
-                throws DuplicateSymbolException {
+        public Symbol define(@NotNull Symbol s) throws DuplicateSymbolException {
             return s;
         }
 
         @Override
         @NotNull
-        public <T extends Symbol> List<T> getSymbolsOfType(
-                @NotNull Class<T> type) {
+        public <T extends Symbol> List<T> getSymbolsOfType(@NotNull Class<T> type) {
             return new ArrayList<>();
         }
 
         @Override
         @NotNull
-        public List<Symbol> getSymbolsOfType(
-                @NotNull Class<?>... type) {
+        public List<Symbol> getSymbolsOfType(@NotNull Class<?>... type) {
             return new ArrayList<>();
         }
     }

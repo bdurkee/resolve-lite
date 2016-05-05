@@ -55,7 +55,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                     expsAsImmutableConjuncts.cachedQuantifiedVariableNames;
             cachedFunctionApplications =
                     expsAsImmutableConjuncts.cachedFunctionApplications;
-        } else {
+        }
+        else {
             List<PExp> newExps = new ArrayList<>();
             exps.forEach(newExps::add);
             conjuncts = new ArrayBackedImmutableList<>(newExps);
@@ -139,7 +140,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
             if (unique) {
                 runLength++;
-            } else {
+            }
+            else {
                 newConjuncts =
                         appendConjuncts(newConjuncts, runStart, runLength);
 
@@ -176,6 +178,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      *
      * @param otherConjuncts The set of conjuncts to returnEnsuresArgSubstitutions for ordered
      *                       equality.
+     *
      * @return True <strong>iff</strong> the given expression is order-equal.
      */
     public boolean orderEqual(Iterable<PExp> otherConjuncts) {
@@ -195,6 +198,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * has an equal expression in {@code this}, and <em>visa versa</em>.
      *
      * @param o The set of conjuncts to returnEnsuresArgSubstitutions against {@code this}.
+     *
      * @return True <strong>iff</strong> the given set of conjuncts is equal.
      */
     public boolean equals(Object o) {
@@ -227,6 +231,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      *
      * @param query expressions to returnEnsuresArgSubstitutions
      * @param base  expressions to returnEnsuresArgSubstitutions against
+     *
      * @return the answer
      */
     private static boolean oneWayEquals(Iterable<?> query, Iterable<?> base) {
@@ -256,6 +261,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * conjuncts in {@code this} is equal to {@code e}.
      *
      * @param e The {@code PExp} to returnEnsuresArgSubstitutions for equality.
+     *
      * @return True <strong>iff</strong> {@code this} contains an
      * equal conjunct.
      * @throws NullPointerException If {@code e == null}.
@@ -307,6 +313,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * value.
      *
      * @param mapping The mapping to use for substituting.
+     *
      * @return A new {@code ImmutableConjuncts} with the mapping applied.
      */
     public ImmutableConjuncts substitute(Map<PExp, PExp> mapping) {
@@ -334,6 +341,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * the end of the list of conjuncts.
      *
      * @param e The expression to append.
+     *
      * @return An {@code ImmutableConjuncts} with size {@code this.size() + 1}
      * whose first {@code this.size()} conjuncts are copies of {@code this}'s
      * conjuncts, and whose last conjunct is a copy of {@code e}.
@@ -347,6 +355,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * appended at the end of the list of conjuncts.
      *
      * @param i The expressions to append.
+     *
      * @return An {@code ImmutableConjuncts} whose first {@code this.size()}
      * conjuncts are copies of {@code this}'s conjuncts, and whose other
      * conjuncts are copies of the {@code PExp}s in {@code i}, in order.
@@ -362,7 +371,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
             if (iConjuncts.size() == 0) {
                 retval = this;
-            } else {
+            }
+            else {
                 //Performance hack: if i is an ImmutableConjuncts, we can safely
                 //just steal it's internal list of conjuncts--after all, that
                 //list is immutable.
@@ -370,12 +380,14 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
                 retval = new ImmutableConjuncts(newExps);
             }
-        } else {
+        }
+        else {
             Iterator<PExp> iIterator = i.iterator();
 
             if (iIterator.hasNext()) {
                 retval = new ImmutableConjuncts(i);
-            } else {
+            }
+            else {
                 retval = this;
             }
         }
@@ -389,6 +401,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * {@code index}th.
      *
      * @param indexToRemove The index to remove.
+     *
      * @return A new {@code ImmutableConjuncts} without the {@code idex}th one.
      * @throws IndexOutOfBoundsException If the provided index is out of bounds.
      */
@@ -409,6 +422,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      *
      * @param start  The index of the first conjunct to include (zero-based).
      * @param length The number of conjuncts from that point to include.
+     *
      * @return A new {@code ImmutableConjuncts} containing those conjuncts
      * starting at {@code start} and extending to include the next
      * {@code length} conjuncts, or all the remaining conjuncts if
@@ -434,6 +448,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * Returns a deep copy of the {@code index}th conjunct in {@code this}.
      *
      * @param index The index of the conjunct to retrieve, zero-based.
+     *
      * @return A deep copy of the {@code index}th conjunct in {@code this}.
      * @throws IndexOutOfBoundsException If the provided index is less than zero
      *                                   or equal to or greater than {@code size()}.
@@ -469,7 +484,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         if (conjunctChanged) {
             retval = new ImmutableConjuncts(workingSpace, conjunctsSize);
-        } else {
+        }
+        else {
             retval = this;
         }
 

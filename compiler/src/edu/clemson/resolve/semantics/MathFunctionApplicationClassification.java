@@ -45,8 +45,7 @@ public class MathFunctionApplicationClassification extends MathClassification {
     public MathClassification withVariablesSubstituted(
             Map<String, MathClassification> substitutions) {
         MathFunctionClassification newNameType =
-                (MathFunctionClassification) function
-                        .withVariablesSubstituted(substitutions);
+                (MathFunctionClassification) function.withVariablesSubstituted(substitutions);
         List<MathClassification> newArgs = new ArrayList<>();
         for (MathClassification t : arguments) {
             newArgs.add(t.withVariablesSubstituted(substitutions));

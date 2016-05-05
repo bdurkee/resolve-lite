@@ -53,25 +53,22 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Some generally useful methods and interfaces.
- */
+/** Some generally useful methods and interfaces. */
 public class Utils {
 
     /**
-     * Applies the provided function, {@code f} to all elements of {@code l},
-     * returning a new list of elements of type corresponding to the range of
-     * {@code f}.
+     * Applies the provided function, {@code f} to all elements of {@code l}, returning a new list of elements of type
+     * corresponding to the range of {@code f}.
      *
      * @param l   a starting {@link Collection} of elements
      * @param f   a function to be applied to the elements of {@code l}
      * @param <T> type of the starting collection
      * @param <R> type of resulting list
+     *
      * @return a new list of type {@code R}
      */
     @NotNull
-    public static <T, R> List<R> apply(@NotNull Collection<T> l,
-                                       @NotNull Function<T, R> f) {
+    public static <T, R> List<R> apply(@NotNull Collection<T> l, @NotNull Function<T, R> f) {
         return l.stream().map(f).collect(Collectors.toList());
     }
 
@@ -84,8 +81,7 @@ public class Utils {
     }
 
     @NotNull
-    public static <T> String join(@NotNull Collection<T> data,
-                                  @NotNull String separator) {
+    public static <T> String join(@NotNull Collection<T> data, @NotNull String separator) {
         return join(data.iterator(), separator, "", "");
     }
 
@@ -100,7 +96,8 @@ public class Utils {
     @NotNull
     public static <T> String join(@NotNull Iterator<T> iter,
                                   @NotNull String separator,
-                                  @NotNull String left, String right) {
+                                  @NotNull String left,
+                                  @NotNull String right) {
         StringBuilder buf = new StringBuilder();
 
         while (iter.hasNext()) {
@@ -113,8 +110,7 @@ public class Utils {
     }
 
     @NotNull
-    public static <T> String join(@NotNull T[] array,
-                                  @NotNull String separator) {
+    public static <T> String join(@NotNull T[] array, @NotNull String separator) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < array.length; ++i) {
@@ -127,12 +123,10 @@ public class Utils {
     }
 
     @NotNull
-    public static <T, R> Map<T, R> zip(@NotNull List<T> l1,
-                                       @NotNull List<R> l2)
+    public static <T, R> Map<T, R> zip(@NotNull List<T> l1, @NotNull List<R> l2)
             throws IllegalArgumentException {
         if (l1.size() != l2.size()) {
-            throw new IllegalArgumentException("attempt to zip differently " +
-                    "sized lists");
+            throw new IllegalArgumentException("attempt to zip differently sized lists");
         }
         Map<T, R> result = new LinkedHashMap<>();
         Iterator<R> l2iter = l2.iterator();
@@ -143,62 +137,63 @@ public class Utils {
     }
 
     /**
-     * Returns a list of {@code E} given: an expected type {@code T}, some
-     * number
-     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
-     * some number of elements descending from {@code E}.
+     * Returns a list of {@code E} given: an expected type {@code T}, some number of concrete syntax {@code nodes},
+     * and a mapping from rule contexts to some number of elements descending from {@code E}.
      *
      * @param expectedType the class type to inhabit the returned list
-     * @param nodes        a list of concrete syntax nodes, as obtained through
-     *                     a visitor, listener, etc.
-     * @param annotations  a map from rule context to the primary supertype
-     *                     of {@code expectedType} ({@code E}).
+     * @param nodes        a list of concrete syntax nodes, as obtained through a visitor, listener, etc.
+     * @param annotations  a map from rule context to the primary supertype of {@code expectedType} ({@code E}).
      * @param <E>          super type of {@code expectedType}.
      * @param <T>          the expected type.
+     *
      * @return a list of {@code T}.
      */
     @NotNull
-    public static <E, T extends E> List<T> collect(
-            @NotNull Class<T> expectedType,
-            @NotNull List<? extends ParseTree> nodes,
-            @NotNull ParseTreeProperty<? extends E> annotations) {
+    public static <E, T extends E> List<T> collect(@NotNull Class<T> expectedType,
+                                                   @NotNull List<? extends ParseTree> nodes,
+                                                   @NotNull ParseTreeProperty<? extends E> annotations) {
         return nodes.stream().map(x -> expectedType
                 .cast(annotations.get(x))).collect(Collectors.toList());
     }
 
     @NotNull
     public static Token getModuleName(@NotNull ParseTree ctx) {
-        if (ctx instanceof ResolveParser.ModuleDeclContext) {
-            ctx = ctx.getChild(0);
-        }
+        if (ctx instanceof ResolveParser.ModuleDeclContext) ctx = ctx.getChild(0);
+
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext) {
             return ((ResolveParser.PrecisModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.PrecisExtModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.PrecisExtModuleDeclContext) {
             return ((ResolveParser.PrecisExtModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.FacilityModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.FacilityModuleDeclContext) {
             return ((ResolveParser.FacilityModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.ConceptModuleDeclContext) {
             return ((ResolveParser.ConceptModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptImplModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.ConceptImplModuleDeclContext) {
             return ((ResolveParser.ConceptImplModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptExtModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.ConceptExtModuleDeclContext) {
             return ((ResolveParser.ConceptExtModuleDeclContext) ctx).name;
-        } else if (ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
+        }
+        else if (ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
             return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("unrecognized module");
         }
     }
 
     /**
-     * A general purpose builder for objects of type {@code T}. This interface
-     * should be implemented by classes that might benefit from incremental
-     * construction -- meaning through chained calls to a series of builder
-     * methods that return back a {@code Builder} subclass.
+     * A general purpose builder for objects of type {@code T}. This interface should be implemented by classes that
+     * might benefit from incremental construction -- meaning through chained calls to a series of builder methods that
+     * return back a {@code Builder} subclass.
      *
      * @param <T> the type of the object to be built
-     * @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder
-     * for an example usage
+     *
+     * @see edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder for an example usage
      */
     @FunctionalInterface
     public interface Builder<T> {
@@ -207,23 +202,19 @@ public class Utils {
     }
 
     /**
-     * Returns a new {@link CommonToken} from some arbtrary existing
-     * {@code Token}. This is useful for when you want create a {@code Token}
-     * consisting of {@code desiredText}, but using existing location information
-     * from {@code t}.
+     * Returns a new {@link CommonToken} from some arbtrary existing {@code Token}. This is useful for when you want
+     * create a {@code Token} consisting of {@code desiredText}, but using existing location information from {@code t}.
      * <p>
-     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then
-     * the text for the resulting {@code Token} will contain whatever text was
-     * already in {@code t} starting out.</p>
+     * <strong>NOTE:</strong> if {@code desiredText} is {@code null}, then the text for the resulting {@code Token}
+     * will contain whatever text was already in {@code t} starting out.</p>
      *
-     * @param t           an existing token (preferably near where {@code desiredText}
-     *                    should appear)
+     * @param t           an existing token (preferably near where {@code desiredText} should appear)
      * @param desiredText the text we want the resulting token to hold
+     *
      * @return a new token
      */
     @NotNull
-    public static CommonToken createTokenFrom(@NotNull Token t,
-                                              @Nullable String desiredText) {
+    public static CommonToken createTokenFrom(@NotNull Token t, @Nullable String desiredText) {
         CommonToken result = new CommonToken(t);
         if (desiredText != null) {
             result.setText(desiredText);
@@ -232,10 +223,11 @@ public class Utils {
     }
 
     /**
-     * Returns the raw text encapsulated by a {@link ParserRuleContext} exactly
-     * as it appears within whatever sourcecode the user typed in.
+     * Returns the raw text encapsulated by a {@link ParserRuleContext} exactly as it appears within whatever
+     * sourcecode the user typed in.
      *
      * @param ctx the rule context
+     *
      * @return the raw sourcecode represented by {@code ctx}
      * @deprecated use {@link Trees#getNodeText)} instead
      */
@@ -248,14 +240,16 @@ public class Utils {
     }
 
     @Nullable
-    public static ParserRuleContext getFirstAncestorOfType(
-            @Nullable ParserRuleContext t, @NotNull Class<?>... clazzes) {
+    public static ParserRuleContext getFirstAncestorOfType(@Nullable ParserRuleContext t,
+                                                           @NotNull Class<?>... clazzes) {
         return getFirstAncestorOfType(t, Arrays.asList(clazzes));
     }
 
     /**
-     * Return first ancestor node up the chain towards the root that is in
-     * {@code clazzes}. Search includes the current node.
+     * Return first ancestor node up the chain towards the root that is in {@code clazzes}. Search includes the
+     * current node.
+     *
+     * @return the found parent, {@code null} if not found.
      */
     @Nullable
     public static ParserRuleContext getFirstAncestorOfType(
@@ -272,26 +266,23 @@ public class Utils {
     }
 
     /**
-     * Given an extensionless {@code name} and a compiler instance; searches
-     * for and returns an external file of name {@code name}.
+     * Given an extensionless {@code name} and a compiler instance; searches for and returns an external file of
+     * name {@code name}.
      */
-    @Nullable public static File getExternalFile(@NotNull RESOLVECompiler e,
-                                                 @Nullable String name) {
+    @Nullable
+    public static File getExternalFile(@NotNull RESOLVECompiler e, @Nullable String name) {
         if (name == null) return null;
-        FileLocator l = new FileLocator(name,
-                RESOLVECompiler.NON_NATIVE_EXTENSION);
+        FileLocator l = new FileLocator(name, RESOLVECompiler.NON_NATIVE_EXTENSION);
         File result = null;
         try {
             //an external file is likely going to appear in the core lib
             //so we search there first..
-            Files.walkFileTree(new File(RESOLVECompiler
-                    .getCoreLibraryDirectory()).toPath(), l);
+            Files.walkFileTree(new File(RESOLVECompiler.getCoreLibraryDirectory()).toPath(), l);
             result = l.getFile();
         } catch (NoSuchFileException nsfe) {
             //ok, maybe they defined an external file in their own workspace?
             try {
-                Files.walkFileTree(new File(e.workingDirectory)
-                        .toPath(), l);
+                Files.walkFileTree(new File(e.workingDirectory).toPath(), l);
                 result = l.getFile();
             } catch (IOException ignored) {
             }
@@ -302,11 +293,10 @@ public class Utils {
 
     /**
      * Strips leading directories off a file's name; for example:
-     * {@code ../Foo/facilities/Basic_Natural_Number_Theory.resolve}
-     * grooms to
-     * {@code Basic_Natural_Number_Theory.resolve}.
+     * {@code ../Foo/precis/Nat_Num_Theory.resolve} grooms to {@code Nat_Num_Theory.resolve}.
      *
      * @param name a file name with zero or more '/' delimited directories
+     *
      * @return the extensionless filename
      */
     @NotNull
@@ -328,8 +318,7 @@ public class Utils {
 
     //TODO: Add charset parameter 'StandardCharset.' etc.
     @Nullable
-    public static String readFile(@Nullable String file)
-            throws IOException {
+    public static String readFile(@Nullable String file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -341,12 +330,9 @@ public class Utils {
         return stringBuilder.toString();
     }
 
-    public static void writeFile(@Nullable String dir,
-                                 @Nullable String fileName,
-                                 @Nullable String content) {
+    public static void writeFile(@Nullable String dir, @Nullable String fileName, @Nullable String content) {
         try {
-            org.antlr.v4.runtime.misc.Utils.writeFile(dir + File.separator +
-                    fileName, content, "UTF-8");
+            org.antlr.v4.runtime.misc.Utils.writeFile(dir + File.separator + fileName, content, "UTF-8");
         } catch (IOException ioe) {
             System.err.println("can't write file");
             ioe.printStackTrace(System.err);

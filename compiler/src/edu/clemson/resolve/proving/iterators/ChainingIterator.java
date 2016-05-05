@@ -34,7 +34,8 @@ public class ChainingIterator<T> implements Iterator<T> {
         if (myStartHasNext) {
             retval = myStartIterator.next();
             myLastFromStartFlag = true;
-        } else {
+        }
+        else {
             retval = myEndIterator.next();
             myLastFromStartFlag = false;
         }
@@ -44,7 +45,8 @@ public class ChainingIterator<T> implements Iterator<T> {
     public void remove() {
         if (myLastFromStartFlag) {
             myStartIterator.remove();
-        } else {
+        }
+        else {
             myEndIterator.remove();
         }
     }

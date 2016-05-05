@@ -150,7 +150,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 getQuantificationMode(ctx.q), declaredVars);
         if (skipDummyQuantifierNodes) {
             repo.put(ctx, repo.get(ctx.mathAssertionExp()));
-        } else {
+        }
+        else {
             repo.put(ctx, q);
         }
     }
@@ -309,7 +310,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
-            } else {
+            }
+            else {
                 otherwiseResult = repo.get(alt.result);
             }
         }
