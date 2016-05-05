@@ -11,6 +11,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -155,10 +156,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.visit(ctx.type());
         ProgType groupType = tr.progTypes.get(ctx.type());
 
+        ParameterMode mode = ProgParameterSymbol.getModeMapping().get(ctx.parameterMode().getText());
+        if (mode == ParameterMode.INVALID || mode == null) {
+            compiler.errMgr.semanticError(ErrorKind.INVALID_PARAM_MODE, ctx.parameterMode().getStart(),
+                    ctx.parameterMode().getText());
+            mode = ParameterMode.INVALID;
+        }
         for (TerminalNode term : ctx.ID()) {
             try {
-                ProgParameterSymbol.ParameterMode mode =
-                        ProgParameterSymbol.getModeMapping().get(ctx.parameterMode().getText());
                 ProgParameterSymbol p =
                         new ProgParameterSymbol(symtab.getTypeGraph(),
                                 term.getText(), mode, groupType, ctx, getRootModuleIdentifier());
@@ -567,7 +572,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //be introduced.
             ModuleParameterSymbol moduleParam =
                     new ModuleParameterSymbol(new ProgParameterSymbol(g, ctx.name.getText(),
-                            ProgParameterSymbol.ParameterMode.TYPE,
+                            ParameterMode.TYPE,
                             new ProgGenericType(g, ctx.name.getText()),
                             ctx, getRootModuleIdentifier()));
             symtab.getInnermostActiveScope().define(moduleParam);

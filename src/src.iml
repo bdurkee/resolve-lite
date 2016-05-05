@@ -5,5 +5,6 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="RESOLVE 0.0.1" jdkType="RESOLVE SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="RESOLVEPATH &lt;src&gt;" level="project" />
   </component>
 </module>

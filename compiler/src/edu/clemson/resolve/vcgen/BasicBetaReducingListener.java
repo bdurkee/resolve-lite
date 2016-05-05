@@ -35,11 +35,9 @@ public class BasicBetaReducingListener extends PExpListener {
         PExp name = e.getFunctionPortion();
         if (name instanceof PLambda) {
             PLambda asPLambda = (PLambda) name;
-            List<PExp> boundVars = asPLambda.getParameters().stream()
-                    .map(PLambda.MathSymbolDeclaration::asPSymbol)
+            List<PExp> boundVars = asPLambda.getParameters().stream().map(PLambda.MathSymbolDeclaration::asPSymbol)
                     .collect(Collectors.toList());
-            reducedExp = reducedExp.substitute(e,
-                    asPLambda.getBody().substitute(boundVars, e.getArguments()));
+            reducedExp = reducedExp.substitute(e, asPLambda.getBody().substitute(boundVars, e.getArguments()));
         }
     }
 }

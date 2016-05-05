@@ -1,0 +1,19 @@
+Concept Boolean_Template;
+
+    Type family Boolean
+                is modeled by B;
+        exemplar b;
+        initialization
+                ensures b = true;
+    
+    Operation True () : Boolean;
+
+    Operation False () : Boolean;
+
+    Operation And (evaluates a, b : Boolean) : Boolean;
+        ensures And = (a ∧ b);
+
+    Operation Or (evaluates a, b : Boolean) : Boolean;
+        ensures Or = (a ∨ b);
+
+end Boolean_Template;

@@ -58,6 +58,12 @@ public class ProgParameterSymbol extends Symbol {
                 return new ParameterMode[]{EVALUATES};
             }
         },
+        INVALID {
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{};
+            }
+        },
         TYPE {
             @Override
             public ParameterMode[] getValidImplementationModes() {

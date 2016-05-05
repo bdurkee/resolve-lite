@@ -37,7 +37,7 @@ import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrat
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
-    
+
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
     private final DumbTypeGraph g;
@@ -179,8 +179,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     private PExp applyCallRuleToExp(VCAssertiveBlockBuilder block, PExp exp) {
-        ExplicitCallRuleApplyingListener applier =
-                new ExplicitCallRuleApplyingListener(block);
+        ExplicitCallRuleApplyingListener applier = new ExplicitCallRuleApplyingListener(block);
         exp.accept(applier);
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
         block.finalConfirm(finalConfirm);
