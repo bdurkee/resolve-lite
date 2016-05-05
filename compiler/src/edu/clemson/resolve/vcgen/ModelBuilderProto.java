@@ -37,6 +37,7 @@ import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrat
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
 public class ModelBuilderProto extends ResolveBaseListener {
+    
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
     private final DumbTypeGraph g;
@@ -55,20 +56,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //stats.getComponents().get(0), etc.
     private final static StatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
-    private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION =
-            new SwapApplicationStrategy();
+    private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
 
-    private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings =
-            new HashMap<>();
-    private final ParseTreeProperty<VCRuleBackedStat> stats =
-            new ParseTreeProperty<>();
+    private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
+    private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
     private final VCOutputFile outputFile = new VCOutputFile();
     private ModuleScopeBuilder moduleScope = null;
 
     private ProgReprTypeSymbol currentTypeReprSym = null;
 
-    private final Deque<VCAssertiveBlockBuilder> assertiveBlocks =
-            new LinkedList<>();
+    private final Deque<VCAssertiveBlockBuilder> assertiveBlocks = new LinkedList<>();
 
     private OperationSymbol currentProcOpSym = null;
     private boolean withinCallStmt = false;
@@ -88,18 +85,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override
     public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
-            moduleScope = symtab.getModuleScope(
-                    new ModuleIdentifier(tr.getNameToken()));
+            moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
         } catch (NoSuchModuleException e) {
-            gen.getCompiler().errMgr
-                    .semanticError(ErrorKind.NO_SUCH_MODULE,
-                            Utils.getModuleName(ctx));
+            gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleName(ctx));
         }
     }
 
     @Override
-    public void enterFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+    public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
@@ -108,8 +101,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void exitFacilityDecl(
-            ResolveParser.FacilityDeclContext ctx) {
+    public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         ModuleScopeBuilder spec = null, impl = null;
         try {
             spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
@@ -134,27 +126,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         facilitySpecFormalActualMappings.put(ctx.name.getText(), specFormalsToActuals);
 
         Optional<PExp> specReq = spec.getSymbolsOfType(GlobalMathAssertionSymbol.class)
-                .stream().filter(e -> e.getClauseType() ==
-                        ClauseType.REQUIRES)
-                .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
+                .stream()
+                .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                .findAny();
 
         PExp result = g.getTrueExp();
-        if (specReq.isPresent()) {
-            result = specReq.get();
-        }
+        if (specReq.isPresent()) result = specReq.get();
         if (ctx.externally == null && impl != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
-                    .stream().filter(e -> e.getClauseType() ==
-                            ClauseType.REQUIRES)
-                    .map(GlobalMathAssertionSymbol::getEnclosedExp).findAny();
+                    .stream()
+                    .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                    .findAny();
 
-            List<PExp> implArgs = ctx.implArgs.progExp().stream()
-                    .map(tr.mathASTs::get).collect(Collectors.toList());
+            List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.mathASTs::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(implArgs);
-
-            List<PExp> formalImplArgs = spec.getSymbolsOfType(ProgParameterSymbol.class)
-                    .stream().map(ProgParameterSymbol::asPSymbol)
-                    .collect(Collectors.toList());
+            List<PExp> formalImplArgs =
+                    Utils.apply(spec.getSymbolsOfType(ProgParameterSymbol.class), ProgParameterSymbol::asPSymbol);
             Map<PExp, PExp> implFormalsToActuals = Utils.zip(formalImplArgs, reducedImplArgs);
 
             if (implReq.isPresent()) {
@@ -205,14 +194,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void enterTypeRepresentationDecl(
-            ResolveParser.TypeRepresentationDeclContext ctx) {
+    public void enterTypeRepresentationDecl(ResolveParser.TypeRepresentationDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         currentTypeReprSym = null;
         try {
-            currentTypeReprSym =
-                    moduleScope.queryForOne(new UnqualifiedNameQuery(
-                            ctx.name.getText())).toProgReprTypeSymbol();
+            currentTypeReprSym = moduleScope.queryForOne(
+                    new UnqualifiedNameQuery(ctx.name.getText())).toProgReprTypeSymbol();
         } catch (SymbolTableException e) {
         }
 
@@ -229,8 +216,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     public List<ModuleParameterSymbol> getAllModuleParameterSyms() {
-        List<ModuleParameterSymbol> result =
-                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
+        List<ModuleParameterSymbol> result = moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
         for (ModuleIdentifier e : moduleScope.getInheritedIdentifiers()) {
             try {
                 ModuleScopeBuilder s = symtab.getModuleScope(e);
@@ -243,20 +229,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void exitTypeRepresentationDecl(
-            ResolveParser.TypeRepresentationDeclContext ctx) {
+    public void exitTypeRepresentationDecl(ResolveParser.TypeRepresentationDeclContext ctx) {
         PExp constraint = g.getTrueExp();
         PExp correspondence = g.getTrueExp();
         if (currentTypeReprSym == null) return;
         correspondence = currentTypeReprSym.getCorrespondence();
         if (currentTypeReprSym.getDefinition() != null) {
-            constraint = currentTypeReprSym.getDefinition()
-                    .getProgramType().getConstraint();
+            constraint = currentTypeReprSym.getDefinition().getProgramType().getConstraint();
         }
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        PExp newConstraint =
-                constraint.substitute(currentTypeReprSym.exemplarAsPSymbol(),
-                        currentTypeReprSym.conceptualExemplarAsPSymbol());
+        PExp newConstraint = constraint.substitute(
+                currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
 
         block.assume(correspondence.splitIntoConjuncts());
         block.finalConfirm(newConstraint);
@@ -264,14 +247,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void enterTypeImplInit(
-            ResolveParser.TypeImplInitContext ctx) {
+    public void enterTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
         Scope s = symtab.getScope(ctx.getParent());
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         PExp typeInitEnsures = g.getTrueExp();
-        List<ModuleParameterSymbol> moduleParamSyms =
-                getAllModuleParameterSyms();
+        List<ModuleParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
@@ -284,20 +265,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void exitTypeImplInit(
-            ResolveParser.TypeImplInitContext ctx) {
+    public void exitTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
         PExp typeInitEnsures = g.getTrueExp();
         PExp convention = currentTypeReprSym.getConvention();
         PExp correspondence = currentTypeReprSym.getCorrespondence();
         if (currentTypeReprSym.getDefinition() != null) {
-            typeInitEnsures =
-                    currentTypeReprSym.getDefinition().getProgramType()
-                            .getInitializationEnsures();
+            typeInitEnsures = currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures();
         }
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        PExp newInitEnsures =
-                typeInitEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
-                        currentTypeReprSym.conceptualExemplarAsPSymbol());
+        PExp newInitEnsures = typeInitEnsures.substitute(
+                currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
         //block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         block.confirm(convention);  //order here is important
         block.assume(correspondence);
@@ -351,21 +328,16 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }*/
 
     @Override
-    public void enterProcedureDecl(
-            ResolveParser.ProcedureDeclContext ctx) {
+    public void enterProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         try {
-            List<ProgParameterSymbol> paramSyms =
-                    s.getSymbolsOfType(ProgParameterSymbol.class);
+            List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-            currentProcOpSym = s.queryForOne(
-                    new OperationQuery(null, ctx.name,
-                            paramSyms.stream()
-                                    .map(ProgParameterSymbol::getDeclaredType)
-                                    .collect(Collectors.toList())));
+            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name, paramSyms.stream()
+                    .map(ProgParameterSymbol::getDeclaredType)
+                    .collect(Collectors.toList())));
 
-            PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(
-                    paramSyms, ctx, currentProcOpSym.getRequires());
+            PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, ctx, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
 
@@ -386,17 +358,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void exitProcedureDecl(
-            ResolveParser.ProcedureDeclContext ctx) {
+    public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         Scope scope = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms =
                 scope.getSymbolsOfType(ProgParameterSymbol.class);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        List<ProgParameterSymbol> formalParameters = null;
+        List<ProgParameterSymbol> formalParameters = new ArrayList<>();
         try {
-            formalParameters = scope.query(
-                    new SymbolTypeQuery<ProgParameterSymbol>(
-                            ProgParameterSymbol.class));
+            formalParameters = scope.query(new SymbolTypeQuery<ProgParameterSymbol>(ProgParameterSymbol.class));
         } catch (NoSuchModuleException | UnexpectedSymbolException e) {
             e.printStackTrace();
         }
@@ -406,12 +375,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .map(p -> (PTRepresentation) p.getDeclaredType())
                 .map(p -> p.getReprTypeSymbol().getCorrespondence())
                 .collect(Collectors.toList());
-        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
-                ctx, currentProcOpSym.getEnsures()); //postcondition[params 1..i <-- corr_fn_exp]
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, ctx, currentProcOpSym.getEnsures());
+        //postcondition[params 1..i <-- corr_fn_exp]
 
         List<PExp> paramConsequents = new ArrayList<>();
-        Utils.apply(formalParameters, paramConsequents,
-                this::extractConsequentsFromParameter);
+        Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
 
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                 .confirm(paramConsequents) //assumes for correspondence reprs included here
@@ -463,14 +431,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 if (inSimpleForm(args.get(0), params)) simple = true;
             }
             else if (ensuresAsPApply.isConjunct()) {
-                if (inSimpleForm(args.get(0), params) &&
-                        inSimpleForm(args.get(1), params)) simple = true;
+                if (inSimpleForm(args.get(0), params) && inSimpleForm(args.get(1), params)) simple = true;
             }
         }
         else if (ensures instanceof PSymbol) {
             for (ProgParameterSymbol p : params) {
-                if (p.getMode() == ParameterMode.UPDATES &&
-                        p.asPSymbol().equals(ensures)) simple = true;
+                if (p.getMode() == ParameterMode.UPDATES && p.asPSymbol().equals(ensures)) simple = true;
             }
         }
         return simple;
@@ -484,14 +450,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         if (inSimpleForm(op.getEnsures(), op.getParameters())) {
             //TODO: Use log instead!
             //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
-            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                    EXPLICIT_CALL_APPLICATION, callExp);
+            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
         }
         else {
             //TODO: Use log instead!
             //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
-            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                    GENERAL_CALL_APPLICATION, callExp);
+            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
         }
         stats.put(ctx, s);
     }
@@ -517,23 +481,20 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
-    private List<PExp> getAssertionsFromModuleFormalParameters(
-            List<ModuleParameterSymbol> parameters,
-            Function<ProgParameterSymbol, List<PExp>> extract) {
+    private List<PExp> getAssertionsFromModuleFormalParameters(List<ModuleParameterSymbol> parameters,
+                                                               Function<ProgParameterSymbol, List<PExp>> extract) {
         List<PExp> result = new ArrayList<>();
         for (ModuleParameterSymbol p : parameters) {
             //todo: For now.
             if (p.getWrappedParamSymbol() instanceof ProgParameterSymbol) {
-                result.addAll(
-                        extract.apply((ProgParameterSymbol) p.getWrappedParamSymbol()));
+                result.addAll(extract.apply((ProgParameterSymbol) p.getWrappedParamSymbol()));
             }
         }
         return result;
     }
 
-    private List<PExp> getAssertionsFromFormalParameters(
-            List<ProgParameterSymbol> parameters,
-            Function<ProgParameterSymbol, List<PExp>> extract) {
+    private List<PExp> getAssertionsFromFormalParameters(List<ProgParameterSymbol> parameters,
+                                                         Function<ProgParameterSymbol, List<PExp>> extract) {
         List<PExp> result = new ArrayList<>();
         for (ProgParameterSymbol p : parameters) {
             result.addAll(extract.apply(p));
@@ -558,12 +519,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 */
             }
             else if (declaredType instanceof PTRepresentation) {
-                ProgReprTypeSymbol repr =
-                        ((PTRepresentation) declaredType).getReprTypeSymbol();
+                ProgReprTypeSymbol repr = ((PTRepresentation) declaredType).getReprTypeSymbol();
                 PExp convention = repr.getConvention();
 
-                resultingAssumptions.add(convention.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME RC (repr convention -- since we're a repr)
+                resultingAssumptions.add(convention.substitute( declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
+                // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
             }
         }
@@ -576,27 +536,21 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {
         List<PExp> result = new ArrayList<>();
-        PExp incParamExp = new PSymbolBuilder(p.asPSymbol())
-                .incoming(true).build();
-        PExp paramExp = new PSymbolBuilder(p.asPSymbol())
-                .incoming(false).build();
+        PExp incParamExp = new PSymbolBuilder(p.asPSymbol()).incoming(true).build();
+        PExp paramExp = new PSymbolBuilder(p.asPSymbol()).incoming(false).build();
 
         if (p.getDeclaredType() instanceof ProgNamedType) {
             ProgNamedType t = (ProgNamedType) p.getDeclaredType();
-            PExp exemplar =
-                    new PSymbolBuilder(t.getExemplarName())
-                            .mathType(t.toMath()).build();
+            PExp exemplar = new PSymbolBuilder(t.getExemplarName()).mathType(t.toMath()).build();
 
             if (t instanceof PTRepresentation) {
-                ProgReprTypeSymbol repr =
-                        ((PTRepresentation) t).getReprTypeSymbol();
+                ProgReprTypeSymbol repr = ((PTRepresentation) t).getReprTypeSymbol();
 
                 PExp convention = repr.getConvention();
                 PExp corrFnExp = repr.getCorrespondence();
                 result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp));
             }
-            if (p.getMode() == ParameterMode.PRESERVES
-                    || p.getMode() == ParameterMode.RESTORES) {
+            if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp);
                 result.add(equalsExp);
             }
@@ -615,13 +569,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         List<GlobalMathAssertionSymbol> assertions = new LinkedList<>();
         List<FacilitySymbol> facilities = new LinkedList<>();
         try {
-            assertions.addAll(moduleScope.query(
-                    new SymbolTypeQuery<GlobalMathAssertionSymbol>
-                            (GlobalMathAssertionSymbol.class)).stream()
+            assertions.addAll(moduleScope.query(new SymbolTypeQuery<GlobalMathAssertionSymbol>
+                        (GlobalMathAssertionSymbol.class))
+                    .stream()
                     .filter(e -> e.getClauseType() == type)
                     .collect(Collectors.toList()));
-            facilities.addAll(moduleScope.query(
-                    new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class)));
+            facilities.addAll(moduleScope.query(new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class)));
         } catch (NoSuchModuleException | UnexpectedSymbolException e) {
         }
         return assertions.stream()
@@ -632,17 +585,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private PExp substituteByFacilities(List<FacilitySymbol> facilities,
                                         GlobalMathAssertionSymbol e) {
         for (FacilitySymbol facility : facilities) {
-            if (facility.getFacility().getSpecification().getModuleIdentifier()
-                    .equals(e.getModuleIdentifier())) {
-                return e.getEnclosedExp().substitute(
-                        getSpecializationsForFacility(facility.getName()));
+            if (facility.getFacility().getSpecification().getModuleIdentifier().equals(e.getModuleIdentifier())) {
+                return e.getEnclosedExp().substitute(getSpecializationsForFacility(facility.getName()));
             }
         }
         return e.getEnclosedExp();
     }
 
-    private Map<PExp, PExp> getSpecializationsForFacility(
-            @Nullable String facility) {
+    private Map<PExp, PExp> getSpecializationsForFacility(@Nullable String facility) {
         Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
         if (result == null) result = new HashMap<>();
         //TODO: If we come back null, go ahead query and specialize the specs...
@@ -659,17 +609,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp resultingClause = requiresOrEnsures;
         for (ProgParameterSymbol p : params) {
             if (p.getDeclaredType() instanceof PTRepresentation) {
-                ProgReprTypeSymbol repr =
-                        ((PTRepresentation) p.getDeclaredType()).getReprTypeSymbol();
-
+                ProgReprTypeSymbol repr = ((PTRepresentation) p.getDeclaredType()).getReprTypeSymbol();
                 PExp corrFnExp = repr.getCorrespondence();
                 //distribute conc.X into the clause passed
                 Map<PExp, PExp> concReplMapping = new HashMap<>();
-                concReplMapping.put(repr.exemplarAsPSymbol(),
-                        repr.conceptualExemplarAsPSymbol());
-                concReplMapping.put(repr.exemplarAsPSymbol(true),
-                        repr.conceptualExemplarAsPSymbol(true));
-
+                concReplMapping.put(repr.exemplarAsPSymbol(), repr.conceptualExemplarAsPSymbol());
+                concReplMapping.put(repr.exemplarAsPSymbol(true), repr.conceptualExemplarAsPSymbol(true));
                 resultingClause = resultingClause.substitute(concReplMapping);
             }
         }

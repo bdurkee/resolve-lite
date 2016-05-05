@@ -5,21 +5,15 @@ import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
 
-/**
- * Represents an immutable vc (verification condition), which takes the form
- * of a mathematical implication.
- */
+/** Represents an immutable vc (verification condition), which takes the form of a mathematical implication. */
 public class VC extends OutputModelObject {
 
-    /**
-     * A human-readable name for the VC; used for debugging purposes.
-     */
+    /** A human-readable name for the VC; used for debugging purposes. */
     public final String name;
 
     /**
-     * This is set to true to indicate that this vc is not the
-     * original version of the vc with 'name'--rather, it was derived from a
-     * vc named 'name' (or derived from a vc derived from a vc named 'name').
+     * This is set to true to indicate that this vc is not the original version of the vc with 'name'--rather, it
+     * was derived from a vc named 'name' (or derived from a vc derived from a vc named 'name').
      */
     public final boolean derived;
 
@@ -34,8 +28,7 @@ public class VC extends OutputModelObject {
         this(name, antecedent, consequent, false);
     }
 
-    public VC(String name, Antecedent antecedent, Consequent consequent,
-              boolean derived) {
+    public VC(String name, Antecedent antecedent, Consequent consequent, boolean derived) {
         this.name = name;
         this.antecedent = antecedent;
         this.consequent = consequent;

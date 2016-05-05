@@ -42,12 +42,8 @@ public class RESOLVECompiler {
     public static String VERSION = "0.0.1";
 
     public static final String FILE_EXTENSION = ".resolve";
-
-    private static final List<String> NATIVE_EXTENSION =
-            Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
-    public static final List<String> NON_NATIVE_EXTENSION =
-            Collections.unmodifiableList(Collections.singletonList(".java"));
-
+    private static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
+    public static final List<String> NON_NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(".java"));
     private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
     private static class Option {
@@ -60,17 +56,13 @@ public class RESOLVECompiler {
             this(fieldName, name, OptionArgType.NONE, description);
         }
 
-        Option(@NotNull String fieldName,
-               @NotNull String name,
-               @NotNull OptionArgType argType,
-               @NotNull String description) {
+        Option(@NotNull String fieldName, @NotNull String name, @NotNull OptionArgType argType, @NotNull String desc) {
             this.fieldName = fieldName;
             this.name = name;
             this.argType = argType;
-            this.description = description;
+            this.description = desc;
         }
     }
-
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
@@ -95,7 +87,9 @@ public class RESOLVECompiler {
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
-    /** Track separately so if a listener is added, it's the only one (instead of it and default stderr listener). */
+    /**
+     * Track separately so if a listener is added, it's the only one (instead of it plus the default stderr listener).
+     */
     DefaultCompilerListener defaultListener = new DefaultCompilerListener(this);
     public final MathSymbolTable symbolTable = new MathSymbolTable();
 
@@ -171,9 +165,7 @@ public class RESOLVECompiler {
         }
         if (outputDirectory != null) {
             if (outputDirectory.endsWith("/") || outputDirectory.endsWith("\\")) {
-                outputDirectory =
-                        outputDirectory.substring(0,
-                                outputDirectory.length() - 1);
+                outputDirectory = outputDirectory.substring(0, outputDirectory.length() - 1);
             }
             File outDir = new File(outputDirectory);
             haveOutputDir = true;
@@ -301,8 +293,7 @@ public class RESOLVECompiler {
         for (ModuleIdentifier importRequest : root.uses) {
             AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
             try {
-                File file = findResolveFile(importRequest
-                        .getNameToken().getText());
+                File file = findResolveFile(importRequest.getNameToken().getText());
                 if (module == null) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
@@ -314,20 +305,17 @@ public class RESOLVECompiler {
                         importRequest.getNameToken(), root.getNameToken().getText(),
                         importRequest.getNameToken().getText());
                 //mark the current root as erroneous
-                root.semanticallyRelevantUses.remove(
-                        new ModuleIdentifier(importRequest.getNameToken()));
+                root.semanticallyRelevantUses.remove(new ModuleIdentifier(importRequest.getNameToken()));
                 continue;
             }
             if (module != null) {
-                if (pathExists(g, module.getNameToken().getText(),
-                        root.getNameToken().getText())) {
+                if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
                             importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
                     break;
                 }
-                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(),
-                        module.getNameToken().getText());
+                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(), module.getNameToken().getText());
                 findDependencies(g, module, roots);
             }
         }
@@ -351,8 +339,7 @@ public class RESOLVECompiler {
         if (!g.containsVertex(src)) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator =
-                new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
@@ -441,8 +428,7 @@ public class RESOLVECompiler {
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
-    public Writer getOutputFileWriter(@NotNull String fileName)
-            throws IOException {
+    public Writer getOutputFileWriter(@NotNull String fileName) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
