@@ -83,7 +83,7 @@ public class PLambda extends PExp {
 
     public List<PExp> getParametersAsPExps() {
         return parameters.stream().map(p -> new PSymbol.PSymbolBuilder(p.name)
-                .mathType(p.type).build()).collect(Collectors.toList());
+                .mathClssfctn(p.type).build()).collect(Collectors.toList());
     }
 
     public List<MathSymbolDeclaration> getParameters() {
@@ -146,7 +146,7 @@ public class PLambda extends PExp {
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions = new LinkedList<>(body.getFunctionApplications());
-        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(getMathType()).build());
+        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathClssfctn(getMathType()).build());
         return bodyFunctions;
     }
 
@@ -167,7 +167,7 @@ public class PLambda extends PExp {
         }
 
         public PSymbol asPSymbol() {
-            return new PSymbol.PSymbolBuilder(name).mathType(type).build();
+            return new PSymbol.PSymbolBuilder(name).mathClssfctn(type).build();
         }
 
         @Override

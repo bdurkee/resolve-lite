@@ -24,8 +24,7 @@ public class ProgParameterSymbol extends Symbol {
         UPDATES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{UPDATES, CLEARS, RESTORES,
-                        PRESERVES};
+                return new ParameterMode[]{UPDATES, CLEARS, RESTORES, PRESERVES};
             }
         },
         REPLACES {
@@ -128,13 +127,11 @@ public class ProgParameterSymbol extends Symbol {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
-                            new MathNamedClassification(g, name, level,
-                                    type.toMath()),
+                            new MathNamedClassification(g, name, level, type.toMath()),
                             definingTree, moduleIdentifier);
         }
         this.progVariableAlterEgo =
-                new ProgVariableSymbol(getName(), getDefiningTree(),
-                        declaredType, getModuleIdentifier());
+                new ProgVariableSymbol(getName(), getDefiningTree(), declaredType, getModuleIdentifier());
     }
 
     public void setTypeQualifierString(String typeQualifier) {
@@ -198,7 +195,7 @@ public class ProgParameterSymbol extends Symbol {
     public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
-                .mathType(declaredType.toMath()).build();
+                .mathClssfctn(declaredType.toMath()).build();
     }
 
     @NotNull
@@ -215,8 +212,7 @@ public class ProgParameterSymbol extends Symbol {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), getDefiningTree(),
-                getModuleIdentifier());
+                        instantiatingFacility), getDefiningTree(), getModuleIdentifier());
     }
 
     @Override

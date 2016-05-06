@@ -14,16 +14,12 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 import java.util.Collections;
 import java.util.List;
 
-public class FunctionAssignApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class FunctionAssignApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCRuleBackedStat stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
         PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
 

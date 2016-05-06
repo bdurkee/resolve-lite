@@ -54,7 +54,7 @@ public class ProgReprTypeSymbol extends Symbol {
     @NotNull
     public PSymbol exemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(representation.getExemplarName())
-                .mathType(representation.toMath()).incoming(incoming).build();
+                .mathClssfctn(representation.toMath()).incoming(incoming).build();
     }
 
     @NotNull
@@ -65,10 +65,10 @@ public class ProgReprTypeSymbol extends Symbol {
     @NotNull
     public PSelector conceptualExemplarAsPSymbol(boolean incoming) {
         return new PSelector(
-                new PSymbol.PSymbolBuilder("conc").mathType(typeGraph.BOOLEAN)
+                new PSymbol.PSymbolBuilder("conc").mathClssfctn(typeGraph.BOOLEAN)
                         .incoming(incoming).build(),
                 new PSymbol.PSymbolBuilder(representation.getExemplarName())
-                        .mathType(representation.toMath()).build());
+                        .mathClssfctn(representation.toMath()).build());
     }
 
     @NotNull

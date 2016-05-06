@@ -61,7 +61,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull
     public PSymbol asPSymbol() {
-        return new PSymbol.PSymbolBuilder(getName()).mathType(getModelType())
+        return new PSymbol.PSymbolBuilder(getName()).mathClssfctn(getModelType())
                 .build();
     }
 

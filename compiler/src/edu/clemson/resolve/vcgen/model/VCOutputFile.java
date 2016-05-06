@@ -54,8 +54,7 @@ public class VCOutputFile extends OutputModelObject {
      */
     private void addVCsInContext(final AssertiveBlock batch,
                                  final int sectionNumber) {
-        List<PExp> vcs = batch.getFinalConfirm().getConfirmExp()
-                .splitIntoSequents();
+        List<PExp> vcs = batch.getFinalConfirm().getConfirmExp().splitIntoSequents();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
         for (PExp vc : vcs) {
@@ -63,9 +62,8 @@ public class VCOutputFile extends OutputModelObject {
             if (!(vc instanceof PApply)) continue;
             //args.get(0) would be the function name portion of the PApply;
             //so we actually do args.get(1) to get the first arg (lhs)
-            VC curVC = new VC(sectionNumber + "_" + vcIndex,
-                    args.get(1), args.get(2));
-
+            VC curVC = new VC(sectionNumber + "_" + vcIndex, args.get(1), args.get(2));
+            if (args.get(1).isObviouslyTrue() || args.get(2).isObviouslyTrue()) continue;
             finalVcs.add(curVC);
             vcIndex++;
         }

@@ -1,3 +1,30 @@
 Concept Integer_Template;
+        uses Basic_Integer_Theory;
+
+    Definition
+     max_int,
+         min_int : Z;
+    constraints
+       min_int ≤ 0 and 1 ≤ max_int;
+
+    Type family Integer
+            is modeled by Z;
+        exemplar I;
+        constraints
+            min_int ≤ I ≤ max_int;
+        initialization
+            ensures I = 0;
+
+    Operation Sum
+            (evaluates i, j : Integer)
+                : Integer;
+        requires min_int ≤ i + j ≤ max_int;
+        ensures Sum = (i + j);
+
+    Operation Difference
+            (evaluates i, j : Integer)
+                : Integer;
+        requires min_int ≤ i - j ≤ max_int;
+        ensures Difference = (i - j);
 
 end Integer_Template;

@@ -17,20 +17,15 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 builder.applicationSteps, builder.description);
     }
 
-    public static class VCAssertiveBlockBuilder
-            implements
-            Utils.Builder<VCAssertiveBlock> {
+    public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
         public final DumbTypeGraph g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
 
-        public final Map<String, Map<PExp, PExp>> facilitySpecializations =
-                new HashMap<>();
-        public final LinkedList<VCRuleBackedStat> stats =
-                new LinkedList<>();
-        public final List<RuleApplicationStep> applicationSteps =
-                new ArrayList<>();
+        public final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
+        public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
         public final String description;
 
         public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
@@ -43,9 +38,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
                                        String description,
                                        ParserRuleContext ctx) {
             if (s == null) {
-                throw new IllegalArgumentException(
-                        "passed null scope to vc assertive " +
-                                "block for: " + description);
+                throw new IllegalArgumentException("passed null scope to vc assertive block for: " + description);
             }
             this.g = g;
             this.definingTree = ctx;
@@ -54,8 +47,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.description = description;
         }
 
-        public VCAssertiveBlockBuilder facilitySpecializations(
-                Map<String, Map<PExp, PExp>> mappings) {
+        public VCAssertiveBlockBuilder facilitySpecializations(Map<String, Map<PExp, PExp>> mappings) {
             facilitySpecializations.putAll(mappings);
             return this;
         }
@@ -69,10 +61,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if (assume == null) {
                 return this;
             }
-            //stats.add(new VCAssume(this,
-            //        new DefaultAssumeApplicationStrategy(), assume));
-            stats.add(new VCAssume(this,
-                    new ParsimoniousAssumeApplicationStrategy(), assume));
+            //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), assume));
+            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), assume));
             return this;
         }
 
@@ -118,17 +108,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         /**
-         * Same as {@link #build()}, but this one doesn't automatically apply
-         * proof rules to the stats within this block.
+         * Same as {@link #build()}, but this one doesn't automatically apply proof rules to the stats within this
+         * block.
          */
         public VCAssertiveBlock snapshot() {
             return new VCAssertiveBlock(this);
         }
 
         /**
-         * Applies the appropriate rule to each stat within this builder. In
-         * other words, a call to this will fully develop the final confirm
-         * for this particular block of assertive code.
+         * Applies the appropriate rule to each stat within this builder. In other words, a call to this will fully
+         * develop the final confirm for this particular block of assertive code.
          */
         @NotNull
         @Override
@@ -136,8 +125,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(new RuleApplicationStep(currentStat
-                        .reduce(), currentStat.getApplicationDescription()));
+                applicationSteps.add(new RuleApplicationStep(currentStat.reduce(),
+                        currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);
         }

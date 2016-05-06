@@ -7,8 +7,10 @@ Concept Boolean_Template;
             ensures b = true;
     
     Operation True () : Boolean;
+        ensures True = true;
 
     Operation False () : Boolean;
+        ensures False = false;
 
     Operation And
             (evaluates a, b : Boolean)

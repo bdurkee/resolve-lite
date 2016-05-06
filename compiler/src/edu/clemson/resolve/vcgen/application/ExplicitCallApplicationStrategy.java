@@ -30,28 +30,20 @@ import java.util.*;
  * See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
  * more info on what consitutes a call as 'simple' or explicit.
  */
-public class ExplicitCallApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class ExplicitCallApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCRuleBackedStat stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
 
-        ExplicitCallRuleApplyingListener applier =
-                new ExplicitCallRuleApplyingListener(block);
+        ExplicitCallRuleApplyingListener applier = new ExplicitCallRuleApplyingListener(block);
         callExp.accept(applier);
 
         PExp completedExp = applier.getCompletedExp();
-        BasicBetaReducingListener lambdaReducer =
-                new BasicBetaReducingListener(completedExp);
+        BasicBetaReducingListener lambdaReducer = new BasicBetaReducingListener(completedExp);
         completedExp.accept(lambdaReducer);
-
-        return block.finalConfirm(lambdaReducer.getReducedExp())
-                .snapshot();
+        return block.finalConfirm(lambdaReducer.getReducedExp()).snapshot();
     }
 
     @NotNull
@@ -62,8 +54,7 @@ public class ExplicitCallApplicationStrategy
 
     public static OperationSymbol getOperation(Scope s, PApply app) {
         PSymbol name = (PSymbol) app.getFunctionPortion();
-        Token qualifier = (name.getQualifier() != null) ?
-                new CommonToken(ResolveLexer.ID, name.getQualifier()) : null;
+        Token qualifier = (name.getQualifier() != null) ? new CommonToken(ResolveLexer.ID, name.getQualifier()) : null;
         try {
             return s.queryForOne(new OperationQuery(qualifier, name.getName(),
                     Utils.apply(app.getArguments(), PExp::getProgType)));
@@ -78,8 +69,7 @@ public class ExplicitCallApplicationStrategy
         public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
-        public ExplicitCallRuleApplyingListener(
-                VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        public ExplicitCallRuleApplyingListener(VCAssertiveBlock.VCAssertiveBlockBuilder block) {
             this.block = block;
         }
 
@@ -96,28 +86,23 @@ public class ExplicitCallApplicationStrategy
             PSymbol functionName = (PSymbol) e.getFunctionPortion();
             OperationSymbol op = getOperation(block.scope, e);
 
-            List<PExp> formals = Utils.apply(op.getParameters(),
-                    ProgParameterSymbol::asPSymbol);
+            List<PExp> formals = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
             PExp opRequires = op.getRequires().substitute(formals, actuals);
-            opRequires = opRequires.substitute(
-                    block.getSpecializationsForFacility(name.getQualifier()));
+            opRequires = opRequires.substitute(block.getSpecializationsForFacility(name.getQualifier()));
             block.confirm(opRequires);
 
             PExp opEnsures = op.getEnsures();
-            Iterator<ProgParameterSymbol> formalParamIter =
-                    op.getParameters().iterator();
+            Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
             Iterator<PExp> actualParamIter = e.getArguments().iterator();
 
             Map<PExp, PExp> intermediateBindings = new LinkedHashMap<>();
-            Map<String, PExp> ensuresEqualities =
-                    opEnsures.getTopLevelVariableEqualities();
+            Map<String, PExp> ensuresEqualities = opEnsures.getTopLevelVariableEqualities();
 
             //TODO: I don't think this will actually happen here. What we (were) worried about here is
             //what the FunctionAssign application is responsible for.
             //I think this 'if' (and its body) below should be erased.
             if (ensuresEqualities.containsKey(functionName.getName())) {
-                intermediateBindings.put(e,
-                        ensuresEqualities.get(functionName.getName()));
+                intermediateBindings.put(e, ensuresEqualities.get(functionName.getName()));
             }
 
             while (formalParamIter.hasNext()) {
@@ -127,8 +112,7 @@ public class ExplicitCallApplicationStrategy
                     if (!ensuresEqualities.containsKey(formal.getName())) {
                         continue;
                     }
-                    intermediateBindings.put(actual,
-                            ensuresEqualities.get(formal.getName()));
+                    intermediateBindings.put(actual, ensuresEqualities.get(formal.getName()));
                 }
             }
             for (Map.Entry<PExp, PExp> exp : intermediateBindings.entrySet()) {
@@ -136,16 +120,14 @@ public class ExplicitCallApplicationStrategy
                 //to themselves in the ensures clause
                 List<PExp> varsToReplaceInEnsures = new ArrayList<>(formals);
                 for (PSymbol f : exp.getValue().getIncomingVariables()) {
-                    Collections.replaceAll(varsToReplaceInEnsures,
-                            f.withIncomingSignsErased(), f);
+                    Collections.replaceAll(varsToReplaceInEnsures, f.withIncomingSignsErased(), f);
                 }
                 /**
                  * Now we substitute the formals for actuals in the rhs of the ensures
                  * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
                  * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
                  */
-                PExp v = exp.getValue().substitute(
-                        varsToReplaceInEnsures, actuals);
+                PExp v = exp.getValue().substitute(varsToReplaceInEnsures, actuals);
                 returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
             PExp existingConfirm = block.finalConfirm.getConfirmExp();

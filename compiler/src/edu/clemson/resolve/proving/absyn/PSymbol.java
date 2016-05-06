@@ -317,7 +317,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathType(MathClassification e) {
+        public PSymbolBuilder mathClssfctn(MathClassification e) {
             this.mathType = e;
             return this;
         }

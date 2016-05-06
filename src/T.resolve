@@ -1,8 +1,9 @@
 Facility T;
     uses Standard_Booleans;
+
     Operation Foo ();
+
         Procedure
-            Var x, y : Std_Bools :: Boolean;
-            Std_Bools :: And(x, y);
+
     end Foo;
 end T;

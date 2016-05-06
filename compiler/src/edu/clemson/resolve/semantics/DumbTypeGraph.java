@@ -149,7 +149,7 @@ public class DumbTypeGraph {
 
     @NotNull
     public PApply formConjunct(@NotNull PExp left, @NotNull PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("and").mathType(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("and").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
@@ -158,7 +158,7 @@ public class DumbTypeGraph {
 
     @NotNull
     public PApply formDisjunct(PExp left, PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("or").mathType(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("or").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
@@ -167,17 +167,17 @@ public class DumbTypeGraph {
 
     @NotNull
     public final PSymbol getTrueExp() {
-        return new PSymbolBuilder("true").mathType(BOOLEAN).literal(true).build();
+        return new PSymbolBuilder("true").mathClssfctn(BOOLEAN).literal(true).build();
     }
 
     @NotNull
     public final PSymbol getFalseExp() {
-        return new PSymbolBuilder("false").mathType(BOOLEAN).literal(true).build();
+        return new PSymbolBuilder("false").mathClssfctn(BOOLEAN).literal(true).build();
     }
 
     @NotNull
     public final PApply formEquals(PExp left, PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("=").mathType(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("=").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
@@ -186,7 +186,7 @@ public class DumbTypeGraph {
 
     @NotNull
     public final PApply formImplies(PExp left, PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("implies").mathType(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("implies").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
@@ -195,6 +195,6 @@ public class DumbTypeGraph {
 
     @NotNull
     public final PSymbol formConcExp() {
-        return new PSymbolBuilder("conc").mathType(BOOLEAN).build();
+        return new PSymbolBuilder("conc").mathClssfctn(BOOLEAN).build();
     }
 }

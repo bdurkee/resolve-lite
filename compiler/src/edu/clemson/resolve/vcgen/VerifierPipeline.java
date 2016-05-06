@@ -32,7 +32,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 //TODO: Use log instead!
                 //compiler.info("generating vcs for: " + unit.getNameToken().getText());
                 ST x = gen.generateAssertions();
-                //List<VC> vcs = gen.getProverInput();
+                List<VC> vcs = gen.getProverInput();
                 System.out.println(x.render());
                 //TODO: Hook up conguence class prover.
                 //  ModelBuilderProto2 vv = new ModelBuilderProto2();
