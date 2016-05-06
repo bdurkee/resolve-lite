@@ -1,9 +1,13 @@
 Facility T;
-    uses Standard_Booleans;
+    uses (
+        Standard_Booleans;
+        Basic_Integer_Theory from cpsc372;
 
-    Operation Foo ();
+    );
 
+    Operation Foo (evaluates a, b : Std_Bools :: Boolean) : Std_Bools :: Boolean;
+            ensures Foo = true;
         Procedure
-
+            Foo := a and b;
     end Foo;
 end T;

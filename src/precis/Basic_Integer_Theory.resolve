@@ -4,6 +4,7 @@ Precis Basic_Integer_Theory;
     Categorical Definition for Z : SSet, 0 : Z, NB : Z ⟶ Z is
         Is_Monogeneric_for(Z, 0, NB);
 
+
     Definition +(m, n : Z) : Z;
     Definition -(m, n : Z) : Z;
 

@@ -1,7 +1,7 @@
 Concept Boolean_Template;
 
     Type family Boolean
-            is modeled by B;
+                is modeled by B;
         exemplar b;
         initialization
             ensures b = true;

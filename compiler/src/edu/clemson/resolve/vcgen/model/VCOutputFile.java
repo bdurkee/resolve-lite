@@ -14,16 +14,13 @@ public class VCOutputFile extends OutputModelObject {
     private int assertiveBatchCt;
 
     /**
-     * All completed {@link AssertiveBlock} objects; where each
-     * represents a vc or group of vcs that must be satisfied to verify a parsed
-     * program.
+     * All completed {@link AssertiveBlock} objects; where each represents a vc or group of vcs that must be satisfied
+     * to verify a parsed program.
      */
     @ModelElement
     public List<AssertiveBlock> chunks = new ArrayList<>();
 
-    /**
-     * The final list of immutable vcs.
-     */
+    /** The final list of immutable vcs. */
     @ModelElement
     public List<VC> finalVcs = new ArrayList<>();
 
@@ -42,11 +39,10 @@ public class VCOutputFile extends OutputModelObject {
     }
 
     /**
-     * Each {@code AssertiveBlock} contains a set of VCs that refer to
-     * the same set of free variables.  This method adds each {@code VC} to the
-     * final list.
+     * Each {@code AssertiveBlock} contains a set of VCs that refer to the same set of free variables.  This method
+     * adds each {@code VC} to the final list.
      *
-     * @param batch         the set of {@code VC}s in context.
+     * @param batch         The set of {@code VC}s in context.
      * @param sectionNumber The batch number so that we can mirror the numbering
      *                      used by the Verifier. (Ideally, we should eventually
      *                      embed the name of each {@code VC} from the Verifier
@@ -63,7 +59,7 @@ public class VCOutputFile extends OutputModelObject {
             //args.get(0) would be the function name portion of the PApply;
             //so we actually do args.get(1) to get the first arg (lhs)
             VC curVC = new VC(sectionNumber + "_" + vcIndex, args.get(1), args.get(2));
-            if (args.get(1).isObviouslyTrue() || args.get(2).isObviouslyTrue()) continue;
+            if (args.get(2).isObviouslyTrue()) continue;
             finalVcs.add(curVC);
             vcIndex++;
         }
