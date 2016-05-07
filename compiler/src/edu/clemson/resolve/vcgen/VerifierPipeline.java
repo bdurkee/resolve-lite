@@ -4,6 +4,7 @@ import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;
@@ -25,12 +26,12 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 VCGenerator gen = new VCGenerator(compiler, unit);
                 //TODO: Use log instead!
                 //compiler.info("generating vcs for: " + unit.getNameToken().getText());
-                ST x = gen.generateAssertions();
-                List<VC> vcs = gen.getProverInput();
-                System.out.println(x.render());
-                //TODO: Hook up conguence class prover.
-                //  ModelBuilderProto2 vv = new ModelBuilderProto2();
-                //  ParseTreeWalker.DEFAULT.walk(vv, unit.getRoot());
+                VCOutputFile vcs = gen.getVCOutput();
+                unit.setVCs(vcs);
+                //ST x = gen.generateAssertions();
+                //System.out.println(x.render());
+
+                 List<VC> proverInput = vcs.getFinalVCs();
             }
         }
     }

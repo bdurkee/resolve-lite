@@ -1,6 +1,7 @@
 package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
@@ -11,6 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import edu.clemson.resolve.semantics.programtype.ProgType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -27,6 +29,11 @@ public class AnnotatedModule {
 
     public ParseTreeProperty<MathClassification> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
+    /**
+     * For each {@link edu.clemson.resolve.parser.ResolveParser.MathExpContext} and
+     * {@link edu.clemson.resolve.parser.ResolveParser.ProgExpContext}, this map keeps a pointer to its corresponding
+     * AST (represented by {@link PExp}).
+     */
     public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
@@ -36,7 +43,7 @@ public class AnnotatedModule {
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
 
     /**
-     * Think of the {@code uses} set as refs useful for coming up with module orderings, etc. Think of these strings
+     * Think of the {@code uses} set as refs useful for coming up with module orderings, etc. Think of these then as
      * the refs the symboltable will see. We don't want implementations of facilities showing up in this set.
      */
     public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
@@ -44,6 +51,7 @@ public class AnnotatedModule {
     private final String fileName;
     private final Token name;
     private final ParseTree root;
+    private VCOutputFile vcs = null;
     public boolean hasErrors;
 
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {
@@ -67,8 +75,12 @@ public class AnnotatedModule {
         }
     }
 
+    public void setVCs(@Nullable VCOutputFile vco) {
+        this.vcs = vco;
+    }
+
     @NotNull
-    public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @NotNull ParserRuleContext ctx) {
+    public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @Nullable ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
@@ -86,6 +98,11 @@ public class AnnotatedModule {
     @NotNull
     public ParseTree getRoot() {
         return root;
+    }
+
+    @Nullable
+    public VCOutputFile getVCOutput() {
+        return vcs;
     }
 
     @Override

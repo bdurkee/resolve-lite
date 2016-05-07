@@ -101,6 +101,13 @@ public class RESOLVECompiler {
     @NotNull
     public LogManager logMgr = new LogManager();
 
+    /**
+     * So if the user specifies on cmdline "compile T.resolve X.resolve " this will store the {@link AnnotatedModule}s
+     * for T and X; as opposed to {T, X} U {dependent modules}.
+     */
+    @NotNull
+    List<AnnotatedModule> cmdLineTargetModules = new ArrayList<>();
+
     public RESOLVECompiler() {
         this(null);
     }
@@ -219,8 +226,20 @@ public class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
-        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences();
+        cmdLineTargetModules.addAll(parseAndReturnRootModules());
+        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(cmdLineTargetModules);
         processCommandLineTargets(targets);
+    }
+
+    private List<AnnotatedModule> parseAndReturnRootModules() {
+        List<AnnotatedModule> modules = new ArrayList<>();
+        for (String e : targetFiles) {
+            AnnotatedModule m = parseModule(e);
+            if (m != null) {
+                modules.add(parseModule(e));
+            }
+        }
+        return modules;
     }
 
     public void processCommandLineTargets(AnnotatedModule... module) {
@@ -239,18 +258,8 @@ public class RESOLVECompiler {
         }
         codegenPipe.process();
         vcsPipe.process();
-    }
-
-    @NotNull
-    public List<AnnotatedModule> sortTargetModulesByUsesReferences() {
-        List<AnnotatedModule> modules = new ArrayList<>();
-        for (String e : targetFiles) {
-            AnnotatedModule m = parseModule(e);
-            if (m != null) {
-                modules.add(parseModule(e));
-            }
-        }
-        return sortTargetModulesByUsesReferences(modules);
+        int i;
+        i=0;
     }
 
     @NotNull
