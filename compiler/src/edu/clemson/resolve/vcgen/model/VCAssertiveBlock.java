@@ -5,7 +5,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.Scope;
 
 import java.util.*;
@@ -18,7 +18,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
     }
 
     public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
-        public final DumbTypeGraph g;
+        public final DumbMathClssftnHandler g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
@@ -34,9 +34,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return result;
         }
 
-        public VCAssertiveBlockBuilder(DumbTypeGraph g, Scope s,
-                                       String description,
-                                       ParserRuleContext ctx) {
+        public VCAssertiveBlockBuilder(DumbMathClssftnHandler g, Scope s, String description, ParserRuleContext ctx) {
             if (s == null) {
                 throw new IllegalArgumentException("passed null scope to vc assertive block for: " + description);
             }

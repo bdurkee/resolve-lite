@@ -15,6 +15,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +41,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
-    private final DumbTypeGraph g;
+    private final DumbMathClssftnHandler g;
 
     //TODO: in applyCallRule() in ModelBuilderProto, we should be going through
     //one of these static fields to apply the rule, we should make a class that
@@ -86,7 +87,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
             moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
-        } catch (NoSuchModuleException e) {
+        } catch (NoSuchModuleException e) {//shouldn't happen, but eh.
             gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleName(ctx));
         }
     }
@@ -281,19 +282,22 @@ public class ModelBuilderProto extends ResolveBaseListener {
         outputFile.addAssertiveBlock(block.build());
     }
 
-    @Override public void enterOperationProcedureDecl(
+    @Override
+    public void enterOperationProcedureDecl(
             ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
         //precondition[params 1..i <-- conc.X]
-        PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, ctx, tr.getMathExpASTFor(g, ctx.requiresClause()));
+        PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
+                tr.getMathExpASTFor(g, ctx.requiresClause()));
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
-                        "Proc_Decl_rule="+ctx.name.getText(), ctx)
+                        "Proc_Decl_rule=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
-                        .assume(getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(), this::extractAssumptionsFromParameter))
+                        .assume(getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
+                                this::extractAssumptionsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
@@ -302,18 +306,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
         assertiveBlocks.push(block);
     }
 
-    @Override public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+    @Override
+    public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        List<ProgParameterSymbol> paramSyms =  s.getSymbolsOfType(ProgParameterSymbol.class);
+        List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
+
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
-                ctx, tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
+                tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
+        if (ctx.ensuresClause() != null) {
+            corrFnExpEnsures.setVCStartAndStop(ctx.ensuresClause().start, ctx.ensuresClause().stop);
+            corrFnExpEnsures.setVCDescription("Ensures clause of " + ctx.name.getText());
+        }
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                    .confirm(paramConsequents)
-                    .finalConfirm(corrFnExpEnsures);
+                .confirm(paramConsequents)
+                .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
     }
@@ -328,7 +338,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     .map(ProgParameterSymbol::getDeclaredType)
                     .collect(Collectors.toList())));
 
-            PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, ctx, currentProcOpSym.getRequires());
+            //This is the requires for the operation with some substutions made (see corrFnExp rule in HH-diss)
+            PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
 
@@ -365,7 +376,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .map(p -> (PTRepresentation) p.getDeclaredType())
                 .map(p -> p.getReprTypeSymbol().getCorrespondence())
                 .collect(Collectors.toList());
-        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, ctx, currentProcOpSym.getEnsures());
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getEnsures());
         //postcondition[params 1..i <-- corr_fn_exp]
 
         List<PExp> paramConsequents = new ArrayList<>();
@@ -511,7 +522,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 ProgReprTypeSymbol repr = ((PTRepresentation) declaredType).getReprTypeSymbol();
                 PExp convention = repr.getConvention();
 
-                resultingAssumptions.add(convention.substitute( declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
+                resultingAssumptions.add(convention.substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
                 // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
             }
@@ -560,14 +571,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
         try {
             assertions.addAll(moduleScope.query(
                     new SymbolTypeQuery<GlobalMathAssertionSymbol>(GlobalMathAssertionSymbol.class))
-                        .stream()
-                        .filter(e -> e.getClauseType() == type)
-                        .collect(Collectors.toList()));
+                    .stream()
+                    .filter(e -> e.getClauseType() == type)
+                    .collect(Collectors.toList()));
             facilities.addAll(moduleScope.query(new SymbolTypeQuery<FacilitySymbol>(FacilitySymbol.class)));
         } catch (NoSuchModuleException | UnexpectedSymbolException e) {
         }
-        return assertions
-                .stream()
+        return assertions.stream()
                 .map(assertion -> substituteByFacilities(facilities, assertion))
                 .collect(Collectors.toSet());
     }
@@ -592,9 +602,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //The only way I'm current aware of a local requires clause getting changed
     //is by passing a locally defined type  to an operation (something of type
     //PTRepresentation). This method won't do anything otherwise.
-    private PExp perParameterCorrFnExpSubstitute(List<ProgParameterSymbol> params,
-                                                 ParserRuleContext functionCtx,
-                                                 PExp requiresOrEnsures) {
+    @NotNull
+    private PExp perParameterCorrFnExpSubstitute(@NotNull List<ProgParameterSymbol> params,
+                                                 @Nullable PExp requiresOrEnsures) {
         List<PExp> result = new ArrayList<>();
         PExp resultingClause = requiresOrEnsures;
         for (ProgParameterSymbol p : params) {
@@ -608,6 +618,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 resultingClause = resultingClause.substitute(concReplMapping);
             }
         }
-        return resultingClause;
+        return resultingClause == null ? g.getTrueExp() : resultingClause;
     }
 }

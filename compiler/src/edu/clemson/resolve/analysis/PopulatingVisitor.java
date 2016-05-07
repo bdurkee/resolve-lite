@@ -40,7 +40,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private final MathSymbolTable symtab;
 
     private final AnnotatedModule tr;
-    private final DumbTypeGraph g;
+    private final DumbMathClssftnHandler g;
 
     /**
      * While walking children of an {@link ResolveParser.MathCategoricalDefnDeclContext} or
@@ -86,7 +86,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         this.g = symtab.getTypeGraph();
     }
 
-    public DumbTypeGraph getTypeGraph() {
+    public DumbMathClssftnHandler getTypeGraph() {
         return g;
     }
 
@@ -1783,7 +1783,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     public static MathClassification getMetaFieldType(
-            @NotNull DumbTypeGraph g, @NotNull String metaSegment) {
+            @NotNull DumbMathClssftnHandler g, @NotNull String metaSegment) {
         MathClassification result = null;
 
         if (metaSegment.equals("Is_Initial")) {

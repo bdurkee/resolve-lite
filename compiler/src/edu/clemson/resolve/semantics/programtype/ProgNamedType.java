@@ -3,7 +3,7 @@ package edu.clemson.resolve.semantics.programtype;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 /**
@@ -23,7 +23,7 @@ public abstract class ProgNamedType extends ProgType {
     @NotNull
     private final ModuleIdentifier moduleIdentifier;
 
-    public ProgNamedType(@NotNull DumbTypeGraph g,
+    public ProgNamedType(@NotNull DumbMathClssftnHandler g,
                          @NotNull String name,
                          @NotNull PExp initEnsures,
                          @NotNull ModuleIdentifier moduleIdentifier) {

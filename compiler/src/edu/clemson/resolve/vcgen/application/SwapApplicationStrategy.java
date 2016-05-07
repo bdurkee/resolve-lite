@@ -5,9 +5,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
 
-public class SwapApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class SwapApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Todo, maybe make vcswapStat, vcwh
     @NotNull

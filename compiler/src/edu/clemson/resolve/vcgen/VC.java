@@ -4,12 +4,15 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
+import org.antlr.v4.runtime.Token;
 
 /** Represents an immutable vc (verification condition), which takes the form of a mathematical implication. */
 public class VC extends OutputModelObject {
 
     /** A human-readable name for the VC; used for debugging purposes. */
     public final String name;
+
+    Token start, stop;
 
     /**
      * This is set to true to indicate that this vc is not the original version of the vc with 'name'--rather, it

@@ -117,10 +117,10 @@ public class MathSymbolTable {
     @Nullable
     private ModuleScopeBuilder curModuleScope = null;
     @NotNull
-    private final DumbTypeGraph typeGraph;
+    private final DumbMathClssftnHandler typeGraph;
 
     public MathSymbolTable() {
-        this.typeGraph = new DumbTypeGraph();
+        this.typeGraph = new DumbMathClssftnHandler();
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope = new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER, ModuleIdentifier.GLOBAL);
@@ -128,7 +128,7 @@ public class MathSymbolTable {
         lexicalScopeStack.push(globalScope);
     }
 
-    private void initializeMathTypeSystem(@NotNull DumbTypeGraph g, @NotNull ScopeBuilder globalScope) {
+    private void initializeMathTypeSystem(@NotNull DumbMathClssftnHandler g, @NotNull ScopeBuilder globalScope) {
         try {
             globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
             globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
@@ -180,7 +180,7 @@ public class MathSymbolTable {
     }
 
     @NotNull
-    public DumbTypeGraph getTypeGraph() {
+    public DumbMathClssftnHandler getTypeGraph() {
         return typeGraph;
     }
 

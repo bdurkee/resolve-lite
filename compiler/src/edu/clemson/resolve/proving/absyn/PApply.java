@@ -1,7 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
@@ -293,7 +293,7 @@ public class PApply extends PExp {
     @NotNull
     public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        DumbTypeGraph g = getMathType().getTypeGraph();
+        DumbMathClssftnHandler g = getMathType().getTypeGraph();
         if (getCanonicalName().equals("and")) {
             arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
         }

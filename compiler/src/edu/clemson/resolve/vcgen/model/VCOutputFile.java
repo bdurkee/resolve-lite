@@ -43,13 +43,11 @@ public class VCOutputFile extends OutputModelObject {
      * adds each {@code VC} to the final list.
      *
      * @param batch         The set of {@code VC}s in context.
-     * @param sectionNumber The batch number so that we can mirror the numbering
-     *                      used by the Verifier. (Ideally, we should eventually
-     *                      embed the name of each {@code VC} from the Verifier
-     *                      with its name for greater robustness.)
+     * @param sectionNumber The batch number so that we can mirror the numbering used by the Verifier.
+     *                      (Ideally, we should eventually embed the name of each {@code VC} from the Verifier with
+     *                      its name for greater robustness.)
      */
-    private void addVCsInContext(final AssertiveBlock batch,
-                                 final int sectionNumber) {
+    private void addVCsInContext(final AssertiveBlock batch, final int sectionNumber) {
         List<PExp> vcs = batch.getFinalConfirm().getConfirmExp().splitIntoSequents();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;

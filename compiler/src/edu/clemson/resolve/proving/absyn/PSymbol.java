@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.Quantification;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
@@ -130,7 +130,7 @@ public class PSymbol extends PExp {
     @NotNull
     public List<PExp> splitIntoSequents(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        DumbTypeGraph g = getMathType().getTypeGraph();
+        DumbMathClssftnHandler g = getMathType().getTypeGraph();
         result.add(g.formImplies(assumptions, this));
         return result;
     }

@@ -8,7 +8,7 @@ import java.util.*;
 /** The parent class of all mathematical classifications. */
 public abstract class MathClassification {
 
-    protected final DumbTypeGraph g;
+    protected final DumbMathClssftnHandler g;
     public int typeRefDepth = 0;
     public MathClassification enclosingClassification;
 
@@ -19,13 +19,13 @@ public abstract class MathClassification {
      */
     public boolean identifiesSchematicType = false;
 
-    public MathClassification(@NotNull DumbTypeGraph g,
+    public MathClassification(@NotNull DumbMathClssftnHandler g,
                               @Nullable MathClassification enclosingClassification) {
         this.g = g;
         this.enclosingClassification = enclosingClassification;
     }
 
-    public DumbTypeGraph getTypeGraph() {
+    public DumbMathClssftnHandler getTypeGraph() {
         return g;
     }
 

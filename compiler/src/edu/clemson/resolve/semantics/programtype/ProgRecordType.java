@@ -1,7 +1,7 @@
 package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathCartesianClassification;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
@@ -15,7 +15,7 @@ public class ProgRecordType extends ProgType {
     @NotNull
     private MathClassification mathTypeAlterEgo;
 
-    public ProgRecordType(@NotNull DumbTypeGraph g, @NotNull Map<String, ProgType> types) {
+    public ProgRecordType(@NotNull DumbMathClssftnHandler g, @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
         List<MathCartesianClassification.Element> eles = new ArrayList<>();

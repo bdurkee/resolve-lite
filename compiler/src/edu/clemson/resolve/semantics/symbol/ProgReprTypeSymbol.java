@@ -5,7 +5,7 @@ import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import edu.clemson.resolve.semantics.programtype.PTRepresentation;
@@ -31,11 +31,11 @@ public class ProgReprTypeSymbol extends Symbol {
     protected final PExp convention, correspondence;
 
     @NotNull
-    protected final DumbTypeGraph typeGraph;
+    protected final DumbMathClssftnHandler typeGraph;
     @NotNull
     protected final PTRepresentation representation;
 
-    public ProgReprTypeSymbol(@NotNull DumbTypeGraph g,
+    public ProgReprTypeSymbol(@NotNull DumbMathClssftnHandler g,
                               @NotNull String name,
                               @Nullable ParserRuleContext definingElement,
                               @NotNull ModuleIdentifier moduleIdentifier,

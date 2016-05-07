@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class DumbTypeGraph {
+public class DumbMathClssftnHandler {
 
-    public DumbTypeGraph() {
+    public DumbMathClssftnHandler() {
     }
 
     public final MathClassification INVALID = MathInvalidClassification.getInstance(this);
@@ -52,7 +52,7 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
                                                            @NotNull MathFunctionClassification f,
                                                            @NotNull String calledAsName,
                                                            @NotNull List<MathClassification> arguments) {
@@ -65,7 +65,7 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
                                                            @NotNull MathFunctionClassification f,
                                                            @NotNull String calledAsName,
                                                            @NotNull List<MathClassification> arguments) {
@@ -78,7 +78,7 @@ public class DumbTypeGraph {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbTypeGraph g,
+        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
                                                            @NotNull MathFunctionClassification f,
                                                            @NotNull String calledAsName,
                                                            @NotNull List<MathClassification> arguments) {

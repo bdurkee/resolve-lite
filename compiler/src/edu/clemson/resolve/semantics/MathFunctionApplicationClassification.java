@@ -11,14 +11,14 @@ public class MathFunctionApplicationClassification extends MathClassification {
     private final MathFunctionClassification function;
     private final String name;
 
-    public MathFunctionApplicationClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionApplicationClassification(@NotNull DumbMathClssftnHandler g,
                                                  @NotNull MathFunctionClassification f,
                                                  @NotNull String name,
                                                  @NotNull MathClassification... arguments) {
         this(g, f, name, Arrays.asList(arguments));
     }
 
-    public MathFunctionApplicationClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionApplicationClassification(@NotNull DumbMathClssftnHandler g,
                                                  @NotNull MathFunctionClassification f,
                                                  @NotNull String name,
                                                  @NotNull List<MathClassification> arguments) {

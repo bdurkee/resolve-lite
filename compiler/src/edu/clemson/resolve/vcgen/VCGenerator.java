@@ -6,6 +6,7 @@ import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;
@@ -25,6 +26,12 @@ public class VCGenerator extends AbstractCodeGenerator {
         return o.getOutputFile();
     }
 
+    @NotNull
+    public VCOutputFile getVCOutput() {
+        return buildVCOutputModel();
+    }
+
+    @NotNull
     public List<VC> getProverInput() {
         return buildVCOutputModel().getFinalVCs();
     }

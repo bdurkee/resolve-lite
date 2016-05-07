@@ -14,7 +14,7 @@ public class MathNamedClassification extends MathClassification {
 
     public String tag;
 
-    public MathNamedClassification(@NotNull DumbTypeGraph g,
+    public MathNamedClassification(@NotNull DumbMathClssftnHandler g,
                                    String tag,
                                    int typeDepth,
                                    @Nullable MathClassification enclosingType) {

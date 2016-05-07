@@ -13,11 +13,11 @@ public class MathCartesianClassification extends MathClassification {
     public final Map<String, MathClssftnWrappingSymbol> syms = new LinkedHashMap<>();
     public final Map<String, Element> tagsToElements = new LinkedHashMap<>();
 
-    public MathCartesianClassification(DumbTypeGraph g, Element... e) {
+    public MathCartesianClassification(DumbMathClssftnHandler g, Element... e) {
         this(g, Arrays.asList(e));
     }
 
-    public MathCartesianClassification(DumbTypeGraph g, List<Element> elements) {
+    public MathCartesianClassification(DumbMathClssftnHandler g, List<Element> elements) {
         super(g, g.CLS);
         this.elements.addAll(elements);
         this.typeRefDepth = 1;

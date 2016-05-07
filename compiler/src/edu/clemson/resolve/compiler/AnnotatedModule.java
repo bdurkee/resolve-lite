@@ -3,7 +3,7 @@ package edu.clemson.resolve.compiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -68,7 +68,7 @@ public class AnnotatedModule {
     }
 
     @NotNull
-    public PExp getMathExpASTFor(@NotNull DumbTypeGraph g, @NotNull ParserRuleContext ctx) {
+    public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @NotNull ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }

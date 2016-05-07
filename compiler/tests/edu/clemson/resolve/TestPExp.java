@@ -9,7 +9,7 @@ import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathInvalidClassification;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -30,7 +30,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class TestPExp extends BaseTest {
 
-    private final DumbTypeGraph g = new DumbTypeGraph();
+    private final DumbMathClssftnHandler g = new DumbMathClssftnHandler();
 
     @Test
     public void testGetSubExpressions() throws Exception {
@@ -465,7 +465,7 @@ public class TestPExp extends BaseTest {
      * @return the dummy-typed {@link PExp} representation of {@code input}
      */
     @NotNull
-    public static PExp parseMathAssertionExp(@NotNull DumbTypeGraph g,
+    public static PExp parseMathAssertionExp(@NotNull DumbMathClssftnHandler g,
                                              @NotNull String input) {
         ParseTree t = getTree(input);
         AnnotatedModule fakeModule =

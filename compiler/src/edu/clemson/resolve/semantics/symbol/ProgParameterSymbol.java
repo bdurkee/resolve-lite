@@ -99,7 +99,7 @@ public class ProgParameterSymbol extends Symbol {
 
     private final ParameterMode mode;
     private final ProgType declaredType;
-    private final DumbTypeGraph typeGraph;
+    private final DumbMathClssftnHandler typeGraph;
 
     private MathClssftnWrappingSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
@@ -107,7 +107,7 @@ public class ProgParameterSymbol extends Symbol {
     @Nullable
     private String typeQualifier;
 
-    public ProgParameterSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public ProgParameterSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                @NotNull ParameterMode mode,
                                @NotNull ProgType type,
                                @Nullable ParserRuleContext definingTree,

@@ -7,7 +7,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.CommonToken;
@@ -36,7 +36,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     private final Map<String, Quantification> quantifiedVars = new HashMap<>();
     private final boolean skipDummyQuantifierNodes;
-    private final DumbTypeGraph g;
+    private final DumbMathClssftnHandler g;
 
     /**
      * Constructs a new {@code PExpBuildingListener} given an {@link AnnotatedModule} with it's associated expression
@@ -45,18 +45,18 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * @param g           a typegraph
      * @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull DumbTypeGraph g, @NotNull AnnotatedModule annotations) {
+    public PExpBuildingListener(@NotNull DumbMathClssftnHandler g, @NotNull AnnotatedModule annotations) {
         this(g, annotations, false);
     }
 
     /**
-     * Constructs a new {@code PExpBuildingListener} given an instance of {@link DumbTypeGraph}, some module
+     * Constructs a new {@code PExpBuildingListener} given an instance of {@link DumbMathClssftnHandler}, some module
      * {@code annotations} and a boolean flag {@code skipDummyQuantifiedNodes} indicating whether or not to construct
      * special, explicit syntactic node representing existential or universal quantifiers.
      *
      * @param annotations annotations to be used for constructing expressions
      */
-    public PExpBuildingListener(@NotNull DumbTypeGraph g,
+    public PExpBuildingListener(@NotNull DumbMathClssftnHandler g,
                                 @NotNull AnnotatedModule annotations,
                                 boolean skipDummyQuantifiedNodes) {
         this.g = g;
