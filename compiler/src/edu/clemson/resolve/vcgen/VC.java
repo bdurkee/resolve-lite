@@ -12,7 +12,8 @@ public class VC extends OutputModelObject {
     /** A human-readable name for the VC; used for debugging purposes. */
     public final String name;
 
-    Token start, stop;
+    public Token location;
+    public String goalOriginDescription;
 
     /**
      * This is set to true to indicate that this vc is not the original version of the vc with 'name'--rather, it
@@ -23,19 +24,21 @@ public class VC extends OutputModelObject {
     public final Antecedent antecedent;
     public final Consequent consequent;
 
-    public VC(String name, PExp antecedent, PExp consequent) {
-        this(name, new Antecedent(antecedent), new Consequent(consequent), false);
+    public VC(Token location, String name, String originDescription, PExp antecedent, PExp consequent) {
+        this(location, name, originDescription, new Antecedent(antecedent), new Consequent(consequent), false);
     }
 
     public VC(String name, Antecedent antecedent, Consequent consequent) {
-        this(name, antecedent, consequent, false);
+        this(null, name, null, antecedent, consequent, false);
     }
 
-    public VC(String name, Antecedent antecedent, Consequent consequent, boolean derived) {
+    public VC(Token location, String name, String description, Antecedent antecedent, Consequent consequent, boolean derived) {
         this.name = name;
         this.antecedent = antecedent;
         this.consequent = consequent;
         this.derived = derived;
+        this.location = location;
+        this.goalOriginDescription = description;
     }
 
     public String getName() {

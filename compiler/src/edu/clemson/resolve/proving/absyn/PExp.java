@@ -281,16 +281,16 @@ public abstract class PExp {
      * @return a list of sequents derived from {@code this}
      */
     @NotNull
-    public List<PExp> splitIntoSequents() {
-        return splitIntoSequents(getMathType().getTypeGraph().getTrueExp());
+    public List<PExp> split() {
+        return split(getMathType().getTypeGraph().getTrueExp());
     }
 
     /**
-     * A protected refinement of {@link PExp#splitIntoSequents()} that adds an
+     * A protected refinement of {@link PExp#split()} that adds an
      * accumulator, {@code assumptions}, for developing our sequents.
      */
     @NotNull
-    protected List<PExp> splitIntoSequents(PExp assumtions) {
+    protected List<PExp> split(PExp assumtions) {
         return new ArrayList<>();
     }
 

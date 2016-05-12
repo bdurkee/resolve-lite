@@ -1,6 +1,5 @@
 package edu.clemson.resolve.vcgen.application;
 
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
@@ -9,32 +8,22 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.symbol.OperationSymbol;
-import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
-import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 
 import java.util.*;
 
-import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
-import static edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
-
-public class GeneralCallApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCRuleBackedStat> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCRuleBackedStat stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
-        GeneralCallRuleSubstitutor applier =
-                new GeneralCallRuleSubstitutor(block);
+        GeneralCallRuleSubstitutor applier = new GeneralCallRuleSubstitutor(stat.getDefiningContext(), block);
         callExp.accept(applier);
 
-        return block.finalConfirm(applier.getCompletedExp())
-                .snapshot();
+        return block.snapshot(); //block.finalConfirm(applier.getCompletedExp(), null, null)
+               // .snapshot();
     }
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in doc/
@@ -42,11 +31,10 @@ public class GeneralCallApplicationStrategy
         private final VCAssertiveBlockBuilder block;
         public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
 
-        public GeneralCallRuleSubstitutor(
-                @NotNull VCAssertiveBlockBuilder block) {
+        public GeneralCallRuleSubstitutor(@NotNull ParserRuleContext ctx, @NotNull VCAssertiveBlockBuilder block) {
             this.block = block;
         }
-
+/*
         @NotNull
         public PExp getCompletedExp() {
             return block.finalConfirm.getConfirmExp();
@@ -73,7 +61,7 @@ public class GeneralCallApplicationStrategy
             block.confirm(confirmPrecondition);
             //^^^^^ Here's the old one:
             //block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
-
+*/
             /*for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
@@ -86,7 +74,7 @@ public class GeneralCallApplicationStrategy
                     }
                 }
             }*/
-            PExp RP = block.finalConfirm.getConfirmExp();
+/*            PExp RP = block.finalConfirm.getConfirmExp();
             Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
             Iterator<ProgParameterSymbol> formalIter =
                     op.getParameters().iterator();
@@ -148,7 +136,7 @@ public class GeneralCallApplicationStrategy
 
             //reset the formal param iter in preperation for building the
             //substitution mapping for our confirm
-            formalIter = op.getParameters().iterator();
+   /*         formalIter = op.getParameters().iterator();
             argIter = e.getArguments().iterator();
             Map<PExp, PExp> confirmSubstitutions = new HashMap<>();
             for (PExp actualArg : e.getArguments()) {
@@ -159,7 +147,7 @@ public class GeneralCallApplicationStrategy
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
-        }
+        }*/
     }
 
     /**

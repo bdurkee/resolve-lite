@@ -12,6 +12,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.model.VCCall;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -21,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.programtype.PTRepresentation;
 import edu.clemson.resolve.semantics.programtype.ProgFamilyType;
-import edu.clemson.resolve.semantics.programtype.ProgGenericType;
 import edu.clemson.resolve.semantics.programtype.ProgNamedType;
 import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
@@ -47,17 +47,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //one of these static fields to apply the rule, we should make a class that
     //extends VCRuleBackedStat called VCCall which simply wraps a PExp representing
     //a call.
-    public static final StatRuleApplicationStrategy<VCRuleBackedStat> EXPLICIT_CALL_APPLICATION =
+    public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
-    public static final StatRuleApplicationStrategy<VCRuleBackedStat> GENERAL_CALL_APPLICATION =
+    public static final VCStatRuleApplicationStrategy<VCRuleBackedStat> GENERAL_CALL_APPLICATION =
             new GeneralCallApplicationStrategy();
     //TODO:
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
     //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
     //stats.getComponents().get(0), etc.
-    private final static StatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
+    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
-    private final static StatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
+    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
 
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
@@ -103,7 +103,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        ModuleScopeBuilder spec = null, impl = null;
+        /*ModuleScopeBuilder spec = null, impl = null;
         try {
             spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
             if (ctx.externally == null) {
@@ -161,29 +161,30 @@ public class ModelBuilderProto extends ResolveBaseListener {
             assertiveBlocks.peek().finalConfirm(result);
         }
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        outputFile.addAssertiveBlock(block.build());
+        outputFile.addAssertiveBlock(block.build());*/
     }
 
 
-    private List<PExp> reduceArgs(List<PExp> args) {
+    private List<PExp> reduceArgs(List<ParserRuleContext> args) {
         List<PExp> result = new ArrayList<>();
-        for (PExp arg : args) {
-            if (arg.isFunctionApplication()) {
-                PExp e = applyCallRuleToExp(assertiveBlocks.peek(), arg);
+        for (ParserRuleContext arg : args) {
+            PExp argAsPExp = tr.getMathExpASTFor(g, arg);
+            if (argAsPExp instanceof PApply) { //i.e., we're dealing with a function application
+                PExp e = applyCallRuleToExp(arg, assertiveBlocks.peek(), (PApply) argAsPExp);
                 result.add(e);
             }
             else {
-                result.add(arg);
+                result.add(argAsPExp);
             }
         }
         return result;
     }
 
-    private PExp applyCallRuleToExp(VCAssertiveBlockBuilder block, PExp exp) {
-        ExplicitCallRuleApplyingListener applier = new ExplicitCallRuleApplyingListener(block);
+    private PExp applyCallRuleToExp(ParserRuleContext ctx, VCAssertiveBlockBuilder block, PApply exp) {
+        ExplicitCallRuleApplyingListener applier = new ExplicitCallRuleApplyingListener(ctx, block);
         exp.accept(applier);
         PExp finalConfirm = block.finalConfirm.getConfirmExp();
-        block.finalConfirm(finalConfirm);
+       // block.finalConfirm(finalConfirm, );
        /* if (applier.returnEnsuresArgSubstitutions.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
@@ -242,7 +243,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
 
         block.assume(correspondence.splitIntoConjuncts());
-        block.finalConfirm(newConstraint);
+        block.finalConfirm(newConstraint, "Constraint clause for model type " + ctx.name.getText());
         outputFile.addAssertiveBlock(block.build());
     }
 
@@ -276,9 +277,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp newInitEnsures = typeInitEnsures.substitute(
                 currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
         //block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
-        block.confirm(convention);  //order here is important
+        //block.confirm(convention);  //order here is important
         block.assume(correspondence);
-        block.finalConfirm(newInitEnsures);
+        block.finalConfirm(newInitEnsures, "Initialization-ensures clause of " + currentTypeReprSym.getName());
         outputFile.addAssertiveBlock(block.build());
     }
 
@@ -315,15 +316,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
-        if (ctx.ensuresClause() != null) {
-            corrFnExpEnsures.setVCStartAndStop(ctx.ensuresClause().start, ctx.ensuresClause().stop);
-            corrFnExpEnsures.setVCDescription("Ensures clause of " + ctx.name.getText());
-        }
+
+        Token loc = ctx.ensuresClause() != null ? ctx.ensuresClause().getStart() : ctx.getStart();
+
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(paramConsequents)
-                .finalConfirm(corrFnExpEnsures);
+        //        .confirm(paramConsequents) TODO TODO
+                .finalConfirm(corrFnExpEnsures, "Ensures clause of " + ctx.name.getText());
 
         outputFile.addAssertiveBlock(block.build());
     }
@@ -383,9 +383,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
 
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .confirm(paramConsequents) //assumes for correspondence reprs included here
+               // .confirm(paramConsequents) //assumes for correspondence reprs included here
                 .assume(corrFnExps)
-                .finalConfirm(corrFnExpEnsures);
+                .finalConfirm(corrFnExpEnsures, "Ensures clause of " + ctx.name.getText());
 
         outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;

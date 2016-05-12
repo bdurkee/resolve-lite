@@ -102,11 +102,11 @@ public class RESOLVECompiler {
     public LogManager logMgr = new LogManager();
 
     /**
-     * So if the user specifies on cmdline "compile T.resolve X.resolve " this will store the {@link AnnotatedModule}s
-     * for T and X; as opposed to {T, X} U {dependent modules}.
+     * So if the user specifies on cmdline "compile T.resolve X.resolve " this will store <em>just</em> the
+     * {@link AnnotatedModule}s for T and X (as opposed to say, {T, X} U {dependent modules}).
      */
     @NotNull
-    List<AnnotatedModule> cmdLineTargetModules = new ArrayList<>();
+    public List<AnnotatedModule> commandlineTargets = new ArrayList<>();
 
     public RESOLVECompiler() {
         this(null);
@@ -226,8 +226,8 @@ public class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
-        cmdLineTargetModules.addAll(parseAndReturnRootModules());
-        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(cmdLineTargetModules);
+        commandlineTargets.addAll(parseAndReturnRootModules());
+        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
         processCommandLineTargets(targets);
     }
 

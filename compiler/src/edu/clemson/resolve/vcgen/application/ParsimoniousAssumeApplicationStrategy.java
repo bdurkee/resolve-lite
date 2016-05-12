@@ -8,15 +8,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ParsimoniousAssumeApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCAssume> {
+public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCAssume stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
         PExp RP = block.finalConfirm.getConfirmExp();
 
@@ -51,10 +47,10 @@ public class ParsimoniousAssumeApplicationStrategy
         //this will be the pruned assume expr
         if (!parsimoniousAssumeConjuncts.isEmpty()) {
             assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
-            block.finalConfirm(block.g.formImplies(assumeExp, RP));
+            block.finalConfirm(block.g.formImplies(assumeExp, RP), block.finalConfirm.getExplanation());
         }
         else {
-            block.finalConfirm(RP);
+            block.finalConfirm(RP, block.finalConfirm.getExplanation());
         }
         return block.snapshot();
     }

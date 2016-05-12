@@ -6,12 +6,12 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import edu.clemson.resolve.vcgen.model.VCCall;
 import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.Scope;
@@ -30,20 +30,25 @@ import java.util.*;
  * See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
  * more info on what consitutes a call as 'simple' or explicit.
  */
-public class ExplicitCallApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCCall> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
-        PApply callExp = (PApply) stat.getStatComponents().get(0);
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
+        PApply callExp = stat.getCallExp();
+        Token callLocation = stat.getDefiningContext().getStart();
 
-        ExplicitCallRuleApplyingListener applier = new ExplicitCallRuleApplyingListener(block);
+        ExplicitCallRuleApplyingListener applier =
+                new ExplicitCallRuleApplyingListener(stat.getDefiningContext(),block);
         callExp.accept(applier);
 
         PExp completedExp = applier.getCompletedExp();
-        BasicBetaReducingListener lambdaReducer = new BasicBetaReducingListener(completedExp);
-        completedExp.accept(lambdaReducer);
-        return block.finalConfirm(lambdaReducer.getReducedExp()).snapshot();
+        //BasicBetaReducingListener lambdaReducer = new BasicBetaReducingListener(completedExp);
+        //completedExp.accept(lambdaReducer);
+
+        //replace the final confirm with our updated one (the one after this rule was applied) but the old explanation
+        //still applies, so we copy it over.
+        return block.finalConfirm(completedExp, block.finalConfirm.getExplanation()).snapshot();
     }
 
     @NotNull
@@ -66,11 +71,15 @@ public class ExplicitCallApplicationStrategy implements StatRuleApplicationStrat
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     public static class ExplicitCallRuleApplyingListener extends PExpListener {
+
+        private final ParserRuleContext ctx;
         public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
 
-        public ExplicitCallRuleApplyingListener(VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        public ExplicitCallRuleApplyingListener(ParserRuleContext ctx,
+                                                VCAssertiveBlock.VCAssertiveBlockBuilder block) {
             this.block = block;
+            this.ctx = ctx;
         }
 
         public PExp getCompletedExp() {
@@ -89,7 +98,7 @@ public class ExplicitCallApplicationStrategy implements StatRuleApplicationStrat
             List<PExp> formals = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
             PExp opRequires = op.getRequires().substitute(formals, actuals);
             opRequires = opRequires.substitute(block.getSpecializationsForFacility(name.getQualifier()));
-            block.confirm(opRequires);
+            block.confirm(ctx, opRequires, "Requires clause of " + name.getName());
 
             PExp opEnsures = op.getEnsures();
             Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
@@ -122,16 +131,15 @@ public class ExplicitCallApplicationStrategy implements StatRuleApplicationStrat
                 for (PSymbol f : exp.getValue().getIncomingVariables()) {
                     Collections.replaceAll(varsToReplaceInEnsures, f.withIncomingSignsErased(), f);
                 }
-                /**
-                 * Now we substitute the formals for actuals in the rhs of the ensures
-                 * ({@code f}), THEN replace all occurences of {@code v} in {@code Q}
-                 * with the modified {@code f}s (formally, {@code Q[v ~> f[x ~> u]]}).
+                /* Now we substitute the formals for actuals in the rhs of the ensures f, THEN replace all occurences
+                 * of v in Q with the modified fs (formally, Q[v ~> f[x ~> u]]).
                  */
                 PExp v = exp.getValue().substitute(varsToReplaceInEnsures, actuals);
                 returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
             PExp existingConfirm = block.finalConfirm.getConfirmExp();
-            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions));
+            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions),
+                    block.finalConfirm.getExplanation());
         }
     }
 }

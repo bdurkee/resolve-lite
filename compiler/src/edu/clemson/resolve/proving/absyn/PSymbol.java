@@ -128,7 +128,7 @@ public class PSymbol extends PExp {
     }
 
     @NotNull
-    public List<PExp> splitIntoSequents(PExp assumptions) {
+    public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbMathClssftnHandler g = getMathType().getTypeGraph();
         result.add(g.formImplies(assumptions, this));

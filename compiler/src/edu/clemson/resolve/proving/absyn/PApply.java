@@ -230,6 +230,8 @@ public class PApply extends PExp {
                     .applicationType(getMathType())
                     .arguments(args).build();
         }
+        result.setVCStartAndStop(start, stop);  //ugly, but can't really think of much of an easier way..
+        result.setVCDescription(description);
         return result;
     }
 
@@ -291,21 +293,21 @@ public class PApply extends PExp {
     }
 
     @NotNull
-    public List<PExp> splitIntoSequents(PExp assumptions) {
+    public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbMathClssftnHandler g = getMathType().getTypeGraph();
         if (getCanonicalName().equals("and")) {
-            arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
+            arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
         else if (getCanonicalName().equals("implies")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).splitIntoSequents(assumptions);
+            //tempList = arguments.get(0).split(assumptions);
             if (!assumptions.isObviouslyTrue()) {
                 tempLeft = g.formConjunct(assumptions, tempLeft);
             }
             tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).splitIntoSequents(tempLeft);
+            return arguments.get(1).split(tempLeft);
         }
         else {
             result.add(g.formImplies(assumptions, this));

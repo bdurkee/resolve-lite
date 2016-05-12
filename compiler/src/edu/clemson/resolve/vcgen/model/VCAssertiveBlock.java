@@ -4,6 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.Scope;
@@ -18,6 +19,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
     }
 
     public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
+
         public final DumbMathClssftnHandler g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
@@ -40,7 +42,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             }
             this.g = g;
             this.definingTree = ctx;
-            this.finalConfirm = new VCConfirm(this, g.getTrueExp());
+            this.finalConfirm = new VCConfirm(ctx, this, description, g.getTrueExp());
             this.scope = s;
             this.description = description;
         }
@@ -69,25 +71,30 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
+        /*public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
             confirms.forEach(this::confirm);
             return this;
-        }
+        }*/
 
-        public VCAssertiveBlockBuilder confirm(PExp confirm) {
+        public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm, String description) {
             if (confirm == null) {
                 confirm = g.getTrueExp();
             }
-            stats.add(new VCConfirm(this, confirm));
+            stats.add(new VCConfirm(ctx, this, description, confirm));
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder finalConfirm(PExp confirm, String explanation) {
+            if (confirm == null) {
+                throw new IllegalArgumentException("finalconfirm==null");
+            }
+            this.finalConfirm = new VCConfirm(definingTree, this, explanation, confirm);
             return this;
         }
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
-            if (confirm == null) {
-                throw new IllegalArgumentException("finalconfirm==null");
-            }
-            this.finalConfirm = new VCConfirm(this, confirm);
-            return this;
+            return finalConfirm(confirm, null); //it's ok if there's no explanation info, we'll just lack info about
+            //where the thing came from...
         }
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {

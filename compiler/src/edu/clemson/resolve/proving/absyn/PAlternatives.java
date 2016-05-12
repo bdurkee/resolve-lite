@@ -144,10 +144,10 @@ public class PAlternatives extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        PExp retval;
+        PExp result;
 
         if (substitutions.containsKey(this)) {
-            retval = substitutions.get(this);
+            result = substitutions.get(this);
         }
         else {
             List<PExp> substitutedConditions = new ArrayList<>();
@@ -157,11 +157,13 @@ public class PAlternatives extends PExp {
                 substitutedConditions.add(alt.condition.substitute(substitutions));
                 substitutedResults.add(alt.result.substitute(substitutions));
             }
-            retval = new PAlternatives(substitutedConditions,
+            result = new PAlternatives(substitutedConditions,
                     substitutedResults, substitutedOtherwiseResult,
                     getMathType());
         }
-        return retval;
+        result.setVCStartAndStop(start, stop);  //ugly, but can't really think of much of an easier way..
+        result.setVCDescription(description);
+        return result;
     }
 
     @Override

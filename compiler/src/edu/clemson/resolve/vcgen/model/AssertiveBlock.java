@@ -4,6 +4,8 @@ import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +20,13 @@ public abstract class AssertiveBlock extends OutputModelObject {
     @ModelElement
     public final List<VCRuleBackedStat> stats = new ArrayList<>();
     @ModelElement
-    public final List<RuleApplicationStep> applicationSteps =
-            new ArrayList<>();
+    public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
 
-    public AssertiveBlock(ParserRuleContext definingTree, VCConfirm finalConfirm,
-                          List<VCRuleBackedStat> stats,
-                          List<RuleApplicationStep> applicationSteps,
-                          String blockDescription) {
+    public AssertiveBlock(@Nullable ParserRuleContext definingTree,
+                          @NotNull VCConfirm finalConfirm,
+                          @NotNull List<VCRuleBackedStat> stats,
+                          @NotNull List<RuleApplicationStep> applicationSteps,
+                          @NotNull String blockDescription) {
         this.definingTree = definingTree;
         this.finalConfirm = finalConfirm;
         this.stats.addAll(stats);
@@ -44,6 +46,7 @@ public abstract class AssertiveBlock extends OutputModelObject {
         return Utils.getRawText(definingTree);
     }
 
+    @NotNull
     public VCConfirm getFinalConfirm() {
         return finalConfirm;
     }

@@ -1,0 +1,5 @@
+Facility Standard_Integers;
+    uses Integer_Template;
+    Facility Std_Ints is Integer_Template
+        externally implemented by impl;
+end Standard_Integers;

@@ -48,15 +48,21 @@ public class VCOutputFile extends OutputModelObject {
      *                      its name for greater robustness.)
      */
     private void addVCsInContext(final AssertiveBlock batch, final int sectionNumber) {
-        List<PExp> vcs = batch.getFinalConfirm().getConfirmExp().splitIntoSequents();
+
+        VCConfirm batchedConfirm = batch.getFinalConfirm();
+        List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
         int vcIndex = 1;
-        for (PExp vc : vcs) {
+        for (PExp vc : sequentComponents) {
             List<? extends PExp> args = vc.getSubExpressions();
             if (!(vc instanceof PApply)) continue;
             //args.get(0) would be the function name portion of the PApply;
             //so we actually do args.get(1) to get the first arg (lhs)
-            VC curVC = new VC(sectionNumber + "_" + vcIndex, args.get(1), args.get(2));
+
+            //TODO: try this once we get some output in the IDE, instead of returning 't' in getLocationToken(), just use
+            //The definingContext.getStart().. That way the confirm wouldn't need to take a Token.., just a description.
+            VC curVC = new VC(batchedConfirm.getLocationToken(), sectionNumber + "_" + vcIndex,
+                    batchedConfirm.getExplanation(), args.get(1), args.get(2));
             if (args.get(2).isObviouslyTrue()) continue;
             finalVcs.add(curVC);
             vcIndex++;

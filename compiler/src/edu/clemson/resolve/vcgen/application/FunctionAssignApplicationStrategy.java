@@ -7,6 +7,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
@@ -14,7 +15,7 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 import java.util.Collections;
 import java.util.List;
 
-public class FunctionAssignApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
@@ -22,7 +23,7 @@ public class FunctionAssignApplicationStrategy implements StatRuleApplicationStr
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
         PExp leftReplacee = stat.getStatComponents().get(0);
         PExp rightReplacer = stat.getStatComponents().get(1);
-
+        ParserRuleContext definingCtx = block.definingTree;
         if (!(rightReplacer.isFunctionApplication())) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
             block.finalConfirm(workingConfirm.substitute(leftReplacee, rightReplacer));
@@ -41,7 +42,10 @@ public class FunctionAssignApplicationStrategy implements StatRuleApplicationStr
          */
         PExp opRequires = op.getRequires().substitute(
                 block.getSpecializationsForFacility(((PSymbol) call.getFunctionPortion()).getQualifier()));
-        if (!opRequires.isObviouslyTrue()) block.confirm(opRequires.substitute(formals, actuals));
+        if (!opRequires.isObviouslyTrue()) {
+            block.confirm(definingCtx, opRequires.substitute(formals, actuals),
+                     "Requires clause for " + ((PSymbol) call.getFunctionPortion()).getName());
+        }
 
         PExp opEnsures = op.getEnsures();
         if (opEnsures.isObviouslyTrue()) return block.snapshot();
@@ -60,7 +64,8 @@ public class FunctionAssignApplicationStrategy implements StatRuleApplicationStr
          * occurences of v in Q with the modified f (formally, Q[v ~> f[x ~> u]]).
          */
         ensuresRight = ensuresRight.substitute(formals, actuals);
-        block.finalConfirm(block.finalConfirm.getConfirmExp().substitute(leftReplacee, ensuresRight));
+        block.finalConfirm(block.finalConfirm.getConfirmExp().substitute(leftReplacee, ensuresRight),
+                block.finalConfirm.getExplanation());
         return block.snapshot();
     }
 

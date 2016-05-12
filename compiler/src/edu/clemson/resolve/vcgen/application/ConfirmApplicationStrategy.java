@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ConfirmApplicationStrategy
         implements
-        StatRuleApplicationStrategy<VCConfirm> {
+        VCStatRuleApplicationStrategy<VCConfirm> {
 
     @NotNull
     @Override

@@ -5,14 +5,12 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.jetbrains.annotations.NotNull;
 
-public class SwapApplicationStrategy implements StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VCRuleBackedStat> {
 
     //TODO: Todo, maybe make vcswapStat, vcwh
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCRuleBackedStat stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
        /* PExp workingConfirm = block.finalConfirm.getConfirmExp();
         PExp swapLeft = stat.getStatComponents().get(0);
         PExp swapRight = stat.getStatComponents().get(1);

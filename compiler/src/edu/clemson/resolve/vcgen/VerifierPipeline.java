@@ -27,6 +27,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 //TODO: Use log instead!
                 //compiler.info("generating vcs for: " + unit.getNameToken().getText());
                 VCOutputFile vcs = gen.getVCOutput();
+
+                //give the vc output info into the AnnotatedModule
                 unit.setVCs(vcs);
                 //ST x = gen.generateAssertions();
                 //System.out.println(x.render());
