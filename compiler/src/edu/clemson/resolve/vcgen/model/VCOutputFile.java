@@ -62,8 +62,7 @@ public class VCOutputFile extends OutputModelObject {
             PExp antecedentExp = args.get(1);
             PExp consequentExp = args.get(2);
 
-            VC curVC = new VC(consequentExp.getVCLocation(), sectionNumber + "_" + vcIndex,
-                    consequentExp.getVCExplanation(), antecedentExp, consequentExp);
+            VC curVC = new VC(sectionNumber + "_" + vcIndex, antecedentExp, consequentExp);
             if (args.get(2).isObviouslyTrue()) continue;
             finalVcs.add(curVC);
             vcIndex++;
