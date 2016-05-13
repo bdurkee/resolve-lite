@@ -12,7 +12,7 @@ public class RememberApplicationStrategy implements VCStatRuleApplicationStrateg
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRemember stat) {
         PExp confirm = block.finalConfirm.getConfirmExp();
-        return block.finalConfirm(confirm.withIncomingSignsErased(), block.finalConfirm.getExplanation()).snapshot();
+        return block.finalConfirm(confirm.withIncomingSignsErased()).snapshot();
     }
 
     @NotNull

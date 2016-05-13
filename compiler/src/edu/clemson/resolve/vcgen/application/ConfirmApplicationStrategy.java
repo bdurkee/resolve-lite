@@ -1,6 +1,7 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCConfirm;
@@ -11,8 +12,16 @@ public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCConfirm stat) {
-        PExp e = block.g.formConjunct(stat.getStatComponents().get(0), block.finalConfirm.getConfirmExp());
-        block.finalConfirm(e);
+        PExp newFinalConfirm = null;
+        DumbMathClssftnHandler g = block.g;
+
+        if (block.finalConfirm.getConfirmExp().equals(g.getTrueExp())) {
+            newFinalConfirm = stat.getConfirmExp();
+        }
+        else {
+            newFinalConfirm = g.formConjunct(stat.getConfirmExp(), block.finalConfirm.getConfirmExp());
+        }
+        block.finalConfirm(newFinalConfirm);
         return block.snapshot();
     }
 

@@ -26,7 +26,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
         PApply callExp = (PApply) stat.getStatComponents().get(0);
         GeneralCallRuleSubstitutor applier = new GeneralCallRuleSubstitutor(stat.getDefiningContext(), block);
         callExp.accept(applier);
-        return block.finalConfirm(stat.getDefiningContext(), applier.getCompletedExp(), block.finalConfirm.getExplanation()).snapshot();
+        return block.finalConfirm(applier.getCompletedExp()).snapshot();
     }
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in doc/
@@ -57,13 +57,15 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
             PExp newAssume = op.getEnsures();
             List<PExp> formalExps = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
-            PExp confirmPrecondition = op.getRequires().substitute(formalExps, e.getArguments());
+            PExp confirmPrecondition = op.getRequires();
 
-            //TODO:
-            confirmPrecondition = confirmPrecondition.substitute(returnEnsuresArgSubstitutions);
-            block.confirm(ctx, confirmPrecondition, "Requires clause of " + functionName.getName());
+            confirmPrecondition = confirmPrecondition
+                    .substitute(formalExps, e.getArguments())
+                    .substitute(returnEnsuresArgSubstitutions)
+                    .withVCInfo(ctx.getStart(), "Requires clause of " + functionName.getName());
+            block.confirm(ctx, confirmPrecondition);
             //^^^^^ Here's the old one:
-            //block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
+            //block.confirm(ctx, op.getRequires().substitute(formalExps, e.getArguments()));
             /*for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
@@ -131,18 +133,16 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
             //reset the formal param iter in preperation for building the
             //substitution mapping for our confirm
-        /*  formalIter = op.getParameters().iterator();
+            formalIter = op.getParameters().iterator();
             argIter = e.getArguments().iterator();
             Map<PExp, PExp> confirmSubstitutions = new HashMap<>();
             for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
-                    confirmSubstitutions.put(actualArg,
-                            NQV(RP, (PSymbol) actualArg));
+                    confirmSubstitutions.put(actualArg, NQV(RP, (PSymbol) actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
-        }*/
         }
     }
 

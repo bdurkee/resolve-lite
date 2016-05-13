@@ -14,11 +14,10 @@ public class DefaultAssumeApplicationStrategy implements VCStatRuleApplicationSt
         PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
         PExp assumeExp = stat.getStatComponents().get(0);
         if (curFinalConfirmExp.isObviouslyTrue()) {
-            block.finalConfirm(assumeExp, block.finalConfirm.getExplanation());
+            block.finalConfirm(assumeExp);
         }
         else if (!assumeExp.equals(block.g.getTrueExp())) {
-            block.finalConfirm(block.g.formImplies(assumeExp, curFinalConfirmExp),
-                    block.finalConfirm.getExplanation());
+            block.finalConfirm(block.g.formImplies(assumeExp, curFinalConfirmExp));
         }
         return block.snapshot();
     }

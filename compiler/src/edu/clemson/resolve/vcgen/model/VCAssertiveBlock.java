@@ -42,7 +42,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             }
             this.g = g;
             this.definingTree = ctx;
-            this.finalConfirm = new VCConfirm(ctx, this, description, g.getTrueExp());
+            this.finalConfirm = new VCConfirm(ctx, this, g.getTrueExp());
             this.scope = s;
             this.description = description;
         }
@@ -76,29 +76,20 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }*/
 
-        public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm, String description) {
+        public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm) {
             if (confirm == null) {
                 confirm = g.getTrueExp();
             }
-            stats.add(new VCConfirm(ctx, this, description, confirm));
+            stats.add(new VCConfirm(ctx, this, confirm));
             return this;
-        }
-
-        public VCAssertiveBlockBuilder finalConfirm(ParserRuleContext ctx, PExp confirm, String explanation) {
-            if (confirm == null) {
-                throw new IllegalArgumentException("finalconfirm==null");
-            }
-            this.finalConfirm = new VCConfirm(ctx, this, explanation, confirm);
-            return this;
-        }
-
-        public VCAssertiveBlockBuilder finalConfirm(PExp confirm, String explanation) {
-            return finalConfirm(definingTree, confirm, explanation);
         }
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {
-            return finalConfirm(confirm, null); //it's ok if there's no explanation info, we'll just lack info about
-            //where the thing came from...
+            if (confirm == null) {
+                throw new IllegalArgumentException("finalconfirm==null");
+            }
+            this.finalConfirm = new VCConfirm(definingTree, this, confirm);
+            return this;
         }
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {

@@ -65,7 +65,8 @@ public class PLambda extends PExp {
             result = substitutions.get(this);
         }
         else {
-            result = new PLambda(parameters, body.substitute(substitutions));
+            result = new PLambda(parameters, body.substitute(substitutions),
+                    getVCLocation(), getVCExplanation());
         }
         return result;
     }
@@ -92,8 +93,7 @@ public class PLambda extends PExp {
     }
 
     public List<PExp> getParametersAsPExps() {
-        return parameters.stream().map(p -> new PSymbol.PSymbolBuilder(p.name)
-                .mathClssfctn(p.type).build()).collect(Collectors.toList());
+        return Utils.apply(parameters, MathSymbolDeclaration::asPSymbol);
     }
 
     public List<MathSymbolDeclaration> getParameters() {

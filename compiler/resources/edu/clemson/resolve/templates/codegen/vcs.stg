@@ -32,7 +32,7 @@
 VCOutputFile(vcs, chunks, finalVcs) ::= <<
 <finalVcs;separator="\n">
 
-<chunks : {c|<c.assertCode.explanation>
+<chunks : {c|<c.assertCode.description>
 <c.assertCode.text>    <!print out the big, starting construct!>
 
 \< S T E P S >
@@ -40,7 +40,7 @@ VCOutputFile(vcs, chunks, finalVcs) ::= <<
 >>
 
 RuleApplicationStep(app, step) ::= <<
-<app.explanation>
+<app.description>
 <step>
 --------------------
 >>
@@ -66,5 +66,7 @@ VCAssume(assume) ::= "Assume <assume.assumeExp>;"
 VCConfirm(confirm) ::= "Confirm <confirm.confirmExp>;"
 
 VCRuleBackedStat(code) ::= "<code.text>"
+
+VCCall(code) ::= "<code.text>"
 
 fileExtension() ::= ".asrt"

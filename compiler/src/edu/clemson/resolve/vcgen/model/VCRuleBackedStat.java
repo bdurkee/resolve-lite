@@ -36,11 +36,6 @@ public class VCRuleBackedStat extends OutputModelObject {
         return "";
     }
 
-    @Nullable
-    public Token getLocationToken() {
-        return definingCtx.getStart();
-    }
-
     @NotNull
     public List<PExp> getStatComponents() {
         return statComponents;

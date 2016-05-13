@@ -4,21 +4,19 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
 
 public class VCCall extends VCRuleBackedStat {
 
-    private final PApply callExp;
-
-    public VCCall(ParserRuleContext ctx,
-                  VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                  VCStatRuleApplicationStrategy apply,
-                  PExp... e) {
-        super(ctx, block, apply, e);
-        this.callExp = (PApply) e[0];
+    public VCCall(@NotNull ParserRuleContext ctx,
+                  @NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+                  @NotNull VCStatRuleApplicationStrategy apply,
+                  @NotNull PApply exp) {
+        super(ctx, block, apply, exp);
     }
 
     public PApply getCallExp() {
-        return callExp;
+        return (PApply) statComponents.get(0);
     }
 
 }

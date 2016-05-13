@@ -48,7 +48,7 @@ public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStr
 
         //replace the final confirm with our updated one (the one after this rule was applied) but the old explanation
         //still applies, so we copy it over.
-        return block.finalConfirm(completedExp, block.finalConfirm.getExplanation()).snapshot();
+        return block.finalConfirm(completedExp).snapshot();
     }
 
     @NotNull
@@ -97,8 +97,9 @@ public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStr
 
             List<PExp> formals = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
             PExp opRequires = op.getRequires().substitute(formals, actuals);
-            opRequires = opRequires.substitute(block.getSpecializationsForFacility(name.getQualifier()));
-            block.confirm(ctx, opRequires, "Requires clause of " + name.getName());
+            opRequires = opRequires.substitute(block.getSpecializationsForFacility(name.getQualifier()))
+                    .withVCInfo(ctx.getStart(), "Requires clause of " + name.getName());
+            block.confirm(ctx, opRequires);
 
             PExp opEnsures = op.getEnsures();
             Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
@@ -138,8 +139,7 @@ public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStr
                 returnEnsuresArgSubstitutions.put(exp.getKey(), v);
             }
             PExp existingConfirm = block.finalConfirm.getConfirmExp();
-            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions),
-                    block.finalConfirm.getExplanation());
+            block.finalConfirm(existingConfirm.substitute(returnEnsuresArgSubstitutions));
         }
     }
 }

@@ -174,7 +174,7 @@ public class PApply extends PExp {
         super(calculateHashes(builder.functionPortion, builder.arguments.iterator()),
                 builder.applicationType,
                 //no; builder.applicationType won't be null; this is checked in PApply:build()
-                builder.functionPortion.getProgType());
+                builder.functionPortion.getProgType(), builder.vcLocation, builder.vcExplanation);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
         this.displayStyle = builder.displayStyle;
@@ -229,6 +229,7 @@ public class PApply extends PExp {
             result = new PApplyBuilder(functionPortion.substitute(substitutions))
                     .style(displayStyle)
                     .applicationType(getMathClssftn())
+                    .vcInfo(getVCLocation(), getVCExplanation())
                     .arguments(args).build();
         }
         return result;
@@ -293,7 +294,7 @@ public class PApply extends PExp {
 
     @Override
     public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
-        return new PApplyBuilder(functionPortion).vcInfo(location, explanation).build();
+        return new PApplyBuilder(this).vcInfo(location, explanation).build();
     }
 
     @NotNull
@@ -325,6 +326,7 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
                 .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .style(displayStyle).build();
     }
 
@@ -334,6 +336,7 @@ public class PApply extends PExp {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
                 .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .style(displayStyle).build();
     }
 

@@ -243,8 +243,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
 
         block.assume(correspondence.splitIntoConjuncts());
-        block.finalConfirm(newConstraint, "Constraint clause for model type " + ctx.name.getText());
-        outputFile.addAssertiveBlock(block.build());
+        throw new UnsupportedOperationException("re-institute the final confirm for this dan");
+
+        //block.finalConfirm(newConstraint, "Constraint clause for model type " + ctx.name.getText());
+        //outputFile.addAssertiveBlock(block.build());
     }
 
     @Override
@@ -279,8 +281,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
         //block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
         //block.confirm(convention);  //order here is important
         block.assume(correspondence);
-        block.finalConfirm(newInitEnsures, "Initialization-ensures clause of " + currentTypeReprSym.getName());
-        outputFile.addAssertiveBlock(block.build());
+        throw new UnsupportedOperationException("re-institute the final confirm for this dan");
+       // block.finalConfirm(newInitEnsures, "Initialization-ensures clause of " + currentTypeReprSym.getName());
+        //outputFile.addAssertiveBlock(block.build());
     }
 
     @Override
@@ -315,17 +318,22 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
-
+        corrFnExpEnsures = corrFnExpEnsures.withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
         Token loc = ctx.ensuresClause() != null ? ctx.ensuresClause().getStart() : ctx.getStart();
 
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
+
+        //add verification statements to the assertive context/block
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+
+        //add any additional confirms from the parameters, etc
         for (ProgParameterSymbol p : paramSyms) {
             confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
         }
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-                .finalConfirm(corrFnExpEnsures, "Ensures clause of " + ctx.name.getText());
-
+        //TODO: Tomorrow look at the verification statements in the assertive context for
+        //int_do_nothing, then
+        block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlock(block.build());
     }
 
@@ -377,7 +385,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .map(p -> (PTRepresentation) p.getDeclaredType())
                 .map(p -> p.getReprTypeSymbol().getCorrespondence())
                 .collect(Collectors.toList());
-        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getEnsures());
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getEnsures())
+                .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
         //postcondition[params 1..i <-- corr_fn_exp]
 
         List<PExp> paramConsequents = new ArrayList<>();
@@ -386,7 +395,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
                // .confirm(paramConsequents) //assumes for correspondence reprs included here
                 .assume(corrFnExps)
-                .finalConfirm(corrFnExpEnsures, "Ensures clause of " + ctx.name.getText());
+                .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;
@@ -550,13 +559,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 PExp corrFnExp = repr.getCorrespondence();
                 //if we're doing this its going to be on a procedure decl or op-proc decl, so just
                 //say block.definingTree
-                block.confirm(block.definingTree,
-                        convention.substitute(t.getExemplarAsPSymbol(), paramExp), "Convention for " + t.getName());
+                PExp newConvention = convention.substitute(t.getExemplarAsPSymbol(), paramExp)
+                        .withVCInfo(block.definingTree.getStart(), "Convention for " + t.getName());
+                block.confirm(block.definingTree, newConvention);
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
-                PExp equalsExp = g.formEquals(paramExp, incParamExp);
-                block.confirm(block.definingTree,
-                        equalsExp, "Ensure 'restores' mode parameter " + p.getName() + " is restored");
+                PExp equalsExp = g.formEquals(paramExp, incParamExp)
+                        .withVCInfo(block.definingTree.getStart(), "Ensure 'restores' mode parameter " +
+                                p.getName() + " is restored");
+                block.confirm(block.definingTree, equalsExp);
             }
             else if (p.getMode() == ParameterMode.CLEARS) {
                 PExp init = ((ProgNamedType) p.getDeclaredType())

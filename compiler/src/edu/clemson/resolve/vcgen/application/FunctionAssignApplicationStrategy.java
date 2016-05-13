@@ -43,8 +43,9 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
         PExp opRequires = op.getRequires().substitute(
                 block.getSpecializationsForFacility(((PSymbol) call.getFunctionPortion()).getQualifier()));
         if (!opRequires.isObviouslyTrue()) {
-            block.confirm(definingCtx, opRequires.substitute(formals, actuals),
-                     "Requires clause for " + ((PSymbol) call.getFunctionPortion()).getName());
+            block.confirm(definingCtx, opRequires.substitute(formals, actuals)
+                    .withVCInfo(definingCtx.getStart(),
+                            "Requires clause for " + ((PSymbol) call.getFunctionPortion()).getName()));
         }
 
         PExp opEnsures = op.getEnsures();
@@ -64,8 +65,7 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
          * occurences of v in Q with the modified f (formally, Q[v ~> f[x ~> u]]).
          */
         ensuresRight = ensuresRight.substitute(formals, actuals);
-        block.finalConfirm(block.finalConfirm.getConfirmExp().substitute(leftReplacee, ensuresRight),
-                block.finalConfirm.getExplanation());
+        block.finalConfirm(block.finalConfirm.getConfirmExp().substitute(leftReplacee, ensuresRight));
         return block.snapshot();
     }
 

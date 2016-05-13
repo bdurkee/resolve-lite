@@ -47,10 +47,10 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
         //this will be the pruned assume expr
         if (!parsimoniousAssumeConjuncts.isEmpty()) {
             assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
-            block.finalConfirm(block.g.formImplies(assumeExp, RP), block.finalConfirm.getExplanation());
+            block.finalConfirm(block.g.formImplies(assumeExp, RP));
         }
         else {
-            block.finalConfirm(RP, block.finalConfirm.getExplanation());
+            block.finalConfirm(RP);
         }
         return block.snapshot();
     }

@@ -2,9 +2,11 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
+import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,13 +58,12 @@ public class VCOutputFile extends OutputModelObject {
         for (PExp vc : sequentComponents) {
             List<? extends PExp> args = vc.getSubExpressions();
             if (!(vc instanceof PApply)) continue;
-            //args.get(0) would be the function name portion of the PApply;
-            //so we actually do args.get(1) to get the first arg (lhs)
 
-            //TODO: try this once we get some output in the IDE, instead of returning 't' in getLocationToken(), just use
-            //The definingContext.getStart().. That way the confirm wouldn't need to take a Token.., just a vcExplanation.
-            VC curVC = new VC(batchedConfirm.getLocationToken(), sectionNumber + "_" + vcIndex,
-                    batchedConfirm.getExplanation(), args.get(1), args.get(2));
+            PExp antecedentExp = args.get(1);
+            PExp consequentExp = args.get(2);
+
+            VC curVC = new VC(consequentExp.getVCLocation(), sectionNumber + "_" + vcIndex,
+                    consequentExp.getVCExplanation(), antecedentExp, consequentExp);
             if (args.get(2).isObviouslyTrue()) continue;
             finalVcs.add(curVC);
             vcIndex++;
