@@ -49,7 +49,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //a call.
     public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
             new ExplicitCallApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCRuleBackedStat> GENERAL_CALL_APPLICATION =
+    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
             new GeneralCallApplicationStrategy();
     //TODO:
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
@@ -313,7 +313,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
 
@@ -321,8 +320,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
+        for (ProgParameterSymbol p : paramSyms) {
+            confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
+        }
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-        //        .confirm(paramConsequents) TODO TODO
                 .finalConfirm(corrFnExpEnsures, "Ensures clause of " + ctx.name.getText());
 
         outputFile.addAssertiveBlock(block.build());
@@ -424,7 +425,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //TODO: TEST THIS
     private boolean inSimpleForm(@NotNull PExp ensures, @NotNull List<ProgParameterSymbol> params) {
         boolean simple = false;
-        if (ensures instanceof PApply) {
+       /* if (ensures instanceof PApply) {
             PApply ensuresAsPApply = (PApply) ensures;
             List<PExp> args = ensuresAsPApply.getArguments();
             if (ensuresAsPApply.isEquality()) {
@@ -438,7 +439,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             for (ProgParameterSymbol p : params) {
                 if (p.getMode() == ParameterMode.UPDATES && p.asPSymbol().equals(ensures)) simple = true;
             }
-        }
+        }*/
         return simple;
     }
 
@@ -450,12 +451,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
         if (inSimpleForm(op.getEnsures(), op.getParameters())) {
             //TODO: Use log instead!
             //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
-            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
+            s = new VCCall(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
         }
         else {
             //TODO: Use log instead!
             //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
-            s = new VCRuleBackedStat(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
+            s = new VCCall(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
         }
         stats.put(ctx, s);
     }
@@ -532,6 +533,38 @@ public class ModelBuilderProto extends ResolveBaseListener {
             //            p.getDeclaredType(), p.getName()));
         }
         return resultingAssumptions;
+    }
+
+    private void confirmParameterConsequentsForBlock(VCAssertiveBlockBuilder block, ProgParameterSymbol p) {
+        PExp incParamExp = new PSymbolBuilder(p.asPSymbol()).incoming(true).build();
+        PExp paramExp = new PSymbolBuilder(p.asPSymbol()).incoming(false).build();
+
+        if (p.getDeclaredType() instanceof ProgNamedType) {
+            ProgNamedType t = (ProgNamedType) p.getDeclaredType();
+            PExp exemplar = new PSymbolBuilder(t.getExemplarName()).mathClssfctn(t.toMath()).build();
+
+            if (t instanceof PTRepresentation) {
+                ProgReprTypeSymbol repr = ((PTRepresentation) t).getReprTypeSymbol();
+
+                PExp convention = repr.getConvention();
+                PExp corrFnExp = repr.getCorrespondence();
+                //if we're doing this its going to be on a procedure decl or op-proc decl, so just
+                //say block.definingTree
+                block.confirm(block.definingTree,
+                        convention.substitute(t.getExemplarAsPSymbol(), paramExp), "Convention for " + t.getName());
+            }
+            if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
+                PExp equalsExp = g.formEquals(paramExp, incParamExp);
+                block.confirm(block.definingTree,
+                        equalsExp, "Ensure 'restores' mode parameter " + p.getName() + " is restored");
+            }
+            else if (p.getMode() == ParameterMode.CLEARS) {
+                PExp init = ((ProgNamedType) p.getDeclaredType())
+                        .getInitializationEnsures()
+                        .substitute(exemplar, paramExp);
+                //result.add(init);
+            }
+        }
     }
 
     private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {

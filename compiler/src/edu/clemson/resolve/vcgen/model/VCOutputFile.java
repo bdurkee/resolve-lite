@@ -60,7 +60,7 @@ public class VCOutputFile extends OutputModelObject {
             //so we actually do args.get(1) to get the first arg (lhs)
 
             //TODO: try this once we get some output in the IDE, instead of returning 't' in getLocationToken(), just use
-            //The definingContext.getStart().. That way the confirm wouldn't need to take a Token.., just a description.
+            //The definingContext.getStart().. That way the confirm wouldn't need to take a Token.., just a vcExplanation.
             VC curVC = new VC(batchedConfirm.getLocationToken(), sectionNumber + "_" + vcIndex,
                     batchedConfirm.getExplanation(), args.get(1), args.get(2));
             if (args.get(2).isObviouslyTrue()) continue;

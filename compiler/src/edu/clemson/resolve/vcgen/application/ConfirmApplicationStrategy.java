@@ -6,17 +6,12 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
-public class ConfirmApplicationStrategy
-        implements
-        VCStatRuleApplicationStrategy<VCConfirm> {
+public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy<VCConfirm> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCConfirm stat) {
-        PExp e = block.g.formConjunct(stat.getStatComponents().get(0),
-                block.finalConfirm.getConfirmExp());
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCConfirm stat) {
+        PExp e = block.g.formConjunct(stat.getStatComponents().get(0), block.finalConfirm.getConfirmExp());
         block.finalConfirm(e);
         return block.snapshot();
     }

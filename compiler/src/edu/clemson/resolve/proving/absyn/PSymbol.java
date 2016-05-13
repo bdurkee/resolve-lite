@@ -15,7 +15,7 @@ import java.util.*;
  * Represents a reference to a named element such as a variable, constant, or function.
  * <p>
  * Specifically, if this refers to a <em>name</em> of a funtion, then this instance represents a typed -- possibly
- * qualified -- first-class reference to some function, independent of any supplied arguments.</p>
+ * qualified -- reference, independent of any supplied arguments (this is what {@link PApply} is for).</p>
  */
 public class PSymbol extends PExp {
 
@@ -38,7 +38,8 @@ public class PSymbol extends PExp {
      * @param builder a 'buildable' version of {@code PSymbol}
      */
     private PSymbol(PSymbolBuilder builder) {
-        super(calculateHashes(builder.name), builder.mathType, builder.progType);
+        super(calculateHashes(builder.name), builder.mathType, builder.progType,
+                builder.vcLocation, builder.vcExplanation);
         this.qualifier = builder.qualifier;
         this.name = builder.name;
         this.leftPrint = builder.lprint;
@@ -130,7 +131,7 @@ public class PSymbol extends PExp {
     @NotNull
     public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        DumbMathClssftnHandler g = getMathType().getTypeGraph();
+        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
         result.add(g.formImplies(assumptions, this));
         return result;
     }
@@ -144,6 +145,11 @@ public class PSymbol extends PExp {
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
+    }
+
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PSymbolBuilder(this).vcInfo(location, explanation).build();
     }
 
     @Override
@@ -255,6 +261,8 @@ public class PSymbol extends PExp {
         protected Quantification quantification = Quantification.NONE;
         protected MathClassification mathType, mathTypeValue;
         protected ProgType progType, progTypeValue;
+        protected Token vcLocation;
+        protected String vcExplanation;
 
         public PSymbolBuilder(PSymbol existingPSymbol) {
             this.name = existingPSymbol.getName();
@@ -265,8 +273,11 @@ public class PSymbol extends PExp {
             this.incoming = existingPSymbol.isIncoming();
             this.quantification = existingPSymbol.getQuantification();
 
-            this.mathType = existingPSymbol.getMathType();
+            this.mathType = existingPSymbol.getMathClssftn();
             this.progType = existingPSymbol.getProgType();
+
+            this.vcLocation = existingPSymbol.getVCLocation();
+            this.vcExplanation = existingPSymbol.getVCExplanation();
         }
 
         public PSymbolBuilder(PSymbol existingPSymbol, String newName) {
@@ -278,7 +289,7 @@ public class PSymbol extends PExp {
             this.incoming = existingPSymbol.isIncoming();
             this.quantification = existingPSymbol.getQuantification();
 
-            this.mathType = existingPSymbol.getMathType();
+            this.mathType = existingPSymbol.getMathClssftn();
             this.progType = existingPSymbol.getProgType();
         }
 
@@ -309,6 +320,12 @@ public class PSymbol extends PExp {
 
         public PSymbolBuilder name(String name) {
             this.name = name;
+            return this;
+        }
+
+        public PSymbolBuilder vcInfo(@Nullable Token vcLocation, @Nullable String vcExplanation) {
+            this.vcLocation = vcLocation;
+            this.vcExplanation = vcExplanation;
             return this;
         }
 

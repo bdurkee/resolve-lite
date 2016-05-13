@@ -4,6 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.Quantification;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -227,11 +228,9 @@ public class PApply extends PExp {
                     .collect(Collectors.toList());
             result = new PApplyBuilder(functionPortion.substitute(substitutions))
                     .style(displayStyle)
-                    .applicationType(getMathType())
+                    .applicationType(getMathClssftn())
                     .arguments(args).build();
         }
-        result.setVCStartAndStop(start, stop);  //ugly, but can't really think of much of an easier way..
-        result.setVCDescription(description);
         return result;
     }
 
@@ -292,10 +291,15 @@ public class PApply extends PExp {
         }
     }
 
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PApplyBuilder(functionPortion).vcInfo(location, explanation).build();
+    }
+
     @NotNull
     public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        DumbMathClssftnHandler g = getMathType().getTypeGraph();
+        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
         if (getCanonicalName().equals("and")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
@@ -320,7 +324,7 @@ public class PApply extends PExp {
     public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
-                .applicationType(getMathType())
+                .applicationType(getMathClssftn())
                 .style(displayStyle).build();
     }
 
@@ -329,7 +333,7 @@ public class PApply extends PExp {
     public PExp withQuantifiersFlipped() {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
-                .applicationType(getMathType())
+                .applicationType(getMathClssftn())
                 .style(displayStyle).build();
     }
 
@@ -454,10 +458,28 @@ public class PApply extends PExp {
 
         protected final PExp functionPortion;
         protected final List<PExp> arguments = new ArrayList<>();
+        protected Token vcLocation;
+        protected String vcExplanation;
 
         protected MathClassification applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
         protected boolean bracketApp = false;
+
+        /**
+         * Constructor for converting an existing function application back into a buildable format. This is useful
+         * for adding (or editing) some information in an existing {@link PApply} instance.
+         *
+         * @param e The existing application.
+         */
+        public PApplyBuilder(@NotNull PApply e) {
+            this.functionPortion = e.functionPortion;
+            this.arguments.addAll(e.arguments);
+            this.applicationType = e.getMathClssftn();
+            this.bracketApp = e.isBracketBasedApp;
+            this.displayStyle = e.getDisplayStyle();
+            this.vcLocation = e.getVCLocation();
+            this.vcExplanation = e.getVCExplanation();
+        }
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
             this.functionPortion = functionPortion;
@@ -482,6 +504,12 @@ public class PApply extends PExp {
 
         public PApplyBuilder applicationType(@Nullable MathClassification type) {
             this.applicationType = type;
+            return this;
+        }
+
+        public PApplyBuilder vcInfo(@Nullable Token vcLocation, @Nullable String vcExplanation) {
+            this.vcLocation = vcLocation;
+            this.vcExplanation = vcExplanation;
             return this;
         }
 

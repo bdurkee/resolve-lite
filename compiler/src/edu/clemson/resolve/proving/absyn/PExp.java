@@ -23,16 +23,17 @@ public abstract class PExp {
 
     /**
      * These fields are primarily for the {@link edu.clemson.resolve.vcgen.VCGenerator}; display requires certain
-     * information about where this {@link PExp} starts and stops in a file (for highlighting purposes) as well as its
-     * textual description (for example, "ensures clause of operation: Foo")
+     * information about where this {@link PExp} stands in a file (with relation to VC gen) as well as its
+     * textual vcExplanation (for example, "ensures clause of operation: Foo")
      */
     @Nullable
-    public Token start, stop;
-    public String description;
+    private final Token vcLocation;
+    @Nullable
+    private final String vcExplanation;
 
     public final int structureHash, valueHash;
 
-    /** Backing field for {@link #getMathType()} */
+    /** Backing field for {@link #getMathClssftn()} */
     private final MathClassification type;
 
     /**
@@ -51,6 +52,11 @@ public abstract class PExp {
         this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType,
+                @Nullable Token vcLocation, @Nullable String vcExplanation) {
+        this(hashes.structureHash, hashes.valueHash, type, progType, vcLocation, vcExplanation);
+    }
+
     public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType) {
         this(hashes.structureHash, hashes.valueHash, type, progType);
     }
@@ -60,10 +66,17 @@ public abstract class PExp {
     }
 
     public PExp(int structureHash, int valueHash, @NotNull MathClassification type, @Nullable ProgType progType) {
+        this(structureHash, valueHash, type, progType, null, null);
+    }
+
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
+                @Nullable ProgType progType, @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this.type = type;
         this.progType = progType;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
+        this.vcLocation = vcLocation;
+        this.vcExplanation = vcExplanation;
     }
 
     @Override
@@ -77,7 +90,7 @@ public abstract class PExp {
     }
 
     @NotNull
-    public final MathClassification getMathType() {
+    public final MathClassification getMathClssftn() {
         return type;
     }
 
@@ -149,7 +162,7 @@ public abstract class PExp {
      * @see PExp#typeMatches(MathClassification)
      */
     public boolean typeMatches(PExp other) {
-        return typeMatches(other.getMathType());
+        return typeMatches(other.getMathClssftn());
     }
 
     public abstract void accept(PExpListener v);
@@ -282,7 +295,7 @@ public abstract class PExp {
      */
     @NotNull
     public List<PExp> split() {
-        return split(getMathType().getTypeGraph().getTrueExp());
+        return split(getMathClssftn().getTypeGraph().getTrueExp());
     }
 
     /**
@@ -303,14 +316,15 @@ public abstract class PExp {
 
     protected abstract void splitIntoConjuncts(@NotNull List<PExp> accumulator);
 
-    public void setVCStartAndStop(@Nullable Token start, @Nullable Token stop) {
-        this.start = start;
-        this.stop = stop;
+    @Nullable public Token getVCLocation() {
+        return vcLocation;
     }
 
-    public void setVCDescription(String description) {
-        this.description = description;
+    @Nullable public String getVCExplanation() {
+        return vcExplanation;
     }
+
+    public abstract PExp withVCInfo(@Nullable Token location, @Nullable String explanation);
 
     /**
      * Returns a new version of this {@code PExp} where all occurences of the

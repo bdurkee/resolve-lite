@@ -84,12 +84,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        public VCAssertiveBlockBuilder finalConfirm(PExp confirm, String explanation) {
+        public VCAssertiveBlockBuilder finalConfirm(ParserRuleContext ctx, PExp confirm, String explanation) {
             if (confirm == null) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
-            this.finalConfirm = new VCConfirm(definingTree, this, explanation, confirm);
+            this.finalConfirm = new VCConfirm(ctx, this, explanation, confirm);
             return this;
+        }
+
+        public VCAssertiveBlockBuilder finalConfirm(PExp confirm, String explanation) {
+            return finalConfirm(definingTree, confirm, explanation);
         }
 
         public VCAssertiveBlockBuilder finalConfirm(PExp confirm) {

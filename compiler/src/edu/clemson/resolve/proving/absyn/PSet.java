@@ -1,8 +1,10 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.MathClassification;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -12,8 +14,16 @@ public class PSet extends PExp {
     private final List<PExp> elements = new ArrayList<>();
 
     //TODO: Give me a real HashDuple (one based on my actual elements!)
-    public PSet(MathClassification type, List<PExp> elements) {
+    public PSet(@NotNull MathClassification type, @NotNull List<PExp> elements) {
         super(new HashDuple(0, 56), type);
+        this.elements.addAll(elements);
+    }
+
+    public PSet(@NotNull MathClassification type,
+                @NotNull List<PExp> elements,
+                @Nullable Token vcLocation,
+                @Nullable String vcExplanation) {
+        super(new HashDuple(0, 56), type, null, vcLocation, vcExplanation);
         this.elements.addAll(elements);
     }
 
@@ -39,7 +49,7 @@ public class PSet extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        return new PSet(getMathType(), Utils.apply(elements, u -> u.substitute(substitutions)));
+        return new PSet(getMathClssftn(), Utils.apply(elements, u -> u.substitute(substitutions)));
     }
 
     @Override
@@ -93,10 +103,15 @@ public class PSet extends PExp {
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
     }
 
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return null;
+    }
+
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PSet(getMathType(),
+        return new PSet(getMathClssftn(),
                 Utils.apply(elements, PExp::withIncomingSignsErased));
     }
 
