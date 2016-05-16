@@ -1,0 +1,9 @@
+Facility T2;
+    uses Standard_Integers;
+
+    Operation Do_Nothing (restores I : Std_Ints :: Integer);
+        Procedure
+            Std_Integer_Fac :: Increment(I);
+            Std_Integer_Fac :: Decrement(I);
+    end Do_Nothing;
+end T2;

@@ -33,7 +33,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 ST x = gen.generateAssertions();
                 System.out.println(x.render());
 
-                 List<VC> proverInput = vcs.getFinalVCs();
+                List<VC> proverInput = vcs.getFinalVCs();
+
             }
         }
     }

@@ -2,14 +2,14 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
-import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
-import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VCOutputFile extends OutputModelObject {
 
@@ -40,6 +40,17 @@ public class VCOutputFile extends OutputModelObject {
         assertiveBatchCt++;
     }
 
+    public Map<Integer, List<VC>> getVCsGroupedByLineNumber() {
+        Map<Integer, List<VC>> result = new LinkedHashMap<>();
+        for (VC vc : finalVcs) {
+            VC.VCInfo consequentInfo = vc.getConsequentInfo();
+            int line = consequentInfo.location.getLine();
+            result.putIfAbsent(line, new ArrayList<>());
+            result.get(line).add(vc);
+        }
+        return result;
+    }
+
     /**
      * Each {@code AssertiveBlock} contains a set of VCs that refer to the same set of free variables.  This method
      * adds each {@code VC} to the final list.
@@ -68,6 +79,8 @@ public class VCOutputFile extends OutputModelObject {
             vcIndex++;
         }
     }
+
+
 
 
 }

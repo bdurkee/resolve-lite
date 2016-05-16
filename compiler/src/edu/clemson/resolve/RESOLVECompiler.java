@@ -75,6 +75,7 @@ public class RESOLVECompiler {
     public String genCode;
     public String genPackage = null;
     public boolean log = false;
+    public boolean printEnv = false;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
@@ -83,7 +84,8 @@ public class RESOLVECompiler {
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
-            new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log")
+            new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
+            new Option("printEnv", "-env", "print path variables")
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
@@ -226,6 +228,14 @@ public class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
+        if (printEnv) {
+            info("$RESOLVEROOT=" + System.getenv("RESOLVEROOT"));
+            Map<String, String> x = System.getenv();
+            for (String o : x.keySet()) {
+                info("key=" + o + ", " + "value=" + x.get(o));
+            }
+            info("core lib directory @: " + getCoreLibraryDirectory());
+        }
         commandlineTargets.addAll(parseAndReturnRootModules());
         List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
         processCommandLineTargets(targets);
@@ -370,8 +380,8 @@ public class RESOLVECompiler {
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
             //well, let's try the core libraries then
-            String stdSrcsPath = getStdSourcesPath();
-            Files.walkFileTree(new File(getStdSourcesPath()).toPath(), l);
+            String stdSrcsPath = getCoreLibraryDirectory();
+            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
             result = l.getFile();
         }
         return result;
@@ -414,20 +424,9 @@ public class RESOLVECompiler {
     public static String getCoreLibraryDirectory() {
         String rootDir = System.getenv("RESOLVEROOT");
         if (rootDir == null) {
-            return ".";
+            return "./";
         }
         return rootDir;
-    }
-
-    @NotNull
-    public static String getStdSourcesPath() {
-        String rootDir = getCoreLibraryDirectory();
-        return getCoreLibraryDirectory() + getCoreLibraryName();
-    }
-
-    @NotNull
-    public static String getCoreLibraryName() {
-        return "src";
     }
 
     /**
