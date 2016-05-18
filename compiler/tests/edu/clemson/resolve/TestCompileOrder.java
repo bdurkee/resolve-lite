@@ -22,31 +22,31 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test
-    public void testTrivialOrdering() throws Exception {
-        String[] modules = new String[]{
-                "Precis T;\n end T;",
-        };
-        String expected = "populating: T";
-        writeModules(modules, "T");
-        testOrdering(expected, "T");
-    }
+    /*    @Test
+        public void testTrivialOrdering() throws Exception {
+            String[] modules = new String[]{
+                    "Precis T;\n end T;",
+            };
+            String expected = "populating: T";
+            writeModules(modules, "T");
+            testOrdering(expected, "T");
+        }
 
-    @Test
-    public void testTrivialOrdering2() throws Exception {
-        String[] modules = new String[]{
-                "Precis T;\n uses U;\n end T;",
-                "Precis U;\n end U;",
-        };
-        String expected = "populating: U\npopulating: T";
-        writeModules(modules, "T", "U");
-        testOrdering(expected, "T");
-    }
-
+        @Test
+        public void testTrivialOrdering2() throws Exception {
+            String[] modules = new String[]{
+                    "Precis T;\n uses U;\n end T;",
+                    "Precis U;\n end U;",
+            };
+            String expected = "populating: U\npopulating: T";
+            writeModules(modules, "T", "U");
+            testOrdering(expected, "T");
+        }
+    */
     //Todo: When facilities, enhancements, and other constructs are
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.
-    private void testOrdering(String expected, String root) {
+    public void testOrdering(String expected, String root) {
         ErrorQueue e = resolve(root + RESOLVECompiler.FILE_EXTENSION, false);
         LogManager l = e.compiler.logMgr;
         List<String> msgs = Utils.apply(l.getRecords(), LogManager.Record::getMsg);

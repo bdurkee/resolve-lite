@@ -301,7 +301,7 @@ public class Utils {
      */
     @NotNull
     public static String groomFileName(@NotNull String name) {
-        int start = name.lastIndexOf("/");
+        int start = name.lastIndexOf(File.separatorChar);
         if (start == -1) {
             return name;
         }
