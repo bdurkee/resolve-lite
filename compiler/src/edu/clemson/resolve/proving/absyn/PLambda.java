@@ -1,9 +1,12 @@
 package edu.clemson.resolve.proving.absyn;
 
+import edu.clemson.resolve.misc.Utils;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.MathFunctionClassification;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.MathInvalidClassification;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,12 +18,19 @@ public class PLambda extends PExp {
     @NotNull
     private final PExp body;
 
+    public PLambda(@NotNull List<MathSymbolDeclaration> parameters, @NotNull PExp body) {
+        this(parameters, body, null, null);
+    }
+
     public PLambda(@NotNull List<MathSymbolDeclaration> parameters,
-                   @NotNull PExp body) {
+                   @NotNull PExp body,
+                   @Nullable Token vcLocation,
+                   @Nullable String vcExplanation) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MathFunctionClassification(body.getMathType()
-                        .getTypeGraph(), body.getMathType(), parameters.stream()
-                        .map(p -> p.type).collect(Collectors.toList())), null);
+                new MathFunctionClassification(body.getMathClssftn().getTypeGraph(), body.getMathClssftn(),
+                        Utils.apply(parameters, p -> p.type)), null,
+                vcLocation,
+                vcExplanation);
         this.parameters.addAll(parameters);
         this.body = body;
     }
@@ -55,7 +65,8 @@ public class PLambda extends PExp {
             result = substitutions.get(this);
         }
         else {
-            result = new PLambda(parameters, body.substitute(substitutions));
+            result = new PLambda(parameters, body.substitute(substitutions),
+                    getVCLocation(), getVCExplanation());
         }
         return result;
     }
@@ -82,8 +93,7 @@ public class PLambda extends PExp {
     }
 
     public List<PExp> getParametersAsPExps() {
-        return parameters.stream().map(p -> new PSymbol.PSymbolBuilder(p.name)
-                .mathType(p.type).build()).collect(Collectors.toList());
+        return Utils.apply(parameters, MathSymbolDeclaration::asPSymbol);
     }
 
     public List<MathSymbolDeclaration> getParameters() {
@@ -108,6 +118,11 @@ public class PLambda extends PExp {
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
+    }
+
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PLambda(parameters, body, location, explanation);
     }
 
     @NotNull
@@ -146,7 +161,7 @@ public class PLambda extends PExp {
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
         List<PExp> bodyFunctions = new LinkedList<>(body.getFunctionApplications());
-        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathType(getMathType()).build());
+        bodyFunctions.add(new PSymbol.PSymbolBuilder("lambda").mathClssfctn(getMathClssftn()).build());
         return bodyFunctions;
     }
 
@@ -167,7 +182,7 @@ public class PLambda extends PExp {
         }
 
         public PSymbol asPSymbol() {
-            return new PSymbol.PSymbolBuilder(name).mathType(type).build();
+            return new PSymbol.PSymbolBuilder(name).mathClssfctn(type).build();
         }
 
         @Override

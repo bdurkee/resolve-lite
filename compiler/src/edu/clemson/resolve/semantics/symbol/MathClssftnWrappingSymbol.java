@@ -5,7 +5,7 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
@@ -14,16 +14,16 @@ import java.util.*;
 public class MathClssftnWrappingSymbol extends Symbol {
 
     private MathClassification classification;
-    private final DumbTypeGraph g;
+    private final DumbMathClssftnHandler g;
     private final Quantification q;
 
-    public MathClssftnWrappingSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                      @NotNull MathClassification classification) {
         this(g, name, Quantification.NONE, classification, null,
                 ModuleIdentifier.GLOBAL);
     }
 
-    public MathClssftnWrappingSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                      @NotNull MathClassification classification,
                                      @Nullable ParserRuleContext definingTree,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
@@ -31,7 +31,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
                 moduleIdentifier);
     }
 
-    public MathClssftnWrappingSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                      @NotNull Quantification q,
                                      @NotNull MathClassification classification,
                                      @Nullable ParserRuleContext definingTree,

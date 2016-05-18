@@ -3,7 +3,7 @@ package edu.clemson.resolve.semantics.symbol;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import edu.clemson.resolve.semantics.Quantification;
@@ -21,7 +21,7 @@ public class TheoremSymbol extends Symbol {
     @NotNull
     private MathClssftnWrappingSymbol mathSymbolAlterEgo;
 
-    public TheoremSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public TheoremSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                          @NotNull PExp theoremAssertion,
                          @Nullable ParserRuleContext definingTree,
                          @NotNull ModuleIdentifier moduleIdentifier) {

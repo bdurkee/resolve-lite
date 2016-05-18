@@ -1,7 +1,7 @@
 package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
@@ -21,9 +21,9 @@ public class ProgTypeSymbol extends Symbol {
     @NotNull
     protected final MathClssftnWrappingSymbol mathTypeAlterEgo;
     @NotNull
-    protected final DumbTypeGraph g;
+    protected final DumbMathClssftnHandler g;
 
-    public ProgTypeSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public ProgTypeSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                           @NotNull ProgType progType,
                           @Nullable MathClassification modelType,
                           @Nullable ParserRuleContext definingTree,
@@ -61,7 +61,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull
     public PSymbol asPSymbol() {
-        return new PSymbol.PSymbolBuilder(getName()).mathType(getModelType())
+        return new PSymbol.PSymbolBuilder(getName()).mathClssfctn(getModelType())
                 .build();
     }
 

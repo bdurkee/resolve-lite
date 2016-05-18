@@ -20,14 +20,14 @@ public class ScopeBuilder extends SyntacticScope {
     @NotNull
     protected final List<ScopeBuilder> children = new ArrayList<>();
     @NotNull
-    private final DumbTypeGraph typeGraph;
+    private final DumbMathClssftnHandler typeGraph;
 
     //We definitely want a linkedHashMap here for the bindings to preserve the order
     //in which entries were added to the table. Though it shouldn't necessarily
     //matter. It just does currently because of the way we grab lists of
     //formal parameters (from scope) for functions before we insert the
     //completed sym into the table.
-    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull DumbTypeGraph g,
+    ScopeBuilder(@NotNull MathSymbolTable s, @NotNull DumbMathClssftnHandler g,
                  @Nullable ParserRuleContext definingTree,
                  @NotNull Scope parent,
                  @NotNull ModuleIdentifier moduleIdentifier) {

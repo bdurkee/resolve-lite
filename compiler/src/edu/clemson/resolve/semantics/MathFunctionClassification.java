@@ -19,19 +19,19 @@ public class MathFunctionClassification extends MathClassification {
 
     private final FunctionApplicationFactory applicationFactory;
 
-    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                       @NotNull MathClassification range,
                                       @NotNull MathClassification... paramTypes) {
         this(g, range, Arrays.asList(paramTypes));
     }
 
-    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                       @NotNull MathClassification range,
                                       @NotNull List<MathClassification> paramTypes) {
         this(g, DEFAULT_FACTORY, range, paramTypes);
     }
 
-    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                       @NotNull MathClassification range,
                                       @NotNull List<String> paramNames,
                                       @NotNull List<MathClassification> paramTypes) {
@@ -39,14 +39,14 @@ public class MathFunctionClassification extends MathClassification {
     }
 
 
-    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                       @Nullable FunctionApplicationFactory apply,
                                       @NotNull MathClassification range,
                                       @NotNull MathClassification... paramTypes) {
         this(g, apply, range, Arrays.asList(paramTypes));
     }
 
-    public MathFunctionClassification(@NotNull DumbTypeGraph g,
+    public MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                       @Nullable FunctionApplicationFactory apply,
                                       @NotNull MathClassification range,
                                       @NotNull List<MathClassification> paramTypes) {
@@ -54,7 +54,7 @@ public class MathFunctionClassification extends MathClassification {
                 paramTypes);
     }
 
-    private MathFunctionClassification(@NotNull DumbTypeGraph g,
+    private MathFunctionClassification(@NotNull DumbMathClssftnHandler g,
                                        @Nullable FunctionApplicationFactory applyFactory,
                                        @NotNull MathClassification range,
                                        @NotNull List<String> paramNames,
@@ -74,7 +74,7 @@ public class MathFunctionClassification extends MathClassification {
         this.typeRefDepth = range.typeRefDepth;
     }
 
-    public static MathClassification buildParameterType(DumbTypeGraph g,
+    public static MathClassification buildParameterType(DumbMathClssftnHandler g,
                                                         List<String> paramNames,
                                                         List<MathClassification> paramTypes) {
 
@@ -265,7 +265,7 @@ public class MathFunctionClassification extends MathClassification {
 
         @Override
         public MathClassification buildFunctionApplication(
-                @NotNull DumbTypeGraph g, @NotNull MathFunctionClassification f,
+                @NotNull DumbMathClssftnHandler g, @NotNull MathFunctionClassification f,
                 @NotNull String calledAsName,
                 @NotNull List<MathClassification> arguments) {
             return new MathFunctionApplicationClassification(g, f, calledAsName, arguments);

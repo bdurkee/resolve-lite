@@ -7,7 +7,7 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 import edu.clemson.resolve.semantics.symbol.ProgReprTypeSymbol;
 import edu.clemson.resolve.semantics.symbol.TypeModelSymbol;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,7 +31,7 @@ public class PTRepresentation extends ProgNamedType {
     private final TypeModelSymbol family;
     private ProgReprTypeSymbol repr;
 
-    public PTRepresentation(@NotNull DumbTypeGraph g,
+    public PTRepresentation(@NotNull DumbMathClssftnHandler g,
                             @NotNull ProgType baseType,
                             @NotNull String name,
                             @Nullable TypeModelSymbol family,

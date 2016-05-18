@@ -15,7 +15,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     private final Set<ModuleIdentifier> locallyInheritedModules =
             new LinkedHashSet<>();
 
-    ModuleScopeBuilder(@NotNull DumbTypeGraph g, @NotNull Token name,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull Token name,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {

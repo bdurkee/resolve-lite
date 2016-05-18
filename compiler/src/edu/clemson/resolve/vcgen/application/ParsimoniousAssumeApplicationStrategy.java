@@ -8,15 +8,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ParsimoniousAssumeApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCAssume> {
+public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCAssume stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
         PExp RP = block.finalConfirm.getConfirmExp();
 

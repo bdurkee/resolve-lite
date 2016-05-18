@@ -1,6 +1,8 @@
 package edu.clemson.resolve.proving.absyn;
 
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -11,7 +13,17 @@ public class PSelector extends PExp {
     private final PExp left, right;
 
     public PSelector(@NotNull PExp left, @NotNull PExp right) {
-        super(left.structureHash * 72, right.structureHash * 36, right.getMathType(), right.getProgType());
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(), right.getProgType());
+        this.left = left;
+        this.right = right;
+    }
+
+    public PSelector(@NotNull PExp left,
+                     @NotNull PExp right,
+                     @Nullable Token vcLocation,
+                     @Nullable String vcExplanation) {
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(),
+                right.getProgType(), vcLocation, vcExplanation);
         this.left = left;
         this.right = right;
     }
@@ -32,15 +44,13 @@ public class PSelector extends PExp {
 
     @NotNull
     @Override
-    public PExp substitute(
-            @NotNull Map<PExp, PExp> substitutions) {
+    public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
         PExp result;
         if (substitutions.containsKey(this)) {
             result = substitutions.get(this);
         }
         else {
-            result = new PSelector(left.substitute(substitutions),
-                    right.substitute(substitutions));
+            result = new PSelector(left.substitute(substitutions), right.substitute(substitutions));
         }
         return result;
     }
@@ -76,16 +86,19 @@ public class PSelector extends PExp {
     }
 
     @Override
-    protected void splitIntoConjuncts(
-            @NotNull List<PExp> accumulator) {
+    protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
+    }
+
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PSelector(left, right, location, explanation);
     }
 
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PSelector(left.withIncomingSignsErased(),
-                right.withIncomingSignsErased());
+        return new PSelector(left.withIncomingSignsErased(), right.withIncomingSignsErased());
     }
 
     //shouldn't be any quantifiers in a dot expr
@@ -99,8 +112,7 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public Set<PSymbol> getIncomingVariablesNoCache() {
-        Set<PSymbol> result =
-                new LinkedHashSet<>(left.getIncomingVariables());
+        Set<PSymbol> result = new LinkedHashSet<>(left.getIncomingVariables());
         result.addAll(right.getIncomingVariables());
         return result;
     }
@@ -108,8 +120,7 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public Set<PSymbol> getQuantifiedVariablesNoCache() {
-        Set<PSymbol> result =
-                new LinkedHashSet<>(left.getQuantifiedVariables());
+        Set<PSymbol> result = new LinkedHashSet<>(left.getQuantifiedVariables());
         result.addAll(right.getQuantifiedVariables());
         return result;
     }
@@ -117,8 +128,7 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
-        List<PExp> result =
-                new LinkedList<>(left.getFunctionApplications());
+        List<PExp> result = new LinkedList<>(left.getFunctionApplications());
         result.addAll(right.getFunctionApplications());
         return result;
     }
@@ -134,8 +144,7 @@ public class PSelector extends PExp {
     // intersection right? Why is it we only consider the entire string? Is
     // there some mathematical justification for that?
     @Override
-    protected Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
         result.add(this.getCanonicalName());
         return result;
@@ -151,8 +160,7 @@ public class PSelector extends PExp {
     public boolean equals(Object o) {
         boolean result = (o instanceof PSelector);
         if (result) {
-            result = left.equals(((PSelector) o).left) &&
-                    right.equals(((PSelector) o).right);
+            result = left.equals(((PSelector) o).left) && right.equals(((PSelector) o).right);
         }
         return result;
     }

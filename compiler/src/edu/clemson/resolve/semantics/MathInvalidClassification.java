@@ -5,9 +5,9 @@ import java.util.WeakHashMap;
 
 public class MathInvalidClassification extends MathClassification {
 
-    private static WeakHashMap<DumbTypeGraph, MathInvalidClassification> instances = new WeakHashMap<>();
+    private static WeakHashMap<DumbMathClssftnHandler, MathInvalidClassification> instances = new WeakHashMap<>();
 
-    public static MathInvalidClassification getInstance(DumbTypeGraph g) {
+    public static MathInvalidClassification getInstance(DumbMathClssftnHandler g) {
         MathInvalidClassification result = instances.get(g);
         if (result == null) {
             result = new MathInvalidClassification(g);
@@ -20,7 +20,7 @@ public class MathInvalidClassification extends MathClassification {
         return "Invalid";
     }
 
-    private MathInvalidClassification(DumbTypeGraph g) {
+    private MathInvalidClassification(DumbMathClssftnHandler g) {
         super(g, null);
     }
 

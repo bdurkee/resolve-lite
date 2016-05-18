@@ -2,6 +2,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathClassification;
@@ -11,33 +12,35 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 import java.util.*;
 
 /**
- * This class represents the root of the prover abstract syntax tree (AST)
- * hierarchy.
+ * This class represents the root of the prover abstract syntax tree (AST) hierarchy.
  * <p>
- * Unlike previous expression hierarchies used by the compiler, {@code PExp}s are
- * immutable and exist without the complications introduced by control
- * structures. And while {@code PExp}s technically exist to represent
- * <em>only</em> mathematical expressions, realize that many 'programmatic'
- * ones such as calls are also converted into {@code PExp}s for vc generation
- * purposes.</p>
+ * Unlike previous expression hierarchies used by the compiler, {@code PExp}s are immutable and exist without the
+ * complications introduced by control structures. And while {@code PExp}s technically exist to represent <em>only</em>
+ * mathematical expressions, realize that many 'programmatic' ones such as calls are also converted into {@code PExp}s
+ * for vc generation purposes.</p>
  */
 public abstract class PExp {
 
-    public final int structureHash;
-    public final int valueHash;
-
     /**
-     * Backing field for {@link #getMathType()}
+     * These fields are primarily for the {@link edu.clemson.resolve.vcgen.VCGenerator}; display requires certain
+     * information about where this {@link PExp} stands in a file (with relation to VC gen) as well as its
+     * textual vcExplanation (for example, "ensures clause of operation: Foo")
      */
+    @Nullable
+    private final Token vcLocation;
+    @Nullable
+    private final String vcExplanation;
+
+    public final int structureHash, valueHash;
+
+    /** Backing field for {@link #getMathClssftn()} */
     private final MathClassification type;
 
     /**
-     * Since the removal of the Exp hierarchy, the role of {@code PExps} has
-     * expanded considerably.
+     * Since the removal of the Exp hierarchy, the role of {@code PExps} has expanded considerably.
      * <p>
-     * So in other words, if this {@code PExp} was born out of a
-     * programmatic expression (for vcgen), program type info should be
-     * present, if not, then these should/will be {@code null}.</p>
+     * So in other words, if this {@code PExp} was born out of a programmatic expression (for vcgen), program type info
+     * should be present, if not, then these should/will be {@code null}.</p>
      */
     private final ProgType progType;
 
@@ -49,8 +52,12 @@ public abstract class PExp {
         this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type,
-                @Nullable ProgType progType) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType,
+                @Nullable Token vcLocation, @Nullable String vcExplanation) {
+        this(hashes.structureHash, hashes.valueHash, type, progType, vcLocation, vcExplanation);
+    }
+
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType) {
         this(hashes.structureHash, hashes.valueHash, type, progType);
     }
 
@@ -58,12 +65,18 @@ public abstract class PExp {
         this(structureHash, valueHash, type, null);
     }
 
+    public PExp(int structureHash, int valueHash, @NotNull MathClassification type, @Nullable ProgType progType) {
+        this(structureHash, valueHash, type, progType, null, null);
+    }
+
     public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
-                @Nullable ProgType progType) {
+                @Nullable ProgType progType, @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this.type = type;
         this.progType = progType;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
+        this.vcLocation = vcLocation;
+        this.vcExplanation = vcExplanation;
     }
 
     @Override
@@ -77,7 +90,7 @@ public abstract class PExp {
     }
 
     @NotNull
-    public final MathClassification getMathType() {
+    public final MathClassification getMathClssftn() {
         return type;
     }
 
@@ -91,10 +104,8 @@ public abstract class PExp {
     }
 
     /**
-     * Returns a new {@code PExp} whose subexpressions appearing in
-     * {@code currents} are substituted by those in {@code repls}. In order to
-     * call this, it must be the case that
-     * {@code currents.size() == repls.size()}.
+     * Returns a new {@code PExp} whose subexpressions appearing in {@code currents} are substituted by those in
+     * {@code repls}. In order to call this, it must be the case that {@code currents.size() == repls.size()}.
      *
      * @param currents a list of sub-expressions to be substituted (replaced)
      * @param repls    a list of replacement {@code PExp}s.
@@ -102,18 +113,16 @@ public abstract class PExp {
      * @return the {@code PExp} with substitutions made
      */
     @NotNull
-    public PExp substitute(@NotNull List<PExp> currents,
-                           @NotNull List<PExp> repls) {
+    public PExp substitute(@NotNull List<PExp> currents, @NotNull List<PExp> repls) {
         if (currents.size() != repls.size()) {
-            throw new IllegalArgumentException("substitution lists must be"
-                    + "the same length");
+            throw new IllegalArgumentException("substitution lists must be the same length");
         }
         return substitute(Utils.zip(currents, repls));
     }
 
     /**
-     * Returns {@code true} if the provided {@code substitutions} have no
-     * affect on {@code this} expression; {@code false} otherwise.
+     * Returns {@code true} if the provided {@code substitutions} have no affect on {@code this} expression;
+     * {@code false} otherwise.
      *
      * @param substitutions substitutions to make
      *
@@ -137,8 +146,8 @@ public abstract class PExp {
     }
 
     /**
-     * Returns true if the {@link MathClassification} of this expression matches
-     * (or is a subtype) of {@code other}; {@code false} otherwise.
+     * Returns true if the {@link MathClassification} of this expression matches (or is a subtype) of {@code other};
+     * {@code false} otherwise.
      *
      * @param other some {@code MathClassification}.
      *
@@ -153,32 +162,29 @@ public abstract class PExp {
      * @see PExp#typeMatches(MathClassification)
      */
     public boolean typeMatches(PExp other) {
-        return typeMatches(other.getMathType());
+        return typeMatches(other.getMathClssftn());
     }
 
     public abstract void accept(PExpListener v);
 
     /**
-     * Substitutes all occurences of the subexpressions matching those defined
-     * in {@code substitutions.keyset()} with the corresponding {@code PExp}
-     * defined by the map, returning a new (substituted) {@code PExp}.
+     * Substitutes all occurences of the subexpressions matching those defined in {@code substitutions.keyset()} with
+     * the corresponding {@code PExp} defined by the map, returning a new (substituted) {@code PExp}.
      *
      * @param substitutions map like {@code existing PExp -> replacement PExp}
      *
      * @return a, new, substituted expression
      */
     @NotNull
-    public abstract PExp substitute(
-            @NotNull Map<PExp, PExp> substitutions);
+    public abstract PExp substitute(@NotNull Map<PExp, PExp> substitutions);
 
     /**
-     * Returns {@code true} iff {@code this} contains a subexpression whose
-     * 'name' field matches {@code name}; {@code false} otherwise.
+     * Returns {@code true} iff {@code this} contains a subexpression whose 'name' field matches {@code name};
+     * {@code false} otherwise.
      *
      * @param name some name
      *
-     * @return whether or not the name appears anywhere in {@code this}'s
-     * subtree
+     * @return whether or not the name appears anywhere in {@code this}'s subtree
      */
     public abstract boolean containsName(String name);
 
@@ -202,11 +208,9 @@ public abstract class PExp {
     /**
      * A predicate that returns {@code true} in any of the following cases:
      * <ul>
-     * <li>If we're an instance of {@code PSymbol} whose name is simply
-     * {@code true}.</li>
-     * <li>If we're an expression with a top level application of
-     * of binary {@code =}s whose left and right arguments are themselves
-     * equal (as determined via a call to {@link PExp#equals(Object)}).</li>
+     * <li>If we're an instance of {@code PSymbol} whose name is simply {@code true}.</li>
+     * <li>If we're an expression with a top level application of of binary {@code =}s whose left and right arguments
+     * are themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>;
      *
      * @return whether or not we represent a trivially 'true' expression
@@ -216,11 +220,10 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} if this {@code PExp} represents a primitive
-     * application of the {@code =} operator; {@code false} otherwise.
+     * Returns {@code true} if this {@code PExp} represents a primitive application of the {@code =} operator;
+     * {@code false} otherwise.
      *
-     * @return whether or not we have represent a top-level application of
-     * equals
+     * @return whether or not we have represent a top-level application of equals
      */
     public boolean isEquality() {
         return false;
@@ -231,8 +234,8 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} if this {@code PExp} is prefixed by the {@code @}
-     * marker (incoming marker); {@code false} otherwise.
+     * Returns {@code true} if this {@code PExp} is prefixed by the {@code @} marker (incoming marker); {@code false}
+     * otherwise.
      *
      * @return whether or not {@code this} is an incoming expression
      */
@@ -249,16 +252,14 @@ public abstract class PExp {
     }
 
     /**
-     * If this {@code PExp} is one with a sensible (meaning: extant) name,
-     * then this method simply returns it, independent of any parens or other
-     * syntactic characteristics.
+     * If this {@code PExp} is one with a sensible (meaning: extant) name, then this method simply returns it,
+     * independent of any parens or other syntactic characteristics.
      * <p>
-     * If {@code this} expression is anonoymous, then we simply return a canned
-     * string such as <code>\:PLamda</code> or <code>{ PSet }</code>.</p>
+     * If {@code this} expression is anonoymous, then we simply return a canned string such as <code>\:PLamda</code>
+     * or <code>{ PSet }</code>.</p>
      * <p>
-     * If your dealing with a curried style top-level application of
-     * the form {@code SS(k)(Cen(k))}, then the canonical name returned
-     * should simply be <tt>SS</tt>.</p>
+     * If your dealing with a curried style top-level application of the form {@code SS(k)(Cen(k))}, then the canonical
+     * name returned should simply be <tt>SS</tt>.</p>
      *
      * @return the canonical name
      */
@@ -279,13 +280,9 @@ public abstract class PExp {
         return false;
     }
 
-    public boolean hasSymbolNamesInCommonWith(final PExp other,
-                                              boolean excludeApplication,
-                                              boolean excludeLiterals) {
-        Set<String> myNames = this.getSymbolNames(excludeApplication,
-                excludeLiterals);
-        Set<String> othersNames = other.getSymbolNames(excludeApplication,
-                excludeLiterals);
+    public boolean hasSymbolNamesInCommonWith(final PExp other, boolean excludeApplication, boolean excludeLiterals) {
+        Set<String> myNames = this.getSymbolNames(excludeApplication, excludeLiterals);
+        Set<String> othersNames = other.getSymbolNames(excludeApplication, excludeLiterals);
         myNames.retainAll(othersNames);
         return !myNames.isEmpty();
     }
@@ -297,16 +294,16 @@ public abstract class PExp {
      * @return a list of sequents derived from {@code this}
      */
     @NotNull
-    public List<PExp> splitIntoSequents() {
-        return splitIntoSequents(getMathType().getTypeGraph().getTrueExp());
+    public List<PExp> split() {
+        return split(getMathClssftn().getTypeGraph().getTrueExp());
     }
 
     /**
-     * A protected refinement of {@link PExp#splitIntoSequents()} that adds an
+     * A protected refinement of {@link PExp#split()} that adds an
      * accumulator, {@code assumptions}, for developing our sequents.
      */
     @NotNull
-    protected List<PExp> splitIntoSequents(PExp assumtions) {
+    protected List<PExp> split(PExp assumtions) {
         return new ArrayList<>();
     }
 
@@ -318,6 +315,16 @@ public abstract class PExp {
     }
 
     protected abstract void splitIntoConjuncts(@NotNull List<PExp> accumulator);
+
+    @Nullable public Token getVCLocation() {
+        return vcLocation;
+    }
+
+    @Nullable public String getVCExplanation() {
+        return vcExplanation;
+    }
+
+    public abstract PExp withVCInfo(@Nullable Token location, @Nullable String explanation);
 
     /**
      * Returns a new version of this {@code PExp} where all occurences of the
@@ -332,17 +339,15 @@ public abstract class PExp {
     public abstract PExp withQuantifiersFlipped();
 
     /**
-     * Returns a set of '@'-prefixed symbols appearing in the subexpressions of
-     * this {@code PExp}. Note that when we say 'symbols' we mean both function
-     * applications and argument-less variables.
+     * Returns a set of '@'-prefixed symbols appearing in the subexpressions of this {@code PExp}. Note that when we
+     * say 'symbols' we mean both function applications and argument-less variables.
      *
      * @return the set of all incoming symbols
      */
     @NotNull
     public final Set<PSymbol> getIncomingVariables() {
         if (cachedIncomingVariables == null) {
-            cachedIncomingVariables = Collections.unmodifiableSet(
-                    getIncomingVariablesNoCache());
+            cachedIncomingVariables = Collections.unmodifiableSet(getIncomingVariablesNoCache());
         }
         return cachedIncomingVariables;
     }
@@ -354,9 +359,7 @@ public abstract class PExp {
     public final Set<PSymbol> getQuantifiedVariables() {
         if (cachedQuantifiedVariables == null) {
             //We're immutable, so only do this once
-            cachedQuantifiedVariables =
-                    Collections
-                            .unmodifiableSet(getQuantifiedVariablesNoCache());
+            cachedQuantifiedVariables = Collections.unmodifiableSet(getQuantifiedVariablesNoCache());
         }
         return cachedQuantifiedVariables;
     }
@@ -384,30 +387,26 @@ public abstract class PExp {
     }
 
     @NotNull
-    public final Set<String> getSymbolNames(boolean excludeApplications,
-                                            boolean excludeLiterals) {
+    public final Set<String> getSymbolNames(boolean excludeApplications, boolean excludeLiterals) {
         return getSymbolNamesNoCache(excludeApplications, excludeLiterals);
     }
 
-    protected abstract Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals);
+    protected abstract Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals);
 
     /**
-     * Returns {@code true} iff this {@code PExp} and {@code o},
-     * are equivalent with respect to structure and all function and variable
-     * names; {@code false} otherwise.
+     * Returns {@code true} iff this {@code PExp} and {@code o}, are equivalent with respect to structure and all
+     * function and variable names; {@code false} otherwise.
      *
      * @param o the expression to compare with {@code this}
      *
-     * @return whether {@code this} matches {@code o} with respect to structure
-     * and variable naming
+     * @return whether {@code this} matches {@code o} with respect to structure and variable naming
      */
     @Override
     public abstract boolean equals(Object o);
 
     /**
-     * Returns a map of equalities contained in the top level of {@code this}
-     * of the form: {@code [variable name] = [some expr]}.
+     * Returns a map of equalities contained in the top level of {@code this} of the form:
+     * {@code [variable name] = [some expr]}.
      *
      * @return pairs of variable equalities in {@code this}.
      */
@@ -423,9 +422,7 @@ public abstract class PExp {
         return result;
     }
 
-    /**
-     * A util container for storing node structural and value hashcodes.
-     */
+    /** A util container for storing node structural and value hashcodes. */
     public static class HashDuple {
         public int structureHash;
         public int valueHash;

@@ -207,66 +207,45 @@ public enum ErrorKind {
     /**
      * Compiler Error 38: generated Java error: <em>message</em>.
      */
-    GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
-            ErrorSeverity.ERROR),
+    GENERATED_JAVA_ERROR(38, "generated java error: <arg>", ErrorSeverity.ERROR),
 
-    MODULE_AND_FILE_NAME_DIFFER(39, "module name <arg> and file name " +
-            "<arg2> differ", ErrorSeverity.ERROR),
+    MODULE_AND_FILE_NAME_DIFFER(39, "module name <arg> and file name <arg2> differ", ErrorSeverity.ERROR),
 
-    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
-            "unmarked recursive procedure: '<arg2>'; should be: " +
-            "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
-            ErrorSeverity.WARNING),
+    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an unmarked recursive procedure: '<arg2>'; " +
+            "should be: Oper <arg2>(..); Recursive Procedure ... end <arg2>;", ErrorSeverity.WARNING),
 
-    MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: " +
-            "'<arg>' != '<arg2>'",
-            ErrorSeverity.WARNING),
+    MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: '<arg>' != '<arg2>'", ErrorSeverity.WARNING),
 
-    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked 'Recursive', " +
-            "but contains no recursive calls",
-            ErrorSeverity.WARNING),
+    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked 'Recursive', but contains no recursive calls", ErrorSeverity.WARNING),
 
-    INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: " +
-            "[<arg2>, <arg3>]; these need to be the same types",
-            ErrorSeverity.ERROR),
+    INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: [<arg2>, <arg3>]; these need to be the same types", ErrorSeverity.ERROR),
 
-    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return " +
-            "assignment stmt (e.g.: the concluding statement should be " +
-            "<arg> := [SOME RETURN VALUE];",
-            ErrorSeverity.ERROR),
+    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the concluding " +
+            "statement should be <arg> := [SOME RETURN VALUE];", ErrorSeverity.ERROR),
 
-    ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued " +
-            "variable ref(s): [<arg; separator={, }>] in requires " +
-            "clause: <arg2>; '@-variables' are not permitted in requires clauses",
-            ErrorSeverity.ERROR),
+    ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued variable ref(s): [<arg; separator={, }>] in " +
+            "requires clause: <arg2>; '@-variables' are not permitted in requires clauses", ErrorSeverity.ERROR),
 
-    MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
-            "recursive call: <arg>. i.e.: arguments fail to match in either " +
-            "number or type (or both) for recursive operation: <arg2>",
-            ErrorSeverity.ERROR),
+    MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to recursive call: <arg>. i.e.: arguments " +
+            "fail to match in either number or type (or both) for recursive operation: <arg2>", ErrorSeverity.ERROR),
 
-    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, " +
-            "(which is <arg2>) shares the same name as the enclosing module; " +
-            "it needs a unique name", ErrorSeverity.ERROR),
+    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, (which is <arg2>) shares the same name as the enclosing " +
+            "module; it needs a unique name", ErrorSeverity.ERROR),
 
-    ILLEGAL_MODE_FOR_FUNCTIONAL_OP(61, "operation <arg> declares a return, " +
-            "but parameter(s) [<arg2; separator = ', '>] use mode <arg3>; " +
-            "operations with a return can only use these modes: " +
-            "[preserves, restores, evaluates]",
-            ErrorSeverity.ERROR),
+    ILLEGAL_MODE_FOR_FUNCTIONAL_OP(61, "operation <arg> declares a return, but parameter(s) " +
+            "[<arg2; separator = ', '>] use mode <arg3>; operations with a return can only use these modes: " +
+            "[preserves, restores, evaluates]", ErrorSeverity.ERROR),
 
     ILLEGAL_PRIMARY_OPERATION_CALL(62, "procedure '<arg>' references another " +
-            "primary operation with: <arg2>; primary operations shouldn't " +
-            "reference each other", ErrorSeverity.ERROR),
+            "primary operation with: <arg2>; primary operations shouldn't reference each other", ErrorSeverity.ERROR),
 
-    INVALID_APPLICATION_ARG(63, "arg of classification: <arg> is not " +
-            "acceptable where <arg2> is required", ErrorSeverity.ERROR),
+    INVALID_APPLICATION_ARG(63, "arg of classification: <arg> is not acceptable where <arg2> is required", ErrorSeverity.ERROR),
 
-    INVALID_APPLICATION_ARG2(64, "<arg> is not acceptable where a " +
-            "set is required", ErrorSeverity.ERROR),
+    INVALID_APPLICATION_ARG2(64, "<arg> is not acceptable where a set is required", ErrorSeverity.ERROR),
 
-    MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>",
-            ErrorSeverity.ERROR);
+    MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>", ErrorSeverity.ERROR),
+
+    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

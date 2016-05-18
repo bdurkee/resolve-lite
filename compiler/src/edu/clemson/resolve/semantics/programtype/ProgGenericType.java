@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathNamedClassification;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
 import java.util.Map;
 
@@ -14,7 +14,7 @@ public class ProgGenericType extends ProgType {
     @NotNull
     private final String name;
 
-    public ProgGenericType(@NotNull DumbTypeGraph g, @NotNull String name) {
+    public ProgGenericType(@NotNull DumbMathClssftnHandler g, @NotNull String name) {
         super(g);
         this.name = name;
     }

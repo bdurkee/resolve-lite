@@ -4,39 +4,37 @@ import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;
 
 public class VerifierPipeline extends AbstractCompilationPipeline {
 
-    public VerifierPipeline(RESOLVECompiler rc,
-                            List<AnnotatedModule> compilationUnits) {
+    public VerifierPipeline(RESOLVECompiler rc, List<AnnotatedModule> compilationUnits) {
         super(rc, compilationUnits);
     }
 
     @Override
     public void process() {
         for (AnnotatedModule unit : compilationUnits) {
-            if (compiler.targetNames.contains(
-                    unit.getNameToken().getText()) && compiler.vcs) {
-                if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.PrecisModuleDeclContext) continue;
-                else if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.ConceptModuleDeclContext) continue;
-                else if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.ConceptExtModuleDeclContext) continue;
-                else if (unit.getRoot().getChild(0) instanceof
-                        ResolveParser.PrecisExtModuleDeclContext) continue;
+            if (compiler.targetNames.contains(unit.getNameToken().getText()) && compiler.vcs) {
+                if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleDeclContext) continue;
+                else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptModuleDeclContext) continue;
+                else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptExtModuleDeclContext) continue;
+                else if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisExtModuleDeclContext) continue;
                 VCGenerator gen = new VCGenerator(compiler, unit);
                 //TODO: Use log instead!
                 //compiler.info("generating vcs for: " + unit.getNameToken().getText());
+                VCOutputFile vcs = gen.getVCOutput();
+
+                //give the vc output info into the AnnotatedModule
+                unit.setVCs(vcs);
                 ST x = gen.generateAssertions();
-                //List<VC> vcs = gen.getProverInput();
                 System.out.println(x.render());
-                //TODO: Hook up conguence class prover.
-                //  ModelBuilderProto2 vv = new ModelBuilderProto2();
-                //  ParseTreeWalker.DEFAULT.walk(vv, unit.getRoot());
+
+                List<VC> proverInput = vcs.getFinalVCs();
+
             }
         }
     }

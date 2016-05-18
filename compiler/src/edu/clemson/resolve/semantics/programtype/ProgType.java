@@ -1,7 +1,7 @@
 package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 
@@ -10,14 +10,14 @@ import java.util.Map;
 public abstract class ProgType {
 
     @NotNull
-    protected final DumbTypeGraph g;
+    protected final DumbMathClssftnHandler g;
 
-    public ProgType(@NotNull DumbTypeGraph g) {
+    public ProgType(@NotNull DumbMathClssftnHandler g) {
         this.g = g;
     }
 
     @NotNull
-    public final DumbTypeGraph getTypeGraph() {
+    public final DumbMathClssftnHandler getTypeGraph() {
         return g;
     }
 

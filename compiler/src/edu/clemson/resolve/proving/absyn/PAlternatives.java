@@ -1,7 +1,9 @@
 package edu.clemson.resolve.proving.absyn;
 
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.MathClassification;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -14,22 +16,29 @@ public class PAlternatives extends PExp {
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
                          PExp otherwiseClauseResult, MathClassification type) {
+        this(conditions, results, otherwiseClauseResult, type, null, null);
+    }
+
+    public PAlternatives(@NotNull List<PExp> conditions,
+                         @NotNull List<PExp> results,
+                         @Nullable PExp otherwiseClauseResult,
+                         @NotNull MathClassification type,
+                         @Nullable Token vcLocation,
+                         @Nullable String vcExplanation) {
         super(calculateStructureHash(conditions, results,
                 otherwiseClauseResult), calculateStructureHash(
-                conditions, results, otherwiseClauseResult), type);
+                conditions, results, otherwiseClauseResult), type, null, vcLocation, vcExplanation);
 
         this.alternatives = new ArrayList<>();
         sanityCheckConditions(conditions);
 
         if (conditions.size() != results.size()) {
-            throw new IllegalArgumentException("conditions.size() must equal "
-                    + "results.size()");
+            throw new IllegalArgumentException("conditions.size() must equal results.size()");
         }
         Iterator<PExp> conditionIter = conditions.iterator();
         Iterator<PExp> resultIter = results.iterator();
         while (conditionIter.hasNext()) {
-            alternatives.add(new Alternative(conditionIter.next(), resultIter
-                    .next()));
+            alternatives.add(new Alternative(conditionIter.next(), resultIter.next()));
         }
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
@@ -57,11 +66,11 @@ public class PAlternatives extends PExp {
 
     private void sanityCheckConditions(List<PExp> conditions) {
         for (PExp condition : conditions) {
-            if (!condition.typeMatches(condition.getMathType().getTypeGraph().BOOLEAN)) {
+            if (!condition.typeMatches(condition.getMathClssftn().getTypeGraph().BOOLEAN)) {
                 throw new IllegalArgumentException("AlternativeExps with "
                         + "non-boolean-typed conditions are not accepted "
                         + "by the prover. \n\t" + condition + " has type "
-                        + condition.getMathType());
+                        + condition.getMathClssftn());
             }
         }
     }
@@ -109,6 +118,17 @@ public class PAlternatives extends PExp {
         accumulator.add(this);
     }
 
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        List<PExp> conditions = new ArrayList<>();
+        List<PExp> results = new ArrayList<>();
+        for (Alternative alt : alternatives) {
+            conditions.add(alt.condition);
+            results.add(alt.result);
+        }
+        return new PAlternatives(conditions, results, otherwiseClauseResult, getMathClssftn(), location, explanation);
+    }
+
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
@@ -119,7 +139,7 @@ public class PAlternatives extends PExp {
             results.add(alt.result.withIncomingSignsErased());
         }
         PExp otherwise = otherwiseClauseResult.withIncomingSignsErased();
-        return new PAlternatives(conditions, results, otherwise, getMathType());
+        return new PAlternatives(conditions, results, otherwise, getMathClssftn());
     }
 
     @NotNull
@@ -144,10 +164,10 @@ public class PAlternatives extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        PExp retval;
+        PExp result;
 
         if (substitutions.containsKey(this)) {
-            retval = substitutions.get(this);
+            result = substitutions.get(this);
         }
         else {
             List<PExp> substitutedConditions = new ArrayList<>();
@@ -157,11 +177,11 @@ public class PAlternatives extends PExp {
                 substitutedConditions.add(alt.condition.substitute(substitutions));
                 substitutedResults.add(alt.result.substitute(substitutions));
             }
-            retval = new PAlternatives(substitutedConditions,
+            result = new PAlternatives(substitutedConditions,
                     substitutedResults, substitutedOtherwiseResult,
-                    getMathType());
+                    getMathClssftn());
         }
-        return retval;
+        return result;
     }
 
     @Override

@@ -4,8 +4,9 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.Scope;
 
 import java.util.*;
@@ -17,20 +18,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 builder.applicationSteps, builder.description);
     }
 
-    public static class VCAssertiveBlockBuilder
-            implements
-            Utils.Builder<VCAssertiveBlock> {
-        public final DumbTypeGraph g;
+    public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
+
+        public final DumbMathClssftnHandler g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
 
-        public final Map<String, Map<PExp, PExp>> facilitySpecializations =
-                new HashMap<>();
-        public final LinkedList<VCRuleBackedStat> stats =
-                new LinkedList<>();
-        public final List<RuleApplicationStep> applicationSteps =
-                new ArrayList<>();
+        public final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
+        public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
         public final String description;
 
         public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
@@ -39,23 +36,18 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return result;
         }
 
-        public VCAssertiveBlockBuilder(DumbTypeGraph g, Scope s,
-                                       String description,
-                                       ParserRuleContext ctx) {
+        public VCAssertiveBlockBuilder(DumbMathClssftnHandler g, Scope s, String description, ParserRuleContext ctx) {
             if (s == null) {
-                throw new IllegalArgumentException(
-                        "passed null scope to vc assertive " +
-                                "block for: " + description);
+                throw new IllegalArgumentException("passed null scope to vc assertive block for: " + description);
             }
             this.g = g;
             this.definingTree = ctx;
-            this.finalConfirm = new VCConfirm(this, g.getTrueExp());
+            this.finalConfirm = new VCConfirm(ctx, this, g.getTrueExp());
             this.scope = s;
             this.description = description;
         }
 
-        public VCAssertiveBlockBuilder facilitySpecializations(
-                Map<String, Map<PExp, PExp>> mappings) {
+        public VCAssertiveBlockBuilder facilitySpecializations(Map<String, Map<PExp, PExp>> mappings) {
             facilitySpecializations.putAll(mappings);
             return this;
         }
@@ -69,10 +61,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if (assume == null) {
                 return this;
             }
-            //stats.add(new VCAssume(this,
-            //        new DefaultAssumeApplicationStrategy(), assume));
-            stats.add(new VCAssume(this,
-                    new ParsimoniousAssumeApplicationStrategy(), assume));
+            //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), assume));
+            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), assume));
             return this;
         }
 
@@ -81,16 +71,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
+        /*public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
             confirms.forEach(this::confirm);
             return this;
-        }
+        }*/
 
-        public VCAssertiveBlockBuilder confirm(PExp confirm) {
+        public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm) {
             if (confirm == null) {
                 confirm = g.getTrueExp();
             }
-            stats.add(new VCConfirm(this, confirm));
+            stats.add(new VCConfirm(ctx, this, confirm));
             return this;
         }
 
@@ -98,7 +88,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if (confirm == null) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
-            this.finalConfirm = new VCConfirm(this, confirm);
+            this.finalConfirm = new VCConfirm(definingTree, this, confirm);
             return this;
         }
 
@@ -118,17 +108,16 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         /**
-         * Same as {@link #build()}, but this one doesn't automatically apply
-         * proof rules to the stats within this block.
+         * Same as {@link #build()}, but this one doesn't automatically apply proof rules to the stats within this
+         * block.
          */
         public VCAssertiveBlock snapshot() {
             return new VCAssertiveBlock(this);
         }
 
         /**
-         * Applies the appropriate rule to each stat within this builder. In
-         * other words, a call to this will fully develop the final confirm
-         * for this particular block of assertive code.
+         * Applies the appropriate rule to each stat within this builder. In other words, a call to this will fully
+         * develop the final confirm for this particular block of assertive code.
          */
         @NotNull
         @Override
@@ -136,8 +125,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(new RuleApplicationStep(currentStat
-                        .reduce(), currentStat.getApplicationDescription()));
+                applicationSteps.add(new RuleApplicationStep(currentStat.reduce(),
+                        currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);
         }

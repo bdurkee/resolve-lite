@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.DefaultAssumeApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.StatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 
 public class VCAssume extends VCRuleBackedStat {
 
@@ -13,7 +13,7 @@ public class VCAssume extends VCRuleBackedStat {
     }
 
     public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                    StatRuleApplicationStrategy<VCAssume> strategy,
+                    VCStatRuleApplicationStrategy<VCAssume> strategy,
                     PExp... e) {
         super(null, block, strategy, e);
     }

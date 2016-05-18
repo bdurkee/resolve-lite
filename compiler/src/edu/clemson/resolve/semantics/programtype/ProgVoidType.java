@@ -1,7 +1,7 @@
 package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 
@@ -11,10 +11,10 @@ import java.util.WeakHashMap;
 public class ProgVoidType extends ProgType {
 
     @NotNull
-    private static WeakHashMap<DumbTypeGraph, ProgVoidType> instances = new WeakHashMap<>();
+    private static WeakHashMap<DumbMathClssftnHandler, ProgVoidType> instances = new WeakHashMap<>();
 
     @NotNull
-    public static ProgVoidType getInstance(@NotNull DumbTypeGraph g) {
+    public static ProgVoidType getInstance(@NotNull DumbMathClssftnHandler g) {
         ProgVoidType result = instances.get(g);
         if (result == null) {
             result = new ProgVoidType(g);
@@ -28,7 +28,7 @@ public class ProgVoidType extends ProgType {
         return "Void";
     }
 
-    private ProgVoidType(@NotNull DumbTypeGraph g) {
+    private ProgVoidType(@NotNull DumbMathClssftnHandler g) {
         super(g);
     }
 

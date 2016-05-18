@@ -3,7 +3,7 @@ package edu.clemson.resolve.semantics.symbol;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -19,7 +19,7 @@ public class TypeModelSymbol extends ProgTypeSymbol {
     @NotNull
     private final MathClssftnWrappingSymbol exemplar;
 
-    public TypeModelSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public TypeModelSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                            @NotNull MathClassification modelType,
                            @NotNull ProgFamilyType programType,
                            @NotNull MathClssftnWrappingSymbol exemplar,

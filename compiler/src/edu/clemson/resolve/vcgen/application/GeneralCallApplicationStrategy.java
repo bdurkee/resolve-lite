@@ -6,35 +6,27 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
-import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
+import edu.clemson.resolve.vcgen.model.AssertiveBlock;
+import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.model.VCCall;
+import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
-import static edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode.*;
-
-public class GeneralCallApplicationStrategy
-        implements
-        StatRuleApplicationStrategy<VCRuleBackedStat> {
+public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCCall> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(
-            @NotNull VCAssertiveBlockBuilder block,
-            @NotNull VCRuleBackedStat stat) {
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
-        GeneralCallRuleSubstitutor applier =
-                new GeneralCallRuleSubstitutor(block);
+        GeneralCallRuleSubstitutor applier = new GeneralCallRuleSubstitutor(stat.getDefiningContext(), block);
         callExp.accept(applier);
-
-        return block.finalConfirm(applier.getCompletedExp())
-                .snapshot();
+        return block.finalConfirm(applier.getCompletedExp()).snapshot();
     }
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in doc/
@@ -42,9 +34,11 @@ public class GeneralCallApplicationStrategy
         private final VCAssertiveBlockBuilder block;
         public Map<PExp, PExp> returnEnsuresArgSubstitutions = new HashMap<>();
 
-        public GeneralCallRuleSubstitutor(
-                @NotNull VCAssertiveBlockBuilder block) {
+        private final ParserRuleContext ctx;
+
+        public GeneralCallRuleSubstitutor(@NotNull ParserRuleContext ctx, @NotNull VCAssertiveBlockBuilder block) {
             this.block = block;
+            this.ctx = ctx;
         }
 
         @NotNull
@@ -54,26 +48,24 @@ public class GeneralCallApplicationStrategy
 
         @Override
         public void endPApply(@NotNull PApply e) {
-            OperationSymbol op = getOperation(block.scope, e);
+            OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(block.scope, e);
             final Set<ParameterMode> distinguishedModes =
-                    new HashSet<>(Arrays.asList(UPDATES, REPLACES, ALTERS, CLEARS));
+                    new HashSet<>(Arrays.asList(ParameterMode.UPDATES, ParameterMode.REPLACES,
+                            ParameterMode.ALTERS, ParameterMode.CLEARS));
 
             PSymbol functionName = (PSymbol) e.getFunctionPortion();
 
             PExp newAssume = op.getEnsures();
-            List<PExp> formalExps = Utils.apply(op.getParameters(),
-                    ProgParameterSymbol::asPSymbol);
+            List<PExp> formalExps = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
+            PExp confirmPrecondition = op.getRequires();
 
-            PExp confirmPrecondition =
-                    op.getRequires().substitute(formalExps, e.getArguments());
-
-            //TODO:
             confirmPrecondition = confirmPrecondition
-                    .substitute(returnEnsuresArgSubstitutions);
-            block.confirm(confirmPrecondition);
+                    .substitute(formalExps, e.getArguments())
+                    .substitute(returnEnsuresArgSubstitutions)
+                    .withVCInfo(ctx.getStart(), "Requires clause of " + functionName.getName());
+            block.confirm(ctx, confirmPrecondition);
             //^^^^^ Here's the old one:
-            //block.confirm(op.getRequires().substitute(formalExps, e.getArguments()));
-
+            //block.confirm(ctx, op.getRequires().substitute(formalExps, e.getArguments()));
             /*for (ProgParameterSymbol p : op.getParameters()) {
                 //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
                 //postcondition
@@ -88,8 +80,7 @@ public class GeneralCallApplicationStrategy
             }*/
             PExp RP = block.finalConfirm.getConfirmExp();
             Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
-            Iterator<ProgParameterSymbol> formalIter =
-                    op.getParameters().iterator();
+            Iterator<ProgParameterSymbol> formalIter = op.getParameters().iterator();
             Iterator<PExp> argIter = e.getArguments().iterator();
 
             while (formalIter.hasNext()) {
@@ -97,24 +88,19 @@ public class GeneralCallApplicationStrategy
                 PExp curActual = (PExp) argIter.next();
 
                 //t ~> NQV(RP, a), @t ~> a
-                if (curFormal.getMode() == UPDATES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
-                            NQV(RP, (PSymbol) curActual));
-                    newAssumeSubtitutions.put(new PSymbolBuilder(curFormal
-                                    .asPSymbol()).incoming(true).build(),
-                            (PSymbol) curActual);
+                if (curFormal.getMode() == ParameterMode.UPDATES) {
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NQV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(new PSymbolBuilder(
+                            curFormal.asPSymbol()).incoming(true).build(), (PSymbol) curActual);
                 }
                 //v ~> NQV(RP, b)
-                else if (curFormal.getMode() == REPLACES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(),
-                            NQV(RP, (PSymbol) curActual));
+                else if (curFormal.getMode() == ParameterMode.REPLACES) {
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NQV(RP, (PSymbol) curActual));
                 }
                 //@y ~> e, @z ~> f
-                else if (curFormal.getMode() == ALTERS ||
-                        curFormal.getMode() == CLEARS) {
-                    newAssumeSubtitutions.put(
-                            new PSymbolBuilder(curFormal.asPSymbol())
-                                    .incoming(true).build(), curActual);
+                else if (curFormal.getMode() == ParameterMode.ALTERS || curFormal.getMode() == ParameterMode.CLEARS) {
+                    newAssumeSubtitutions.put(new PSymbolBuilder(curFormal.asPSymbol())
+                            .incoming(true).build(), curActual);
                 }
                 else {
                     newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
@@ -129,8 +115,7 @@ public class GeneralCallApplicationStrategy
             //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
             //Post [ t ~> NQV(RP, a), @t ~> a, u ~> Math(exp), v ~> NQV(RP, b),
             //       w ~> c, x ~> d, @y ~> e, @z ~> f]
-            block.assume(newAssume.substitute(newAssumeSubtitutions)
-                    .substitute(returnEnsuresArgSubstitutions));
+            block.assume(newAssume.substitute(newAssumeSubtitutions).substitute(returnEnsuresArgSubstitutions));
 
             //Ok, so this happens down here since the rule is laid out s.t.
             //substitutions occur prior to conjuncting this -- consult the
@@ -154,21 +139,17 @@ public class GeneralCallApplicationStrategy
             for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
-                    confirmSubstitutions.put(actualArg,
-                            NQV(RP, (PSymbol) actualArg));
+                    confirmSubstitutions.put(actualArg, NQV(RP, (PSymbol) actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
         }
     }
 
-    /**
-     * "Next Question-mark Variable"
-     */
+    /** "Next Question-mark Variable" */
     public static PSymbol NQV(PExp RP, PSymbol oldSym) {
         // Add an extra question mark to the front of oldSym
-        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName())
-                .build();
+        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName()).build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
         if (RP.containsName(oldSym.getName())) {
@@ -192,4 +173,5 @@ public class GeneralCallApplicationStrategy
     public String getDescription() {
         return "general call rule application";
     }
+
 }

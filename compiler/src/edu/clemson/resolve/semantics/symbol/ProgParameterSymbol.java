@@ -24,8 +24,7 @@ public class ProgParameterSymbol extends Symbol {
         UPDATES {
             @Override
             public ParameterMode[] getValidImplementationModes() {
-                return new ParameterMode[]{UPDATES, CLEARS, RESTORES,
-                        PRESERVES};
+                return new ParameterMode[]{UPDATES, CLEARS, RESTORES, PRESERVES};
             }
         },
         REPLACES {
@@ -56,6 +55,12 @@ public class ProgParameterSymbol extends Symbol {
             @Override
             public ParameterMode[] getValidImplementationModes() {
                 return new ParameterMode[]{EVALUATES};
+            }
+        },
+        INVALID {
+            @Override
+            public ParameterMode[] getValidImplementationModes() {
+                return new ParameterMode[]{};
             }
         },
         TYPE {
@@ -94,7 +99,7 @@ public class ProgParameterSymbol extends Symbol {
 
     private final ParameterMode mode;
     private final ProgType declaredType;
-    private final DumbTypeGraph typeGraph;
+    private final DumbMathClssftnHandler typeGraph;
 
     private MathClssftnWrappingSymbol mathSymbolAlterEgo;
     private final ProgVariableSymbol progVariableAlterEgo;
@@ -102,7 +107,7 @@ public class ProgParameterSymbol extends Symbol {
     @Nullable
     private String typeQualifier;
 
-    public ProgParameterSymbol(@NotNull DumbTypeGraph g, @NotNull String name,
+    public ProgParameterSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                @NotNull ParameterMode mode,
                                @NotNull ProgType type,
                                @Nullable ParserRuleContext definingTree,
@@ -122,13 +127,11 @@ public class ProgParameterSymbol extends Symbol {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
-                            new MathNamedClassification(g, name, level,
-                                    type.toMath()),
+                            new MathNamedClassification(g, name, level, type.toMath()),
                             definingTree, moduleIdentifier);
         }
         this.progVariableAlterEgo =
-                new ProgVariableSymbol(getName(), getDefiningTree(),
-                        declaredType, getModuleIdentifier());
+                new ProgVariableSymbol(getName(), getDefiningTree(), declaredType, getModuleIdentifier());
     }
 
     public void setTypeQualifierString(String typeQualifier) {
@@ -192,7 +195,7 @@ public class ProgParameterSymbol extends Symbol {
     public PSymbol asPSymbol() {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
-                .mathType(declaredType.toMath()).build();
+                .mathClssfctn(declaredType.toMath()).build();
     }
 
     @NotNull
@@ -209,8 +212,7 @@ public class ProgParameterSymbol extends Symbol {
 
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), getDefiningTree(),
-                getModuleIdentifier());
+                        instantiatingFacility), getDefiningTree(), getModuleIdentifier());
     }
 
     @Override

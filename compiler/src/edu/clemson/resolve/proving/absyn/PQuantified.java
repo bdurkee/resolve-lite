@@ -1,8 +1,10 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.Quantification;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +23,16 @@ public class PQuantified extends PExp {
     public PQuantified(@NotNull PExp assertion,
                        @NotNull Quantification quantificationType,
                        @NotNull List<PLambda.MathSymbolDeclaration> symDecls) {
-        super(assertion.structureHash, assertion.valueHash,
-                assertion.getMathType());
+        this(assertion, quantificationType, symDecls, null, null);
+    }
+
+    public PQuantified(@NotNull PExp assertion,
+                       @NotNull Quantification quantificationType,
+                       @NotNull List<PLambda.MathSymbolDeclaration> symDecls,
+                       @Nullable Token vcLocation,
+                       @Nullable String vcExplanation) {
+        super(assertion.structureHash, assertion.valueHash, assertion.getMathClssftn(), null,
+                vcLocation, vcExplanation);
         this.quantificationType = quantificationType;
         this.assertion = assertion;
         this.declaredSymbols.addAll(symDecls);
@@ -76,6 +86,11 @@ public class PQuantified extends PExp {
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
         accumulator.add(this);
+    }
+
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PQuantified(assertion, quantificationType, declaredSymbols, location, explanation);
     }
 
     @NotNull

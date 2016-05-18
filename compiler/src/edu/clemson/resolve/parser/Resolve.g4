@@ -445,7 +445,6 @@ mathExp
     |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
     |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
     |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
-
     |   mathExp ':' mathExp                                 #mathClssftnAssertionExp
     |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
     |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
@@ -470,7 +469,7 @@ mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|
 mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
 mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
 mathImpliesOpExp : (qualifier=ID '::')? op='implies';
-mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
+mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'∧'|'∨'|'iff');
 
 mathPrimeExp
     :   mathLiteralExp

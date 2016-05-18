@@ -117,10 +117,10 @@ public class MathSymbolTable {
     @Nullable
     private ModuleScopeBuilder curModuleScope = null;
     @NotNull
-    private final DumbTypeGraph typeGraph;
+    private final DumbMathClssftnHandler typeGraph;
 
     public MathSymbolTable() {
-        this.typeGraph = new DumbTypeGraph();
+        this.typeGraph = new DumbMathClssftnHandler();
 
         //The only things in global scope are built-in things
         ScopeBuilder globalScope = new ScopeBuilder(this, typeGraph, null, DUMMY_RESOLVER, ModuleIdentifier.GLOBAL);
@@ -128,14 +128,18 @@ public class MathSymbolTable {
         lexicalScopeStack.push(globalScope);
     }
 
-    private void initializeMathTypeSystem(@NotNull DumbTypeGraph g, @NotNull ScopeBuilder globalScope) {
+    private void initializeMathTypeSystem(@NotNull DumbMathClssftnHandler g, @NotNull ScopeBuilder globalScope) {
         try {
             globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
             globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
             globalScope.define(new MathClssftnWrappingSymbol(g, "Cls", g.CLS));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "and", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∧", g.BOOLEAN_FUNCTION));
+
             globalScope.define(new MathClssftnWrappingSymbol(g, "or", g.BOOLEAN_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∨", g.BOOLEAN_FUNCTION));
+
             globalScope.define(new MathClssftnWrappingSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "Powerset", g.POWERSET_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "conc", g.BOOLEAN));
@@ -168,13 +172,15 @@ public class MathSymbolTable {
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "/=",
                     new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "≠",
+                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate builtin symbol");
         }
     }
 
     @NotNull
-    public DumbTypeGraph getTypeGraph() {
+    public DumbMathClssftnHandler getTypeGraph() {
         return typeGraph;
     }
 

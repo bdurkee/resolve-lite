@@ -1,9 +1,10 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClassification;
 import edu.clemson.resolve.semantics.Quantification;
+import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -173,7 +174,7 @@ public class PApply extends PExp {
         super(calculateHashes(builder.functionPortion, builder.arguments.iterator()),
                 builder.applicationType,
                 //no; builder.applicationType won't be null; this is checked in PApply:build()
-                builder.functionPortion.getProgType());
+                builder.functionPortion.getProgType(), builder.vcLocation, builder.vcExplanation);
         this.functionPortion = builder.functionPortion;
         this.arguments.addAll(builder.arguments);
         this.displayStyle = builder.displayStyle;
@@ -227,7 +228,8 @@ public class PApply extends PExp {
                     .collect(Collectors.toList());
             result = new PApplyBuilder(functionPortion.substitute(substitutions))
                     .style(displayStyle)
-                    .applicationType(getMathType())
+                    .applicationType(getMathClssftn())
+                    .vcInfo(getVCLocation(), getVCExplanation())
                     .arguments(args).build();
         }
         return result;
@@ -290,22 +292,27 @@ public class PApply extends PExp {
         }
     }
 
+    @Override
+    public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
+        return new PApplyBuilder(this).vcInfo(location, explanation).build();
+    }
+
     @NotNull
-    public List<PExp> splitIntoSequents(PExp assumptions) {
+    public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
-        DumbTypeGraph g = getMathType().getTypeGraph();
+        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
         if (getCanonicalName().equals("and")) {
-            arguments.forEach(a -> result.addAll(a.splitIntoSequents(assumptions)));
+            arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
         else if (getCanonicalName().equals("implies")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).splitIntoSequents(assumptions);
+            //tempList = arguments.get(0).split(assumptions);
             if (!assumptions.isObviouslyTrue()) {
                 tempLeft = g.formConjunct(assumptions, tempLeft);
             }
             tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).splitIntoSequents(tempLeft);
+            return arguments.get(1).split(tempLeft);
         }
         else {
             result.add(g.formImplies(assumptions, this));
@@ -318,7 +325,8 @@ public class PApply extends PExp {
     public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
                 .arguments(apply(arguments, PExp::withIncomingSignsErased))
-                .applicationType(getMathType())
+                .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .style(displayStyle).build();
     }
 
@@ -327,7 +335,8 @@ public class PApply extends PExp {
     public PExp withQuantifiersFlipped() {
         return new PApplyBuilder(functionPortion.withQuantifiersFlipped())
                 .arguments(apply(arguments, PExp::withQuantifiersFlipped))
-                .applicationType(getMathType())
+                .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .style(displayStyle).build();
     }
 
@@ -452,10 +461,28 @@ public class PApply extends PExp {
 
         protected final PExp functionPortion;
         protected final List<PExp> arguments = new ArrayList<>();
+        protected Token vcLocation;
+        protected String vcExplanation;
 
         protected MathClassification applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
         protected boolean bracketApp = false;
+
+        /**
+         * Constructor for converting an existing function application back into a buildable format. This is useful
+         * for adding (or editing) some information in an existing {@link PApply} instance.
+         *
+         * @param e The existing application.
+         */
+        public PApplyBuilder(@NotNull PApply e) {
+            this.functionPortion = e.functionPortion;
+            this.arguments.addAll(e.arguments);
+            this.applicationType = e.getMathClssftn();
+            this.bracketApp = e.isBracketBasedApp;
+            this.displayStyle = e.getDisplayStyle();
+            this.vcLocation = e.getVCLocation();
+            this.vcExplanation = e.getVCExplanation();
+        }
 
         public PApplyBuilder(@NotNull PExp functionPortion) {
             this.functionPortion = functionPortion;
@@ -480,6 +507,12 @@ public class PApply extends PExp {
 
         public PApplyBuilder applicationType(@Nullable MathClassification type) {
             this.applicationType = type;
+            return this;
+        }
+
+        public PApplyBuilder vcInfo(@Nullable Token vcLocation, @Nullable String vcExplanation) {
+            this.vcLocation = vcLocation;
+            this.vcExplanation = vcExplanation;
             return this;
         }
 

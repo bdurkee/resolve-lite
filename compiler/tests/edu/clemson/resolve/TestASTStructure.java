@@ -6,7 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExpListener;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
-import edu.clemson.resolve.semantics.DumbTypeGraph;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
 public class TestASTStructure extends BaseTest {
 
@@ -34,7 +34,7 @@ public class TestASTStructure extends BaseTest {
 
     @Test
     public void testPSymbolStructure() {
-        DumbTypeGraph g = new DumbTypeGraph();
+        DumbMathClssftnHandler g = new DumbMathClssftnHandler();
         String[] expected = {
                 "<PApply:infixPApply:begin>:(x + (1 * y))\n" +
                         "<PSymbol:begin>:+\n" +

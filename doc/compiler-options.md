@@ -1,6 +1,6 @@
 # RESOLVE Compiler Command Line Options
 
-There are currently a number of options you can supply to the compiler. This document simply gives a detailed description 
+There are currently a number of options you can supply to the compiler. This document simply gives a detailed explanation
 and example usage of each. Note that this list will likely fluctuate and change over time, so keep an eye on this list and 
 update it accordingly.
 
