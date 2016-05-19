@@ -1,11 +1,27 @@
 Precis Basic_Integer_Theory;
         uses Monogenerator_Theory;
+    /** many theorems elided */
 
     Categorical Definition for Z : SSet, 0 : Z, NB : Z ⟶ Z is
         Is_Monogeneric_for(Z, 0, NB);
 
+    Inductive Definition Is_Neg(n : Z) : B is
+        (i.) Is_Neg(n);
+        (ii.) Is_Neg(NB(n)) = ⌐(Is_Neg(n));
 
-    Definition +(m, n : Z) : Z;
+    Inductive Definition -(n : Z) : Z is
+        (i.) -(0) = 0;
+        (ii.) -(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
+
+    Theorem I1 : ∀ n : Z, Is_Neg(n) implies NB(n) = -(n);
+
+    Theorem I2 : ∀ n : Z, -(-(n)) = n;
+
+    Inductive Definition suc(n : Z) : Z is
+        (i.) suc(0) = NB(NB(0));
+        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); -(n) otherwise;}};
+
+ /*   Definition +(m, n : Z) : Z;
     Definition -(m, n : Z) : Z;
 
     //Type Theorem N_Subset_of_Z: N : Z;
@@ -18,5 +34,5 @@ Precis Basic_Integer_Theory;
     Definition 1 : Z;
     Definition 2 : Z;
     Definition 3 : Z;
-    Definition 4 : Z;
+    Definition 4 : Z;*/
 end Basic_Integer_Theory;
