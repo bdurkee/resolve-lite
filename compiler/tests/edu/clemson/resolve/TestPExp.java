@@ -421,7 +421,7 @@ public class TestPExp extends BaseTest {
     @NotNull
     public static PExp parseMathAssertionExp(@NotNull DumbMathClssftnHandler g, @NotNull String input) {
         ParseTree t = getTree(input);
-        AnnotatedModule fakeModule = new AnnotatedModule(t, new CommonToken(ResolveLexer.ID, "T"), "T.resolve", false);
+        AnnotatedModule fakeModule = new AnnotatedModule(t, new CommonToken(ResolveLexer.ID, "T"), "scratch/T.resolve", false);
         PExpBuildingListener<PExp> l = new PExpBuildingListener<>(g, fakeModule, true);
         ParseTreeWalker.DEFAULT.walk(l, t);
         PExp result = l.getBuiltPExp(t);

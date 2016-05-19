@@ -1459,29 +1459,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
     */
     @Override
-    public Void visitMathSqBrOpExp(
-            ResolveParser.MathSqBrOpExpContext ctx) {
+    public Void visitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
         typeMathSymbol(ctx, null, "[..]");
         return null;
     }
 
     @Override
-    public Void visitMathMultOpExp(
-            ResolveParser.MathMultOpExpContext ctx) {
+    public Void visitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 
     @Override
-    public Void visitMathAddOpExp(
-            ResolveParser.MathAddOpExpContext ctx) {
+    public Void visitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 
     @Override
-    public Void visitMathJoiningOpExp(
-            ResolveParser.MathJoiningOpExpContext ctx) {
+    public Void visitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }

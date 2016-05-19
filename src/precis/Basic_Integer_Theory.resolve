@@ -1,7 +1,6 @@
 Precis Basic_Integer_Theory;
-        uses Monogenerator_Theory;
+        uses Monogenerator_Theory, Basic_Binary_Relation_Properties;
     /** many theorems elided */
-
     Categorical Definition for Z : SSet, 0 : Z, NB : Z ⟶ Z is
         Is_Monogeneric_for(Z, 0, NB);
 
@@ -9,30 +8,49 @@ Precis Basic_Integer_Theory;
         (i.) Is_Neg(n);
         (ii.) Is_Neg(NB(n)) = ⌐(Is_Neg(n));
 
-    Inductive Definition -(n : Z) : Z is
-        (i.) -(0) = 0;
-        (ii.) -(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
+    Inductive Definition ⨩(n : Z) : Z is
+        (i.) ⨩(0) = 0;
+        (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
-    Theorem I1 : ∀ n : Z, Is_Neg(n) implies NB(n) = -(n);
+    Theorem I1 : ∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
 
-    Theorem I2 : ∀ n : Z, -(-(n)) = n;
+    Theorem I2 : ∀ n : Z, ⨩(⨩(n)) = n;
 
     Inductive Definition suc(n : Z) : Z is
         (i.) suc(0) = NB(NB(0));
-        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); -(n) otherwise;}};
+        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨩(n) otherwise;}};
 
- /*   Definition +(m, n : Z) : Z;
-    Definition -(m, n : Z) : Z;
+    Inductive Definition (m : Z) + (n : Z) : Z is
+        (i.) m + 0 = m;
+        (ii.) m + NB(n) = {{⨩(m) + n if Is_Neg(n);
+                suc(⨩(m) + n) otherwise;}};
 
-    //Type Theorem N_Subset_of_Z: N : Z;
+    Definition (m : Z) - (n : Z) : Z;
 
-    Definition >(m, n : Z) : B;
-    Definition <(m, n : Z) : B;
-    Definition ≤(m, n : Z) : B;
+    Definition NN : Powerset(Z) is {n : Z | ⌐(Is_Neg(n))};
+        //won't typecheck at the moment
+        //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
+        //Corollary nn2: ∀ n : NN, suc(n) : NN;
+
+    Definition (m : Z) > (n : Z) : B;
+
+    Definition (m : Z) < (n : Z) : B;
+
+    Definition (m : Z) ≤ (n : Z) : B is (n + ⨩(m) ∈ NN);
+        Corollary leq1: Is_Transitive(≤);
+        Corollary leq2: Is_Antisymmetric(≤);
+        Corollary leq3: Is_Total(≤);
+
     Definition ≥(m, n : Z) : B;
 
-    Definition 1 : Z;
-    Definition 2 : Z;
-    Definition 3 : Z;
-    Definition 4 : Z;*/
+    Definition 1 : Z is suc(0);
+        Corollary one1: ∀ m : Z, suc(m) = m + 1;
+
+    Definition 2 : Z is suc(1);
+    Definition 3 : Z is suc(2);
+    Definition 4 : Z is suc(3);
+
+    Inductive Definition (m : Z) * (n : Z) : Z is
+        (i.) m * 0 = 0;
+        (ii.) m * NB(n) = {{⨩(m * n) if Is_Neg(n); ⨩(m * n + m) otherwise; }};
 end Basic_Integer_Theory;

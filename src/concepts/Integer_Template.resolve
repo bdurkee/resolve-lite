@@ -1,6 +1,6 @@
 Concept Integer_Template;
         uses Basic_Integer_Theory;
-/*
+
     Definition max_int : Z;
     Definition min_int : Z;
     constraints
@@ -35,5 +35,5 @@ Concept Integer_Template;
                 : Integer;
         requires min_int ≤ i - j ≤ max_int;
         ensures Difference = (i - j);
-*/
+
 end Integer_Template;

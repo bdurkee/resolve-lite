@@ -379,7 +379,7 @@ mathPostfixDefnSig
 mathSymbolName
     : ( ID |
       ('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'≤'|
-       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'))
+       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'|'⨩'))
     ;
 
 mathCategoricalDefnDecl
