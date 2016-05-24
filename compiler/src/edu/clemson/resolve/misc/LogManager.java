@@ -73,15 +73,12 @@ public class LogManager {
         }
     }
 
-    private List<Record> records;
+    private List<Record> records = new ArrayList<>();
 
     public void log(String component, String msg) {
         Record r = new Record();
         r.component = component;
         r.msg = msg;
-        if (records == null) {
-            records = new ArrayList<Record>();
-        }
         records.add(r);
     }
 

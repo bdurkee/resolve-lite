@@ -69,12 +69,16 @@ public class RESOLVECompiler {
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
+
+    //TODO: Change package of this to pkgLibDirectory or contentRootDir.. something like that...
     public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
     public String genCode;
+
+    @Deprecated
     public String genPackage = null;
     public boolean log = false;
     public boolean printEnv = false;
@@ -400,7 +404,7 @@ public class RESOLVECompiler {
             }
             File foundFile = null;
             if (new File(fileName).exists()) {
-                foundFile = new File(libDirectory, fileName);
+                foundFile = new File(fileName);
             }
             else {
                 foundFile = findResolveFile(Utils.stripFileExtension(fileName));
