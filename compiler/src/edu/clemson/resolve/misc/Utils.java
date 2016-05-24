@@ -31,7 +31,6 @@
 package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
@@ -282,7 +281,7 @@ public class Utils {
         } catch (NoSuchFileException nsfe) {
             //ok, maybe they defined an external file in their own workspace?
             try {
-                Files.walkFileTree(new File(e.workingDirectory).toPath(), l);
+                Files.walkFileTree(new File(e.libDirectory).toPath(), l);
                 result = l.getFile();
             } catch (IOException ignored) {
             }
@@ -308,9 +307,8 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
-    @Nullable
-    public static String stripFileExtension(@Nullable String name) {
-        if (name == null) return null;
+    @NotNull
+    public static String stripFileExtension(@NotNull String name) {
         int lastDot = name.lastIndexOf('.');
         if (lastDot < 0) return name;
         return name.substring(0, lastDot);

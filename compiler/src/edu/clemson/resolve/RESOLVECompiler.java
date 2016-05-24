@@ -26,6 +26,8 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -67,7 +69,7 @@ public class RESOLVECompiler {
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
-    public String workingDirectory;
+    public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
@@ -76,16 +78,17 @@ public class RESOLVECompiler {
     public String genPackage = null;
     public boolean log = false;
     public boolean printEnv = false;
+    public boolean genFake = false;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("workingDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
-            new Option("printEnv", "-env", "print path variables")
+            new Option("printEnv", "-env", "print path variables"),
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
@@ -181,24 +184,24 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
-                workingDirectory = ".";
+                libDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
         }
-        if (workingDirectory != null) {
-            if (workingDirectory.endsWith("/") || workingDirectory.endsWith("\\")) {
-                workingDirectory = workingDirectory.substring(0, workingDirectory.length() - 1);
+        if (libDirectory != null) {
+            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
+                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
             }
-            File outDir = new File(workingDirectory);
+            File outDir = new File(libDirectory);
             if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, workingDirectory);
-                workingDirectory = ".";
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
+                libDirectory = ".";
             }
         }
         else {
-            workingDirectory = ".";
+            libDirectory = ".";
         }
     }
 
@@ -228,6 +231,7 @@ public class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
+        //TESTING CMDS:
         if (printEnv) {
             info("$RESOLVEROOT=" + System.getenv("RESOLVEROOT"));
             Map<String, String> x = System.getenv();
@@ -375,7 +379,7 @@ public class RESOLVECompiler {
         FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
-            Files.walkFileTree(new File(workingDirectory).toPath(), l);
+            Files.walkFileTree(new File(libDirectory).toPath(), l);
             result = l.getFile();
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
@@ -390,11 +394,18 @@ public class RESOLVECompiler {
     @Nullable
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
-            File file = new File(fileName);
-            if (!file.isAbsolute()) {
-                file = new File(workingDirectory, fileName);
+            if (!fileName.endsWith(".resolve")) {
+                errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
+                return null;
             }
-            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
+            File foundFile = null;
+            if (new File(fileName).exists()) {
+                foundFile = new File(libDirectory, fileName);
+            }
+            else {
+                foundFile = findResolveFile(Utils.stripFileExtension(fileName));
+            }
+            return parseModule(new ANTLRFileStream(foundFile.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -422,11 +433,8 @@ public class RESOLVECompiler {
 
     @NotNull
     public static String getCoreLibraryDirectory() {
-        String rootDir = System.getenv("RESOLVEROOT");
-        if (rootDir == null) {
-            return "./";
-        }
-        return rootDir;
+        String resolveRoot = System.getenv("RESOLVEROOT");
+        return resolveRoot == null ? "." : resolveRoot;
     }
 
     /**
@@ -437,23 +445,26 @@ public class RESOLVECompiler {
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
-    public Writer getOutputFileWriter(@NotNull String fileName) throws IOException {
+    public Writer getOutputFileWriter(@NotNull AnnotatedModule module, @NotNull String fileName) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-        // output directory is a function of where the source file lives
-        // for subdir/T.resolve, you get subdir here.  Well, depends on -o etc...
-        File outputDir = getOutputDirectory(fileName);
+
+        File outputDir = getOutputDirectory(module.getFileName());
         File outputFile = new File(outputDir, fileName);
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();
         }
         FileOutputStream fos = new FileOutputStream(outputFile);
-        return new BufferedWriter(new OutputStreamWriter(fos));
+        OutputStreamWriter osw;
+        osw = new OutputStreamWriter(fos);
+
+        return new BufferedWriter(osw);
     }
 
     public File getOutputDirectory(@NotNull String fileNameWithPath) {
+
         File outputDir;
         String fileDirectory;
 
@@ -464,12 +475,10 @@ public class RESOLVECompiler {
             fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
         }
         if (haveOutputDir) {
-            if ((new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~"))) {
-                outputDir = new File(outputDirectory);
-            }
-            else {
-                outputDir = new File(outputDirectory, fileDirectory);
-            }
+            Path filePathAbsolute = Paths.get(fileDirectory);
+            Path libPathAbsolute = Paths.get(new File(libDirectory).getAbsolutePath());
+            Path pathRelative = libPathAbsolute.relativize(filePathAbsolute);
+            outputDir = new File(outputDirectory, pathRelative.toFile().getPath());
         }
         else {
             outputDir = new File(fileDirectory);

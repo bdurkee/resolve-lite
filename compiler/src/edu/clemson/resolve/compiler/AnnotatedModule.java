@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -54,6 +55,9 @@ public class AnnotatedModule {
     private VCOutputFile vcs = null;
     public boolean hasErrors;
 
+    public File containingDir;
+
+
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {
         this(root, name, "", false);
     }
@@ -67,12 +71,23 @@ public class AnnotatedModule {
         this.root = root;
         this.name = name;
         this.fileName = fileName;
+
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
         if (!hasErrors) {
             UsesListener l = new UsesListener(this);
             ParseTreeWalker.DEFAULT.walk(l, root);
         }
+    }
+
+    /**
+     * returns the fully qualified name of this module/file. These qualified names are relative to RESOLVEROOT
+     * and RESOLVEPATH.
+     * @return
+     */
+    public String getFullyQualifiedName() {
+
+        return name.getText();
     }
 
     public void setVCs(@Nullable VCOutputFile vco) {
@@ -93,6 +108,11 @@ public class AnnotatedModule {
     @NotNull
     public String getFileName() {
         return fileName;
+    }
+
+    public File getContainingDir() {
+        File result = new File(fileName); //it has to exist, antlr would've thrown a fit if it didn't
+        return result.getParentFile();
     }
 
     @NotNull

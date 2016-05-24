@@ -38,7 +38,6 @@ moduleDecl
     |   conceptImplModuleDecl
     |   conceptExtImplModuleDecl
     |   facilityModuleDecl) EOF
-
     ;
 
 precisModuleDecl
@@ -98,7 +97,7 @@ facilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' (usesSpec | '(' usesSpec+ ')' ';')
+    :   'uses' ID (',' ID)* ';'
     ;
 
 usesSpec

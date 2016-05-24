@@ -24,8 +24,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
 
     private static final String LANGUAGE = "Java";
 
-    JavaCodeGenerator(@NotNull RESOLVECompiler compiler,
-                      @NotNull AnnotatedModule module) {
+    JavaCodeGenerator(@NotNull RESOLVECompiler compiler, @NotNull AnnotatedModule module) {
         super(compiler, module, LANGUAGE);
     }
 
@@ -46,10 +45,8 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         //we've already checked in BasicSanityCheckingVisitor..
         for (ModuleIdentifier e : module.externalUses.values()) {
             String fileName = e.getNameString() + getFileExtension();
-            ModuleFile moduleFile =
-                    new ModuleFile(null, fileName, compiler.genPackage);
-            File externalFile =
-                    Utils.getExternalFile(compiler, e.getNameString());
+            ModuleFile moduleFile = new ModuleFile(null, fileName, compiler.genPackage);
+            File externalFile = Utils.getExternalFile(compiler, e.getNameString());
             if (externalFile == null) continue;
             String contents = null;
             try {

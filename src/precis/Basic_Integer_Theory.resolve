@@ -12,7 +12,9 @@ Precis Basic_Integer_Theory;
         (i.) ⨩(0) = 0;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
-    Theorem I1 : ∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
+    Theorem I1 :
+        ∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
+     //∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
 
     Theorem I2 : ∀ n : Z, ⨩(⨩(n)) = n;
 
@@ -35,6 +37,8 @@ Precis Basic_Integer_Theory;
     Definition (m : Z) > (n : Z) : B;
 
     Definition (m : Z) < (n : Z) : B;
+
+    Definition (m : Z) <= (n : Z) : B;
 
     Definition (m : Z) ≤ (n : Z) : B is (n + ⨩(m) ∈ NN);
         Corollary leq1: Is_Transitive(≤);

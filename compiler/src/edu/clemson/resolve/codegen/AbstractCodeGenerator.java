@@ -19,8 +19,7 @@ import java.io.Writer;
  */
 public abstract class AbstractCodeGenerator {
 
-    public static final String TEMPLATE_ROOT =
-            "edu/clemson/resolve/templates/codegen";
+    public static final String TEMPLATE_ROOT = "edu/clemson/resolve/templates/codegen";
 
     protected final RESOLVECompiler compiler;
     protected final AnnotatedModule module;
@@ -72,7 +71,7 @@ public abstract class AbstractCodeGenerator {
     public void write(ST code, String fileName) {
         try {
 //			long start = System.currentTimeMillis();
-            Writer w = compiler.getOutputFileWriter(fileName);
+            Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
@@ -90,8 +89,7 @@ public abstract class AbstractCodeGenerator {
     }
 
     public STGroup loadTemplates() {
-        String groupFileName = TEMPLATE_ROOT + "/" + language +
-                STGroup.GROUP_FILE_EXTENSION;
+        String groupFileName = TEMPLATE_ROOT + "/" + language + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);
