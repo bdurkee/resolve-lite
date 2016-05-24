@@ -97,7 +97,7 @@ facilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'
+    :   'uses' usesSpec (',' usesSpec)* ';'
     ;
 
 usesSpec
