@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
@@ -15,6 +16,8 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -54,9 +57,6 @@ public class AnnotatedModule {
     private final ParseTree root;
     private VCOutputFile vcs = null;
     public boolean hasErrors;
-
-    public File containingDir;
-
 
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {
         this(root, name, "", false);
@@ -110,10 +110,33 @@ public class AnnotatedModule {
         return fileName;
     }
 
+    public String getModulePathRelativeToProjectRoot(String projectRoot) {
+        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
+        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
+
+        String result = null;
+        Path modulePath = new File(fileName).toPath();
+        if (modulePath.startsWith(resolvePath)) {
+            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else if (modulePath.startsWith(resolveRoot)) {
+            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else {
+            //just use the lib directory if the user has a non-conformal project..
+            result = new File(modulePath.toFile().getPath()).getPath();
+        }
+        return result;
+    }
+
     @NotNull
     public File getContainingDir() {
         File result = new File(fileName); //it has to exist, antlr would've thrown a fit if it didn't
-        if (!result.exists() || !result.isDirectory()) {
+        if (!result.exists()) {
             throw new RuntimeException("apparently module: " + name.getText() +
                     " is not contained in a directory?!");
         }

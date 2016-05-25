@@ -43,8 +43,16 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
 
     @Override public void write(ST code, String fileName) {
         try {
-            Writer w = compiler.getOutputFileWriter(module, fileName,
-                    new javaOutputFun(compiler.libDirectory, compiler.outputDirectory));
+            Writer w = compiler.getOutputFileWriter(module, fileName, new Function<AnnotatedModule, File>() {
+                @Override
+                public File apply(AnnotatedModule annotatedModule) {
+                    String filePath = annotatedModule.getModulePathRelativeToProjectRoot(compiler.outputDirectory);
+                    File result = new File(filePath).getParentFile(); //if we have foo/T.resolve, this gives foo/
+
+                    //and this will stick the output directory on the front out/foo
+                    return new File(compiler.outputDirectory, result.getPath());
+                }
+            });
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
@@ -53,45 +61,6 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
                     ioe,
                     fileName);
-        }
-    }
-
-    public static class javaOutputFun implements Function<AnnotatedModule, File> {
-
-        @NotNull private final String libDir, specifiedOutputDir;
-
-        public javaOutputFun(@NotNull String libDir, @NotNull String specifiedOutputDir) {
-            this.libDir = libDir;
-            this.specifiedOutputDir = specifiedOutputDir;
-        }
-
-        @Override
-        public File apply(AnnotatedModule annotatedModule) {
-
-            String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
-            String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
-
-            Path filePathAbsolute = Paths.get(libDir);
-            Path projectPathAbsolute = null;
-            File result = null;
-            //is the current file on $RESOLVEPATH?
-            if (filePathAbsolute.startsWith(resolvePath)) {
-                projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
-                Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
-
-                //concatenate -o dir + trimmed subfolders
-                result = new File(specifiedOutputDir, pathRelative.toFile().getPath());
-            }
-            else if (filePathAbsolute.startsWith(resolveRoot)) {
-                projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
-                Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
-                result = new File(specifiedOutputDir, pathRelative.toFile().getPath());
-            }
-            else {
-                //just use the lib directory if the user has a non-conformal project..
-                result = new File(specifiedOutputDir, filePathAbsolute.toFile().getPath());
-            }
-            return result;
         }
     }
 

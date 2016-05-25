@@ -26,13 +26,11 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
         for (AnnotatedModule unit : compilationUnits) {
             ParseTree t = unit.getRoot().getChild(0);
             if (t instanceof ResolveParser.PrecisModuleDeclContext ||
-                    t instanceof ResolveParser.PrecisExtModuleDeclContext)
+                    t instanceof ResolveParser.PrecisExtModuleDeclContext) {
                 continue;
-
+            }
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
-            ST generatedST = gen.generateModule();
-            // System.out.println("t="+generatedST.render());
-            gen.write(generatedST, gen.getFileName());
+            gen.write(gen.generateModule(), gen.getFileName());
             //gen.writeReferencedExternalFiles();
         }
     }

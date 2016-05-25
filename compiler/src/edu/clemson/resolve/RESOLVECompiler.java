@@ -277,8 +277,6 @@ public class RESOLVECompiler {
         }
         codegenPipe.process();
         vcsPipe.process();
-        int i;
-        i=0;
     }
 
     @NotNull
@@ -448,39 +446,6 @@ public class RESOLVECompiler {
         return resolvePath == null ? "." : resolvePath;
     }
 
-    @NotNull public static File getRelativeOutputDirectoryForModule(@NotNull AnnotatedModule module,
-                                                                    @NotNull String libDirectory,
-                                                                    @NotNull String outputDir) {
-        String fileDirectory = null;
-        if (module.getFilePath().lastIndexOf(File.separatorChar) == -1) {
-            fileDirectory = ".";
-        }
-        else {
-            fileDirectory = module.getFilePath().substring(0, module.getFilePath().lastIndexOf(File.separatorChar));
-        }
-        Path filePathAbsolute = module.getContainingDir().toPath();
-        String resolveRoot = getCoreLibraryDirectory() + File.separator + "src";
-        String resolvePath = getLibrariesPathDirectory() + File.separator + "src";
-        Path projectPathAbsolute = null;
-        File result = null;
-        //is the current file on $RESOLVEPATH?
-        if (filePathAbsolute.startsWith(resolvePath)) {
-            projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
-            result = new File(outputDir, pathRelative.toFile().getPath());
-        }
-        else if (filePathAbsolute.startsWith(resolveRoot)) {
-            projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
-            result = new File(outputDir, pathRelative.toFile().getPath());
-        }
-        else {
-            projectPathAbsolute = Paths.get(libDirectory); //just use the package (lib) directory in this case
-            result = new File(outputDir, projectPathAbsolute.toFile().getPath());
-        }
-        return result;
-    }
-
     /**
      * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
      * will be created. The final filename is sensitive to the output directory and the directory where the soure file
@@ -516,8 +481,7 @@ public class RESOLVECompiler {
 
     public Writer getOutputFileWriter(@NotNull AnnotatedModule module,
                                       @NotNull String fileName,
-                                      @NotNull Function<AnnotatedModule, File> outputDirFun)
-            throws IOException {
+                                      @NotNull Function<AnnotatedModule, File> outputDirFun) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
