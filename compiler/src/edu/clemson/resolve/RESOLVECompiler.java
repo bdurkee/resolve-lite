@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 /**
  * The main entrypoint for the compiler. All input flows into here and this is also where we manage flags for
@@ -70,8 +71,8 @@ public class RESOLVECompiler {
     public final String[] args;
     protected boolean haveOutputDir = false;
 
-    //TODO: Change package of this to pkgLibDirectory or pkgDirectory.. something like that...
-    public String pkgDirectory;
+    //TODO: Change package of this to pkgLibDirectory or libDirectory.. something like that...
+    public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
@@ -87,7 +88,7 @@ public class RESOLVECompiler {
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("pkgDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
@@ -188,24 +189,24 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
-                pkgDirectory = ".";
+                libDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
         }
-        if (pkgDirectory != null) {
-            if (pkgDirectory.endsWith("/") || pkgDirectory.endsWith("\\")) {
-                pkgDirectory = pkgDirectory.substring(0, pkgDirectory.length() - 1);
+        if (libDirectory != null) {
+            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
+                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
             }
-            File outDir = new File(pkgDirectory);
+            File outDir = new File(libDirectory);
             if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, pkgDirectory);
-                pkgDirectory = ".";
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
+                libDirectory = ".";
             }
         }
         else {
-            pkgDirectory = ".";
+            libDirectory = ".";
         }
     }
 
@@ -383,7 +384,7 @@ public class RESOLVECompiler {
         FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
-            Files.walkFileTree(new File(pkgDirectory).toPath(), l);
+            Files.walkFileTree(new File(libDirectory).toPath(), l);
             result = l.getFile();
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
@@ -441,20 +442,87 @@ public class RESOLVECompiler {
         return resolveRoot == null ? "." : resolveRoot;
     }
 
+    @NotNull
+    public static String getLibrariesPathDirectory() {
+        String resolvePath = System.getenv("RESOLVEPATH");
+        return resolvePath == null ? "." : resolvePath;
+    }
+
+    @NotNull public static File getRelativeOutputDirectoryForModule(@NotNull AnnotatedModule module,
+                                                                    @NotNull String libDirectory,
+                                                                    @NotNull String outputDir) {
+        String fileDirectory = null;
+        if (module.getFilePath().lastIndexOf(File.separatorChar) == -1) {
+            fileDirectory = ".";
+        }
+        else {
+            fileDirectory = module.getFilePath().substring(0, module.getFilePath().lastIndexOf(File.separatorChar));
+        }
+        Path filePathAbsolute = module.getContainingDir().toPath();
+        String resolveRoot = getCoreLibraryDirectory() + File.separator + "src";
+        String resolvePath = getLibrariesPathDirectory() + File.separator + "src";
+        Path projectPathAbsolute = null;
+        File result = null;
+        //is the current file on $RESOLVEPATH?
+        if (filePathAbsolute.startsWith(resolvePath)) {
+            projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
+            result = new File(outputDir, pathRelative.toFile().getPath());
+        }
+        else if (filePathAbsolute.startsWith(resolveRoot)) {
+            projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(filePathAbsolute);
+            result = new File(outputDir, pathRelative.toFile().getPath());
+        }
+        else {
+            projectPathAbsolute = Paths.get(libDirectory); //just use the package (lib) directory in this case
+            result = new File(outputDir, projectPathAbsolute.toFile().getPath());
+        }
+        return result;
+    }
+
     /**
      * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
      * will be created. The final filename is sensitive to the output directory and the directory where the soure file
      * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
+     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project
+     * root directory {@code libDirectory}, which is specified by the user.
+     * <p>
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
     public Writer getOutputFileWriter(@NotNull AnnotatedModule module, @NotNull String fileName) throws IOException {
+        return getOutputFileWriter(module, fileName, new Function<AnnotatedModule, File>() {
+            @Override
+            public File apply(AnnotatedModule module) {
+                File outputDir;
+                String fileDirectory = libDirectory;
+                if (haveOutputDir) {
+                    if (new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~")) {
+                        outputDir = new File(outputDirectory);
+                    }
+                    else {
+                        outputDir = new File(outputDirectory, fileDirectory);
+                    }
+                }
+                else {
+                    outputDir = new File(fileDirectory);
+                }
+                return outputDir;
+            }
+        });
+    }
+
+    public Writer getOutputFileWriter(@NotNull AnnotatedModule module,
+                                      @NotNull String fileName,
+                                      @NotNull Function<AnnotatedModule, File> outputDirFun)
+            throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
 
-        File outputDir = getOutputDirectory(module.getFilePath());
+        File outputDir = outputDirFun.apply(module);
         File outputFile = new File(outputDir, fileName);
 
         if (!outputDir.exists()) {
@@ -465,29 +533,6 @@ public class RESOLVECompiler {
         osw = new OutputStreamWriter(fos);
 
         return new BufferedWriter(osw);
-    }
-
-    public File getOutputDirectory(@NotNull String fileNameWithPath) {
-
-        File outputDir;
-        String fileDirectory;
-
-        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
-            fileDirectory = ".";
-        }
-        else {
-            fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
-        }
-        if (haveOutputDir) {
-            Path filePathAbsolute = Paths.get(fileDirectory);
-            Path libPathAbsolute = Paths.get(new File(pkgDirectory).getAbsolutePath());
-            Path pathRelative = libPathAbsolute.relativize(filePathAbsolute);
-            outputDir = new File(outputDirectory, pathRelative.toFile().getPath());
-        }
-        else {
-            outputDir = new File(fileDirectory);
-        }
-        return outputDir;
     }
 
     public void addListener(@Nullable RESOLVECompilerListener cl) {

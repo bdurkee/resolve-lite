@@ -74,13 +74,11 @@ public abstract class AbstractCodeGenerator {
 
     public void write(ST code, String fileName) {
         try {
-//			long start = System.currentTimeMillis();
             Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
             w.close();
-//			long stop = System.currentTimeMillis();
         } catch (IOException ioe) {
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
                     ioe,

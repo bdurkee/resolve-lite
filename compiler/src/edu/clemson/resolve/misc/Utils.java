@@ -281,7 +281,7 @@ public class Utils {
         } catch (NoSuchFileException nsfe) {
             //ok, maybe they defined an external file in their own workspace?
             try {
-                Files.walkFileTree(new File(e.pkgDirectory).toPath(), l);
+                Files.walkFileTree(new File(e.libDirectory).toPath(), l);
                 result = l.getFile();
             } catch (IOException ignored) {
             }

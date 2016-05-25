@@ -110,8 +110,13 @@ public class AnnotatedModule {
         return fileName;
     }
 
+    @NotNull
     public File getContainingDir() {
         File result = new File(fileName); //it has to exist, antlr would've thrown a fit if it didn't
+        if (!result.exists() || !result.isDirectory()) {
+            throw new RuntimeException("apparently module: " + name.getText() +
+                    " is not contained in a directory?!");
+        }
         return result.getParentFile();
     }
 
