@@ -13,16 +13,14 @@ import java.util.List;
 
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
-    public CodeGenPipeline(@NotNull RESOLVECompiler compiler,
-                           @NotNull List<AnnotatedModule> compilationUnits) {
+    public CodeGenPipeline(@NotNull RESOLVECompiler compiler, @NotNull List<AnnotatedModule> compilationUnits) {
         super(compiler, compilationUnits);
     }
 
     @Override
     public void process() {
         if (compiler.genCode == null) return;
-        File external = new File(RESOLVECompiler.getCoreLibraryDirectory()
-                + File.separator + "external");
+        File external = new File(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "external");
         for (AnnotatedModule unit : compilationUnits) {
             ParseTree t = unit.getRoot().getChild(0);
             if (t instanceof ResolveParser.PrecisModuleDeclContext ||
@@ -32,8 +30,8 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             ST generatedST = gen.generateModule();
             // System.out.println("t="+generatedST.render());
-            gen.write(generatedST);
-            gen.writeReferencedExternalFiles();
+            gen.write(generatedST, gen.getFileName());
+            //gen.writeReferencedExternalFiles();
         }
     }
 }

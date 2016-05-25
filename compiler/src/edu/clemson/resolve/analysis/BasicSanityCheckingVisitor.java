@@ -3,7 +3,6 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -11,9 +10,6 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 
 class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -28,7 +24,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         Token moduleNameToken = tr.getNameToken();
-        String groomedFileName = Utils.groomFileName(tr.getFileName());
+        String groomedFileName = Utils.groomFileName(tr.getFilePath());
         String extlessFileName = Utils.stripFileExtension(groomedFileName);
 
         if (!moduleNameToken.getText().equals(extlessFileName)) {

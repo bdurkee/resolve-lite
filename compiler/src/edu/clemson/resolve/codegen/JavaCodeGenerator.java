@@ -55,7 +55,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
                 throw new RuntimeException(ioe.getCause());
             }
             ST result = walk(moduleFile).add("module", contents);
-            write(result, fileName);
+            write(result);
         }
     }
 }

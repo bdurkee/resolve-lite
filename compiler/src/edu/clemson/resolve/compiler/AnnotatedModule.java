@@ -106,7 +106,7 @@ public class AnnotatedModule {
     }
 
     @NotNull
-    public String getFileName() {
+    public String getFilePath() {
         return fileName;
     }
 

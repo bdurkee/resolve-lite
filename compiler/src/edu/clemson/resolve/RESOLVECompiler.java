@@ -70,8 +70,8 @@ public class RESOLVECompiler {
     public final String[] args;
     protected boolean haveOutputDir = false;
 
-    //TODO: Change package of this to pkgLibDirectory or contentRootDir.. something like that...
-    public String libDirectory;
+    //TODO: Change package of this to pkgLibDirectory or pkgDirectory.. something like that...
+    public String pkgDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
@@ -87,7 +87,7 @@ public class RESOLVECompiler {
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("pkgDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
@@ -188,24 +188,24 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
-                libDirectory = ".";
+                pkgDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
         }
-        if (libDirectory != null) {
-            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
-                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
+        if (pkgDirectory != null) {
+            if (pkgDirectory.endsWith("/") || pkgDirectory.endsWith("\\")) {
+                pkgDirectory = pkgDirectory.substring(0, pkgDirectory.length() - 1);
             }
-            File outDir = new File(libDirectory);
+            File outDir = new File(pkgDirectory);
             if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
-                libDirectory = ".";
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, pkgDirectory);
+                pkgDirectory = ".";
             }
         }
         else {
-            libDirectory = ".";
+            pkgDirectory = ".";
         }
     }
 
@@ -383,7 +383,7 @@ public class RESOLVECompiler {
         FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
         File result = null;
         try {
-            Files.walkFileTree(new File(libDirectory).toPath(), l);
+            Files.walkFileTree(new File(pkgDirectory).toPath(), l);
             result = l.getFile();
         } catch (NoSuchFileException nsfe) {
             //couldn't find what we were looking for in the local directory?
@@ -454,7 +454,7 @@ public class RESOLVECompiler {
             return new StringWriter();
         }
 
-        File outputDir = getOutputDirectory(module.getFileName());
+        File outputDir = getOutputDirectory(module.getFilePath());
         File outputFile = new File(outputDir, fileName);
 
         if (!outputDir.exists()) {
@@ -480,7 +480,7 @@ public class RESOLVECompiler {
         }
         if (haveOutputDir) {
             Path filePathAbsolute = Paths.get(fileDirectory);
-            Path libPathAbsolute = Paths.get(new File(libDirectory).getAbsolutePath());
+            Path libPathAbsolute = Paths.get(new File(pkgDirectory).getAbsolutePath());
             Path pathRelative = libPathAbsolute.relativize(filePathAbsolute);
             outputDir = new File(outputDirectory, pathRelative.toFile().getPath());
         }

@@ -68,6 +68,10 @@ public abstract class AbstractCodeGenerator {
         return extST.render();
     }
 
+    public void write(ST code) {
+        write(code, getFileName());
+    }
+
     public void write(ST code, String fileName) {
         try {
 //			long start = System.currentTimeMillis();
@@ -82,10 +86,6 @@ public abstract class AbstractCodeGenerator {
                     ioe,
                     fileName);
         }
-    }
-
-    public void write(ST code) {
-        write(code, getFileName());
     }
 
     public STGroup loadTemplates() {
