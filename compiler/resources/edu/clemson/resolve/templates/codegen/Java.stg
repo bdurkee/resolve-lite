@@ -42,9 +42,7 @@ import edu.clemson.resolve.runtime.*;
 >>
 
 fileHeader(resolveFileName, RESOLVEVersion) ::= <<
-/** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>.
- *  This file should not be modified.
- */
+/** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>. This file should not be modified. */
 >>
 
 ConceptModule(concept, types, funcs) ::= <<

@@ -23,6 +23,7 @@ import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -464,7 +465,6 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitConceptModuleDecl(ResolveParser.ConceptModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
-
         if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
@@ -499,6 +499,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
         ModuleFile file = buildFile();
+        file.genPackage = buildPackage();
+
         ExtensionImplModule impl = new ExtensionImplModule(
                 ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
         Scope conceptScope = null;
@@ -528,11 +530,6 @@ public class ModelBuilder extends ResolveBaseListener {
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
-    }
-
-    protected ModuleFile buildFile() {
-        AnnotatedModule annotatedTree = gen.getModule();
-        return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree.getFilePath()), compiler.genPackage);
     }
 
     protected boolean withinFacilityModule() {
@@ -573,6 +570,20 @@ public class ModelBuilder extends ResolveBaseListener {
             }
         }
         return false;
+    }
+
+    protected ModuleFile buildFile() {
+        AnnotatedModule annotatedTree = gen.getModule();
+        return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree.getFilePath()), buildPackage());
+    }
+
+    private String buildPackage() {
+        String pkg = tr.getModulePathRelativeToProjectRoot(gen.compiler.outputDirectory);
+        if (pkg.startsWith(File.separator)) {
+            pkg = pkg.substring(1);
+        }
+        pkg = pkg.substring(0, pkg.lastIndexOf('/'));
+        return pkg.replaceAll(File.separator, ".");
     }
 
     protected CallStat buildPrimitiveInfixStat(String name, ParserRuleContext left, ParserRuleContext right) {

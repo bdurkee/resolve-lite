@@ -321,6 +321,7 @@ public class RESOLVECompiler {
             AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
             try {
                 File file = findResolveFile(importRequest.getNameToken().getText());
+
                 if (module == null) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
@@ -485,7 +486,6 @@ public class RESOLVECompiler {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-
         File outputDir = outputDirFun.apply(module);
         File outputFile = new File(outputDir, fileName);
 
