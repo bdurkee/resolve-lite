@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Traverses a tree of directories. Each file encountered is reported via the
@@ -48,7 +50,8 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     private final PathMatcher matcher;
     private String pattern = null;
 
-    private List<File> matches = new ArrayList<>();
+    private final List<String> excludeDirs = new ArrayList<>();
+    private final List<File> matches = new ArrayList<>();
 
     /**
      * Constructs a new {@code FileLocator} that will match based on the
@@ -65,10 +68,28 @@ public class FileLocator extends SimpleFileVisitor<Path> {
                         "glob:" + pattern + parseExtensions(extensions));
     }
 
+    public FileLocator(String pattern, List<String> extensions, String ... excludeDirs) {
+        this.pattern = pattern;
+        this.excludeDirs.addAll(Arrays.asList(excludeDirs));
+        this.matcher =
+                FileSystems.getDefault().getPathMatcher(
+                        "glob:" + pattern + parseExtensions(extensions));
+    }
+
     public FileLocator(String extension) {
         matcher =
                 FileSystems.getDefault().getPathMatcher(
                         "glob:*{" + extension + "}");
+    }
+
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        if (dir.getFileName().endsWith("gen") || dir.getFileName().endsWith("out")) {
+            return FileVisitResult.SKIP_SUBTREE;
+        }
+        else {
+            return FileVisitResult.CONTINUE;
+        }
     }
 
     @Override

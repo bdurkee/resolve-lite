@@ -69,8 +69,11 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe.getCause());
             }
-            //ST result = walk(moduleFile).add("module", contents);
             JavaOutputDirFun o = new JavaOutputDirFun(compiler);
+
+            //ok. can't do o.apply(module)... it will give us the wrong output directory..
+            //externally referenced files proper out dir is a function of where the original file was located. Not the
+            //file that references it (which is what is assumed below)
             Utils.writeFile(o.apply(module).getPath(), file.getName(), contents);
         }
     }

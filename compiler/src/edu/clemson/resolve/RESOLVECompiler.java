@@ -397,7 +397,7 @@ public class RESOLVECompiler {
 
     @Nullable
     private File findFile(@NotNull String fileName, List<String> extensions) throws IOException {
-        FileLocator l = new FileLocator(fileName, extensions);
+        FileLocator l = new FileLocator(fileName, extensions, "gen", "out"); //ignore gen and out folders.
         File result = null;
         try {
             Files.walkFileTree(new File(libDirectory).toPath(), l);
