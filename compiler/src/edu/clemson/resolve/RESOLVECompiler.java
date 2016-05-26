@@ -26,8 +26,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -83,7 +81,6 @@ public class RESOLVECompiler {
     public String genPackage = null;
     public boolean log = false;
     public boolean printEnv = false;
-    public boolean genFake = false;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
@@ -320,11 +317,22 @@ public class RESOLVECompiler {
         for (ModuleIdentifier importRequest : root.uses) {
             AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
             try {
-                File file = findResolveFile(importRequest.getNameToken().getText());
+                File file = findFile(importRequest.getNameToken().getText());
 
                 if (module == null) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
+                        root.usesFiles.add(file);
+                        for (ModuleIdentifier ext : root.externalUses.values()) {
+                            try {
+                                file = findFile(ext.getNameToken().getText(), NON_NATIVE_EXTENSION);
+                                root.usesFiles.add(file);
+                            } catch (IOException ioe1) {
+                                int i;
+                                i=0;
+                                //if we can't find the external uses, that's ok for now.
+                            }
+                        }
                         roots.put(module.getNameToken().getText(), module);
                     }
                 }
@@ -378,9 +386,18 @@ public class RESOLVECompiler {
         return false;
     }
 
-    @NotNull
-    private File findResolveFile(@NotNull String fileName) throws IOException {
-        FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
+    @Nullable File findFile(@NotNull String fileName) throws IOException {
+        return findFile(fileName, NATIVE_EXTENSION);
+    }
+
+    @Nullable
+    private File findFile(@NotNull String fileName, String ... extensions) throws IOException {
+        return findFile(fileName, Arrays.asList(extensions));
+    }
+
+    @Nullable
+    private File findFile(@NotNull String fileName, List<String> extensions) throws IOException {
+        FileLocator l = new FileLocator(fileName, extensions);
         File result = null;
         try {
             Files.walkFileTree(new File(libDirectory).toPath(), l);
@@ -407,7 +424,10 @@ public class RESOLVECompiler {
                 foundFile = new File(fileName);
             }
             else {
-                foundFile = findResolveFile(Utils.stripFileExtension(fileName));
+                foundFile = findFile(Utils.stripFileExtension(fileName));
+            }
+            if (foundFile == null) {
+                return null;
             }
             return parseModule(new ANTLRFileStream(foundFile.getAbsolutePath()));
         } catch (IOException ioe) {

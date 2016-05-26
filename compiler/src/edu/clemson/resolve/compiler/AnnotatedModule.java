@@ -41,14 +41,16 @@ public class AnnotatedModule {
     public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
+    public List<File> usesFiles = new ArrayList<>();
 
     //use a map for more efficiency when checking whether a module references
     //an external impl
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
 
     /**
-     * Think of the {@code uses} set as refs useful for coming up with module orderings, etc. Think of these then as
-     * the refs the symboltable will see. We don't want implementations of facilities showing up in this set.
+     * Think of the {@code uses} set (declared above) as refs useful for coming up with module orderings, etc. Think
+     * of these then as the refs the symboltable will see. We don't want implementations of facilities showing up
+     * in this set.
      */
     public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
 

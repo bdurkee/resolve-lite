@@ -139,7 +139,7 @@ public class ModelBuilder extends ResolveBaseListener {
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
 
         DecoratedFacilityInstantiation basePtr =
-                new DecoratedFacilityInstantiation(ctx.spec.getText(),ctx.impl.getText());
+                new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
         basePtr.isProxied = false;
         List<Expr> specArgs =
                 ctx.specArgs == null ? new ArrayList<>() :
@@ -365,7 +365,7 @@ public class ModelBuilder extends ResolveBaseListener {
     /**
      * Given an arbitrary expression within some
      * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
-     * suitable for that argument.
+     * for that argument.
      */
     @NotNull
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNamedExpContext ctx) {
@@ -450,12 +450,9 @@ public class ModelBuilder extends ResolveBaseListener {
         FacilityImplModule impl = new FacilityImplModule(ctx.name.getText(), file);
 
         if (ctx.facilityBlock() != null) {
-            impl.facilities.addAll(Utils.collect(FacilityDef.class,
-                    ctx.facilityBlock().facilityDecl(), built));
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class,
-                    ctx.facilityBlock().operationProcedureDecl(), built));
-            impl.repClasses.addAll(Utils.collect(MemberClassDef.class,
-                    ctx.facilityBlock().typeRepresentationDecl(), built));
+            impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx.facilityBlock().facilityDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.facilityBlock().operationProcedureDecl(), built));
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx.facilityBlock().typeRepresentationDecl(), built));
         }
         file.module = impl;
         built.put(ctx, file);
@@ -574,8 +571,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     protected ModuleFile buildFile() {
         AnnotatedModule annotatedTree = gen.getModule();
-        return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree.getFilePath()), buildPackage());
+        return new ModuleFile(annotatedTree,
+                Utils.groomFileName(annotatedTree.getFilePath()), buildPackage()/*, buildImports()*/);
     }
+
 
     private String buildPackage() {
         String pkg = tr.getModulePathRelativeToProjectRoot(gen.compiler.outputDirectory);
@@ -585,6 +584,8 @@ public class ModelBuilder extends ResolveBaseListener {
         pkg = pkg.substring(0, pkg.lastIndexOf('/'));
         return pkg.replaceAll(File.separator, ".");
     }
+
+
 
     protected CallStat buildPrimitiveInfixStat(String name, ParserRuleContext left, ParserRuleContext right) {
         NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
