@@ -572,12 +572,16 @@ public class ModelBuilder extends ResolveBaseListener {
     protected ModuleFile buildFile() {
         AnnotatedModule annotatedTree = gen.getModule();
         return new ModuleFile(annotatedTree,
-                Utils.groomFileName(annotatedTree.getFilePath()), buildPackage()/*, buildImports()*/);
+                Utils.groomFileName(annotatedTree.getFilePath()), buildPackage(), buildImports());
     }
 
 
     private String buildPackage() {
-        String pkg = tr.getModulePathRelativeToProjectRoot(gen.compiler.outputDirectory);
+        return buildPackage(Utils.getModuleFilePathRelativeToProjectLibDirs(tr.getFilePath()));
+    }
+
+    protected static String buildPackage(String filePath) {
+        String pkg = Utils.getModuleFilePathRelativeToProjectLibDirs(filePath);
         if (pkg.startsWith(File.separator)) {
             pkg = pkg.substring(1);
         }
@@ -586,6 +590,15 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
 
+    private List<String> buildImports() {
+        List<String> result = new ArrayList<>();
+        for (File f : gen.module.usesFiles) {
+            String importString = Utils.getModuleFilePathRelativeToProjectLibDirs(f.getPath());
+            importString = importString.substring(0, importString.lastIndexOf('.'));
+            result.add(importString.replaceAll(File.separator, "."));
+        }
+        return result;
+    }
 
     protected CallStat buildPrimitiveInfixStat(String name, ParserRuleContext left, ParserRuleContext right) {
         NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");

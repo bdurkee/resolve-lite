@@ -31,7 +31,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
             }
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             gen.write(gen.generateModule(), gen.getFileName());
-            //gen.writeReferencedExternalFiles();
+            gen.writeReferencedExternalFiles();
         }
     }
 }

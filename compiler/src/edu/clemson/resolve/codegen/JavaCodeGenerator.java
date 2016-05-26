@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.function.Function;
 
 class JavaCodeGenerator extends AbstractCodeGenerator {
@@ -43,16 +44,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
 
     @Override public void write(ST code, String fileName) {
         try {
-            Writer w = compiler.getOutputFileWriter(module, fileName, new Function<AnnotatedModule, File>() {
-                @Override
-                public File apply(AnnotatedModule annotatedModule) {
-                    String filePath = annotatedModule.getModulePathRelativeToProjectRoot(compiler.outputDirectory);
-                    File result = new File(filePath).getParentFile(); //if we have foo/T.resolve, this gives foo/
-
-                    //and this will stick the output directory on the front out/foo
-                    return new File(compiler.outputDirectory, result.getPath());
-                }
-            });
+            Writer w = compiler.getOutputFileWriter(module, fileName, new JavaOutputDirFun(compiler));
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
@@ -65,21 +57,38 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     void writeReferencedExternalFiles() {
-        //these *should* exist;
-        //we've already checked in BasicSanityCheckingVisitor..
-        for (ModuleIdentifier e : module.externalUses.values()) {
-            String fileName = e.getNameString() + getFileExtension();
-            ModuleFile moduleFile = new ModuleFile(null, fileName, compiler.genPackage);
-            File externalFile = Utils.getExternalFile(compiler, e.getNameString());
-            if (externalFile == null) continue;
+        for (File file : module.usesFiles) {
+            if (!file.getPath().endsWith(".java")) continue;
+            /*ModuleFile moduleFile = new ModuleFile(null, file.getName(), ModelBuilder.buildPackage(file.getPath()),
+                    new ArrayList<>()); //TODO: these will probably need imports too.. sigh. maybe just take the
+            //imports from the parenting module? .. hmm. will need to think about this.
+            */
             String contents = null;
             try {
-                contents = Utils.readFile(externalFile.getPath());
+                contents = Utils.readFile(file.getPath());
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe.getCause());
             }
-            ST result = walk(moduleFile).add("module", contents);
-            write(result);
+            //ST result = walk(moduleFile).add("module", contents);
+            JavaOutputDirFun o = new JavaOutputDirFun(compiler);
+            Utils.writeFile(o.apply(module).getPath(), file.getName(), contents);
+        }
+    }
+
+    private static class JavaOutputDirFun implements Function<AnnotatedModule, File> {
+        private final RESOLVECompiler compiler;
+
+        JavaOutputDirFun(RESOLVECompiler compiler) {
+            this.compiler = compiler;
+        }
+
+        @Override
+        public File apply(AnnotatedModule annotatedModule) {
+            String filePath = Utils.getModuleFilePathRelativeToProjectLibDirs(annotatedModule.getFilePath());
+            File result = new File(filePath).getParentFile(); //if we have foo/T.resolve, this gives foo/
+
+            //and this will stick the output directory on the front out/foo
+            return new File(compiler.outputDirectory, result.getPath());
         }
     }
 }

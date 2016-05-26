@@ -96,10 +96,10 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
-        File externalFile = Utils.getExternalFile(compiler, externalNameRef.getText());
+        /*File externalFile = Utils.getExternalFile(compiler, externalNameRef.getText());
         if (externalFile == null) {
             compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE, externalNameRef,
                     externalNameRef.getText());
-        }
+        }*/
     }
 }

@@ -48,6 +48,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -264,28 +266,25 @@ public class Utils {
         return null;
     }
 
-    /**
-     * Given an extensionless {@code name} and a compiler instance; searches for and returns an external file of
-     * name {@code name}.
-     */
-    @Nullable
-    public static File getExternalFile(@NotNull RESOLVECompiler e, @Nullable String name) {
-        if (name == null) return null;
-        FileLocator l = new FileLocator(name, RESOLVECompiler.NON_NATIVE_EXTENSION);
-        File result = null;
-        try {
-            //an external file is likely going to appear in the core lib
-            //so we search there first..
-            Files.walkFileTree(new File(RESOLVECompiler.getCoreLibraryDirectory()).toPath(), l);
-            result = l.getFile();
-        } catch (NoSuchFileException nsfe) {
-            //ok, maybe they defined an external file in their own workspace?
-            try {
-                Files.walkFileTree(new File(e.libDirectory).toPath(), l);
-                result = l.getFile();
-            } catch (IOException ignored) {
-            }
-        } catch (IOException ignored) {
+    public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
+        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
+        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
+
+        String result = null;
+        Path modulePath = new File(filePath).toPath();
+        if (modulePath.startsWith(resolvePath)) {
+            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else if (modulePath.startsWith(resolveRoot)) {
+            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else {
+            //just use the lib directory if the user has a non-conformal project..
+            result = new File(modulePath.toFile().getPath()).getPath();
         }
         return result;
     }

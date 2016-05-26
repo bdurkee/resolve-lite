@@ -112,29 +112,6 @@ public class AnnotatedModule {
         return fileName;
     }
 
-    public String getModulePathRelativeToProjectRoot(String projectRoot) {
-        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
-        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
-
-        String result = null;
-        Path modulePath = new File(fileName).toPath();
-        if (modulePath.startsWith(resolvePath)) {
-            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else if (modulePath.startsWith(resolveRoot)) {
-            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else {
-            //just use the lib directory if the user has a non-conformal project..
-            result = new File(modulePath.toFile().getPath()).getPath();
-        }
-        return result;
-    }
-
     @NotNull
     public File getContainingDir() {
         File result = new File(fileName); //it has to exist, antlr would've thrown a fit if it didn't
