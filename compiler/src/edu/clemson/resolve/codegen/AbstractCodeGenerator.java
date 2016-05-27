@@ -12,9 +12,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A general base class for anything in the compiler that requires us to
- * produce a 'significant' amount of structured code/output/text. This includes
- * our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
+ * A general base class for anything in the compiler that requires us to produce a 'significant' amount of structured
+ * code/output/text. This includes our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
  * from {@link edu.clemson.resolve.vcgen.VCGenerator}.
  */
 public abstract class AbstractCodeGenerator {

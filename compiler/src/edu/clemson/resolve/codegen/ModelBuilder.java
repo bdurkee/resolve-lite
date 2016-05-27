@@ -24,6 +24,7 @@ import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -395,13 +396,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier(
-                "Boolean_Template", "Std_Bools"), "Boolean", ctx.getText()));
+                "concepts.boolean_template.Boolean_Template", "Std_Bools"), "Boolean", ctx.getText()));
     }
 
     @Override
     public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier(
-                "Integer_Template", "Std_Ints"), "Integer", ctx.getText()));
+                "concepts.integer_template.Integer_Template", "Std_Ints"), "Integer", ctx.getText()));
     }
 
     @Override
@@ -421,9 +422,7 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitConceptImplModuleDecl(
             ResolveParser.ConceptImplModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        ConceptImplModule impl =
-                new ConceptImplModule(ctx.name.getText(),
-                        ctx.concept.getText(), file);
+        ConceptImplModule impl = new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
         if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().procedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().operationProcedureDecl(), built));
@@ -534,16 +533,15 @@ public class ModelBuilder extends ResolveBaseListener {
         return t.getChild(0) instanceof ResolveParser.FacilityModuleDeclContext;
     }
 
-    protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
-            throws NoSuchSymbolException {
+    protected boolean isJavaLocallyAccessibleSymbol(@Nullable Symbol s) throws NoSuchSymbolException {
+        if (s == null) return false;
         //System.out.println("symbol: "+s.getNameToken()+":"+s.getModuleIdentifier()+" is locally accessible?");
         boolean result = isJavaLocallyAccessibleSymbol(s.getModuleIdentifier());
         //System.out.println(result);
         return result;
     }
 
-    protected boolean isJavaLocallyAccessibleSymbol(
-            @NotNull ModuleIdentifier symbolModuleID) {
+    protected boolean isJavaLocallyAccessibleSymbol(@NotNull ModuleIdentifier symbolModuleID) {
         //was s defined in the module we're translating?
         if (moduleScope.getModuleIdentifier().equals(symbolModuleID)) {
             return true;
@@ -589,7 +587,6 @@ public class ModelBuilder extends ResolveBaseListener {
         return pkg.replaceAll(File.separator, ".");
     }
 
-
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
         for (File f : gen.module.usesFiles) {
@@ -606,45 +603,56 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     protected Qualifier buildQualifier(@Nullable Token refQualifier, @NotNull Token refName) {
-        try {
-            Symbol corresondingSym = null;
-            if (refQualifier == null) {
+        Symbol corresondingSym = null;
+
+        //if the reference was not qualified, a simple query should be able to find it.
+        if (refQualifier == null) {
+            try {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
-                NormalQualifier q;
-                if (isJavaLocallyAccessibleSymbol(corresondingSym)) {
-                    //this.<symName>
-                    if (withinFacilityModule()) {
-                        q = new NormalQualifier(moduleScope.getModuleIdentifier().getNameString());
-                    }
-                    else {
-                        q = new NormalQualifier("this");
-                    }
+            } catch (NoSuchSymbolException | DuplicateSymbolException |
+                     UnexpectedSymbolException | NoSuchModuleException e) {}
+            String qualifier = getFullyQualifiedModuleIdentifier(corresondingSym.getModuleIdentifier());
+            return new NormalQualifier(qualifier);
+        }
+        else { // if the reference was qualified, let's see if it was a facility or module.
+            try {
+                Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier, true));
+                if (s instanceof FacilitySymbol) {
+                    ModuleIdentifier id =
+                            ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
+                    String qualifier = getFullyQualifiedModuleIdentifier(id);
+                    return new FacilityQualifier(qualifier, s.getName());
                 }
-                else { //something referenced from a facility module (to say another facility module)
-                    //Test_Fac.<symName>
-                    q = new NormalQualifier(corresondingSym.getModuleIdentifier().getNameString());
-                }
-                return q;
             }
-            //We're here: so the call (or thing) was qualified... is the qualifier
-            //referring to a facility? Let's check.
-            FacilitySymbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier, true)).toFacilitySymbol();
-            //ok, it's referring to a facility alright
-            //(we would've already been kicked to catch below if it wasn't).
-            //So let's assign correspondingSym using a namequery with 'refqualifier'
-            //as the qualifier.
-            corresondingSym = moduleScope.queryForOne(new NameQuery(refQualifier, refName, true));
-            return new FacilityQualifier(
-                    corresondingSym.getModuleIdentifier().getNameString(), s.getName());
-        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            assert refQualifier != null;
-            if (isJavaLocallyAccessibleSymbol(new ModuleIdentifier(refQualifier))) {
-                return new NormalQualifier("this");
+            catch (NoSuchSymbolException e) {
+                //not dealing with a facility... the qualifier must be a module then..
+                Symbol s = null;
+                try {
+                    s = moduleScope.queryForOne(new NameQuery(refQualifier, refName, true));
+                } catch (Exception e1) {
+                    return new NormalQualifier(refQualifier.getText());
+                }
+                String qualifier = getFullyQualifiedModuleIdentifier(corresondingSym.getModuleIdentifier());
+                return new FacilityQualifier(qualifier, s.getName());
+            } catch (UnexpectedSymbolException | NoSuchModuleException | DuplicateSymbolException e) {
+                //none of these should happen as we're not  coercing anything or naming a specific module, duplicate
+                //symbols should have been detected in population..
             }
             return new NormalQualifier(refQualifier.getText());
-        } catch (UnexpectedSymbolException | NoSuchModuleException e) {
-            throw new RuntimeException();//populator should've tripped it.
         }
+    }
+
+    private String getFullyQualifiedModuleIdentifier(ModuleIdentifier id) {
+        String qualifiedName = null;
+        try {
+            File foundFile = gen.compiler.findFile(id.getNameString());
+            qualifiedName = Utils.getModuleFilePathRelativeToProjectLibDirs(foundFile.getPath());
+            qualifiedName = Utils.stripFileExtension(qualifiedName);
+            qualifiedName = qualifiedName.replace(File.separator, ".");
+        }
+        catch (IOException ioe1) {
+            qualifiedName = id.getNameString();
+        }
+        return qualifiedName;
     }
 }

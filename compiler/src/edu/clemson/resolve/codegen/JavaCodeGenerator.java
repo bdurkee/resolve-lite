@@ -74,11 +74,11 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
             //ok. can't do o.apply(module)... it will give us the wrong output directory..
             //externally referenced files proper out dir is a function of where the original file was located. Not the
             //file that references it (which is what is assumed below)
-            Utils.writeFile(o.apply(module).getPath(), file.getName(), contents);
+            Utils.writeFile(o.apply(file.getPath()).getPath(), file.getName(), contents);
         }
     }
 
-    private static class JavaOutputDirFun implements Function<AnnotatedModule, File> {
+    protected static class JavaOutputDirFun implements Function<String, File> {
         private final RESOLVECompiler compiler;
 
         JavaOutputDirFun(RESOLVECompiler compiler) {
@@ -86,8 +86,8 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         }
 
         @Override
-        public File apply(AnnotatedModule annotatedModule) {
-            String filePath = Utils.getModuleFilePathRelativeToProjectLibDirs(annotatedModule.getFilePath());
+        public File apply(String filePath) {
+            filePath = Utils.getModuleFilePathRelativeToProjectLibDirs(filePath);
             File result = new File(filePath).getParentFile(); //if we have foo/T.resolve, this gives foo/
 
             //and this will stick the output directory on the front out/foo

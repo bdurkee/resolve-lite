@@ -155,11 +155,12 @@ public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
     this(<[ctor.members, "null"]; separator=", ">);
 }
 
-/** This constructor should only get invoked in the case of enhancements; as
- *  the last parameter 'delegate' takes an instance of the base concept.
- *  \<p>
- *  The only reason it's here is simplicity. If the compiler is correct,
- *  this should never get invoked from the wrong place.\</p>
+/**
+ * This constructor should only get invoked in the case of enhancements; as the last parameter 'delegate' takes an
+ * instance of the base concept.
+ * \<p>
+ * The only reason it's here is simplicity. If the compiler is correct, this should never get invoked from the
+ * wrong place.\</p>
  */
 public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
                      {<ctor.delegateInterface> delegate}]; anchor, separator=", \n">) {
@@ -316,7 +317,7 @@ new BaseOperationParameter() {
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.referencedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
+((<q.fullyQualifiedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
 <toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
 
 NormalQualifier(q) ::= "<q.name>"

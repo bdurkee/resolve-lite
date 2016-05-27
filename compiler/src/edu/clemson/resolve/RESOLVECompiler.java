@@ -386,7 +386,7 @@ public class RESOLVECompiler {
         return false;
     }
 
-    @Nullable File findFile(@NotNull String fileName) throws IOException {
+    @Nullable public File findFile(@NotNull String fileName) throws IOException {
         return findFile(fileName, NATIVE_EXTENSION);
     }
 
@@ -479,9 +479,9 @@ public class RESOLVECompiler {
      * {@code outputDirectory==null} then write a String.
      */
     public Writer getOutputFileWriter(@NotNull AnnotatedModule module, @NotNull String fileName) throws IOException {
-        return getOutputFileWriter(module, fileName, new Function<AnnotatedModule, File>() {
+        return getOutputFileWriter(module, fileName, new Function<String, File>() {
             @Override
-            public File apply(AnnotatedModule module) {
+            public File apply(String filePath) {
                 File outputDir;
                 String fileDirectory = libDirectory;
                 if (haveOutputDir) {
@@ -502,11 +502,11 @@ public class RESOLVECompiler {
 
     public Writer getOutputFileWriter(@NotNull AnnotatedModule module,
                                       @NotNull String fileName,
-                                      @NotNull Function<AnnotatedModule, File> outputDirFun) throws IOException {
+                                      @NotNull Function<String, File> outputDirFun) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-        File outputDir = outputDirFun.apply(module);
+        File outputDir = outputDirFun.apply(module.getFilePath());
         File outputFile = new File(outputDir, fileName);
 
         if (!outputDir.exists()) {
