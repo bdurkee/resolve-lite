@@ -14,7 +14,6 @@ Precis Basic_Integer_Theory;
 
     Theorem I1 :
         ∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
-     //∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
 
     Theorem I2 : ∀ n : Z, ⨩(⨩(n)) = n;
 
