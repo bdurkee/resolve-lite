@@ -41,7 +41,9 @@ public class AnnotatedModule {
     public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
-    public List<File> usesFiles = new ArrayList<>();
+
+    //won't contain precis Files
+    public List<File> usesFilesForCodegen = new ArrayList<>();
 
     //use a map for more efficiency when checking whether a module references
     //an external impl
@@ -110,16 +112,6 @@ public class AnnotatedModule {
     @NotNull
     public String getFilePath() {
         return fileName;
-    }
-
-    @NotNull
-    public File getContainingDir() {
-        File result = new File(fileName); //it has to exist, antlr would've thrown a fit if it didn't
-        if (!result.exists()) {
-            throw new RuntimeException("apparently module: " + name.getText() +
-                    " is not contained in a directory?!");
-        }
-        return result.getParentFile();
     }
 
     @NotNull

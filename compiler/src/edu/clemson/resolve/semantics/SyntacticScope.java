@@ -114,7 +114,6 @@ public abstract class SyntacticScope extends AbstractScope {
                 symbolTableView = updateSymbols(symbols, genericInstantiations, instantiatingFacility);
             }
             finished = searcher.addMatches(symbolTableView, matches, l);
-
             if (!finished) {
                 finished = parent.addMatches(searcher, matches, searchedScopes,
                         genericInstantiations, instantiatingFacility, l);

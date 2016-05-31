@@ -1741,31 +1741,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         if (entailsRetype != null) {
-            s.setClassification(
-                    new MathNamedClassification(g, name,
-                            entailsRetype.typeRefDepth - 1, entailsRetype));
+            s.setClassification(new MathNamedClassification(g, name, entailsRetype.typeRefDepth - 1, entailsRetype));
         }
         exactNamedMathClssftns.put(ctx, s.getClassification());
         if (s.getClassification().identifiesSchematicType) {
             tr.mathClssftns.put(ctx, s.getClassification());
         }
         else {
-            tr.mathClssftns.put(ctx, s.getClassification()
-                    .getEnclosingClassification());
+            tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
     }
 
     @Nullable
-    private MathClssftnWrappingSymbol getIntendedMathSymbol(
-            @Nullable Token qualifier, @NotNull String symbolName,
-            @NotNull ParserRuleContext ctx) {
+    private MathClssftnWrappingSymbol getIntendedMathSymbol(@Nullable Token qualifier,
+                                                            @NotNull String symbolName,
+                                                            @NotNull ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(qualifier,
-                            symbolName, ctx.getStart()));
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName, ctx.getStart()));
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
-                    symbolName);
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), symbolName);
         } catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(nsme.getErrorKind(),
                     nsme.getRequestedModule(),
@@ -1794,8 +1789,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void expectType(ParserRuleContext ctx, MathClassification expected) {
         MathClassification foundType = tr.mathClssftns.get(ctx);
         if (!g.isSubtype(foundType, expected)) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                    ctx.getStart(), expected, foundType);
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE, ctx.getStart(), expected, foundType);
         }
     }
 
@@ -1810,8 +1804,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void visitAndClassifyMathExpCtx(@NotNull ParseTree ctx,
                                             @NotNull ParseTree child) {
         this.visit(child);
-        exactNamedMathClssftns.put(ctx,
-                exactNamedMathClssftns.get(child));
+        exactNamedMathClssftns.put(ctx, exactNamedMathClssftns.get(child));
         MathClassification x = tr.mathClssftns.get(child);
         tr.mathClssftns.put(ctx, tr.mathClssftns.get(child));
     }
@@ -1842,8 +1835,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
         if (missingReturn) {
-            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT,
-                    operationName, operationName.getText());
+            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT, operationName, operationName.getText());
         }
     }
 

@@ -1,6 +1,5 @@
 package edu.clemson.resolve.codegen;
 
-import edu.clemson.resolve.codegen.model.ModuleFile;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
@@ -9,7 +8,6 @@ import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.stringtemplate.v4.AutoIndentWriter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STWriter;
@@ -17,9 +15,6 @@ import org.stringtemplate.v4.STWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.function.Function;
 
 class JavaCodeGenerator extends AbstractCodeGenerator {
@@ -57,7 +52,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     void writeReferencedExternalFiles() {
-        for (File file : module.usesFiles) {
+        for (File file : module.usesFilesForCodegen) {
             if (!file.getPath().endsWith(".java")) continue;
             /*ModuleFile moduleFile = new ModuleFile(null, file.getName(), ModelBuilder.buildPackage(file.getPath()),
                     new ArrayList<>()); //TODO: these will probably need imports too.. sigh. maybe just take the

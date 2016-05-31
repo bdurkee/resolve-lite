@@ -589,7 +589,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-        for (File f : gen.module.usesFiles) {
+        for (File f : gen.module.usesFilesForCodegen) {
             String importString = Utils.getModuleFilePathRelativeToProjectLibDirs(f.getPath());
             importString = importString.substring(0, importString.lastIndexOf('.'));
             result.add(importString.replaceAll(File.separator, "."));

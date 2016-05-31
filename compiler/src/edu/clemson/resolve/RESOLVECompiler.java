@@ -267,7 +267,7 @@ public class RESOLVECompiler {
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, modules);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, modules);
         VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
-
+        if (errMgr.getErrorCount() > 0) return; //I just really don't want to analyze something erroneous..
         analysisPipe.process();
         if (errMgr.getErrorCount() > initialErrCt) {
             return;
@@ -322,11 +322,14 @@ public class RESOLVECompiler {
                 if (module == null) {
                     module = parseModule(file.getAbsolutePath());
                     if (module != null) {
-                        root.usesFiles.add(file);
+                        if (!(module.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleDeclContext ||
+                                module.getRoot().getChild(0) instanceof  ResolveParser.PrecisExtModuleDeclContext)) {
+                            root.usesFilesForCodegen.add(file);
+                        }
                         for (ModuleIdentifier ext : root.externalUses.values()) {
                             try {
                                 file = findFile(ext.getNameToken().getText(), NON_NATIVE_EXTENSION);
-                                root.usesFiles.add(file);
+                                root.usesFilesForCodegen.add(file);
                             } catch (IOException ioe1) {
                                 int i;
                                 i=0;
@@ -397,6 +400,10 @@ public class RESOLVECompiler {
 
     @Nullable
     private File findFile(@NotNull String fileName, List<String> extensions) throws IOException {
+
+
+        //TODO: First check std libs using the fileLocator...
+        //if not found in there, then scan through the files in the lib directory... DONT search recursively.
         FileLocator l = new FileLocator(fileName, extensions, "gen", "out"); //ignore gen and out folders.
         File result = null;
         try {
@@ -419,17 +426,11 @@ public class RESOLVECompiler {
                 errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
                 return null;
             }
-            File foundFile = null;
-            if (new File(fileName).exists()) {
-                foundFile = new File(fileName);
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(libDirectory, fileName);
             }
-            else {
-                foundFile = findFile(Utils.stripFileExtension(fileName));
-            }
-            if (foundFile == null) {
-                return null;
-            }
-            return parseModule(new ANTLRFileStream(foundFile.getAbsolutePath()));
+            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
