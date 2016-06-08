@@ -1420,7 +1420,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //If we're describing a type, then the range (as a result of the function is too broad),
         //so we'll annotate the type of this application with its (verbose) application type.
         //but it's enclosing type will of course still be the range.
-        if (walkingType && expectedFuncType.getResultType().getTypeRefDepth() <= 1) {
+        if (walkingType && expectedFuncType.getRangeClssftn().getTypeRefDepth() <= 1) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
         }
@@ -1441,8 +1441,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //  C \ E2 : D
             //  ---------------------
             //  C \ f(E1, E2) : R
-            exactNamedMathClssftns.put(ctx, expectedFuncType.getResultType());
-            tr.mathClssftns.put(ctx, expectedFuncType.getResultType());
+            exactNamedMathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
+            tr.mathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
         }
     }
 

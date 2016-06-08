@@ -111,7 +111,7 @@ public class PLambda extends PExp {
 
     @NotNull
     @Override
-    public String getCanonicalName() {
+    public String getTopLevelOperationName() {
         return "\\lambda";
     }
 

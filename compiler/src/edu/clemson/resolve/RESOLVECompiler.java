@@ -75,6 +75,7 @@ public class RESOLVECompiler {
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
+    public boolean prove = false;
     public String genCode;
 
     @Deprecated
@@ -89,6 +90,7 @@ public class RESOLVECompiler {
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
+            new Option("prove", "-prove", "attempt to prove generated VCs for the current file"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
             new Option("printEnv", "-env", "print path variables"),
     };

@@ -65,7 +65,7 @@ public class PApply extends PExp {
         INFIX {
             @Override
             protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getCanonicalName() + " ") + ")";
+                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ") + ")";
             }
 
             @Override
@@ -92,7 +92,7 @@ public class PApply extends PExp {
                 if (s.arguments.size() > 1) {
                     retval = "(" + retval + ")";
                 }
-                return retval + s.functionPortion.getCanonicalName();
+                return retval + s.functionPortion.getTopLevelOperationName();
             }
 
             @Override
@@ -248,7 +248,7 @@ public class PApply extends PExp {
     public boolean isObviouslyTrue() {
         boolean result = (functionPortion instanceof PSymbol);
         if (result) {
-            result = functionPortion.getCanonicalName().equals("=") &&
+            result = functionPortion.getTopLevelOperationName().equals("=") &&
                     arguments.size() == 2 &&
                     arguments.get(0).equals(arguments.get(1));
         }
@@ -257,18 +257,18 @@ public class PApply extends PExp {
 
     @Override
     public boolean isEquality() {
-        return arguments.size() == 2 && functionPortion.getCanonicalName().equals("=");
+        return arguments.size() == 2 && functionPortion.getTopLevelOperationName().equals("=");
     }
 
     @Override
     public boolean isConjunct() {
-        return arguments.size() == 2 && functionPortion.getCanonicalName().equals("and");
+        return arguments.size() == 2 && functionPortion.getTopLevelOperationName().equals("and");
     }
 
     @NotNull
     @Override
-    protected String getCanonicalName() {
-        return functionPortion.getCanonicalName();
+    public String getTopLevelOperationName() {
+        return functionPortion.getTopLevelOperationName();
     }
 
     @Override
@@ -283,7 +283,7 @@ public class PApply extends PExp {
 
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
-        if (arguments.size() == 2 && functionPortion.getCanonicalName().equals("and")) {
+        if (arguments.size() == 2 && functionPortion.getTopLevelOperationName().equals("and")) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }
@@ -301,10 +301,10 @@ public class PApply extends PExp {
     public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getCanonicalName().equals("and")) {
+        if (getTopLevelOperationName().equals("and")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
-        else if (getCanonicalName().equals("implies")) {
+        else if (getTopLevelOperationName().equals("implies")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
             //tempList = arguments.get(0).split(assumptions);

@@ -1,23 +1,25 @@
 package edu.clemson.resolve.vcgen.model;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
+import edu.clemson.resolve.vcgen.VCFormatException;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VCOutputFile extends OutputModelObject {
 
-    private int assertiveBatchCt;
+    private int currentVcNumber;
+    private final RESOLVECompiler compiler;
 
     /**
-     * All completed {@link AssertiveBlock} objects; where each represents a vc or group of vcs that must be satisfied
-     * to verify a parsed program.
+     * All raw {@link AssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
+     * must be satisfied to verify the program under consideration.
      */
     @ModelElement
     public List<AssertiveBlock> chunks = new ArrayList<>();
@@ -26,8 +28,9 @@ public class VCOutputFile extends OutputModelObject {
     @ModelElement
     public List<VC> finalVcs = new ArrayList<>();
 
-    public VCOutputFile() {
-        assertiveBatchCt = 0;
+    public VCOutputFile(@NotNull RESOLVECompiler rc) {
+        this.currentVcNumber = 1;
+        this.compiler = rc;
     }
 
     public List<VC> getFinalVCs() {
@@ -36,51 +39,55 @@ public class VCOutputFile extends OutputModelObject {
 
     public void addAssertiveBlock(AssertiveBlock b) {
         chunks.add(b);
-        addVCsInContext(b, assertiveBatchCt);
-        assertiveBatchCt++;
+        addVCsInContext(b);
     }
 
+    /**
+     * A convenience method for tools looking to annotate lines by {@link VC} information
+     *
+     * @return A mapping from line number to the VCs arising from that particular line.
+     */
     public Map<Integer, List<VC>> getVCsGroupedByLineNumber() {
         Map<Integer, List<VC>> result = new LinkedHashMap<>();
         for (VC vc : finalVcs) {
-            VC.VCInfo consequentInfo = vc.getConsequentInfo();
-            int line = consequentInfo.location.getLine();
+            int line = vc.getLocation().getLine();
             result.putIfAbsent(line, new ArrayList<>());
             result.get(line).add(vc);
         }
         return result;
     }
 
-    /**
-     * Each {@code AssertiveBlock} contains a set of VCs that refer to the same set of free variables.  This method
-     * adds each {@code VC} to the final list.
-     *
-     * @param batch         The set of {@code VC}s in context.
-     * @param sectionNumber The batch number so that we can mirror the numbering used by the Verifier.
-     *                      (Ideally, we should eventually embed the name of each {@code VC} from the Verifier with
-     *                      its name for greater robustness.)
-     */
-    private void addVCsInContext(final AssertiveBlock batch, final int sectionNumber) {
+    private void addVCsInContext(final AssertiveBlock batch) {
 
         VCConfirm batchedConfirm = batch.getFinalConfirm();
         List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
-        int vcIndex = 1;
-        for (PExp vc : sequentComponents) {
-            List<? extends PExp> args = vc.getSubExpressions();
-            if (!(vc instanceof PApply)) continue;
+
+        PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
+            @Override
+            public int compare(VC o1, VC o2) {
+                return o1.getNumber() <= o2.getNumber() ? -1 : 1;
+            }
+        });
+        for (PExp e : sequentComponents) {
+            List<? extends PExp> args = e.getSubExpressions();
+            if (!(e instanceof PApply)) continue;   //TODO: Why is this here again?
 
             PExp antecedentExp = args.get(1);
             PExp consequentExp = args.get(2);
-
-            VC curVC = new VC(sectionNumber + "_" + vcIndex, antecedentExp, consequentExp);
             if (args.get(2).isObviouslyTrue()) continue;
-            finalVcs.add(curVC);
-            vcIndex++;
+
+            if (consequentExp.getVCLocation() == null) {
+                compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, consequentExp.toString());
+                continue;
+            }
+            VC curVC = new VC(consequentExp.getVCLocation().getLine(), antecedentExp, consequentExp);
+            vcTempBatchOrderedByLine.add(curVC);
+        }
+        VC vc = null;
+        while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
+            finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
+            currentVcNumber++;
         }
     }
-
-
-
-
 }

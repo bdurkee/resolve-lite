@@ -265,7 +265,7 @@ public class PAlternatives extends PExp {
 
     @NotNull
     @Override
-    protected String getCanonicalName() {
+    public String getTopLevelOperationName() {
         return "{{ PAlternatives }}";
     }
 

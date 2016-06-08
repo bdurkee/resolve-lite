@@ -245,7 +245,9 @@ public enum ErrorKind {
 
     MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>", ErrorSeverity.ERROR),
 
-    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR);
+    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR),
+
+    VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING);
 
     public final int code;
     public final String message;

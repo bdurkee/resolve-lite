@@ -239,7 +239,7 @@ public class MathFunctionClassification extends MathClassification {
         return domainType;
     }
 
-    public MathClassification getResultType() {
+    public MathClassification getRangeClssftn() {
         return resultType;
     }
 
