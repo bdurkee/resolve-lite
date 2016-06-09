@@ -247,7 +247,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         // this is the full type and is necessarily a function type
 
-        MathClassification rangeType = ((MathFunctionClassification) typeOfFormula).getResultType();
+        MathClassification rangeType = ((MathFunctionClassification) typeOfFormula).getRangeClssftn();
         String symName =
                 m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
         assert rangeType != null : symName + " has null type";
