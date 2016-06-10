@@ -26,6 +26,8 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -237,6 +239,8 @@ public class RESOLVECompiler {
     public void processCommandLineTargets() {
         //TESTING CMDS:
         if (printEnv) {
+            info("SYSTEM DIR: " + System.getProperty("user.dir"));
+            info("HERE's new File('.'): " + new File(".").getAbsolutePath());
             info("$RESOLVEROOT=" + System.getenv("RESOLVEROOT"));
             Map<String, String> x = System.getenv();
             for (String o : x.keySet()) {
@@ -402,36 +406,65 @@ public class RESOLVECompiler {
 
     @Nullable
     private File findFile(@NotNull String fileName, List<String> extensions) throws IOException {
-
-
-        //TODO: First check std libs using the fileLocator...
-        //if not found in there, then scan through the files in the lib directory... DONT search recursively.
-        FileLocator l = new FileLocator(fileName, extensions, "gen", "out"); //ignore gen and out folders.
-        File result = null;
-        try {
-            Files.walkFileTree(new File(libDirectory).toPath(), l);
-            result = l.getFile();
-        } catch (NoSuchFileException nsfe) {
-            //couldn't find what we were looking for in the local directory?
-            //well, let's try the core libraries then
-            String stdSrcsPath = getCoreLibraryDirectory();
-            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
-            result = l.getFile();
+        boolean satisfiesExtension = false;
+        for (String ext : extensions) {
+            if (fileName.endsWith(ext)) {
+                satisfiesExtension = true;
+                break;
+            }
         }
-        return result;
+        if (!satisfiesExtension) {
+            errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
+            return null;
+        }
+
+        //first check to see if we're on RESOLVEPATH
+        Path projectPath = Paths.get(libDirectory).toAbsolutePath();
+        Path resolvePath = Paths.get(getLibrariesPathDirectory()).toAbsolutePath();
+        if (!projectPath.startsWith(resolvePath)) {
+            File localFile = searchNonPathProjectDirectory(fileName);
+            if (localFile != null) return localFile;
+        }
+        File file = new File(fileName);
+        if (!file.isAbsolute()) {
+            file = new File(libDirectory, fileName);    //first try searching in the local project..
+        }
+        //we didn't find it? then try std library root (e.g. RESOLVEROOT)
+        if (!file.exists()) {
+            file = new File(getCoreLibraryDirectory() + File.pathSeparator + "src", fileName);
+        }
+        return file;
+    }
+
+    @Nullable
+    private File searchNonPathProjectDirectory(String fileName) {
+        Path projectPath = Paths.get(libDirectory).toAbsolutePath();
+
+        File localFile = new File(projectPath.getParent().getParent().toString(), fileName);
+        if (localFile.exists()) {
+            return localFile;
+        }
+        else {
+            searchRESOLVEROOTDirectory(fileName);
+        }
+    }
+
+    @Nullable
+    private File searchRESOLVELocalProjectDirectory(String fileName) {
+        File result = new File(getLibrariesPathDirectory() + File.pathSeparator + "src", fileName);
+        return result.exists() ? result : null;
+    }
+
+    @Nullable
+    private File searchRESOLVEROOTDirectory(String fileName) {
+        File result = new File(getCoreLibraryDirectory() + File.pathSeparator + "src", fileName);
+        return result.exists() ? result : null;
     }
 
     @Nullable
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
-            if (!fileName.endsWith(".resolve")) {
-                errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
-                return null;
-            }
-            File file = new File(fileName);
-            if (!file.isAbsolute()) {
-                file = new File(libDirectory, fileName);
-            }
+            File file = findFile(fileName);
             return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);

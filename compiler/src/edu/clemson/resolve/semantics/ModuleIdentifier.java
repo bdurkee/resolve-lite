@@ -1,12 +1,17 @@
 package edu.clemson.resolve.semantics;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveLexer;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,22 +32,36 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     public final Set<String> tagAliases = new HashSet<>();
     @NotNull
-    private final Token name;
+    private  Token name;
     private final boolean globalFlag;
+
+    public List<Token> moduleIdentPieces = new ArrayList<>();
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");
         this.globalFlag = true;
     }
 
-    public ModuleIdentifier(@NotNull Token t) {
-        this.name = t;
+    public ModuleIdentifier(ResolveParser.ModuleIdentContext m) {
+        this(Utils.apply(m.ID(), TerminalNode::getSymbol));
+    }
+
+    public ModuleIdentifier(ResolveParser.UsesSpecContext m) {
+        this(Utils.apply(m.moduleIdent().ID(), TerminalNode::getSymbol));
+    }
+
+    public ModuleIdentifier(@NotNull List<Token> t) {
+        this.moduleIdentPieces.addAll(t);
         this.globalFlag = false;
     }
 
     @NotNull
     public String getNameString() {
         return name.getText();
+    }
+
+    @NotNull public String getFullyQualifiedName() {
+        return this.toString();
     }
 
     @NotNull
@@ -70,11 +89,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public String toString() {
-        return name.getText();
-    }
-
-    @NotNull
-    public String fullyQualifiedRepresentation(@Nullable String symbolName) {
-        return name.getText() + " :: " + symbolName;
+        List<String> pieces = Utils.apply(moduleIdentPieces, Token::getText);
+        return Utils.join(pieces, ".");
     }
 }

@@ -27,7 +27,7 @@ public class UsesListener extends ResolveBaseListener {
     public UsesListener(AnnotatedModule tr) {
         this.tr = tr;
     }
-
+/*
     @Override
     public void enterPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
@@ -102,5 +102,5 @@ public class UsesListener extends ResolveBaseListener {
         else {
             //tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
-    }
+    }*/
 }

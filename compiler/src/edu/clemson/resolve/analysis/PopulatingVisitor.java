@@ -100,9 +100,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitPrecisModuleDecl(ResolveParser.PrecisModuleDeclContext ctx) {
-        if (ctx.tag != null) {
-            symtab.addTag(new ModuleIdentifier(ctx.tag));
-        }
         super.visitChildren(ctx);
         return null;
     }
