@@ -105,8 +105,8 @@ usesList
     :   'uses' usesSpec (',' usesSpec)*
     ;
 
-usesSpec : moduleIdent alias? ';' ;
-moduleIdent :   ID ('.' ID)* ;
+usesSpec : ID fromClause alias? ';' ;
+fromClause :   'from' ID ('.' ID)* ;
 alias : 'as' ID ;
 
 // module blocks & items
