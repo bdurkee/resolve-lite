@@ -32,26 +32,24 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     public final Set<String> tagAliases = new HashSet<>();
     @NotNull
-    private  Token name;
+    private Token name;
     private final boolean globalFlag;
 
-    public List<Token> moduleIdentPieces = new ArrayList<>();
+    public List<Token> fromClausePath = new ArrayList<>();
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");
         this.globalFlag = true;
     }
 
-    public ModuleIdentifier(ResolveParser.ModuleIdentContext m) {
-        this(Utils.apply(m.ID(), TerminalNode::getSymbol));
+    public ModuleIdentifier(@NotNull ResolveParser.UsesSpecContext m) {
+        this(m.ID().getSymbol(), m.alias() != null ?
+                Utils.apply(m.fromClause().ID(), TerminalNode::getSymbol) : new ArrayList<>());
     }
 
-    public ModuleIdentifier(ResolveParser.UsesSpecContext m) {
-        this(Utils.apply(m.moduleIdent().ID(), TerminalNode::getSymbol));
-    }
-
-    public ModuleIdentifier(@NotNull List<Token> t) {
-        this.moduleIdentPieces.addAll(t);
+    public ModuleIdentifier(Token t, @NotNull List<Token> fromPath) {
+        this.name = t;
+        this.fromClausePath.addAll(fromPath);
         this.globalFlag = false;
     }
 
