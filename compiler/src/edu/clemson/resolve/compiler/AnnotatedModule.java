@@ -75,13 +75,6 @@ public class AnnotatedModule {
         this.root = root;
         this.name = name;
         this.fileName = fileName;
-
-        //if we have syntactic errors, better not risk processing imports with
-        //our tree (as it usually will result in a flurry of npe's).
-        if (!hasErrors) {
-            UsesListener l = new UsesListener(this);
-            ParseTreeWalker.DEFAULT.walk(l, root);
-        }
     }
 
     /**

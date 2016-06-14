@@ -10,6 +10,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graphs;
@@ -46,7 +47,7 @@ public class RESOLVECompiler {
     public static String VERSION = "0.0.1";
 
     public static final String FILE_EXTENSION = ".resolve";
-    private static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
+    public static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
     public static final List<String> NON_NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(".java"));
     private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
@@ -445,7 +446,7 @@ public class RESOLVECompiler {
             return localFile;
         }
         else {
-            searchRESOLVEROOTDirectory(fileName);
+            return searchRESOLVEROOTDirectory(fileName);
         }
     }
 
@@ -486,9 +487,16 @@ public class RESOLVECompiler {
         } catch (IllegalArgumentException iae) {
             return null;
         }
-        return new AnnotatedModule(start, moduleNameTok,
+        AnnotatedModule result = new AnnotatedModule(start, moduleNameTok,
                 parser.getSourceName(),
                 parser.getNumberOfSyntaxErrors() > 0);
+
+        //if we have syntactic errors, better not risk processing imports with
+        //our tree (as it usually will result in a flurry of npe's).
+        if (!result.hasErrors) {
+            UsesListener l = new UsesListener(this);
+            ParseTreeWalker.DEFAULT.walk(l, root);
+        }
     }
 
     @NotNull

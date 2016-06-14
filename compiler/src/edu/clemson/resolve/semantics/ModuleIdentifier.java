@@ -1,5 +1,7 @@
 package edu.clemson.resolve.semantics;
 
+import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -9,6 +11,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +37,14 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
-    public final Set<String> tagAliases = new HashSet<>();
     @NotNull
     private Token name;
     private final boolean globalFlag;
 
+    @NotNull
+    public List<String> pathListRelativeToRoot = new ArrayList<>();
+
+    @NotNull
     public List<Token> fromClausePath = new ArrayList<>();
 
     private ModuleIdentifier() {
@@ -42,15 +52,38 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         this.globalFlag = true;
     }
 
+    public ModuleIdentifier(@NotNull Token t) {
+        this(t, new ArrayList<>());
+    }
+
     public ModuleIdentifier(@NotNull ResolveParser.UsesSpecContext m) {
-        this(m.ID().getSymbol(), m.alias() != null ?
+        this(m.ID().getSymbol(), m.fromClause() != null ?
                 Utils.apply(m.fromClause().ID(), TerminalNode::getSymbol) : new ArrayList<>());
     }
 
     public ModuleIdentifier(Token t, @NotNull List<Token> fromPath) {
         this.name = t;
+        //NoSuchFileException;
+        String fromString = Utils.join(fromPath, File.separator);
+        //use
+        //throw a no such module exception
+        //use path searcher to find a file.
+        FileLocator l = new FileLocator(t.getText(), RESOLVECompiler.NATIVE_EXTENSION, "gen", "out");
+
         this.fromClausePath.addAll(fromPath);
         this.globalFlag = false;
+    }
+
+    private void searchCurrentProjectRoot(FileLocator l, String fromString) {
+        //Path
+        Path p = Paths.get(fromString);
+        Files.walkFileTree()
+        //assign file
+        //assign project root path list
+    }
+
+    @NotNull public File getFile() {
+        return null;
     }
 
     @NotNull
@@ -58,13 +91,24 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         return name.getText();
     }
 
-    @NotNull public String getFullyQualifiedName() {
+    @NotNull
+    public String getFullyQualifiedName() {
         return this.toString();
     }
 
     @NotNull
     public Token getNameToken() {
         return name;
+    }
+
+    @NotNull
+    public List<Token> getFromPath() {
+        return fromClausePath;
+    }
+
+    @Nullable
+    public String getQualifiedFromPath() {
+        return Utils.join(fromClausePath, ".");
     }
 
     @Override
@@ -87,7 +131,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public String toString() {
-        List<String> pieces = Utils.apply(moduleIdentPieces, Token::getText);
-        return Utils.join(pieces, ".");
+        return name.getText();
     }
 }
