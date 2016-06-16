@@ -42,66 +42,14 @@ public class UsesListener extends ResolveBaseListener {
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
         //TODO: Handle from clauses.
         for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
-            File f = resolveImport(compiler, u);
-            ModuleIdentifier id = new ModuleIdentifier(u.ID().getSymbol(), f);
-            uses.add(id);
-            uses.semanticallyRelevantUses.add(id);
-
-            /*for (TerminalNode t : u.ID()) {
-                ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
-                tr.uses.add(id);
-                tr.semanticallyRelevantUses.add(id);
-            }*/
-        }
-    }
-
-    @Nullable
-    public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull ResolveParser.UsesSpecContext u) {
-        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ? u.fromClause().getText() : null);
-    }
-
-    @Nullable
-    public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull Token usesToken,
-                                     @Nullable String fromPath) {
-        //first check to see if we're on RESOLVEPATH
-        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
-        Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
-        File result = null;
-        try {
-            //user specified a root with the fromclause.
-            if (fromPath != null) {
-                //a fromclause can either describe something on RESOLVEROOT or it can describe the root
-                //of some other resolve project on RESOLVEPATH
-            }
-            else {
-                //search the current project
-                result = searchProjectRootDirectory(compiler, usesToken.getText());
-                //then search the std libs.. if we didn't find anything
-                if (result == null) result = searchStdRootDirectory(compiler, usesToken.getText());
+            try {
+                File f = resolveImport(compiler, u);
+                uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+                //uses.semanticallyRelevantUses.add(id);
+            } catch (IOException e) {
+                compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, u.getStart(), u.getText());
             }
         }
-        catch (IOException e) {
-            compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, usesToken, usesToken.getText());
-        }
-        return result;
-    }
-
-    @Nullable
-    private static File searchProjectRootDirectory(RESOLVECompiler compiler, String usesId) throws IOException {
-        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
-        FileLocator l = new FileLocator(usesId, RESOLVECompiler.NATIVE_EXTENSION, "gen", "out");
-        Files.walkFileTree(projectPath, l);
-        return l.getFile();
-    }
-
-    @Nullable
-    private static File searchStdRootDirectory(RESOLVECompiler compiler, String usesId) throws IOException {
-        Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
-        FileLocator l = new FileLocator(usesId, RESOLVECompiler.NATIVE_EXTENSION, "gen", "out");
-        Files.walkFileTree(stdLibPath, l);
-        return l.getFile();
     }
 
 /*
@@ -180,4 +128,79 @@ public class UsesListener extends ResolveBaseListener {
             //tr.uses.add(new ModuleIdentifier(ctx.impl));
         }
     }*/
+
+    @Nullable
+    private static Path getRootDirectoryForFromClauseStem(@NotNull Token t, @NotNull String fromStem) {
+        Path resolveStdRootPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
+        Path resolveLibRootPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src");
+        File result = new File(resolveStdRootPath.toString(), fromStem);
+        if (result.exists() && result.isDirectory()) return result.toPath();
+        result = new File(resolveLibRootPath.toString(), fromStem);
+        if (result.exists() && result.isDirectory()) return result.toPath();
+        return null;
+    }
+
+    @Nullable
+    public static File resolveImport(@NotNull RESOLVECompiler compiler,
+                                     @NotNull ResolveParser.UsesSpecContext u) throws IOException {
+        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ? u.fromClause().getText() : null);
+    }
+
+    @Nullable
+    public static File resolveImport(@NotNull RESOLVECompiler compiler,
+                                     @NotNull Token usesToken,
+                                     @Nullable String fromPath) throws IOException {
+        //first check to see if we're on RESOLVEPATH
+        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
+        Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
+        File result = null;
+
+        //user specified a root with the fromclause.
+        if (fromPath != null) {
+            //a fromclause can either describe something on RESOLVEROOT or it can describe the root
+            //of some other resolve project on RESOLVEPATH
+
+            Path s = getRootDirectoryForFromClauseStem(usesToken, fromPath);
+            if (s == null) {
+                //ERROR
+                return null;
+            }
+
+        }
+        else {
+            //search the current project
+            result = searchProjectRootDirectory(compiler, usesToken.getText());
+
+            //now search the
+            //then search the std libs.. if we didn't find anything
+            if (result == null) result = searchStdRootDirectory(usesToken.getText());
+        }
+        return result;
+    }
+
+    @Nullable
+    private static File searchProjectRootDirectory(RESOLVECompiler compiler, String id) throws IOException {
+        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
+        return findFile(projectPath, id);
+    }
+
+    @Nullable
+    private static File searchStdRootDirectory(String id) throws IOException {
+        Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
+        return findFile(stdLibPath, id);
+    }
+
+    @Nullable
+    public static File findFile(@NotNull Path rootPath, @NotNull String fileName) throws IOException {
+        return findFile(RESOLVECompiler.NATIVE_EXTENSION, rootPath, fileName);
+    }
+
+    @Nullable
+    public static File findFile(@NotNull List<String> validExtensions,
+                                @NotNull Path rootPath,
+                                @NotNull String fileName) throws IOException {
+        FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
+        Files.walkFileTree(rootPath, l);
+        return l.getFile();
+    }
 }

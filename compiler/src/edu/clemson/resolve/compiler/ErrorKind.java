@@ -47,11 +47,9 @@ public enum ErrorKind {
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 8: module <em>name</em> was unable to find the file
-     * corresponding to uses reference '<em>usesref</em>'.
+     * Compiler Error 8: unable to resolve uses reference: <em>name</em>'.
      */
-    MISSING_IMPORT_FILE(8, "module <arg> was unable to find the file "
-            + "corresponding to uses reference '<arg2>'",
+    MISSING_IMPORT_FILE(8, "unable to resolve uses reference: '<arg>'",
             ErrorSeverity.ERROR),
 
     /**
