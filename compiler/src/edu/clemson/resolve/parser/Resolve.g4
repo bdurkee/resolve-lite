@@ -102,10 +102,10 @@ shortFacilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' usesSpec (',' usesSpec)*
+    :   'uses' usesSpec (',' usesSpec)* ';'
     ;
 
-usesSpec : ID fromClause alias? ';' ;
+usesSpec : ID fromClause? alias? ;
 fromClause :   'from' ID ('.' ID)* ;
 alias : 'as' ID ;
 

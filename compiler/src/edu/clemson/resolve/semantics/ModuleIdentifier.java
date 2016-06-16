@@ -40,6 +40,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull
     private Token name;
     private final boolean globalFlag;
+    @Nullable private File file;
 
     @NotNull
     public List<String> pathListRelativeToRoot = new ArrayList<>();
@@ -56,6 +57,12 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         this(t, new ArrayList<>());
     }
 
+    public ModuleIdentifier(@NotNull Token t, @Nullable File file) {
+        this.name = t;
+        this.file = file;
+        this.globalFlag = false;
+    }
+
     public ModuleIdentifier(@NotNull ResolveParser.UsesSpecContext m) {
         this(m.ID().getSymbol(), m.fromClause() != null ?
                 Utils.apply(m.fromClause().ID(), TerminalNode::getSymbol) : new ArrayList<>());
@@ -68,18 +75,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         //use
         //throw a no such module exception
         //use path searcher to find a file.
-        FileLocator l = new FileLocator(t.getText(), RESOLVECompiler.NATIVE_EXTENSION, "gen", "out");
-
         this.fromClausePath.addAll(fromPath);
         this.globalFlag = false;
-    }
-
-    private void searchCurrentProjectRoot(FileLocator l, String fromString) {
-        //Path
-        Path p = Paths.get(fromString);
-        Files.walkFileTree()
-        //assign file
-        //assign project root path list
     }
 
     @NotNull public File getFile() {
@@ -109,6 +106,29 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @Nullable
     public String getQualifiedFromPath() {
         return Utils.join(fromClausePath, ".");
+    }
+
+    public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
+        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
+        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
+
+        String result = null;
+        Path modulePath = new File(filePath).toPath();
+        if (modulePath.startsWith(resolvePath)) {
+            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else if (modulePath.startsWith(resolveRoot)) {
+            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else {
+            //just use the lib directory if the user has a non-conformal project..
+            result = new File(modulePath.toFile().getPath()).getPath();
+        }
+        return result;
     }
 
     @Override

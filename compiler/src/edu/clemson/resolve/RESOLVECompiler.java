@@ -465,7 +465,12 @@ public class RESOLVECompiler {
     @Nullable
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
-            File file = findFile(fileName);
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(libDirectory, fileName);    //first try searching in the local project..
+            }
+            //we didn't find it? then try std library root (e.g. RESOLVEROOT)
+            if (!file.exists()) return null;
             return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
@@ -487,16 +492,16 @@ public class RESOLVECompiler {
         } catch (IllegalArgumentException iae) {
             return null;
         }
-        AnnotatedModule result = new AnnotatedModule(start, moduleNameTok,
-                parser.getSourceName(),
-                parser.getNumberOfSyntaxErrors() > 0);
+        boolean hasErrors = parser.getNumberOfSyntaxErrors() > 0;
 
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
-        if (!result.hasErrors) {
-            UsesListener l = new UsesListener(this);
-            ParseTreeWalker.DEFAULT.walk(l, root);
+        UsesListener l = new UsesListener(this);
+        if (!hasErrors) {
+            ParseTreeWalker.DEFAULT.walk(l, start);
         }
+        //TODO: Now pass the moduleIdents into the annotated module.
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasErrors);
     }
 
     @NotNull

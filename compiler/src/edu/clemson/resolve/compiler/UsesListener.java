@@ -18,6 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 
@@ -28,6 +32,7 @@ import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 public class UsesListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
+    private final Set<ModuleIdentifier> uses = new HashSet<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -37,35 +42,48 @@ public class UsesListener extends ResolveBaseListener {
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
         //TODO: Handle from clauses.
         for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
+            File f = resolveImport(compiler, u);
+            ModuleIdentifier id = new ModuleIdentifier(u.ID().getSymbol(), f);
+            uses.add(id);
+            uses.semanticallyRelevantUses.add(id);
 
-            for (TerminalNode t : u.ID()) {
+            /*for (TerminalNode t : u.ID()) {
                 ModuleIdentifier id = new ModuleIdentifier(t.getSymbol());
                 tr.uses.add(id);
                 tr.semanticallyRelevantUses.add(id);
-            }
+            }*/
         }
     }
 
-    @Nullable public static File resolveImport(RESOLVECompiler compiler, String usesId, String fromPath) {
+    @Nullable
+    public static File resolveImport(@NotNull RESOLVECompiler compiler,
+                                     @NotNull ResolveParser.UsesSpecContext u) {
+        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ? u.fromClause().getText() : null);
+    }
+
+    @Nullable
+    public static File resolveImport(@NotNull RESOLVECompiler compiler,
+                                     @NotNull Token usesToken,
+                                     @Nullable String fromPath) {
         //first check to see if we're on RESOLVEPATH
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
         File result = null;
         try {
             //user specified a root with the fromclause.
-            if (!fromPath.equals("")) {
+            if (fromPath != null) {
                 //a fromclause can either describe something on RESOLVEROOT or it can describe the root
                 //of some other resolve project on RESOLVEPATH
             }
             else {
                 //search the current project
-                result = searchProjectRootDirectory(compiler, usesId);
+                result = searchProjectRootDirectory(compiler, usesToken.getText());
                 //then search the std libs.. if we didn't find anything
-                if (result == null) result = searchStdRootDirectory(compiler, usesId);
+                if (result == null) result = searchStdRootDirectory(compiler, usesToken.getText());
             }
         }
         catch (IOException e) {
-            compiler.errMgr.toolError(ErrorKind.MISSING_IMPORT_FILE, usesId);
+            compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, usesToken, usesToken.getText());
         }
         return result;
     }
@@ -84,14 +102,6 @@ public class UsesListener extends ResolveBaseListener {
         FileLocator l = new FileLocator(usesId, RESOLVECompiler.NATIVE_EXTENSION, "gen", "out");
         Files.walkFileTree(stdLibPath, l);
         return l.getFile();
-    }
-
-    @Nullable
-    private File searchNonPathProjectDirectory(String fileName) {
-        Path projectPath = Paths.get(libDirectory).toAbsolutePath();
-        String groomedFileName = Utils.groomFileName(fileName);
-        File localFile = new File(projectPath.getParent().toString(), groomedFileName);    //see if it exists in localFile
-        return localFile.exists() ? localFile : null;
     }
 
 /*
