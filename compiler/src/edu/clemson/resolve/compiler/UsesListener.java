@@ -143,7 +143,8 @@ public class UsesListener extends ResolveBaseListener {
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull ResolveParser.UsesSpecContext u) throws IOException {
-        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ? u.fromClause().getText() : null);
+        return resolveImport(compiler, u.ID().getSymbol(), u.fromClauseSpec() != null ?
+                u.fromClauseSpec().qualifiedFromPath().getText() : null);
     }
 
     @Nullable
@@ -160,7 +161,7 @@ public class UsesListener extends ResolveBaseListener {
             //a fromclause can either describe something on RESOLVEROOT or it can describe the root
             //of some other resolve project on RESOLVEPATH
 
-            Path s = getRootDirectoryForFromClauseStem(usesToken, fromPath);
+            Path s = getRootDirectoryForFromClauseStem(usesToken, fromPath.replace('.', File.separatorChar));
             if (s == null) {
                 //ERROR
                 return null;
@@ -181,6 +182,9 @@ public class UsesListener extends ResolveBaseListener {
     @Nullable
     private static File searchProjectRootDirectory(RESOLVECompiler compiler, String id) throws IOException {
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
+        if (projectPath.endsWith(".")) {
+            projectPath = projectPath.getParent();
+        }
         return findFile(projectPath, id);
     }
 

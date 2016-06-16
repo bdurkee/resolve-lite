@@ -63,11 +63,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         this.globalFlag = false;
     }
 
-    public ModuleIdentifier(@NotNull ResolveParser.UsesSpecContext m) {
-        this(m.ID().getSymbol(), m.fromClause() != null ?
-                Utils.apply(m.fromClause().ID(), TerminalNode::getSymbol) : new ArrayList<>());
-    }
-
     public ModuleIdentifier(Token t, @NotNull List<Token> fromPath) {
         this.name = t;
         //NoSuchFileException;
