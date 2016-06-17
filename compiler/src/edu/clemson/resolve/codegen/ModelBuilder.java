@@ -55,11 +55,11 @@ public class ModelBuilder extends ResolveBaseListener {
         this.symtab = symtab;
         this.compiler = gen.compiler;
         this.tr = gen.getModule();
-        try {
+        /*try {
             this.moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
         } catch (NoSuchModuleException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override
@@ -430,14 +430,14 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx.implBlock().facilityDecl(), built));
         }
         List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
-        try {
+        /*try {
             allParamsFromSpecAndImpl =
                     symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
                             .getSymbolsOfType(ModuleParameterSymbol.class);
             allParamsFromSpecAndImpl.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allParamsFromSpecAndImpl);
         } catch (NoSuchModuleException e) { //shouldn't happen
-        }
+        }*/
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
@@ -500,16 +500,16 @@ public class ModelBuilder extends ResolveBaseListener {
         ExtensionImplModule impl = new ExtensionImplModule(
                 ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
         Scope conceptScope = null;
-        try {
+        /*try {
             conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
             impl.addDelegateMethods(conceptScope.getSymbolsOfType(OperationSymbol.class, TypeModelSymbol.class));
         } catch (NoSuchModuleException e) {
-        }
+        }*/
         if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().operationProcedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().procedureDecl(), built));
         }
-        try {
+       /* try {
             //first the concept spec
             List<ModuleParameterSymbol> allSymsFromConceptAndExtAndThisModule =
                     symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
@@ -522,7 +522,7 @@ public class ModelBuilder extends ResolveBaseListener {
             allSymsFromConceptAndExtAndThisModule.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allSymsFromConceptAndExtAndThisModule);
         } catch (NoSuchModuleException e) {
-        }
+        }*/
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
@@ -589,11 +589,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-        for (File f : gen.module.usesFilesForCodegen) {
-            String importString = Utils.getModuleFilePathRelativeToProjectLibDirs(f.getPath());
-            importString = importString.substring(0, importString.lastIndexOf('.'));
-            result.add(importString.replaceAll(File.separator, "."));
-        }
+
         return result;
     }
 
@@ -644,7 +640,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private String getFullyQualifiedModuleIdentifier(ModuleIdentifier id) {
         String qualifiedName = null;
-        try {
+        /*try {
             File foundFile = gen.compiler.findFile(id.getNameString());
             qualifiedName = Utils.getModuleFilePathRelativeToProjectLibDirs(foundFile.getPath());
             qualifiedName = Utils.stripFileExtension(qualifiedName);
@@ -652,7 +648,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         catch (IOException ioe1) {
             qualifiedName = id.getNameString();
-        }
+        }*/
         return qualifiedName;
     }
 }

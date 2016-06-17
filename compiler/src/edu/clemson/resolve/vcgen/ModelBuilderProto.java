@@ -86,11 +86,11 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override
     public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-        try {
+        /*try {
             moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
         } catch (NoSuchModuleException e) {//shouldn't happen, but eh.
             gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleName(ctx));
-        }
+        }*/
     }
 
     @Override

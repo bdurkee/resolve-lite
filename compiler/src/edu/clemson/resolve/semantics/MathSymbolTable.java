@@ -192,7 +192,7 @@ public class MathSymbolTable {
         ParseTree contextTree = module.getRoot();
 
         ScopeBuilder parent = lexicalScopeStack.peek();
-        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph, module.getNameToken(),
+        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph, null,//TODO: Should be moduleIdent
                 (ParserRuleContext) contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);

@@ -42,9 +42,6 @@ public class AnnotatedModule {
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
-    //won't contain precis Files
-    public List<File> usesFilesForCodegen = new ArrayList<>();
-
     //use a map for more efficiency when checking whether a module references
     //an external impl
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
@@ -61,20 +58,20 @@ public class AnnotatedModule {
     private final ParseTree root;
     private VCOutputFile vcs = null;
     public boolean hasErrors;
+    private final ModuleIdentifier identifier;
 
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {
-        this(root, name, "", false);
-    }
-
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {
-        this(root, name, fileName, false);
-    }
-
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName, boolean hasErrors) {
+    public AnnotatedModule(@NotNull ParseTree root,
+                           @NotNull Token name,
+                           @NotNull String fileName,
+                           boolean hasErrors,
+                           @NotNull Set<ModuleIdentifier> uses) {
         this.hasErrors = hasErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
+        this.uses.addAll(uses);
+
+        this.identifier = new ModuleIdentifier(name, new File(fileName));
     }
 
     /**
@@ -83,7 +80,6 @@ public class AnnotatedModule {
      * @return
      */
     public String getFullyQualifiedName() {
-
         return name.getText();
     }
 

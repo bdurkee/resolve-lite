@@ -106,21 +106,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
-        try {
+      /*  try {
             //exts implicitly gain the parenting precis's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.precis));
             moduleScope.addImports(conceptScope.getImports());
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.precis, ctx.precis.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
 
     @Override
     public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
-        try {
+    /*    try {
             //implementations implicitly gain the parenting concept's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
@@ -128,21 +128,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
 
     @Override
     public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
-        try {
+      /*  try {
             //implementations implicitly gain the parenting concept's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
@@ -196,7 +196,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
-            symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            //symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
 
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same
@@ -207,15 +207,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             // facility.getFacility().getSpecification().getArguments()
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
-        } catch (NoSuchModuleException e) {
-            noSuchModule(e);
-            try {
-                if (ctx.externally == null) symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
-            }
-            catch (NoSuchModuleException e2) {
-                noSuchModule(e2);
-            }
-        }
+        } //catch (NoSuchModuleException e) {
+           // noSuchModule(e);
+            //try {
+            //    if (ctx.externally == null) symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+            //}
+            //catch (NoSuchModuleException e2) {
+            //    noSuchModule(e2);
+            //}
+      //  }
         return null;
     }
 
@@ -392,14 +392,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void initializeAndSanityCheckInfo(@NotNull ResolveParser.FacilityDeclContext ctx) {
-
+/*
         if (ctx.specArgs != null) {
             sanityCheckParameterizationArgs(ctx.specArgs.progExp(), new ModuleIdentifier(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs.put(ctx.specArgs, new ArrayList<>());
         }
         if (ctx.implArgs != null) {
             sanityCheckParameterizationArgs(ctx.implArgs.progExp(), new ModuleIdentifier(ctx.impl));
-        }
+        }*/
         for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
             if (extension.specArgs != null) {
                 actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());

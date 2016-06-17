@@ -52,25 +52,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     void writeReferencedExternalFiles() {
-        for (File file : module.usesFilesForCodegen) {
-            if (!file.getPath().endsWith(".java")) continue;
-            /*ModuleFile moduleFile = new ModuleFile(null, file.getName(), ModelBuilder.buildPackage(file.getPath()),
-                    new ArrayList<>()); //TODO: these will probably need imports too.. sigh. maybe just take the
-            //imports from the parenting module? .. hmm. will need to think about this.
-            */
-            String contents = null;
-            try {
-                contents = Utils.readFile(file.getPath());
-            } catch (IOException ioe) {
-                throw new RuntimeException(ioe.getCause());
-            }
-            JavaOutputDirFun o = new JavaOutputDirFun(compiler);
 
-            //ok. can't do o.apply(module)... it will give us the wrong output directory..
-            //externally referenced files proper out dir is a function of where the original file was located. Not the
-            //file that references it (which is what is assumed below)
-            Utils.writeFile(o.apply(file.getPath()).getPath(), file.getName(), contents);
-        }
     }
 
     protected static class JavaOutputDirFun implements Function<String, File> {

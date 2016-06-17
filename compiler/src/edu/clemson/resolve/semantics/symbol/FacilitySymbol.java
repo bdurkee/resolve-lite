@@ -47,7 +47,7 @@ public class FacilitySymbol extends Symbol {
         this.actualGenerics = actualGenerics;
         List<ProgTypeSymbol> specGenericArgs =
                 actualGenerics.get(facility.specArgs);
-
+/*
         ModuleParameterization spec = new ModuleParameterization(
                 new ModuleIdentifier(facility.spec),
                 specGenericArgs == null ?
@@ -58,7 +58,7 @@ public class FacilitySymbol extends Symbol {
                 new ArrayList<>(), this, scopeRepo);
 
         this.type = new SpecImplementationPairing(spec, impl);
-
+*/
         //These are realized by the concept realization
         /*for (EnhancementItem realizationEnhancement : facility
                 .getEnhancements()) {

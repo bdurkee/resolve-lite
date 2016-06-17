@@ -49,6 +49,7 @@ public class RESOLVECompiler {
     public static final String FILE_EXTENSION = ".resolve";
     public static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
     public static final List<String> NON_NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(".java"));
+
     private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
     private static class Option {
@@ -68,6 +69,7 @@ public class RESOLVECompiler {
             this.description = desc;
         }
     }
+
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
@@ -323,36 +325,12 @@ public class RESOLVECompiler {
                                   @NotNull Map<String, AnnotatedModule> roots) {
         for (ModuleIdentifier importRequest : root.uses) {
             AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
-            try {
-                File file = findFile(importRequest.getNameToken().getText());
-
-                if (module == null) {
-                    module = parseModule(file.getAbsolutePath());
-                    if (module != null) {
-                        if (!(module.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleDeclContext ||
-                                module.getRoot().getChild(0) instanceof  ResolveParser.PrecisExtModuleDeclContext)) {
-                            root.usesFilesForCodegen.add(file);
-                        }
-                        for (ModuleIdentifier ext : root.externalUses.values()) {
-                            try {
-                                file = findFile(ext.getNameToken().getText(), NON_NATIVE_EXTENSION);
-                                root.usesFilesForCodegen.add(file);
-                            } catch (IOException ioe1) {
-                                int i;
-                                i=0;
-                                //if we can't find the external uses, that's ok for now.
-                            }
-                        }
-                        roots.put(module.getNameToken().getText(), module);
-                    }
+            File file = importRequest.getFile();
+            if (module == null) {
+                module = parseModule(file.getAbsolutePath());
+                if (module != null) {
+                    roots.put(module.getNameToken().getText(), module);
                 }
-            } catch (IOException ioe) {
-                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.getNameToken(), root.getNameToken().getText(),
-                        importRequest.getNameToken().getText());
-                //mark the current root as erroneous
-                root.semanticallyRelevantUses.remove(new ModuleIdentifier(importRequest.getNameToken()));
-                continue;
             }
             if (module != null) {
                 if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
@@ -396,45 +374,18 @@ public class RESOLVECompiler {
         return false;
     }
 
-    @Nullable public File findFile(@NotNull String fileName) throws IOException {
-        return findFile(fileName, NATIVE_EXTENSION);
+    @Nullable
+    public static File findFile(@NotNull Path rootPath, @NotNull String fileName) throws IOException {
+        return findFile(RESOLVECompiler.NATIVE_EXTENSION, rootPath, fileName);
     }
 
     @Nullable
-    private File findFile(@NotNull String fileName, String ... extensions) throws IOException {
-        return findFile(fileName, Arrays.asList(extensions));
-    }
-
-    @Nullable
-    private File findFile(@NotNull String fileName, List<String> extensions) throws IOException {
-        boolean satisfiesExtension = false;
-        for (String ext : extensions) {
-            if (fileName.endsWith(ext)) {
-                satisfiesExtension = true;
-                break;
-            }
-        }
-        if (!satisfiesExtension) {
-            errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
-            return null;
-        }
-
-        //first check to see if we're on RESOLVEPATH
-        Path projectPath = Paths.get(libDirectory).toAbsolutePath();
-        Path resolvePath = Paths.get(getLibrariesPathDirectory()).toAbsolutePath();
-        if (!projectPath.startsWith(resolvePath)) {
-            File localFile = searchNonPathProjectDirectory(fileName);
-            if (localFile != null) return localFile;
-        }
-        File file = new File(fileName);
-        if (!file.isAbsolute()) {
-            file = new File(libDirectory, fileName);    //first try searching in the local project..
-        }
-        //we didn't find it? then try std library root (e.g. RESOLVEROOT)
-        if (!file.exists()) {
-            file = new File(getCoreLibraryDirectory() + File.pathSeparator + "src", fileName);
-        }
-        return file;
+    public static File findFile(@NotNull List<String> validExtensions,
+                                @NotNull Path rootPath,
+                                @NotNull String fileName) throws IOException {
+        FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
+        Files.walkFileTree(rootPath, l);
+        return l.getFile();
     }
 
     @Nullable
@@ -469,9 +420,8 @@ public class RESOLVECompiler {
             if (!file.isAbsolute()) {
                 file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
-            //we didn't find it? then try std library root (e.g. RESOLVEROOT)
             if (!file.exists()) return null;
-            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
+            return parseModule(file, new ANTLRFileStream(file.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -479,7 +429,7 @@ public class RESOLVECompiler {
     }
 
     @Nullable
-    public AnnotatedModule parseModule(CharStream input) {
+    public AnnotatedModule parseModule(File f, CharStream input) {
         ResolveLexer lexer = new ResolveLexer(input);
         TokenStream tokens = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokens);
@@ -501,7 +451,7 @@ public class RESOLVECompiler {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
         //TODO: Now pass the moduleIdents into the annotated module.
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasErrors);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasErrors, l.uses);
     }
 
     @NotNull

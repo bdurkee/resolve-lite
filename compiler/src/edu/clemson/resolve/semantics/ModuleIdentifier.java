@@ -36,46 +36,29 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
-
     @NotNull
     private Token name;
     private final boolean globalFlag;
-    @Nullable private File file;
-
+    @NotNull
+    private File file;
     @NotNull
     public List<String> pathListRelativeToRoot = new ArrayList<>();
-
-    @NotNull
-    public List<Token> fromClausePath = new ArrayList<>();
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");
         this.globalFlag = true;
+        file = new File(".");
     }
 
-    public ModuleIdentifier(@NotNull Token t) {
-        this(t, new ArrayList<>());
-    }
-
-    public ModuleIdentifier(@NotNull Token t, @Nullable File file) {
+    public ModuleIdentifier(@NotNull Token t, @NotNull File file) {
         this.name = t;
         this.file = file;
         this.globalFlag = false;
     }
 
-    public ModuleIdentifier(Token t, @NotNull List<Token> fromPath) {
-        this.name = t;
-        //NoSuchFileException;
-        String fromString = Utils.join(fromPath, File.separator);
-        //use
-        //throw a no such module exception
-        //use path searcher to find a file.
-        this.fromClausePath.addAll(fromPath);
-        this.globalFlag = false;
-    }
-
-    @NotNull public File getFile() {
-        return null;
+    @NotNull
+    public File getFile() {
+        return file;
     }
 
     @NotNull
@@ -94,13 +77,23 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     }
 
     @NotNull
-    public List<Token> getFromPath() {
-        return fromClausePath;
+    public String getPackageRoot() {
+        return getPackageRootPath().toString();
     }
 
-    @Nullable
-    public String getQualifiedFromPath() {
-        return Utils.join(fromClausePath, ".");
+    @NotNull
+    private Path getPackageRootPath() {
+        Path libraryPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.pathSeparator + "src");
+        Path stdlibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.pathSeparator + "src");
+
+        Path filePath = Paths.get(file.getAbsolutePath());
+        return filePath.startsWith(libraryPath) ? libraryPath : stdlibPath;
+    }
+
+    @NotNull
+    public Path getPathRelativeToRootDir() {
+        Path filePath = Paths.get(file.getAbsolutePath());
+        return filePath.relativize(getPackageRootPath());
     }
 
     public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
@@ -135,6 +128,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         return result;
     }
 
+    @Override
     public int hashCode() {
         return name.getText().hashCode();
     }

@@ -30,7 +30,7 @@ public class ScopeBuilder extends SyntacticScope {
     ScopeBuilder(@NotNull MathSymbolTable s, @NotNull DumbMathClssftnHandler g,
                  @Nullable ParserRuleContext definingTree,
                  @NotNull Scope parent,
-                 @NotNull ModuleIdentifier moduleIdentifier) {
+                 @Nullable ModuleIdentifier moduleIdentifier) {
         super(s, definingTree, parent, moduleIdentifier, new LinkedHashMap<>());
         this.typeGraph = g;
     }

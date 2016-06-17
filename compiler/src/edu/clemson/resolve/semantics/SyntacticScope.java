@@ -30,7 +30,7 @@ public abstract class SyntacticScope extends AbstractScope {
     SyntacticScope(@NotNull MathSymbolTable scopeRepo,
                    @Nullable ParserRuleContext definingTree,
                    @NotNull Scope parent,
-                   @NotNull ModuleIdentifier moduleIdentifier,
+                   @Nullable ModuleIdentifier moduleIdentifier,
                    @NotNull Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;

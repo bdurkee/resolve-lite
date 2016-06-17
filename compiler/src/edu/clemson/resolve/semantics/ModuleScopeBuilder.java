@@ -15,11 +15,11 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     private final Set<ModuleIdentifier> locallyInheritedModules =
             new LinkedHashSet<>();
 
-    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull Token name,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @Nullable ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
-        super(symbolTable, g, definingTree, parent, new ModuleIdentifier(name));
+        super(symbolTable, g, definingTree, parent, e);
     }
 
     @NotNull

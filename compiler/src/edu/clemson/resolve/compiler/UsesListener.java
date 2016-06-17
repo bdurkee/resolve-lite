@@ -4,10 +4,8 @@ import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,15 +13,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 
 /**
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
@@ -32,7 +26,7 @@ import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
 public class UsesListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
-    private final Set<ModuleIdentifier> uses = new HashSet<>();
+    public final Set<ModuleIdentifier> uses = new HashSet<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -129,10 +123,12 @@ public class UsesListener extends ResolveBaseListener {
         }
     }*/
 
+    //so we don't have Path resolveProjRootPath here because our projects should be on RESOLVEPATH anyways..
     @Nullable
-    private static Path getRootDirectoryForFromClauseStem(@NotNull Token t, @NotNull String fromStem) {
+    private static Path getAppropriateRootDirectoryForFromClause(@NotNull Token t, @NotNull String fromStem) {
         Path resolveStdRootPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
         Path resolveLibRootPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src");
+
         File result = new File(resolveStdRootPath.toString(), fromStem);
         if (result.exists() && result.isDirectory()) return result.toPath();
         result = new File(resolveLibRootPath.toString(), fromStem);
@@ -161,12 +157,12 @@ public class UsesListener extends ResolveBaseListener {
             //a fromclause can either describe something on RESOLVEROOT or it can describe the root
             //of some other resolve project on RESOLVEPATH
 
-            Path s = getRootDirectoryForFromClauseStem(usesToken, fromPath.replace('.', File.separatorChar));
+            Path s = getAppropriateRootDirectoryForFromClause(usesToken, fromPath.replace('.', File.separatorChar));
             if (s == null) {
-                //ERROR
+                //from clause was apparently bad (doesn't exist, isn't a directory, etc)
                 return null;
             }
-
+            return RESOLVECompiler.findFile(s, usesToken.getText());
         }
         else {
             //search the current project
@@ -185,26 +181,12 @@ public class UsesListener extends ResolveBaseListener {
         if (projectPath.endsWith(".")) {
             projectPath = projectPath.getParent();
         }
-        return findFile(projectPath, id);
+        return RESOLVECompiler.findFile(projectPath, id);
     }
 
     @Nullable
     private static File searchStdRootDirectory(String id) throws IOException {
         Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
-        return findFile(stdLibPath, id);
-    }
-
-    @Nullable
-    public static File findFile(@NotNull Path rootPath, @NotNull String fileName) throws IOException {
-        return findFile(RESOLVECompiler.NATIVE_EXTENSION, rootPath, fileName);
-    }
-
-    @Nullable
-    public static File findFile(@NotNull List<String> validExtensions,
-                                @NotNull Path rootPath,
-                                @NotNull String fileName) throws IOException {
-        FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
-        Files.walkFileTree(rootPath, l);
-        return l.getFile();
+        return RESOLVECompiler.findFile(stdLibPath, id);
     }
 }
