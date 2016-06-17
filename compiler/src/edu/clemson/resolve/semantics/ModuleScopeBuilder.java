@@ -12,8 +12,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     private final List<ModuleIdentifier> importedModules = new ArrayList<>();
 
     /** The set of all modules {@code this} either extends or inherits from. */
-    private final Set<ModuleIdentifier> locallyInheritedModules =
-            new LinkedHashSet<>();
+    private final Set<ModuleIdentifier> locallyInheritedModules = new LinkedHashSet<>();
 
     ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @Nullable ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,

@@ -67,11 +67,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     }
 
     @NotNull
-    public String getFullyQualifiedName() {
-        return this.toString();
-    }
-
-    @NotNull
     public Token getNameToken() {
         return name;
     }
@@ -83,8 +78,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     private Path getPackageRootPath() {
-        Path libraryPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.pathSeparator + "src");
-        Path stdlibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.pathSeparator + "src");
+        Path libraryPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src");
+        Path stdlibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
 
         Path filePath = Paths.get(file.getAbsolutePath());
         return filePath.startsWith(libraryPath) ? libraryPath : stdlibPath;

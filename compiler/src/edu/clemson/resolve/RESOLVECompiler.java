@@ -26,7 +26,6 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -294,7 +293,7 @@ public class RESOLVECompiler {
     public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (AnnotatedModule module : modules) {
-            roots.put(module.getNameToken().getText(), module);
+            roots.put(module.getIdentifier().getFile().toString(), module);
         }
         return sortTargetModulesByUsesReferences(roots);
     }
@@ -304,7 +303,7 @@ public class RESOLVECompiler {
         DefaultDirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
-            g.addVertex(t.getNameToken().getText());
+            g.addVertex(t.getIdentifier().getFile().toString());
             findDependencies(g, t, modules);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
@@ -324,12 +323,11 @@ public class RESOLVECompiler {
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
         for (ModuleIdentifier importRequest : root.uses) {
-            AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
-            File file = importRequest.getFile();
+            AnnotatedModule module = roots.get(importRequest.getFile().toString());
             if (module == null) {
-                module = parseModule(file.getAbsolutePath());
+                module = parseModule(importRequest.getFile().getAbsolutePath());
                 if (module != null) {
-                    roots.put(module.getNameToken().getText(), module);
+                    roots.put(module.getIdentifier().getFile().toString(), module);
                 }
             }
             if (module != null) {
@@ -421,7 +419,7 @@ public class RESOLVECompiler {
                 file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
             if (!file.exists()) return null;
-            return parseModule(file, new ANTLRFileStream(file.getAbsolutePath()));
+            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -429,7 +427,7 @@ public class RESOLVECompiler {
     }
 
     @Nullable
-    public AnnotatedModule parseModule(File f, CharStream input) {
+    public AnnotatedModule parseModule(CharStream input) {
         ResolveLexer lexer = new ResolveLexer(input);
         TokenStream tokens = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokens);

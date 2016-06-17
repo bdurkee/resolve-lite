@@ -7,6 +7,7 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 
 import java.util.*;
 
+//TODO: Put moduleIdentifier up here.. (from syntacticScope and make getModuleIdentifier a method of Scope)
 public abstract class AbstractScope implements Scope {
 
     @NotNull

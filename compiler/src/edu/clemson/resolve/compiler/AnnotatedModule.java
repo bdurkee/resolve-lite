@@ -59,7 +59,7 @@ public class AnnotatedModule {
     private VCOutputFile vcs = null;
     public boolean hasErrors;
     private final ModuleIdentifier identifier;
-
+    String contentRoot;
     public AnnotatedModule(@NotNull ParseTree root,
                            @NotNull Token name,
                            @NotNull String fileName,
@@ -72,15 +72,12 @@ public class AnnotatedModule {
         this.uses.addAll(uses);
 
         this.identifier = new ModuleIdentifier(name, new File(fileName));
+        this.contentRoot = identifier.getPackageRoot();
     }
 
-    /**
-     * returns the fully qualified name of this module/file. These qualified names are relative to RESOLVEROOT
-     * and RESOLVEPATH.
-     * @return
-     */
-    public String getFullyQualifiedName() {
-        return name.getText();
+    @NotNull
+    public ModuleIdentifier getIdentifier() {
+        return identifier;
     }
 
     public void setVCs(@Nullable VCOutputFile vco) {
