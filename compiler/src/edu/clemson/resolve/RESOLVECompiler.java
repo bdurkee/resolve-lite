@@ -261,7 +261,7 @@ public class RESOLVECompiler {
         for (String e : targetFiles) {
             AnnotatedModule m = parseModule(e);
             if (m != null) {
-                modules.add(parseModule(e));
+                modules.add(m);
             }
         }
         return modules;
@@ -426,6 +426,7 @@ public class RESOLVECompiler {
         if (!hasErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
+        hasErrors = hasErrors || errMgr.getErrorCount() > 0;
         //TODO: Now pass the moduleIdents into the annotated module.
         return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasErrors, l.uses);
     }
