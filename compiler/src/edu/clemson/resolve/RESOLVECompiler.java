@@ -388,31 +388,6 @@ public class RESOLVECompiler {
     }
 
     @Nullable
-    private File searchNonPathProjectDirectory(String fileName) {
-        Path projectPath = Paths.get(libDirectory).toAbsolutePath();
-
-        File localFile = new File(projectPath.getParent().getParent().toString(), fileName);
-        if (localFile.exists()) {
-            return localFile;
-        }
-        else {
-            return searchRESOLVEROOTDirectory(fileName);
-        }
-    }
-
-    @Nullable
-    private File searchRESOLVELocalProjectDirectory(String fileName) {
-        File result = new File(getLibrariesPathDirectory() + File.pathSeparator + "src", fileName);
-        return result.exists() ? result : null;
-    }
-
-    @Nullable
-    private File searchRESOLVEROOTDirectory(String fileName) {
-        File result = new File(getCoreLibraryDirectory() + File.pathSeparator + "src", fileName);
-        return result.exists() ? result : null;
-    }
-
-    @Nullable
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
