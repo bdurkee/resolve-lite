@@ -55,11 +55,10 @@ public class ModelBuilder extends ResolveBaseListener {
         this.symtab = symtab;
         this.compiler = gen.compiler;
         this.tr = gen.getModule();
-        /*try {
-            this.moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
+        try {
+            this.moduleScope = symtab.getModuleScope(tr.getModuleIdentifier());
         } catch (NoSuchModuleException e) {
-            e.printStackTrace();
-        }*/
+        }
     }
 
     @Override
