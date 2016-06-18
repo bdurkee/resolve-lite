@@ -92,7 +92,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-        moduleScope = symtab.startModuleScope(tr).addImports(tr.semanticallyRelevantUses);
+        moduleScope = symtab.startModuleScope(tr).addImports(tr.uses);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'

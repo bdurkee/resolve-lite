@@ -33,10 +33,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     @NotNull
-    public ModuleScopeBuilder addImports(@Nullable Collection<ModuleIdentifier> imports) {
-        if (imports != null) {
-            importedModules.addAll(imports);
-        }
+    public ModuleScopeBuilder addImports(@NotNull Collection<ModuleIdentifier> imports) {
+        importedModules.addAll(imports);
         return this;
     }
 

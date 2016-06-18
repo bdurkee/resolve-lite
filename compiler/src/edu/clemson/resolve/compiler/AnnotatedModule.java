@@ -76,7 +76,7 @@ public class AnnotatedModule {
     }
 
     @NotNull
-    public ModuleIdentifier getIdentifier() {
+    public ModuleIdentifier getModuleIdentifier() {
         return identifier;
     }
 

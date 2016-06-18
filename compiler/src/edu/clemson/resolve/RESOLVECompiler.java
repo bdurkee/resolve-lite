@@ -293,7 +293,7 @@ public class RESOLVECompiler {
     public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (AnnotatedModule module : modules) {
-            roots.put(module.getIdentifier().getFile().toString(), module);
+            roots.put(module.getModuleIdentifier().getFile().toString(), module);
         }
         return sortTargetModulesByUsesReferences(roots);
     }
@@ -303,7 +303,7 @@ public class RESOLVECompiler {
         DefaultDirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
-            g.addVertex(t.getIdentifier().getFile().toString());
+            g.addVertex(t.getModuleIdentifier().getFile().getAbsolutePath());
             findDependencies(g, t, modules);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
@@ -323,11 +323,11 @@ public class RESOLVECompiler {
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
         for (ModuleIdentifier importRequest : root.uses) {
-            AnnotatedModule module = roots.get(importRequest.getFile().toString());
+            AnnotatedModule module = roots.get(importRequest.getFile().getAbsolutePath());
             if (module == null) {
                 module = parseModule(importRequest.getFile().getAbsolutePath());
                 if (module != null) {
-                    roots.put(module.getIdentifier().getFile().toString(), module);
+                    roots.put(module.getModuleIdentifier().getFile().getAbsolutePath(), module);
                 }
             }
             if (module != null) {
@@ -337,7 +337,8 @@ public class RESOLVECompiler {
                             importRequest.getNameToken().getText());
                     break;
                 }
-                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(), module.getNameToken().getText());
+                Graphs.addEdgeWithVertices(g, root.getModuleIdentifier().getFile().getAbsolutePath(),
+                        module.getModuleIdentifier().getFile().getAbsolutePath());
                 findDependencies(g, module, roots);
             }
         }
@@ -419,7 +420,7 @@ public class RESOLVECompiler {
                 file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
             if (!file.exists()) return null;
-            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
+            return parseModule(new ANTLRFileStream(file.getCanonicalPath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }

@@ -88,7 +88,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull
     public Path getPathRelativeToRootDir() {
         Path filePath = Paths.get(file.getAbsolutePath());
-        return filePath.relativize(getPackageRootPath());
+        return getPackageRootPath().relativize(filePath);
     }
 
     public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
@@ -118,7 +118,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     public boolean equals(@Nullable Object o) {
         boolean result = (o instanceof ModuleIdentifier);
         if (result) {
-            result = ((ModuleIdentifier) o).name.getText().equals(name.getText());
+            result = ((ModuleIdentifier) o).name.getText().equals(name.getText()) &&
+                    ((ModuleIdentifier) o).getFile().getAbsolutePath().equals(file.getAbsolutePath());
         }
         return result;
     }
@@ -135,6 +136,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public String toString() {
-        return name.getText();
+        String fromPathStr = getPathRelativeToRootDir().getParent().toString();
+
+        return name.getText() + " from " + fromPathStr.replaceAll(File.separator, ".");
     }
 }
