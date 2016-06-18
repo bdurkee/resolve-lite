@@ -9,21 +9,16 @@ import java.util.*;
 
 public class ModuleScopeBuilder extends ScopeBuilder {
 
-    private final List<ModuleIdentifier> importedModules = new ArrayList<>();
+    private final Set<ModuleIdentifier> importedModules = new HashSet<>();
 
     /** The set of all modules {@code this} either extends or inherits from. */
     private final Set<ModuleIdentifier> locallyInheritedModules = new LinkedHashSet<>();
 
-    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @Nullable ModuleIdentifier e,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, e);
-    }
-
-    @NotNull
-    public ModuleIdentifier getModuleIdentifier() {
-        return moduleIdentifier;
     }
 
     @NotNull
@@ -42,9 +37,20 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return i != null && i.equals(getModuleIdentifier()) || importedModules.contains(i);
     }
 
+    //Implicitly referenced imports are included in this set as well. See {@link UsesListener}.
     @NotNull
-    public List<ModuleIdentifier> getImports() {
-        return new ArrayList<>(importedModules);
+    public Set<ModuleIdentifier> getImports() {
+        return new HashSet<>(importedModules);
+    }
+
+    @Nullable
+    public ModuleIdentifier getImportWithName(@NotNull Token name) {
+        for (ModuleIdentifier e : importedModules) {
+            if (e.getNameToken().getText().equals(name.getText())) {
+                return e;
+            }
+        }
+        return null;
     }
 
     @NotNull

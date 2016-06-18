@@ -34,6 +34,12 @@ public class InstantiatedScope extends AbstractScope {
 
     @NotNull
     @Override
+    public ModuleIdentifier getModuleIdentifier() {
+        return baseScope.getModuleIdentifier();
+    }
+
+    @NotNull
+    @Override
     public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query)
             throws NoSuchModuleException, UnexpectedSymbolException {
         return baseScope.query(query);

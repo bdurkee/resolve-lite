@@ -273,6 +273,12 @@ public class MathSymbolTable {
 
     protected static class DummyIdentifierResolver extends AbstractScope {
 
+        @NotNull
+        @Override
+        public ModuleIdentifier getModuleIdentifier() {
+            return ModuleIdentifier.GLOBAL;
+        }
+
         @Override
         @NotNull
         public <E extends Symbol> List<E> query(@NotNull MultimatchSymbolQuery<E> query) {

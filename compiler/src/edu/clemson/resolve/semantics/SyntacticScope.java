@@ -45,6 +45,7 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @NotNull
+    @Override
     public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
