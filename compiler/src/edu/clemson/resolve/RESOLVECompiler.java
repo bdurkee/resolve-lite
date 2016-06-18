@@ -26,6 +26,7 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -251,8 +252,8 @@ public class RESOLVECompiler {
             info("core lib directory @: " + getCoreLibraryDirectory());
         }
         commandlineTargets.addAll(parseAndReturnRootModules());
-        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
-        processCommandLineTargets(targets);
+       // List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
+       // processCommandLineTargets(targets);
     }
 
     private List<AnnotatedModule> parseAndReturnRootModules() {
@@ -384,6 +385,7 @@ public class RESOLVECompiler {
                                 @NotNull String fileName) throws IOException {
         FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
         Files.walkFileTree(rootPath, l);
+        if (l.getFile() == null) throw new NoSuchFileException(fileName);
         return l.getFile();
     }
 

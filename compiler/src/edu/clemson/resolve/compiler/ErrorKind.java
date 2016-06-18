@@ -245,7 +245,9 @@ public enum ErrorKind {
 
     INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR),
 
-    VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING);
+    VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING),
+
+    BAD_FROM_CLAUSE(68, "from clause '<arg>' doesn't exist, isn't a directory, and/or isn't a valid project root", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

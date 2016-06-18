@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -34,14 +35,10 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        //TODO: Handle from clauses.
         for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
-            try {
-                File f = resolveImport(compiler, u);
+            File f = resolveImport(compiler, u);
+            if (f != null) {
                 uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
-                //uses.semanticallyRelevantUses.add(id);
-            } catch (IOException e) {
-                compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, u.getStart(), u.getText());
             }
         }
     }
@@ -138,39 +135,43 @@ public class UsesListener extends ResolveBaseListener {
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull ResolveParser.UsesSpecContext u) throws IOException {
+                                     @NotNull ResolveParser.UsesSpecContext u) {
         return resolveImport(compiler, u.ID().getSymbol(), u.fromClauseSpec() != null ?
-                u.fromClauseSpec().qualifiedFromPath().getText() : null);
+                u.fromClauseSpec().qualifiedFromPath() : null);
     }
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull Token usesToken,
-                                     @Nullable String fromPath) throws IOException {
+                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx) {
         //first check to see if we're on RESOLVEPATH
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
         File result = null;
+        try {
+            if (fromPathCtx != null) {
+                //a fromclause can either describe something on RESOLVEROOT or it can describe the root
+                //of some other resolve project on RESOLVEPATH
 
-        //user specified a root with the fromclause.
-        if (fromPath != null) {
-            //a fromclause can either describe something on RESOLVEROOT or it can describe the root
-            //of some other resolve project on RESOLVEPATH
-
-            Path s = getAppropriateRootDirectoryForFromClause(usesToken, fromPath.replace('.', File.separatorChar));
-            if (s == null) {
-                //from clause was apparently bad (doesn't exist, isn't a directory, etc)
-                return null;
+                Path s = getAppropriateRootDirectoryForFromClause(usesToken,
+                        fromPathCtx.getText().replace('.', File.separatorChar));
+                if (s == null) {
+                    compiler.errMgr.semanticError(ErrorKind.BAD_FROM_CLAUSE, fromPathCtx.getStart(),
+                            fromPathCtx.getText());
+                    return null;
+                }
+                return RESOLVECompiler.findFile(s, usesToken.getText());
             }
-            return RESOLVECompiler.findFile(s, usesToken.getText());
-        }
-        else {
-            //search the current project
-            result = searchProjectRootDirectory(compiler, usesToken.getText());
+            else {
+                //search the current project
+                result = searchProjectRootDirectory(compiler, usesToken.getText());
 
-            //now search the
-            //then search the std libs.. if we didn't find anything
-            if (result == null) result = searchStdRootDirectory(usesToken.getText());
+                //now search the
+                //then search the std libs.. if we didn't find anything
+                if (result == null) result = searchStdRootDirectory(usesToken.getText());
+            }
+        } catch(IOException e) {
+            compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, usesToken, usesToken.getText());
         }
         return result;
     }
