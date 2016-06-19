@@ -122,9 +122,7 @@ public class ModelBuilder extends ResolveBaseListener {
             f.stats.add((Stat) built.get(s));
             //ResolveParser returns are buried in an assignment
             //(specifically those assignments whose lhs == funcname)
-            if (s.assignStmt() != null
-                    && s.assignStmt().left.getText().equals(name)
-                    && f.hasReturn) {
+            if (s.assignStmt() != null && s.assignStmt().left.getText().equals(name) && f.hasReturn) {
                 Expr rhs = (Expr) built.get(s.assignStmt().right);
                 f.vars.add(new VariableDef(name, rhs));
                 f.stats.add(new ReturnStat(name));
@@ -151,8 +149,7 @@ public class ModelBuilder extends ResolveBaseListener {
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
-        for (ResolveParser.ExtensionPairingContext pair :
-                ctx.extensionPairing()) {
+        for (ResolveParser.ExtensionPairingContext pair : ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer =
                     new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
             specArgs = pair.specArgs == null ? new ArrayList<>() :
@@ -409,13 +406,13 @@ public class ModelBuilder extends ResolveBaseListener {
     public void exitProgCharacterLiteralExp(
             ResolveParser.ProgCharacterLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier(
-                "Character_Template", "Std_Chars"), "Character", ctx.getText()));
+                "concepts.char_template.Char_Template", "Std_Chars"), "Character", ctx.getText()));
     }
 
     @Override
     public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier(
-                "Char_String_Template", "Std_Char_Strings"), "Char_Str", ctx.getText()));
+                "concepts.char_str_template.Char_Str_Template", "Std_Char_Strs"), "Char_Str", ctx.getText()));
     }
 
     @Override
@@ -533,46 +530,11 @@ public class ModelBuilder extends ResolveBaseListener {
         return t.getChild(0) instanceof ResolveParser.FacilityModuleDeclContext;
     }
 
-    protected boolean isJavaLocallyAccessibleSymbol(@Nullable Symbol s) throws NoSuchSymbolException {
-        if (s == null) return false;
-        //System.out.println("symbol: "+s.getNameToken()+":"+s.getModuleIdentifier()+" is locally accessible?");
-        boolean result = isJavaLocallyAccessibleSymbol(s.getModuleIdentifier());
-        //System.out.println(result);
-        return result;
-    }
-
-    protected boolean isJavaLocallyAccessibleSymbol(@NotNull ModuleIdentifier symbolModuleID) {
-        //was s defined in the module we're translating?
-        if (moduleScope.getModuleIdentifier().equals(symbolModuleID)) {
-            return true;
-        }
-        else { //was s defined in our parent concept or enhancement?
-            ParseTree thisTree = moduleScope.getDefiningTree();
-            if (thisTree instanceof ResolveParser.ModuleDeclContext) {
-                thisTree = thisTree.getChild(0);
-            }
-            if (thisTree instanceof ResolveParser.ConceptImplModuleDeclContext) {
-                ResolveParser.ConceptImplModuleDeclContext asConceptImpl =
-                        (ResolveParser.ConceptImplModuleDeclContext) thisTree;
-                return symbolModuleID.getNameString()
-                        .equals(asConceptImpl.concept.getText());
-            }
-            else if (thisTree instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
-                ResolveParser.ConceptExtImplModuleDeclContext asExtensionImpl =
-                        (ResolveParser.ConceptExtImplModuleDeclContext) thisTree;
-                return symbolModuleID.getNameString()
-                        .equals(asExtensionImpl.concept.getText());
-            }
-        }
-        return false;
-    }
-
     protected ModuleFile buildFile() {
         AnnotatedModule annotatedTree = gen.getModule();
         return new ModuleFile(annotatedTree,
                 Utils.groomFileName(annotatedTree.getFilePath()), buildPackage(), buildImports());
     }
-
 
     private String buildPackage() {
         Path p = gen.module.getModuleIdentifier().getPathRelativeToRootDir();
@@ -626,7 +588,7 @@ public class ModelBuilder extends ResolveBaseListener {
                     return new NormalQualifier(refQualifier.getText());
                 }
                 String qual = s.getModuleIdentifier().getPathRelativeToRootDir().toString();
-                qual = qual.substring(0, qual.toString().lastIndexOf(".")); //strip ext
+                if (qual.lastIndexOf(".") != -1) qual = qual.substring(0, qual.lastIndexOf(".")); //strip ext
                 return new NormalQualifier(qual.replaceAll(File.separator, "."));
             } catch (UnexpectedSymbolException | NoSuchModuleException | DuplicateSymbolException e) {
                 //none of these should happen as we're not  coercing anything or naming a specific module, duplicate
