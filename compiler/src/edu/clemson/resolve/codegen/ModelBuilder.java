@@ -25,6 +25,7 @@ import edu.clemson.resolve.semantics.symbol.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -606,10 +607,9 @@ public class ModelBuilder extends ResolveBaseListener {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
             } catch (NoSuchSymbolException | DuplicateSymbolException |
                      UnexpectedSymbolException | NoSuchModuleException e) {
-
             }
-            String qualifier = getFullyQualifiedModuleIdentifier(corresondingSym.getModuleIdentifier());
-            return new NormalQualifier(qualifier);
+            Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
+            return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));
         }
         else { // if the reference was qualified, let's see if it was a facility or module.
             try {
@@ -617,8 +617,8 @@ public class ModelBuilder extends ResolveBaseListener {
                 if (s instanceof FacilitySymbol) {
                     ModuleIdentifier id =
                             ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
-                    String qualifier = getFullyQualifiedModuleIdentifier(id);
-                    return new FacilityQualifier(qualifier, s.getName());
+                    Path qual = id.getPathRelativeToRootDir().getParent();
+                    return new FacilityQualifier(qual.toString().replaceAll(File.separator, "."), s.getName());
                 }
             }
             catch (NoSuchSymbolException e) {
@@ -629,27 +629,13 @@ public class ModelBuilder extends ResolveBaseListener {
                 } catch (Exception e1) {
                     return new NormalQualifier(refQualifier.getText());
                 }
-                String qualifier = getFullyQualifiedModuleIdentifier(corresondingSym.getModuleIdentifier());
-                return new FacilityQualifier(qualifier, s.getName());
+                Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
+                return new FacilityQualifier(qual.toString().replaceAll(File.separator, "."), s.getName());
             } catch (UnexpectedSymbolException | NoSuchModuleException | DuplicateSymbolException e) {
                 //none of these should happen as we're not  coercing anything or naming a specific module, duplicate
                 //symbols should have been detected in population..
             }
             return new NormalQualifier(refQualifier.getText());
         }
-    }
-
-    private String getFullyQualifiedModuleIdentifier(ModuleIdentifier id) {
-        String qualifiedName = null;
-        /*try {
-            File foundFile = gen.compiler.findFile(id.getNameString());
-            qualifiedName = Utils.getModuleFilePathRelativeToProjectLibDirs(foundFile.getPath());
-            qualifiedName = Utils.stripFileExtension(qualifiedName);
-            qualifiedName = qualifiedName.replace(File.separator, ".");
-        }
-        catch (IOException ioe1) {
-            qualifiedName = id.getNameString();
-        }*/
-        return qualifiedName;
     }
 }

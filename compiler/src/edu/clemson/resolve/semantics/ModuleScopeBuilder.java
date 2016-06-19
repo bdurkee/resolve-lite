@@ -43,14 +43,14 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return new HashSet<>(importedModules);
     }
 
-    @Nullable
+    @NotNull
     public ModuleIdentifier getImportWithName(@NotNull Token name) {
         for (ModuleIdentifier e : importedModules) {
             if (e.getNameToken().getText().equals(name.getText())) {
                 return e;
             }
         }
-        return null;
+        return ModuleIdentifier.createInvalidModuleIdentifier(name);
     }
 
     @NotNull

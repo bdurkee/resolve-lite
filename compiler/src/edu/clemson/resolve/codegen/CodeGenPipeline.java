@@ -22,13 +22,7 @@ public class CodeGenPipeline extends AbstractCompilationPipeline {
     @Override
     public void process() {
         if (compiler.genCode == null) return;
-        File external = new File(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "external");
         for (AnnotatedModule unit : compilationUnits) {
-            ParseTree t = unit.getRoot().getChild(0);
-            if (t instanceof ResolveParser.PrecisModuleDeclContext ||
-                    t instanceof ResolveParser.PrecisExtModuleDeclContext) {
-                continue;
-            }
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
             gen.write(gen.generateModule(), gen.getFileName());
             gen.writeReferencedExternalFiles();

@@ -36,6 +36,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
+
     @NotNull
     private Token name;
     private final boolean globalFlag;
@@ -139,5 +140,9 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         String fromPathStr = getPathRelativeToRootDir().getParent().toString();
 
         return name.getText() + " from " + fromPathStr.replaceAll(File.separator, ".");
+    }
+
+    public static ModuleIdentifier createInvalidModuleIdentifier(Token name) {
+        return new ModuleIdentifier(name, new File("."));
     }
 }

@@ -252,8 +252,8 @@ public class RESOLVECompiler {
             info("core lib directory @: " + getCoreLibraryDirectory());
         }
         commandlineTargets.addAll(parseAndReturnRootModules());
-       // List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
-       // processCommandLineTargets(targets);
+        List<AnnotatedModule> targets = sortTargetModulesByUsesReferences(commandlineTargets);
+        processCommandLineTargets(targets);
     }
 
     private List<AnnotatedModule> parseAndReturnRootModules() {

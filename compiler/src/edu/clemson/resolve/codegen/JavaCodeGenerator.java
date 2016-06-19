@@ -15,6 +15,7 @@ import org.stringtemplate.v4.STWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.function.Function;
 
 class JavaCodeGenerator extends AbstractCodeGenerator {
@@ -37,9 +38,16 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         return walk(buildModuleOutputModel());
     }
 
-    @Override public void write(ST code, String fileName) {
+    @Override
+    public void write(ST code, String fileName) {
         try {
-            Writer w = compiler.getOutputFileWriter(module, fileName, new JavaOutputDirFun(compiler));
+            Writer w = compiler.getOutputFileWriter(module, fileName, new Function<String, File>() {
+                @Override
+                public File apply(String s) {
+                    Path p = module.getModuleIdentifier().getPathRelativeToRootDir();
+                    return new File(compiler.outputDirectory, p.getParent().toString());
+                }
+            });
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
@@ -52,23 +60,5 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     void writeReferencedExternalFiles() {
-
-    }
-
-    protected static class JavaOutputDirFun implements Function<String, File> {
-        private final RESOLVECompiler compiler;
-
-        JavaOutputDirFun(RESOLVECompiler compiler) {
-            this.compiler = compiler;
-        }
-
-        @Override
-        public File apply(String filePath) {
-            filePath = Utils.getModuleFilePathRelativeToProjectLibDirs(filePath);
-            File result = new File(filePath).getParentFile(); //if we have foo/T.resolve, this gives foo/
-
-            //and this will stick the output directory on the front out/foo
-            return new File(compiler.outputDirectory, result.getPath());
-        }
     }
 }

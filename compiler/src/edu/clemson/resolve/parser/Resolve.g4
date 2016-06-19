@@ -103,6 +103,7 @@ shortFacilityModuleDecl
 
 usesList
     :   'uses' usesSpec (',' usesSpec)* ';'
+    |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
     ;
 
 usesSpec : id=ID fromClauseSpec? alias? ;
