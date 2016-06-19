@@ -138,7 +138,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull
     public String toString() {
         String fromPathStr = getPathRelativeToRootDir().getParent().toString();
-
         return name.getText() + " from " + fromPathStr.replaceAll(File.separator, ".");
     }
 

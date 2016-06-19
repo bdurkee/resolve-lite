@@ -258,7 +258,7 @@ class <clazz.name>_Rep {
     }
 
     @Override public String toString() {
-        return <fields: {f|<f.var.name>.toString()}; separator="+">;
+        return <if(fields)><fields: {f|<f.var.name>.toString()}; separator="+"><else>""<endif>;
     }
 }
 public<if(clazz.isStatic)> static<endif> RType init<clazz.name>() {

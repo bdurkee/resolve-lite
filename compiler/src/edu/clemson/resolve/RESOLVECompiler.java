@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -37,7 +36,7 @@ import java.util.function.Function;
  * The main entrypoint for the compiler. All input flows into here and this is also where we manage flags for
  * commandline args which are encapsulated via instances of the {@link Option} class (which also resides here).
  * <p>
- * The structure and much of the code appearing here has been adapted to our compiler's needs from the frontend of the
+ * The structure and much of the code appearing here has been adapted to our prototype needs from the frontend of the
  * ANTLRv4 tool, publically available here: {@code https://github.com/antlr/antlr4}.</p>
  *
  * @since 0.0.1
@@ -83,8 +82,6 @@ public class RESOLVECompiler {
     public boolean prove = false;
     public String genCode;
 
-    @Deprecated
-    public String genPackage = null;
     public boolean log = false;
     public boolean printEnv = false;
 
@@ -414,7 +411,7 @@ public class RESOLVECompiler {
         ParserRuleContext start = parser.moduleDecl();
         Token moduleNameTok = null;
         try {
-            moduleNameTok = Utils.getModuleName(start);
+            moduleNameTok = Utils.getModuleCtxName(start);
         } catch (IllegalArgumentException iae) {
             return null;
         }
@@ -426,9 +423,8 @@ public class RESOLVECompiler {
         if (!hasErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        hasErrors = hasErrors || errMgr.getErrorCount() > 0;
-        //TODO: Now pass the moduleIdents into the annotated module.
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasErrors, l.uses);
+        return new AnnotatedModule(start, moduleNameTok,
+                parser.getSourceName(), hasErrors || errMgr.getErrorCount() > 0, l.uses);
     }
 
     @NotNull
@@ -516,7 +512,7 @@ public class RESOLVECompiler {
         info("RESOLVE Compiler Version " + VERSION);
     }
 
-    public void help() {
+    private void help() {
         version();
         for (Option o : optionDefs) {
             String name = o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
@@ -558,7 +554,7 @@ public class RESOLVECompiler {
         }
     }
 
-    public void exit(int e) {
+    private void exit(int e) {
         System.exit(e);
     }
 }

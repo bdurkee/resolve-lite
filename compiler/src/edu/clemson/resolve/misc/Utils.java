@@ -158,7 +158,7 @@ public class Utils {
     }
 
     @NotNull
-    public static Token getModuleName(@NotNull ParseTree ctx) {
+    public static Token getModuleCtxName(@NotNull ParseTree ctx) {
         if (ctx instanceof ResolveParser.ModuleDeclContext) ctx = ctx.getChild(0);
 
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext) {
@@ -264,29 +264,6 @@ public class Utils {
             t = t.getParent();
         }
         return null;
-    }
-
-    public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
-        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
-        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
-
-        String result = null;
-        Path modulePath = new File(filePath).toPath();
-        if (modulePath.startsWith(resolvePath)) {
-            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else if (modulePath.startsWith(resolveRoot)) {
-            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else {
-            //just use the lib directory if the user has a non-conformal project..
-            result = new File(modulePath.toFile().getPath()).getPath();
-        }
-        return result;
     }
 
     /**

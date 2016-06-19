@@ -575,21 +575,17 @@ public class ModelBuilder extends ResolveBaseListener {
 
 
     private String buildPackage() {
-        return buildPackage(Utils.getModuleFilePathRelativeToProjectLibDirs(tr.getFilePath()));
-    }
-
-    protected static String buildPackage(String filePath) {
-        String pkg = Utils.getModuleFilePathRelativeToProjectLibDirs(filePath);
-        if (pkg.startsWith(File.separator)) {
-            pkg = pkg.substring(1);
-        }
-        pkg = pkg.substring(0, pkg.lastIndexOf('/'));
-        return pkg.replaceAll(File.separator, ".");
+        Path p = gen.module.getModuleIdentifier().getPathRelativeToRootDir();
+        return p.getParent().toString().replaceAll(File.separator, ".");
     }
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-
+        for (ModuleIdentifier e : gen.module.uses) {
+            Path p = e.getPathRelativeToRootDir();
+            String i = p.toString().substring(0, p.toString().lastIndexOf("."));
+            result.add(i.replaceAll(File.separator, "."));
+        }
         return result;
     }
 
@@ -629,8 +625,9 @@ public class ModelBuilder extends ResolveBaseListener {
                 } catch (Exception e1) {
                     return new NormalQualifier(refQualifier.getText());
                 }
-                Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
-                return new FacilityQualifier(qual.toString().replaceAll(File.separator, "."), s.getName());
+                String qual = s.getModuleIdentifier().getPathRelativeToRootDir().toString();
+                qual = qual.substring(0, qual.toString().lastIndexOf(".")); //strip ext
+                return new NormalQualifier(qual.replaceAll(File.separator, "."));
             } catch (UnexpectedSymbolException | NoSuchModuleException | DuplicateSymbolException e) {
                 //none of these should happen as we're not  coercing anything or naming a specific module, duplicate
                 //symbols should have been detected in population..

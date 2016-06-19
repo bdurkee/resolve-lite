@@ -45,7 +45,9 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
                 @Override
                 public File apply(String s) {
                     Path p = module.getModuleIdentifier().getPathRelativeToRootDir();
-                    return new File(compiler.outputDirectory, p.getParent().toString());
+                    String outputDir = compiler.outputDirectory;
+                    if (compiler.outputDirectory.equals(".")) outputDir = "out";
+                    return new File(outputDir, p.getParent().toString());
                 }
             });
             STWriter wr = new AutoIndentWriter(w);
