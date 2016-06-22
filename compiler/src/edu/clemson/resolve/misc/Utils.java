@@ -31,7 +31,6 @@
 package edu.clemson.resolve.misc;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
@@ -49,6 +48,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -157,7 +158,7 @@ public class Utils {
     }
 
     @NotNull
-    public static Token getModuleName(@NotNull ParseTree ctx) {
+    public static Token getModuleCtxName(@NotNull ParseTree ctx) {
         if (ctx instanceof ResolveParser.ModuleDeclContext) ctx = ctx.getChild(0);
 
         if (ctx instanceof ResolveParser.PrecisModuleDeclContext) {
@@ -266,32 +267,6 @@ public class Utils {
     }
 
     /**
-     * Given an extensionless {@code name} and a compiler instance; searches for and returns an external file of
-     * name {@code name}.
-     */
-    @Nullable
-    public static File getExternalFile(@NotNull RESOLVECompiler e, @Nullable String name) {
-        if (name == null) return null;
-        FileLocator l = new FileLocator(name, RESOLVECompiler.NON_NATIVE_EXTENSION);
-        File result = null;
-        try {
-            //an external file is likely going to appear in the core lib
-            //so we search there first..
-            Files.walkFileTree(new File(RESOLVECompiler.getCoreLibraryDirectory()).toPath(), l);
-            result = l.getFile();
-        } catch (NoSuchFileException nsfe) {
-            //ok, maybe they defined an external file in their own workspace?
-            try {
-                Files.walkFileTree(new File(e.workingDirectory).toPath(), l);
-                result = l.getFile();
-            } catch (IOException ignored) {
-            }
-        } catch (IOException ignored) {
-        }
-        return result;
-    }
-
-    /**
      * Strips leading directories off a file's name; for example:
      * {@code ../Foo/precis/Nat_Num_Theory.resolve} grooms to {@code Nat_Num_Theory.resolve}.
      *
@@ -308,9 +283,8 @@ public class Utils {
         return name.substring(start + 1, name.length());
     }
 
-    @Nullable
-    public static String stripFileExtension(@Nullable String name) {
-        if (name == null) return null;
+    @NotNull
+    public static String stripFileExtension(@NotNull String name) {
         int lastDot = name.lastIndexOf('.');
         if (lastDot < 0) return name;
         return name.substring(0, lastDot);

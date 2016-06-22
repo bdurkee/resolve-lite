@@ -88,7 +88,7 @@ public class PSymbol extends PExp {
 
     @NotNull
     @Override
-    public String getCanonicalName() {
+    public String getTopLevelOperationName() {
         return getName();
     }
 
@@ -205,7 +205,7 @@ public class PSymbol extends PExp {
         if (!(excludeApplications && isFunctionApplication()) &&
                 !(excludeLiterals && isLiteral()) &&
                 quantification == Quantification.NONE) {
-            result.add(getCanonicalName());
+            result.add(getTopLevelOperationName());
         }
         return result;
     }

@@ -9,30 +9,22 @@ import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class CodeGenPipeline extends AbstractCompilationPipeline {
 
-    public CodeGenPipeline(@NotNull RESOLVECompiler compiler,
-                           @NotNull List<AnnotatedModule> compilationUnits) {
+    public CodeGenPipeline(@NotNull RESOLVECompiler compiler, @NotNull List<AnnotatedModule> compilationUnits) {
         super(compiler, compilationUnits);
     }
 
     @Override
     public void process() {
         if (compiler.genCode == null) return;
-        File external = new File(RESOLVECompiler.getCoreLibraryDirectory()
-                + File.separator + "external");
         for (AnnotatedModule unit : compilationUnits) {
-            ParseTree t = unit.getRoot().getChild(0);
-            if (t instanceof ResolveParser.PrecisModuleDeclContext ||
-                    t instanceof ResolveParser.PrecisExtModuleDeclContext)
-                continue;
-
             JavaCodeGenerator gen = new JavaCodeGenerator(compiler, unit);
-            ST generatedST = gen.generateModule();
-            // System.out.println("t="+generatedST.render());
-            gen.write(generatedST);
+            gen.write(gen.generateModule(), gen.getFileName());
             gen.writeReferencedExternalFiles();
         }
     }

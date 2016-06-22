@@ -10,10 +10,10 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -43,8 +43,9 @@ public class AnnotatedModule {
     public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
 
     /**
-     * Think of the {@code uses} set as refs useful for coming up with module orderings, etc. Think of these then as
-     * the refs the symboltable will see. We don't want implementations of facilities showing up in this set.
+     * Think of the {@code uses} set (declared above) as refs useful for coming up with module orderings, etc. Think
+     * of these then as the refs the symboltable will see. We don't want implementations of facilities showing up
+     * in this set.
      */
     public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
 
@@ -52,27 +53,27 @@ public class AnnotatedModule {
     private final Token name;
     private final ParseTree root;
     private VCOutputFile vcs = null;
-    public boolean hasErrors;
-
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name) {
-        this(root, name, "", false);
-    }
-
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {
-        this(root, name, fileName, false);
-    }
-
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName, boolean hasErrors) {
-        this.hasErrors = hasErrors;
+    public boolean hasParseErrors;
+    private final ModuleIdentifier identifier;
+    String contentRoot;
+    public AnnotatedModule(@NotNull ParseTree root,
+                           @NotNull Token name,
+                           @NotNull String fileName,
+                           boolean hasParseErrors,
+                           @NotNull Set<ModuleIdentifier> uses) {
+        this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
-        //if we have syntactic errors, better not risk processing imports with
-        //our tree (as it usually will result in a flurry of npe's).
-        if (!hasErrors) {
-            UsesListener l = new UsesListener(this);
-            ParseTreeWalker.DEFAULT.walk(l, root);
-        }
+        this.uses.addAll(uses);
+
+        this.identifier = new ModuleIdentifier(name, new File(fileName));
+        this.contentRoot = identifier.getPackageRoot();
+    }
+
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier() {
+        return identifier;
     }
 
     public void setVCs(@Nullable VCOutputFile vco) {
@@ -91,7 +92,7 @@ public class AnnotatedModule {
     }
 
     @NotNull
-    public String getFileName() {
+    public String getFilePath() {
         return fileName;
     }
 

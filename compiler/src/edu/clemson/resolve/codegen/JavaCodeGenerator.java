@@ -1,31 +1,28 @@
 package edu.clemson.resolve.codegen;
 
-import edu.clemson.resolve.codegen.model.Module;
-import edu.clemson.resolve.codegen.model.ModuleFile;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.misc.FileLocator;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.ModuleIdentifier;
+import org.stringtemplate.v4.AutoIndentWriter;
 import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STWriter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-
-import static edu.clemson.resolve.RESOLVECompiler.NON_NATIVE_EXTENSION;
+import java.io.Writer;
+import java.nio.file.Path;
+import java.util.function.Function;
 
 class JavaCodeGenerator extends AbstractCodeGenerator {
 
     private static final String LANGUAGE = "Java";
 
-    JavaCodeGenerator(@NotNull RESOLVECompiler compiler,
-                      @NotNull AnnotatedModule module) {
+    JavaCodeGenerator(@NotNull RESOLVECompiler compiler, @NotNull AnnotatedModule module) {
         super(compiler, module, LANGUAGE);
     }
 
@@ -41,24 +38,29 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         return walk(buildModuleOutputModel());
     }
 
-    void writeReferencedExternalFiles() {
-        //these *should* exist;
-        //we've already checked in BasicSanityCheckingVisitor..
-        for (ModuleIdentifier e : module.externalUses.values()) {
-            String fileName = e.getNameString() + getFileExtension();
-            ModuleFile moduleFile =
-                    new ModuleFile(null, fileName, compiler.genPackage);
-            File externalFile =
-                    Utils.getExternalFile(compiler, e.getNameString());
-            if (externalFile == null) continue;
-            String contents = null;
-            try {
-                contents = Utils.readFile(externalFile.getPath());
-            } catch (IOException ioe) {
-                throw new RuntimeException(ioe.getCause());
-            }
-            ST result = walk(moduleFile).add("module", contents);
-            write(result, fileName);
+    @Override
+    public void write(ST code, String fileName) {
+        try {
+            Writer w = compiler.getOutputFileWriter(module, fileName, new Function<String, File>() {
+                @Override
+                public File apply(String s) {
+                    Path p = module.getModuleIdentifier().getPathRelativeToRootDir();
+                    String outputDir = compiler.outputDirectory;
+                    if (compiler.outputDirectory.equals(".")) outputDir = "out";
+                    return new File(outputDir, p.getParent().toString());
+                }
+            });
+            STWriter wr = new AutoIndentWriter(w);
+            wr.setLineWidth(80);
+            code.write(wr);
+            w.close();
+        } catch (IOException ioe) {
+            compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
+                    ioe,
+                    fileName);
         }
+    }
+
+    void writeReferencedExternalFiles() {
     }
 }

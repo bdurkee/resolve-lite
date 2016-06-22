@@ -23,11 +23,11 @@ public class MathFunctionApplicationClassification extends MathClassification {
                                                  @NotNull String name,
                                                  @NotNull List<MathClassification> arguments) {
         //our range type is the result of an application, so we implicitly exhaust one layer from it...
-        super(g, f.getResultType());
+        super(g, f.getRangeClssftn());
         this.function = f;
         this.name = name;
         this.arguments.addAll(arguments);
-        this.typeRefDepth = f.getResultType().typeRefDepth - 1;
+        this.typeRefDepth = f.getRangeClssftn().typeRefDepth - 1;
     }
 
     public String getName() {

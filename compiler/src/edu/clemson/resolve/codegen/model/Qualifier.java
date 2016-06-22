@@ -3,12 +3,12 @@ package edu.clemson.resolve.codegen.model;
 public abstract class Qualifier extends OutputModelObject {
 
     public static class FacilityQualifier extends Qualifier {
-        public String referencedSymbolSpecName, facilityName;
+        public String fullyQualifiedSymbolSpecName, facilityName;
 
-        public FacilityQualifier(String referencedSymbolSpecName,
+        public FacilityQualifier(String fullyQualifiedSymbolSpecName,
                                  String facilityName) {
             this.facilityName = facilityName;
-            this.referencedSymbolSpecName = referencedSymbolSpecName;
+            this.fullyQualifiedSymbolSpecName = fullyQualifiedSymbolSpecName;
         }
     }
 

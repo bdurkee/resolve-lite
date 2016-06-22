@@ -331,13 +331,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitEnsuresClause(
-            ResolveParser.EnsuresClauseContext ctx) {
+    @Override public void exitEnsuresClause(ResolveParser.EnsuresClauseContext ctx) {
         repo.put(ctx, repo.get(ctx.mathAssertionExp()));
     }
 
-    @Override public void exitProgPrimaryExp(
-            ResolveParser.ProgPrimaryExpContext ctx) {
+    @Override public void exitProgPrimaryExp(ResolveParser.ProgPrimaryExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progPrimary()));
     }
 
@@ -351,16 +349,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), rhs));
     }
 
-    @Override public void exitProgParamExp(
-            ResolveParser.ProgParamExpContext ctx) {
+    @Override public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType( getMathClssfctn(ctx));
         repo.put(ctx, result.build());
     }
 
-    @Override public void exitProgNamedExp(
-            ResolveParser.ProgNamedExpContext ctx) {
+    @Override public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
                 .mathClssfctn(getMathClssfctn(ctx))
@@ -368,14 +364,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
        repo.put(ctx, result.build());
     }
 
-    @Override public void exitProgNestedExp(
-            ResolveParser.ProgNestedExpContext ctx) {
+    @Override public void exitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
         repo.put(ctx, repo.get(ctx.progExp()));
     }
 
     @Override public void exitProgInfixExp(
             ResolveParser.ProgInfixExpContext ctx) {
-        List<ProgType> argTypes = ctx.progExp().stream().map(annotations.progTypes::get).collect(Collectors.toList());
+        List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
         HardCodedProgOps.BuiltInOpAttributes attr = HardCodedProgOps.convert(ctx.op, argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())

@@ -30,7 +30,7 @@ public abstract class SyntacticScope extends AbstractScope {
     SyntacticScope(@NotNull MathSymbolTable scopeRepo,
                    @Nullable ParserRuleContext definingTree,
                    @NotNull Scope parent,
-                   @NotNull ModuleIdentifier moduleIdentifier,
+                   @Nullable ModuleIdentifier moduleIdentifier,
                    @NotNull Map<String, Symbol> bindingSyms) {
         this.symtab = scopeRepo;
         this.symbols = bindingSyms;
@@ -45,6 +45,7 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @NotNull
+    @Override
     public ModuleIdentifier getModuleIdentifier() {
         return moduleIdentifier;
     }
@@ -114,7 +115,6 @@ public abstract class SyntacticScope extends AbstractScope {
                 symbolTableView = updateSymbols(symbols, genericInstantiations, instantiatingFacility);
             }
             finished = searcher.addMatches(symbolTableView, matches, l);
-
             if (!finished) {
                 finished = parent.addMatches(searcher, matches, searchedScopes,
                         genericInstantiations, instantiatingFacility, l);

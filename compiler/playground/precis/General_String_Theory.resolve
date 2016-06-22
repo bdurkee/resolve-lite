@@ -1,8 +1,0 @@
-Precis General_String_Theory;
-    uses Basic_Natural_Number_Theory;
-
-    Definition Is_String_Former(SStr : Cls, Empty_String : SStr,
-            ext : SStr * El -> (SStr ~ {Empty_String})) : B;
-
-
-end General_String_Theory;

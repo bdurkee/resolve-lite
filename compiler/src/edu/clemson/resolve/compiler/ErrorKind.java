@@ -47,12 +47,9 @@ public enum ErrorKind {
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 8: module <em>name</em> was unable to find the file
-     * corresponding to uses reference '<em>usesref</em>'.
+     * Compiler Error 8: unable to resolve uses reference: <em>name</em>'.
      */
-    MISSING_IMPORT_FILE(8, "module <arg> was unable to find the file "
-            + "corresponding to uses reference '<arg2>'",
-            ErrorSeverity.ERROR),
+    MISSING_IMPORT_FILE(8, "unable to resolve uses reference: '<arg>'", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 9: circular dependency: <em>moduleName1</em> depends on
@@ -245,7 +242,11 @@ public enum ErrorKind {
 
     MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>", ErrorSeverity.ERROR),
 
-    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR);
+    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR),
+
+    VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING),
+
+    BAD_FROM_CLAUSE(68, "from clause '<arg>' doesn't exist, isn't a directory, and/or isn't a valid project root", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

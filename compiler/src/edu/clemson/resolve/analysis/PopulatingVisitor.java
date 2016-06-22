@@ -92,7 +92,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-        moduleScope = symtab.startModuleScope(tr).addImports(tr.semanticallyRelevantUses);
+        moduleScope = symtab.startModuleScope(tr).addImports(tr.uses);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
@@ -100,30 +100,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitPrecisModuleDecl(ResolveParser.PrecisModuleDeclContext ctx) {
-        if (ctx.tag != null) {
-            symtab.addTag(new ModuleIdentifier(ctx.tag));
-        }
         super.visitChildren(ctx);
         return null;
     }
 
     @Override
     public Void visitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
-        try {
+      /*  try {
             //exts implicitly gain the parenting precis's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.precis));
             moduleScope.addImports(conceptScope.getImports());
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.precis, ctx.precis.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
 
     @Override
     public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
-        try {
+    /*    try {
             //implementations implicitly gain the parenting concept's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
@@ -131,21 +128,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
 
     @Override
     public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
-        try {
+      /*  try {
             //implementations implicitly gain the parenting concept's useslist
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
             moduleScope.addImports(conceptScope.getImports());
             moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
         } catch (NoSuchModuleException e) {
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }
+        }*/
         super.visitChildren(ctx);
         return null;
     }
@@ -199,7 +196,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
-            symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            symtab.getModuleScope(moduleScope.getImportWithName(ctx.spec));
 
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same
@@ -213,7 +210,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } catch (NoSuchModuleException e) {
             noSuchModule(e);
             try {
-                if (ctx.externally == null) symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+                if (ctx.externally == null) symtab.getModuleScope(moduleScope.getImportWithName(ctx.impl));
             }
             catch (NoSuchModuleException e2) {
                 noSuchModule(e2);
@@ -395,14 +392,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void initializeAndSanityCheckInfo(@NotNull ResolveParser.FacilityDeclContext ctx) {
-
+/*
         if (ctx.specArgs != null) {
             sanityCheckParameterizationArgs(ctx.specArgs.progExp(), new ModuleIdentifier(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs.put(ctx.specArgs, new ArrayList<>());
         }
         if (ctx.implArgs != null) {
             sanityCheckParameterizationArgs(ctx.implArgs.progExp(), new ModuleIdentifier(ctx.impl));
-        }
+        }*/
         for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
             if (extension.specArgs != null) {
                 actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
@@ -1420,7 +1417,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //If we're describing a type, then the range (as a result of the function is too broad),
         //so we'll annotate the type of this application with its (verbose) application type.
         //but it's enclosing type will of course still be the range.
-        if (walkingType && expectedFuncType.getResultType().getTypeRefDepth() <= 1) {
+        if (walkingType && expectedFuncType.getRangeClssftn().getTypeRefDepth() <= 1) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
         }
@@ -1441,8 +1438,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //  C \ E2 : D
             //  ---------------------
             //  C \ f(E1, E2) : R
-            exactNamedMathClssftns.put(ctx, expectedFuncType.getResultType());
-            tr.mathClssftns.put(ctx, expectedFuncType.getResultType());
+            exactNamedMathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
+            tr.mathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
         }
     }
 
@@ -1459,29 +1456,25 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
     */
     @Override
-    public Void visitMathSqBrOpExp(
-            ResolveParser.MathSqBrOpExpContext ctx) {
+    public Void visitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
         typeMathSymbol(ctx, null, "[..]");
         return null;
     }
 
     @Override
-    public Void visitMathMultOpExp(
-            ResolveParser.MathMultOpExpContext ctx) {
+    public Void visitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 
     @Override
-    public Void visitMathAddOpExp(
-            ResolveParser.MathAddOpExpContext ctx) {
+    public Void visitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
 
     @Override
-    public Void visitMathJoiningOpExp(
-            ResolveParser.MathJoiningOpExpContext ctx) {
+    public Void visitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
         typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
         return null;
     }
@@ -1745,31 +1738,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         if (entailsRetype != null) {
-            s.setClassification(
-                    new MathNamedClassification(g, name,
-                            entailsRetype.typeRefDepth - 1, entailsRetype));
+            s.setClassification(new MathNamedClassification(g, name, entailsRetype.typeRefDepth - 1, entailsRetype));
         }
         exactNamedMathClssftns.put(ctx, s.getClassification());
         if (s.getClassification().identifiesSchematicType) {
             tr.mathClssftns.put(ctx, s.getClassification());
         }
         else {
-            tr.mathClssftns.put(ctx, s.getClassification()
-                    .getEnclosingClassification());
+            tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
     }
 
     @Nullable
-    private MathClssftnWrappingSymbol getIntendedMathSymbol(
-            @Nullable Token qualifier, @NotNull String symbolName,
-            @NotNull ParserRuleContext ctx) {
+    private MathClssftnWrappingSymbol getIntendedMathSymbol(@Nullable Token qualifier,
+                                                            @NotNull String symbolName,
+                                                            @NotNull ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(qualifier,
-                            symbolName, ctx.getStart()));
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName, ctx.getStart()));
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
-                    symbolName);
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), symbolName);
         } catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(nsme.getErrorKind(),
                     nsme.getRequestedModule(),
@@ -1798,8 +1786,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void expectType(ParserRuleContext ctx, MathClassification expected) {
         MathClassification foundType = tr.mathClssftns.get(ctx);
         if (!g.isSubtype(foundType, expected)) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE,
-                    ctx.getStart(), expected, foundType);
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_TYPE, ctx.getStart(), expected, foundType);
         }
     }
 
@@ -1814,8 +1801,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private void visitAndClassifyMathExpCtx(@NotNull ParseTree ctx,
                                             @NotNull ParseTree child) {
         this.visit(child);
-        exactNamedMathClssftns.put(ctx,
-                exactNamedMathClssftns.get(child));
+        exactNamedMathClssftns.put(ctx, exactNamedMathClssftns.get(child));
         MathClassification x = tr.mathClssftns.get(child);
         tr.mathClssftns.put(ctx, tr.mathClssftns.get(child));
     }
@@ -1846,8 +1832,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
         if (missingReturn) {
-            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT,
-                    operationName, operationName.getText());
+            compiler.errMgr.semanticError(ErrorKind.MISSING_RETURN_STMT, operationName, operationName.getText());
         }
     }
 

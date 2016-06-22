@@ -45,4 +45,6 @@ public interface Scope {
     @NotNull
     public List<Symbol> getSymbolsOfType(@NotNull Class<?>... types);
 
+    @NotNull
+    public ModuleIdentifier getModuleIdentifier();
 }

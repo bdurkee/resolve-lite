@@ -12,15 +12,13 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A general base class for anything in the compiler that requires us to
- * produce a 'significant' amount of structured code/output/text. This includes
- * our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
+ * A general base class for anything in the compiler that requires us to produce a 'significant' amount of structured
+ * code/output/text. This includes our Java code generator {@link JavaCodeGenerator}, as well as VCs produced
  * from {@link edu.clemson.resolve.vcgen.VCGenerator}.
  */
 public abstract class AbstractCodeGenerator {
 
-    public static final String TEMPLATE_ROOT =
-            "edu/clemson/resolve/templates/codegen";
+    public static final String TEMPLATE_ROOT = "edu/clemson/resolve/templates/codegen";
 
     protected final RESOLVECompiler compiler;
     protected final AnnotatedModule module;
@@ -69,15 +67,17 @@ public abstract class AbstractCodeGenerator {
         return extST.render();
     }
 
+    public void write(ST code) {
+        write(code, getFileName());
+    }
+
     public void write(ST code, String fileName) {
         try {
-//			long start = System.currentTimeMillis();
-            Writer w = compiler.getOutputFileWriter(fileName);
+            Writer w = compiler.getOutputFileWriter(module, fileName);
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
             w.close();
-//			long stop = System.currentTimeMillis();
         } catch (IOException ioe) {
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
                     ioe,
@@ -85,13 +85,8 @@ public abstract class AbstractCodeGenerator {
         }
     }
 
-    public void write(ST code) {
-        write(code, getFileName());
-    }
-
     public STGroup loadTemplates() {
-        String groupFileName = TEMPLATE_ROOT + "/" + language +
-                STGroup.GROUP_FILE_EXTENSION;
+        String groupFileName = TEMPLATE_ROOT + "/" + language + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {
             result = new STGroupFile(groupFileName);

@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCompileOrder extends BaseTest {
 
-    @Test
+/*    @Test
     public void testBasicLinearOrdering() throws Exception {
         String[] modules = new String[]{
                 "Precis T;\n uses U;\n end T;",
@@ -42,7 +42,7 @@ public class TestCompileOrder extends BaseTest {
         writeModules(modules, "T", "U");
         testOrdering(expected, "T");
     }
-
+*/
     //Todo: When facilities, enhancements, and other constructs are
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.

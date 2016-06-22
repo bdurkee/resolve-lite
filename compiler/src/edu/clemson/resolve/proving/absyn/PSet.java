@@ -85,7 +85,7 @@ public class PSet extends PExp {
 
     @NotNull
     @Override
-    protected String getCanonicalName() {
+    public String getTopLevelOperationName() {
         return "{ PSet }";
     }
 

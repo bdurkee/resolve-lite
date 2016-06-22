@@ -9,22 +9,16 @@ import java.util.*;
 
 public class ModuleScopeBuilder extends ScopeBuilder {
 
-    private final List<ModuleIdentifier> importedModules = new ArrayList<>();
+    private final Set<ModuleIdentifier> importedModules = new HashSet<>();
 
     /** The set of all modules {@code this} either extends or inherits from. */
-    private final Set<ModuleIdentifier> locallyInheritedModules =
-            new LinkedHashSet<>();
+    private final Set<ModuleIdentifier> locallyInheritedModules = new LinkedHashSet<>();
 
-    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull Token name,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
-        super(symbolTable, g, definingTree, parent, new ModuleIdentifier(name));
-    }
-
-    @NotNull
-    public ModuleIdentifier getModuleIdentifier() {
-        return moduleIdentifier;
+        super(symbolTable, g, definingTree, parent, e);
     }
 
     @NotNull
@@ -34,10 +28,8 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     @NotNull
-    public ModuleScopeBuilder addImports(@Nullable Collection<ModuleIdentifier> imports) {
-        if (imports != null) {
-            importedModules.addAll(imports);
-        }
+    public ModuleScopeBuilder addImports(@NotNull Collection<ModuleIdentifier> imports) {
+        importedModules.addAll(imports);
         return this;
     }
 
@@ -45,9 +37,20 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return i != null && i.equals(getModuleIdentifier()) || importedModules.contains(i);
     }
 
+    //Implicitly referenced imports are included in this set as well. See {@link UsesListener}.
     @NotNull
-    public List<ModuleIdentifier> getImports() {
-        return new ArrayList<>(importedModules);
+    public Set<ModuleIdentifier> getImports() {
+        return new HashSet<>(importedModules);
+    }
+
+    @NotNull
+    public ModuleIdentifier getImportWithName(@NotNull Token name) {
+        for (ModuleIdentifier e : importedModules) {
+            if (e.getNameToken().getText().equals(name.getText())) {
+                return e;
+            }
+        }
+        return ModuleIdentifier.createInvalidModuleIdentifier(name);
     }
 
     @NotNull

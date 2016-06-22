@@ -1,12 +1,24 @@
 package edu.clemson.resolve.semantics;
 
+import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.misc.FileLocator;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveLexer;
+import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,19 +37,29 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
-    public final Set<String> tagAliases = new HashSet<>();
     @NotNull
-    private final Token name;
+    private Token name;
     private final boolean globalFlag;
+    @NotNull
+    private File file;
+    @NotNull
+    public List<String> pathListRelativeToRoot = new ArrayList<>();
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");
         this.globalFlag = true;
+        file = new File(".");
     }
 
-    public ModuleIdentifier(@NotNull Token t) {
+    public ModuleIdentifier(@NotNull Token t, @NotNull File file) {
         this.name = t;
+        this.file = file;
         this.globalFlag = false;
+    }
+
+    @NotNull
+    public File getFile() {
+        return file;
     }
 
     @NotNull
@@ -50,15 +72,60 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         return name;
     }
 
-    @Override
-    public boolean equals(@Nullable Object o) {
-        boolean result = (o instanceof ModuleIdentifier);
-        if (result) {
-            result = ((ModuleIdentifier) o).name.getText().equals(name.getText());
+    @NotNull
+    public String getPackageRoot() {
+        return getPackageRootPath().toString();
+    }
+
+    @NotNull
+    private Path getPackageRootPath() {
+        Path libraryPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src");
+        Path stdlibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
+
+        Path filePath = Paths.get(file.getAbsolutePath());
+        return filePath.startsWith(libraryPath) ? libraryPath : stdlibPath;
+    }
+
+    @NotNull
+    public Path getPathRelativeToRootDir() {
+        Path filePath = Paths.get(file.getAbsolutePath());
+        return getPackageRootPath().relativize(filePath);
+    }
+
+    public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
+        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
+        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
+
+        String result = null;
+        Path modulePath = new File(filePath).toPath();
+        if (modulePath.startsWith(resolvePath)) {
+            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else if (modulePath.startsWith(resolveRoot)) {
+            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
+            Path pathRelative = projectPathAbsolute.relativize(modulePath);
+            result = pathRelative.toString();
+        }
+        else {
+            //just use the lib directory if the user has a non-conformal project..
+            result = new File(modulePath.toFile().getPath()).getPath();
         }
         return result;
     }
 
+    @Override
+    public boolean equals(@Nullable Object o) {
+        boolean result = (o instanceof ModuleIdentifier);
+        if (result) {
+            result = ((ModuleIdentifier) o).name.getText().equals(name.getText()) &&
+                    ((ModuleIdentifier) o).getFile().getAbsolutePath().equals(file.getAbsolutePath());
+        }
+        return result;
+    }
+
+    @Override
     public int hashCode() {
         return name.getText().hashCode();
     }
@@ -70,11 +137,11 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     @NotNull
     public String toString() {
-        return name.getText();
+        String fromPathStr = getPathRelativeToRootDir().getParent().toString();
+        return name.getText() + " from " + fromPathStr.replaceAll(File.separator, ".");
     }
 
-    @NotNull
-    public String fullyQualifiedRepresentation(@Nullable String symbolName) {
-        return name.getText() + " :: " + symbolName;
+    public static ModuleIdentifier createInvalidModuleIdentifier(Token name) {
+        return new ModuleIdentifier(name, new File("."));
     }
 }

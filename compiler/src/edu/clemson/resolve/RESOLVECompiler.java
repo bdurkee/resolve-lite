@@ -10,6 +10,7 @@ import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graphs;
@@ -26,14 +27,16 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 /**
  * The main entrypoint for the compiler. All input flows into here and this is also where we manage flags for
  * commandline args which are encapsulated via instances of the {@link Option} class (which also resides here).
  * <p>
- * The structure and much of the code appearing here has been adapted to our compiler's needs from the frontend of the
+ * The structure and much of the code appearing here has been adapted to our prototype needs from the frontend of the
  * ANTLRv4 tool, publically available here: {@code https://github.com/antlr/antlr4}.</p>
  *
  * @since 0.0.1
@@ -43,8 +46,9 @@ public class RESOLVECompiler {
     public static String VERSION = "0.0.1";
 
     public static final String FILE_EXTENSION = ".resolve";
-    private static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
+    public static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
     public static final List<String> NON_NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(".java"));
+
     private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
     private static class Option {
@@ -64,28 +68,33 @@ public class RESOLVECompiler {
             this.description = desc;
         }
     }
+
     //fields set by option manager
     public final String[] args;
     protected boolean haveOutputDir = false;
-    public String workingDirectory;
+
+    //TODO: Change package of this to pkgLibDirectory or libDirectory.. something like that...
+    public String libDirectory;
     public String outputDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
+    public boolean prove = false;
     public String genCode;
-    public String genPackage = null;
+
     public boolean log = false;
     public boolean printEnv = false;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("workingDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
+            new Option("prove", "-prove", "attempt to prove generated VCs for the current file"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
-            new Option("printEnv", "-env", "print path variables")
+            new Option("printEnv", "-env", "print path variables"),
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
@@ -181,24 +190,24 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
-                workingDirectory = ".";
+                libDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
         }
-        if (workingDirectory != null) {
-            if (workingDirectory.endsWith("/") || workingDirectory.endsWith("\\")) {
-                workingDirectory = workingDirectory.substring(0, workingDirectory.length() - 1);
+        if (libDirectory != null) {
+            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
+                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
             }
-            File outDir = new File(workingDirectory);
+            File outDir = new File(libDirectory);
             if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, workingDirectory);
-                workingDirectory = ".";
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
+                libDirectory = ".";
             }
         }
         else {
-            workingDirectory = ".";
+            libDirectory = ".";
         }
     }
 
@@ -228,7 +237,10 @@ public class RESOLVECompiler {
     }
 
     public void processCommandLineTargets() {
+        //TESTING CMDS:
         if (printEnv) {
+            info("SYSTEM DIR: " + System.getProperty("user.dir"));
+            info("HERE's new File('.'): " + new File(".").getAbsolutePath());
             info("$RESOLVEROOT=" + System.getenv("RESOLVEROOT"));
             Map<String, String> x = System.getenv();
             for (String o : x.keySet()) {
@@ -246,7 +258,7 @@ public class RESOLVECompiler {
         for (String e : targetFiles) {
             AnnotatedModule m = parseModule(e);
             if (m != null) {
-                modules.add(parseModule(e));
+                modules.add(m);
             }
         }
         return modules;
@@ -261,15 +273,13 @@ public class RESOLVECompiler {
         AnalysisPipeline analysisPipe = new AnalysisPipeline(this, modules);
         CodeGenPipeline codegenPipe = new CodeGenPipeline(this, modules);
         VerifierPipeline vcsPipe = new VerifierPipeline(this, modules);
-
+        if (errMgr.getErrorCount() > 0) return; //I just really don't want to analyze something erroneous..
         analysisPipe.process();
         if (errMgr.getErrorCount() > initialErrCt) {
             return;
         }
         codegenPipe.process();
         vcsPipe.process();
-        int i;
-        i=0;
     }
 
     @NotNull
@@ -281,7 +291,7 @@ public class RESOLVECompiler {
     public List<AnnotatedModule> sortTargetModulesByUsesReferences(@NotNull List<AnnotatedModule> modules) {
         Map<String, AnnotatedModule> roots = new HashMap<>();
         for (AnnotatedModule module : modules) {
-            roots.put(module.getNameToken().getText(), module);
+            roots.put(module.getModuleIdentifier().getFile().toString(), module);
         }
         return sortTargetModulesByUsesReferences(roots);
     }
@@ -291,14 +301,14 @@ public class RESOLVECompiler {
         DefaultDirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         for (AnnotatedModule t : Collections.unmodifiableCollection(modules.values())) {
-            g.addVertex(t.getNameToken().getText());
+            g.addVertex(t.getModuleIdentifier().getFile().getAbsolutePath());
             findDependencies(g, t, modules);
         }
         List<AnnotatedModule> finalOrdering = new ArrayList<>();
         List<String> intermediateOrdering = getCompileOrder(g);
         for (String s : getCompileOrder(g)) {
             AnnotatedModule m = modules.get(s);
-            if (m.hasErrors) {
+            if (m.hasParseErrors) {
                 finalOrdering.clear();
                 break;
             }
@@ -311,22 +321,12 @@ public class RESOLVECompiler {
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
         for (ModuleIdentifier importRequest : root.uses) {
-            AnnotatedModule module = roots.get(importRequest.getNameToken().getText());
-            try {
-                File file = findResolveFile(importRequest.getNameToken().getText());
-                if (module == null) {
-                    module = parseModule(file.getAbsolutePath());
-                    if (module != null) {
-                        roots.put(module.getNameToken().getText(), module);
-                    }
+            AnnotatedModule module = roots.get(importRequest.getFile().getAbsolutePath());
+            if (module == null) {
+                module = parseModule(importRequest.getFile().getAbsolutePath());
+                if (module != null) {
+                    roots.put(module.getModuleIdentifier().getFile().getAbsolutePath(), module);
                 }
-            } catch (IOException ioe) {
-                errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE,
-                        importRequest.getNameToken(), root.getNameToken().getText(),
-                        importRequest.getNameToken().getText());
-                //mark the current root as erroneous
-                root.semanticallyRelevantUses.remove(new ModuleIdentifier(importRequest.getNameToken()));
-                continue;
             }
             if (module != null) {
                 if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
@@ -335,7 +335,8 @@ public class RESOLVECompiler {
                             importRequest.getNameToken().getText());
                     break;
                 }
-                Graphs.addEdgeWithVertices(g, root.getNameToken().getText(), module.getNameToken().getText());
+                Graphs.addEdgeWithVertices(g, root.getModuleIdentifier().getFile().getAbsolutePath(),
+                        module.getModuleIdentifier().getFile().getAbsolutePath());
                 findDependencies(g, module, roots);
             }
         }
@@ -370,21 +371,19 @@ public class RESOLVECompiler {
         return false;
     }
 
-    @NotNull
-    private File findResolveFile(@NotNull String fileName) throws IOException {
-        FileLocator l = new FileLocator(fileName, NATIVE_EXTENSION);
-        File result = null;
-        try {
-            Files.walkFileTree(new File(workingDirectory).toPath(), l);
-            result = l.getFile();
-        } catch (NoSuchFileException nsfe) {
-            //couldn't find what we were looking for in the local directory?
-            //well, let's try the core libraries then
-            String stdSrcsPath = getCoreLibraryDirectory();
-            Files.walkFileTree(new File(getCoreLibraryDirectory()).toPath(), l);
-            result = l.getFile();
-        }
-        return result;
+    @Nullable
+    public static File findFile(@NotNull Path rootPath, @NotNull String fileName) throws IOException {
+        return findFile(RESOLVECompiler.NATIVE_EXTENSION, rootPath, fileName);
+    }
+
+    @Nullable
+    public static File findFile(@NotNull List<String> validExtensions,
+                                @NotNull Path rootPath,
+                                @NotNull String fileName) throws IOException {
+        FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
+        Files.walkFileTree(rootPath, l);
+        if (l.getFile() == null) throw new NoSuchFileException(fileName);
+        return l.getFile();
     }
 
     @Nullable
@@ -392,9 +391,10 @@ public class RESOLVECompiler {
         try {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(workingDirectory, fileName);
+                file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
-            return parseModule(new ANTLRFileStream(file.getAbsolutePath()));
+            if (!file.exists()) return null;
+            return parseModule(new ANTLRFileStream(file.getCanonicalPath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -411,22 +411,31 @@ public class RESOLVECompiler {
         ParserRuleContext start = parser.moduleDecl();
         Token moduleNameTok = null;
         try {
-            moduleNameTok = Utils.getModuleName(start);
+            moduleNameTok = Utils.getModuleCtxName(start);
         } catch (IllegalArgumentException iae) {
             return null;
         }
-        return new AnnotatedModule(start, moduleNameTok,
-                parser.getSourceName(),
-                parser.getNumberOfSyntaxErrors() > 0);
+        boolean hasParseErrors = parser.getNumberOfSyntaxErrors() > 0;
+
+        //if we have syntactic errors, better not risk processing imports with
+        //our tree (as it usually will result in a flurry of npe's).
+        UsesListener l = new UsesListener(this);
+        if (!hasParseErrors) {
+            ParseTreeWalker.DEFAULT.walk(l, start);
+        }
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.uses);
     }
 
     @NotNull
     public static String getCoreLibraryDirectory() {
-        String rootDir = System.getenv("RESOLVEROOT");
-        if (rootDir == null) {
-            return "./";
-        }
-        return rootDir;
+        String resolveRoot = System.getenv("RESOLVEROOT");
+        return resolveRoot == null ? "." : resolveRoot;
+    }
+
+    @NotNull
+    public static String getLibrariesPathDirectory() {
+        String resolvePath = System.getenv("RESOLVEPATH");
+        return resolvePath == null ? "." : resolvePath;
     }
 
     /**
@@ -434,47 +443,51 @@ public class RESOLVECompiler {
      * will be created. The final filename is sensitive to the output directory and the directory where the soure file
      * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
+     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project
+     * root directory {@code libDirectory}, which is specified by the user.
+     * <p>
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
-    public Writer getOutputFileWriter(@NotNull String fileName) throws IOException {
+    public Writer getOutputFileWriter(@NotNull AnnotatedModule module, @NotNull String fileName) throws IOException {
+        return getOutputFileWriter(module, fileName, new Function<String, File>() {
+            @Override
+            public File apply(String filePath) {
+                File outputDir;
+                String fileDirectory = libDirectory;
+                if (haveOutputDir) {
+                    if (new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~")) {
+                        outputDir = new File(outputDirectory);
+                    }
+                    else {
+                        outputDir = new File(outputDirectory, fileDirectory);
+                    }
+                }
+                else {
+                    outputDir = new File(fileDirectory);
+                }
+                return outputDir;
+            }
+        });
+    }
+
+    public Writer getOutputFileWriter(@NotNull AnnotatedModule module,
+                                      @NotNull String fileName,
+                                      @NotNull Function<String, File> outputDirFun) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-        // output directory is a function of where the source file lives
-        // for subdir/T.resolve, you get subdir here.  Well, depends on -o etc...
-        File outputDir = getOutputDirectory(fileName);
+        File outputDir = outputDirFun.apply(module.getFilePath());
         File outputFile = new File(outputDir, fileName);
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();
         }
         FileOutputStream fos = new FileOutputStream(outputFile);
-        return new BufferedWriter(new OutputStreamWriter(fos));
-    }
+        OutputStreamWriter osw;
+        osw = new OutputStreamWriter(fos);
 
-    public File getOutputDirectory(@NotNull String fileNameWithPath) {
-        File outputDir;
-        String fileDirectory;
-
-        if (fileNameWithPath.lastIndexOf(File.separatorChar) == -1) {
-            fileDirectory = ".";
-        }
-        else {
-            fileDirectory = fileNameWithPath.substring(0, fileNameWithPath.lastIndexOf(File.separatorChar));
-        }
-        if (haveOutputDir) {
-            if ((new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~"))) {
-                outputDir = new File(outputDirectory);
-            }
-            else {
-                outputDir = new File(outputDirectory, fileDirectory);
-            }
-        }
-        else {
-            outputDir = new File(fileDirectory);
-        }
-        return outputDir;
+        return new BufferedWriter(osw);
     }
 
     public void addListener(@Nullable RESOLVECompilerListener cl) {
@@ -498,7 +511,7 @@ public class RESOLVECompiler {
         info("RESOLVE Compiler Version " + VERSION);
     }
 
-    public void help() {
+    private void help() {
         version();
         for (Option o : optionDefs) {
             String name = o.name + (o.argType != OptionArgType.NONE ? " ___" : "");
@@ -540,7 +553,7 @@ public class RESOLVECompiler {
         }
     }
 
-    public void exit(int e) {
+    private void exit(int e) {
         System.exit(e);
     }
 }

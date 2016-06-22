@@ -1,7 +1,0 @@
-Precis Extension Str_Relativization_Ext for General_String_Theory;
-
-    Definition Str(T : Cls) : Powerset(SStr);
-
-
-
-end Str_Relativization_Ext;

@@ -192,7 +192,7 @@ public class MathSymbolTable {
         ParseTree contextTree = module.getRoot();
 
         ScopeBuilder parent = lexicalScopeStack.peek();
-        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph, module.getNameToken(),
+        ModuleScopeBuilder s = new ModuleScopeBuilder(typeGraph, module.getModuleIdentifier(),
                 (ParserRuleContext) contextTree, parent, this);
         curModuleScope = s;
         addScope(s, parent);
@@ -263,7 +263,7 @@ public class MathSymbolTable {
     }
 
     @NotNull
-    public ModuleScopeBuilder getModuleScope(@Nullable ModuleIdentifier identifier) throws NoSuchModuleException {
+    public ModuleScopeBuilder getModuleScope(@NotNull ModuleIdentifier identifier) throws NoSuchModuleException {
         ModuleScopeBuilder module = moduleScopes.get(identifier);
         if (module == null) {
             throw new NoSuchModuleException(identifier);
@@ -272,6 +272,12 @@ public class MathSymbolTable {
     }
 
     protected static class DummyIdentifierResolver extends AbstractScope {
+
+        @NotNull
+        @Override
+        public ModuleIdentifier getModuleIdentifier() {
+            return ModuleIdentifier.GLOBAL;
+        }
 
         @Override
         @NotNull

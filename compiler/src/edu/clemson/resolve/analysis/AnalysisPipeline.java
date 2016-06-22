@@ -19,6 +19,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
     @Override
     public void process() {
         //if (compiler.errMgr.getErrorCount() > 0) return;
+        //int initialErrCount = compiler.errMgr.getErrorCount();
         for (AnnotatedModule unit : compilationUnits) {
             compiler.log("AnalysisPipeline", "populating: " + unit.getNameToken().getText());
             ParseTreeWalker walker = new ParseTreeWalker();
@@ -31,7 +32,7 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             SanityCheckingListener sanityChecker = new SanityCheckingListener(compiler, unit);
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
-            if (compiler.errMgr.getErrorCount() > 0) return;
+            //if (compiler.errMgr.getErrorCount() > initialErrCount) return;
 
             MathClssftnLogger pl = new MathClssftnLogger(compiler, unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());

@@ -37,12 +37,12 @@ moduleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
     |   conceptExtImplModuleDecl
-    |   facilityModuleDecl) EOF
-
+    |   facilityModuleDecl
+    |   shortFacilityModuleDecl) EOF
     ;
 
 precisModuleDecl
-    :   'Precis' name=ID ('tagged_as' tag=ID)? ';'
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF
@@ -95,17 +95,21 @@ facilityModuleDecl
         'end' closename=ID ';'
     ;
 
+shortFacilityModuleDecl
+    :   facilityDecl
+    ;
+
 // uses, imports
 
 usesList
-    :   'uses' (usesSpec | '(' usesSpec+ ')' ';')
+    :   'uses' usesSpec (',' usesSpec)* ';'
+    |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
     ;
 
-usesSpec
-    :   ID (',' ID)* fromSpec? ';'
-    ;
-
-fromSpec : 'from' ID ;
+usesSpec : id=ID fromClauseSpec? alias? ;
+fromClauseSpec : 'from' qualifiedFromPath ;
+qualifiedFromPath : ID ('.' ID)*;
+alias : 'as' ID ;
 
 // module blocks & items
 
@@ -379,7 +383,7 @@ mathPostfixDefnSig
 mathSymbolName
     : ( ID |
       ('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'≤'|
-       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'))
+       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'|'⨩'))
     ;
 
 mathCategoricalDefnDecl

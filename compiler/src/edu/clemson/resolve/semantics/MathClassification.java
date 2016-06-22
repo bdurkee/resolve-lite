@@ -102,6 +102,10 @@ public abstract class MathClassification {
         return result;
     }
 
+    public boolean isSubtypeOf(MathClassification o) {
+        return g.isSubtype(this, o);
+    }
+
     public MathClassification getEnclosingClassification() {
         return enclosingClassification;
     }

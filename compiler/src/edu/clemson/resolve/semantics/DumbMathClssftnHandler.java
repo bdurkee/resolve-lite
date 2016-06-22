@@ -118,8 +118,8 @@ public class DumbMathClssftnHandler {
                     supertype instanceof MathFunctionClassification) {
                 result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
                         ((MathFunctionClassification) supertype).getDomainType())
-                        && isSubtype(((MathFunctionClassification) subtype).getResultType(),
-                        ((MathFunctionClassification) supertype).getResultType());
+                        && isSubtype(((MathFunctionClassification) subtype).getRangeClssftn(),
+                        ((MathFunctionClassification) supertype).getRangeClssftn());
             }
         }
         return result;

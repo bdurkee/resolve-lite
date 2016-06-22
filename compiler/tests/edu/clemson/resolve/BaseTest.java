@@ -3,6 +3,7 @@ package edu.clemson.resolve;
 import edu.clemson.resolve.compiler.DefaultCompilerListener;
 import edu.clemson.resolve.compiler.RESOLVEMessage;
 import org.antlr.v4.runtime.misc.Utils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -90,15 +91,15 @@ public abstract class BaseTest {
         testErrors(pairs, moduleName, new String[]{});
     }
 
-    public void testErrors(String[] pairs, String moduleName,
+    public void testErrors(String[] pairs,
+                           String moduleName,
                            String... compilerOptions) {
         for ( int i = 0; i<pairs.length; i += 2 ) {
             String input = pairs[i];
             String expected = pairs[i + 1];
 
             String fileName = moduleName + RESOLVECompiler.FILE_EXTENSION;
-            ErrorQueue errors = resolve(fileName, input, false,
-                    compilerOptions);
+            ErrorQueue errors = resolve(fileName, input, false, compilerOptions);
 
             String actual = errors.toString(true);
             actual = actual.replace(tmpdir + File.separator, "");
@@ -112,10 +113,8 @@ public abstract class BaseTest {
         }
     }
 
-    protected String execCode(String resolveFileName, String moduleStr,
-                              String startModuleName, boolean debug) {
-        boolean success = rawGenerateAndCompileCode(
-                resolveFileName, moduleStr, startModuleName, false);
+    protected String execCode(String resolveFileName, String moduleStr, String startModuleName, boolean debug) {
+        boolean success = rawGenerateAndCompileCode(resolveFileName, moduleStr, startModuleName, false);
         assertTrue(success);
         String output = execClass(startModuleName);
         if ( stderrDuringGenClassExec!=null && stderrDuringGenClassExec.length()>0 ) {
@@ -131,8 +130,7 @@ public abstract class BaseTest {
                                                 String moduleStr,
                                                 String moduleName,
                                                 boolean defaultListener) {
-        ErrorQueue errorQueue = resolve(resolveFileName, moduleStr,
-                defaultListener, "-genCode");
+        ErrorQueue errorQueue = resolve(resolveFileName, moduleStr, defaultListener, "-genCode");
         if ( !errorQueue.errors.isEmpty() ) return false;
         List<String> files = new ArrayList<>();
         if ( moduleName!=null ) {
@@ -141,26 +139,29 @@ public abstract class BaseTest {
         return compile(files.toArray(new String[files.size()]));
     }
 
-    protected ErrorQueue resolve(String moduleFileName, String moduleStr,
-                                 boolean defaultListener, String... extraOptions) {
+    protected ErrorQueue resolve(String moduleFileName,
+                                 String moduleStr,
+                                 boolean defaultListener,
+                                 String... extraOptions) {
         mkdir(tmpdir);
         writeFile(tmpdir, moduleFileName, moduleStr);
         return resolve(moduleFileName, defaultListener, extraOptions);
     }
 
     protected ErrorQueue resolve(String moduleFileName,
-                                 boolean defaultListener, String... extraOptions) {
+                                 boolean defaultListener,
+                                 String... extraOptions) {
         final List<String> options = new ArrayList<>();
         Collections.addAll(options, extraOptions);
-        if ( !options.contains("-o") ) {
+        if (!options.contains("-o")) {
             options.add("-o");
             options.add(tmpdir);
         }
-        if ( !options.contains("-lib") ) {
+        if (!options.contains("-lib")) {
             options.add("-lib");
             options.add(tmpdir);
         }
-        options.add(new File(tmpdir, moduleFileName).toString());
+        options.add(new File(moduleFileName).toString());
         final String[] optionsA = new String[options.size()];
         options.toArray(optionsA);
         RESOLVECompiler resolve = new RESOLVECompiler(optionsA);
@@ -171,8 +172,7 @@ public abstract class BaseTest {
         }
         resolve.processCommandLineTargets();
 
-        if ( (!defaultListener && !equeue.errors.isEmpty()) ||
-                resolve.errMgr.getErrorCount()>0 ) {
+        if ( (!defaultListener && !equeue.errors.isEmpty()) || resolve.errMgr.getErrorCount()>0 ) {
             System.err.println("resolve reports errors from " + options);
             for ( int i = 0; i<equeue.errors.size(); i++ ) {
                 RESOLVEMessage msg = equeue.errors.get(i);

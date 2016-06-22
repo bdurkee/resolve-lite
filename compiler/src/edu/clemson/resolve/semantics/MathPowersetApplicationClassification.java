@@ -5,7 +5,7 @@ public class MathPowersetApplicationClassification extends MathFunctionApplicati
 
     protected MathPowersetApplicationClassification(DumbMathClssftnHandler g, MathClassification argument) {
         super(g, g.POWERSET_FUNCTION, "Powerset", argument);
-        int normalResultRefDepth = g.POWERSET_FUNCTION.getResultType().typeRefDepth - 1;
+        int normalResultRefDepth = g.POWERSET_FUNCTION.getRangeClssftn().typeRefDepth - 1;
         //powerset is the normal type ref depth of the range (SSET) + whatever
         //the args type ref depth is...
         this.typeRefDepth = normalResultRefDepth + argument.typeRefDepth;

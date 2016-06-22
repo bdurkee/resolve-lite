@@ -264,7 +264,7 @@ public abstract class PExp {
      * @return the canonical name
      */
     @NotNull
-    protected abstract String getCanonicalName();
+    public abstract String getTopLevelOperationName();
 
     /**
      * Returns {@code true} iff this expression represents a primitive such as
@@ -415,7 +415,7 @@ public abstract class PExp {
         for (PExp v : this.splitIntoConjuncts()) {
             if (v.isEquality() &&
                     v.getSubExpressions().get(1).isVariable()) {
-                result.put(v.getSubExpressions().get(1).getCanonicalName(),
+                result.put(v.getSubExpressions().get(1).getTopLevelOperationName(),
                         v.getSubExpressions().get(2));
             }
         }

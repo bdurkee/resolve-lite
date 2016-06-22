@@ -81,8 +81,8 @@ public class PSelector extends PExp {
 
     @NotNull
     @Override
-    protected String getCanonicalName() {
-        return left.getCanonicalName() + "." + right.getCanonicalName();
+    public String getTopLevelOperationName() {
+        return left.getTopLevelOperationName() + "." + right.getTopLevelOperationName();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class PSelector extends PExp {
     @Override
     protected Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> result = new LinkedHashSet<>();
-        result.add(this.getCanonicalName());
+        result.add(this.getTopLevelOperationName());
         return result;
         /*Set<String> result =
                 new LinkedHashSet<>(left.getSymbolNames(

@@ -61,7 +61,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
-    private final VCOutputFile outputFile = new VCOutputFile();
+    private final VCOutputFile outputFile;
     private ModuleScopeBuilder moduleScope = null;
 
     private ProgReprTypeSymbol currentTypeReprSym = null;
@@ -77,6 +77,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         this.tr = gen.getModule();
         this.g = symtab.getTypeGraph();
         this.gen = gen;
+        this.outputFile = new VCOutputFile(gen.getCompiler());
     }
 
     public VCOutputFile getOutputFile() {
@@ -86,9 +87,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override
     public void enterModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         try {
-            moduleScope = symtab.getModuleScope(new ModuleIdentifier(tr.getNameToken()));
+            moduleScope = symtab.getModuleScope(tr.getModuleIdentifier());
         } catch (NoSuchModuleException e) {//shouldn't happen, but eh.
-            gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleName(ctx));
+            gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleCtxName(ctx));
         }
     }
 
@@ -565,7 +566,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp)
-                        .withVCInfo(block.definingTree.getStart(), "Ensure 'restores' mode parameter " +
+                        .withVCInfo(block.definingTree.getStart(), "Ensure parameter " +
                                 p.getName() + " is restored");
                 block.confirm(block.definingTree, equalsExp);
             }

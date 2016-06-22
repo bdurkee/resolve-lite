@@ -3,7 +3,6 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -11,9 +10,6 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 
 class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -28,7 +24,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         Token moduleNameToken = tr.getNameToken();
-        String groomedFileName = Utils.groomFileName(tr.getFileName());
+        String groomedFileName = Utils.groomFileName(tr.getFilePath());
         String extlessFileName = Utils.stripFileExtension(groomedFileName);
 
         if (!moduleNameToken.getText().equals(extlessFileName)) {
@@ -55,6 +51,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitFacilityModuleDecl(ResolveParser.FacilityModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
+        this.visitChildren(ctx);
         return null;
     }
 
@@ -88,6 +85,12 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+        return null;
+    }
+
     /**
      * Checks to ensure the name {@link Token}s bookending some scoped block are the same --
      * meaning they contain  the same text.
@@ -100,10 +103,10 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void sanityCheckExternalFileRef(@NotNull Token externalNameRef) {
-        File externalFile = Utils.getExternalFile(compiler, externalNameRef.getText());
+        /*File externalFile = Utils.getExternalFile(compiler, externalNameRef.getText());
         if (externalFile == null) {
             compiler.errMgr.semanticError(ErrorKind.MISSING_EXTERNAL_FILE, externalNameRef,
                     externalNameRef.getText());
-        }
+        }*/
     }
 }
