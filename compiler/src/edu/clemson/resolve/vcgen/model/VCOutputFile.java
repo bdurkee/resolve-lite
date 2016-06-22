@@ -7,7 +7,6 @@ import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
-import edu.clemson.resolve.vcgen.VCFormatException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
