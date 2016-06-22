@@ -49,8 +49,7 @@ public enum ErrorKind {
     /**
      * Compiler Error 8: unable to resolve uses reference: <em>name</em>'.
      */
-    MISSING_IMPORT_FILE(8, "unable to resolve uses reference: '<arg>'",
-            ErrorSeverity.ERROR),
+    MISSING_IMPORT_FILE(8, "unable to resolve uses reference: '<arg>'", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 9: circular dependency: <em>moduleName1</em> depends on

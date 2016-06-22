@@ -308,7 +308,7 @@ public class RESOLVECompiler {
         List<String> intermediateOrdering = getCompileOrder(g);
         for (String s : getCompileOrder(g)) {
             AnnotatedModule m = modules.get(s);
-            if (m.hasErrors) {
+            if (m.hasParseErrors) {
                 finalOrdering.clear();
                 break;
             }
@@ -415,16 +415,15 @@ public class RESOLVECompiler {
         } catch (IllegalArgumentException iae) {
             return null;
         }
-        boolean hasErrors = parser.getNumberOfSyntaxErrors() > 0;
+        boolean hasParseErrors = parser.getNumberOfSyntaxErrors() > 0;
 
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
         UsesListener l = new UsesListener(this);
-        if (!hasErrors) {
+        if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        return new AnnotatedModule(start, moduleNameTok,
-                parser.getSourceName(), hasErrors || errMgr.getErrorCount() > 0, l.uses);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.uses);
     }
 
     @NotNull

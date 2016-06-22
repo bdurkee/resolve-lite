@@ -1,6 +1,5 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
@@ -11,13 +10,10 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -57,15 +53,15 @@ public class AnnotatedModule {
     private final Token name;
     private final ParseTree root;
     private VCOutputFile vcs = null;
-    public boolean hasErrors;
+    public boolean hasParseErrors;
     private final ModuleIdentifier identifier;
     String contentRoot;
     public AnnotatedModule(@NotNull ParseTree root,
                            @NotNull Token name,
                            @NotNull String fileName,
-                           boolean hasErrors,
+                           boolean hasParseErrors,
                            @NotNull Set<ModuleIdentifier> uses) {
-        this.hasErrors = hasErrors;
+        this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;

@@ -51,6 +51,7 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitFacilityModuleDecl(ResolveParser.FacilityModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
+        this.visitChildren(ctx);
         return null;
     }
 
@@ -81,6 +82,12 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         if (ctx.externally != null) sanityCheckExternalFileRef(ctx.externally);
+        return null;
+    }
+
+    @Override
+    public Void visitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 

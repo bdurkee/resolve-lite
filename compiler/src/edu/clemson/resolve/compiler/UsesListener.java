@@ -37,14 +37,15 @@ public class UsesListener extends ResolveBaseListener {
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
         for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
             File f = resolveImport(compiler, u);
-            if (f != null) {
-                uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+            if (f == null) {
+                compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, u.ID().getSymbol(), u.ID().getText());
+                continue;
             }
+            uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
         }
     }
 
-/*
-    @Override
+/*  @Override
     public void enterPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
         ModuleIdentifier precisRef = new ModuleIdentifier(ctx.precis);
         tr.uses.add(precisRef);
@@ -148,46 +149,54 @@ public class UsesListener extends ResolveBaseListener {
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
         File result = null;
-        try {
-            if (fromPathCtx != null) {
-                //a fromclause can either describe something on RESOLVEROOT or it can describe the root
-                //of some other resolve project on RESOLVEPATH
+        if (fromPathCtx != null) {
+            //a fromclause can either describe something on RESOLVEROOT or it can describe the root
+            //of some other resolve project on RESOLVEPATH
 
-                Path s = getAppropriateRootDirectoryForFromClause(usesToken,
-                        fromPathCtx.getText().replace('.', File.separatorChar));
-                if (s == null) {
-                    compiler.errMgr.semanticError(ErrorKind.BAD_FROM_CLAUSE, fromPathCtx.getStart(),
-                            fromPathCtx.getText());
-                    return null;
-                }
+            Path s = getAppropriateRootDirectoryForFromClause(usesToken,
+                    fromPathCtx.getText().replace('.', File.separatorChar));
+            if (s == null) {
+                compiler.errMgr.semanticError(ErrorKind.BAD_FROM_CLAUSE, fromPathCtx.getStart(), fromPathCtx.getText());
+                return null;
+            }
+            try {
                 return RESOLVECompiler.findFile(s, usesToken.getText());
             }
-            else {
-                //search the current project
-                result = searchProjectRootDirectory(compiler, usesToken.getText());
-
-                //now search the
-                //then search the std libs.. if we didn't find anything
-                if (result == null) result = searchStdRootDirectory(usesToken.getText());
+            catch (IOException ioe) {
+                return null;
             }
-        } catch(IOException e) {
-            compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, usesToken, usesToken.getText());
+        }
+        else {
+            //search the current project
+            result = searchProjectRootDirectory(compiler, usesToken.getText());
+
+            //now search the
+            //then search the std libs.. if we didn't find anything
+            if (result == null) result = searchStdRootDirectory(usesToken.getText());
         }
         return result;
     }
 
     @Nullable
-    private static File searchProjectRootDirectory(RESOLVECompiler compiler, String id) throws IOException {
+    private static File searchProjectRootDirectory(RESOLVECompiler compiler, String id) {
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         if (projectPath.endsWith(".")) {
             projectPath = projectPath.getParent();
         }
-        return RESOLVECompiler.findFile(projectPath, id);
+        try {
+            return RESOLVECompiler.findFile(projectPath, id);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Nullable
-    private static File searchStdRootDirectory(String id) throws IOException {
+    private static File searchStdRootDirectory(String id) {
         Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
-        return RESOLVECompiler.findFile(stdLibPath, id);
+        try {
+            return RESOLVECompiler.findFile(stdLibPath, id);
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
