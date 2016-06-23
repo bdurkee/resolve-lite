@@ -328,7 +328,7 @@ progParamExp
     ;
 
 progNamedExp
-    :   (qualifier=ID '::')? name=ID
+    :   (qualifier=ID '.')? name=ID
     ;
 
 progLiteralExp
@@ -362,8 +362,7 @@ mathPrefixDefnSig
     ;
 
 mathPrefixDefnSigs
-    :   mathPrefixDefnSig
-        (',' mathPrefixDefnSig)*
+    :   mathPrefixDefnSig (',' mathPrefixDefnSig)*
     ;
 
 mathInfixDefnSig
