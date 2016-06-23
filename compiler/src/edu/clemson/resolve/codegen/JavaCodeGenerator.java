@@ -5,6 +5,7 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
@@ -62,5 +63,8 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     void writeReferencedExternalFiles() {
+        for (ModuleIdentifier e : module.externalUses) {
+
+        }
     }
 }

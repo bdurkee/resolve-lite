@@ -564,7 +564,7 @@ public class ModelBuilder extends ResolveBaseListener {
             try {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
             } catch (NoSuchSymbolException | DuplicateSymbolException |
-                     UnexpectedSymbolException | NoSuchModuleException e) {
+                     UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
             }
             Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
             return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));

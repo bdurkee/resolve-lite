@@ -28,6 +28,7 @@ public class UsesListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
     public final Set<ModuleIdentifier> uses = new HashSet<>();
+    public final Set<ModuleIdentifier> extUses = new HashSet<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -42,6 +43,30 @@ public class UsesListener extends ResolveBaseListener {
                 continue;
             }
             uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+        }
+    }
+
+    //TODO: Ok, assume the externally realized file is from the same package as the spec...
+    //slight restriction right now.. external uses must be in the same folder as the concept they are
+    //externally realizing.
+    //eventually I'd like to allow something like this for facilitydecls
+    //
+    // Facility SF is Stack_Template(Int, 4) from goo
+    //      externally implemented by Java_Stk_Impl from goo.ext;
+    //
+    // this also gives us a nice way of doing short facility modules (without explicit uses lists -- which from's)
+    // so right now, because we don't have implicit imports working yet, Stack_Template
+    @Override
+    public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
+
+        for (ModuleIdentifier e : uses) {
+            if (e.getNameString().equals(ctx.spec.getText())) {
+                File f = e.getFile();
+                File dir = f.getParentFile();   //get file from spec, use that as basis for path to ext file.
+                if (ctx.externally != null && dir.isDirectory() && dir.exists()) {
+                    extUses.add(new ModuleIdentifier(ctx.impl, new File(dir, ctx.impl.getText() + ".java")));
+                }
+            }
         }
     }
 

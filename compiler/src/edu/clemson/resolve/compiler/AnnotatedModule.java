@@ -40,7 +40,7 @@ public class AnnotatedModule {
 
     //use a map for more efficiency when checking whether a module references
     //an external impl
-    public final Map<String, ModuleIdentifier> externalUses = new HashMap<>();
+    public final Set<ModuleIdentifier> externalUses = new HashSet<>();
 
     /**
      * Think of the {@code uses} set (declared above) as refs useful for coming up with module orderings, etc. Think
@@ -56,19 +56,34 @@ public class AnnotatedModule {
     public boolean hasParseErrors;
     private final ModuleIdentifier identifier;
     String contentRoot;
+
     public AnnotatedModule(@NotNull ParseTree root,
                            @NotNull Token name,
                            @NotNull String fileName,
                            boolean hasParseErrors,
-                           @NotNull Set<ModuleIdentifier> uses) {
+                           @NotNull Set<ModuleIdentifier> uses,
+                           @NotNull Set<ModuleIdentifier> externalUses) {
         this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
         this.uses.addAll(uses);
+        this.externalUses.addAll(externalUses);
 
         this.identifier = new ModuleIdentifier(name, new File(fileName));
         this.contentRoot = identifier.getPackageRoot();
+    }
+
+    public AnnotatedModule(@NotNull ParseTree root,
+                           @NotNull Token name,
+                           @NotNull String fileName,
+                           boolean hasParseErrors,
+                           @NotNull Set<ModuleIdentifier> uses) {
+        this(root, name, fileName, hasParseErrors, uses, new HashSet<>());
+    }
+
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {
+        this(root, name, fileName, false, new HashSet<>());
     }
 
     @NotNull

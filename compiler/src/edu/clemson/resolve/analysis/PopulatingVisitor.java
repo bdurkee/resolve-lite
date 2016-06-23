@@ -434,8 +434,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitTypeModelDecl(
-            ResolveParser.TypeModelDeclContext ctx) {
+    public Void visitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         symtab.startScope(ctx);
         this.visit(ctx.mathClssftnExp());
         MathClssftnWrappingSymbol exemplarSymbol = null;
@@ -810,12 +809,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private Void typeProgLiteralExp(ParserRuleContext ctx,
                                     String typeQualifier, String typeName) {
-        ProgTypeSymbol p =
-                getProgTypeSymbol(ctx, typeQualifier, typeName);
-        tr.progTypes.put(ctx, p != null ? p.getProgramType() :
-                ProgInvalidType.getInstance(g));
-        tr.mathClssftns.put(ctx, p != null ? p.getModelType() :
-                g.INVALID);
+        ProgTypeSymbol p = getProgTypeSymbol(ctx, typeQualifier, typeName);
+        tr.progTypes.put(ctx, p != null ? p.getProgramType() : ProgInvalidType.getInstance(g));
+        tr.mathClssftns.put(ctx, p != null ? p.getModelType() : g.INVALID);
         return null;
     }
 
@@ -878,7 +874,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     .map(ResolveParser.ProgExpContext::getText)
                     .collect(Collectors.toList());
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                    ctx.getStart(), name.getText(), argStrList, argTypes);
+                    name, name.getText(), argStrList, argTypes);
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "an operation", name.getText(),
@@ -1667,8 +1663,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathSelectorExp(
-            ResolveParser.MathSelectorExpContext ctx) {
+    public Void visitMathSelectorExp(ResolveParser.MathSelectorExpContext ctx) {
         MathClassification tempEntailsRetype = entailsRetype;
         entailsRetype = null;
         this.visit(ctx.lhs);
@@ -1689,14 +1684,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull String symbolName) {
 
         MathClassification type;
-        MathClassification prevMathAccessType =
-                tr.mathClssftns.get(prevAccessExp);
+        MathClassification prevMathAccessType = tr.mathClssftns.get(prevAccessExp);
         //Todo: This can't go into {@link #getMetaFieldType()} since
         //it starts the access chain, rather than, say, terminating it.
         if (prevAccessExp.getText().equals("conc")) {
             if (curTypeReprModelSymbol == null) {
-                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR,
-                        ctx.getStart(), symbolName);
+                compiler.errMgr.semanticError(ErrorKind.NO_SUCH_FACTOR, ctx.getStart(), symbolName);
                 tr.mathClssftns.put(ctx, g.INVALID);
                 return;
             }
@@ -1704,8 +1697,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         try {
-            MathCartesianClassification typeCartesian =
-                    (MathCartesianClassification) prevMathAccessType;
+            MathCartesianClassification typeCartesian = (MathCartesianClassification) prevMathAccessType;
             if (entailsRetype != null) {
                 Element x = typeCartesian.getElementUnder(symbolName);
                 if (x != null) {

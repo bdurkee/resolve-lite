@@ -37,8 +37,7 @@ moduleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
     |   conceptExtImplModuleDecl
-    |   facilityModuleDecl
-    |   shortFacilityModuleDecl) EOF
+    |   facilityModuleDecl) EOF
     ;
 
 precisModuleDecl
@@ -95,10 +94,6 @@ facilityModuleDecl
         'end' closename=ID ';'
     ;
 
-shortFacilityModuleDecl
-    :   facilityDecl
-    ;
-
 // uses, imports
 
 usesList
@@ -148,7 +143,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '::')? name=ID           #namedType
+    :   (qualifier=ID '.')? name=ID           #namedType
     |    'Record' (recordVarDeclGroup)* 'end'  #recordType
     ;
 
@@ -486,8 +481,8 @@ mathPrimeExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID '::')? op=('true'|'false')    #mathBooleanLiteralExp
-    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
+    :   (qualifier=ID '.')? op=('true'|'false')    #mathBooleanLiteralExp
+    |   (qualifier=ID '.')? num=INT                #mathIntegerLiteralExp
     ;
 
 mathCartProdExp
@@ -495,7 +490,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
+    :   (incoming='@')? (qualifier=ID '.')? name=mathSymbolName
     ;
 
 mathOutfixAppExp

@@ -1,12 +1,10 @@
 package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.semantics.*;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathSymbolTable;
-import edu.clemson.resolve.semantics.ModuleIdentifier;
-import edu.clemson.resolve.semantics.ModuleParameterization;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.ArrayList;
@@ -16,7 +14,6 @@ import java.util.Map;
 
 public class FacilitySymbol extends Symbol {
 
-    @NotNull
     private SpecImplementationPairing type;
     @NotNull
     private MathSymbolTable scopeRepo;
@@ -32,33 +29,32 @@ public class FacilitySymbol extends Symbol {
     @NotNull
     private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
 
-    private final Map<ModuleParameterization, ModuleParameterization>
-            enhancementImplementations = new HashMap<>();
-    private final List<ModuleParameterization> enhancements =
-            new ArrayList<>();
+    private final Map<ModuleParameterization, ModuleParameterization> enhancementImplementations = new HashMap<>();
+    private final List<ModuleParameterization> enhancements = new ArrayList<>();
 
-    public FacilitySymbol(
-            @NotNull ResolveParser.FacilityDeclContext facility,
-            @NotNull ModuleIdentifier moduleIdentifier,
-            @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
-            @NotNull MathSymbolTable scopeRepo) {
+    public FacilitySymbol(@NotNull ResolveParser.FacilityDeclContext facility,
+                          @NotNull ModuleIdentifier moduleIdentifier,
+                          @NotNull ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics,
+                          @NotNull MathSymbolTable scopeRepo) {
         super(facility.name.getText(), facility, moduleIdentifier);
         this.scopeRepo = scopeRepo;
         this.actualGenerics = actualGenerics;
         List<ProgTypeSymbol> specGenericArgs =
                 actualGenerics.get(facility.specArgs);
-/*
-        ModuleParameterization spec = new ModuleParameterization(
-                new ModuleIdentifier(facility.spec),
-                specGenericArgs == null ?
-                        new ArrayList<>() : specGenericArgs, this, scopeRepo);
 
-        ModuleParameterization impl = new ModuleParameterization(
-                new ModuleIdentifier(facility.impl),
-                new ArrayList<>(), this, scopeRepo);
+        try {
+            ModuleScopeBuilder m = scopeRepo.getModuleScope(moduleIdentifier);
+            ModuleParameterization spec = new ModuleParameterization(
+                    m.getImportWithName(facility.spec),
+                    specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
+            ModuleParameterization impl = new ModuleParameterization(
+                    m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
 
-        this.type = new SpecImplementationPairing(spec, impl);
-*/
+            this.type = new SpecImplementationPairing(spec, impl);
+
+        } catch (NoSuchModuleException e) {
+            //shouldn't happen at this point..
+        }
         //These are realized by the concept realization
         /*for (EnhancementItem realizationEnhancement : facility
                 .getEnhancements()) {
