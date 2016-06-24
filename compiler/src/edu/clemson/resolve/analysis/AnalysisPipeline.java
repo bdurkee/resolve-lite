@@ -23,16 +23,17 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
         for (AnnotatedModule unit : compilationUnits) {
             compiler.log("AnalysisPipeline", "populating: " + unit.getNameToken().getText());
             ParseTreeWalker walker = new ParseTreeWalker();
-
+            int initialErrCount = compiler.errMgr.getErrorCount();
             BasicSanityCheckingVisitor initialSanityChecks = new BasicSanityCheckingVisitor(compiler, unit);
             initialSanityChecks.visit(unit.getRoot());
             PopulatingVisitor defSymsAndScopes = new PopulatingVisitor(compiler, compiler.symbolTable, unit);
             defSymsAndScopes.visit(unit.getRoot());
             PExpBuildingListener<PExp> pexpAnnotator = new PExpBuildingListener<>(defSymsAndScopes.getTypeGraph(), unit);
             SanityCheckingListener sanityChecker = new SanityCheckingListener(compiler, unit);
+            if (compiler.errMgr.getErrorCount() > initialErrCount) return;
+
             walker.walk(pexpAnnotator, unit.getRoot());
             walker.walk(sanityChecker, unit.getRoot());
-            //if (compiler.errMgr.getErrorCount() > initialErrCount) return;
 
             MathClssftnLogger pl = new MathClssftnLogger(compiler, unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());

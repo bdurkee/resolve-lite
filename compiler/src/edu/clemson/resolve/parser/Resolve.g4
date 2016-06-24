@@ -37,7 +37,8 @@ moduleDecl
     |   conceptModuleDecl
     |   conceptImplModuleDecl
     |   conceptExtImplModuleDecl
-    |   facilityModuleDecl) EOF
+    |   facilityModuleDecl
+    |   shortFacilityModuleDecl) EOF
     ;
 
 precisModuleDecl
@@ -92,6 +93,10 @@ facilityModuleDecl
          (requiresClause)?
          facilityBlock
         'end' closename=ID ';'
+    ;
+
+shortFacilityModuleDecl
+    :   facilityDecl
     ;
 
 // uses, imports
@@ -230,9 +235,14 @@ varDeclGroup
 
 // facility decls
 
-facilityDecl
+/*facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
         (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    ;*/
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
+        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
         (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
     ;
 
