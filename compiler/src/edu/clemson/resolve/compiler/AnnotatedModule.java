@@ -74,9 +74,7 @@ public class AnnotatedModule {
         this.contentRoot = identifier.getPackageRoot();
     }
 
-    public AnnotatedModule(@NotNull ParseTree root,
-                           @NotNull Token name,
-                           @NotNull String fileName,
+    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName,
                            boolean hasParseErrors,
                            @NotNull Set<ModuleIdentifier> uses) {
         this(root, name, fileName, hasParseErrors, uses, new HashSet<>());

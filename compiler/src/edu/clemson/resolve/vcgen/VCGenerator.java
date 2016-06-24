@@ -39,5 +39,4 @@ public class VCGenerator extends AbstractCodeGenerator {
     public ST generateAssertions() {
         return walk(buildVCOutputModel());
     }
-
 }

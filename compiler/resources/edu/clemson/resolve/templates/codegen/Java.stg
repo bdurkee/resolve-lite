@@ -336,4 +336,6 @@ toStdFacilityName ::= [
     "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
 
+externalClassCode(code) ::= "<code>"
+
 fileExtension() ::= ".java"

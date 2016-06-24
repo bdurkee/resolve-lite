@@ -449,8 +449,9 @@ public class RESOLVECompiler {
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
-    public Writer getOutputFileWriter(@NotNull AnnotatedModule module, @NotNull String fileName) throws IOException {
-        return getOutputFileWriter(module, fileName, new Function<String, File>() {
+    public Writer getOutputFileWriter(@NotNull ModuleIdentifier moduleIdentifier,
+                                      @NotNull String outputFileName) throws IOException {
+        return getOutputFileWriter(moduleIdentifier, outputFileName, new Function<String, File>() {
             @Override
             public File apply(String filePath) {
                 File outputDir;
@@ -471,14 +472,14 @@ public class RESOLVECompiler {
         });
     }
 
-    public Writer getOutputFileWriter(@NotNull AnnotatedModule module,
-                                      @NotNull String fileName,
+    public Writer getOutputFileWriter(@NotNull ModuleIdentifier moduleIdentifier,
+                                      @NotNull String outputFileName,
                                       @NotNull Function<String, File> outputDirFun) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-        File outputDir = outputDirFun.apply(module.getFilePath());
-        File outputFile = new File(outputDir, fileName);
+        File outputDir = outputDirFun.apply(moduleIdentifier.getFile().getPath());
+        File outputFile = new File(outputDir, outputFileName);
 
         if (!outputDir.exists()) {
             outputDir.mkdirs();
