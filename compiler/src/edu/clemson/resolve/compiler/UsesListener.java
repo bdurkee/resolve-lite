@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -83,7 +84,7 @@ public class UsesListener extends ResolveBaseListener {
         }
         else {
             //we're an external implementation..
-            File resolveExternal =  resolveImport(compiler, t, from, RESOLVECompiler.NON_NATIVE_EXTENSION);
+            File resolveExternal = resolveImport(compiler, t, from, RESOLVECompiler.NATIVE_FILE_EXTENSION);
             if (resolveExternal != null) {
                 extUses.add(new ModuleIdentifier(t, resolveExternal));
             }
@@ -186,14 +187,15 @@ public class UsesListener extends ResolveBaseListener {
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull ResolveParser.UsesSpecContext u) {
         return resolveImport(compiler, u.ID().getSymbol(), u.fromClauseSpec() != null ?
-                u.fromClauseSpec().qualifiedFromPath() : null, RESOLVECompiler.NATIVE_EXTENSION);
+                u.fromClauseSpec().qualifiedFromPath() : null, RESOLVECompiler.NATIVE_FILE_EXTENSION);
     }
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull Token usesToken,
-                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx) {
-        return resolveImport(compiler, usesToken, fromPathCtx, RESOLVECompiler.NATIVE_EXTENSION);
+                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
+                                     @NotNull String ... extensions) {
+        return resolveImport(compiler, usesToken, fromPathCtx, Arrays.asList(extensions));
     }
 
     @Nullable
@@ -216,7 +218,7 @@ public class UsesListener extends ResolveBaseListener {
                 return null;
             }
             try {
-                return RESOLVECompiler.findFile(extensions, s, usesToken.getText());
+                return findFile(s, usesToken.getText(), extensions);
             }
             catch (IOException ioe) {
                 return null;
@@ -240,7 +242,7 @@ public class UsesListener extends ResolveBaseListener {
             projectPath = projectPath.getParent();
         }
         try {
-            return RESOLVECompiler.findFile(extensions, projectPath, id);
+            return findFile(projectPath, id, extensions);
         } catch (IOException e) {
             return null;
         }
@@ -250,9 +252,19 @@ public class UsesListener extends ResolveBaseListener {
     private static File searchStdRootDirectory(List<String> extensions, String id) {
         Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
         try {
-            return RESOLVECompiler.findFile(extensions, stdLibPath, id);
+            return findFile(stdLibPath, id, extensions);
         } catch (IOException e) {
             return null;
         }
+    }
+
+    @Nullable
+    private static File findFile(@NotNull Path rootPath,
+                                 @NotNull String fileNameWithoutExt,
+                                 @NotNull List<String> extensions) throws IOException {
+        FileLocator l = new FileLocator(fileNameWithoutExt, extensions);
+        Files.walkFileTree(rootPath, l);
+        if (l.getFile() == null) throw new NoSuchFileException(fileNameWithoutExt);
+        return l.getFile();
     }
 }

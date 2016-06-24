@@ -45,9 +45,11 @@ public class RESOLVECompiler {
 
     public static String VERSION = "0.0.1";
 
-    public static final String FILE_EXTENSION = ".resolve";
-    public static final List<String> NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(FILE_EXTENSION));
-    public static final List<String> NON_NATIVE_EXTENSION = Collections.unmodifiableList(Collections.singletonList(".java"));
+    public static final String NATIVE_FILE_EXTENSION = ".resolve";
+    public static final String NON_NATIVE_FILE_EXTENSION = ".java";
+
+    public static final List<String> ALL_FILE_EXTENSIONS =
+            Collections.unmodifiableList(Arrays.asList(NATIVE_FILE_EXTENSION, NON_NATIVE_FILE_EXTENSION));
 
     private static enum OptionArgType {NONE, STRING} // NONE implies boolean
 
@@ -135,7 +137,7 @@ public class RESOLVECompiler {
             String arg = args[i];
             i++;
             if (arg.charAt(0) != '-') { // file name
-                if (!arg.endsWith(FILE_EXTENSION)) {
+                if (!arg.endsWith(NATIVE_FILE_EXTENSION)) {
                     errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, arg);
                     continue;
                 }
@@ -372,21 +374,6 @@ public class RESOLVECompiler {
     }
 
     @Nullable
-    public static File findFile(@NotNull Path rootPath, @NotNull String fileName) throws IOException {
-        return findFile(RESOLVECompiler.NATIVE_EXTENSION, rootPath, fileName);
-    }
-
-    @Nullable
-    public static File findFile(@NotNull List<String> validExtensions,
-                                @NotNull Path rootPath,
-                                @NotNull String fileName) throws IOException {
-        FileLocator l = new FileLocator(fileName, validExtensions, "gen", "out");
-        Files.walkFileTree(rootPath, l);
-        if (l.getFile() == null) throw new NoSuchFileException(fileName);
-        return l.getFile();
-    }
-
-    @Nullable
     public AnnotatedModule parseModule(@NotNull String fileName) {
         try {
             File file = new File(fileName);
@@ -449,9 +436,9 @@ public class RESOLVECompiler {
      * If no -o is specified, then just write to the directory where the sourcefile was found; and if
      * {@code outputDirectory==null} then write a String.
      */
-    public Writer getOutputFileWriter(@NotNull ModuleIdentifier moduleIdentifier,
+    public Writer getOutputFileWriter(@NotNull ModuleIdentifier module,
                                       @NotNull String outputFileName) throws IOException {
-        return getOutputFileWriter(moduleIdentifier, outputFileName, new Function<String, File>() {
+        return getOutputFileWriter(module, outputFileName, new Function<String, File>() {
             @Override
             public File apply(String filePath) {
                 File outputDir;
@@ -472,13 +459,13 @@ public class RESOLVECompiler {
         });
     }
 
-    public Writer getOutputFileWriter(@NotNull ModuleIdentifier moduleIdentifier,
+    public Writer getOutputFileWriter(@NotNull ModuleIdentifier module,
                                       @NotNull String outputFileName,
                                       @NotNull Function<String, File> outputDirFun) throws IOException {
         if (outputDirectory == null) {
             return new StringWriter();
         }
-        File outputDir = outputDirFun.apply(moduleIdentifier.getFile().getPath());
+        File outputDir = outputDirFun.apply(module.getFile().getPath());
         File outputFile = new File(outputDir, outputFileName);
 
         if (!outputDir.exists()) {
