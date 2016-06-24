@@ -34,10 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Traverses a tree of directories. Each file encountered is reported via the
@@ -49,8 +46,6 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     private final PathMatcher matcher;
     private String pattern = null;
-
-    private final List<String> excludeDirs = new ArrayList<>();
     private final List<File> matches = new ArrayList<>();
 
     /**
@@ -63,23 +58,11 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      */
     public FileLocator(String pattern, List<String> extensions) {
         this.pattern = pattern;
-        this.matcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + parseExtensions(extensions));
-    }
-
-    public FileLocator(String pattern, List<String> extensions, String ... excludeDirs) {
-        this.pattern = pattern;
-        this.excludeDirs.addAll(Arrays.asList(excludeDirs));
-        this.matcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + parseExtensions(extensions));
+        this.matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern + parseExtensions(extensions));
     }
 
     public FileLocator(String extension) {
-        matcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:*{" + extension + "}");
+        matcher = FileSystems.getDefault().getPathMatcher("glob:*{" + extension + "}");
     }
 
     @Override
@@ -111,8 +94,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      */
     public File getFile() throws IOException {
         if (matches.size() == 0) {
-            throw new NoSuchFileException("file matching name '" + pattern
-                    + "' could not be found");
+            throw new NoSuchFileException("file matching name '" + pattern + "' could not be found");
         }
         return matches.get(0);
     }

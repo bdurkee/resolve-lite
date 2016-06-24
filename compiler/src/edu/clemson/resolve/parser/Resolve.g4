@@ -148,7 +148,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '::')? name=ID           #namedType
+    :   (qualifier=ID '.')? name=ID           #namedType
     |    'Record' (recordVarDeclGroup)* 'end'  #recordType
     ;
 
@@ -236,8 +236,8 @@ varDeclGroup
 // facility decls
 
 facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
+        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
         (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
     ;
 
@@ -328,7 +328,7 @@ progParamExp
     ;
 
 progNamedExp
-    :   (qualifier=ID '::')? name=ID
+    :   (qualifier=ID '.')? name=ID
     ;
 
 progLiteralExp
@@ -362,8 +362,7 @@ mathPrefixDefnSig
     ;
 
 mathPrefixDefnSigs
-    :   mathPrefixDefnSig
-        (',' mathPrefixDefnSig)*
+    :   mathPrefixDefnSig (',' mathPrefixDefnSig)*
     ;
 
 mathInfixDefnSig
@@ -487,8 +486,8 @@ mathPrimeExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID '::')? op=('true'|'false')    #mathBooleanLiteralExp
-    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
+    :   (qualifier=ID '.')? op=('true'|'false')    #mathBooleanLiteralExp
+    |   (qualifier=ID '.')? num=INT                #mathIntegerLiteralExp
     ;
 
 mathCartProdExp
@@ -496,7 +495,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
+    :   (incoming='@')? (qualifier=ID '.')? name=mathSymbolName
     ;
 
 mathOutfixAppExp

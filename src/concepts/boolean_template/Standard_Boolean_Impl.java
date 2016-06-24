@@ -98,15 +98,14 @@ public class Standard_Boolean_Impl extends RESOLVEBase implements Boolean_Templa
         return new Boolean(((Boolean)a).rep.val != ((Boolean)b).rep.val);
     }
 
+    @Override
+    public void Write_Line(RType i) {
+        System.out.println(((Boolean) i).rep.val);
+    }
 /*
 @Override
 public void Read(RType e) {
     Scanner sc = new Scanner(System.in);
     ((Boolean)e).rep.val = sc.nextBoolean();
-}
-
-@Override
-public void Write_Line(RType i) {
-    System.out.println(((Boolean) i).rep.val);
 }*/
 }

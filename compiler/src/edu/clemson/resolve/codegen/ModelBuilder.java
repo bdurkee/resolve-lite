@@ -26,9 +26,7 @@ import edu.clemson.resolve.semantics.symbol.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefLeft;
@@ -543,7 +541,10 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-        for (ModuleIdentifier e : gen.module.uses) {
+        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.uses);
+        allImports.addAll(gen.module.externalUses);
+
+        for (ModuleIdentifier e : allImports) {
             Path p = e.getPathRelativeToRootDir();
             String i = p.toString().substring(0, p.toString().lastIndexOf("."));
             result.add(i.replaceAll(File.separator, "."));
@@ -564,7 +565,7 @@ public class ModelBuilder extends ResolveBaseListener {
             try {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
             } catch (NoSuchSymbolException | DuplicateSymbolException |
-                     UnexpectedSymbolException | NoSuchModuleException e) {
+                     UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
             }
             Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
             return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));

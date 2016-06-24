@@ -16,9 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
@@ -28,6 +26,7 @@ public class UsesListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
     public final Set<ModuleIdentifier> uses = new HashSet<>();
+    public final Set<ModuleIdentifier> extUses = new HashSet<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -42,6 +41,53 @@ public class UsesListener extends ResolveBaseListener {
                 continue;
             }
             uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+        }
+    }
+
+    //TODO: Ok, assume the externally realized file is from the same package as the spec...
+    //slight restriction right now.. external uses must be in the same folder as the concept they are
+    //externally realizing.
+    //eventually I'd like to allow something like this for facilitydecls
+    //
+    // Facility SF is Stack_Template(Int, 4) from goo
+    //      externally implemented by Java_Stk_Impl from goo.ext;
+    //
+    // this also gives us a nice way of doing short facility modules (without explicit uses lists -- which from's)
+    // so right now, because we don't have implicit imports working yet, Stack_Template
+    @Override
+    public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
+        ResolveParser.QualifiedFromPathContext specFrom = ctx.specFrom != null ?
+                ctx.specFrom.qualifiedFromPath() : null;
+        ResolveParser.QualifiedFromPathContext implFrom = ctx.implFrom != null ?
+                ctx.implFrom.qualifiedFromPath() : null;
+
+        resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
+        resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
+    }
+
+    private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
+                                                 boolean isExternal,
+                                                 @Nullable ResolveParser.QualifiedFromPathContext from) {
+        if (!isExternal) {
+            //we're not an external implementation
+            File resolve = resolveImport(compiler, t, from);
+
+            if (resolve != null) {
+                uses.add(new ModuleIdentifier(t, resolve));
+            }
+            else {
+                compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, t, t.getText());
+            }
+        }
+        else {
+            //we're an external implementation..
+            File resolveExternal = resolveImport(compiler, t, from, RESOLVECompiler.NON_NATIVE_FILE_EXTENSION);
+            if (resolveExternal != null) {
+                extUses.add(new ModuleIdentifier(t, resolveExternal));
+            }
+            else {
+                compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, t, t.getText());
+            }
         }
     }
 
@@ -138,13 +184,25 @@ public class UsesListener extends ResolveBaseListener {
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull ResolveParser.UsesSpecContext u) {
         return resolveImport(compiler, u.ID().getSymbol(), u.fromClauseSpec() != null ?
-                u.fromClauseSpec().qualifiedFromPath() : null);
+                u.fromClauseSpec().qualifiedFromPath() : null, RESOLVECompiler.NATIVE_FILE_EXTENSION);
     }
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull Token usesToken,
-                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx) {
+                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
+                                     @NotNull String ... extensions) {
+        List<String> exts = (extensions.length == 0) ?
+                Collections.singletonList(RESOLVECompiler.NATIVE_FILE_EXTENSION) :
+                Arrays.asList(extensions);
+        return resolveImport(compiler, usesToken, fromPathCtx, exts);
+    }
+
+    @Nullable
+    public static File resolveImport(@NotNull RESOLVECompiler compiler,
+                                     @NotNull Token usesToken,
+                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
+                                     @NotNull List<String> extensions) {
         //first check to see if we're on RESOLVEPATH
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
@@ -160,7 +218,7 @@ public class UsesListener extends ResolveBaseListener {
                 return null;
             }
             try {
-                return RESOLVECompiler.findFile(s, usesToken.getText());
+                return findFile(s, usesToken.getText(), extensions);
             }
             catch (IOException ioe) {
                 return null;
@@ -168,35 +226,45 @@ public class UsesListener extends ResolveBaseListener {
         }
         else {
             //search the current project
-            result = searchProjectRootDirectory(compiler, usesToken.getText());
+            result = searchProjectRootDirectory(extensions, compiler, usesToken.getText());
 
             //now search the
             //then search the std libs.. if we didn't find anything
-            if (result == null) result = searchStdRootDirectory(usesToken.getText());
+            if (result == null) result = searchStdRootDirectory(extensions, usesToken.getText());
         }
         return result;
     }
 
     @Nullable
-    private static File searchProjectRootDirectory(RESOLVECompiler compiler, String id) {
+    private static File searchProjectRootDirectory(List<String> extensions, RESOLVECompiler compiler, String id) {
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
         if (projectPath.endsWith(".")) {
             projectPath = projectPath.getParent();
         }
         try {
-            return RESOLVECompiler.findFile(projectPath, id);
+            return findFile(projectPath, id, extensions);
         } catch (IOException e) {
             return null;
         }
     }
 
     @Nullable
-    private static File searchStdRootDirectory(String id) {
+    private static File searchStdRootDirectory(List<String> extensions, String id) {
         Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
         try {
-            return RESOLVECompiler.findFile(stdLibPath, id);
+            return findFile(stdLibPath, id, extensions);
         } catch (IOException e) {
             return null;
         }
+    }
+
+    @Nullable
+    private static File findFile(@NotNull Path rootPath,
+                                 @NotNull String fileNameWithoutExt,
+                                 @NotNull List<String> extensions) throws IOException {
+        FileLocator l = new FileLocator(fileNameWithoutExt, extensions);
+        Files.walkFileTree(rootPath, l);
+        if (l.getFile() == null) throw new NoSuchFileException(fileNameWithoutExt);
+        return l.getFile();
     }
 }

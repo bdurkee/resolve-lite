@@ -4,12 +4,15 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.misc.STMessage;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.function.Function;
 
 /**
  * A general base class for anything in the compiler that requires us to produce a 'significant' amount of structured
@@ -51,13 +54,13 @@ public abstract class AbstractCodeGenerator {
     }
 
     @NotNull
-    public String getFileName() {
+    String getOutputFileName() {
         String moduleName = module.getNameToken().getText();
         return moduleName + getFileExtension();
     }
 
     @NotNull
-    protected String getFileExtension() {
+    String getFileExtension() {
         ST extST = templates.getInstanceOf("fileExtension");
         if (extST == null) {
             throw new IllegalStateException("forgot to define template for" +
@@ -67,13 +70,15 @@ public abstract class AbstractCodeGenerator {
         return extST.render();
     }
 
-    public void write(ST code) {
-        write(code, getFileName());
+    public void write(@NotNull ST code, @NotNull String outputFileName) {
+        write(module.getModuleIdentifier(), code, outputFileName);
     }
 
-    public void write(ST code, String fileName) {
+    protected void write(@NotNull ModuleIdentifier moduleIdentifier,
+                         @NotNull ST code,
+                         @NotNull String outputFileName) {
         try {
-            Writer w = compiler.getOutputFileWriter(module, fileName);
+            Writer w = compiler.getOutputFileWriter(moduleIdentifier, outputFileName);
             STWriter wr = new AutoIndentWriter(w);
             wr.setLineWidth(80);
             code.write(wr);
@@ -81,11 +86,11 @@ public abstract class AbstractCodeGenerator {
         } catch (IOException ioe) {
             compiler.errMgr.toolError(ErrorKind.CANNOT_WRITE_FILE,
                     ioe,
-                    fileName);
+                    outputFileName);
         }
     }
 
-    public STGroup loadTemplates() {
+    private STGroup loadTemplates() {
         String groupFileName = TEMPLATE_ROOT + "/" + language + STGroup.GROUP_FILE_EXTENSION;
         STGroup result = null;
         try {

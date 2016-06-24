@@ -12,13 +12,10 @@ Concept Boolean_Template;
     Operation False () : Boolean;
         ensures False = false;
 
-    Operation And
-            (evaluates a, b : Boolean)
-                : Boolean;
+    Operation And /*[infix and]*/ (evaluates a, b : Boolean) : Boolean;
         ensures And = (a ∧ b);
 
-    Operation Or
-            (evaluates a, b : Boolean)
+    Operation Or /*[infix or]*/ (evaluates a, b : Boolean)
                 : Boolean;
         ensures Or = (a ∨ b);
 
@@ -36,5 +33,7 @@ Concept Boolean_Template;
             (evaluates a, b : Boolean)
                 : Boolean;
         ensures Are_Not_Equal = (a ≠ b);
+
+    Operation Write_Line(evaluates a : Boolean);
 
 end Boolean_Template;
