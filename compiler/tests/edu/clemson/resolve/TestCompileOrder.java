@@ -47,7 +47,7 @@ public class TestCompileOrder extends BaseTest {
     //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.
     public void testOrdering(String expected, String root) {
-        ErrorQueue e = resolve(root + RESOLVECompiler.FILE_EXTENSION, false);
+        ErrorQueue e = resolve(root + RESOLVECompiler.NATIVE_FILE_EXTENSION, false);
         LogManager l = e.compiler.logMgr;
         List<String> msgs = Utils.apply(l.getRecords(), LogManager.Record::getMsg);
         String actual = Utils.join(msgs, "\n");

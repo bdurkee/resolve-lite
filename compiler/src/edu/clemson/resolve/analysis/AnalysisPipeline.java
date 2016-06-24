@@ -18,12 +18,10 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
 
     @Override
     public void process() {
-        //if (compiler.errMgr.getErrorCount() > 0) return;
-        //int initialErrCount = compiler.errMgr.getErrorCount();
+        int initialErrCount = compiler.errMgr.getErrorCount();
         for (AnnotatedModule unit : compilationUnits) {
             compiler.log("AnalysisPipeline", "populating: " + unit.getNameToken().getText());
             ParseTreeWalker walker = new ParseTreeWalker();
-            int initialErrCount = compiler.errMgr.getErrorCount();
             BasicSanityCheckingVisitor initialSanityChecks = new BasicSanityCheckingVisitor(compiler, unit);
             initialSanityChecks.visit(unit.getRoot());
             PopulatingVisitor defSymsAndScopes = new PopulatingVisitor(compiler, compiler.symbolTable, unit);

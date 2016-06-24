@@ -98,7 +98,7 @@ public abstract class BaseTest {
             String input = pairs[i];
             String expected = pairs[i + 1];
 
-            String fileName = moduleName + RESOLVECompiler.FILE_EXTENSION;
+            String fileName = moduleName + RESOLVECompiler.NATIVE_FILE_EXTENSION;
             ErrorQueue errors = resolve(fileName, input, false, compilerOptions);
 
             String actual = errors.toString(true);
@@ -308,7 +308,7 @@ public abstract class BaseTest {
         mkdir(tmpdir);
         for ( int i = 0; i<modules.length; i++ ) {
             String inputModule = modules[i];
-            String fileName = names[i] + RESOLVECompiler.FILE_EXTENSION;
+            String fileName = names[i] + RESOLVECompiler.NATIVE_FILE_EXTENSION;
             //write all of our returnEnsuresArgSubstitutions modules to tmpdir
             writeFile(tmpdir, fileName, inputModule);
         }

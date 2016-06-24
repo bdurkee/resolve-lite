@@ -182,6 +182,9 @@ public class Utils {
         else if (ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
             return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
         }
+        else if (ctx instanceof ResolveParser.ShortFacilityModuleDeclContext) {
+            return ((ResolveParser.ShortFacilityModuleDeclContext) ctx).facilityDecl().name;
+        }
         else {
             throw new IllegalArgumentException("unrecognized module");
         }

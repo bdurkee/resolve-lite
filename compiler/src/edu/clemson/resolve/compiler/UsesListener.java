@@ -16,10 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
@@ -84,7 +81,7 @@ public class UsesListener extends ResolveBaseListener {
         }
         else {
             //we're an external implementation..
-            File resolveExternal = resolveImport(compiler, t, from, RESOLVECompiler.NATIVE_FILE_EXTENSION);
+            File resolveExternal = resolveImport(compiler, t, from, RESOLVECompiler.NON_NATIVE_FILE_EXTENSION);
             if (resolveExternal != null) {
                 extUses.add(new ModuleIdentifier(t, resolveExternal));
             }
@@ -195,7 +192,10 @@ public class UsesListener extends ResolveBaseListener {
                                      @NotNull Token usesToken,
                                      @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
                                      @NotNull String ... extensions) {
-        return resolveImport(compiler, usesToken, fromPathCtx, Arrays.asList(extensions));
+        List<String> exts = (extensions.length == 0) ?
+                Collections.singletonList(RESOLVECompiler.NATIVE_FILE_EXTENSION) :
+                Arrays.asList(extensions);
+        return resolveImport(compiler, usesToken, fromPathCtx, exts);
     }
 
     @Nullable

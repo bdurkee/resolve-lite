@@ -235,11 +235,6 @@ varDeclGroup
 
 // facility decls
 
-/*facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
-    ;*/
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
         (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
