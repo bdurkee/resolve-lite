@@ -44,16 +44,6 @@ class MathClssftnLogger extends ResolveBaseListener {
     }
 
     @Override
-    public void exitMathBooleanLiteralExp(ResolveParser.MathBooleanLiteralExpContext ctx) {
-        logClssftn(ctx);
-    }
-
-    @Override
-    public void exitMathIntegerLiteralExp(ResolveParser.MathIntegerLiteralExpContext ctx) {
-        logClssftn(ctx);
-    }
-
-    @Override
     public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         logClssftn(ctx);
     }

@@ -4,7 +4,7 @@ import edu.clemson.resolve.codegen.model.*;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.misc.HardCodedProgOps;
+import edu.clemson.resolve.misc.StdTemplateProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -24,7 +24,6 @@ import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -300,13 +299,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        if (referencesOperationParameter(ctx.progNamedExp().name.getText())) {
-            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progNamedExp().name.getText(), args));
+        if (referencesOperationParameter(ctx.progSymbolExp().name.getText())) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progSymbolExp().name.getText(), args));
         }
         else {
             built.put(ctx, new MethodCall(buildQualifier(
-                    ctx.progNamedExp().qualifier, ctx.progNamedExp().name),
-                    ctx.progNamedExp().name.getText(), args));
+                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name.getStart()),
+                    ctx.progSymbolExp().name.getText(), args));
         }
     }
 
@@ -320,7 +319,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().progSymbolName().getStart(), ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
@@ -333,13 +332,13 @@ public class ModelBuilder extends ResolveBaseListener {
                                            @NotNull Token op,
                                            @NotNull List<? extends ParseTree> args) {
         List<ProgType> argTypes = args.stream().map(tr.progTypes::get).collect(Collectors.toList());
-        HardCodedProgOps.BuiltInOpAttributes o = HardCodedProgOps.convert(op, argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes o = StdTemplateProgOps.convert(op, argTypes);
         return new MethodCall(buildQualifier(o.qualifier, o.name),
                 o.name.getText(), Utils.collect(Expr.class, args, built));
     }
 
     @Override
-    public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
+    public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         //if we're within a module argument list:
         if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null) {
             built.put(ctx, createFacilityArgumentModel(ctx));
@@ -364,20 +363,20 @@ public class ModelBuilder extends ResolveBaseListener {
      * for that argument.
      */
     @NotNull
-    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNamedExpContext ctx) {
+    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;
         try {
-            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name, true));
+            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getStart(), true));
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
-                        ctx.qualifier, ctx.name), s.toOperationSymbol());
+                        ctx.qualifier, ctx.name.getStart()), s.toOperationSymbol());
             }
             else if (s.isModuleTypeParameter()) {
                 //typeinit wrapped in a "get" call
-                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
+                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getStart()), ctx.name.getText(), ""));
             }
             else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
-                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), "");
+                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getStart()), ctx.name.getText(), "");
             }
             else {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());

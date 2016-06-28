@@ -9,7 +9,7 @@ import edu.clemson.resolve.semantics.programtype.ProgType;
 import java.util.Arrays;
 import java.util.List;
 
-public class HardCodedProgOps {
+public class StdTemplateProgOps {
 
     public static BuiltInOpAttributes convert(Token op, ProgType... args) {
         return convert(op, Arrays.asList(args));
@@ -48,38 +48,38 @@ public class HardCodedProgOps {
 
     public static BuiltInOpAttributes convertIntegerProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        switch (op.getType()) {
-            case ResolveLexer.PLUS:
+        switch (op.getText()) {
+            case "+":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Sum");
                 break;
-            case ResolveLexer.MINUS:
+            case "-":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Difference");
                 break;
-            case ResolveLexer.MULT:
+            case "*":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Product");
                 break;
-            case ResolveLexer.DIV:
+            case "/":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Divide");
                 break;
-            case ResolveLexer.LTE:
+            case "<=":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Less_Or_Equal");
                 break;
-            case ResolveLexer.LT:
+            case "<":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Less");
                 break;
-            case ResolveLexer.GTE:
+            case ">=":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Greater_Or_Equal");
                 break;
-            case ResolveLexer.GT:
+            case ">":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Greater");
                 break;
-            case ResolveLexer.EQUALS:
+            case "=":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Are_Equal");
                 break;
-            case ResolveLexer.NEQUALS:
+            case "/=":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Are_Not_Equal");
                 break;
-            case ResolveLexer.MOD:
+            case "%":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Mod");
                 break;
         }
@@ -88,26 +88,26 @@ public class HardCodedProgOps {
 
     public static BuiltInOpAttributes convertBooleanProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-        switch (op.getType()) {
-            case ResolveLexer.NOT:
+        switch (op.getText()) {
+            case "not":
                 result = new BuiltInOpAttributes("Std_Bools", op, "Not");
                 break;
-            case ResolveLexer.EQUALS:
+            case "=":
                 result = new BuiltInOpAttributes("Std_Bools", op, "Are_Equal");
                 break;
-            case ResolveLexer.NEQUALS:
+            case "/=":
                 result = new BuiltInOpAttributes("Std_Bools", op, "Are_Not_Equal");
                 break;
-            case ResolveLexer.TRUE:
+            case "true":
                 result = new BuiltInOpAttributes("Std_Bools", op, "True");
                 break;
-            case ResolveLexer.FALSE:
+            case "false":
                 result = new BuiltInOpAttributes("Std_Bools", op, "False");
                 break;
-            case ResolveLexer.AND:
+            case "and":
                 result = new BuiltInOpAttributes("Std_Bools", op, "And");
                 break;
-            case ResolveLexer.OR:
+            case "or":
                 result = new BuiltInOpAttributes("Std_Bools", op, "Or");
                 break;
         }
@@ -121,8 +121,7 @@ public class HardCodedProgOps {
             this.name = new CommonToken(op);
         }
 
-        public BuiltInOpAttributes(String qualifier, Token original,
-                                   String opAsText) {
+        public BuiltInOpAttributes(String qualifier, Token original, String opAsText) {
             this.name = new CommonToken(original);
             this.name.setText(opAsText);
             this.qualifier = new CommonToken(original);

@@ -12,7 +12,7 @@ Concept Boolean_Template;
     Operation False () : Boolean;
         ensures False = false;
 
-    Operation And /*[infix and]*/ (evaluates a, b : Boolean) : Boolean;
+    Operation And /*[infix Std_Bools and]*/ (evaluates a, b : Boolean) : Boolean;
         ensures And = (a ∧ b);
 
     Operation Or /*[infix or]*/ (evaluates a, b : Boolean)

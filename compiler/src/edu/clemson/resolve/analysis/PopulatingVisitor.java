@@ -3,7 +3,7 @@ package edu.clemson.resolve.analysis;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.misc.HardCodedProgOps;
+import edu.clemson.resolve.misc.StdTemplateProgOps;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveLexer;
@@ -632,7 +632,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
+    public Void visitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         if (prevSelectorAccess != null) {
             typeProgSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
             return null;
@@ -641,8 +641,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
-                            new NameQuery(ctx.qualifier, ctx.name,
-                                    true));
+                            new NameQuery(ctx.qualifier, ctx.name.getStart(), true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class);
@@ -750,51 +749,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitProgInfixExp(
-            ResolveParser.ProgInfixExpContext ctx) {
+    public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = ctx.progExp().stream()
                 .map(tr.progTypes::get).collect(Collectors.toList());
-        HardCodedProgOps.BuiltInOpAttributes attr =
-                HardCodedProgOps.convert(ctx.op, argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes attr =
+                StdTemplateProgOps.convert(ctx.progSymbolExp().progSymbolName().getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
-   /* @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+    @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());
-        if (ctx.NOT() != null) {
-            HardCodedProgOps.BuiltInOpAttributes attr =
-                    HardCodedProgOps.convert(ctx.op, tr.progTypes.get(ctx.progExp()));
-            typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
-        }
-        else {
-            //minus is overloaded WITHIN integer template, so for now we'll just handle it this way.
-            Token qualifier =  Utils.createTokenFrom(ctx.getStart(), "Std_Integer_Fac");
-            Token name =  Utils.createTokenFrom(ctx.getStart(), "Negate");
-            typeOperationRefExp(ctx, qualifier, name, ctx.progExp());
-        }
-        return null;
-    }*/
-
-    @Override
-    public Void visitProgParamExp(
-            ResolveParser.ProgParamExpContext ctx) {
-        this.visit(ctx.progNamedExp());
-        ctx.progExp().forEach(this::visit);
-        typeOperationRefExp(ctx, ctx.progNamedExp(), ctx.progExp());
+        StdTemplateProgOps.BuiltInOpAttributes attr =
+                StdTemplateProgOps.convert(ctx.progSymbolExp().getStart(), tr.progTypes.get(ctx.progExp()));
+        typeOperationRefExp(ctx, attr.qualifier, attr.name, Collections.singletonList(ctx.progExp()));
         return null;
     }
 
     @Override
-    public Void visitProgBooleanLiteralExp(
-            ResolveParser.ProgBooleanLiteralExpContext ctx) {
+    public Void visitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
+        //this.visit(ctx.progNamedExp());
+        ctx.progExp().forEach(this::visit);
+        typeOperationRefExp(ctx, ctx.progSymbolExp(), ctx.progExp());
+        return null;
+    }
+
+    @Override
+    public Void visitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Bools", "Boolean");
     }
 
     @Override
-    public Void visitProgIntegerLiteralExp(
-            ResolveParser.ProgIntegerLiteralExpContext ctx) {
+    public Void visitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Ints", "Integer");
     }
 
@@ -842,15 +829,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
-                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull ResolveParser.ProgExpContext... args) {
         typeOperationRefExp(ctx, name, Arrays.asList(args));
     }
 
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
-                                       @NotNull ResolveParser.ProgNamedExpContext name,
+                                       @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        typeOperationRefExp(ctx, name.qualifier, name.name, args);
+        typeOperationRefExp(ctx, name.qualifier, name.name.getStart(), args);
     }
 
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
@@ -1004,10 +991,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         return null;
     }
-
+/*
     @Override
-    public Void visitMathPostfixDefnSig(
-            ResolveParser.MathPostfixDefnSigContext ctx) {
+    public Void visitMathPostfixDefnSig(ResolveParser.MathPostfixDefnSigContext ctx) {
         try {
             CommonToken name = new CommonToken(ctx.lop);
             name.setText(ctx.lop.getText() + ".." + ctx.rop.getText());
@@ -1018,7 +1004,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.getStart(), e.getOffendingSymbol().getName());
         }
         return null;
-    }
+    }*/
 
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
@@ -1292,12 +1278,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visitMathBracketAppExp(
-            ResolveParser.MathBracketAppExpContext ctx) {
+    /*@Override
+    public Void visitMathBracketAppExp(ResolveParser.MathBracketAppExpContext ctx) {
         typeMathFunctionAppExp(ctx, ctx.mathSqBrOpExp(), ctx.mathExp());
         return null;
-    }
+    }*/
 
     //TODO: Outfix. Infix postfix?
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
@@ -1439,101 +1424,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    /*
-    mathSqBrOpExp : op='[' ;
-    mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
-    mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
-    mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
-    mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
-    mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
-    mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
-    mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
-    mathImpliesOpExp : (qualifier=ID '::')? op='implies';
-    mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
-    */
     @Override
-    public Void visitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
-        typeMathSymbol(ctx, null, "[..]");
-        return null;
-    }
-
-    @Override
-    public Void visitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathArrowOpExp(
-            ResolveParser.MathArrowOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathRelationalOpExp(
-            ResolveParser.MathRelationalOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathEqualityOpExp(
-            ResolveParser.MathEqualityOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathSetContainmentOpExp(
-            ResolveParser.MathSetContainmentOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathImpliesOpExp(
-            ResolveParser.MathImpliesOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathBooleanOpExp(
-            ResolveParser.MathBooleanOpExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathBooleanLiteralExp(
-            ResolveParser.MathBooleanLiteralExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.op.getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathIntegerLiteralExp(
-            ResolveParser.MathIntegerLiteralExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.INT().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitMathSymbolExp(
-            ResolveParser.MathSymbolExpContext ctx) {
+    public Void visitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         if (prevSelectorAccess != null) {
             typeMathSelectorAccessExp(ctx, prevSelectorAccess,
                     ctx.name.getText());
@@ -1545,8 +1437,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathCartProdExp(
-            ResolveParser.MathCartProdExpContext ctx) {
+    public Void visitMathCartProdExp(ResolveParser.MathCartProdExpContext ctx) {
         //ctx.mathVarDeclGroup().forEach(this::visit);
         //List<MathSymbol> fieldSyms = new ArrayList<>();
         /*for (ResolveParser.MathVarDeclGroupContext grp :
@@ -1577,8 +1468,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathSetRestrictionExp(
-            ResolveParser.MathSetRestrictionExpContext ctx) {
+    public Void visitMathSetRestrictionExp(ResolveParser.MathSetRestrictionExpContext ctx) {
         this.visit(ctx.mathVarDecl());
         this.visit(ctx.mathAssertionExp());
         MathClassification t =
