@@ -6,7 +6,7 @@ Concept Boolean_Template;
         initialization
             ensures b = true;
     
-    Operation True () : Boolean;
+    Operation True [true] () : Boolean;
         ensures True = true;
 
     Operation False () : Boolean;
@@ -22,12 +22,12 @@ Concept Boolean_Template;
                 : Boolean;
         ensures Or = (a ∨ b);
 
-    Operation Not 
+    Operation Not
     		(evaluates a : Boolean)
                 : Boolean;
         ensures Not = ⌐ a;
 
-    Operation Are_Equal
+    Operation Are_Equal "="
             (evaluates a, b : Boolean)
                 : Boolean;
         ensures Are_Equal = (a = b);
@@ -40,4 +40,10 @@ Concept Boolean_Template;
     Operation Write_Line
             (evaluates a : Boolean);
 
+	/* then std_ints has
+	Operation One '1'() : Integer;
+	Operation Two '2'	: Integer;
+	Operation Three '3' : Integer;
+	...
+	*/
 end Boolean_Template;

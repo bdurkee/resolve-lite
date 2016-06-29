@@ -64,7 +64,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * only applies to exps.
      */
     public ParseTreeProperty<MathClassification> exactNamedMathClssftns = new ParseTreeProperty<>();
-
+    public ParseTreeProperty<String> progExpCallQualifiers = new ParseTreeProperty<>();
     /**
      * A reference to the expr context that represents the previous segment
      * accessed in a {@link ResolveParser.MathSelectorExpContext} or
@@ -849,7 +849,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
                             FacilityStrategy.FACILITY_INSTANTIATE,
-                            MathSymbolTable.ImportStrategy.IMPORT_NAMED));
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED, true));
 
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());

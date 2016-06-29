@@ -20,14 +20,12 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
     private final String queryName;
     @NotNull
     private final List<ProgType> actualArgTypes;
+    private final boolean localPriority;
 
-    public OperationSearcher(@NotNull Token name, @NotNull List<ProgType> argumentTypes) {
-        this(name.getText(), argumentTypes);
-    }
-
-    public OperationSearcher(@NotNull String name, @NotNull List<ProgType> argumentTypes) {
+    public OperationSearcher(@NotNull String name, @NotNull List<ProgType> argumentTypes, boolean localPriority) {
         this.queryName = name;
         this.actualArgTypes = new ArrayList<>(argumentTypes);
+        this.localPriority = localPriority;
     }
 
     @Override
@@ -35,7 +33,7 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
                               @NotNull List<OperationSymbol> matches,
                               @NotNull SearchContext l)
             throws DuplicateSymbolException {
-
+        boolean found = false;
         if (entries.containsKey(queryName)) {
             try {
                 OperationSymbol operation = entries.get(queryName).toOperationSymbol();
@@ -45,12 +43,13 @@ public class OperationSearcher implements TableSearcher<OperationSymbol> {
                     if (!matches.isEmpty()) {
                         throw new DuplicateSymbolException();
                     }
+                    found = true;
                     matches.add(operation);
                 }
             } catch (UnexpectedSymbolException use) {
             }
         }
-        return false;
+        return l.equals(SearchContext.SOURCE_MODULE) && found;
     }
 
     private boolean argumentsMatch(@NotNull List<ProgParameterSymbol> formalParameters) {

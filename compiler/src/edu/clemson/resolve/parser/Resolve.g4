@@ -224,9 +224,12 @@ moduleArgumentList
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'
+    :   'Operation' name=ID opSugaredName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
+
+//Add this to the symboltable with an underscore or something in front to distinguish it.. Or just keep the quotes
+opSugaredName : '[' progSymbolName ']';
 
 operationProcedureDecl
     :   'Operation' name=ID operationParameterList (':' type)? ';'
@@ -290,12 +293,15 @@ progParamExp
     ;
 
 progSymbolExp
-    :   (qualifier=ID '.')? name=ID
+    :   (qualifier=ID '.')? name=progSymbolName
+    ;
+
+progSymbolName
+    :   (SYM | ID)
     ;
 
 progLiteralExp
-    :   ('true'|'false')                #progBooleanLiteralExp
-    |   INT                 #progIntegerLiteralExp
+    :   INT                 #progIntegerLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
@@ -344,7 +350,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' | 'true' | 'false')
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|')
     ;
 
 mathSymbolNameNoID
@@ -464,7 +470,7 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;
-SYM : [!-'*-/<->|-|]+;
+SYM : [!-!#-&*-/<->|-|]+;
 
 MATH_UNICODE_SYM
     :   [\u2200-\u22FF]
@@ -475,6 +481,8 @@ MATH_UNICODE_SYM
     ;
 
 CHAR: '\'' . '\'' ;
+
+RAW_STRING :  '\'' (ESC | ~["\\])* '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;
 fragment ESC :   '\\' ["\bfnrt] ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;
