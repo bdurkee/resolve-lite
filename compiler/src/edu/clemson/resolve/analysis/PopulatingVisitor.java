@@ -818,8 +818,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new NameQuery(qualifierToken, nameToken, false))
                     .toProgTypeSymbol();
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(),
-                    ctx.getStart(), typeName);
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), typeName);
         } catch (UnexpectedSymbolException e) {
             e.printStackTrace();
         } catch (NoSuchModuleException nsme) {

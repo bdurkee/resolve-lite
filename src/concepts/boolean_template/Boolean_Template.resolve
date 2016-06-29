@@ -12,15 +12,14 @@ Concept Boolean_Template;
     Operation False () : Boolean;
         ensures False = false;
 
-    Operation And /*[infix Std_Bools and]*/ (evaluates a, b : Boolean) : Boolean;
+    Operation And (evaluates a, b : Boolean) : Boolean;
         ensures And = (a ∧ b);
 
-    Operation Or /*[infix or]*/ (evaluates a, b : Boolean)
+    Operation Or (evaluates a, b : Boolean)
                 : Boolean;
         ensures Or = (a ∨ b);
 
-    Operation Not
-            (evaluates a : Boolean)
+    Operation Not (evaluates a : Boolean)
                 : Boolean;
         ensures Not = ⌐(a);
 

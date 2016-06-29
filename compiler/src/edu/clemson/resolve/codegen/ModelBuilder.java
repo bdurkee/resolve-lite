@@ -564,7 +564,9 @@ public class ModelBuilder extends ResolveBaseListener {
             try {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
             } catch (NoSuchSymbolException | DuplicateSymbolException |
-                     UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
+                    UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
+                compiler.errMgr.semanticError(e.getErrorKind(), refName, refName.getText());
+                return new NormalQualifier("this");
             }
             Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
             return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));
@@ -573,10 +575,14 @@ public class ModelBuilder extends ResolveBaseListener {
             try {
                 Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier, true));
                 if (s instanceof FacilitySymbol) {
+                    ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
                     ModuleIdentifier id =
                             ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
-                    Path qual = id.getPathRelativeToRootDir().getParent();
-                    return new FacilityQualifier(qual.toString().replaceAll(File.separator, "."), s.getName());
+                    String name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
+                            + "." + s.getName();
+
+                    String qual = Utils.stripFileExtension(id.getPathRelativeToRootDir().toString()) ;
+                    return new FacilityQualifier(qual.replaceAll(File.separator, "."), name.replaceAll(File.separator, "."));
                 }
             }
             catch (NoSuchSymbolException e) {

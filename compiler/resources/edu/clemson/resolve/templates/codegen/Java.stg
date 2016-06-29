@@ -211,8 +211,7 @@ ConceptDelegateMethod(method) ::= <<
 >>
 
 FacilityDef(facility, root) ::= <<
-public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
-<if(toStdFacilityName.(facility.name))>INSTANCE<else><facility.name><endif> = <root>;
+public <if(facility.isStatic)>static <endif>final <facility.concept> <facility.name> = <root>;
 >>
 
 DecoratedFacilityInstantiation(init, args, child) ::= <%
@@ -317,8 +316,7 @@ new BaseOperationParameter() {
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.fullyQualifiedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
-<toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
+((<q.fullyQualifiedSymbolSpecName>)<q.facilityName>)%>
 
 NormalQualifier(q) ::= "<q.name>"
 
@@ -327,13 +325,6 @@ toJavaPrimitive ::= [
     "Integer":"int",
     "Character":"char",
     "Char_Str":"String"
-]
-
-toStdFacilityName ::= [
-    "Std_Bools":"Standard_Booleans.INSTANCE",
-    "Std_Ints":"Standard_Integers.INSTANCE",
-    "Std_Chars":"Standard_Characters.INSTANCE",
-    "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
 
 externalClassCode(code) ::= "<code>"
