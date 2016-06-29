@@ -15,10 +15,6 @@ public class StdTemplateProgOps {
         return convert(op, Arrays.asList(args));
     }
 
-    public static boolean isBuiltinOp(Token op) {
-        con
-        return false;
-    }
     public static BuiltInOpAttributes convert(Token op, List<ProgType> args) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
 

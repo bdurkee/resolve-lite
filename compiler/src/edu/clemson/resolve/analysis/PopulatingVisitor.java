@@ -641,7 +641,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
-                            new NameQuery(ctx.qualifier, ctx.name.getStart(), true));
+                            new NameQuery(ctx.qualifier, ctx.name, true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class);
@@ -753,7 +753,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.progSymbolExp().progSymbolName().getStart(), argTypes);
+                StdTemplateProgOps.convert(ctx.progSymbolExp().name, argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
@@ -835,7 +835,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        typeOperationRefExp(ctx, name.qualifier, name.name.getStart(), args);
+        typeOperationRefExp(ctx, name.qualifier, name.name, args);
     }
 
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,

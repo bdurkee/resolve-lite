@@ -224,12 +224,8 @@ moduleArgumentList
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID sugarSpec? operationParameterList (':' type)? ';'
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
-    ;
-
-sugarSpec
-    :   '[' style=(POSTFIX|PREFIX|UNARY|INFIX)? name=progSymbolName ']'
     ;
 
 operationProcedureDecl
@@ -275,11 +271,6 @@ elseStmt : 'else' stmt* ;
 
 // program expressions
 
-//these should all be a *single token* (they currently all are)
-progSymbolName
-    :   (ID | SYM)
-    ;
-
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
@@ -299,11 +290,11 @@ progParamExp
     ;
 
 progSymbolExp
-    :   (qualifier=ID '.')? name=progSymbolName
+    :   (qualifier=ID '.')? name=ID
     ;
 
 progLiteralExp
-    :   BOOL                #progBooleanLiteralExp
+    :   ('true'|'false')                #progBooleanLiteralExp
     |   INT                 #progIntegerLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
@@ -353,7 +344,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' | BOOL)
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' | 'true' | 'false')
     ;
 
 mathSymbolNameNoID
@@ -474,7 +465,6 @@ LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
-BOOL : ('true'|'false');
 INT : [0-9]+ ;
 SYM : [!-'*-/<->|-|]+;
 

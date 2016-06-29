@@ -304,7 +304,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else {
             built.put(ctx, new MethodCall(buildQualifier(
-                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name.getStart()),
+                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name),
                     ctx.progSymbolExp().name.getText(), args));
         }
     }
@@ -319,7 +319,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().progSymbolName().getStart(), ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name, ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
@@ -366,17 +366,17 @@ public class ModelBuilder extends ResolveBaseListener {
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;
         try {
-            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getStart(), true));
+            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name, true));
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
-                        ctx.qualifier, ctx.name.getStart()), s.toOperationSymbol());
+                        ctx.qualifier, ctx.name), s.toOperationSymbol());
             }
             else if (s.isModuleTypeParameter()) {
                 //typeinit wrapped in a "get" call
-                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getStart()), ctx.name.getText(), ""));
+                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
             }
             else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
-                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getStart()), ctx.name.getText(), "");
+                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), "");
             }
             else {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
@@ -389,6 +389,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
+
         built.put(ctx, new TypeInit(new FacilityQualifier(
                 "concepts.boolean_template.Boolean_Template", "Std_Bools"), "Boolean", ctx.getText()));
     }
