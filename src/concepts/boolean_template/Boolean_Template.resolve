@@ -12,16 +12,20 @@ Concept Boolean_Template;
     Operation False () : Boolean;
         ensures False = false;
 
-    Operation And (evaluates a, b : Boolean) : Boolean;
+    Operation And 
+    		(evaluates a, b : Boolean) 
+    			: Boolean;
         ensures And = (a ∧ b);
 
-    Operation Or (evaluates a, b : Boolean)
+    Operation Or 
+    		(evaluates a, b : Boolean)
                 : Boolean;
         ensures Or = (a ∨ b);
 
-    Operation Not (evaluates a : Boolean)
+    Operation Not 
+    		(evaluates a : Boolean)
                 : Boolean;
-        ensures Not = ⌐(a);
+        ensures Not = ⌐ a;
 
     Operation Are_Equal
             (evaluates a, b : Boolean)

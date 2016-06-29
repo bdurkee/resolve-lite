@@ -751,8 +751,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
-        List<ProgType> argTypes = ctx.progExp().stream()
-                .map(tr.progTypes::get).collect(Collectors.toList());
+        List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr =
                 StdTemplateProgOps.convert(ctx.progSymbolExp().progSymbolName().getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
