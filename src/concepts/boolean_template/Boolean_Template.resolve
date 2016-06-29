@@ -6,7 +6,7 @@ Concept Boolean_Template;
         initialization
             ensures b = true;
     
-    Operation True [true] () : Boolean;
+    Operation True () : Boolean;
         ensures True = true;
 
     Operation False () : Boolean;
@@ -27,7 +27,7 @@ Concept Boolean_Template;
                 : Boolean;
         ensures Not = ⌐ a;
 
-    Operation Are_Equal "="
+    Operation Are_Equal
             (evaluates a, b : Boolean)
                 : Boolean;
         ensures Are_Equal = (a = b);

@@ -224,12 +224,9 @@ moduleArgumentList
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID opSugaredName? operationParameterList (':' type)? ';'
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
-
-//Add this to the symboltable with an underscore or something in front to distinguish it.. Or just keep the quotes
-opSugaredName : '[' progSymbolName ']';
 
 operationProcedureDecl
     :   'Operation' name=ID operationParameterList (':' type)? ';'
@@ -301,7 +298,8 @@ progSymbolName
     ;
 
 progLiteralExp
-    :   INT                 #progIntegerLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
@@ -350,7 +348,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|')
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' | 'true' | 'false')    //TODO: Maybe use BOOL instead?
     ;
 
 mathSymbolNameNoID

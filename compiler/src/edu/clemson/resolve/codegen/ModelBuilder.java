@@ -319,12 +319,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name, ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name.getStart(), ctx.progExp()));
     }
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name, ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name.getStart(), ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
@@ -336,7 +336,7 @@ public class ModelBuilder extends ResolveBaseListener {
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
                                            @NotNull Token op,
                                            @NotNull List<? extends ParseTree> args) {
-        List<ProgType> argTypes = args.stream().map(tr.progTypes::get).collect(Collectors.toList());
+        List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes o = StdTemplateProgOps.convert(op, argTypes);
         return new MethodCall(buildQualifier(o.qualifier, o.name.getText()),
                 o.name.getText(), Utils.collect(Expr.class, args, built));
@@ -400,6 +400,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
+        //TODO: Do this one like the boolean method directly above.
         built.put(ctx, new TypeInit(new FacilityQualifier(
                 "concepts.integer_template.Integer_Template", "Std_Ints"), "Integer", ctx.getText()));
     }

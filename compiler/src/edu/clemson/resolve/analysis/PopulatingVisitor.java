@@ -733,8 +733,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitProgSelectorExp(
-            ResolveParser.ProgSelectorExpContext ctx) {
+    public Void visitProgSelectorExp(ResolveParser.ProgSelectorExpContext ctx) {
         this.visit(ctx.lhs);
         prevSelectorAccess = ctx.lhs;
         this.visit(ctx.rhs);
@@ -753,7 +752,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.progSymbolExp().name, argTypes);
+                StdTemplateProgOps.convert(ctx.progSymbolExp().name.getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
@@ -835,7 +834,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        typeOperationRefExp(ctx, name.qualifier, name.name, args);
+        typeOperationRefExp(ctx, name.qualifier, name.name.getStart(), args);
     }
 
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
