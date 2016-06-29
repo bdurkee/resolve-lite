@@ -459,8 +459,6 @@ mathAlternativeItemExp
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
 
-PREFIX  : 'prefix'; INFIX : 'infix'; UNARY : 'unary'; POSTFIX : 'postfix';
-
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
