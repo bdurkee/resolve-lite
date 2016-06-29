@@ -192,7 +192,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitNamedType(ResolveParser.NamedTypeContext ctx) {
-        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
+        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getText()), ctx.name.getText(), ""));
     }
 
     @Override
@@ -304,7 +304,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else {
             built.put(ctx, new MethodCall(buildQualifier(
-                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name),
+                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name.getText()),
                     ctx.progSymbolExp().name.getText(), args));
         }
     }
@@ -333,7 +333,7 @@ public class ModelBuilder extends ResolveBaseListener {
                                            @NotNull List<? extends ParseTree> args) {
         List<ProgType> argTypes = args.stream().map(tr.progTypes::get).collect(Collectors.toList());
         StdTemplateProgOps.BuiltInOpAttributes o = StdTemplateProgOps.convert(op, argTypes);
-        return new MethodCall(buildQualifier(o.qualifier, o.name),
+        return new MethodCall(buildQualifier(o.qualifier, o.name.getText()),
                 o.name.getText(), Utils.collect(Expr.class, args, built));
     }
 
@@ -366,17 +366,17 @@ public class ModelBuilder extends ResolveBaseListener {
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;
         try {
-            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name, true));
+            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(), true));
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
-                        ctx.qualifier, ctx.name), s.toOperationSymbol());
+                        ctx.qualifier, ctx.name.getText()), s.toOperationSymbol());
             }
             else if (s.isModuleTypeParameter()) {
                 //typeinit wrapped in a "get" call
-                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
+                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getText()), ctx.name.getText(), ""));
             }
             else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
-                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), "");
+                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getText()), ctx.name.getText(), "");
             }
             else {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
@@ -389,9 +389,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
-
-        built.put(ctx, new TypeInit(new FacilityQualifier(
-                "concepts.boolean_template.Boolean_Template", "Std_Bools"), "Boolean", ctx.getText()));
+        built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Bools"),
+                ctx.getText()), "Boolean", ctx.getText()));
     }
 
     @Override
@@ -557,7 +556,7 @@ public class ModelBuilder extends ResolveBaseListener {
         return new CallStat(qualifier, name, (Expr) built.get(left), (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(@Nullable Token refQualifier, @NotNull Token refName) {
+    protected Qualifier buildQualifier(@Nullable Token refQualifier, @NotNull String refName) {
         Symbol corresondingSym = null;
 
         //if the reference was not qualified, a simple query should be able to find it.
@@ -566,7 +565,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
             } catch (NoSuchSymbolException | DuplicateSymbolException |
                     UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
-                compiler.errMgr.semanticError(e.getErrorKind(), refName, refName.getText());
+                //compiler.errMgr.semanticError(e.getErrorKind(), refName, refName);
                 return new NormalQualifier("this");
             }
             Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
@@ -574,7 +573,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else { // if the reference was qualified, let's see if it was a facility or module.
             try {
-                Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier, true));
+                Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier.getText(), true));
                 if (s instanceof FacilitySymbol) {
                     ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
                     ModuleIdentifier id =

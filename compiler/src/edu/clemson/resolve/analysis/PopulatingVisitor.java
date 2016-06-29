@@ -281,7 +281,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             correspondingOp =
                     symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(null, ctx.name, false))
+                            .queryForOne(new NameQuery(null, ctx.name.getText(), false))
                             .toOperationSymbol();
         } catch (NoSuchSymbolException nse) {
             compiler.errMgr.semanticError(ErrorKind.DANGLING_PROCEDURE, ctx.getStart(), ctx.name.getText());
@@ -413,7 +413,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             Token qualifier = ctx.qualifier;
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(qualifier, ctx.name, true))
+                            .queryForOne(new NameQuery(qualifier, ctx.name.getText(), true))
                             .toProgTypeSymbol();
 
             tr.progTypes.put(ctx, type.getProgramType());
@@ -482,7 +482,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         try {
             curTypeReprModelSymbol =
-                    symtab.getInnermostActiveScope().queryForOne(new NameQuery(null, ctx.name, false))
+                    symtab.getInnermostActiveScope().queryForOne(new NameQuery(null, ctx.name.getText(), false))
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
@@ -641,7 +641,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
                     symtab.getInnermostActiveScope().queryForOne(
-                            new NameQuery(ctx.qualifier, ctx.name, true));
+                            new NameQuery(ctx.qualifier, ctx.name.getText(), true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class);
@@ -814,7 +814,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ProgTypeSymbol result = null;
         try {
             result = symtab.getInnermostActiveScope().queryForOne(
-                    new NameQuery(qualifierToken, nameToken, false))
+                    new NameQuery(qualifierToken, nameToken.getText(), false))
                     .toProgTypeSymbol();
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), typeName);
