@@ -32,7 +32,7 @@ public class TestASTStructure extends BaseTest {
                         .toLowerCase() + className;
     }
 
-    @Test
+    /*@Test
     public void testPSymbolStructure() {
         DumbMathClssftnHandler g = new DumbMathClssftnHandler();
         String[] expected = {
@@ -55,7 +55,7 @@ public class TestASTStructure extends BaseTest {
         TestListener v = new TestListener();
         tree.accept(v);
         Assert.assertEquals(expected[0], v.trace);
-    }
+    }*/
 
     /*@Test public void testPAltStructure() {
         DumbTypeGraph g = new DumbTypeGraph();

@@ -318,6 +318,11 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
+    public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name, ctx.progExp()));
+    }
+
+    @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name, ctx.progExp()));
     }

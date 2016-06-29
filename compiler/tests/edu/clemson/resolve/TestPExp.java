@@ -98,11 +98,11 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testIsObviouslyTrue() throws Exception {
-        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = y + x").isObviouslyTrue());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = (y + x)").isObviouslyTrue());
         Assert.assertEquals(true, parseMathAssertionExp(g, "true").isObviouslyTrue());
         Assert.assertEquals(false, parseMathAssertionExp(g, "false").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = x * 3 + 2").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = x + y").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = (x * 3 + 2)").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = (x + y)").isObviouslyTrue());
     }
 
     @Test
@@ -112,9 +112,9 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testIsEquality() throws Exception {
-        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = y + x").isEquality());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = y + x").isEquality());
-        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and y + x").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = (y + x)").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = (y + x)").isEquality());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and (y + x)").isEquality());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSplitIntoConjuncts() {
-        PExp result = parseMathAssertionExp(g, "x and y = 2 and P.Lab = λ q : Z,(true)");
+        PExp result = parseMathAssertionExp(g, "x and (y = 2) and (P.Lab = λ q : Z,(true))");
         List<PExp> conjuncts = result.splitIntoConjuncts();
         //Assert.assertEquals(2, conjuncts.size());
         Iterator<? extends PExp> exps = conjuncts.iterator();
