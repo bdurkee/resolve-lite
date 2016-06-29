@@ -118,8 +118,8 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '.')? name=ID           #namedType
-    |    'Record' (recordVarDeclGroup)* 'end'  #recordType
+    :   (qualifier=ID '.')? name=ID             #namedType
+    |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 
 typeModelDecl
@@ -298,7 +298,7 @@ progSymbolName
     ;
 
 progLiteralExp
-    :   ('true'|'false')    #progBooleanLiteralExp
+    :   BOOL                #progBooleanLiteralExp
     |   INT                 #progIntegerLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
@@ -348,7 +348,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' | 'true' | 'false')    //TODO: Maybe use BOOL instead?
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )    //TODO: Maybe use BOOL instead?
     ;
 
 mathSymbolNameNoID
@@ -462,6 +462,7 @@ mathAlternativeItemExp
 
 FORALL : ('Forall'|'forall');
 EXISTS : ('Exists'|'exists');
+BOOL: ('true'|'false');
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
@@ -479,7 +480,6 @@ MATH_UNICODE_SYM
     ;
 
 CHAR: '\'' . '\'' ;
-
 RAW_STRING :  '\'' (ESC | ~["\\])* '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;
 fragment ESC :   '\\' ["\bfnrt] ;
