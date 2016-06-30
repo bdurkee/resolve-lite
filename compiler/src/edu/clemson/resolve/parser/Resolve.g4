@@ -76,10 +76,12 @@ usesList
     |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
     ;
 
-usesSpec : id=ID fromClauseSpec? alias? ;
-fromClauseSpec : 'from' qualifiedFromPath ;
-qualifiedFromPath : ID ('.' ID)*;
-alias : 'as' ID ;
+//TODO: To make this match up better with the plugin, do the following renames:
+
+usesSpec : id=ID fromClauseSpec? alias? ;   //TODO: Rename this moduleIdentifierSpec
+fromClauseSpec : 'from' qualifiedFromPath ; //TODO: Rename 'fromClause'
+alias : 'as' ID ;                           //TODO: Rename 'aliasClause'
+qualifiedFromPath : ID ('.' ID)* ;          //TODO: Rename ModuleLibraryIdentifier
 
 // module blocks & items
 
@@ -275,8 +277,8 @@ progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   name=progSymbolExp progExp                      #progUnaryExp       //TODO: Change from progSymbolExp to just ID
-    |   progExp name=progSymbolExp progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
+    |   name=progSymbolName progExp                      #progUnaryExp       //TODO: Change from progSymbolExp to just ID, er, programSymbolName
+    |   progExp name=progSymbolName progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
     ;
 
 progPrimary
