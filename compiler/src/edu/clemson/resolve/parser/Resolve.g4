@@ -72,12 +72,14 @@ shortFacilityModuleDecl
 // uses, imports
 
 usesList
-    :   'uses' usesSpec (',' usesSpec)* ';'
-    |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
+    :   'uses' (usesSpecs|'(' usesSpecs ')') ';'
+    ;
+
+usesSpecs
+    :   usesSpec (',' usesSpec)*
     ;
 
 //TODO: To make this match up better with the plugin, do the following renames:
-
 usesSpec : id=ID fromClauseSpec? alias? ;   //TODO: Rename this moduleIdentifierSpec
 fromClauseSpec : 'from' qualifiedFromPath ; //TODO: Rename 'fromClause'
 alias : 'as' ID ;                           //TODO: Rename 'aliasClause'
