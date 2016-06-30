@@ -5,7 +5,7 @@ import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class AnnotatedModule {
 
-    public ParseTreeProperty<MathClassification> mathClssftns = new ParseTreeProperty<>();
+    public ParseTreeProperty<MathClssftn> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
     /**
      * For each {@link edu.clemson.resolve.parser.ResolveParser.MathExpContext} and

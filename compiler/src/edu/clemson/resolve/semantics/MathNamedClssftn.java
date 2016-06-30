@@ -10,14 +10,14 @@ import java.util.Map;
  * For example, in {@code BigUnion t : MType}{t}}, the second {@code t} is a
  * named type.
  */
-public class MathNamedClassification extends MathClassification {
+public class MathNamedClssftn extends MathClssftn {
 
     public String tag;
 
-    public MathNamedClassification(@NotNull DumbMathClssftnHandler g,
-                                   String tag,
-                                   int typeDepth,
-                                   @Nullable MathClassification enclosingType) {
+    public MathNamedClssftn(@NotNull DumbMathClssftnHandler g,
+                            String tag,
+                            int typeDepth,
+                            @Nullable MathClssftn enclosingType) {
         super(g, enclosingType);
         this.tag = tag;
         this.typeRefDepth = typeDepth;
@@ -30,8 +30,8 @@ public class MathNamedClassification extends MathClassification {
     }
 
     @Override
-    public MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions) {
-        MathClassification result = substitutions.get(this.tag);
+    public MathClssftn withVariablesSubstituted(Map<String, MathClssftn> substitutions) {
+        MathClssftn result = substitutions.get(this.tag);
         return result == null ? this : result;
     }
 

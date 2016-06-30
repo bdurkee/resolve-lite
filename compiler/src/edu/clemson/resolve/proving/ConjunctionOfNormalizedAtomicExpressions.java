@@ -1,10 +1,7 @@
 package edu.clemson.resolve.proving;
 
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.semantics.MathClassification;
-import edu.clemson.resolve.semantics.MathFunctionClassification;
-import edu.clemson.resolve.semantics.Quantification;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 
 import java.util.*;
 
@@ -243,11 +240,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_expSet.containsKey(atomicFormula))
             return m_expSet.get(atomicFormula).readRoot();
         // no such formula exists
-        MathClassification typeOfFormula =
+        MathClssftn typeOfFormula =
                 m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         // this is the full type and is necessarily a function type
 
-        MathClassification rangeType = ((MathFunctionClassification) typeOfFormula).getRangeClssftn();
+        MathClssftn rangeType = ((MathFunctionClssftn) typeOfFormula).getRangeClssftn();
         String symName =
                 m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
         assert rangeType != null : symName + " has null type";
@@ -710,10 +707,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     continue;
                 if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac))
                     continue next; // this clause ensures usage of same symbol where required.
-                MathClassification wildType =
+                MathClssftn wildType =
                         searchReg.getTypeByIndex(searchReg
                                 .getIndexForSymbol(wc));
-                MathClassification localType =
+                MathClssftn localType =
                         m_registry.getTypeByIndex(m_registry
                                 .getIndexForSymbol(ac));
                 if (!m_registry.isSubtype(localType, wildType))
@@ -761,7 +758,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        for (MathClassification key : m_registry.m_typeToSetOfOperators.keySet()) {
+        for (MathClssftn key : m_registry.m_typeToSetOfOperators.keySet()) {
             r += key.toString() + ":\n";
             r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
         }

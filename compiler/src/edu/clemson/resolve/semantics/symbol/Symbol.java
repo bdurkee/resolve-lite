@@ -1,6 +1,6 @@
 package edu.clemson.resolve.semantics.symbol;
 
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.SyntacticScope;
 import edu.clemson.resolve.semantics.UnexpectedSymbolException;
@@ -139,10 +139,10 @@ public abstract class Symbol {
             @Nullable FacilitySymbol instantiatingFacility);
 
     @NotNull
-    public static Map<String, MathClassification> buildMathTypeGenerics(
+    public static Map<String, MathClssftn> buildMathTypeGenerics(
             @NotNull Map<String, ProgType> genericInstantiations) {
 
-        Map<String, MathClassification> genericMathematicalInstantiations = new HashMap<>();
+        Map<String, MathClssftn> genericMathematicalInstantiations = new HashMap<>();
 
         for (Map.Entry<String, ProgType> instantiation : genericInstantiations
                 .entrySet()) {

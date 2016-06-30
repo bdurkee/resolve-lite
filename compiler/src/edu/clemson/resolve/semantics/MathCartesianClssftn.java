@@ -7,17 +7,17 @@ import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 
 import java.util.*;
 
-public class MathCartesianClassification extends MathClassification {
+public class MathCartesianClssftn extends MathClssftn {
 
     private final List<Element> elements = new ArrayList<>();
     public final Map<String, MathClssftnWrappingSymbol> syms = new LinkedHashMap<>();
     public final Map<String, Element> tagsToElements = new LinkedHashMap<>();
 
-    public MathCartesianClassification(DumbMathClssftnHandler g, Element... e) {
+    public MathCartesianClssftn(DumbMathClssftnHandler g, Element... e) {
         this(g, Arrays.asList(e));
     }
 
-    public MathCartesianClassification(DumbMathClssftnHandler g, List<Element> elements) {
+    public MathCartesianClssftn(DumbMathClssftnHandler g, List<Element> elements) {
         super(g, g.CLS);
         this.elements.addAll(elements);
         this.typeRefDepth = 1;
@@ -27,8 +27,8 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     @Override
-    public List<MathClassification> getComponentTypes() {
-        List<MathClassification> result = new ArrayList<>();
+    public List<MathClssftn> getComponentTypes() {
+        List<MathClssftn> result = new ArrayList<>();
         for (Element e : elements) {
             result.add(e.clssfcn);
         }
@@ -41,27 +41,27 @@ public class MathCartesianClassification extends MathClassification {
     }
 
     @Override
-    public MathClassification withVariablesSubstituted(
-            Map<String, MathClassification> substitutions) {
+    public MathClssftn withVariablesSubstituted(
+            Map<String, MathClssftn> substitutions) {
         List<Element> newElements = new ArrayList<>();
         for (Element element : elements) {
             newElements.add(
                     new Element(element.getTag(), element.clssfcn
                             .withVariablesSubstituted(substitutions)));
         }
-        return new MathCartesianClassification(g, newElements);
+        return new MathCartesianClssftn(g, newElements);
     }
 
     public int size() {
         return elements.size();
     }
 
-    public MathClassification getFactor(int i) {
+    public MathClssftn getFactor(int i) {
         return elements.get(i).clssfcn;
     }
 
     @Nullable
-    public MathClassification getFactor(String tag) {
+    public MathClssftn getFactor(String tag) {
         if (tagsToElements.get(tag) == null)
             throw new NoSuchElementException(tag);
         return tagsToElements.get(tag).clssfcn;
@@ -79,14 +79,14 @@ public class MathCartesianClassification extends MathClassification {
 
     public static class Element {
         private final String tag;
-        public MathClassification clssfcn;
+        public MathClssftn clssfcn;
 
-        public Element(@Nullable String tag, @NotNull MathClassification c) {
+        public Element(@Nullable String tag, @NotNull MathClssftn c) {
             this.tag = tag;
             this.clssfcn = c;
         }
 
-        public Element(@NotNull MathClassification c) {
+        public Element(@NotNull MathClssftn c) {
             this(null, c);
         }
 

@@ -1,9 +1,9 @@
 package edu.clemson.resolve.semantics;
 
-public class MathPowersetApplicationClassification extends MathFunctionApplicationClassification {
-    private final MathClassification argument;
+public class MathPowersetApplicationClssftn extends MathFunctionApplicationClssftn {
+    private final MathClssftn argument;
 
-    protected MathPowersetApplicationClassification(DumbMathClssftnHandler g, MathClassification argument) {
+    protected MathPowersetApplicationClssftn(DumbMathClssftnHandler g, MathClssftn argument) {
         super(g, g.POWERSET_FUNCTION, "Powerset", argument);
         int normalResultRefDepth = g.POWERSET_FUNCTION.getRangeClssftn().typeRefDepth - 1;
         //powerset is the normal type ref depth of the range (SSET) + whatever
@@ -12,7 +12,7 @@ public class MathPowersetApplicationClassification extends MathFunctionApplicati
         this.argument = argument;
     }
 
-    public MathClassification getPowersetArgumentClassification() {
+    public MathClssftn getPowersetArgumentClassification() {
         return argument;
     }
 }

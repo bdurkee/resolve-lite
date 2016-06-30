@@ -16,32 +16,32 @@ public class DumbMathClssftnHandler {
     public DumbMathClssftnHandler() {
     }
 
-    public final MathClassification INVALID = MathInvalidClassification.getInstance(this);
+    public final MathClssftn INVALID = MathInvalidClssftn.getInstance(this);
 
-    public final MathClassification CLS = new MathNamedClassification(this, "Cls", 2, INVALID);
-    public final MathClassification SSET = new MathNamedClassification(this, "SSet", 2, CLS);
-    public final MathClassification EMPTY_SET = new MathNamedClassification(this, "Empty_Set", 1, SSET);
+    public final MathClssftn CLS = new MathNamedClssftn(this, "Cls", 2, INVALID);
+    public final MathClssftn SSET = new MathNamedClssftn(this, "SSet", 2, CLS);
+    public final MathClssftn EMPTY_SET = new MathNamedClssftn(this, "Empty_Set", 1, SSET);
 
-    public final MathClassification ENTITY = new MathNamedClassification(this, "Entity", 1, INVALID);
-    public final MathClassification EL = new MathNamedClassification(this, "El", 1, INVALID);
+    public final MathClssftn ENTITY = new MathNamedClssftn(this, "Entity", 1, INVALID);
+    public final MathClssftn EL = new MathNamedClssftn(this, "El", 1, INVALID);
 
-    public final MathClassification BOOLEAN = new MathNamedClassification(this, "B", 1, SSET);
-    public final MathClassification VOID = new MathNamedClassification(this, "Void", 0, INVALID);
+    public final MathClssftn BOOLEAN = new MathNamedClssftn(this, "B", 1, SSET);
+    public final MathClssftn VOID = new MathNamedClssftn(this, "Void", 0, INVALID);
 
     /**
      * General purpose (binary) boolean function type, useful for things like
      * "and", "or", "xor", etc;
      */
-    public final MathFunctionClassification BOOLEAN_FUNCTION =
-            new MathFunctionClassification(this, BOOLEAN, BOOLEAN, BOOLEAN);
-    public final MathFunctionClassification EQUALITY_FUNCTION =
-            new MathFunctionClassification(this, BOOLEAN, ENTITY, ENTITY);
-    public final MathFunctionClassification POWERSET_FUNCTION =
-            new MathFunctionClassification(this, POWERSET_APPLICATION, SSET, SSET);
-    public final MathFunctionClassification ARROW_FUNCTION =
-            new MathFunctionClassification(this, ARROW_APPLICATION, CLS, CLS, CLS);
-    public final MathFunctionClassification CROSS_PROD_FUNCTION =
-            new MathFunctionClassification(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
+    public final MathFunctionClssftn BOOLEAN_FUNCTION =
+            new MathFunctionClssftn(this, BOOLEAN, BOOLEAN, BOOLEAN);
+    public final MathFunctionClssftn EQUALITY_FUNCTION =
+            new MathFunctionClssftn(this, BOOLEAN, ENTITY, ENTITY);
+    public final MathFunctionClssftn POWERSET_FUNCTION =
+            new MathFunctionClssftn(this, POWERSET_APPLICATION, SSET, SSET);
+    public final MathFunctionClssftn ARROW_FUNCTION =
+            new MathFunctionClssftn(this, ARROW_APPLICATION, CLS, CLS, CLS);
+    public final MathFunctionClssftn CROSS_PROD_FUNCTION =
+            new MathFunctionClssftn(this, CARTESIAN_APPLICATION, CLS, CLS, CLS);
 
     private final static FunctionApplicationFactory CARTESIAN_APPLICATION = new CartesianProductApplicationFactory();
     private final static FunctionApplicationFactory POWERSET_APPLICATION = new PowersetApplicationFactory();
@@ -52,11 +52,11 @@ public class DumbMathClssftnHandler {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
-                                                           @NotNull MathFunctionClassification f,
-                                                           @NotNull String calledAsName,
-                                                           @NotNull List<MathClassification> arguments) {
-            return new MathPowersetApplicationClassification(g, arguments.get(0));
+        public MathClssftn buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
+                                                    @NotNull MathFunctionClssftn f,
+                                                    @NotNull String calledAsName,
+                                                    @NotNull List<MathClssftn> arguments) {
+            return new MathPowersetApplicationClssftn(g, arguments.get(0));
         }
     }
 
@@ -65,11 +65,11 @@ public class DumbMathClssftnHandler {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
-                                                           @NotNull MathFunctionClassification f,
-                                                           @NotNull String calledAsName,
-                                                           @NotNull List<MathClassification> arguments) {
-            return new MathFunctionClassification(g, arguments.get(1), arguments.get(0));
+        public MathClssftn buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
+                                                    @NotNull MathFunctionClssftn f,
+                                                    @NotNull String calledAsName,
+                                                    @NotNull List<MathClssftn> arguments) {
+            return new MathFunctionClssftn(g, arguments.get(1), arguments.get(0));
         }
     }
 
@@ -78,23 +78,23 @@ public class DumbMathClssftnHandler {
             FunctionApplicationFactory {
 
         @Override
-        public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
-                                                           @NotNull MathFunctionClassification f,
-                                                           @NotNull String calledAsName,
-                                                           @NotNull List<MathClassification> arguments) {
-            return new MathCartesianClassification(g,
-                    new MathCartesianClassification.Element(arguments.get(0)),
-                    new MathCartesianClassification.Element(arguments.get(1)));
+        public MathClssftn buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
+                                                    @NotNull MathFunctionClssftn f,
+                                                    @NotNull String calledAsName,
+                                                    @NotNull List<MathClssftn> arguments) {
+            return new MathCartesianClssftn(g,
+                    new MathCartesianClssftn.Element(arguments.get(0)),
+                    new MathCartesianClssftn.Element(arguments.get(1)));
         }
     }
 
-    public final Map<MathClassification, MathClassification> relationships = new HashMap<>();
+    public final Map<MathClssftn, MathClssftn> relationships = new HashMap<>();
 
-    public boolean isSubtype(@NotNull MathClassification subtype, @NotNull MathClassification supertype) {
+    public boolean isSubtype(@NotNull MathClssftn subtype, @NotNull MathClssftn supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS);
         if (!result) {
-            MathClassification subtypesEnclosingType = subtype.enclosingClassification;
-            MathClassification foundRelationship = relationships.get(subtype);
+            MathClssftn subtypesEnclosingType = subtype.enclosingClassification;
+            MathClssftn foundRelationship = relationships.get(subtype);
             //if we're equal, we're a trivial subtype
             if (subtype.equals(supertype)) result = true;
             else if (foundRelationship != null && foundRelationship.equals(supertype)) {
@@ -109,17 +109,17 @@ public class DumbMathClssftnHandler {
             else if (subtype.enclosingClassification == supertype) {
                 result = true;
             }
-            else if (subtype instanceof MathFunctionApplicationClassification &&
-                    supertype instanceof MathFunctionApplicationClassification) {
+            else if (subtype instanceof MathFunctionApplicationClssftn &&
+                    supertype instanceof MathFunctionApplicationClssftn) {
                 result = isSubtype(subtype.getEnclosingClassification(),
                         supertype.getEnclosingClassification());
             }
-            else if (subtype instanceof MathFunctionClassification &&
-                    supertype instanceof MathFunctionClassification) {
-                result = isSubtype(((MathFunctionClassification) subtype).getDomainType(),
-                        ((MathFunctionClassification) supertype).getDomainType())
-                        && isSubtype(((MathFunctionClassification) subtype).getRangeClssftn(),
-                        ((MathFunctionClassification) supertype).getRangeClssftn());
+            else if (subtype instanceof MathFunctionClssftn &&
+                    supertype instanceof MathFunctionClssftn) {
+                result = isSubtype(((MathFunctionClssftn) subtype).getDomainType(),
+                        ((MathFunctionClssftn) supertype).getDomainType())
+                        && isSubtype(((MathFunctionClssftn) subtype).getRangeClssftn(),
+                        ((MathFunctionClssftn) supertype).getRangeClssftn());
             }
         }
         return result;

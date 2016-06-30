@@ -6,21 +6,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /** The parent class of all mathematical classifications. */
-public abstract class MathClassification {
+public abstract class MathClssftn {
 
     protected final DumbMathClssftnHandler g;
     public int typeRefDepth = 0;
-    public MathClassification enclosingClassification;
+    public MathClssftn enclosingClassification;
 
     /**
-     * Really this should only apply to instances of {@link MathNamedClassification}s,
+     * Really this should only apply to instances of {@link MathNamedClssftn}s,
      * as those are what represent the holes that can be filled in an arbitrary
      * {@code MathClassification}.
      */
     public boolean identifiesSchematicType = false;
 
-    public MathClassification(@NotNull DumbMathClssftnHandler g,
-                              @Nullable MathClassification enclosingClassification) {
+    public MathClssftn(@NotNull DumbMathClssftnHandler g,
+                       @Nullable MathClssftn enclosingClassification) {
         this.g = g;
         this.enclosingClassification = enclosingClassification;
     }
@@ -34,7 +34,7 @@ public abstract class MathClassification {
     }
 
     public boolean containsSchematicType() {
-        for (MathClassification component : getComponentTypes()) {
+        for (MathClssftn component : getComponentTypes()) {
             if (component.containsSchematicType()) return true;
         }
         return false;
@@ -42,10 +42,10 @@ public abstract class MathClassification {
 
     @Override
     public boolean equals(Object o) {
-        boolean result = (o instanceof MathClassification);
+        boolean result = (o instanceof MathClssftn);
         if (result) {
             try {
-                result = checkAlphaEquivalence(this, (MathClassification) o);
+                result = checkAlphaEquivalence(this, (MathClssftn) o);
             } catch (TypeMismatchException tme) {
                 result = false;
             }
@@ -53,20 +53,20 @@ public abstract class MathClassification {
         return result;
     }
 
-    public static boolean checkAlphaEquivalence(MathClassification t1, MathClassification t2)
+    public static boolean checkAlphaEquivalence(MathClssftn t1, MathClssftn t2)
             throws TypeMismatchException {
         if (t1 == t2 || isEquivalentDependentType(t1, t2)) return true;
         else {
             if (t1.getClass() != t2.getClass())
                 throw new TypeMismatchException();
 
-            List<MathClassification> t1Components = t1.getComponentTypes();
-            List<MathClassification> t2Components = t2.getComponentTypes();
+            List<MathClssftn> t1Components = t1.getComponentTypes();
+            List<MathClssftn> t2Components = t2.getComponentTypes();
             if (t1Components.size() != t2Components.size())
                 throw new TypeMismatchException();
 
-            Iterator<MathClassification> t1Iter = t1Components.iterator();
-            Iterator<MathClassification> t2Iter = t2Components.iterator();
+            Iterator<MathClssftn> t1Iter = t1Components.iterator();
+            Iterator<MathClssftn> t2Iter = t2Components.iterator();
             boolean result = false;
             while (t1Iter.hasNext()) {
                 result = checkAlphaEquivalence(t1Iter.next(), t2Iter.next());
@@ -89,34 +89,34 @@ public abstract class MathClassification {
         }
     }
 
-    private static boolean isEquivalentDependentType(MathClassification t1, MathClassification t2) {
-        boolean result = t1 instanceof MathNamedClassification &&
-                t2 instanceof MathNamedClassification;
+    private static boolean isEquivalentDependentType(MathClssftn t1, MathClssftn t2) {
+        boolean result = t1 instanceof MathNamedClssftn &&
+                t2 instanceof MathNamedClssftn;
         if (result) {
             result = t1.identifiesSchematicType &&
                     t1.typeRefDepth == 0 &&
                     t2.identifiesSchematicType &&
                     t2.typeRefDepth == 0 &&
-                    ((MathNamedClassification) t1).tag.equals(((MathNamedClassification) t2).tag);
+                    ((MathNamedClssftn) t1).tag.equals(((MathNamedClssftn) t2).tag);
         }
         return result;
     }
 
-    public boolean isSubtypeOf(MathClassification o) {
+    public boolean isSubtypeOf(MathClssftn o) {
         return g.isSubtype(this, o);
     }
 
-    public MathClassification getEnclosingClassification() {
+    public MathClssftn getEnclosingClassification() {
         return enclosingClassification;
     }
 
     //TODO: eventually make this abstract -- I'm just being lazy now.
-    public List<MathClassification> getComponentTypes() {
+    public List<MathClssftn> getComponentTypes() {
         return new ArrayList<>();
     }
 
     //TODO maybe change this map to MathNamedClassification -> MathNamedClassification, to
     //indicate this is just for names; would also be more in line with the name
     //of this method...
-    public abstract MathClassification withVariablesSubstituted(Map<String, MathClassification> substitutions);
+    public abstract MathClssftn withVariablesSubstituted(Map<String, MathClssftn> substitutions);
 }

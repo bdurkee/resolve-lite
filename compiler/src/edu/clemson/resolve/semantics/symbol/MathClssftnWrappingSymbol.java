@@ -1,6 +1,6 @@
 package edu.clemson.resolve.semantics.symbol;
 
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
@@ -13,18 +13,18 @@ import java.util.*;
 
 public class MathClssftnWrappingSymbol extends Symbol {
 
-    private MathClassification classification;
+    private MathClssftn classification;
     private final DumbMathClssftnHandler g;
     private final Quantification q;
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
-                                     @NotNull MathClassification classification) {
+                                     @NotNull MathClssftn classification) {
         this(g, name, Quantification.NONE, classification, null,
                 ModuleIdentifier.GLOBAL);
     }
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
-                                     @NotNull MathClassification classification,
+                                     @NotNull MathClssftn classification,
                                      @Nullable ParserRuleContext definingTree,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
         this(g, name, Quantification.NONE, classification, definingTree,
@@ -33,7 +33,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                      @NotNull Quantification q,
-                                     @NotNull MathClassification classification,
+                                     @NotNull MathClssftn classification,
                                      @Nullable ParserRuleContext definingTree,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
@@ -42,11 +42,11 @@ public class MathClssftnWrappingSymbol extends Symbol {
         this.q = q;
     }
 
-    public void setClassification(MathClassification n) {
+    public void setClassification(MathClssftn n) {
         this.classification = n;
     }
 
-    public MathClassification getClassification() {
+    public MathClssftn getClassification() {
         return classification;
     }
 
@@ -75,15 +75,15 @@ public class MathClssftnWrappingSymbol extends Symbol {
             genericInstantiations.remove(schematicType);
         }*/
 
-        Map<String, MathClassification> genericMathematicalInstantiations =
+        Map<String, MathClssftn> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
         if (genericInstantiations.isEmpty()) return this;
-        MathClassification instEncClssftn =
+        MathClssftn instEncClssftn =
                 classification.enclosingClassification
                         .withVariablesSubstituted(
                                 genericMathematicalInstantiations);
-        MathClassification instClssftn =
+        MathClssftn instClssftn =
                 classification
                         .withVariablesSubstituted(
                                 genericMathematicalInstantiations);

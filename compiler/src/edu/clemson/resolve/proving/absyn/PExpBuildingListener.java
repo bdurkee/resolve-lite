@@ -8,9 +8,8 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -194,7 +193,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
-        MathClassification t = getMathClssfctn(ctx);
+        MathClssftn t = getMathClssfctn(ctx);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
@@ -227,7 +226,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 otherwiseResult = repo.get(alt.result);
             }
         }
-        MathClassification x = getMathClssfctn(ctx);
+        MathClssftn x = getMathClssfctn(ctx);
         PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, getMathClssfctn(ctx));
         repo.put(ctx, result);
     }
@@ -329,7 +328,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @NotNull
     private PExp buildLiteral(@NotNull String literalText,
-                              @NotNull MathClassification type,
+                              @NotNull MathClssftn type,
                               @Nullable ProgType progType) {
         PSymbolBuilder result =
                 new PSymbolBuilder(literalText).mathClssfctn(type)
@@ -339,7 +338,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @NotNull
-    private MathClassification getMathClssfctn(ParseTree t) {
+    private MathClssftn getMathClssfctn(ParseTree t) {
         return annotations.mathClssftns.get(t) == null ? g.INVALID : annotations.mathClssftns.get(t);
     }
 }

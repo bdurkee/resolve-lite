@@ -12,15 +12,6 @@
  */
 package edu.clemson.resolve.proving;
 
-import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
-import edu.clemson.resolve.vcgen.VC;
-
-import java.util.*;
-
 /**
  * Created by mike on 4/3/2014.
  */

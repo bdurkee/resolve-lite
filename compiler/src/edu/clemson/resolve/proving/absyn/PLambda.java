@@ -3,13 +3,12 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathFunctionClassification;
-import edu.clemson.resolve.semantics.MathClassification;
-import edu.clemson.resolve.semantics.MathInvalidClassification;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathInvalidClssftn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /** An anonymous (lambda) function consisting of one or more typed bound variables and a body. */
 public class PLambda extends PExp {
@@ -27,7 +26,7 @@ public class PLambda extends PExp {
                    @Nullable Token vcLocation,
                    @Nullable String vcExplanation) {
         super(body.structureHash * 34, parameterHash(parameters),
-                new MathFunctionClassification(body.getMathClssftn().getTypeGraph(), body.getMathClssftn(),
+                new MathFunctionClssftn(body.getMathClssftn().getTypeGraph(), body.getMathClssftn(),
                         Utils.apply(parameters, p -> p.type)), null,
                 vcLocation,
                 vcExplanation);
@@ -167,9 +166,9 @@ public class PLambda extends PExp {
 
     public static class MathSymbolDeclaration {
         public final String name;
-        public final MathClassification type;
+        public final MathClssftn type;
 
-        public MathSymbolDeclaration(String name, MathClassification type) {
+        public MathSymbolDeclaration(String name, MathClssftn type) {
             //Todo: Again, I think this should probably be checked before now
             if (name == null) {
                 throw new IllegalArgumentException("name==null");
@@ -197,7 +196,7 @@ public class PLambda extends PExp {
 
         @Override
         public String toString() {
-            return name + ":" + (type instanceof MathInvalidClassification ? "Inv" : type);
+            return name + ":" + (type instanceof MathInvalidClssftn ? "Inv" : type);
         }
     }
 

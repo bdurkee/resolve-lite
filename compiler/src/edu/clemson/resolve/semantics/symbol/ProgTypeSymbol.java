@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class ProgTypeSymbol extends Symbol {
 
     @NotNull
-    protected final MathClassification modelType;
+    protected final MathClssftn modelType;
     @NotNull
     protected final ProgType type;
     @NotNull
@@ -25,7 +25,7 @@ public class ProgTypeSymbol extends Symbol {
 
     public ProgTypeSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                           @NotNull ProgType progType,
-                          @Nullable MathClassification modelType,
+                          @Nullable MathClssftn modelType,
                           @Nullable ParserRuleContext definingTree,
                           @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
@@ -43,7 +43,7 @@ public class ProgTypeSymbol extends Symbol {
     }
 
     @NotNull
-    public MathClassification getModelType() {
+    public MathClssftn getModelType() {
         return modelType;
     }
 
@@ -83,14 +83,14 @@ public class ProgTypeSymbol extends Symbol {
             @NotNull Map<String, ProgType> genericInstantiations,
             @Nullable FacilitySymbol instantiatingFacility) {
 
-        Map<String, MathClassification> genericMathematicalInstantiations =
+        Map<String, MathClssftn> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
         if (genericMathematicalInstantiations.isEmpty()) return this;
-        MathClassification instModelEncClssftn =
+        MathClssftn instModelEncClssftn =
                 modelType.enclosingClassification
                         .withVariablesSubstituted(
                                 genericMathematicalInstantiations);
-        MathClassification instModelClssftn = modelType
+        MathClssftn instModelClssftn = modelType
                 .withVariablesSubstituted(
                         genericMathematicalInstantiations);
         instModelClssftn.enclosingClassification = instModelEncClssftn;

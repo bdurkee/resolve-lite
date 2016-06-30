@@ -2,8 +2,8 @@ package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathCartesianClassification;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathCartesianClssftn;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 
 import java.util.*;
@@ -13,18 +13,18 @@ public class ProgRecordType extends ProgType {
     @NotNull
     private final Map<String, ProgType> fields = new HashMap<>();
     @NotNull
-    private MathClassification mathTypeAlterEgo;
+    private MathClssftn mathTypeAlterEgo;
 
     public ProgRecordType(@NotNull DumbMathClssftnHandler g, @NotNull Map<String, ProgType> types) {
         super(g);
         this.fields.putAll(types);
-        List<MathCartesianClassification.Element> eles = new ArrayList<>();
+        List<MathCartesianClssftn.Element> eles = new ArrayList<>();
         int index = 0;
         for (Map.Entry<String, ProgType> field : types.entrySet()) {
-            eles.add(new MathCartesianClassification.Element(field.getKey(),
+            eles.add(new MathCartesianClssftn.Element(field.getKey(),
                     field.getValue().toMath()));
         }
-        this.mathTypeAlterEgo = new MathCartesianClassification(g, eles);
+        this.mathTypeAlterEgo = new MathCartesianClssftn(g, eles);
     }
 
     @NotNull
@@ -44,7 +44,7 @@ public class ProgRecordType extends ProgType {
 
     @NotNull
     @Override
-    public MathClassification toMath() {
+    public MathClssftn toMath() {
         return mathTypeAlterEgo;
     }
 

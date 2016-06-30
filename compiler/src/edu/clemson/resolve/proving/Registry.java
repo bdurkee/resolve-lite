@@ -13,8 +13,8 @@
 package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
-import edu.clemson.resolve.semantics.MathFunctionClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -27,9 +27,9 @@ public class Registry {
     public final String m_ccFormat = "¢c%03d";
     public final String m_cvFormat = "¢v%03d";
     public TreeMap<String, Integer> m_symbolToIndex;
-    public Map<MathClassification, TreeSet<String>> m_typeToSetOfOperators;
+    public Map<MathClssftn, TreeSet<String>> m_typeToSetOfOperators;
     public ArrayList<String> m_indexToSymbol;
-    public ArrayList<MathClassification> m_indexToType;
+    public ArrayList<MathClssftn> m_indexToType;
     public ArrayList<Integer> m_symbolIndexParentArray;
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
@@ -49,20 +49,20 @@ public class Registry {
 
     protected final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
-    protected Map<String, MathClassification> m_typeDictionary;
+    protected Map<String, MathClssftn> m_typeDictionary;
 
     public Registry(DumbMathClssftnHandler g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
-        m_typeToSetOfOperators = new HashMap<MathClassification, TreeSet<String>>();
+        m_typeToSetOfOperators = new HashMap<MathClssftn, TreeSet<String>>();
         m_indexToSymbol = new ArrayList<String>();
-        m_indexToType = new ArrayList<MathClassification>();
+        m_indexToType = new ArrayList<MathClssftn>();
         m_symbolIndexParentArray = new ArrayList<Integer>();
         m_unusedIndices = new Stack<Integer>();
         m_symbolToUsage = new HashMap<String, Usage>(2048, .5f); // entries won't change
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
-        m_typeDictionary = new TreeMap<String, MathClassification>();
-        addSymbol("=B", new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
+        m_typeDictionary = new TreeMap<String, MathClssftn>();
+        addSymbol("=B", new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
@@ -81,7 +81,7 @@ public class Registry {
         m_cached_isSubtype = new HashMap<String, Boolean>();
     }
 
-    public boolean isSubtype(MathClassification a, MathClassification b) {
+    public boolean isSubtype(MathClssftn a, MathClssftn b) {
         String catKey = a.toString() + "," + b.toString();
         if (m_cached_isSubtype.containsKey(catKey)) {
             return m_cached_isSubtype.get(catKey);
@@ -98,14 +98,14 @@ public class Registry {
         return m_symbolToUsage.get(symbol);
     }
 
-    public Set<String> getSetMatchingType(MathClassification t) {
+    public Set<String> getSetMatchingType(MathClssftn t) {
         assert t != null : "request for null type";
         Set<String> rSet = new HashSet<>();
-        Set<MathClassification> allTypesInSet = m_typeToSetOfOperators.keySet();
+        Set<MathClssftn> allTypesInSet = m_typeToSetOfOperators.keySet();
         assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
         assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
         // if there are subtypes of t, return those too
-        for (MathClassification m : allTypesInSet) {
+        for (MathClssftn m : allTypesInSet) {
             assert m != null : "null entry in allTypesInSet";
             if (isSubtype(m, t)) {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
@@ -117,7 +117,7 @@ public class Registry {
         return rSet;
     }
 
-    public Set<String> getParentsByType(MathClassification t) {
+    public Set<String> getParentsByType(MathClssftn t) {
         Set<String> rSet = getSetMatchingType(t);
         Set<String> fSet = new HashSet<>();
         for (String s : rSet) {
@@ -135,8 +135,8 @@ public class Registry {
      * @param opIndexB index to be replaced by opIndexA
      */
     public void substitute(int opIndexA, int opIndexB) {
-        MathClassification aType = getTypeByIndex(opIndexA);
-        MathClassification bType = getTypeByIndex(opIndexB);
+        MathClssftn aType = getTypeByIndex(opIndexA);
+        MathClssftn bType = getTypeByIndex(opIndexB);
 
         // set usage to most restricted: i.e literal over created over forall
         // this is because the earliest now becomes the parent
@@ -193,7 +193,7 @@ public class Registry {
             return "";
     }
 
-    public MathClassification getTypeByIndex(int index) {
+    public MathClssftn getTypeByIndex(int index) {
         return m_indexToType.get(findAndCompress(index));
     }
 
@@ -216,7 +216,7 @@ public class Registry {
         return m_foralls;
     }
 
-    public int makeSymbol(MathClassification symbolType, boolean isVariable) {
+    public int makeSymbol(MathClssftn symbolType, boolean isVariable) {
         String symbolName = "";
         if (isVariable)
             symbolName = String.format(m_cvFormat, m_uniqueCounter++);
@@ -226,7 +226,7 @@ public class Registry {
     }
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
-    public int addSymbol(String symbolName, MathClassification symbolType, Usage usage) {
+    public int addSymbol(String symbolName, MathClssftn symbolType, Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
         if (symbolName.contains("lambda"))
             m_lambda_names.add(symbolName);

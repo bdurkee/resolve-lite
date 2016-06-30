@@ -145,23 +145,23 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "conc", g.BOOLEAN));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "is_in",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∈",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "is_not_in",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∉",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "~",
-                    new MathFunctionClassification(g, g.SSET, g.SSET, g.SSET)));
+                    new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "not", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "⌐", new MathFunctionClassification(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "not", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "⌐", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "true", new MathNamedClassification(g, "true", 0, g.BOOLEAN)));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "false", new MathNamedClassification(g, "false", 0, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "true", new MathNamedClssftn(g, "true", 0, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "false", new MathNamedClssftn(g, "false", 0, g.BOOLEAN)));
 
             //aliases for our 'arrow type'
             globalScope.define(new MathClssftnWrappingSymbol(g, "⟶", g.ARROW_FUNCTION));
@@ -169,11 +169,11 @@ public class MathSymbolTable {
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "*", g.CROSS_PROD_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "=",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "/=",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "≠",
-                    new MathFunctionClassification(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
+                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
             throw new RuntimeException("duplicate builtin symbol");
         }

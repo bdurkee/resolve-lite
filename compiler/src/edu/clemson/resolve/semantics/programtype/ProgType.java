@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 
 import java.util.Map;
@@ -22,7 +22,7 @@ public abstract class ProgType {
     }
 
     @NotNull
-    public abstract MathClassification toMath();
+    public abstract MathClssftn toMath();
 
     /**
      * Returns {@code true} if this program type is a 'typed container' of other program types. Basically makes it

@@ -5,7 +5,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
@@ -34,7 +34,7 @@ public abstract class PExp {
     public final int structureHash, valueHash;
 
     /** Backing field for {@link #getMathClssftn()} */
-    private final MathClassification type;
+    private final MathClssftn type;
 
     /**
      * Since the removal of the Exp hierarchy, the role of {@code PExps} has expanded considerably.
@@ -48,28 +48,28 @@ public abstract class PExp {
     private Set<PSymbol> cachedQuantifiedVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type) {
         this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType,
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type, @Nullable ProgType progType,
                 @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this(hashes.structureHash, hashes.valueHash, type, progType, vcLocation, vcExplanation);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type, @Nullable ProgType progType) {
         this(hashes.structureHash, hashes.valueHash, type, progType);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type) {
         this(structureHash, valueHash, type, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type, @Nullable ProgType progType) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type, @Nullable ProgType progType) {
         this(structureHash, valueHash, type, progType, null, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type,
                 @Nullable ProgType progType, @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this.type = type;
         this.progType = progType;
@@ -90,7 +90,7 @@ public abstract class PExp {
     }
 
     @NotNull
-    public final MathClassification getMathClssftn() {
+    public final MathClssftn getMathClssftn() {
         return type;
     }
 
@@ -146,20 +146,20 @@ public abstract class PExp {
     }
 
     /**
-     * Returns true if the {@link MathClassification} of this expression matches (or is a subtype) of {@code other};
+     * Returns true if the {@link MathClssftn} of this expression matches (or is a subtype) of {@code other};
      * {@code false} otherwise.
      *
      * @param other some {@code MathClassification}.
      *
      * @return whether or not the math types of this or {@code other} matches
      */
-    public boolean typeMatches(MathClassification other) {
+    public boolean typeMatches(MathClssftn other) {
         //return other.isSubtypeOf(getClassification());
         return true;
     }
 
     /**
-     * @see PExp#typeMatches(MathClassification)
+     * @see PExp#typeMatches(MathClssftn)
      */
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getMathClssftn());
