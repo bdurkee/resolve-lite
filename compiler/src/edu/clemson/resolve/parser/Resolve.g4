@@ -275,8 +275,8 @@ progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   name=progSymbolExp progExp                      #progUnaryExp
-    |   progExp name=progSymbolExp progExp              #progInfixExp
+    |   name=progSymbolExp progExp                      #progUnaryExp       //TODO: Change from progSymbolExp to just ID
+    |   progExp name=progSymbolExp progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
     ;
 
 progPrimary
@@ -324,7 +324,7 @@ mathDefnSig
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
                 mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
-                ':' mathClssftnExp
+                (':'|'⦂') mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -333,7 +333,7 @@ mathPrefixDefnSigs
 
 mathInfixDefnSig
     :   '(' mathVarDecl ')' name=mathSymbolName
-        '(' mathVarDecl ')' ':' mathClssftnExp
+        '(' mathVarDecl ')' (':'|'⦂') mathClssftnExp
     ;
 
 /*mathOutfixDefnSig
@@ -372,11 +372,11 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   ID (',' ID)* ':' mathClssftnExp
+    :   ID (',' ID)* (':'|'⦂') mathClssftnExp
     ;
 
 mathVarDecl
-    :   ID ':' mathClssftnExp
+    :   ID (':'|'⦂') mathClssftnExp
     ;
 
 // mathematical clauses
@@ -407,15 +407,16 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
+//TODO: no unary
 mathExp
     :   mathPrimeExp                                        #mathPrimaryExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
     |   name=mathSymbolExp mathExp                          #mathUnaryExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')' #mathPrefixAppExp
-//    |   mathExp lop='[' mathExp (',' mathExp)* rop=']'      #mathBracketAppExp
+//    |   mathExp lop='[' mathExp (',' mathExp)* rop=']'    #mathBracketAppExp
     |   mathExp mathSymbolExp mathExp                       #mathInfixAppExp
-    |   mathExp ':' mathExp                                 #mathClssftnAssertionExp
+    |   mathExp (':'|'⦂') mathExp                           #mathClssftnAssertionExp
     ;
 
 mathPrimeExp
@@ -433,7 +434,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '.')? name=mathSymbolName
+    :   incoming='@'? (qualifier=ID '.')? name=mathSymbolName
     ;
 
 mathOutfixAppExp
