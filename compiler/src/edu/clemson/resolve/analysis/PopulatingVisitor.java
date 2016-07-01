@@ -532,8 +532,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             reprType.setReprTypeSymbol(rep);
             symtab.getInnermostActiveScope().define(rep);
         } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.name, ctx.name.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         }
         curTypeReprModelSymbol = null;
         return null;
@@ -752,7 +751,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.progSymbolExp().name.getStart(), argTypes);
+                StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
@@ -760,7 +759,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());
         StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.progSymbolExp().getStart(), tr.progTypes.get(ctx.progExp()));
+                StdTemplateProgOps.convert(ctx.getStart(), tr.progTypes.get(ctx.progExp()));
         typeOperationRefExp(ctx, attr.qualifier, attr.name, Collections.singletonList(ctx.progExp()));
         return null;
     }
@@ -955,18 +954,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathDefnSig(
-            ResolveParser.MathDefnSigContext ctx) {
+    public Void visitMathDefnSig(ResolveParser.MathDefnSigContext ctx) {
         this.visitChildren(ctx);
         return null;
     }
 
     @Override
-    public Void visitMathInfixDefnSig(
-            ResolveParser.MathInfixDefnSigContext ctx) {
+    public Void visitMathInfixDefnSig(ResolveParser.MathInfixDefnSigContext ctx) {
         try {
-            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathClssftnExp(),
-                    ctx.name.getStart());
+            insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathClssftnExp(), ctx.name.getStart());
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), e.getOffendingSymbol().getName());
@@ -975,13 +971,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathPrefixDefnSig(
-            ResolveParser.MathPrefixDefnSigContext ctx) {
+    public Void visitMathPrefixDefnSig(ResolveParser.MathPrefixDefnSigContext ctx) {
         try {
             insertMathDefnSignature(ctx, ctx.mathVarDeclGroup(),
                     ctx.mathClssftnExp(),
-                    Utils.apply(ctx.mathSymbolName(),
-                            ParserRuleContext::getStart));
+                    Utils.apply(ctx.mathSymbolName(), ParserRuleContext::getStart));
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                     ctx.getStart(), e.getOffendingSymbol().getName());
@@ -1023,8 +1017,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
         //next, visit the definition's 'return type' to give it a type
         this.visit(type);
-        MathClssftn colonRhsType =
-                exactNamedMathClssftns.get(type);
+        MathClssftn colonRhsType = exactNamedMathClssftns.get(type);
 
         MathClssftn defnType = null;
         if (colonRhsType.typeRefDepth > 0) {
@@ -1038,8 +1031,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         ResolveParser.MathVarDeclGroupContext grp =
                                 (ResolveParser.MathVarDeclGroupContext) formal;
                         for (TerminalNode t : grp.ID()) {
-                            MathClssftn ty =
-                                    exactNamedMathClssftns.get(grp.mathClssftnExp());
+                            MathClssftn ty = exactNamedMathClssftns.get(grp.mathClssftnExp());
                             paramTypes.add(ty);
                             paramNames.add(t.getText());
                         }
@@ -1052,43 +1044,35 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         paramNames.add(singularDecl.ID().getText());
                     }
                 }
-                defnType = new MathFunctionClssftn(
-                        g, colonRhsType, paramNames, paramTypes);
+                defnType = new MathFunctionClssftn(g, colonRhsType, paramNames, paramTypes);
 
                 for (Token t : names) {
-                    MathClssftn asNamed = new MathNamedClssftn(g, t.getText(),
-                            newTypeDepth, defnType);
-                    defnEnclosingScope
-                            .define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
+                    MathClssftn asNamed = new MathNamedClssftn(g, t.getText(), newTypeDepth, defnType);
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
                 }
             }
             else {
                 for (Token t : names) {
-                    defnType = new MathNamedClssftn(g, t.getText(),
-                            newTypeDepth, colonRhsType);
-                    defnEnclosingScope
-                            .define(new MathClssftnWrappingSymbol(g, t.getText(), defnType));
+                    defnType = new MathNamedClssftn(g, t.getText(), newTypeDepth, colonRhsType);
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType));
                 }
             }
         }
         else {
             for (Token t : names) {
-                defnEnclosingScope
-                        .define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
+                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
             }
         }
     }
 
     @Override
-    public Void visitMathVarDeclGroup(
-            ResolveParser.MathVarDeclGroupContext ctx) {
+    public Void visitMathVarDeclGroup(ResolveParser.MathVarDeclGroupContext ctx) {
         insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
         return null;
     }
 
     @Override
-    public Void visitMathVarDecl(
-            ResolveParser.MathVarDeclContext ctx) {
+    public Void visitMathVarDecl(ResolveParser.MathVarDeclContext ctx) {
         insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
         return null;
     }
@@ -1123,25 +1107,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitRequiresClause(
-            ResolveParser.RequiresClauseContext ctx) {
+    public Void visitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
         return null;
     }
 
     @Override
-    public Void visitMathClssftnExp(
-            ResolveParser.MathClssftnExpContext ctx) {
+    public Void visitMathClssftnExp(ResolveParser.MathClssftnExpContext ctx) {
         walkingType = true;
         this.visit(ctx.mathExp());
         walkingType = false;
 
         MathClssftn type = exactNamedMathClssftns.get(ctx.mathExp());
         if (type == g.INVALID || type == null || type.getTypeRefDepth() == 0) {
-
-            compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE,
-                    ctx.getStart(), ctx.mathExp().getText());
+            compiler.errMgr.semanticError(ErrorKind.INVALID_MATH_TYPE, ctx.getStart(), ctx.mathExp().getText());
             type = g.INVALID;
         }
         exactNamedMathClssftns.put(ctx, type);
@@ -1152,13 +1132,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     private MathClssftn entailsRetype = null;
 
     @Override
-    public Void visitMathClssftnAssertionExp(
-            ResolveParser.MathClssftnAssertionExpContext ctx) {
+    public Void visitMathClssftnAssertionExp(ResolveParser.MathClssftnAssertionExpContext ctx) {
         this.visit(ctx.mathExp(1)); //visit the asserted clssfctn
-        MathClssftn rhsColonType =
-                exactNamedMathClssftns.get(ctx.mathExp(1));
-        boolean walkingEntails = Utils.getFirstAncestorOfType(
-                ctx, ResolveParser.EntailsClauseContext.class) != null;
+        MathClssftn rhsColonType = exactNamedMathClssftns.get(ctx.mathExp(1));
+        boolean walkingEntails = Utils.getFirstAncestorOfType(ctx, ResolveParser.EntailsClauseContext.class) != null;
         if (walkingEntails) {
             entailsRetype = rhsColonType;
             this.visit(ctx.mathExp(0));
@@ -1201,8 +1178,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathQuantifiedExp(
-            ResolveParser.MathQuantifiedExpContext ctx) {
+    public Void visitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         symtab.startScope(ctx);
         Quantification quantification;
 
@@ -1232,46 +1208,38 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathAssertionExp(
-            ResolveParser.MathAssertionExpContext ctx) {
+    public Void visitMathAssertionExp(ResolveParser.MathAssertionExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.getChild(0));
         return null;
     }
 
     @Override
-    public Void visitMathPrimaryExp(
-            ResolveParser.MathPrimaryExpContext ctx) {
+    public Void visitMathPrimaryExp(ResolveParser.MathPrimaryExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathPrimeExp());
         return null;
     }
 
     @Override
-    public Void visitMathPrimeExp(
-            ResolveParser.MathPrimeExpContext ctx) {
+    public Void visitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.getChild(0));
         return null;
     }
 
     @Override
-    public Void visitMathNestedExp(
-            ResolveParser.MathNestedExpContext ctx) {
+    public Void visitMathNestedExp(ResolveParser.MathNestedExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathAssertionExp());
         return null;
     }
 
     @Override
-    public Void visitMathInfixAppExp(
-            ResolveParser.MathInfixAppExpContext ctx) {
-        typeMathFunctionAppExp(ctx, (ParserRuleContext) ctx.getChild(1),
-                ctx.mathExp());
+    public Void visitMathInfixAppExp(ResolveParser.MathInfixAppExpContext ctx) {
+        typeMathFunctionAppExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
         return null;
     }
 
     @Override
-    public Void visitMathPrefixAppExp(
-            ResolveParser.MathPrefixAppExpContext ctx) {
-        typeMathFunctionAppExp(ctx, ctx.name,
-                ctx.mathExp().subList(1, ctx.mathExp().size()));
+    public Void visitMathPrefixAppExp(ResolveParser.MathPrefixAppExpContext ctx) {
+        typeMathFunctionAppExp(ctx, ctx.name, ctx.mathExp().subList(1, ctx.mathExp().size()));
         return null;
     }
 
@@ -1309,12 +1277,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
         }
-        MathFunctionClssftn expectedFuncType =
-                (MathFunctionClssftn) t;
-        List<MathClssftn> actualArgumentTypes =
-                Utils.apply(args, tr.mathClssftns::get);
-        List<MathClssftn> formalParameterTypes =
-                expectedFuncType.getParamTypes();
+        MathFunctionClssftn expectedFuncType = (MathFunctionClssftn) t;
+        List<MathClssftn> actualArgumentTypes = Utils.apply(args, tr.mathClssftns::get);
+        List<MathClssftn> formalParameterTypes = expectedFuncType.getParamTypes();
         //ugly hook to handle chained operator applications like 0 <= i <= j or
         //j >= i >= 0
         if ((nameExp.getText().equals("<=") || nameExp.getText().equals("<") || nameExp.getText().equals("≤")) &&
@@ -1331,8 +1296,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         } //end ugly hook.
         //TODO: Factor this out to a helper, get it out of my face.
         if (formalParameterTypes.size() != actualArgumentTypes.size()) {
-            compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT,
-                    ctx.getStart(), ctx.getText());
+            compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT, ctx.getStart(), ctx.getText());
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
@@ -1354,8 +1318,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //args
         formalParameterTypes = expectedFuncType.getParamTypes();
 
-        List<MathClssftn> actualValues =
-                Utils.apply(args, exactNamedMathClssftns::get);
+        List<MathClssftn> actualValues = Utils.apply(args, exactNamedMathClssftns::get);
 
         Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
         Iterator<MathClssftn> actualsIter = actualArgumentTypes.iterator();
@@ -1424,8 +1387,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         if (prevSelectorAccess != null) {
-            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
-                    ctx.name.getText());
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
         }
         else {
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
@@ -1447,15 +1409,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         for (ResolveParser.MathVarDeclGroupContext grp : ctx
                 .mathVarDeclGroup()) {
             this.visit(grp.mathClssftnExp());
-            MathClssftn grpType =
-                    exactNamedMathClssftns
-                            .get(grp.mathClssftnExp());
+            MathClssftn grpType = exactNamedMathClssftns.get(grp.mathClssftnExp());
             for (TerminalNode label : grp.ID()) {
                 fields.add(new Element(label.getText(), grpType));
             }
         }
-        MathCartesianClssftn cartClssftn =
-                new MathCartesianClssftn(g, fields);
+        MathCartesianClssftn cartClssftn = new MathCartesianClssftn(g, fields);
         /*for (MathSymbol fieldSym : fieldSyms) {
             cartClssftn.syms.put(fieldSym.getName(), fieldSym);
         }*/
@@ -1484,18 +1443,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.EMPTY_SET);
         }
         else {
-            MathClssftn t =
-                    g.POWERSET_FUNCTION.getApplicationType("Powerset",
-                            exactNamedMathClssftns
-                                    .get(ctx.mathExp(0)));
+            MathClssftn t = g.POWERSET_FUNCTION.getApplicationType(
+                    "Powerset", exactNamedMathClssftns.get(ctx.mathExp(0)));
             tr.mathClssftns.put(ctx, t);
         }
         return null;
     }
 
     @Override
-    public Void visitMathLambdaExp(
-            ResolveParser.MathLambdaExpContext ctx) {
+    public Void visitMathLambdaExp(ResolveParser.MathLambdaExpContext ctx) {
         symtab.startScope(ctx);
         compiler.log("lambda exp: " + ctx.getText());
 
@@ -1509,21 +1465,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.endScope();
 
         MathClssftn bodyClss = tr.mathClssftns.get(ctx.mathExp());
-        MathClssftn varClss = exactNamedMathClssftns.get(
-                ctx.mathVarDecl().mathClssftnExp());
-        tr.mathClssftns.put(ctx, new MathFunctionClssftn(
-                g, bodyClss, varClss));
+        MathClssftn varClss = exactNamedMathClssftns.get(ctx.mathVarDecl().mathClssftnExp());
+        tr.mathClssftns.put(ctx, new MathFunctionClssftn(g, bodyClss, varClss));
         return null;
     }
 
     @Override
-    public Void visitMathAlternativeExp(
-            ResolveParser.MathAlternativeExpContext ctx) {
+    public Void visitMathAlternativeExp(ResolveParser.MathAlternativeExpContext ctx) {
 
         MathClssftn establishedType = null;
         MathClssftn establishedTypeValue = null;
-        for (ResolveParser.MathAlternativeItemExpContext alt : ctx
-                .mathAlternativeItemExp()) {
+        for (ResolveParser.MathAlternativeItemExpContext alt : ctx.mathAlternativeItemExp()) {
             this.visit(alt.result);
             if (alt.condition != null) this.visit(alt.condition);
             if (establishedType == null) {
@@ -1540,8 +1492,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathAlternativeItemExp(
-            ResolveParser.MathAlternativeItemExpContext ctx) {
+    public Void visitMathAlternativeItemExp(ResolveParser.MathAlternativeItemExpContext ctx) {
         if (ctx.condition != null) {
             expectType(ctx.condition, g.BOOLEAN);
         }

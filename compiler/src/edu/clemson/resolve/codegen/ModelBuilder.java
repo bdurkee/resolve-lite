@@ -319,12 +319,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name.getStart(), ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.name.getStart(), ctx.progExp()));
     }
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.progSymbolExp().name.getStart(), ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.name.getStart(), ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,

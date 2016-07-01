@@ -76,14 +76,14 @@ usesList
     ;
 
 usesSpecs
-    :   usesSpec (',' usesSpec)*
+    :   moduleIdentifierSpec (',' moduleIdentifierSpec)*
     ;
 
 //TODO: To make this match up better with the plugin, do the following renames:
-usesSpec : id=ID fromClauseSpec? alias? ;   //TODO: Rename this moduleIdentifierSpec
-fromClauseSpec : 'from' qualifiedFromPath ; //TODO: Rename 'fromClause'
-alias : 'as' ID ;                           //TODO: Rename 'aliasClause'
-qualifiedFromPath : ID ('.' ID)* ;          //TODO: Rename ModuleLibraryIdentifier
+moduleIdentifierSpec : id=ID fromClause? aliasClause? ;   //TODO: Rename this moduleIdentifierSpec
+fromClause : 'from' moduleLibraryIdentifier ; //TODO: Rename 'fromClause'
+aliasClause : 'as' ID ;                           //TODO: Rename 'aliasClause'
+moduleLibraryIdentifier : ID ('.' ID)* ;          //TODO: Rename ModuleLibraryIdentifier
 
 // module blocks & items
 
@@ -210,8 +210,8 @@ varDeclGroup
 // facility decls
 
 facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
-        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClause?
         (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
     ;
 
@@ -279,8 +279,7 @@ progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   name=progSymbolName progExp                      #progUnaryExp       //TODO: Change from progSymbolExp to just ID, er, programSymbolName
-    |   progExp name=progSymbolName progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
+    |   progExp name=progSymbolExp progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
     ;
 
 progPrimary
@@ -340,11 +339,10 @@ mathInfixDefnSig
         '(' mathVarDecl ')' (':'|'⦂') mathClssftnExp
     ;
 
-/*mathOutfixDefnSig
-    :   leftSym=mathSymbolName mathVarDecl
-        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathClssftnExp
+mathOutfixDefnSig
+    :   leftSym=mathSymbolNameNoID mathVarDecl
+        rightSym=mathSymbolNameNoID (':'|'⦂') mathClssftnExp
     ;
-*/
 
 mathPostfixDefnSig
     :   '('mathVarDecl')' lop=mathSymbolName mathVarDecl rop=mathSymbolName ':' mathClssftnExp

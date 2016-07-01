@@ -299,7 +299,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(
-                ctx.progSymbolExp().name.getStart(), argTypes);
+                ctx.name.getStart(), argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())
                 .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
