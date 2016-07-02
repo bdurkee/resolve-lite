@@ -320,8 +320,8 @@ mathClssftnTheoremDecl
 mathDefnSig
     :   mathPrefixDefnSigs
     |   mathInfixDefnSig
-//    |   mathOutfixDefnSig
-    |   mathPostfixDefnSig
+    |   mathOutfixDefnSig
+ //   |   mathPostfixDefnSig
     ;
 
 mathPrefixDefnSig
@@ -340,13 +340,13 @@ mathInfixDefnSig
     ;
 
 mathOutfixDefnSig
-    :   leftSym=mathSymbolNameNoID mathVarDecl
-        rightSym=mathSymbolNameNoID (':'|'⦂') mathClssftnExp
+    :   '`' leftSym=mathSymbolNameNoID mathVarDecl
+        rightSym=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
     ;
 
-mathPostfixDefnSig
-    :   '('mathVarDecl')' lop=mathSymbolName mathVarDecl rop=mathSymbolName ':' mathClssftnExp
-    ;
+//mathPostfixDefnSig
+//    :   '('mathVarDecl')' '`' lop=mathSymbolNameNoID mathVarDecl rop=mathSymbolNameNoID '`' ':' mathClssftnExp
+//    ;
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
@@ -409,12 +409,10 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
-//TODO: no unary
 mathExp
     :   mathPrimeExp                                        #mathPrimaryExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
     |   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
-    |   name=mathSymbolExp mathExp                          #mathUnaryExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')' #mathPrefixAppExp
 //    |   mathExp lop='[' mathExp (',' mathExp)* rop=']'    #mathBracketAppExp
     |   mathExp mathSymbolExp mathExp                       #mathInfixAppExp

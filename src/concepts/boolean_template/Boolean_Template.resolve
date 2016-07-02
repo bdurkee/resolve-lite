@@ -20,12 +20,12 @@ Concept Boolean_Template;
     Operation Or 
     		(evaluates a, b : Boolean)
                 : Boolean;
-        ensures Or = (a ∨ b);
+        ensures Or = (a or b);
 
     Operation Not
     		(evaluates a : Boolean)
                 : Boolean;
-        ensures Not = ⌐ a;
+        ensures Not = ⌐(a);
 
     Operation Are_Equal
             (evaluates a, b : Boolean)
@@ -40,10 +40,4 @@ Concept Boolean_Template;
     Operation Write_Line
             (evaluates a : Boolean);
 
-	/* then std_ints has
-	Operation One '1'() : Integer;
-	Operation Two '2'	: Integer;
-	Operation Three '3' : Integer;
-	...
-	*/
 end Boolean_Template;

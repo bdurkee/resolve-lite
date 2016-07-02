@@ -677,7 +677,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
             tr.progTypes.put(ctx, programType);
-            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
@@ -753,14 +753,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         StdTemplateProgOps.BuiltInOpAttributes attr =
                 StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
-        return null;
-    }
-
-    @Override public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
-        this.visit(ctx.progExp());
-        StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.getStart(), tr.progTypes.get(ctx.progExp()));
-        typeOperationRefExp(ctx, attr.qualifier, attr.name, Collections.singletonList(ctx.progExp()));
         return null;
     }
 
@@ -853,11 +845,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            List<String> argStrList = args.stream()
-                    .map(ResolveParser.ProgExpContext::getText)
-                    .collect(Collectors.toList());
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION,
-                    name, name.getText(), argStrList, argTypes);
+            List<String> argStrList = Utils.apply(args, ResolveParser.ProgExpContext::getText);
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name, name.getText(), argStrList, argTypes);
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "an operation", name.getText(),
@@ -942,8 +931,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathStandardDefnDecl(
-            ResolveParser.MathStandardDefnDeclContext ctx) {
+    public Void visitMathStandardDefnDecl(ResolveParser.MathStandardDefnDeclContext ctx) {
         defnEnclosingScope = symtab.getInnermostActiveScope();
         symtab.startScope(ctx);
         this.visit(ctx.mathDefnSig());
@@ -1390,7 +1378,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             typeMathSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
         }
         else {
-            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getText());
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
         }
         return null;
     }
@@ -1558,7 +1546,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     private void typeMathSymbol(@NotNull ParserRuleContext ctx,
                                 @Nullable Token qualifier,
-                                @NotNull String name) {
+                                @NotNull Token name) {
         String here = ctx.getText();
 
         MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
@@ -1568,7 +1556,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         if (entailsRetype != null) {
-            s.setClassification(new MathNamedClssftn(g, name, entailsRetype.typeRefDepth - 1, entailsRetype));
+            s.setClassification(new MathNamedClssftn(g, name.getText(), entailsRetype.typeRefDepth - 1, entailsRetype));
         }
         exactNamedMathClssftns.put(ctx, s.getClassification());
         if (s.getClassification().identifiesSchematicType) {
@@ -1581,13 +1569,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Nullable
     private MathClssftnWrappingSymbol getIntendedMathSymbol(@Nullable Token qualifier,
-                                                            @NotNull String symbolName,
+                                                            @NotNull Token symbolName,
                                                             @NotNull ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(qualifier, symbolName, ctx.getStart()));
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName.getText(), ctx.getStart()));
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), symbolName);
+            compiler.errMgr.semanticError(e.getErrorKind(), symbolName, symbolName.getText());
         } catch (NoSuchModuleException nsme) {
             compiler.errMgr.semanticError(nsme.getErrorKind(),
                     nsme.getRequestedModule(),
