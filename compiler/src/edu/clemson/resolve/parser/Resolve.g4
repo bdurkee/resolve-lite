@@ -406,7 +406,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
@@ -442,7 +442,7 @@ mathOutfixAppExp
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl 's.t.' mathAssertionExp '}'
+    :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp
@@ -461,8 +461,8 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-FORALL : ('Forall'|'forall');
-EXISTS : ('Exists'|'exists');
+FORALL : ('Forall'|'∀');
+EXISTS : ('Exists'|'∃');
 BOOL: ('true'|'false');
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
