@@ -13,7 +13,7 @@ Precis Basic_Integer_Theory;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
     Theorem I1 :
-        ∀ n : Z, Is_Neg(n) implies NB(n) = ⨩(n);
+        ∀ n : Z, Is_Neg(n) implies (NB(n) = ⨩(n));
 
     Theorem I2 : ∀ n : Z, ⨩(⨩(n)) = n;
 
@@ -28,7 +28,7 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) - (n : Z) : Z;
 
-    Definition NN : Powerset(Z) is {n : Z | ⌐(Is_Neg(n))};
+    Definition NN : Powerset(Z) is {n : Z s.t. ⌐(Is_Neg(n))};
         //won't typecheck at the moment
         //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
         //Corollary nn2: ∀ n : NN, suc(n) : NN;
@@ -44,10 +44,10 @@ Precis Basic_Integer_Theory;
         Corollary leq2: Is_Antisymmetric(≤);
         Corollary leq3: Is_Total(≤);
 
-    Definition ≥(m, n : Z) : B;
+    Definition (m : Z) ≥ (n : Z) : B;
 
     Definition 1 : Z is suc(0);
-        Corollary one1: ∀ m : Z, suc(m) = m + 1;
+        Corollary one1: ∀ m : Z, suc(m) = (m + 1);
 
     Definition 2 : Z is suc(1);
     Definition 3 : Z is suc(2);

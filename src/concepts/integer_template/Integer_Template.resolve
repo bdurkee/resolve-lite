@@ -1,6 +1,7 @@
 Concept Integer_Template;
-        uses precis.Basic_Integer_Theory;
 
+
+/*
     Definition max_int : Z;
     Definition min_int : Z;
     constraints
@@ -46,5 +47,5 @@ Concept Integer_Template;
     Operation Write (evaluates i : Integer);
 
     Operation Write_Line (evaluates i : Integer);
-
+*/
 end Integer_Template;

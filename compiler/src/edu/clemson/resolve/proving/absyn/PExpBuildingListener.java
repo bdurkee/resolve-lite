@@ -3,6 +3,7 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.misc.StdTemplateProgOps;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
@@ -113,10 +114,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     public Quantification getQuantificationMode(@NotNull Token q) {
         Quantification result = Quantification.NONE;
         switch (q.getType()) {
-            case ResolveParser.FORALL:
+            case ResolveLexer.FORALL:
                 result = Quantification.UNIVERSAL;
                 break;
-            case ResolveParser.EXISTS:
+            case ResolveLexer.EXISTS:
                 result = Quantification.EXISTENTIAL;
                 break;
         }

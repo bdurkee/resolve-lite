@@ -10,7 +10,7 @@ Precis Basic_Binary_Relation_Properties;
         ∀ x, y : D, p(x, y) implies p(y, x);
 
     Definition Is_Antisymmetric(p : (D : SSet) * D ⟶ B) : B is
-        ∀ x, y : D, p(x, y) ∧ p(y, x) implies x = y;
+        ∀ x, y : D, p(x, y) ∧ p(y, x) implies (x = y);
 
     Definition Is_Asymmetric(p : (D : SSet) * D ⟶ B) : B is
         ∀ x, y : D, p(x, y) implies ⌐(p(y, x));
@@ -22,6 +22,6 @@ Precis Basic_Binary_Relation_Properties;
         Is_Transitive(p) implies Is_Irreflexive(p);
 
     Definition Is_Total(p : (D : SSet) * D -> B) : B is
-        ∀ x, y : D, p(x, y) ∨ p(y, x) ∨ x = y;
+        ∀ x, y : D, p(x, y) ∨ p(y, x) ∨ (x = y);
 
 end Basic_Binary_Relation_Properties;

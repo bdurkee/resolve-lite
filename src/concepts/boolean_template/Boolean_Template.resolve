@@ -20,7 +20,7 @@ Concept Boolean_Template;
     Operation Or 
     		(evaluates a, b : Boolean)
                 : Boolean;
-        ensures Or = (a or b);
+        ensures Or = (a ∨ b);
 
     Operation Not
     		(evaluates a : Boolean)

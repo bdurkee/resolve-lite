@@ -442,7 +442,7 @@ mathOutfixAppExp
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl '|' mathAssertionExp '}'
+    :   '{' mathVarDecl 's.t.' mathAssertionExp '}'
     ;
 
 mathSetExp

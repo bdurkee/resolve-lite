@@ -1,7 +1,7 @@
 Precis Basic_Natural_Number_Theory;
     uses Monogenerator_Theory;
 
-    Categorical Definition for N : SSet, 0 : N, suc : N -> N is
+    Categorical Definition for N : SSet, 0 : N, suc : N ⟶ N is
         Is_Monogeneric_for(N, 0, suc);
 
     Inductive Definition (m : N) + (n : N) : N is
@@ -13,7 +13,7 @@ Precis Basic_Natural_Number_Theory;
     Definition (m : N) > (n : N) : B;
     Definition (m : N) < (n : N) : B;
 
-    Definition 1 : N;   //is suc(0);
-    Definition 2 : N;   //is suc(1);
+    Definition 1 : N is suc(0);
+    Definition 2 : N is suc(1);
 
 end Basic_Natural_Number_Theory;

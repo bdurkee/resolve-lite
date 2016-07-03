@@ -1,7 +1,7 @@
 Facility Standard_Integers;
-    uses concepts.int.Integer_Template;
+   /* uses concepts.int.Integer_Template;
 
     Facility Std_Ints is Integer_Template
         externally
-            implemented by Standard_Integer_Impl;
+            implemented by Standard_Integer_Impl;*/
 end Standard_Integers;

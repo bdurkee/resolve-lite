@@ -1544,9 +1544,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, type);
     }
 
-    private void typeMathSymbol(@NotNull ParserRuleContext ctx,
-                                @Nullable Token qualifier,
-                                @NotNull Token name) {
+    private void typeMathSymbol(@NotNull ParserRuleContext ctx, @Nullable Token qualifier, @NotNull Token name) {
         String here = ctx.getText();
 
         MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
@@ -1616,8 +1614,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * @param ctx   a parent {@code ParseTree}
      * @param child one of {@code ctx}s children
      */
-    private void visitAndClassifyMathExpCtx(@NotNull ParseTree ctx,
-                                            @NotNull ParseTree child) {
+    private void visitAndClassifyMathExpCtx(@NotNull ParseTree ctx, @NotNull ParseTree child) {
         this.visit(child);
         exactNamedMathClssftns.put(ctx, exactNamedMathClssftns.get(child));
         MathClssftn x = tr.mathClssftns.get(child);
