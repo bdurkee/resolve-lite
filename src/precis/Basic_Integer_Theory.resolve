@@ -37,8 +37,6 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) < (n : Z) : B;
 
-    Definition (m : Z) <= (n : Z) : B;
-
     Definition (m : Z) ≤ (n : Z) : B is (n + ⨩(m) ∈ NN);
         Corollary leq1: Is_Transitive(≤);
         Corollary leq2: Is_Antisymmetric(≤);

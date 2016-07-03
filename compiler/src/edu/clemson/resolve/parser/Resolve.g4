@@ -79,11 +79,10 @@ usesSpecs
     :   moduleIdentifierSpec (',' moduleIdentifierSpec)*
     ;
 
-//TODO: To make this match up better with the plugin, do the following renames:
-moduleIdentifierSpec : id=ID fromClause? aliasClause? ;   //TODO: Rename this moduleIdentifierSpec
-fromClause : 'from' moduleLibraryIdentifier ; //TODO: Rename 'fromClause'
-aliasClause : 'as' ID ;                           //TODO: Rename 'aliasClause'
-moduleLibraryIdentifier : ID ('.' ID)* ;          //TODO: Rename ModuleLibraryIdentifier
+moduleIdentifierSpec : id=ID fromClause? aliasClause? ;
+fromClause : 'from' moduleLibraryIdentifier ;
+aliasClause : 'as' ID ;
+moduleLibraryIdentifier : ID ('.' ID)* ;
 
 // module blocks & items
 
