@@ -5,19 +5,22 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import edu.clemson.resolve.semantics.programtype.ProgNamedType;
 import edu.clemson.resolve.semantics.programtype.ProgType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class StdTemplateProgOps {
 
-    public static BuiltInOpAttributes convert(Token op, ProgType... args) {
-        return convert(op, Arrays.asList(args));
+    public static BuiltInOpAttributes convert(@NotNull Token op, @NotNull ProgType... args) {
+        return convert(op, args.length == 0 ? new ArrayList<ProgType>() : Arrays.asList(args));
     }
 
-    public static BuiltInOpAttributes convert(Token op, List<ProgType> args) {
+    public static BuiltInOpAttributes convert(@NotNull Token op, @NotNull List<ProgType> args) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-
+        int argCount = args.size();
         if (args.isEmpty()) {
             return convertBooleanProgramOp(op); //only (pseudo hardcoded) thing we could possibly match currently that has no arguments is true or false
         }
@@ -28,7 +31,7 @@ public class StdTemplateProgOps {
             result = convertBooleanProgramOp(op);
         }
         else if (firstArgType.getName().equals("Integer")) {
-            result = convertIntegerProgramOp(op);
+            result = convertIntegerProgramOp(op, argCount);
         }
         else if (firstArgType.getName().equals("Char_Str")) {
             result = convertCharStrProgramOp(op);
@@ -46,13 +49,17 @@ public class StdTemplateProgOps {
         return result;
     }
 
-    public static BuiltInOpAttributes convertIntegerProgramOp(Token op) {
+    public static BuiltInOpAttributes convertIntegerProgramOp(Token op, int argCount) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
         switch (op.getText()) {
             case "+":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Sum");
                 break;
             case "-":
+                if (argCount == 1) {
+                    result = new BuiltInOpAttributes("Std_Ints", op, "Negate");
+                    break;
+                }
                 result = new BuiltInOpAttributes("Std_Ints", op, "Difference");
                 break;
             case "*":

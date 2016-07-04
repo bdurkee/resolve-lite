@@ -26,7 +26,6 @@ import edu.clemson.resolve.semantics.symbol.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefLeft;
 import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefRight;
@@ -472,7 +471,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.ExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
+        SpecModule spec = new SpecModule.SpecExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
 
         if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
@@ -521,6 +520,25 @@ public class ModelBuilder extends ResolveBaseListener {
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
+    }
+
+    @Override
+    public void exitPrecisModuleDecl(ResolveParser.PrecisModuleDeclContext ctx) {
+        built.put(ctx, buildDummyPrecisFile(ctx.name.getText()));
+    }
+
+    @Override
+    public void exitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
+        built.put(ctx, buildDummyPrecisFile(ctx.name.getText()));
+    }
+
+    @NotNull
+    private ModuleFile buildDummyPrecisFile(String name) {
+        ModuleFile file = buildFile();
+        file.genPackage = buildPackage();
+        Module.PrecisModule precis = new Module.PrecisModule(name, file);
+        file.module = precis;
+        return file;
     }
 
     protected boolean withinFacilityModule() {
@@ -582,11 +600,10 @@ public class ModelBuilder extends ResolveBaseListener {
                     String name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
                             + "." + s.getName();
 
-                    String qual = Utils.stripFileExtension(id.getPathRelativeToRootDir().toString()) ;
+                    String qual = Utils.stripFileExtension(id.getPathRelativeToRootDir().toString());
                     return new FacilityQualifier(qual.replaceAll(File.separator, "."), name.replaceAll(File.separator, "."));
                 }
-            }
-            catch (NoSuchSymbolException e) {
+            } catch (NoSuchSymbolException e) {
                 //not dealing with a facility... the qualifier must be a module then..
                 Symbol s = null;
                 try {

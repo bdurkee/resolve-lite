@@ -47,6 +47,12 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 /** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>. This file should not be modified. */
 >>
 
+PrecisModule(precis) ::= <<
+public class <precis.name> {
+    //non-executable precis (or precis-ext)
+}
+>>
+
 ConceptModule(concept, types, funcs) ::= <<
 public interface <concept.name> {
     <types; separator="\n">
@@ -54,7 +60,7 @@ public interface <concept.name> {
 }
 >>
 
-ExtensionModule(ext, types, funcs) ::= <<
+SpecExtensionModule(ext, types, funcs) ::= <<
 public interface <ext.name> extends <ext.concept> {
     <types; separator="\n">
     <funcs; separator="\n">

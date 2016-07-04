@@ -37,6 +37,9 @@ Concept Boolean_Template;
                 : Boolean;
         ensures Are_Not_Equal = (a ≠ b);
 
+    Operation Write
+            (evaluates a : Boolean);
+
     Operation Write_Line
             (evaluates a : Boolean);
 

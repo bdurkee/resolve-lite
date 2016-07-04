@@ -24,6 +24,23 @@ Concept Integer_Template;
            min_int ≤ (i - 1);
         ensures	i = (@i - 1);
 
+    Operation Are_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools.Boolean;
+        ensures i = j;
+
+    Operation Are_Not_Equal
+            (evaluates i, j : Integer)
+                : Std_Bools.Boolean;
+        ensures i ≠ j;
+
+    Operation Negate
+            (evaluates i : Integer)
+                : Integer;
+        requires
+            min_int ≤ ⨩(i) ≤ max_int;
+        ensures Negate = ⨩(i);
+
     Operation Less_Or_Equal
             (evaluates i, j : Integer)
                 : Std_Bools.Boolean;
@@ -55,13 +72,6 @@ Concept Integer_Template;
         ensures
             Sum = (i + j);
 
-    Operation Negate
-            (evaluates i : Integer)
-                : Integer;
-        requires
-            min_int ≤ ⨩(i) ≤ max_int;
-        ensures Negate = ⨩(i);
-
     Operation Difference
             (evaluates i, j : Integer)
                 : Integer;
@@ -75,6 +85,10 @@ Concept Integer_Template;
         ensures
             Product = (i Basic_Integer_Theory.* j);
 
-    Operation Write_Line (preserves I : Integer);
+    Operation Write
+            (evaluates a : Integer);
+
+    Operation Write_Line
+            (evaluates a : Integer);
 
 end Integer_Template;

@@ -24,7 +24,8 @@ public abstract class Module extends OutputModelObject {
      * Like the name suggests, adds getters and member variabes for the formal parameters to a concept
      * (or enhancement).
      */
-    public abstract void addGettersAndMembersForModuleParameterSyms(List<ModuleParameterSymbol> symbols);
+    public void addGettersAndMembersForModuleParameterSyms(List<ModuleParameterSymbol> symbols) {
+    }
 
     /**
      * For implementations that take an operation as a parameter, this method adds both an RType member variable
@@ -33,5 +34,13 @@ public abstract class Module extends OutputModelObject {
      *
      * @param wrappedFunction
      */
-    public abstract void addOperationParameterModelObjects(FunctionDef wrappedFunction);
+    public void addOperationParameterModelObjects(FunctionDef wrappedFunction) {
+    }
+
+    /** We gen a dummy class for precis to make java happy. Could be filtered too, but this is easier. */
+    public static class PrecisModule extends Module {
+        public PrecisModule(String name, ModuleFile file) {
+            super(name, file);
+        }
+    }
 }
