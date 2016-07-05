@@ -8,22 +8,21 @@ import java.util.Scanner;
 public class Standard_Boolean_Impl extends RESOLVEBase implements Boolean_Template{
 
     public class Boolean implements Boolean_Template.Boolean {
-        public Boolean_Rep rep;
+        public boolean val;
 
         Boolean() {
-            rep = new Boolean_Rep();
+            val = true;
         }
 
         Boolean(boolean i) {
-            rep = new Boolean_Rep(i);
+            val = i;
         }
 
         public Object getRep() {
-            return rep;
+            return new Boolean(val);
         }
 
         public void setRep(Object o) {
-            rep = (Boolean_Rep)o;
         }
 
         public RType initialValue() {
@@ -31,27 +30,12 @@ public class Standard_Boolean_Impl extends RESOLVEBase implements Boolean_Templa
         }
 
         public String toString() {
-            return rep.toString();
-        }
-    }
-    class Boolean_Rep {
-        boolean val;
-        Boolean_Rep() {
-            val = true;
-        }
-
-        Boolean_Rep(boolean e) {
-            val = e;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(val);
+            return new java.lang.Boolean(val).toString();
         }
     }
 
     public RType replica(RType b) {
-        return new Boolean(((Boolean)b).rep.val);
+        return new Boolean(((Boolean)b).val);
     }
 
     public RType initBoolean(boolean ... e) {
@@ -75,37 +59,37 @@ public class Standard_Boolean_Impl extends RESOLVEBase implements Boolean_Templa
 
     @Override
     public RType And(RType a, RType b) {
-        return new Boolean(((Boolean)a).rep.val && ((Boolean)b).rep.val);
+        return new Boolean(((Boolean)a).val && ((Boolean)b).val);
     }
 
     @Override
     public RType Or(RType a, RType b) {
-        return new Boolean(((Boolean)b).rep.val || ((Boolean)b).rep.val);
+        return new Boolean(((Boolean)b).val || ((Boolean)b).val);
     }
 
     @Override
     public RType Not(RType a) {
-        return new Boolean(!((Boolean)a).rep.val);
+        return new Boolean(!((Boolean)a).val);
     }
 
     @Override
     public RType Are_Equal(RType a, RType b) {
-        return new Boolean(((Boolean)a).rep.val == ((Boolean)b).rep.val);
+        return new Boolean(((Boolean)a).val == ((Boolean)b).val);
     }
 
     @Override
     public RType Are_Not_Equal(RType a, RType b) {
-        return new Boolean(((Boolean)a).rep.val != ((Boolean)b).rep.val);
+        return new Boolean(((Boolean)a).val != ((Boolean)b).val);
     }
 
     @Override
     public void Write(RType i) {
-        System.out.print(((Boolean) i).rep.val);
+        System.out.print(((Boolean) i).val);
     }
 
     @Override
     public void Write_Line(RType i) {
-        System.out.println(((Boolean) i).rep.val);
+        System.out.println(((Boolean) i).val);
     }
 /*
 @Override

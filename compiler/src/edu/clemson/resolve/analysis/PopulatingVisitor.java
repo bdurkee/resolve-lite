@@ -392,14 +392,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void initializeAndSanityCheckInfo(@NotNull ResolveParser.FacilityDeclContext ctx) {
-/*
+
         if (ctx.specArgs != null) {
-            sanityCheckParameterizationArgs(ctx.specArgs.progExp(), new ModuleIdentifier(ctx.spec));
+            sanityCheckParameterizationArgs(ctx.specArgs.progExp(), moduleScope.getImportWithName(ctx.spec));
             actualGenericTypesPerFacilitySpecArgs.put(ctx.specArgs, new ArrayList<>());
         }
         if (ctx.implArgs != null) {
-            sanityCheckParameterizationArgs(ctx.implArgs.progExp(), new ModuleIdentifier(ctx.impl));
-        }*/
+            sanityCheckParameterizationArgs(ctx.implArgs.progExp(), moduleScope.getImportWithName(ctx.impl));
+        }
         for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
             if (extension.specArgs != null) {
                 actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
@@ -694,8 +694,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
-                    ctx.name.getText());
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), ctx.name.getText());
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a variable", ctx.name.getText(),
