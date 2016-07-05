@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen;
 
-import edu.clemson.resolve.codegen.model.*;
+import edu.clemson.resolve.codegen.Model.*;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.RESOLVECompiler;
@@ -26,12 +26,6 @@ import edu.clemson.resolve.semantics.symbol.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
-
-import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefLeft;
-import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefRight;
-import static edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
-import static edu.clemson.resolve.codegen.model.Qualifier.NormalQualifier;
-import static edu.clemson.resolve.codegen.model.Stat.*;
 
 public class ModelBuilder extends ResolveBaseListener {
 
@@ -350,8 +344,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgSelectorExp(ResolveParser.ProgSelectorExpContext ctx) {
         ProgType leftType = tr.progTypes.get(ctx.lhs);
-        Expr left = new LeafAccessRefLeft(((ProgNamedType) leftType).getName(), (Expr) built.get(ctx.lhs));
-        Expr right = new LeafAccessRefRight((Expr) built.get(ctx.rhs));
+        Expr left = new AccessRef.LeafAccessRefLeft(((ProgNamedType) leftType).getName(), (Expr) built.get(ctx.lhs));
+        Expr right = new AccessRef.LeafAccessRefRight((Expr) built.get(ctx.rhs));
         AccessRef ref = new AccessRef(left, right);
         built.put(ctx, ref);
     }
@@ -454,7 +448,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitConceptModuleDecl(ResolveParser.ConceptModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
+        AbstractSpecModule spec = new ConceptModule(ctx.name.getText(), file);
         if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
@@ -471,7 +465,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
         ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.SpecExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
+        AbstractSpecModule spec = new SpecExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
 
         if (ctx.conceptBlock() != null) {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
@@ -575,7 +569,7 @@ public class ModelBuilder extends ResolveBaseListener {
         return new CallStat(qualifier, name, (Expr) built.get(left), (Expr) built.get(right));
     }
 
-    protected Qualifier buildQualifier(@Nullable Token refQualifier, @NotNull String refName) {
+    protected AbstractQualifier buildQualifier(@Nullable Token refQualifier, @NotNull String refName) {
         Symbol corresondingSym = null;
 
         //if the reference was not qualified, a simple query should be able to find it.

@@ -28,7 +28,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.clemson.resolve.codegen.model;
+package edu.clemson.resolve.codegen;
 
-public abstract class OutputModelObject {
+import edu.clemson.resolve.codegen.model.OutputModelObject;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * Indicates a field of an {@link OutputModelObject} that should be walked when
+ * constructing a hierarchy of {@link org.stringtemplate.v4.ST}s.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ModelElement {
 }

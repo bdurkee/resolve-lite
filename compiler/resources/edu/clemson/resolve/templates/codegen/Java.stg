@@ -208,7 +208,7 @@ public RType init<func.name>() {
 }
 >>
 
-ConceptDelegateMethod(method) ::= <<
+ConceptDelegateMethodDef(method) ::= <<
 @Override public <if(method.hasReturn)>RType <else>void <endif><method.name><\\>
 (<method.parameters : {p | RType <p>}; separator=", ">) {
     <if(method.hasReturn)>return <endif>delegate.<method.name><\\>

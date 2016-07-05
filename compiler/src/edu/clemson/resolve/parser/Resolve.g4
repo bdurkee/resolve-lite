@@ -275,10 +275,10 @@ elseStmt : 'else' stmt* ;
 // program expressions
 
 progExp
-    :   progPrimary                                     #progPrimaryExp
-    |   '(' progExp ')'                                 #progNestedExp
+    :   progExp name=progSymbolExp progExp              #progInfixExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   progExp name=progSymbolExp progExp              #progInfixExp       //TODO: Change from progSymbolExp to just ID
+    |   '(' progExp ')'                                 #progNestedExp
+    |   progPrimary                                     #progPrimaryExp
     ;
 
 progPrimary
@@ -292,7 +292,7 @@ progParamExp
     ;
 
 progSymbolExp
-    :   (qualifier=ID '.')? name=progSymbolName
+    :   (qualifier=ID '::')? name=progSymbolName
     ;
 
 progSymbolName
