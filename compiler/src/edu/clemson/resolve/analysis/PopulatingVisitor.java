@@ -794,16 +794,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
     }*/
 
-    private Void typeProgLiteralExp(ParserRuleContext ctx,
-                                    String typeQualifier, String typeName) {
+    private Void typeProgLiteralExp(ParserRuleContext ctx, String typeQualifier, String typeName) {
         ProgTypeSymbol p = getProgTypeSymbol(ctx, typeQualifier, typeName);
         tr.progTypes.put(ctx, p != null ? p.getProgramType() : ProgInvalidType.getInstance(g));
         tr.mathClssftns.put(ctx, p != null ? p.getModelType() : g.INVALID);
         return null;
     }
 
-    private ProgTypeSymbol getProgTypeSymbol(ParserRuleContext ctx,
-                                             String typeQualifier, String typeName) {
+    private ProgTypeSymbol getProgTypeSymbol(ParserRuleContext ctx, String typeQualifier, String typeName) {
         CommonToken qualifierToken = new CommonToken(ctx.getStart());
         qualifierToken.setText(typeQualifier);
         qualifierToken.setType(ResolveLexer.ID);
@@ -880,8 +878,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathTheoremDecl(
-            ResolveParser.MathTheoremDeclContext ctx) {
+    public Void visitMathTheoremDecl(ResolveParser.MathTheoremDeclContext ctx) {
         symtab.startScope(ctx);
         this.visit(ctx.mathAssertionExp());
         symtab.endScope();
@@ -890,8 +887,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             //PExp assertion = getMathExpASTFor(ctx.mathAssertionExp());
             symtab.getInnermostActiveScope().define(
-                    new TheoremSymbol(g, ctx.name.getText(), g.getTrueExp(),
-                            ctx, getRootModuleIdentifier()));
+                    new TheoremSymbol(g, ctx.name.getText(), g.getTrueExp(), ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         }
