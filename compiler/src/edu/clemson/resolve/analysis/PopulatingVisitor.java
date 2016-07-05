@@ -687,17 +687,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
             if (programType instanceof PTRepresentation) {
                 if (((PTRepresentation) programType).getBaseType() instanceof ProgRecordType) {
-                    if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgSelectorExpContext.class) == null) {
-                        //we're something like S.Top.. just a progSymbolExp -- so no need to set the global
-                        //prevSelectorAccess, since we're indeed not part of a larger selector exp
-                        typeProgSelectorAccessExp(ctx, ctx, ctx.name.getText());
-                        prevSelectorAccess = null; //just in case.
-                    }
-                    else {
-                        //if we're a leaf in a larger prog selector access expression, we need to set this
-                        //so next time we visit a progSymbolExp we'll call the appropriate method.
-                        prevSelectorAccess = ctx;
-                    }
+                    //we're something like S.Top.. just a progSymbolExp -- so no need to set the global
+                    //prevSelectorAccess, since we're indeed not part of a larger selector exp
+                    typeProgSelectorAccessExp(ctx, ctx, ctx.name.getText());
                 }
             }
             return null;

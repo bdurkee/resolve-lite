@@ -31,9 +31,9 @@ public class ProgTypeSymbol extends Symbol {
         super(name, definingTree, moduleIdentifier);
         this.type = progType;
         this.g = g;
-        this.modelType = modelType == null ? g.INVALID : modelType;
+        this.modelType = modelType == null ? progType.toMath() : modelType;
         this.mathTypeAlterEgo =
-                new MathClssftnWrappingSymbol(g, name, Quantification.NONE, modelType,
+                new MathClssftnWrappingSymbol(g, name, Quantification.NONE, this.modelType,
                         definingTree, moduleIdentifier);
     }
 
