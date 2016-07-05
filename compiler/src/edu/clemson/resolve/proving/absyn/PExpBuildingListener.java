@@ -105,7 +105,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void enterMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
-        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
+        for (ResolveParser.MathSymbolNameContext term : ctx.mathVarDeclGroup().mathSymbolName()) {
             String quantifier = ctx.q.getText();
             quantifiedVars.put(term.getText(), getQuantificationMode(ctx.q));
         }
@@ -127,7 +127,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> declaredVars = new ArrayList<>();
-        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
+        for (ResolveParser.MathSymbolNameContext term : ctx.mathVarDeclGroup().mathSymbolName()) {
             quantifiedVars.remove(term.getText());
             declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
                     getMathClssfctn(ctx.mathVarDeclGroup().mathClssftnExp())));
@@ -207,7 +207,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathLambdaExp(ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
-        parameters.add(new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().ID().getText(), getMathClssfctn(ctx)));
+        parameters.add(new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(), getMathClssfctn(ctx)));
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 

@@ -3,6 +3,7 @@ package concepts.integer_template;
 import edu.clemson.resolve.runtime.RESOLVEBase;
 import edu.clemson.resolve.runtime.RType;
 
+import facilities.Standard_Booleans;
 import java.util.Scanner;
 import java.lang.reflect.*;
 import edu.clemson.resolve.runtime.*;
@@ -64,32 +65,32 @@ public class Standard_Integer_Impl extends RESOLVEBase implements Integer_Templa
     }
 
     @Override public RType Are_Equal(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer)i1).val ==
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer)i1).val ==
                 ((Integer)i2).val);
     }
 
     @Override public RType Are_Not_Equal(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val !=
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer) i1).val !=
                 ((Integer) i2).val);
     }
 
     @Override public RType Less_Or_Equal(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val <=
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer) i1).val <=
                 ((Integer) i2).val);
     }
 
     @Override public RType Less(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val <
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer) i1).val <
                 ((Integer) i2).val);
     }
 
     @Override public RType Greater(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val >
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer) i1).val >
                 ((Integer) i2).val);
     }
 
     @Override public RType Greater_Or_Equal(RType i1, RType i2) {
-        return Standard_Booleans.INSTANCE.initBoolean(((Integer) i1).val >=
+        return Standard_Booleans.Std_Bools.initBoolean(((Integer) i1).val >=
                 ((Integer) i2).val);
     }
 
@@ -118,9 +119,9 @@ public class Standard_Integer_Impl extends RESOLVEBase implements Integer_Templa
     @Override public void Write_Line(RType i) {
         System.out.println(((Integer) i).val);
     }
-
+/*
     @Override public void Read(RType e) {
         Scanner sc = new Scanner(System.in);
         ((Integer)e).val = sc.nextInt();
-    }
+    }*/
 }

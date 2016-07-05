@@ -1018,7 +1018,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     try {
                         ResolveParser.MathVarDeclGroupContext grp =
                                 (ResolveParser.MathVarDeclGroupContext) formal;
-                        for (TerminalNode t : grp.ID()) {
+                        for (ResolveParser.MathSymbolNameContext t : grp.mathSymbolName()) {
                             MathClssftn ty = exactNamedMathClssftns.get(grp.mathClssftnExp());
                             paramTypes.add(ty);
                             paramNames.add(t.getText());
@@ -1029,7 +1029,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         MathClssftn ty = exactNamedMathClssftns.get(
                                 singularDecl.mathClssftnExp());
                         paramTypes.add(ty);
-                        paramNames.add(singularDecl.ID().getText());
+                        paramNames.add(singularDecl.mathSymbolName().getText());
                     }
                 }
                 defnType = new MathFunctionClssftn(g, colonRhsType, paramNames, paramTypes);
@@ -1055,29 +1055,29 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathVarDeclGroup(ResolveParser.MathVarDeclGroupContext ctx) {
-        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
+        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.mathSymbolName());
         return null;
     }
 
     @Override
     public Void visitMathVarDecl(ResolveParser.MathVarDeclContext ctx) {
-        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.ID());
+        insertMathVarDecls(ctx, ctx.mathClssftnExp(), ctx.mathSymbolName());
         return null;
     }
 
     private void insertMathVarDecls(@NotNull ParserRuleContext ctx,
                                     @NotNull ResolveParser.MathClssftnExpContext t,
-                                    @NotNull TerminalNode... terms) {
+                                    @NotNull ResolveParser.MathSymbolNameContext ... terms) {
         insertMathVarDecls(ctx, t, Arrays.asList(terms));
     }
 
     private void insertMathVarDecls(@NotNull ParserRuleContext ctx,
                                     @NotNull ResolveParser.MathClssftnExpContext t,
-                                    @NotNull List<TerminalNode> terms) {
+                                    @NotNull List<ResolveParser.MathSymbolNameContext> terms) {
         String x = ctx.getText();
         this.visitMathClssftnExp(t);
         MathClssftn rhsColonType = exactNamedMathClssftns.get(t);
-        for (TerminalNode term : terms) {
+        for (ResolveParser.MathSymbolNameContext term : terms) {
             MathClssftn ty = new MathNamedClssftn(g, term.getText(),
                     rhsColonType.typeRefDepth - 1, rhsColonType);
 
@@ -1394,11 +1394,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }*/
         List<Element> fields = new ArrayList<>();
-        for (ResolveParser.MathVarDeclGroupContext grp : ctx
-                .mathVarDeclGroup()) {
+        for (ResolveParser.MathVarDeclGroupContext grp : ctx.mathVarDeclGroup()) {
             this.visit(grp.mathClssftnExp());
             MathClssftn grpType = exactNamedMathClssftns.get(grp.mathClssftnExp());
-            for (TerminalNode label : grp.ID()) {
+            for (ResolveParser.MathSymbolNameContext label : grp.mathSymbolName()) {
                 fields.add(new Element(label.getText(), grpType));
             }
         }

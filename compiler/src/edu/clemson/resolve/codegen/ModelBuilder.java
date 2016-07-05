@@ -395,8 +395,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
         //TODO: Do this one like the boolean method directly above.
-        built.put(ctx, new TypeInit(new FacilityQualifier(
-                "concepts.integer_template.Integer_Template", "Std_Ints"), "Integer", ctx.getText()));
+        built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Ints"),
+                ctx.getText()), "Integer", ctx.getText()));
     }
 
     @Override
@@ -587,8 +587,9 @@ public class ModelBuilder extends ResolveBaseListener {
                 //compiler.errMgr.semanticError(e.getErrorKind(), refName, refName);
                 return new NormalQualifier("this");
             }
-            Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
-            return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));
+            Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir();
+            String formedQual = Utils.stripFileExtension(qual.toString());
+            return new NormalQualifier(formedQual.replaceAll(File.separator, "."));
         }
         else { // if the reference was qualified, let's see if it was a facility or module.
             try {

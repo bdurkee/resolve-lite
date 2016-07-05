@@ -373,11 +373,11 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   ID (',' ID)* (':'|'⦂') mathClssftnExp
+    :   mathSymbolName (',' mathSymbolName)* (':'|'⦂') mathClssftnExp
     ;
 
 mathVarDecl
-    :   ID (':'|'⦂') mathClssftnExp
+    :   mathSymbolName (':'|'⦂') mathClssftnExp
     ;
 
 // mathematical clauses

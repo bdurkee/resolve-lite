@@ -99,6 +99,11 @@ public class Standard_Boolean_Impl extends RESOLVEBase implements Boolean_Templa
     }
 
     @Override
+    public void Write(RType i) {
+        System.out.print(((Boolean) i).rep.val);
+    }
+
+    @Override
     public void Write_Line(RType i) {
         System.out.println(((Boolean) i).rep.val);
     }
