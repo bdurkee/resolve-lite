@@ -27,8 +27,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
                                      @NotNull MathClssftn classification,
                                      @Nullable ParserRuleContext definingTree,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
-        this(g, name, Quantification.NONE, classification, definingTree,
-                moduleIdentifier);
+        this(g, name, Quantification.NONE, classification, definingTree, moduleIdentifier);
     }
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,

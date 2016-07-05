@@ -1,5 +1,5 @@
 Precis Basic_Integer_Theory;
-        uses Monogenerator_Theory, Basic_Binary_Relation_Properties;
+        uses Monogenerator_Theory, Basic_Binary_Relation_Properties, Basic_Natural_Number_Theory;
     /** many theorems elided */
     Categorical Definition for Z : SSet, 0 : Z, NB : Z ⟶ Z is
         Is_Monogeneric_for(Z, 0, NB);
@@ -11,6 +11,8 @@ Precis Basic_Integer_Theory;
     Inductive Definition ⨩(n : Z) : Z is
         (i.) ⨩(0) = 0;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
+
+    Type Theorem N_Subset_of_Z : N : Z;
 
     Theorem I1 :
         ∀ n : Z, Is_Neg(n) implies (NB(n) = ⨩(n));
