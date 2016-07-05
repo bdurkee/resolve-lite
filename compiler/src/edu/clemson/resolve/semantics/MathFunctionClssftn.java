@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 
 public class MathFunctionClssftn extends MathClssftn {
 
-    private static final FunctionApplicationFactory DEFAULT_FACTORY =
-            new VanillaFunctionApplicationFactory();
-
+    private static final FunctionApplicationFactory DEFAULT_FACTORY = new VanillaFunctionApplicationFactory();
     private final List<MathClssftn> paramTypes = new LinkedList<>();
     private final List<String> paramNames = new LinkedList<>();
 
@@ -99,8 +97,7 @@ public class MathFunctionClssftn extends MathClssftn {
         return result;
     }
 
-    private static List<MathClssftn> expandAsNeeded(
-            @NotNull List<MathClssftn> t) {
+    private static List<MathClssftn> expandAsNeeded(@NotNull List<MathClssftn> t) {
         List<MathClssftn> result = new ArrayList<>();
         for (MathClssftn c : t) {
             result.addAll(expandAsNeeded(c));
@@ -133,8 +130,7 @@ public class MathFunctionClssftn extends MathClssftn {
         return this;
     }
 
-    private static List<String> buildDummyNameListOfEqualLength(
-            List<MathClssftn> original) {
+    private static List<String> buildDummyNameListOfEqualLength(List<MathClssftn> original) {
         return original.stream().map(t -> "").collect(Collectors.toList());
     }
 
@@ -154,25 +150,19 @@ public class MathFunctionClssftn extends MathClssftn {
                 domainType.withVariablesSubstituted(substitutions));
     }
 
-    public MathClssftn deschematize(@NotNull List<MathClssftn> argTypes)
-            throws BindingException {
+    public MathClssftn deschematize(@NotNull List<MathClssftn> argTypes)  throws BindingException {
         //for each supplied actual type
         Map<String, MathClssftn> bindingsSoFar = new HashMap<>();
         Iterator<MathClssftn> argTypeIter = argTypes.iterator();
 
         for (MathClssftn formalParameterType : paramTypes) {
-            formalParameterType =
-                    formalParameterType
-                            .withVariablesSubstituted(bindingsSoFar);
-
+            formalParameterType = formalParameterType.withVariablesSubstituted(bindingsSoFar);
             //We know arguments and formalParameterTypes are the same
             //length, see above
             MathClssftn argumentType = argTypeIter.next();
 
             if (formalParameterType.containsSchematicType()) {
-
-                Map<String, MathClssftn> iterationBindings =
-                        new HashMap<>();
+                Map<String, MathClssftn> iterationBindings = new HashMap<>();
                 try {
                     bind(argumentType, formalParameterType, iterationBindings);
                 } catch (BindingException be) {
@@ -180,8 +170,7 @@ public class MathFunctionClssftn extends MathClssftn {
                 bindingsSoFar.putAll(iterationBindings);
             }
         }
-        MathClssftn thisDeschematized =
-                this.withVariablesSubstituted(bindingsSoFar);
+        MathClssftn thisDeschematized = this.withVariablesSubstituted(bindingsSoFar);
         return thisDeschematized;
     }
 
@@ -264,10 +253,10 @@ public class MathFunctionClssftn extends MathClssftn {
             FunctionApplicationFactory {
 
         @Override
-        public MathClssftn buildFunctionApplication(
-                @NotNull DumbMathClssftnHandler g, @NotNull MathFunctionClssftn f,
-                @NotNull String calledAsName,
-                @NotNull List<MathClssftn> arguments) {
+        public MathClssftn buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
+                                                    @NotNull MathFunctionClssftn f,
+                                                    @NotNull String calledAsName,
+                                                    @NotNull List<MathClssftn> arguments) {
             return new MathFunctionApplicationClssftn(g, f, calledAsName, arguments);
         }
     }

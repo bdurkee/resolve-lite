@@ -772,15 +772,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
-        StdTemplateProgOps.BuiltInOpAttributes attr =
-                StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
         return null;
     }
 
     @Override
     public Void visitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
-        //this.visit(ctx.progNamedExp());
         ctx.progExp().forEach(this::visit);
         typeOperationRefExp(ctx, ctx.progSymbolExp(), ctx.progExp());
         return null;
@@ -854,8 +852,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                        @Nullable Token qualifier,
                                        @NotNull Token name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        List<ProgType> argTypes = args.stream().map(tr.progTypes::get)
-                .collect(Collectors.toList());
+        List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
         //every other call
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
@@ -905,17 +902,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new TheoremSymbol(g, ctx.name.getText(), g.getTrueExp(),
                             ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException dse) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.name, ctx.name.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         }
         return null;
     }
 
     @Override
-    public Void visitMathCategoricalDefnDecl(
-            ResolveParser.MathCategoricalDefnDeclContext ctx) {
-        for (ResolveParser.MathPrefixDefnSigContext sig :
-                ctx.mathPrefixDefnSigs().mathPrefixDefnSig()) {
+    public Void visitMathCategoricalDefnDecl(ResolveParser.MathCategoricalDefnDeclContext ctx) {
+        for (ResolveParser.MathPrefixDefnSigContext sig : ctx.mathPrefixDefnSigs().mathPrefixDefnSig()) {
             defnEnclosingScope = symtab.getInnermostActiveScope();
             symtab.startScope(ctx);
             this.visit(sig);
@@ -929,8 +923,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathInductiveDefnDecl(
-            ResolveParser.MathInductiveDefnDeclContext ctx) {
+    public Void visitMathInductiveDefnDecl(ResolveParser.MathInductiveDefnDeclContext ctx) {
         defnEnclosingScope = symtab.getInnermostActiveScope();
         symtab.startScope(ctx);
         ResolveParser.MathDefnSigContext sig = ctx.mathDefnSig();
@@ -973,8 +966,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             insertMathDefnSignature(ctx, ctx.mathVarDecl(), ctx.mathClssftnExp(), ctx.name.getStart());
         } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), e.getOffendingSymbol().getName());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.getStart(), e.getOffendingSymbol().getName());
         }
         return null;
     }
@@ -986,8 +978,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     ctx.mathClssftnExp(),
                     Utils.apply(ctx.mathSymbolName(), ParserRuleContext::getStart));
         } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), e.getOffendingSymbol().getName());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.getStart(), e.getOffendingSymbol().getName());
         }
         return null;
     }
@@ -1106,8 +1097,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     (rhsColonType == g.SSET || rhsColonType == g.CLS ||
                             rhsColonType instanceof MathPowersetApplicationClssftn);
             try {
-                symtab.getInnermostActiveScope().define(
-                        new MathClssftnWrappingSymbol(g, term.getText(), ty));
+                symtab.getInnermostActiveScope().define(new MathClssftnWrappingSymbol(g, term.getText(), ty));
             } catch (DuplicateSymbolException e) {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.getStart(), e.getOffendingSymbol().getName());
@@ -1152,8 +1142,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.BOOLEAN);
             //type this guy bool so we can say which_entails x : N AND y : Z
         }
-        else if (ctx.mathExp(0).getChild(0).getChild(0)
-                instanceof ResolveParser.MathSymbolExpContext) {
+        else if (ctx.mathExp(0).getChild(0).getChild(0) instanceof ResolveParser.MathSymbolExpContext) {
             MathClssftn ty =
                     new MathNamedClssftn(g,
                             ctx.mathExp().get(0).getText(),
@@ -1211,8 +1200,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //activeQuantifications.pop();
         symtab.endScope();
         tr.mathClssftns.put(ctx, g.BOOLEAN);
-        exactNamedMathClssftns.put(ctx,
-                exactNamedMathClssftns.get(ctx.mathAssertionExp()));
+        exactNamedMathClssftns.put(ctx, exactNamedMathClssftns.get(ctx.mathAssertionExp()));
         return null;
     }
 
@@ -1354,8 +1342,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     && actualVal.typeRefDepth == 0
                     && formal.typeRefDepth >= 2) {
                 //its ok if we're a schematic type whose enclosing classification is a set
-                if (actualVal.identifiesSchematicType &&
-                        actualVal.enclosingClassification.typeRefDepth >= 1) {
+                if (actualVal.identifiesSchematicType && actualVal.enclosingClassification.typeRefDepth >= 1) {
                     continue;
                 }
                 compiler.errMgr.semanticError(
