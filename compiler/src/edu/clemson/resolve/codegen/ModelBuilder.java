@@ -388,14 +388,12 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
-        //TODO: Do this one like the boolean method directly above.
         built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Ints"),
                 ctx.getText()), "Integer", ctx.getText()));
     }
 
     @Override
-    public void exitProgCharacterLiteralExp(
-            ResolveParser.ProgCharacterLiteralExpContext ctx) {
+    public void exitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(new FacilityQualifier(
                 "concepts.char_template.Char_Template", "Std_Chars"), "Character", ctx.getText()));
     }
