@@ -77,8 +77,10 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(parseMathAssertionExp(g, "conc.s"), parseMathAssertionExp(g, "conc.s"));
 
         Assert.assertNotEquals(parseMathAssertionExp(g, "foo"), parseMathAssertionExp(g, "bar.foo"));
-        Assert.assertEquals(parseMathAssertionExp(g, "bar.f.x"), parseMathAssertionExp(g, "bar.f.x"));
-        Assert.assertNotEquals(parseMathAssertionExp(g, "bar.f.x"), parseMathAssertionExp(g, "bar.f.y"));
+        Assert.assertEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "bar::f.x"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "bar::f.y"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "baz::f.x"));
+
         Assert.assertEquals(parseMathAssertionExp(g, "||S||"), parseMathAssertionExp(g, "||S||"));
     }
 

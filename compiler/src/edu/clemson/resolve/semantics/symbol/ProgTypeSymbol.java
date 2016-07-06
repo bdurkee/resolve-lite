@@ -61,8 +61,7 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull
     public PSymbol asPSymbol() {
-        return new PSymbol.PSymbolBuilder(getName()).mathClssfctn(getModelType())
-                .build();
+        return new PSymbol.PSymbolBuilder(getName()).mathClssfctn(getModelType()).build();
     }
 
     @NotNull
@@ -79,10 +78,8 @@ public class ProgTypeSymbol extends Symbol {
 
     @NotNull
     @Override
-    public ProgTypeSymbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility) {
-
+    public ProgTypeSymbol instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                              @Nullable FacilitySymbol instantiatingFacility) {
         Map<String, MathClssftn> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
         if (genericMathematicalInstantiations.isEmpty()) return this;

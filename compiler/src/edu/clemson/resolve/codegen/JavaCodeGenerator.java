@@ -41,6 +41,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         return walk(buildModuleOutputModel());
     }
 
+    //output dir is a function of where the original file/module was located.
     @Override
     protected void write(@NotNull ModuleIdentifier moduleIdentifier,
                          @NotNull ST code,
