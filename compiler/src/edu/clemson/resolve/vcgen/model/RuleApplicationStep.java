@@ -1,7 +1,8 @@
 package edu.clemson.resolve.vcgen.model;
 
+import edu.clemson.resolve.codegen.Model;
+import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.codegen.ModelElement;
-import edu.clemson.resolve.codegen.model.OutputModelObject;
 
 public class RuleApplicationStep extends OutputModelObject {
 

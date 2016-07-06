@@ -1,6 +1,7 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.codegen.Model;
+import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;

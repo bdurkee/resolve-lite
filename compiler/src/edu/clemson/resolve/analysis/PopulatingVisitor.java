@@ -638,16 +638,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         try {
             //definition, operation, type, parameter, module param, or just some variable.
-            Symbol namedSymbol = null;
-            try {
-                namedSymbol =
-                        symtab.getInnermostActiveScope().queryForOne(
-                                new NameQuery(ctx.qualifier, ctx.name.getText(), true));
-            } catch (NoSuchModuleException e) {
-                //ok, maybe we're dealing with the starting leaf of a prog selector exp
-                namedSymbol = symtab.getInnermostActiveScope().queryForOne(
-                        new NameQuery(null, ctx.qualifier.getText(), true));
-            }
+            Symbol namedSymbol =
+                    symtab.getInnermostActiveScope().queryForOne(
+                            new NameQuery(ctx.qualifier, ctx.name.getText(), true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class);
@@ -685,16 +678,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             tr.progTypes.put(ctx, programType);
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
-            if (programType instanceof PTRepresentation) {
-                if (((PTRepresentation) programType).getBaseType() instanceof ProgRecordType) {
-                    //we're something like S.Top.. just a progSymbolExp -- so no need to set the global
-                    //prevSelectorAccess, since we're indeed not part of a larger selector exp
-                    typeProgSelectorAccessExp(ctx, ctx, ctx.name.getText());
-                }
-            }
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(), ctx.name.getText());
+            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+                    ctx.name.getText());
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a variable", ctx.name.getText(),
@@ -1369,7 +1356,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
-        typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
+        if (prevSelectorAccess != null) {
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
+                    ctx.name.getText());
+        }
+        else {
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
+        }
         return null;
     }
 
@@ -1522,52 +1515,26 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, type);
     }
 
-    private void typeMathSymbol(@NotNull ParserRuleContext ctx, @Nullable Token qualifier, @NotNull Token name) {
+    private void typeMathSymbol(@NotNull ParserRuleContext ctx,
+                                @Nullable Token qualifier,
+                                @NotNull Token name) {
         String here = ctx.getText();
-        //Add initial check if here to see if the 'qualifier' refers to a record/cartesian.
-        if (qualifier != null && prevSelectorAccess == null) {
-            try {
-                MathClssftnWrappingSymbol s = symtab.getInnermostActiveScope()
-                        .queryForOne(new MathSymbolQuery(null, qualifier.getText(), ctx.getStart()));
-                if (s.getClassification().enclosingClassification instanceof MathCartesianClssftn
-                        || qualifier.getText().equals("conc")) {
-                    tr.mathClssftns.put(ctx, s.getClassification().enclosingClassification);
-                    typeMathSelectorAccessExp(ctx, ctx, name.getText());
-                    //If we're part of a larger selector exp, remember to set the global var
-                    if (Utils.getFirstAncestorOfType(ctx, ResolveParser.MathSelectorExpContext.class) == null) {
-                        prevSelectorAccess = null;
-                    }
-                    else {
-                        prevSelectorAccess = ctx;
-                    }
-                    return; //we've typed the leaf selector and set the global selector access var appropriately,
-                    //nothing left to do here at this point.
-                }
-            }
-            catch (Exception e) {   //no problem, we'll proceed under the assumption that in the case of something
-                //like S.X, the S actually identifies a module (couldn't find anything else above).
-            }
+
+        MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
+        if (s == null || s.getClassification() == null) {
+            exactNamedMathClssftns.put(ctx, g.INVALID);
+            tr.mathClssftns.put(ctx, g.INVALID);
+            return;
         }
-        if (prevSelectorAccess != null) {
-            typeMathSelectorAccessExp(ctx, prevSelectorAccess, name.getText());
+        if (entailsRetype != null) {
+            s.setClassification(new MathNamedClssftn(g, name.getText(), entailsRetype.typeRefDepth - 1, entailsRetype));
+        }
+        exactNamedMathClssftns.put(ctx, s.getClassification());
+        if (s.getClassification().identifiesSchematicType) {
+            tr.mathClssftns.put(ctx, s.getClassification());
         }
         else {
-            MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
-            if (s == null || s.getClassification() == null) {
-                exactNamedMathClssftns.put(ctx, g.INVALID);
-                tr.mathClssftns.put(ctx, g.INVALID);
-                return;
-            }
-            if (entailsRetype != null) {
-                s.setClassification(new MathNamedClssftn(g, name.getText(), entailsRetype.typeRefDepth - 1, entailsRetype));
-            }
-            exactNamedMathClssftns.put(ctx, s.getClassification());
-            if (s.getClassification().identifiesSchematicType) {
-                tr.mathClssftns.put(ctx, s.getClassification());
-            }
-            else {
-                tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
-            }
+            tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
     }
 

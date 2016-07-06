@@ -121,7 +121,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '.')? name=ID             #namedType
+    :   (qualifier=ID '::')? name=ID             #namedType
     |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 
@@ -325,8 +325,7 @@ mathDefnSig
 
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
-                mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
-                (':'|'⦂') mathClssftnExp
+        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? (':'|'⦂') mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -433,7 +432,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   incoming='@'? (qualifier=ID '.')? name=mathSymbolName
+    :   incoming='@'? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathOutfixAppExp
