@@ -26,12 +26,12 @@ Concept Integer_Template;
 
     Operation Are_Equal
             (evaluates i, j : Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures i = j;
 
     Operation Are_Not_Equal
             (evaluates i, j : Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures i ≠ j;
 
     Operation Negate
@@ -43,25 +43,25 @@ Concept Integer_Template;
 
     Operation Less_Or_Equal
             (evaluates i, j : Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures
             Less_Or_Equal = (i ≤ j);
 
     Operation Less
             (evaluates i, j : Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures
             Less = (1 + i ≤ j);
 
     Operation Greater
             (evaluates i, j: Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures
             Greater = (1 + j ≤ i);
 
     Operation Greater_Or_Equal
             (evaluates i, j: Integer)
-                : Std_Bools.Boolean;
+                : Std_Bools :: Boolean;
         ensures
             Greater_Or_Equal = (j ≤ i);
 

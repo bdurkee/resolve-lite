@@ -1,0 +1,18 @@
+Concept Bdd_Ceramic_Array_Template(type Entry;
+        evaluates Lower_Bound,
+                  Upper_Bound : Std_Ints :: Integer);
+    uses Standard_Integers, Basic_Integer_Theory;
+
+    Type family Ceramic_Array
+            is modeled by Z ⟶ Entry;
+        exemplar A;
+
+    Operation Swap_Entry (updates A : Ceramic_Array;
+                          updates e : Entry;
+                          evaluates i : Std_Ints :: Integer);
+        requires Lower_Bound ≤ i ≤ Upper_Bound;
+        //ensures e = @A(i) and A = λ j : Z,(
+        //                       {{@e if j = i;
+        //                         @A(j) otherwise;}});
+
+end Bdd_Ceramic_Array_Template;
