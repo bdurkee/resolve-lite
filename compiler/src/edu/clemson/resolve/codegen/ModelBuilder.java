@@ -333,7 +333,11 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         //if we're within a module argument list:
-        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null) {
+        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
+                (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
+                (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
+                built.put(ctx, createFacilityArgumentModel(ctx));   //ok, if the above conditions are true, we're
+                //just a name or a variable (as opposed to some larger expression)
             built.put(ctx, createFacilityArgumentModel(ctx));
         }
         else {
@@ -375,7 +379,11 @@ public class ModelBuilder extends ResolveBaseListener {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
             }
         } catch (SymbolTableException e) {
-            throw new RuntimeException();//shouldn't happen now
+            //Must be some expr then..
+            OutputModelObject o = built.get(ctx);
+            int i;
+            i=0;
+            //throw new RuntimeException();//shouldn't happen now
         }
         return result;
     }
@@ -416,14 +424,14 @@ public class ModelBuilder extends ResolveBaseListener {
             impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx.implBlock().facilityDecl(), built));
         }
         List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
-        /*try {
+        try {
             allParamsFromSpecAndImpl =
-                    symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
+                    symtab.getModuleScope(moduleScope.getImportWithName(ctx.concept))
                             .getSymbolsOfType(ModuleParameterSymbol.class);
             allParamsFromSpecAndImpl.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allParamsFromSpecAndImpl);
         } catch (NoSuchModuleException e) { //shouldn't happen
-        }*/
+        }
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
