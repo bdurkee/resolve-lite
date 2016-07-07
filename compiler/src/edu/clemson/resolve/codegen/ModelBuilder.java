@@ -589,6 +589,9 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir();
             String formedQual = Utils.stripFileExtension(qual.toString());
+            if (isLocallyAccessibleSymbol(corresondingSym)) {
+                formedQual = "this";
+            }
             return new NormalQualifier(formedQual.replaceAll(File.separator, "."));
         }
         else { // if the reference was qualified, let's see if it was a facility or module.
@@ -598,9 +601,14 @@ public class ModelBuilder extends ResolveBaseListener {
                     ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
                     ModuleIdentifier id =
                             ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
-                    String name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
-                            + "." + s.getName();
-
+                    String name = null;
+                    if (isLocallyAccessibleSymbol(s)) {
+                        name = s.getName();
+                    }
+                    else {
+                        name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
+                                + "." + s.getName();
+                    }
                     String qual = Utils.stripFileExtension(id.getPathRelativeToRootDir().toString());
                     return new FacilityQualifier(qual.replaceAll(File.separator, "."), name.replaceAll(File.separator, "."));
                 }
@@ -621,5 +629,12 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             return new NormalQualifier(refQualifier.getText());
         }
+    }
+
+    private boolean isLocallyAccessibleSymbol(@NotNull Symbol s) {
+        ModuleIdentifier id = s.getModuleIdentifier();
+        if (moduleScope.getModuleIdentifier().equals(id)) return true;
+        else if (moduleScope.getInheritedIdentifiers().contains(s.getModuleIdentifier())) return true;
+        else return false;
     }
 }

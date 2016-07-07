@@ -11,10 +11,14 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final Set<ModuleIdentifier> importedModules = new HashSet<>();
 
-    /** The set of all modules {@code this} either extends or inherits from. */
-    private final Set<ModuleIdentifier> locallyInheritedModules = new LinkedHashSet<>();
+    /**
+     * The set of all modules {@code this} either extends or inherits from. This set should be a subset of
+     * {@link #importedModules}.
+     */
+    private final Set<ModuleIdentifier> inheritedModules = new LinkedHashSet<>();
 
-    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull ModuleIdentifier e,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g,
+                       @NotNull ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
@@ -23,7 +27,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     @NotNull
     public ModuleScopeBuilder addInheritedModules(@NotNull ModuleIdentifier... i) {
-        locallyInheritedModules.addAll(Arrays.asList(i));
+        inheritedModules.addAll(Arrays.asList(i));
         return this;
     }
 
@@ -60,6 +64,6 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     public Set<ModuleIdentifier> getInheritedIdentifiers() {
-        return new LinkedHashSet<>(locallyInheritedModules);
+        return new LinkedHashSet<>(inheritedModules);
     }
 }

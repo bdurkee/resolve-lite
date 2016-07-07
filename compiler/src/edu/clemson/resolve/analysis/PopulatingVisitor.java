@@ -120,15 +120,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
-    /*    try {
-            //implementations implicitly gain the parenting concept's useslist
-            ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
-            moduleScope.addImports(conceptScope.getImports());
-
-            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
-        } catch (NoSuchModuleException e) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }*/
+        ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
+        if (conceptIdent != null) moduleScope.addInheritedModules(conceptIdent);
         super.visitChildren(ctx);
         return null;
     }
