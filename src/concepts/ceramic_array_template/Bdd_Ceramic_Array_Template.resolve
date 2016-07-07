@@ -1,4 +1,4 @@
-Concept Bdd_Ceramic_Array_Template(type Entry;
+Concept Bdd_Ceramic_Array_Template (type Entry;
         evaluates Lower_Bound,
                   Upper_Bound : Std_Ints :: Integer);
     uses Standard_Integers, Basic_Integer_Theory;

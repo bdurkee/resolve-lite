@@ -83,7 +83,7 @@ Concept Integer_Template;
             (evaluates i, j : Integer)
                 : Integer;
         ensures
-            Product = (i Basic_Integer_Theory::* j);
+            Product = (i Basic_Integer_Theory::+ j);
 
     Operation Write
             (evaluates a : Integer);

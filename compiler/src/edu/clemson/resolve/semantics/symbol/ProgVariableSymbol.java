@@ -27,8 +27,7 @@ public class ProgVariableSymbol extends Symbol {
         this.mathSymbolAlterEgo =
                 new MathClssftnWrappingSymbol(type.getTypeGraph(), name, Quantification.NONE,
                         new MathNamedClssftn(type.getTypeGraph(),
-                                name, m.typeRefDepth - 1, m), definingTree,
-                        moduleIdentifier);
+                                name, m.typeRefDepth - 1, m), definingTree, moduleIdentifier);
     }
 
     @NotNull
