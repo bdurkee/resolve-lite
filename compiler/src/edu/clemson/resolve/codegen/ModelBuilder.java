@@ -127,25 +127,17 @@ public class ModelBuilder extends ResolveBaseListener {
         f.isStatic = withinFacilityModule();
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
 
-        DecoratedFacilityInstantiation basePtr =
-                new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
+        DecoratedFacilityInstantiation basePtr = new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
         basePtr.isProxied = false;
-        List<Expr> specArgs =
-                ctx.specArgs == null ? new ArrayList<>() :
-                        Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
-        List<Expr> implArgs =
-                ctx.implArgs == null ? new ArrayList<>() :
-                        Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
+        List<Expr> specArgs = ctx.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
+        List<Expr> implArgs = ctx.implArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
         for (ResolveParser.ExtensionPairingContext pair : ctx.extensionPairing()) {
-            DecoratedFacilityInstantiation layer =
-                    new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
-            specArgs = pair.specArgs == null ? new ArrayList<>() :
-                    Utils.collect(Expr.class, pair.specArgs.progExp(), built);
-            implArgs = pair.implArgs == null ? new ArrayList<>() :
-                    Utils.collect(Expr.class, pair.implArgs.progExp(), built);
+            DecoratedFacilityInstantiation layer = new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
+            specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, pair.specArgs.progExp(), built);
+            implArgs = pair.implArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, pair.implArgs.progExp(), built);
             layer.args.addAll(basePtr.args); // always prefaced with the base facility args
             layer.args.addAll(specArgs);
             layer.args.addAll(implArgs);
@@ -230,8 +222,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitParameterDeclGroup(
-            ResolveParser.ParameterDeclGroupContext ctx) {
+    public void exitParameterDeclGroup(ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.ID()) {
             built.put(t, new ParameterDef(t.getText()));
         }
@@ -326,8 +317,7 @@ public class ModelBuilder extends ResolveBaseListener {
                                            @NotNull List<? extends ParseTree> args) {
         List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes o = StdTemplateProgOps.convert(op, argTypes);
-        return new MethodCall(buildQualifier(o.qualifier, o.name.getText()),
-                o.name.getText(), Utils.collect(Expr.class, args, built));
+        return new MethodCall(buildQualifier(o.qualifier, o.name.getText()), o.name.getText(), Utils.collect(Expr.class, args, built));
     }
 
     @Override
@@ -480,8 +470,7 @@ public class ModelBuilder extends ResolveBaseListener {
         //Note that here we only need to query locally for symbols. Meaning
         //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
         //etc from the concept. We just want the ones (if any) from enhancement.
-        spec.addGettersAndMembersForModuleParameterSyms(
-                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
+        spec.addGettersAndMembersForModuleParameterSyms(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
         file.module = spec;
         built.put(ctx, file);
     }
@@ -491,8 +480,7 @@ public class ModelBuilder extends ResolveBaseListener {
         ModuleFile file = buildFile();
         file.genPackage = buildPackage();
 
-        ExtensionImplModule impl = new ExtensionImplModule(
-                ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
+        ExtensionImplModule impl = new ExtensionImplModule(ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
         Scope conceptScope = null;
         /*try {
             conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
@@ -599,8 +587,7 @@ public class ModelBuilder extends ResolveBaseListener {
                 Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier.getText(), true));
                 if (s instanceof FacilitySymbol) {
                     ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
-                    ModuleIdentifier id =
-                            ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
+                    ModuleIdentifier id = ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
                     String name = null;
                     if (isLocallyAccessibleSymbol(s)) {
                         name = s.getName();
