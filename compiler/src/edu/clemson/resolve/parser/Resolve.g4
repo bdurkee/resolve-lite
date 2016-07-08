@@ -413,8 +413,8 @@ mathExp
     |   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')' #mathPrefixAppExp
 //    |   mathExp lop='[' mathExp (',' mathExp)* rop=']'    #mathBracketAppExp
-    |   mathExp mathSymbolExp mathExp                       #mathInfixAppExp
     |   mathExp (':'|'⦂') mathExp                           #mathClssftnAssertionExp
+    |   mathExp mathSymbolExp mathExp                       #mathInfixAppExp
     ;
 
 mathPrimeExp

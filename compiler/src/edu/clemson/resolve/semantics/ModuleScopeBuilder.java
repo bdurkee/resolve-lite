@@ -16,6 +16,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
      * {@link #importedModules}.
      */
     private final Set<ModuleIdentifier> inheritedModules = new LinkedHashSet<>();
+    private final Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
     ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g,
                        @NotNull ModuleIdentifier e,
@@ -23,6 +24,12 @@ public class ModuleScopeBuilder extends ScopeBuilder {
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
         super(symbolTable, g, definingTree, parent, e);
+    }
+
+    @NotNull
+    public ModuleScopeBuilder addAliases(@NotNull Map<String, ModuleIdentifier> aliases) {
+        this.aliases.putAll(aliases);
+        return this;
     }
 
     @NotNull
@@ -48,13 +55,21 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     @NotNull
-    public ModuleIdentifier getImportWithName(@NotNull Token name) {
+    public ModuleIdentifier getImportWithName(@NotNull Token name) throws NoSuchModuleException {
         for (ModuleIdentifier e : importedModules) {
             if (e.getNameToken().getText().equals(name.getText())) {
                 return e;
             }
         }
-        return ModuleIdentifier.createInvalidModuleIdentifier(name);
+        throw new NoSuchModuleException(name);
+    }
+
+    @NotNull
+    public ModuleIdentifier getAlias(@NotNull Token name) throws NoSuchModuleException {
+        if (aliases.get(name.getText()) == null) {
+            throw new NoSuchModuleException(name);
+        }
+        return aliases.get(name.getText());
     }
 
     @NotNull
@@ -65,5 +80,9 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     public Set<ModuleIdentifier> getInheritedIdentifiers() {
         return new LinkedHashSet<>(inheritedModules);
+    }
+
+    public Map<String, ModuleIdentifier> getAliases() {
+        return aliases;
     }
 }

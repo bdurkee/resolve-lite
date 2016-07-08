@@ -49,6 +49,9 @@ public class AnnotatedModule {
      */
     public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
 
+    /** Aliases to modules -- this gets passed off to various moduleScope's */
+    public final Map<String, ModuleIdentifier> aliases = new HashMap<>();
+
     private final String fileName;
     private final Token name;
     private final ParseTree root;
@@ -62,13 +65,16 @@ public class AnnotatedModule {
                            @NotNull String fileName,
                            boolean hasParseErrors,
                            @NotNull Set<ModuleIdentifier> uses,
-                           @NotNull Set<ModuleIdentifier> externalUses) {
+                           @NotNull Set<ModuleIdentifier> externalUses,
+                           @NotNull Map<String, ModuleIdentifier> aliases) {
         this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
+
         this.uses.addAll(uses);
         this.externalUses.addAll(externalUses);
+        this.aliases.putAll(aliases);
 
         this.identifier = new ModuleIdentifier(name, new File(fileName));
         this.contentRoot = identifier.getPackageRoot();
@@ -77,7 +83,7 @@ public class AnnotatedModule {
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName,
                            boolean hasParseErrors,
                            @NotNull Set<ModuleIdentifier> uses) {
-        this(root, name, fileName, hasParseErrors, uses, new HashSet<>());
+        this(root, name, fileName, hasParseErrors, uses, new HashSet<>(), new HashMap<>());
     }
 
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {

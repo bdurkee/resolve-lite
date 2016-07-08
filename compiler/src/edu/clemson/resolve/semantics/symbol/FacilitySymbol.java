@@ -47,9 +47,12 @@ public class FacilitySymbol extends Symbol {
             ModuleParameterization spec = new ModuleParameterization(
                     m.getImportWithName(facility.spec),
                     specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
-            ModuleParameterization impl = new ModuleParameterization(
-                    m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
+            ModuleParameterization impl = null;
 
+            if (facility.externally == null) {
+                impl = new ModuleParameterization(
+                        m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
+            }
             this.type = new SpecImplementationPairing(spec, impl);
 
         } catch (NoSuchModuleException e) {

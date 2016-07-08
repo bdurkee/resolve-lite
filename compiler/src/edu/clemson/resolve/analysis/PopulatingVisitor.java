@@ -92,7 +92,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
-        moduleScope = symtab.startModuleScope(tr).addImports(tr.uses);
+        moduleScope = symtab.startModuleScope(tr)
+                .addImports(tr.uses)
+                .addAliases(tr.aliases);
         super.visitChildren(ctx);
         symtab.endScope();
         return null; //java requires a return, even if its 'Void'
@@ -120,8 +122,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
-        ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
-        if (conceptIdent != null) moduleScope.addInheritedModules(conceptIdent);
+        try {
+            ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(conceptIdent);
+            moduleScope.addImports(conceptScope.getImports())
+                    .addInheritedModules(conceptIdent)
+                    .addAliases(conceptScope.getAliases());
+        } catch (NoSuchModuleException e) {
+            noSuchModule(e);
+        }
         super.visitChildren(ctx);
         return null;
     }
@@ -385,19 +394,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     private void initializeAndSanityCheckInfo(@NotNull ResolveParser.FacilityDeclContext ctx) {
-
-        if (ctx.specArgs != null) {
-            sanityCheckParameterizationArgs(ctx.specArgs.progExp(), moduleScope.getImportWithName(ctx.spec));
-            actualGenericTypesPerFacilitySpecArgs.put(ctx.specArgs, new ArrayList<>());
-        }
-        if (ctx.implArgs != null) {
-            sanityCheckParameterizationArgs(ctx.implArgs.progExp(), moduleScope.getImportWithName(ctx.impl));
-        }
-        for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
-            if (extension.specArgs != null) {
-                actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
+        //try {
+            if (ctx.specArgs != null) {
+                //sanityCheckParameterizationArgs(ctx.specArgs.progExp(), moduleScope.getImportWithName(ctx.spec));
+                actualGenericTypesPerFacilitySpecArgs.put(ctx.specArgs, new ArrayList<>());
             }
-        }
+            if (ctx.implArgs != null) {
+                //sanityCheckParameterizationArgs(ctx.implArgs.progExp(), moduleScope.getImportWithName(ctx.impl));
+            }
+            for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
+                if (extension.specArgs != null) {
+                    actualGenericTypesPerFacilitySpecArgs.put(extension.specArgs, new ArrayList<>());
+                }
+            }
+       // } catch (NoSuchModuleException nsme) {
+       //     noSuchModule(nsme);
+       /// }
     }
 
     @Override
@@ -1244,20 +1256,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathFunctionClssftn expectedFuncType = (MathFunctionClssftn) t;
         List<MathClssftn> actualArgumentTypes = Utils.apply(args, tr.mathClssftns::get);
         List<MathClssftn> formalParameterTypes = expectedFuncType.getParamTypes();
-        //ugly hook to handle chained operator applications like 0 <= i <= j or
-        //j >= i >= 0
-        if ((nameExp.getText().equals("<=") || nameExp.getText().equals("<") || nameExp.getText().equals("≤")) &&
-                args.size() == 2 &&
-                args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
-            ResolveParser.MathInfixAppExpContext argAsInfixApp =
-                    (ResolveParser.MathInfixAppExpContext) args.get(0);
-            if (argAsInfixApp.getChild(1).getText().equals("<=") ||
-                    argAsInfixApp.getChild(1).getText().equals("≤") ||
-                    argAsInfixApp.getChild(1).getText().equals("<")) {
-                MathClssftn x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
-                actualArgumentTypes.set(0, x);
-            }
-        } //end ugly hook.
+
+        handleAndTypeMathBetweenExp(ctx, nameExp, args, actualArgumentTypes);
         //TODO: Factor this out to a helper, get it out of my face.
         if (formalParameterTypes.size() != actualArgumentTypes.size()) {
             compiler.errMgr.semanticError(ErrorKind.INCORRECT_FUNCTION_ARG_COUNT, ctx.getStart(), ctx.getText());
@@ -1268,15 +1268,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             MathClssftn oldExpectedFuncType = expectedFuncType;
 
-            expectedFuncType = (MathFunctionClssftn)
-                    expectedFuncType.deschematize(actualArgumentTypes);
+            expectedFuncType = (MathFunctionClssftn) expectedFuncType.deschematize(actualArgumentTypes);
             if (!oldExpectedFuncType.toString().equals(expectedFuncType.toString())) {
                 compiler.log("expected function type: " + oldExpectedFuncType);
                 compiler.log("   deschematizes to: " + expectedFuncType);
             }
         } catch (BindingException e) {
-            compiler.log("formal params in: '" + asString +
-                    "' don't bind against the actual arg types");
+            compiler.log("formal params in: '" + asString +  "' don't bind against the actual arg types");
         }
         //we have to redo this since deschematize above might've changed the
         //args
@@ -1326,11 +1324,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.INVALID);
         }
         else if (walkingType) {
-            List<MathClssftn> actualNamedArgumentTypes =
-                    Utils.apply(args, exactNamedMathClssftns::get);
-            MathClssftn appType =
-                    expectedFuncType.getApplicationType(
-                            nameExp.getText(), actualNamedArgumentTypes);
+            List<MathClssftn> actualNamedArgumentTypes = Utils.apply(args, exactNamedMathClssftns::get);
+            MathClssftn appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
             exactNamedMathClssftns.put(ctx, appType);
             tr.mathClssftns.put(ctx, appType);
         }
@@ -1347,11 +1342,40 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
+    //modifies actualArgTypes
+    private void handleAndTypeMathBetweenExp(@NotNull ParserRuleContext ctx,
+                                             @NotNull ParserRuleContext nameExp,
+                                             @NotNull List<? extends ParseTree> args,
+                                             @NotNull List<MathClssftn> actualArgTypes) {
+
+        //ugly hook to handle chained operator applications like 0 <= i <= j or
+        //j >= i >= 0
+        if (nameExp instanceof ResolveParser.MathSymbolExpContext) {
+            String nameWithoutQual = ((ResolveParser.MathSymbolExpContext) nameExp).name.getText();
+            Token qualifier = ((ResolveParser.MathSymbolExpContext) nameExp).qualifier;
+            if ((nameWithoutQual.equals("<=") || nameWithoutQual.equals("<") || nameWithoutQual.equals("≤")) &&
+                    args.size() == 2 &&
+                    args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
+                ResolveParser.MathInfixAppExpContext argAsInfixApp =
+                        (ResolveParser.MathInfixAppExpContext) args.get(0);
+                if (!(argAsInfixApp.getChild(1) instanceof ResolveParser.MathSymbolExpContext)) return;
+                ResolveParser.MathSymbolExpContext symExp =
+                        (ResolveParser.MathSymbolExpContext) argAsInfixApp.getChild(1);
+                String symExpName = symExp.name.getText();
+                if (symExpName.equals("<=") ||
+                        symExpName.equals("≤") ||
+                        symExpName.equals("<")) {
+                    MathClssftn x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
+                    actualArgTypes.set(0, x);
+                }
+            } //end ugly hook.
+        }
+    }
+
     @Override
     public Void visitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         if (prevSelectorAccess != null) {
-            typeMathSelectorAccessExp(ctx, prevSelectorAccess,
-                    ctx.name.getText());
+            typeMathSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
         }
         else {
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());

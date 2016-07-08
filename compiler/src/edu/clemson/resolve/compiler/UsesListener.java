@@ -27,6 +27,7 @@ public class UsesListener extends ResolveBaseListener {
     private final RESOLVECompiler compiler;
     public final Set<ModuleIdentifier> uses = new HashSet<>();
     public final Set<ModuleIdentifier> extUses = new HashSet<>();
+    public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -40,7 +41,17 @@ public class UsesListener extends ResolveBaseListener {
                 compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, u.ID().getSymbol(), u.ID().getText());
                 continue;
             }
-            uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+            ModuleIdentifier e = new ModuleIdentifier(u.ID().getSymbol(), f);
+            if (u.aliasClause() != null) {
+                String alias = u.aliasClause().ID().getText();
+                if (aliases.containsKey(alias)) {
+                    //TODO: error, duplicate alias
+                }
+                else {
+                    aliases.put(alias, e);
+                }
+            }
+            uses.add(e);
         }
     }
 

@@ -41,14 +41,22 @@ public class QualifiedPath implements ScopeSearchPath {
             //Dtw returnEnsuresArgSubstitutions:
             for (ModuleParameterization enh : facility.getEnhancements()) {
                 Scope enhScope = enh.getScope(instantiateGenerics);
-                result.addAll(enhScope.getMatches(searcher,
-                        SearchContext.FACILITY));
+                result.addAll(enhScope.getMatches(searcher, SearchContext.FACILITY));
             }
         } catch (NoSuchSymbolException | ClassCastException e) {
             //then perhaps it identifies a module..
             ModuleScopeBuilder sourceModuleScope = repo.getModuleScope(source.getModuleIdentifier());
-            ModuleScopeBuilder referencedModuleScope =
-                    repo.getModuleScope(sourceModuleScope.getImportWithName(qualifier));
+            ModuleIdentifier qualifierModuleIdentifier = null;
+            try {
+                qualifierModuleIdentifier = sourceModuleScope.getImportWithName(qualifier);
+            } catch (NoSuchModuleException e2) {
+                //let's try to get its alias (note, if there is no alias with this name,
+                //this getter will throw the appropriate no such module exception
+                qualifierModuleIdentifier = sourceModuleScope.getAlias(qualifier);
+            }
+            //Note that if qualifierModuleIdentifier can't null here, a no such module exception would've been
+            //thrown in the prior try catch block.
+            ModuleScopeBuilder referencedModuleScope = repo.getModuleScope(qualifierModuleIdentifier);
             result = referencedModuleScope.getMatches(searcher, TableSearcher.SearchContext.IMPORT);
         }
         return result;

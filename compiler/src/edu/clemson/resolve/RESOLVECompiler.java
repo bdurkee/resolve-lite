@@ -410,7 +410,8 @@ public class RESOLVECompiler {
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.uses, l.extUses);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors,
+                l.uses, l.extUses, l.aliases);
     }
 
     @NotNull
