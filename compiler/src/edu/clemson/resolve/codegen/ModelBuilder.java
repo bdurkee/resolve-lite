@@ -185,9 +185,7 @@ public class ModelBuilder extends ResolveBaseListener {
         MemberClassDef representationClass = new MemberClassDef(ctx.name.getText());
         String exemplarName = "";
         try {
-            ProgReprTypeSymbol x =
-                    moduleScope.queryForOne(new UnqualifiedNameQuery(
-                            ctx.name.getText())).toProgReprTypeSymbol();
+            ProgReprTypeSymbol x = moduleScope.queryForOne(new UnqualifiedNameQuery(ctx.name.getText())).toProgReprTypeSymbol();
             exemplarName = ((ProgNamedType) x.toProgTypeSymbol().getProgramType()).getExemplarName();
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             exemplarName = ctx.name.getText().substring(0, 1); //default name
