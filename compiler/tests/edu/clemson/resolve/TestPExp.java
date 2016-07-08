@@ -286,7 +286,7 @@ public class TestPExp extends BaseTest {
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
-                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream().collect(Collectors.toSet());
+                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream().collect(Collectors.toSet());                                 
         Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }

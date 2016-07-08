@@ -275,10 +275,10 @@ elseStmt : 'else' stmt* ;
 // program expressions
 
 progExp
-    :   progExp name=progSymbolExp progExp              #progInfixExp
-    |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
-    |   progPrimary                                     #progPrimaryExp
+    |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    |   progExp name=progSymbolExp progExp              #progInfixExp
     ;
 
 progPrimary
