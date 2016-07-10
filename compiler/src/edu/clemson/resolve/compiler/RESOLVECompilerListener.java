@@ -30,6 +30,7 @@
  */
 package edu.clemson.resolve.compiler;
 
+/** A general purpose listening interface for the RESOLVE compiler. Adapted to our needs from the ANTLR v4 project. */
 public interface RESOLVECompilerListener {
 
     public void info(String msg);

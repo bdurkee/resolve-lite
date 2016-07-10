@@ -7,14 +7,15 @@ import java.util.List;
 public class Stat extends OutputModelObject {
 
     public static class CallStat extends Stat {
-        @ModelElement public Expr methodParamExp;
+        @ModelElement
+        public Expr methodParamExp;
 
         public CallStat(Qualifier qualifier, String name, Expr... args) {
             this(qualifier, name, Arrays.asList(args));
         }
 
         public CallStat(Expr expr) {
-            if ( expr instanceof MethodCall.OperationParameterMethodCall ||
+            if (expr instanceof MethodCall.OperationParameterMethodCall ||
                     expr instanceof MethodCall) {
                 this.methodParamExp = expr;
             }
@@ -38,9 +39,12 @@ public class Stat extends OutputModelObject {
 
     public static class IfStat extends Stat {
 
-        @ModelElement public List<Stat> ifStats = new ArrayList<>();
-        @ModelElement public List<Stat> elseStats = new ArrayList<>();
-        @ModelElement public Expr cond;
+        @ModelElement
+        public List<Stat> ifStats = new ArrayList<>();
+        @ModelElement
+        public List<Stat> elseStats = new ArrayList<>();
+        @ModelElement
+        public Expr cond;
 
         public IfStat(Expr cond) {
             this.cond = cond;
@@ -48,8 +52,10 @@ public class Stat extends OutputModelObject {
     }
 
     public static class WhileStat extends Stat {
-        @ModelElement public Expr cond;
-        @ModelElement public List<Stat> stats = new ArrayList<>();
+        @ModelElement
+        public Expr cond;
+        @ModelElement
+        public List<Stat> stats = new ArrayList<>();
 
         public WhileStat(Expr cond) {
             this.cond = cond;

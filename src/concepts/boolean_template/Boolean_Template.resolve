@@ -1,0 +1,39 @@
+Concept Boolean_Template;
+
+    Type family Boolean
+                is modeled by B;
+        exemplar b;
+        initialization
+            ensures b = true;
+    
+    Operation True () : Boolean;
+        ensures True = true;
+
+    Operation False () : Boolean;
+        ensures False = false;
+
+    Operation And /*[infix and]*/ (evaluates a, b : Boolean) : Boolean;
+        ensures And = (a ∧ b);
+
+    Operation Or /*[infix or]*/ (evaluates a, b : Boolean)
+                : Boolean;
+        ensures Or = (a ∨ b);
+
+    Operation Not
+            (evaluates a : Boolean)
+                : Boolean;
+        ensures Not = ⌐(a);
+
+    Operation Are_Equal
+            (evaluates a, b : Boolean)
+                : Boolean;
+        ensures Are_Equal = (a = b);
+
+    Operation Are_Not_Equal
+            (evaluates a, b : Boolean)
+                : Boolean;
+        ensures Are_Not_Equal = (a ≠ b);
+
+    Operation Write_Line(evaluates a : Boolean);
+
+end Boolean_Template;

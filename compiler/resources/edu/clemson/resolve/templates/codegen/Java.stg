@@ -31,16 +31,20 @@
 
 ModuleFile(file, module) ::= <<
 <fileHeader(file.resolveFileName, file.RESOLVEVersion)>
+<if(file.genPackage)>
+package <file.genPackage>;
+<endif>
+
+<file.imports: {f|import <f>;}; separator="\n">
+
 import java.lang.reflect.*;
+import edu.clemson.resolve.runtime.*;
 
 <module>
 >>
 
 fileHeader(resolveFileName, RESOLVEVersion) ::= <<
-/**
- * Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>.
- * This file should not be modified.
- */
+/** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>. This file should not be modified. */
 >>
 
 ConceptModule(concept, types, funcs) ::= <<
@@ -50,8 +54,8 @@ public interface <concept.name> {
 }
 >>
 
-EnhancementModule(enhancement, types, funcs) ::= <<
-public interface <enhancement.name> extends <enhancement.concept> {
+ExtensionModule(ext, types, funcs) ::= <<
+public interface <ext.name> extends <ext.concept> {
     <types; separator="\n">
     <funcs; separator="\n">
 }
@@ -69,7 +73,7 @@ public class <impl.name> implements <impl.concept> {
 }
 >>
 
-EnhancementImplModule(impl, ctor, memberVars, repClasses, funcImpls, delegateMethods, opParams) ::= <<
+ExtensionImplModule(impl, ctor, memberVars, repClasses, funcImpls, delegateMethods, opParams) ::= <<
 public class <impl.name>
     implements
         <impl.enhancement>, <impl.concept>, InvocationHandler {
@@ -92,12 +96,20 @@ public class <impl.name>
     @Override public Object invoke(Object proxy, Method method,
             Object[] args) throws Throwable {
         <if(funcImpls)><\\>
+        switch (method.getName()) {
+        <funcImpls: {f | case "<f.func.name>": return method.invoke(this, args);}; separator="\n">
+        default: return method.invoke(delegate, args);
+        }
+        <else>
+        return method.invoke(delegate, args);
+        <endif>
+        <!<if(funcImpls)><\\>
         <first(funcImpls): {f | if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
         <rest(funcImpls) : {f | else if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
         else return method.invoke(delegate, args);
         <else>
         return method.invoke(delegate, args);
-        <endif>
+        <endif>!>
     }
 
     public static <impl.concept> createProxy(<[{<memberVars: {m|RType <m.var.name>}; anchor, separator=", \n">},
@@ -125,14 +137,14 @@ public <if(func.func.hasReturn)>RType<else>void<endif> <\\>
 }
 >>
 
-FacilityImplModule(impl, facilities, funcImpls, repClasses) ::= <<
-public class <impl.name> {
+FacilityImplModule(facility, facilities, funcImpls, repClasses) ::= <<
+public class <facility.name> {
     <facilities; separator="\n">
     <repClasses; separator="\n">
     <funcImpls; separator="\n">
-    <if(impl.definedMain)>
+    <if(facility.definedMain)>
     public static void main(String[] args) {
-        <impl.definedMain>();
+        <facility.definedMain>();
     }
     <endif>
 }
@@ -144,11 +156,11 @@ public <ctor.name>(<ctor.members: {c|RType <c>}; separator=", ">) {
 }
 
 /**
- * This constructor should only get invoked in the case of enhancements; as
- * the last parameter 'delegate' takes an instance of the base concept.
+ * This constructor should only get invoked in the case of enhancements; as the last parameter 'delegate' takes an
+ * instance of the base concept.
  * \<p>
- * The only reason it's here is simplicity. If the compiler is correct,
- * this will never get invoked from the wrong place.\</p>
+ * The only reason it's here is simplicity. If the compiler is correct, this should never get invoked from the
+ * wrong place.\</p>
  */
 public <ctor.name>(<[{<ctor.members: {c|RType <c>}; anchor, separator=", \n">},
                      {<ctor.delegateInterface> delegate}]; anchor, separator=", \n">) {
@@ -246,7 +258,7 @@ class <clazz.name>_Rep {
     }
 
     @Override public String toString() {
-        return <fields: {f|<f.var.name>.toString()}; separator="+">;
+        return <if(fields)><fields: {f|<f.var.name>.toString()}; separator="+"><else>""<endif>;
     }
 }
 public<if(clazz.isStatic)> static<endif> RType init<clazz.name>() {
@@ -284,15 +296,9 @@ OperationParameterMethodCall(call, args) ::=
 
 VarNameRef(v) ::= "<v.name>"
 
-MemberRef(ref, child) ::= <%
-<if(ref.isBaseRef)>
-((<ref.typeQualifier>.<ref.typeName>)<ref.name>)
-<elseif(ref.isLastRef)>
-(<child>).rep.<ref.name>
-<else>
-((<ref.typeQualifier>.<ref.typeName>)(<child>).rep.<ref.name>)
-<endif>
-%>
+AccessRef(a, left, right) ::= "<left>.<right>"
+LeafAccessRefLeft(l, name) ::= "((<l.type>)<name>)"
+LeafAccessRefRight(l, name) ::= "rep.<name>"
 
 AnonOpParameterClassInstance(wrappedFunc, q) ::= <<
 new BaseOperationParameter() {
@@ -311,7 +317,7 @@ new BaseOperationParameter() {
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.referencedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
+((<q.fullyQualifiedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
 <toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
 
 NormalQualifier(q) ::= "<q.name>"
@@ -324,10 +330,12 @@ toJavaPrimitive ::= [
 ]
 
 toStdFacilityName ::= [
-    "Std_Boolean_Fac":"Standard_Booleans.INSTANCE",
-    "Std_Integer_Fac":"Standard_Integers.INSTANCE",
-    "Std_Character_Fac":"Standard_Characters.INSTANCE",
-    "Std_Char_Str_Fac":"Standard_Char_Strings.INSTANCE"
+    "Std_Bools":"Standard_Booleans.INSTANCE",
+    "Std_Ints":"Standard_Integers.INSTANCE",
+    "Std_Chars":"Standard_Characters.INSTANCE",
+    "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
+
+externalClassCode(code) ::= "<code>"
 
 fileExtension() ::= ".java"

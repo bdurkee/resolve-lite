@@ -1,37 +1,81 @@
 package edu.clemson.resolve.codegen;
 
 import edu.clemson.resolve.codegen.model.*;
-import edu.clemson.resolve.compiler.AnnotatedTree;
+import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.compiler.ErrorKind;
+import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.misc.HardCodedProgOps;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.semantics.*;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.rsrg.semantics.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import edu.clemson.resolve.semantics.programtype.ProgNamedType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
+import edu.clemson.resolve.semantics.query.NameQuery;
+import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
+import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
+import edu.clemson.resolve.semantics.symbol.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefLeft;
+import static edu.clemson.resolve.codegen.model.AccessRef.LeafAccessRefRight;
+import static edu.clemson.resolve.codegen.model.Qualifier.FacilityQualifier;
+import static edu.clemson.resolve.codegen.model.Qualifier.NormalQualifier;
+import static edu.clemson.resolve.codegen.model.Stat.*;
 
 public class ModelBuilder extends ResolveBaseListener {
 
-    public ParseTreeProperty<OutputModelObject> built =
-            new ParseTreeProperty<>();
-    private final ModuleScopeBuilder moduleScope;
+    ParseTreeProperty<OutputModelObject> built = new ParseTreeProperty<>();
+
     private final JavaCodeGenerator gen;
     private final MathSymbolTable symtab;
-    private final AnnotatedTree tr;
 
-    public ModelBuilder(JavaCodeGenerator g, MathSymbolTable symtab) {
-        this.gen = g;
-        this.moduleScope = symtab.getModuleScope(g.getModule().getName());
+    @NotNull
+    private final AnnotatedModule tr;
+    @NotNull
+    private final RESOLVECompiler compiler;
+
+    private ModuleScopeBuilder moduleScope;
+
+    public ModelBuilder(@NotNull JavaCodeGenerator gen, @NotNull MathSymbolTable symtab) {
+        this.gen = gen;
         this.symtab = symtab;
-        this.tr = g.getModule();
+        this.compiler = gen.compiler;
+        this.tr = gen.getModule();
+        try {
+            this.moduleScope = symtab.getModuleScope(tr.getModuleIdentifier());
+        } catch (NoSuchModuleException e) {
+        }
     }
 
-  /*  @Override public void exitTypeModelDecl(Resolve.TypeModelDeclContext ctx) {
+    @Override
+    public void exitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
+        built.put(ctx, built.get(ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitTypeModelDecl(ResolveParser.TypeModelDeclContext ctx) {
         built.put(ctx, new TypeInterfaceDef(ctx.name.getText()));
     }
 
-    @Override public void exitOperationDecl(Resolve.OperationDeclContext ctx) {
+    @Override
+    public void exitOperationDecl(ResolveParser.OperationDeclContext ctx) {
         FunctionDef f = new FunctionDef(ctx.name.getText());
         f.hasReturn = ctx.type() != null;
         f.isStatic = withinFacilityModule();
-        for (Resolve.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx.operationParameterList().parameterDeclGroup()) {
             for (TerminalNode id : grp.ID()) {
                 f.params.add((ParameterDef) built.get(id));
             }
@@ -39,47 +83,44 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override public void exitOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
+    @Override
+    public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
-                        ctx.type(), ctx.operationParameterList()
-                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                        ctx.type(), ctx.operationParameterList().parameterDeclGroup(), ctx.varDeclGroup(),
                         ctx.stmt());
         built.put(ctx, f);
     }
 
-    @Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
+    @Override
+    public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         FunctionImpl f =
                 buildFunctionImpl(ctx.name.getText(),
-                        ctx.type(), ctx.operationParameterList()
-                                .parameterDeclGroup(), ctx.variableDeclGroup(),
+                        ctx.type(), ctx.operationParameterList().parameterDeclGroup(), ctx.varDeclGroup(),
                         ctx.stmt());
         f.implementsOper = true;
         built.put(ctx, f);
     }
 
-    protected FunctionImpl buildFunctionImpl(String name,
-                                             Resolve.TypeContext type,
-                                             List<Resolve.ParameterDeclGroupContext> paramGroupings,
-                                             List<Resolve.VariableDeclGroupContext> variableGroupings,
-                                             List<Resolve.StmtContext> stats) {
+    protected FunctionImpl buildFunctionImpl(@NotNull String name,
+                                             @Nullable ResolveParser.TypeContext type,
+                                             @NotNull List<ResolveParser.ParameterDeclGroupContext> paramGroupings,
+                                             @NotNull List<ResolveParser.VarDeclGroupContext> variableGroupings,
+                                             @NotNull List<ResolveParser.StmtContext> stats) {
         FunctionImpl f = new FunctionImpl(name);
         f.hasReturn = type != null;
         f.isStatic = withinFacilityModule();
-        for (Resolve.ParameterDeclGroupContext grp : paramGroupings) {
+        for (ResolveParser.ParameterDeclGroupContext grp : paramGroupings) {
             f.params.addAll(Utils.collect(ParameterDef.class, grp.ID(), built));
         }
-        for (Resolve.VariableDeclGroupContext grp : variableGroupings) {
+        for (ResolveParser.VarDeclGroupContext grp : variableGroupings) {
             f.vars.addAll(Utils.collect(VariableDef.class, grp.ID(), built));
         }
-        for (Resolve.StmtContext s : stats) {
+        for (ResolveParser.StmtContext s : stats) {
             f.stats.add((Stat) built.get(s));
-            //Resolve returns are buried in an assignment
+            //ResolveParser returns are buried in an assignment
             //(specifically those assignments whose lhs == funcname)
-            if ( s.assignStmt() != null
-                    && s.assignStmt().left.getText().equals(name)
-                    && f.hasReturn ) {
+            if (s.assignStmt() != null && s.assignStmt().left.getText().equals(name) && f.hasReturn) {
                 Expr rhs = (Expr) built.get(s.assignStmt().right);
                 f.vars.add(new VariableDef(name, rhs));
                 f.stats.add(new ReturnStat(name));
@@ -88,48 +129,31 @@ public class ModelBuilder extends ResolveBaseListener {
         return f;
     }
 
-    @Override public void exitFacilityDecl(Resolve.FacilityDeclContext ctx) {
+    @Override
+    public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         FacilityDef f = new FacilityDef(ctx.name.getText(), ctx.spec.getText());
         f.isStatic = withinFacilityModule();
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
 
         DecoratedFacilityInstantiation basePtr =
-                new DecoratedFacilityInstantiation(ctx.spec.getText(),
-                        ctx.impl.getText());
+                new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
         basePtr.isProxied = false;
-        for (Resolve.TypeContext t : ctx.type()) {
-            try {
-                Symbol s =
-                        moduleScope.queryForOne(new NameQuery(t.qualifier,
-                                t.name, true));
-                if ( s instanceof GenericSymbol) {
-                    basePtr.args.add(new MethodCall((TypeInit) built.get(t)));
-                }
-                else {
-                    basePtr.args.add((TypeInit) built.get(t));
-                }
-            }
-            catch (NoSuchSymbolException | DuplicateSymbolException e) {
-                e.printStackTrace();
-            }
-        }
         List<Expr> specArgs =
-                ctx.specArgs == null ? new ArrayList<>() : Utils.collect(
-                        Expr.class, ctx.specArgs.moduleArgument(), built);
+                ctx.specArgs == null ? new ArrayList<>() :
+                        Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
         List<Expr> implArgs =
-                ctx.implArgs == null ? new ArrayList<>() : Utils.collect(
-                        Expr.class, ctx.implArgs.moduleArgument(), built);
+                ctx.implArgs == null ? new ArrayList<>() :
+                        Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
 
-        for (Resolve.EnhancementPairDeclContext pair : ctx.enhancementPairDecl()) {
+        for (ResolveParser.ExtensionPairingContext pair : ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer =
-                    new DecoratedFacilityInstantiation(pair.spec.getText(),
-                            pair.impl.getText());
-            specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(
-                            Expr.class, pair.specArgs.moduleArgument(), built);
-            implArgs = pair.implArgs == null ? new ArrayList<>() : Utils.collect(
-                            Expr.class, pair.implArgs.moduleArgument(), built);
+                    new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
+            specArgs = pair.specArgs == null ? new ArrayList<>() :
+                    Utils.collect(Expr.class, pair.specArgs.progExp(), built);
+            implArgs = pair.implArgs == null ? new ArrayList<>() :
+                    Utils.collect(Expr.class, pair.implArgs.progExp(), built);
             layer.args.addAll(basePtr.args); // always prefaced with the base facility args
             layer.args.addAll(specArgs);
             layer.args.addAll(implArgs);
@@ -137,8 +161,8 @@ public class ModelBuilder extends ResolveBaseListener {
         }
 
         for (int i = 0; i < layers.size(); i++) {
-            layers.get(i).isProxied = ctx.enhancementPairDecl().size() > 1;
-            if ( i + 1 < layers.size() ) {
+            layers.get(i).isProxied = ctx.extensionPairing().size() > 1;
+            if (i + 1 < layers.size()) {
                 layers.get(i).child = layers.get(i + 1);
             }
             else {
@@ -149,8 +173,8 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, f);
     }
 
-    @Override public void exitVariableDeclGroup(
-            Resolve.VariableDeclGroupContext ctx) {
+    @Override
+    public void exitVarDeclGroup(ResolveParser.VarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -158,8 +182,8 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitRecordVariableDeclGroup(
-            Resolve.RecordVariableDeclGroupContext ctx) {
+    @Override
+    public void exitRecordVarDeclGroup(ResolveParser.RecordVarDeclGroupContext ctx) {
         Expr init = (Expr) built.get(ctx.type());
         for (TerminalNode t : ctx.ID()) {
             //System.out.println("adding "+t.getText()+" to built map");
@@ -167,469 +191,411 @@ public class ModelBuilder extends ResolveBaseListener {
         }
     }
 
-    @Override public void exitType(Resolve.TypeContext ctx) {
-        built.put(ctx, new TypeInit(buildQualifier(
-                ctx.qualifier, ctx.name), ctx.name.getText(), ""));
+    @Override
+    public void exitNamedType(ResolveParser.NamedTypeContext ctx) {
+        built.put(ctx, new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
     }
 
-    @Override public void exitTypeRepresentationDecl(
-            Resolve.TypeRepresentationDeclContext ctx) {
-        MemberClassDef representationClass =
-                new MemberClassDef(ctx.name.getText());
+    @Override
+    public void exitTypeRepresentationDecl(ResolveParser.TypeRepresentationDeclContext ctx) {
+        MemberClassDef representationClass = new MemberClassDef(ctx.name.getText());
         String exemplarName = "";
         try {
             ProgReprTypeSymbol x =
-                    moduleScope.queryForOne(
-                            new UnqualifiedNameQuery(ctx.name.getText()))
-                            .toProgReprTypeSymbol();
-            exemplarName =
-                    ((PTNamed) x.toProgTypeSymbol().getProgramType())
-                            .getExemplarName();
-        }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
+                    moduleScope.queryForOne(new UnqualifiedNameQuery(
+                            ctx.name.getText())).toProgReprTypeSymbol();
+            exemplarName = ((ProgNamedType) x.toProgTypeSymbol().getProgramType()).getExemplarName();
+        } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             exemplarName = ctx.name.getText().substring(0, 1); //default name
+        } catch (UnexpectedSymbolException use) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.name, "a type representation", ctx.name.getText(),
+                    use.getTheUnexpectedSymbolDescription());
+        } catch (NoSuchModuleException e) {
+            e.printStackTrace();
         }
         representationClass.isStatic = withinFacilityModule();
         representationClass.referredToByExemplar = exemplarName;
-        if ( ctx.record() != null ) {
-            for (Resolve.RecordVariableDeclGroupContext grp : ctx
-                    .record().recordVariableDeclGroup()) {
-                representationClass.fields.addAll(Utils.collect(
-                        VariableDef.class, grp.ID(), built));
+        if (ctx.type() instanceof ResolveParser.RecordTypeContext) {
+            ResolveParser.RecordTypeContext typeAsRecord = (ResolveParser.RecordTypeContext) ctx.type();
+            for (ResolveParser.RecordVarDeclGroupContext grp : typeAsRecord.recordVarDeclGroup()) {
+                representationClass.fields.addAll(Utils.collect(VariableDef.class, grp.ID(), built));
             }
         }
-        if ( ctx.typeImplInit() != null ) {
-            representationClass.initVars.addAll(Utils.collect(
-                    VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
-                    built));
-            representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
-                    .typeImplInit().stmt(), built));
+        if (ctx.typeImplInit() != null) {
+            //representationClass.initVars.addAll(Utils.collect(
+            //        VariableDef.class, ctx.typeImplInit().variableDeclGroup(),
+            //        built));
+            for (ResolveParser.VarDeclGroupContext grp : ctx.typeImplInit().varDeclGroup()) {
+                for (TerminalNode t : grp.ID()) {
+                    representationClass.initVars.add((VariableDef) built.get(t));
+                }
+            }
+            //representationClass.initStats.addAll(Utils.collect(Stat.class, ctx
+            //        .typeImplInit().stmt(), built));
         }
         built.put(ctx, representationClass);
     }
 
-    @Override public void exitParameterDeclGroup(
-            Resolve.ParameterDeclGroupContext ctx) {
+    @Override
+    public void exitParameterDeclGroup(
+            ResolveParser.ParameterDeclGroupContext ctx) {
         for (TerminalNode t : ctx.ID()) {
             built.put(t, new ParameterDef(t.getText()));
         }
     }
 
-    @Override public void exitModule(Resolve.ModuleContext ctx) {
+    @Override
+    public void exitStmt(ResolveParser.StmtContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitModuleArgument(
-            Resolve.ModuleArgumentContext ctx) {
-        Expr e = (Expr) built.get(ctx.progExp());
-        if ( e instanceof VarNameRef ) {
-            //If this is true, then we're likely dealing with a math definition
-            //(which has no sensible prog type), so we ignore the rest of our
-            //logic here
-            //Yes, kind of weird, but then again, so is passing defs as params...
-            if (tr.progTypes.get(ctx.progExp()) == null) return;
-
-            //Todo: I think it's ok to do getChild(0) here; we know we're
-            //dealing with a VarNameRef (so our (2nd) child ctx must be progNamedExp)...
-            //Todo2: this line below is pretty fugly. Change me eventually.
-            Resolve.ProgNamedExpContext argAsNamedExp =
-                    (Resolve.ProgNamedExpContext) ctx.progExp()
-                            .getChild(0).getChild(0).getChild(0);
-            try {
-                OperationSymbol s =
-                        moduleScope.queryForOne(
-                                new NameQuery(argAsNamedExp.qualifier,
-                                        argAsNamedExp.name, true))
-                                .toOperationSymbol();
-                e =
-                        new AnonOpParameterClassInstance(buildQualifier(
-                                argAsNamedExp.qualifier, argAsNamedExp.name), s);
-            }
-            catch (UnexpectedSymbolException use) {
-                e = new VarNameRef(null, "get" + argAsNamedExp.name.getText() + "()");
-            }
-            catch (NoSuchSymbolException | DuplicateSymbolException e1) {
-                e1.printStackTrace();
-            }
-        }
-        built.put(ctx, e);
-    }
-
-    private Symbol findSymbolFor(Token qualifier, Token name) {
-        try {
-            return symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(qualifier, name, true));
-        } catch (NoSuchSymbolException|DuplicateSymbolException e) {
-            throw new RuntimeException();//shouldn't happen
-        }
-    }
-
-    @Override public void exitStmt(Resolve.StmtContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
-    }
-
-    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
+    @Override
+    public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         built.put(ctx, buildPrimitiveInfixStat("assign", ctx.left, ctx.right));
     }
 
-    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
+    @Override
+    public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
         built.put(ctx, buildPrimitiveInfixStat("swap", ctx.left, ctx.right));
     }
 
-    @Override public void exitCallStmt(Resolve.CallStmtContext ctx) {
-        built.put(ctx, new CallStat((Expr) built.get(ctx.progExp())));
+    @Override
+    public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
+        built.put(ctx, new CallStat((Expr) built.get(ctx.progParamExp())));
     }
 
-    @Override public void exitWhileStmt(Resolve.WhileStmtContext ctx) {
+    @Override
+    public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
         WhileStat w = new WhileStat((Expr) built.get(ctx.progExp()));
         w.stats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
         built.put(ctx, w);
     }
 
-    @Override public void exitIfStmt(Resolve.IfStmtContext ctx) {
+    @Override
+    public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
         IfStat i = new IfStat((Expr) built.get(ctx.progExp()));
         i.ifStats.addAll(Utils.collect(Stat.class, ctx.stmt(), built));
-        if ( ctx.elsePart() != null ) {
-            i.elseStats.addAll(Utils.collect(Stat.class,
-                    ctx.elsePart().stmt(), built));
+        if (ctx.elseStmt() != null) {
+            i.elseStats.addAll(Utils.collect(Stat.class, ctx.elseStmt().stmt(), built));
         }
         built.put(ctx, i);
     }
 
-    @Override public void exitProgNestedExp(Resolve.ProgNestedExpContext ctx) {
+    @Override
+    public void exitProgNestedExp(ResolveParser.ProgNestedExpContext ctx) {
         built.put(ctx, built.get(ctx.progExp()));
     }
 
-    @Override public void exitProgPrimaryExp(Resolve.ProgPrimaryExpContext ctx) {
+    @Override
+    public void exitProgPrimaryExp(ResolveParser.ProgPrimaryExpContext ctx) {
         built.put(ctx, built.get(ctx.progPrimary()));
     }
 
-    @Override public void exitProgPrimary(Resolve.ProgPrimaryContext ctx) {
+    @Override
+    public void exitProgPrimary(ResolveParser.ProgPrimaryContext ctx) {
         built.put(ctx, built.get(ctx.getChild(0)));
     }
 
-    @Override public void exitProgParamExp(Resolve.ProgParamExpContext ctx) {
+    @Override
+    public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        if ( referencesOperationParameter(ctx.name.getText()) ) {
-            built.put(ctx, new MethodCall.OperationParameterMethodCall(
-                    ctx.name.getText(), args));
+        if (referencesOperationParameter(ctx.progNamedExp().name.getText())) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progNamedExp().name.getText(), args));
         }
         else {
-            built.put(ctx, new MethodCall(buildQualifier(ctx.qualifier,
-                    ctx.name), ctx.name.getText(), args));
+            built.put(ctx, new MethodCall(buildQualifier(
+                    ctx.progNamedExp().qualifier, ctx.progNamedExp().name),
+                    ctx.progNamedExp().name.getText(), args));
         }
     }
 
     private boolean referencesOperationParameter(String name) {
-        return !moduleScope.getSymbolsOfType(OperationSymbol.class).stream()
-                .filter(f -> f.getName().equals(name))
-                .filter(OperationSymbol::isModuleParameter)
-                .collect(Collectors.toList())
-                .isEmpty();
-    }
-
-    @Override public void exitProgUnaryExp(Resolve.ProgUnaryExpContext ctx) {
-        if (ctx.NOT() != null) {
-            built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
-        }
-        else {
-            Token qualifier =
-                    Utils.createTokenFrom(ctx.getStart(), "Std_Integer_Fac");
-            Token name = Utils.createTokenFrom(ctx.getStart(), "Negate");
-            built.put(ctx, new MethodCall(buildQualifier(qualifier, name),
-                    name.getText(), (Expr) built.get(ctx.progExp())));
-        }
-    }
-
-    @Override public void exitProgPostfixExp(
-            Resolve.ProgPostfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
-    }
-
-    @Override public void exitProgInfixExp(Resolve.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
-    }
-
-    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
-                                           ParseTree... args) {
-        return buildSugaredProgExp(ctx, op, Arrays.asList(args));
-    }
-
-    private MethodCall buildSugaredProgExp(ParserRuleContext ctx, Token op,
-                                           List<? extends ParseTree> args) {
-        List<PTType> argTypes = args.stream().map(tr.progTypes::get)
-                .collect(Collectors.toList());
-        HardCodedProgOps.BuiltInOpAttributes o =
-                HardCodedProgOps.convert(op, argTypes);
-        return new MethodCall(buildQualifier(o.qualifier, o.name),
-                o.name.getText(), Utils.collect(Expr.class, args, built));
-    }
-
-    @Override public void exitProgVarExp(Resolve.ProgVarExpContext ctx) {
-        built.put(ctx, built.get(ctx.getChild(0)));
-    }
-
-    @Override public void exitProgNamedExp(Resolve.ProgNamedExpContext ctx) {
-        built.put(ctx, new VarNameRef(new NormalQualifier("this"),
-                ctx.name.getText()));
-    }
-
-    @Override public void exitProgMemberExp(Resolve.ProgMemberExpContext ctx) {
-        List<MemberRef> refs = ctx.ID()
-                .stream()
-                .map(t -> new MemberRef(t.getText(), tr.progTypes.get(t)))
-                .collect(Collectors.toList());
-        Collections.reverse(refs);
-        refs.add(new MemberRef(ctx.progNamedExp().name.getText(),
-                tr.progTypes.get(ctx.progNamedExp())));
-
-        for (int i = 0; i < refs.size(); i++) {
-            refs.get(i).isLastRef = i==0;
-            if (i + 1 < refs.size()) {
-                refs.get(i).child = refs.get(i + 1);
-            } else {
-                refs.get(i).isBaseRef = true;
-            }
-        }
-        built.put(ctx, refs.get(0));
-    }
-
-    @Override public void exitProgBooleanLiteralExp(
-            Resolve.ProgBooleanLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Boolean_Template",
-                "Std_Boolean_Fac"), "Boolean", ctx.getText()));
-    }
-
-    @Override public void exitProgIntegerLiteralExp(
-            Resolve.ProgIntegerLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Integer_Template",
-                "Std_Integer_Fac"), "Integer", ctx.getText()));
-    }
-
-    @Override public void exitProgCharacterLiteralExp(
-            Resolve.ProgCharacterLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Character_Template",
-                "Std_Character_Fac"), "Character", ctx.getText()));
-    }
-
-    @Override public void exitProgStringLiteralExp(
-            Resolve.ProgStringLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier("Char_Str_Template",
-                "Std_Char_Str_Fac"), "Char_Str", ctx.getText()));
-    }
-
-    @Override public void exitConceptImplModule(
-            Resolve.ConceptImplModuleContext ctx) {
-        ModuleFile file = buildFile();
-        ConceptImplModule impl =
-                new ConceptImplModule(ctx.name.getText(),
-                        ctx.concept.getText(), file);
-        if ( ctx.implBlock() != null ) {
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
-                    .implBlock().procedureDecl(), built));
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
-                    .implBlock().operationProcedureDecl(), built));
-            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
-                    .implBlock().typeRepresentationDecl(), built));
-            impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx
-                    .implBlock().facilityDecl(), built));
-        }
-        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
-                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
-        allSymsFromConceptAndImpl.addAll(moduleScope
-                .getSymbolsOfType(Symbol.class));
-        impl.addGettersAndMembersForModuleParameterizableSyms(
-                allSymsFromConceptAndImpl);
-
-        impl.addCtor();
-        file.module = impl;
-        built.put(ctx, file);
-    }
-
-    @Override public void exitFacilityModule(Resolve.FacilityModuleContext ctx) {
-        ModuleFile file = buildFile();
-        FacilityImplModule impl =
-                new FacilityImplModule(ctx.name.getText(), file);
-
-        if ( ctx.facilityBlock() != null ) {
-            impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx
-                    .facilityBlock().facilityDecl(), built));
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
-                    .facilityBlock().operationProcedureDecl(), built));
-            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx
-                    .facilityBlock().typeRepresentationDecl(), built));
-        }
-        file.module = impl;
-        built.put(ctx, file);
-    }
-
-    @Override public void exitConceptModule(Resolve.ConceptModuleContext ctx) {
-        ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
-
-        if ( ctx.conceptBlock() != null ) {
-            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
-                    .conceptBlock().typeModelDecl(), built));
-            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
-                    .conceptBlock().operationDecl(), built));
-        }
-        spec.addGettersAndMembersForModuleParameterizableSyms(moduleScope
-                .query(new SymbolTypeQuery<>(Symbol.class)));
-
-        file.module = spec;
-        built.put(ctx, file);
-    }
-
-    @Override public void exitEnhancementModule(
-            Resolve.EnhancementModuleContext ctx) {
-        ModuleFile file = buildFile();
-        SpecModule spec = new SpecModule.EnhancementModule(ctx.name.getText(),
-                ctx.concept.getText(), file);
-
-        if ( ctx.enhancementBlock() != null ) {
-            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx
-                    .enhancementBlock().typeModelDecl(), built));
-            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx
-                    .enhancementBlock().operationDecl(), built));
-        }
-        //Note that here we only need to query locally for symbols. Meaning
-        //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
-        //etc from the concept. We just want the ones (if any) from enhancement.
-        spec.addGettersAndMembersForModuleParameterizableSyms(
-                moduleScope.getSymbolsOfType(Symbol.class));
-        file.module = spec;
-        built.put(ctx, file);
-    }
-
-    @Override public void exitEnhancementImplModule(
-            Resolve.EnhancementImplModuleContext ctx) {
-        ModuleFile file = buildFile();
-        EnhancementImplModule impl =
-                new EnhancementImplModule(ctx.name.getText(),
-                        ctx.enhancement.getText(), ctx.concept.getText(), file);
-        Scope conceptScope = symtab.moduleScopes.get(ctx.concept.getText());
-        impl.addDelegateMethods(
-                conceptScope.getSymbolsOfType(OperationSymbol.class,
-                        ProgTypeModelSymbol.class));
-        if ( ctx.implBlock() != null ) {
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
-                    .implBlock().operationProcedureDecl(), built));
-            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx
-                    .implBlock().procedureDecl(), built));
-        }
-        List<Symbol> allSymsFromConceptAndImpl = symtab.moduleScopes.get(
-                ctx.concept.getText()).getSymbolsOfType(Symbol.class);
-        allSymsFromConceptAndImpl.addAll(moduleScope
-                .getSymbolsOfType(Symbol.class));
-        impl.addGettersAndMembersForModuleParameterizableSyms(
-                allSymsFromConceptAndImpl);
-
-        impl.addCtor();
-        file.module = impl;
-        built.put(ctx, file);
-    }
-
-    protected ModuleFile buildFile() {
-        AnnotatedTree annotatedTree = gen.getModule();
-        return new ModuleFile(annotatedTree, Utils.groomFileName(annotatedTree
-                .getFileName()));
-    }
-
-    protected boolean withinFacilityModule() {
-        ParseTree t = gen.getModule().getRoot();
-        return t.getChild(0) instanceof Resolve.FacilityModuleContext;
-    }
-
-    protected boolean isJavaLocallyAccessibleSymbol(Symbol s)
-            throws NoSuchSymbolException {
-        //System.out.println("symbol: "+s.getName()+":"+s.getModuleID()+" is locally accessible?");
-        boolean result = isJavaLocallyAccessibleSymbol(s.getModuleID());
-        //System.out.println(result);
-        return result;
-    }
-
-    protected boolean isJavaLocallyAccessibleSymbol(String symbolModuleID) {
-        //was s defined in the module we're translating?
-        if ( moduleScope.getModuleID().equals(symbolModuleID) ) {
-            return true;
-        }
-        else { //was s defined in our parent concept or enhancement?
-            ParseTree thisTree = moduleScope.getDefiningTree();
-            if (thisTree instanceof Resolve.ModuleContext) {
-                thisTree = thisTree.getChild(0);
-            }
-            if ( thisTree instanceof Resolve.ConceptImplModuleContext ) {
-                Resolve.ConceptImplModuleContext asConceptImpl =
-                        (Resolve.ConceptImplModuleContext) thisTree;
-                return symbolModuleID.equals(asConceptImpl.concept.getText());
-            }
-            else if ( thisTree instanceof Resolve.EnhancementImplModuleContext ) {
-                Resolve.EnhancementImplModuleContext asEnhancementImpl =
-                        (Resolve.EnhancementImplModuleContext) thisTree;
-                return symbolModuleID.equals(asEnhancementImpl.concept.getText());
-            }
+        List<ModuleParameterSymbol> moduleParams = moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
+        for (ModuleParameterSymbol p : moduleParams) {
+            if (p.isModuleOperationParameter() && p.getName().equals(name)) return true;
         }
         return false;
     }
 
-    protected CallStat buildPrimitiveInfixStat(String name,
-                                               ParserRuleContext left,
-                                               ParserRuleContext right) {
-        Qualifier.NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
-        return new CallStat(qualifier, name, (Expr) built.get(left),
-                (Expr) built.get(right));
+    @Override
+    public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op, ctx.progExp()));
     }
 
-    protected Qualifier buildQualifier(Token refQualifier, Token refName) {
+    private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull Token op,
+                                           @NotNull ParseTree... args) {
+        return buildSugaredProgExp(ctx, op, Arrays.asList(args));
+    }
+
+    private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
+                                           @NotNull Token op,
+                                           @NotNull List<? extends ParseTree> args) {
+        List<ProgType> argTypes = args.stream().map(tr.progTypes::get).collect(Collectors.toList());
+        HardCodedProgOps.BuiltInOpAttributes o = HardCodedProgOps.convert(op, argTypes);
+        return new MethodCall(buildQualifier(o.qualifier, o.name),
+                o.name.getText(), Utils.collect(Expr.class, args, built));
+    }
+
+    @Override
+    public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
+        //if we're within a module argument list:
+        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null) {
+            built.put(ctx, createFacilityArgumentModel(ctx));
+        }
+        else {
+            built.put(ctx, new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
+        }
+    }
+
+    @Override
+    public void exitProgSelectorExp(ResolveParser.ProgSelectorExpContext ctx) {
+        ProgType leftType = tr.progTypes.get(ctx.lhs);
+        Expr left = new LeafAccessRefLeft(((ProgNamedType) leftType).getName(), (Expr) built.get(ctx.lhs));
+        Expr right = new LeafAccessRefRight((Expr) built.get(ctx.rhs));
+        AccessRef ref = new AccessRef(left, right);
+        built.put(ctx, ref);
+    }
+
+    /**
+     * Given an arbitrary expression within some
+     * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
+     * for that argument.
+     */
+    @NotNull
+    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNamedExpContext ctx) {
+        OutputModelObject result = null;
         try {
-            Symbol corresondingSym = null;
-            if ( refQualifier == null ) {
-                corresondingSym =
-                        moduleScope.queryForOne(new NameQuery(null,
-                                refName, true));
-                Qualifier.NormalQualifier q;
-                if ( isJavaLocallyAccessibleSymbol(corresondingSym) ) {
-                    //this.<symName>
-                    if ( withinFacilityModule() ) {
-                        q = new Qualifier.NormalQualifier(moduleScope.getModuleID());
-                    }
-                    else {
-                        q = new Qualifier.NormalQualifier("this");
-                    }
-                }
-                else {
-                    //Test_Fac.<symName>
-                    q = new Qualifier.NormalQualifier(
-                            corresondingSym.getModuleID());
-                }
-                return q;
+            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name, true));
+            if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
+                result = new AnonOpParameterClassInstance(buildQualifier(
+                        ctx.qualifier, ctx.name), s.toOperationSymbol());
             }
-            //We're here: so the call (or thing) was qualified... is the qualifier
-            //referring to a facility? Let's check.
-            FacilitySymbol s =
-                    moduleScope.queryForOne(
-                            new NameQuery(null,
-                                    refQualifier, true)).toFacilitySymbol();
-            //ok, it's referring to a facility alright
-            //(we would've already been kicked to catch below if it wasn't).
-            //So let's assign correspondingSym using a namequery with 'refqualifier'
-            //as the qualifier.
-            corresondingSym =
-                    moduleScope.queryForOne(new NameQuery(refQualifier,
-                            refName, true));
-            return new Qualifier.FacilityQualifier(
-                    corresondingSym.getModuleID(), s.getName());
-        }
-        catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            //Todo: symQualifier can be null here -- npe waiting to happen. Address this.
-            assert refQualifier != null;
-            if ( isJavaLocallyAccessibleSymbol(refQualifier.getText()) ) {
-                return new Qualifier.NormalQualifier("this");
+            else if (s.isModuleTypeParameter()) {
+                //typeinit wrapped in a "get" call
+                result = new MethodCall(new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), ""));
             }
-            return new Qualifier.NormalQualifier(refQualifier.getText());
+            else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
+                result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name), ctx.name.getText(), "");
+            }
+            else {
+                result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
+            }
+        } catch (SymbolTableException e) {
+            throw new RuntimeException();//shouldn't happen now
         }
-        catch (UnexpectedSymbolException use) {
-            throw new RuntimeException(); //should've been caught looong ago.
+        return result;
+    }
+
+    @Override
+    public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier(
+                "concepts.boolean_template.Boolean_Template", "Std_Bools"), "Boolean", ctx.getText()));
+    }
+
+    @Override
+    public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier(
+                "concepts.integer_template.Integer_Template", "Std_Ints"), "Integer", ctx.getText()));
+    }
+
+    @Override
+    public void exitProgCharacterLiteralExp(
+            ResolveParser.ProgCharacterLiteralExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier(
+                "concepts.char_template.Char_Template", "Std_Chars"), "Character", ctx.getText()));
+    }
+
+    @Override
+    public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
+        built.put(ctx, new TypeInit(new FacilityQualifier(
+                "concepts.char_str_template.Char_Str_Template", "Std_Char_Strs"), "Char_Str", ctx.getText()));
+    }
+
+    @Override
+    public void exitConceptImplModuleDecl(
+            ResolveParser.ConceptImplModuleDeclContext ctx) {
+        ModuleFile file = buildFile();
+        ConceptImplModule impl = new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
+        if (ctx.implBlock() != null) {
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().procedureDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().operationProcedureDecl(), built));
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx.implBlock().typeRepresentationDecl(), built));
+            impl.facilityVars.addAll(Utils.collect(FacilityDef.class, ctx.implBlock().facilityDecl(), built));
         }
-    }*/
+        List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
+        /*try {
+            allParamsFromSpecAndImpl =
+                    symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
+                            .getSymbolsOfType(ModuleParameterSymbol.class);
+            allParamsFromSpecAndImpl.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
+            impl.addGettersAndMembersForModuleParameterSyms(allParamsFromSpecAndImpl);
+        } catch (NoSuchModuleException e) { //shouldn't happen
+        }*/
+        impl.addCtor();
+        file.module = impl;
+        built.put(ctx, file);
+    }
+
+    @Override
+    public void exitFacilityModuleDecl(ResolveParser.FacilityModuleDeclContext ctx) {
+        ModuleFile file = buildFile();
+        FacilityImplModule impl = new FacilityImplModule(ctx.name.getText(), file);
+
+        if (ctx.facilityBlock() != null) {
+            impl.facilities.addAll(Utils.collect(FacilityDef.class, ctx.facilityBlock().facilityDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.facilityBlock().operationProcedureDecl(), built));
+            impl.repClasses.addAll(Utils.collect(MemberClassDef.class, ctx.facilityBlock().typeRepresentationDecl(), built));
+        }
+        file.module = impl;
+        built.put(ctx, file);
+    }
+
+    @Override
+    public void exitConceptModuleDecl(ResolveParser.ConceptModuleDeclContext ctx) {
+        ModuleFile file = buildFile();
+        SpecModule spec = new SpecModule.ConceptModule(ctx.name.getText(), file);
+        if (ctx.conceptBlock() != null) {
+            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
+            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
+        }
+        try {
+            spec.addGettersAndMembersForModuleParameterSyms(moduleScope
+                    .query(new SymbolTypeQuery<>(ModuleParameterSymbol.class)));
+        } catch (NoSuchModuleException | UnexpectedSymbolException e) {
+        }
+        file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override
+    public void exitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
+        ModuleFile file = buildFile();
+        SpecModule spec = new SpecModule.ExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
+
+        if (ctx.conceptBlock() != null) {
+            spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
+            spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
+        }
+        //Note that here we only need to query locally for symbols. Meaning
+        //just this enhancement module's scope, otherwise we'd get T, Max_Depth,
+        //etc from the concept. We just want the ones (if any) from enhancement.
+        spec.addGettersAndMembersForModuleParameterSyms(
+                moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
+        file.module = spec;
+        built.put(ctx, file);
+    }
+
+    @Override
+    public void exitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+        ModuleFile file = buildFile();
+        file.genPackage = buildPackage();
+
+        ExtensionImplModule impl = new ExtensionImplModule(
+                ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
+        Scope conceptScope = null;
+        /*try {
+            conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
+            impl.addDelegateMethods(conceptScope.getSymbolsOfType(OperationSymbol.class, TypeModelSymbol.class));
+        } catch (NoSuchModuleException e) {
+        }*/
+        if (ctx.implBlock() != null) {
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().operationProcedureDecl(), built));
+            impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().procedureDecl(), built));
+        }
+       /* try {
+            //first the concept spec
+            List<ModuleParameterSymbol> allSymsFromConceptAndExtAndThisModule =
+                    symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
+                            .getSymbolsOfType(ModuleParameterSymbol.class);
+            //then the extension spec
+            allSymsFromConceptAndExtAndThisModule.addAll(
+                    symtab.getModuleScope(new ModuleIdentifier(ctx.extension))
+                            .getSymbolsOfType(ModuleParameterSymbol.class));
+            //now this
+            allSymsFromConceptAndExtAndThisModule.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
+            impl.addGettersAndMembersForModuleParameterSyms(allSymsFromConceptAndExtAndThisModule);
+        } catch (NoSuchModuleException e) {
+        }*/
+        impl.addCtor();
+        file.module = impl;
+        built.put(ctx, file);
+    }
+
+    protected boolean withinFacilityModule() {
+        ParseTree t = gen.getModule().getRoot();
+        return t.getChild(0) instanceof ResolveParser.FacilityModuleDeclContext;
+    }
+
+    protected ModuleFile buildFile() {
+        AnnotatedModule annotatedTree = gen.getModule();
+        return new ModuleFile(annotatedTree,
+                Utils.groomFileName(annotatedTree.getFilePath()), buildPackage(), buildImports());
+    }
+
+    private String buildPackage() {
+        Path p = gen.module.getModuleIdentifier().getPathRelativeToRootDir();
+        return p.getParent().toString().replaceAll(File.separator, ".");
+    }
+
+    private List<String> buildImports() {
+        List<String> result = new ArrayList<>();
+        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.uses);
+        allImports.addAll(gen.module.externalUses);
+
+        for (ModuleIdentifier e : allImports) {
+            Path p = e.getPathRelativeToRootDir();
+            String i = p.toString().substring(0, p.toString().lastIndexOf("."));
+            result.add(i.replaceAll(File.separator, "."));
+        }
+        return result;
+    }
+
+    protected CallStat buildPrimitiveInfixStat(String name, ParserRuleContext left, ParserRuleContext right) {
+        NormalQualifier qualifier = new NormalQualifier("RESOLVEBase");
+        return new CallStat(qualifier, name, (Expr) built.get(left), (Expr) built.get(right));
+    }
+
+    protected Qualifier buildQualifier(@Nullable Token refQualifier, @NotNull Token refName) {
+        Symbol corresondingSym = null;
+
+        //if the reference was not qualified, a simple query should be able to find it.
+        if (refQualifier == null) {
+            try {
+                corresondingSym = moduleScope.queryForOne(new NameQuery(null, refName, true));
+            } catch (NoSuchSymbolException | DuplicateSymbolException |
+                     UnexpectedSymbolException | NoSuchModuleException e) { //shouldn't happen, population should've filtered this
+            }
+            Path qual = corresondingSym.getModuleIdentifier().getPathRelativeToRootDir().getParent();
+            return new NormalQualifier(qual.toString().replaceAll(File.separator, "."));
+        }
+        else { // if the reference was qualified, let's see if it was a facility or module.
+            try {
+                Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier, true));
+                if (s instanceof FacilitySymbol) {
+                    ModuleIdentifier id =
+                            ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
+                    Path qual = id.getPathRelativeToRootDir().getParent();
+                    return new FacilityQualifier(qual.toString().replaceAll(File.separator, "."), s.getName());
+                }
+            }
+            catch (NoSuchSymbolException e) {
+                //not dealing with a facility... the qualifier must be a module then..
+                Symbol s = null;
+                try {
+                    s = moduleScope.queryForOne(new NameQuery(refQualifier, refName, true));
+                } catch (Exception e1) {
+                    return new NormalQualifier(refQualifier.getText());
+                }
+                String qual = s.getModuleIdentifier().getPathRelativeToRootDir().toString();
+                if (qual.lastIndexOf(".") != -1) qual = qual.substring(0, qual.lastIndexOf(".")); //strip ext
+                return new NormalQualifier(qual.replaceAll(File.separator, "."));
+            } catch (UnexpectedSymbolException | NoSuchModuleException | DuplicateSymbolException e) {
+                //none of these should happen as we're not  coercing anything or naming a specific module, duplicate
+                //symbols should have been detected in population..
+            }
+            return new NormalQualifier(refQualifier.getText());
+        }
+    }
 }

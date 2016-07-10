@@ -22,8 +22,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     private List<PExp> cachedFunctionApplications;
 
     /**
-     * Creates a new {@code ImmutableConjuncts} whose conjuncts are the
-     * top-level conjuncts of {@code e}.
+     * Creates a new {@code ImmutableConjuncts} whose conjuncts are the top-level conjuncts of {@code e}.
      *
      * @param e The {@code PExp} to break into top-level conjuncts.
      */
@@ -35,11 +34,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Creates a new {@code ImmutableConjuncts} whose conjuncts are deep copies
-     * of the {@code PExp}s in {@code exps}.
+     * Creates a new {@code ImmutableConjuncts} whose conjuncts are deep copies of the {@code PExp}s in {@code exps}.
      *
-     * @param exps A list of {@code PExps} to make the conjuncts of the newly-
-     *             created {@code ImmutableConjuncts}.
+     * @param exps A list of {@code PExps} to make the conjuncts of the newly-created {@code ImmutableConjuncts}.
      */
     public ImmutableConjuncts(Iterable<PExp> exps) {
 
@@ -47,14 +44,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             //Performance hack: if exps is an ImmutableConjuncts, we can safely
             //just steal it's internal list of conjuncts--after all, that list
             //is immutable.
-            ImmutableConjuncts expsAsImmutableConjuncts =
-                    (ImmutableConjuncts) exps;
+            ImmutableConjuncts expsAsImmutableConjuncts = (ImmutableConjuncts) exps;
             conjuncts = expsAsImmutableConjuncts.conjuncts;
             cachedSymbolNames = expsAsImmutableConjuncts.cachedSymbolNames;
-            cachedQuantifiedVariableNames =
-                    expsAsImmutableConjuncts.cachedQuantifiedVariableNames;
-            cachedFunctionApplications =
-                    expsAsImmutableConjuncts.cachedFunctionApplications;
+            cachedQuantifiedVariableNames = expsAsImmutableConjuncts.cachedQuantifiedVariableNames;
+            cachedFunctionApplications = expsAsImmutableConjuncts.cachedFunctionApplications;
         }
         else {
             List<PExp> newExps = new ArrayList<>();
@@ -65,8 +59,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Private constructor for making a "blank" {@code ImmutableConjuncts} for
-     * creating singleton subtypes.
+     * Private constructor for making a "blank" {@code ImmutableConjuncts} for creating singleton subtypes.
      */
     protected ImmutableConjuncts() {
         List<PExp> empty = Collections.emptyList();
@@ -75,10 +68,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Private constructor for making an {@code ImmutableConjuncts}
-     * given an immutable list of conjuncts.  Note that expressions in the
-     * immutable list must be considered immutable and have been run through
-     * defensiveCopy!  Just a little performance hack.
+     * Private constructor for making an {@code ImmutableConjuncts} given an immutable list of conjuncts.  Note that
+     * expressions in the immutable list must be considered immutable and have been run through defensiveCopy!
+     * Just a little performance hack.
      */
     protected ImmutableConjuncts(ImmutableList<PExp> l) {
         conjuncts = l;
@@ -86,10 +78,9 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Private constructor for making an {@code ImmutableConjuncts}
-     * given an immutable list of conjuncts.  Note that expressions in the
-     * immutable list must be considered immutable and have been run through
-     * defensiveCopy!  Just a little performance hack.</p>
+     * Private constructor for making an {@code ImmutableConjuncts} given an immutable list of conjuncts.  Note that
+     * expressions in the immutable list must be considered immutable and have been run through
+     * defensiveCopy!  Just a little performance hack.
      */
     protected ImmutableConjuncts(PExp[] exps, int length) {
         conjuncts = new ArrayBackedImmutableList<>(exps, length);
@@ -97,9 +88,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns a copy of this set of conjuncts with very obviously
-     * {@code true} conjuncts removed.  Examples are the actual "true"
-     * value and equalities with the same thing on the left and right side.
+     * Returns a copy of this set of conjuncts with very obviously {@code true} conjuncts removed.  Examples are the
+     * actual "true" value and equalities with the same thing on the left and right side.
      */
     public ImmutableConjuncts eliminateObviousConjuncts() {
         PExp[] workingSpace = new PExp[conjuncts.size()];
@@ -142,8 +132,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 runLength++;
             }
             else {
-                newConjuncts =
-                        appendConjuncts(newConjuncts, runStart, runLength);
+                newConjuncts = appendConjuncts(newConjuncts, runStart, runLength);
 
                 //Any new run will start AFTER this element.
                 runStart += runLength + 1;
@@ -154,8 +143,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         return new ImmutableConjuncts(newConjuncts);
     }
 
-    private ImmutableList<PExp> appendConjuncts(ImmutableList<PExp> original,
-                                                int startIndex, int length) {
+    private ImmutableList<PExp> appendConjuncts(ImmutableList<PExp> original, int startIndex, int length) {
         ImmutableList<PExp> retval;
         switch (length) {
             case 0:
@@ -171,13 +159,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Treats the provided List of {@code PExp}s as a boolean expression
-     * that is the <em>and</em> of each of the elements in that iterable object.
-     * Tests if that boolean expression contains equal conjuncts in the same
-     * order as {@code this}.
+     * Treats the provided List of {@code PExp}s as a boolean expression that is the <em>and</em> of each of the
+     * elements in that iterable object. Tests if that boolean expression contains equal conjuncts in the same order
+     * as {@code this}.
      *
-     * @param otherConjuncts The set of conjuncts to test for ordered
-     * 						 equality.
+     * @param otherConjuncts The set of conjuncts to returnEnsuresArgSubstitutions for ordered equality.
      *
      * @return True <strong>iff</strong> the given expression is order-equal.
      */
@@ -194,10 +180,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Tests if each expression in the given {@code ImmutableConjuncts}
-     * has an equal expression in {@code this}, and <em>visa versa</em>.
+     * Tests if each expression in the given {@code ImmutableConjuncts} has an equal expression in {@code this},
+     * and <em>visa versa</em>.
      *
-     * @param o The set of conjuncts to test against {@code this}.
+     * @param o The set of conjuncts to returnEnsuresArgSubstitutions against {@code this}.
+     *
      * @return True <strong>iff</strong> the given set of conjuncts is equal.
      */
     public boolean equals(Object o) {
@@ -225,11 +212,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Answers the question, "Does each {@code PExp} in {@code query} have an
-     * equal {@code PExp} in {@code base}?"
+     * Answers the question, "Does each {@code PExp} in {@code query} have an equal {@code PExp} in {@code base}?"
      *
-     * @param query expressions to test
-     * @param base expressions to test against
+     * @param query expressions to returnEnsuresArgSubstitutions
+     * @param base  expressions to returnEnsuresArgSubstitutions against
      *
      * @return the answer
      */
@@ -256,14 +242,11 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns {@code true} <strong>iff</strong> at least one of the
-     * conjuncts in {@code this} is equal to {@code e}.
+     * Returns {@code true} <strong>iff</strong> at least one of the conjuncts in {@code this} is equal to {@code e}.
      *
-     * @param e The {@code PExp} to test for equality.
+     * @param e The {@code PExp} to returnEnsuresArgSubstitutions for equality.
      *
-     * @return True <strong>iff</strong> {@code this} contains an
-     *         equal conjunct.
-     *
+     * @return True <strong>iff</strong> {@code this} contains an equal conjunct.
      * @throws NullPointerException If {@code e == null}.
      */
     public boolean containsEqual(PExp e) {
@@ -297,20 +280,19 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 a.append("True");
             }
             a.append("\n");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override public Iterator<PExp> iterator() {
+    @Override
+    public Iterator<PExp> iterator() {
         return conjuncts.iterator();
     }
 
     /**
-     * Returns a copy of {@code this} with all sub-expressions
-     * equal to some key in {@code mapping} replaced with the corresponding
-     * value.
+     * Returns a copy of {@code this} with all sub-expressions equal to some key in {@code mapping} replaced with the
+     * corresponding value.
      *
      * @param mapping The mapping to use for substituting.
      *
@@ -337,28 +319,26 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns a copy of {@code this} with {@code e}s appended at
-     * the end of the list of conjuncts.
+     * Returns a copy of {@code this} with {@code e}s appended at the end of the list of conjuncts.
      *
      * @param e The expression to append.
      *
-     * @return An {@code ImmutableConjuncts} with size {@code this.size() + 1}
-     * whose first {@code this.size()} conjuncts are copies of {@code this}'s
-     * conjuncts, and whose last conjunct is a copy of {@code e}.
+     * @return An {@code ImmutableConjuncts} with size {@code this.size() + 1} whose first {@code this.size()}
+     * conjuncts are copies of {@code this}'s conjuncts, and whose last conjunct is a copy of {@code e}.
      */
     public ImmutableConjuncts appended(PExp e) {
         return new ImmutableConjuncts(conjuncts.appended(e));
     }
 
     /**
-     * Returns a copy of {@code this} with the {@code PExp}s from {@code i}
-     * appended at the end of the list of conjuncts.
+     * Returns a copy of {@code this} with the {@code PExp}s from {@code i} appended at the end of the list of
+     * conjuncts.
      *
      * @param i The expressions to append.
      *
      * @return An {@code ImmutableConjuncts} whose first {@code this.size()}
-     * conjuncts are copies of {@code this}'s conjuncts, and whose other
-     * conjuncts are copies of the {@code PExp}s in {@code i}, in order.
+     * conjuncts are copies of {@code this}'s conjuncts, and whose other conjuncts are copies of the
+     * {@code PExp}s in {@code i}, in order.
      */
     public ImmutableConjuncts appended(Iterable<PExp> i) {
         ImmutableConjuncts retval;
@@ -366,8 +346,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         //TODO: This is dangerous if we change the implementation of
         //       ImmutableConjuncts to a list of lists
         if (i instanceof ImmutableConjuncts) {
-            ImmutableList<PExp> iConjuncts =
-                    ((ImmutableConjuncts) i).conjuncts;
+            ImmutableList<PExp> iConjuncts = ((ImmutableConjuncts) i).conjuncts;
 
             if (iConjuncts.size() == 0) {
                 retval = this;
@@ -377,7 +356,6 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 //just steal it's internal list of conjuncts--after all, that
                 //list is immutable.
                 ImmutableList<PExp> newExps = conjuncts.appended(iConjuncts);
-
                 retval = new ImmutableConjuncts(newExps);
             }
         }
@@ -391,18 +369,16 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 retval = this;
             }
         }
-
         return retval;
     }
 
     /**
-     * Returns a new {@code ImmutableConjuncts} derived from this one,
-     * whose conjuncts are all the conjuncts of {@code this} except the
-     * {@code index}th.
+     * Returns a new {@code ImmutableConjuncts} derived from this one, whose conjuncts are all the conjuncts of
+     * {@code this} except the {@code index}th.
      *
      * @param indexToRemove The index to remove.
-     * @return A new {@code ImmutableConjuncts} without the {@code idex}th one.
      *
+     * @return A new {@code ImmutableConjuncts} without the {@code idex}th one.
      * @throws IndexOutOfBoundsException If the provided index is out of bounds.
      */
     public ImmutableConjuncts removed(int indexToRemove) {
@@ -410,26 +386,22 @@ public class ImmutableConjuncts implements Iterable<PExp> {
     }
 
     /**
-     * Returns a new {@code ImmutableConjuncts} derived from this one,
-     * whose conjuncts are the conjuncts of {@code this} starting at the
-     * {@code start}th conjunct (zero-based) and containing the following
-     * {@code length} conjuncts.  If {@code start + length} exceeds
-     * {@code this.size()}, the returned {@code ImmutableConjuncts}
+     * Returns a new {@code ImmutableConjuncts} derived from this one, whose conjuncts are the conjuncts of
+     * {@code this} starting at the {@code start}th conjunct (zero-based) and containing the following {@code length}
+     * conjuncts.  If {@code start + length} exceeds {@code this.size()}, the returned {@code ImmutableConjuncts}
      * will contain the following {@code size - start} conjuncts instead.
      * <p>
-     * If {@code start >= this.size()}, will return an {@code ImmutableConjuncts}
-     * with {@code size() == 0}.</p>
+     * If {@code start >= this.size()}, will return an {@code ImmutableConjuncts} with {@code size() == 0}.
      *
-     * @param start The index of the first conjunct to include (zero-based).
+     * @param start  The index of the first conjunct to include (zero-based).
      * @param length The number of conjuncts from that point to include.
      *
      * @return A new {@code ImmutableConjuncts} containing those conjuncts
-     *         starting at {@code start} and extending to include the next
-     *         {@code length} conjuncts, or all the remaining conjuncts if
-     *         {@code length} extends past the end of the list.
-     *
+     * starting at {@code start} and extending to include the next
+     * {@code length} conjuncts, or all the remaining conjuncts if
+     * {@code length} extends past the end of the list.
      * @throws IndexOutOfBoundsException If either {@code start} or
-     *             {@code length} is negative.
+     *                                   {@code length} is negative.
      */
     public ImmutableConjuncts subConjuncts(int start, int length) {
 
@@ -450,9 +422,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      *
      * @param index The index of the conjunct to retrieve, zero-based.
      * @return A deep copy of the {@code index}th conjunct in {@code this}.
-     *
      * @throws IndexOutOfBoundsException If the provided index is less than zero
-     *            or equal to or greater than {@code size()}.
+     *                                   or equal to or greater than {@code size()}.
      */
     public PExp get(int index) {
         return conjuncts.get(index);
@@ -504,8 +475,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             cachedQuantifiedVariableNames = new HashSet<>();
 
             for (PExp myConjunct : conjuncts) {
-                cachedQuantifiedVariableNames.addAll(myConjunct
-                        .getQuantifiedVariables());
+                cachedQuantifiedVariableNames.addAll(myConjunct.getQuantifiedVariables());
             }
         }
 
@@ -517,8 +487,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             cachedFunctionApplications = new LinkedList<PExp>();
 
             for (PExp myConjunct : conjuncts) {
-                cachedFunctionApplications.addAll(myConjunct
-                        .getFunctionApplications());
+                cachedFunctionApplications.addAll(myConjunct.getFunctionApplications());
             }
         }
         return cachedFunctionApplications;
@@ -528,8 +497,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         if (cachedSymbolNames == null) {
             cachedSymbolNames = new HashSet<>();
             for (PExp myConjunct : conjuncts) {
-                cachedSymbolNames.addAll(myConjunct
-                        .getSymbolNames());
+                cachedSymbolNames.addAll(myConjunct.getSymbolNames());
             }
         }
         return cachedSymbolNames;

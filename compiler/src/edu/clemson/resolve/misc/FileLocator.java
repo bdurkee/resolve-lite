@@ -34,8 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Traverses a tree of directories. Each file encountered is reported via the
@@ -47,34 +46,40 @@ public class FileLocator extends SimpleFileVisitor<Path> {
 
     private final PathMatcher matcher;
     private String pattern = null;
-
-    private List<File> matches = new ArrayList<>();
+    private final List<File> matches = new ArrayList<>();
 
     /**
      * Constructs a new {@code FileLocator} that will match based on the
      * {@code (pattern, extensions)} pair provided.
      *
-     * @param pattern An extensionless pattern.
+     * @param pattern    An extensionless pattern.
      * @param extensions An list of valid extensions to choose from after a
-     *        pattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
+     *                   pattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
         this.pattern = pattern;
-        this.matcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + parseExtensions(extensions));
+        this.matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern + parseExtensions(extensions));
     }
 
     public FileLocator(String extension) {
-        matcher =
-                FileSystems.getDefault().getPathMatcher(
-                        "glob:*{" + extension + "}");
+        matcher = FileSystems.getDefault().getPathMatcher("glob:*{" + extension + "}");
     }
 
-    @Override public FileVisitResult visitFile(Path file,
-                                               BasicFileAttributes attr) {
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        if (dir.getFileName().endsWith("gen") || dir.getFileName().endsWith("out")) {
+            return FileVisitResult.SKIP_SUBTREE;
+        }
+        else {
+            return FileVisitResult.CONTINUE;
+        }
+    }
+
+    @Override
+    public FileVisitResult visitFile(Path file,
+                                     BasicFileAttributes attr) {
         Path name = file.getFileName();
-        if ( name != null && matcher.matches(name) ) {
+        if (name != null && matcher.matches(name)) {
             matches.add(file.toFile());
         }
         return FileVisitResult.CONTINUE;
@@ -83,14 +88,13 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     /**
      * Returns a single file matching {@code this.pattern}.
      *
-     * @throws NoSuchFileException If a file matching {@code this.pattern} could
-     *         not be found.
      * @return The matching file.
+     * @throws NoSuchFileException If a file matching {@code this.pattern} could
+     *                             not be found.
      */
     public File getFile() throws IOException {
-        if ( matches.size() == 0 ) {
-            throw new NoSuchFileException("file matching name '" + pattern
-                    + "' could not be found");
+        if (matches.size() == 0) {
+            throw new NoSuchFileException("file matching name '" + pattern + "' could not be found");
         }
         return matches.get(0);
     }

@@ -67,4 +67,6 @@ VCConfirm(confirm) ::= "Confirm <confirm.confirmExp>;"
 
 VCRuleBackedStat(code) ::= "<code.text>"
 
+VCCall(code) ::= "<code.text>"
+
 fileExtension() ::= ".asrt"

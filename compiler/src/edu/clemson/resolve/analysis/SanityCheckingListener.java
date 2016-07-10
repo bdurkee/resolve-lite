@@ -1,13 +1,11 @@
 package edu.clemson.resolve.analysis;
 
-import edu.clemson.resolve.compiler.AnnotatedTree;
-import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
-import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.compiler.AnnotatedModule;
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.rsrg.semantics.programtype.PTType;
+import edu.clemson.resolve.parser.ResolveBaseListener;
+import org.antlr.v4.runtime.misc.Predicate;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Uses a combination of listeners and visitors to check for some semantic
@@ -19,109 +17,44 @@ import org.rsrg.semantics.programtype.PTType;
 public class SanityCheckingListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
-    private final AnnotatedTree tr;
+    private final AnnotatedModule tr;
 
-    public SanityCheckingListener(RESOLVECompiler rc, AnnotatedTree tr) {
-        this.compiler = rc;
+    public SanityCheckingListener(@NotNull RESOLVECompiler compiler,
+                                  @NotNull AnnotatedModule tr) {
+        this.compiler = compiler;
         this.tr = tr;
     }
 
-    /*@Override public void exitConceptModule(ResolveParser.ConceptModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
+    /**
+     * Decends into every node in an arbitrary parsetree and listens for
+     * {@link ResolveParser.ProgParamExpContext}s whose characteristics satisfy
+     * some arbitrary {@link Predicate}.
+     * <p>
+     * After a listen, you can check to see if at any point the predicate was
+     * satisfied via the public {@link #result} member. If you need more
+     * specific information, such as "which contexts satisfied my predicate?",
+     * refer to {@link #satisfyingContexts} for a complete list.</p>
+     */
+    private static class CallCheckingListener
+            extends
+            ResolveBaseListener {
 
-    @Override public void exitEnhancementModule(
-            Resolve.EnhancementModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
+        /** Some {@link Predicate} that operates on {@link ResolveParser.ProgParamExpContext}s */
+     /*   private final Predicate<ResolveParser.ProgParamExpContext> checker;
 
-    @Override public void exitFacilityModule(
-            Resolve.FacilityModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
+        public boolean result = false;
+        List<ResolveParser.ProgParamExpContext> satisfyingContexts = new ArrayList<>();
 
-    @Override public void exitConceptImplModule(
-            Resolve.ConceptImplModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
-
-    @Override public void exitEnhancementImplModule(
-            Resolve.EnhancementImplModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }*/
-
-    @Override public void exitPrecisModule(
-            ResolveParser.PrecisModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
-
-    /*@Override public void exitProcedureDecl(Resolve.ProcedureDeclContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-        sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
-    }
-
-    @Override public void exitOperationProcedureDecl(
-            Resolve.OperationProcedureDeclContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-        sanityCheckRecursiveProcKeyword(ctx, ctx.name, ctx.recursive);
-    }
-
-    @Override public void exitAssignStmt(Resolve.AssignStmtContext ctx) {
-        sanityCheckProgOpTypes(ctx, tr.progTypes.get(ctx.left),
-                tr.progTypes.get(ctx.right));
-    }
-
-    @Override public void exitSwapStmt(Resolve.SwapStmtContext ctx) {
-        sanityCheckProgOpTypes(ctx,tr.progTypes.get(ctx.left),
-                tr.progTypes.get(ctx.right));
-    }
-
-    @Override public void exitRequiresClause(Resolve.RequiresClauseContext ctx) {
-        PExp requires = tr.mathPExps.get(ctx);
-        if (requires != null && !requires.getIncomingVariables().isEmpty()) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.ILLEGAL_INCOMING_REF_IN_REQUIRES, ctx.getStart(),
-                    requires.getIncomingVariables(),
-                    ctx.mathAssertionExp().getText());
+        CallCheckingListener(
+                @NotNull Predicate<ResolveParser.ProgParamExpContext> checker) {
+            this.checker = checker;
         }
-    }*/
-
-    private void sanityCheckProgOpTypes(ParserRuleContext ctx,
-                                        PTType l, PTType r) {
-        if (!l.equals(r)) {
-            compiler.errMgr.semanticError(ErrorKind.INCOMPATIBLE_OP_TYPES,
-                    ctx.getStart(), ctx.getText(), l.toString(), r.toString());
-        }
+        @Override public void exitProgParamExp(
+                ResolveParser.ProgParamExpContext ctx) {
+            if (checker.test(ctx)) {
+                result = true;
+                satisfyingContexts.add(ctx);
+            }
+        }*/
     }
-
-    private void sanityCheckRecursiveProcKeyword(ParserRuleContext ctx,
-                                                 Token name,
-                                                 Token recursiveToken) {
-        boolean hasRecRef = hasRecursiveReferenceInStmts(ctx, name);
-        if (recursiveToken == null && hasRecRef) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.UNLABELED_RECURSIVE_FUNC, name, name.getText(),
-                    name.getText());
-        }
-        else if (recursiveToken != null && !hasRecRef) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.LABELED_NON_RECURSIVE_FUNC, name, name.getText());
-        }
-    }
-
-    private void sanityCheckBlockEnds(Token topName, Token bottomName) {
-        if (!topName.getText().equals(bottomName.getText())) {
-            compiler.errMgr.semanticError(
-                    ErrorKind.MISMATCHED_BLOCK_END_NAMES, bottomName,
-                    topName.getText(), bottomName.getText());
-        }
-    }
-
-    private boolean hasRecursiveReferenceInStmts(
-            ParserRuleContext ctx, Token name) {
-        RecursiveStatementCheckingVisitor checker =
-                new RecursiveStatementCheckingVisitor(name);
-        return checker.visit(ctx);
-    }
-
 }

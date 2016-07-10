@@ -30,122 +30,155 @@
  */
 grammar Resolve;
 
-module
-    :   precisModule
-    |   conceptModule
-   // |   conceptImplModule
-    |   facilityModule
-    |   extensionImplModule
-    |   extensionModule
+moduleDecl
+    :   (precisModuleDecl
+    |   precisExtModuleDecl
+    |   conceptExtModuleDecl
+    |   conceptModuleDecl
+    |   conceptImplModuleDecl
+    |   conceptExtImplModuleDecl
+    |   facilityModuleDecl
+    |   shortFacilityModuleDecl) EOF
     ;
 
-conceptModule
-    :   'Concept' name=ID ('<' genericType (',' genericType)* '>')?
-        (specModuleParameterList)? ';'?
-        (usesList)?
-        (requiresClause)?
-        (conceptBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-conceptBlock
-    :   ( typeModelDecl
-        | operationDecl
-        | mathDefinitionDecl
-        | specModuleInit
-        | constraintClause
-        )*
-    ;
-
-// extension module
-
-extensionModule
-    :   'Extension' name=ID (specModuleParameterList)?
-        'for' concept=ID ';'?
-        (usesList)?
-        (requiresClause)?
-        (extensionBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-extensionBlock
-    :   ( operationDecl
-        | typeModelDecl
-        | mathDefinitionDecl
-        )*
-    ;
-
-// implementation modules
-
-/*conceptImplModule
-    :   'Implementation' name=ID (implModuleParameterList)?
-        'for' concept=ID ';'
-        (usesList)?
-        (requiresClause)?
-        (implBlock)
-        'end' closename=ID ';' EOF
-    ;
-*/
-
-extensionImplModule
-   :   'Implementation' name=ID (implModuleParameterList)?
-       'for' enhancement=ID 'of' concept=ID ';'?
-       (usesList)?
-       (requiresClause)?
-       (implBlock)
-       'end' closename=ID ';'? EOF
-   ;
-
-implBlock
-    :   ( typeRepresentationDecl
-        | operationProcedureDecl
-        | procedureDecl
-        | facilityDecl
-        )*
-    ;
-
-// facility modules
-
-facilityModule
-    :   'Facility' name=ID ';'?
-        (usesList)?
-        (requiresClause)?
-        (facilityBlock)
-        'end' closename=ID ';'? EOF
-    ;
-
-facilityBlock
-    :   ( mathDefinitionDecl
-        | operationProcedureDecl
-        | facilityDecl
-        | typeRepresentationDecl
-        )*
-    ;
-
-precisModule
-    :   'Precis' name=ID ';'?
+precisModuleDecl
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
-        'end' closename=ID ';'? EOF
+        'end' closename=ID ';' EOF
     ;
 
-precisBlock
-    :   ( mathDefinitionDecl
-        | mathAssertionDecl
-        )*
+precisExtModuleDecl
+    :   'Precis' 'Extension' name=ID 'for' precis=ID
+        ('with' precisExt=ID)? ';'
+        precisBlock
+        'end' closename=ID ';'
+    ;
+
+conceptModuleDecl
+    :   'Concept' name=ID specModuleParameterList? ';'
+        (usesList)?
+        (requiresClause)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptExtModuleDecl
+    :   'Concept' 'Extension' name=ID specModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        conceptBlock
+        'end' closename=ID ';'
+    ;
+
+conceptImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
+conceptExtImplModuleDecl
+    :   'Implementation' name=ID implModuleParameterList?
+        'for' extension=ID 'of' concept=ID ';'
+        (usesList)?
+        implBlock
+        'end' closename=ID ';'
+    ;
+
+facilityModuleDecl
+    :   'Facility' name=ID ';'
+         (usesList)?
+         (requiresClause)?
+         facilityBlock
+        'end' closename=ID ';'
+    ;
+
+shortFacilityModuleDecl
+    :   facilityDecl
     ;
 
 // uses, imports
 
 usesList
-    :   'uses' ID (',' ID)* ';'?
+    :   'uses' usesSpec (',' usesSpec)* ';'
+    |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
+    ;
+
+usesSpec : id=ID fromClauseSpec? alias? ;
+fromClauseSpec : 'from' qualifiedFromPath ;
+qualifiedFromPath : ID ('.' ID)*;
+alias : 'as' ID ;
+
+// module blocks & items
+
+precisBlock
+    :   ( mathStandardDefnDecl
+        | mathCategoricalDefnDecl
+        | mathInductiveDefnDecl
+        | mathTheoremDecl
+        | mathClssftnTheoremDecl
+        )*
+    ;
+
+conceptBlock
+    :   ( mathStandardDefnDecl
+        | typeModelDecl
+        | operationDecl
+        | constraintsClause
+        )*
+    ;
+
+implBlock
+    :   ( operationProcedureDecl
+        | procedureDecl
+        | typeRepresentationDecl
+        | facilityDecl
+        )*
+    ;
+
+facilityBlock
+    :   ( facilityDecl
+        | operationProcedureDecl
+        | typeRepresentationDecl
+        )*
+    ;
+
+// type refs & decls
+
+type
+    :   (qualifier=ID '.')? name=ID           #namedType
+    |    'Record' (recordVarDeclGroup)* 'end'  #recordType
+    ;
+
+typeModelDecl
+    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathClssftnExp ';'?
+        'exemplar' exemplar=ID ';'?
+        (constraintsClause)?
+        (initializationClause)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=ID '=' type ';'?
+        (conventionsClause)?
+        (correspondenceClause)?
+        (typeImplInit)?
+    ;
+
+// type initialization rules
+
+specModuleInit
+    :   'Facility_Init' (requiresClause)? (ensuresClause)?
+    ;
+
+typeImplInit
+    :   'initialization'
+        (varDeclGroup)* //(stmt)*
+        'end' ';'
     ;
 
 // parameter and parameter-list related rules
-
-operationParameterList
-    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
-    ;
 
 specModuleParameterList
     :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
@@ -155,18 +188,27 @@ implModuleParameterList
     :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
     ;
 
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    ;
+
 specModuleParameterDecl
     :   parameterDeclGroup
-    |   mathDefinitionDecl
+    |   mathStandardDefnDecl
+    |   genericTypeParameterDecl
     ;
 
 implModuleParameterDecl
     :   parameterDeclGroup
-    |   operationDecl
+   // |   operationDecl
     ;
 
 parameterDeclGroup
     :   parameterMode ID (',' ID)* ':' type
+    ;
+
+genericTypeParameterDecl
+    :   'type' name=ID
     ;
 
 parameterMode
@@ -176,11 +218,62 @@ parameterMode
         | 'restores'
         | 'preserves'
         | 'replaces'
-        | 'evaluates' )
+        | 'evaluates'
+        | ID
+        )
     ;
 
-variableDeclGroup
+// prog variable decls
+
+recordVarDeclGroup
+    :   ID (',' ID)* ':' type ';'?
+    ;
+
+varDeclGroup
     :   'Var' ID (',' ID)* ':' type ';'?
+    ;
+
+// facility decls
+
+facilityDecl
+    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
+        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
+        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    ;
+
+extensionPairing
+    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)?
+    ;
+
+moduleArgumentList
+    :   '(' progExp (',' progExp)* ')'
+    ;
+
+// operations & procedures
+
+operationDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)? (ensuresClause)?
+    ;
+
+operationProcedureDecl
+    :   'Operation' name=ID operationParameterList (':' type)? ';'
+        (requiresClause)?
+        (ensuresClause)?
+        (recursive='Recursive')? 'Procedure'
+        (varDeclGroup)*
+        (stmt)*
+        'end' closename=ID ';'
+    ;
+
+procedureDecl
+    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
+        (':' type)? ';'
+        (varDeclGroup)*
+        (stmt)*
+        'end' closename=ID ';'
     ;
 
 // statements
@@ -193,203 +286,145 @@ stmt
     |   ifStmt
     ;
 
-assignStmt
-    :   left=progVarExp ':=' right=progExp ';'?
-    ;
-
-swapStmt
-    :   left=progVarExp ':=:' right=progVarExp ';'?
-    ;
-
-callStmt
-    :   progExp ';'?
-    ;
+assignStmt : left=progExp ':=' right=progExp ';' ;
+swapStmt : left=progExp ':=:' right=progExp ';' ;
+callStmt : progParamExp ';' ;
 
 whileStmt
     :   'While' progExp
-        ('maintaining' mathExp ';'?)?
-        ('decreasing' mathExp ';'?)? 'do'
-        (stmt)*
-        'end' ';'?
+        changingClause? maintainingClause? decreasingClause?
+        'do' stmt* 'end' ';'
     ;
 
-ifStmt
-    :   'If' progExp 'then' stmt* (elsePart)? 'end' ';'?
+ifStmt : 'If' progExp 'then' stmt* elseStmt? 'end' ';' ;
+elseStmt : 'else' stmt* ;
+
+// program expressions
+
+progExp
+    :   progPrimary                                     #progPrimaryExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
+    |   op=('-'|'not') progExp                          #progUnaryExp
+    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
+    |   progExp op=('+'|'-') progExp                    #progInfixExp
+    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
+    |   progExp op=('='|'/=') progExp                   #progInfixExp
+    |   progExp op=('and'|'or') progExp                 #progInfixExp
     ;
 
-elsePart
-    :   'else' stmt*
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNamedExp
     ;
 
-// type and record related rules
-
-type
-    :   (qualifier=ID '::')? name=ID
+//operations are first class citizens with respect to a certain class of
+//parameterized resolve implementation-modules. So we
+//represent the name portion as its own (potentially qualified) expression,
+//once again this makes building our function application AST node much easier.
+progParamExp
+    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
     ;
 
-genericType
-    :   ID
+progNamedExp
+    :   (qualifier=ID '.')? name=ID
     ;
 
-record
-    :   'Record' (recordVariableDeclGroup)+ 'end'
-    ;
-
-recordVariableDeclGroup
-    :   ID (',' ID)* ':' type ';'?
-    ;
-
-typeModelDecl
-    :   'Type' 'family' name=ID 'is' 'modeled' 'by' mathTypeExp ';'?
-        'exemplar' exemplar=ID ';'?
-        (constraintClause)?
-        (typeModelInit)?
-    ;
-
-
-typeRepresentationDecl
-    :   'Type' name=ID '=' (type|record) ';'?
-        (conventionClause)?
-        (correspondenceClause)?
-        (typeImplInit)?
-    ;
-
-// type initialization rules
-
-specModuleInit
-    :   'Facility_Init' (requiresClause)? (ensuresClause)?
-    ;
-
-typeModelInit
-    :   'initialization' (ensuresClause)?
-    ;
-
-typeImplInit
-    :   'initialization' (ensuresClause)?
-        (variableDeclGroup)* (stmt)*
-        'end' ';'?
+progLiteralExp
+    :   ('true'|'false')    #progBooleanLiteralExp
+    |   INT                 #progIntegerLiteralExp
+    |   CHAR                #progCharacterLiteralExp
+    |   STRING              #progStringLiteralExp
     ;
 
 // math constructs
 
-mathAssertionDecl
+mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-//The '(COMMA ID)?' is reserved for the variable we're inducting over
-//in the context of an inductive defn
-mathDefinitionSig
-    :   name=mathSymbolName ('('
-            mathVariableDeclGroup (',' mathVariableDeclGroup)* ')')?
-            ':' mathTypeExp
+mathClssftnTheoremDecl
+    :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
+    ;
+
+mathDefnSig
+    :   mathPrefixDefnSigs
+    |   mathInfixDefnSig
+    |   mathOutfixDefnSig
+    |   mathPostfixDefnSig
+    ;
+
+mathPrefixDefnSig
+    :   mathSymbolName (',' mathSymbolName)* ('('
+                mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
+                ':' mathClssftnExp
+    ;
+
+mathPrefixDefnSigs
+    :   mathPrefixDefnSig (',' mathPrefixDefnSig)*
+    ;
+
+mathInfixDefnSig
+    :   '(' mathVarDecl ')' name=mathSymbolName
+        '(' mathVarDecl ')' ':' mathClssftnExp
+    ;
+
+mathOutfixDefnSig
+    :   leftSym=('|'|'||'|'<'|'⎝'|'⟨') mathVarDecl
+        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathClssftnExp
+    ;
+
+mathPostfixDefnSig
+    :   '('mathVarDecl')' lop='[' mathVarDecl rop=']' ':' mathClssftnExp
     ;
 
 mathSymbolName
-    :   ID
-    |   ('+'|'-'|'*'|'\\'|'...'|'..'|'|'|'||'|'<'|'>'|'<='|'>='|'o'|'*'|INT)
-    |   '|' '...' '|'
-    |   '<' '...' '>'
-    |   '||' '...' '||'
+    : ( ID |
+      ('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'≤'|
+       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'|'⨩'))
     ;
 
-mathDefinitionDecl
-    :   'Definition' mathDefinitionSig ('is' mathAssertionExp)? ';'?
+mathCategoricalDefnDecl
+    :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
+        'is' mathAssertionExp ';'
     ;
 
-mathVariableDeclGroup
-    :   ID (',' ID)* ':' mathTypeExp
+mathStandardDefnDecl
+    :   ('Implicit')? 'Definition' mathDefnSig
+        ('is' body=mathAssertionExp)? ';'
     ;
 
-mathVariableDecl
-    :   ID ':' mathTypeExp
+mathInductiveDefnDecl
+    :   'Inductive' 'Definition' mathDefnSig 'is'
+        '(i.)' mathAssertionExp ';'
+        '(ii.)' mathAssertionExp ';'
     ;
 
-// facilitydecls, enhancements, etc
-
-facilityDecl
-    :   'Facility' name=ID 'is' spec=ID ('<' type (',' type)* '>')?
-        (specArgs=moduleArgumentList)? (externally='externally')? 'implemented'
-        'by' impl=ID (implArgs=moduleArgumentList)? (enhancementPairDecl)* ';'?
+mathVarDeclGroup
+    :   ID (',' ID)* ':' mathClssftnExp
     ;
 
-enhancementPairDecl
-    :   'extended' 'by' spec=ID ('<' type (',' type)* '>')?
-        (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)?
-    ;
-
-moduleArgumentList
-    :   '(' moduleArgument (',' moduleArgument)* ')'
-    ;
-
-moduleArgument
-    :   progExp
-    ;
-
-// functions
-
-operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'?
-        (requiresClause)? (ensuresClause)?
-    ;
-
-operationProcedureDecl
-    :   'Operation'
-        name=ID operationParameterList (':' type)? ';'?
-        (requiresClause)?
-        (ensuresClause)?
-        (recursive='Recursive')? 'Procedure'
-        (variableDeclGroup)*
-        (stmt)*
-        'end' closename=ID ';'?
-    ;
-
-procedureDecl
-    :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
-        (':' type)? ';'?
-        (variableDeclGroup)*
-        (stmt)*
-        'end' closename=ID ';'?
+mathVarDecl
+    :   ID ':' mathClssftnExp
     ;
 
 // mathematical clauses
 
-affectsClause
-    :   'affects' parameterMode affectsItem (',' affectsItem)*
-    ;
-
-affectsItem
-    :   parameterMode (qualifier=ID '::')? name=ID
-    ;
-
-requiresClause
-    :   'requires' mathAssertionExp (entailsClause)? ';'?
-    ;
-
-ensuresClause
-    :   'ensures' mathAssertionExp ';'?
-    ;
-
-constraintClause
-    :   'constraint' mathAssertionExp ';'?
-    ;
-
-conventionClause
-    :   'convention' mathAssertionExp (entailsClause)? ';'?
-    ;
-
-correspondenceClause
-    :   'correspondence' mathAssertionExp ';'?
-    ;
-
-entailsClause
-    :   'which' 'entails' mathExp (',' mathExp)* ':' mathTypeExp
-    ;
+initializationClause : 'initialization' (ensuresClause);
+requiresClause : 'requires' mathAssertionExp (entailsClause)? ';';
+ensuresClause : 'ensures' mathAssertionExp ';';
+constraintsClause : ('constraints') mathAssertionExp ';';
+conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
+correspondenceClause : 'correspondence' mathAssertionExp ';';
+changingClause : 'changing' mathExp (',' mathExp)* ';' ;
+maintainingClause : 'maintaining' mathAssertionExp ';' ;
+decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
+entailsClause : 'which_entails' mathExp ;
 
 // mathematical expressions
 
-mathTypeExp
+mathClssftnExp
     :   mathExp
     ;
 
@@ -399,72 +434,89 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVariableDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
-    :   op='not' mathExp                                    #mathUnaryApplyExp
-    |   functionExp=mathExp '(' mathExp (',' mathExp)* ')'  #mathPrefixApplyExp
-    |   mathExp op=('*'|'/'|'~') mathExp                    #mathInfixApplyExp
-    |   mathExp op=('+'|'-'|'.-') mathExp                   #mathInfixApplyExp
-    |   mathExp op=('..'|'->') mathExp                      #mathInfixApplyExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp        #mathInfixApplyExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp            #mathInfixApplyExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp              #mathInfixApplyExp
-    |   mathExp op=('='|'/=') mathExp                       #mathInfixApplyExp
-    |   mathExp op='implies' mathExp                        #mathInfixApplyExp
-    |   mathExp op=('and'|'or') mathExp                     #mathInfixApplyExp
+    :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
+    |   mathExp mathSqBrOpExp mathExp (',' mathExp)* ']'    #mathBracketAppExp
+    |   mathExp mathMultOpExp mathExp                       #mathInfixAppExp
+    |   mathExp mathAddOpExp mathExp                        #mathInfixAppExp
+    |   mathExp mathJoiningOpExp mathExp                    #mathInfixAppExp
+    |   mathExp mathSetContainmentOpExp mathExp             #mathInfixAppExp
+    |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
+    |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
+    |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
+    |   mathExp ':' mathExp                                 #mathClssftnAssertionExp
+    |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
+    |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
     |   '(' mathAssertionExp ')'                            #mathNestedExp
-    |   mathPrimaryExp                                      #mathPrimeExp
+    |   mathPrimeExp                                        #mathPrimaryExp
     ;
 
-mathPrimaryExp
+/** Because operators are now first class citizens with expressions all of their
+ *  own (as opposed to being simple strings embedded within the context of some application)
+ *  we need these intermediate rules to convince antlr to create visitable, *annotatable*,
+ *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST.
+ *  No longer a need to pass special maps around from Token -> MathClassification, etc --
+ *  now we just need to visit and annotate these names like any other node).
+ */
+//mathMultOpExp : (qualifier=ID '::'|sym='ᶻ')? op=('*'|'/'|'%') ;
+mathSqBrOpExp : op='[' ;
+mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
+mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
+mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
+mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
+mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
+mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
+mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
+mathImpliesOpExp : (qualifier=ID '::')? op='implies';
+mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'∧'|'∨'|'iff');
+
+mathPrimeExp
     :   mathLiteralExp
+    |   mathCartProdExp
     |   mathSymbolExp
-    |   mathCrossTypeExp
-    |   mathSetExp
+    |   mathOutfixAppExp
     |   mathSetRestrictionExp
-    |   mathOutfixApplyExp
-    |   mathTupleExp
-    |   mathAlternativeExp
-    |   mathSegmentsExp
+    |   mathSetExp
     |   mathLambdaExp
-    ;
-
-mathSegmentsExp
-    :   mathSymbolExp ('.' mathSymbolExp)+ ('(' mathExp (',' mathExp)* ')')?
-    ;
-
-mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '::')? name=mathSymbolName
+    |   mathAlternativeExp
     ;
 
 mathLiteralExp
-    :   (qualifier=ID '::')? ('true'|'false')       #mathBooleanLiteralExp
-    |   (qualifier=ID '::')? num=INT                #mathIntegerLiteralExp
+    :   (qualifier=ID '.')? op=('true'|'false')    #mathBooleanLiteralExp
+    |   (qualifier=ID '.')? num=INT                #mathIntegerLiteralExp
     ;
 
-mathCrossTypeExp
-    :   'Cart_Prod' (mathVariableDeclGroup ';')+ 'end'
+mathCartProdExp
+    :   'Cart_Prod' (mathVarDeclGroup ';')+ 'end'
     ;
 
-mathOutfixApplyExp
-    :   lop='<' mathExp rop='>'
-    |   lop='|' mathExp rop='|'
+mathSymbolExp
+    :   (incoming='@')? (qualifier=ID '.')? name=mathSymbolName
+    ;
+
+mathOutfixAppExp
+    :   lop='|' mathExp rop='|'
     |   lop='||' mathExp rop='||'
+    |   lop='<' mathExp rop='>'
+    |   lop='⟨' mathExp rop='⟩'
+    |   lop='[' mathExp rop=']'
+    |   lop='⎝' mathExp rop='⎠'
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'
+    :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp
-    :   '{' (mathExp (',' mathExp)*)? '}'
+    :    '{' (mathExp (',' mathExp)*)? '}'
     ;
 
 mathLambdaExp
-    :   'lambda' '(' mathVariableDeclGroup
-        (',' mathVariableDeclGroup)* ')' '.'  mathExp
+    :   ('lambda'|'λ') mathVarDecl ',' mathExp
     ;
 
 mathAlternativeExp
@@ -475,63 +527,25 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-mathTupleExp
-    :   '(' mathExp (',' mathExp)+ ')'
-    ;
+NOT : 'not' ;
+EQUALS : '=' ;
+NEQUALS : '/=' ;
+LT : '<' ;
+LTE : '<=' ;
+GT : '>' ;
+GTE : '>=' ;
+MOD : '%' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+AND : 'and' ;
+OR : 'or' ;
+PLUS : '+' ;
+MINUS : '-' ;
+MULT : '*' ;
+DIV : '/' ;
 
-// program expressions
-
-//Todo: I think precedence, and the ordering of these alternatives is nearly there -- if not already.
-//we could really use some unit tests to perhaps check precendence so that in the future when
-//someone comes in and mucks with the grammar, our tests will indicate that precedence is right or wrong.
-progExp
-    :   progPrimary                                     #progPrimaryExp
-    |   '(' progExp ')'                                 #progNestedExp
-    |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('++'|'--')                          #progPostfixExp
-    |   progExp op='%' progExp                          #progInfixExp
-    |   progExp op=('*'|'/'|'++') progExp               #progInfixExp
-    |   progExp op=('+'|'-') progExp                    #progInfixExp
-    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
-    |   progExp op=('='|'/=') progExp                   #progInfixExp
-    |   progExp op='and' progExp                        #progInfixExp
-    |   progExp op='or' progExp                         #progInfixExp
-    ;
-
-progPrimary
-    :   progLiteralExp
-    |   progVarExp
-    |   progParamExp
-    ;
-
-progVarExp
-    :   progNamedExp
-    |   progMemberExp
-    ;
-
-progParamExp
-    :   (qualifier=ID '::')? name=ID
-        '(' (progExp (',' progExp)*)? ')'
-    ;
-
-progNamedExp
-    :   (qualifier=ID '::')? name=ID
-    ;
-
-progMemberExp
-    :   (progParamExp|progNamedExp) ('.' ID)+
-    ;
-
-progLiteralExp
-    :   ('true'|'false')    #progBooleanLiteralExp
-    |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
-    |   STRING              #progStringLiteralExp
-    ;
-
-FORALL : ('forall'|'Forall') ;
-EXISTS : ('exists'|'Exists') ;
-
+FORALL : ('Forall'|'forall');
+EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
@@ -541,5 +555,4 @@ INT : [0-9]+ ;
 CHAR: '\'' . '\'' ;
 STRING :  '"' (ESC | ~["\\])* '"' ;
 fragment ESC :   '\\' ["\bfnrt] ;
-
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

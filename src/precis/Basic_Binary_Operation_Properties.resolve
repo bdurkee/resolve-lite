@@ -1,0 +1,5 @@
+Precis Basic_Binary_Operation_Properties;
+
+    Definition Is_Associative(p : (D : SSet) * D ⟶ D) : B is
+        ∀ x, y, z : D, p(x, (p(y, z))) = p(p(x, y), z);
+end Basic_Binary_Operation_Properties;

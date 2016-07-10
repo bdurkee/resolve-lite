@@ -30,44 +30,48 @@
  */
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
+import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 
 /**
- * A basic, default implementation of a listener for the compiler that reports
- * warnings, errors, and other miscellaneous info.
+ * A basic, default implementation of a listener for the compiler that reports warnings, errors, and other
+ * miscellaneous info.
  * <p>
- * Note that this implementation simply outputs the information
- * received directly to {@code stdout} (or {@code stderr}); it doesn't try to
- * save or otherwise preserve any of the information forwarded.</p>
+ * Note that this implementation simply outputs the information received directly to {@code stdout}
+ * (or {@code stderr}); it doesn't try to save or otherwise preserve any of the information forwarded.</p>
  */
 public class DefaultCompilerListener implements RESOLVECompilerListener {
 
     private final RESOLVECompiler compiler;
 
-    public DefaultCompilerListener(RESOLVECompiler c) {
+    public DefaultCompilerListener(@NotNull RESOLVECompiler c) {
         this.compiler = c;
     }
 
-    @Override public void error(RESOLVEMessage msg) {
+    @Override
+    public void error(@NotNull RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
-        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
+        if (compiler.errMgr.formatWantsSingleLineMessage()) {
             outputMsg = outputMsg.replace('\n', ' ');
         }
         System.err.println(outputMsg);
     }
 
-    @Override public void info(String msg) {
-        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
+    @Override
+    public void info(@NotNull String msg) {
+        if (compiler.errMgr.formatWantsSingleLineMessage()) {
             msg = msg.replace('\n', ' ');
         }
         System.out.println(msg);
     }
 
-    @Override public void warning(RESOLVEMessage msg) {
+    @Override
+    public void warning(@NotNull RESOLVEMessage msg) {
         ST msgST = compiler.errMgr.getMessageTemplate(msg);
         String outputMsg = msgST.render();
-        if ( compiler.errMgr.formatWantsSingleLineMessage() ) {
+        if (compiler.errMgr.formatWantsSingleLineMessage()) {
             outputMsg = outputMsg.replace('\n', ' ');
         }
         System.err.println(outputMsg);

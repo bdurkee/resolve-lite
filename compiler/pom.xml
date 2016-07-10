@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -31,6 +32,11 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.clemson</groupId>
+            <artifactId>resolve-runtime</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -79,19 +85,26 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>edu.clemson.resolve.compiler.RESOLVECompiler</mainClass>
+                            <mainClass>edu.clemson.resolve.RESOLVECompiler
+                            </mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <!--NOTE: the line below is responsible for generating
+                        'resolve-x.x.x-complete' to the '/compiler/' directory;
+                        otherwise it would go into the 'target' directory-->
+                    <outputDirectory>${dir}</outputDirectory>
                     <finalName>resolve-${resolve.version}-complete</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <id>make-assembly
+                        </id> <!-- this is used for inheritance merges -->
+                        <phase>package
+                        </phase> <!-- bind to the packaging phase -->
                         <goals>
                             <goal>single</goal>
                         </goals>

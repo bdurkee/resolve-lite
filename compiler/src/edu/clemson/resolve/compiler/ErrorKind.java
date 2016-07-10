@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import org.antlr.v4.tool.ErrorSeverity;
 
 public enum ErrorKind {
@@ -37,8 +38,8 @@ public enum ErrorKind {
      * Compiler Error 6: internal error: <em>message</em>.
      */
     INTERNAL_ERROR(6, "internal error: <arg> <arg2><if(exception&&verbose)>: "
-                           + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
-                   ErrorSeverity.ERROR),
+            + "<exception>" + "<stackTrace; separator=\"\\n\"><endif>",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 7: syntax error: <em>errormsg</em>.
@@ -46,12 +47,9 @@ public enum ErrorKind {
     SYNTAX_ERROR(7, "syntax error: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 8: module <em>name</em> was unable to find the file
-     * corresponding to uses reference '<em>usesref</em>'.
+     * Compiler Error 8: unable to resolve uses reference: <em>name</em>'.
      */
-    MISSING_IMPORT_FILE(8, "module <arg> was unable to find the file "
-            + "corresponding to uses reference '<arg2>'",
-            ErrorSeverity.ERROR),
+    MISSING_IMPORT_FILE(8, "unable to resolve uses reference: '<arg>'", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 9: circular dependency: <em>moduleName1</em> depends on
@@ -79,8 +77,8 @@ public enum ErrorKind {
     DUP_SYMBOL(12, "duplicate symbol: <arg>", ErrorSeverity.ERROR),
 
     /**
-     * Compiler Error 13: expecting <em>entrytype</em>: found
-     * <em>foundentrytype</em>.
+     * Compiler Error 13: expecting <em>expectedSymbolType</em>: found
+     * <em>actualSymbolType</em>.
      */
     UNEXPECTED_SYMBOL(13, "expecting <arg> on '<arg2>', found <arg3> instead",
             ErrorSeverity.ERROR),
@@ -89,37 +87,27 @@ public enum ErrorKind {
      * Compiler Error 14: <em>typename</em> is not known to be a type.
      */
     INVALID_MATH_TYPE(14, "'<arg>' is not known to be a type",
-                      ErrorSeverity.ERROR),
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 15: no such function: <em>name</em>.
      */
     NO_SUCH_MATH_FUNCTION(15, "no such function: <arg>", ErrorSeverity.ERROR),
 
-    /**
-     * Compiler Error 16: no function applicable for domain <em>domain</em>;
-     * candidates: <em>candidatename</em> : <em>candidatetype</em>.
-     */
-    NO_MATH_FUNC_FOR_DOMAIN(
-            16,
-            "no function applicable for domain <arg>;"
-                    + "\ncandidates: "
-                    + "<arg2, arg3 : {name,domain|('<name.name>' : <domain>)};separator={,\n}>",
-            ErrorSeverity.ERROR),
+    APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
+            " application, but it isn't a function", ErrorSeverity.ERROR),
 
-    /**
-     * Compiler Error 17: multiple domain matches: <em>match1name</em> :
-     * <em>match1type</em> and <em>match2name</em> : <em>match2type</em>;
-     * consider explicitly qualifying.
-     */
-    AMBIGIOUS_DOMAIN(17, "multiple domain matches; for example: "
-            + "<arg> : <arg2>  and  <arg3> : <arg4> \nconsider explicitly "
-            + "qualifying", ErrorSeverity.WARNING),
+    INCORRECT_FUNCTION_ARG_COUNT(17, "no such math function: <arg>" +
+            "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
+
+    ILLEGAL_IMPLICIT_CLSSFTN_PARAM(62, "the implicit classification parameter" +
+            " <arg> is not well formed (colon-lhs should be just an ID)",
+            ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 18: expected: <em>type</em>; found <em>othertype</em>.
      */
-    UNEXPECTED_TYPE(18, "expected: <arg>; found: <arg2>", ErrorSeverity.ERROR),
+    UNEXPECTED_TYPE(18, "expected: <arg>, found: <arg2>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 19: value on seg <em>name</em> is not a tuple.
@@ -130,7 +118,8 @@ public enum ErrorKind {
     /**
      * Compiler Error 20: no such factor <em>name</em>.
      */
-    NO_SUCH_FACTOR(20, "no such factor <arg>", ErrorSeverity.ERROR),
+    NO_SUCH_FACTOR(20, "no such factor <arg> (perhaps trying to access" +
+            " something that isn't of type cartesian?)", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 21: procedure <em>name</em> does not implement any known
@@ -143,8 +132,9 @@ public enum ErrorKind {
      * Compiler Error 22: "illegal member access expression: <em>exp</em>;
      * <em>exp first-component</em> must refer to a record".
      */
-    ILLEGAL_MEMBER_ACCESS(22, "illegal member access expression: <arg>; <arg2>"
-            + " must refer to a record/aggregate type", ErrorSeverity.ERROR),
+    ILLEGAL_MEMBER_ACCESS(22, "illegal member access: " +
+            "either <arg> is not a record/aggregate type, or <arg2> is a " +
+            "missing (undeclared) field.", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 30: no operation found corresponding to call
@@ -214,39 +204,49 @@ public enum ErrorKind {
     /**
      * Compiler Error 38: generated Java error: <em>message</em>.
      */
-    GENERATED_JAVA_ERROR(38, "generated java error: <arg>",
-            ErrorSeverity.ERROR),
+    GENERATED_JAVA_ERROR(38, "generated java error: <arg>", ErrorSeverity.ERROR),
 
-    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an " +
-            "unmarked recursive procedure: '<arg2>'; should be: " +
-            "Oper <arg2>(..); Recursive Procedure ... end <arg2>;",
-                         ErrorSeverity.WARNING),
+    MODULE_AND_FILE_NAME_DIFFER(39, "module name <arg> and file name <arg2> differ", ErrorSeverity.ERROR),
 
-    MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: " +
-            "'<arg>' != '<arg2>'",
-                            ErrorSeverity.WARNING),
+    UNLABELED_RECURSIVE_FUNC(39, "recursive call '<arg>' detected in an unmarked recursive procedure: '<arg2>'; " +
+            "should be: Oper <arg2>(..); Recursive Procedure ... end <arg2>;", ErrorSeverity.WARNING),
 
-    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked as recursive, " +
-            "but contains no recursive calls",
-            ErrorSeverity.WARNING),
+    MISMATCHED_BLOCK_END_NAMES(40, "mismatched block end names: '<arg>' != '<arg2>'", ErrorSeverity.WARNING),
 
-    INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: " +
-            "<arg2>, <arg3>; these need to be the same types",
-            ErrorSeverity.ERROR),
+    LABELED_NON_RECURSIVE_FUNC(41, "procedure <arg> marked 'Recursive', but contains no recursive calls", ErrorSeverity.WARNING),
 
-    ILLEGAL_INCOMING_REF_IN_REQUIRES(42, "found illegal '@'-valued " +
-            "variable ref(s): [<arg; separator={, }>] in requires " +
-            "clause: <arg2>; '@-variables' are not permitted in requires clauses",
-            ErrorSeverity.ERROR),
+    INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: [<arg2>, <arg3>]; these need to be the same types", ErrorSeverity.ERROR),
 
-    MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to " +
-            "recursive call: <arg>. i.e.: arguments fail to match in either " +
-            "number or type (or both) for recursive operation: <arg2>",
-            ErrorSeverity.ERROR),
+    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the concluding " +
+            "statement should be <arg> := [SOME RETURN VALUE];", ErrorSeverity.ERROR),
 
-    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, " +
-            "(which is <arg2>) shares the same name as the enclosing module; " +
-            "it needs a unique name", ErrorSeverity.ERROR);
+    ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued variable ref(s): [<arg; separator={, }>] in " +
+            "requires clause: <arg2>; '@-variables' are not permitted in requires clauses", ErrorSeverity.ERROR),
+
+    MALFORMED_RECURSIVE_OP_CALL(56, "inappropriate arguments supplied to recursive call: <arg>. i.e.: arguments " +
+            "fail to match in either number or type (or both) for recursive operation: <arg2>", ErrorSeverity.ERROR),
+
+    SYMBOL_NAME_MATCHES_MODULE_NAME(60, "symbol s=<arg>, (which is <arg2>) shares the same name as the enclosing " +
+            "module; it needs a unique name", ErrorSeverity.ERROR),
+
+    ILLEGAL_MODE_FOR_FUNCTIONAL_OP(61, "operation <arg> declares a return, but parameter(s) " +
+            "[<arg2; separator = ', '>] use mode <arg3>; operations with a return can only use these modes: " +
+            "[preserves, restores, evaluates]", ErrorSeverity.ERROR),
+
+    ILLEGAL_PRIMARY_OPERATION_CALL(62, "procedure '<arg>' references another " +
+            "primary operation with: <arg2>; primary operations shouldn't reference each other", ErrorSeverity.ERROR),
+
+    INVALID_APPLICATION_ARG(63, "arg of classification: <arg> is not acceptable where <arg2> is required", ErrorSeverity.ERROR),
+
+    INVALID_APPLICATION_ARG2(64, "<arg> is not acceptable where a set is required", ErrorSeverity.ERROR),
+
+    MISSING_EXTERNAL_FILE(65, "unable to find external file reference: <arg>", ErrorSeverity.ERROR),
+
+    INVALID_PARAM_MODE(66, "unrecognized parameter mode: <arg>", ErrorSeverity.ERROR),
+
+    VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING),
+
+    BAD_FROM_CLAUSE(68, "from clause '<arg>' doesn't exist, isn't a directory, and/or isn't a valid project root", ErrorSeverity.ERROR);
 
     public final int code;
     public final String message;

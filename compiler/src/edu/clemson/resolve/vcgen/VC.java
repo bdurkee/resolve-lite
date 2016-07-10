@@ -4,55 +4,70 @@ import edu.clemson.resolve.codegen.model.OutputModelObject;
 import edu.clemson.resolve.proving.Antecedent;
 import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
+import org.antlr.v4.runtime.Token;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.IllegalFormatException;
 import java.util.List;
 
-/**
- * Represents an immutable vc (verification condition), which takes the form
- * of a mathematical implication.
- */
-public class VC extends OutputModelObject {
+/** Represents an immutable vc (verification condition), which takes the form of a mathematical implication. */
+public final class VC extends OutputModelObject {
 
-    /**
-     * A human-readable name for the VC; used for debugging purposes.
-     */
-    public final String name;
+    /** A human-readable name for the VC; used for debugging purposes. */
+    private final int number;
+    private final String explanation;
 
-    /**
-     * This is set to true to indicate that this vc is not the
-     * original version of the vc with 'name'--rather, it was derived from a
-     * vc named 'name' (or derived from a vc derived from a vc named 'name').
-     */
-    public final boolean derived;
+    private final Token location;
 
-    public final Antecedent antecedent;
-    public final Consequent consequent;
+    private final Antecedent antecedent;
+    private final Consequent consequent;
 
-    public VC(String name, PExp antecedent, PExp consequent) {
-        this(name, new Antecedent(antecedent), new Consequent(consequent), false);
+    public VC(int number, PExp antecedent, PExp consequent) {
+        this(number, new Antecedent(antecedent), new Consequent(consequent));
     }
 
-    public VC(String name, Antecedent antecedent, Consequent consequent) {
-        this(name, antecedent, consequent, false);
-    }
-
-    public VC(String name, Antecedent antecedent, Consequent consequent,
-              boolean derived) {
-        this.name = name;
+    public VC(int number, Antecedent antecedent, Consequent consequent) {
+        this.number = number;
         this.antecedent = antecedent;
         this.consequent = consequent;
-        this.derived = derived;
+
+        if (consequent.size() != 1) {
+            throw new UnsupportedOperationException("Only VCs with a single consequent are supported at the moment, " +
+                    "the {@link PExp:split()} method is likely at fault here");
+        }
+        PExp consequentExp = consequent.get(0);
+        this.explanation = consequentExp.getVCExplanation();
+        this.location = consequentExp.getVCLocation();
     }
 
-    public String getName() {
-        String result = name;
-        if ( derived ) result += " (modified)";
-        return result;
+    public int getNumber() {
+        return number;
+    }
+
+    @NotNull
+    public String getExplanation() {
+        return explanation;
+    }
+
+    @NotNull
+    public Token getLocation() {
+        return location;
+    }
+
+    @NotNull
+    public Antecedent getAntecedent() {
+        return antecedent;
+    }
+
+    @NotNull
+    public Consequent getConsequent() {
+        return consequent;
     }
 
     /*@Override public String toString() {
         String retval =
-                "========== " + getName() + " ==========\n" + antecedent
+                "========== " + getNameToken() + " ==========\n" + antecedent
                             + "  -->\n" + consequent;
         return retval;
     }*/

@@ -1,8 +1,0 @@
-Extension Stack_Do_Nothing_Capability
-    for Stack_Template
-
-    Operation Do_Nothing
-            (restores S : Stack)
-        requires |S| > 0
-
-end Stack_Do_Nothing_Capability

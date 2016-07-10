@@ -1,0 +1,6 @@
+Facility Standard_Booleans;
+        uses Boolean_Template;
+    Facility Std_Bools is Boolean_Template
+        externally
+            implemented by Standard_Boolean_Impl;
+end Standard_Booleans;

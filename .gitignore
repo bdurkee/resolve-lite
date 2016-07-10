@@ -1,5 +1,4 @@
 .idea/
-*.iml
 .DS_Store
 .DS_Store?
 target/
@@ -8,7 +7,6 @@ dist/
 lib/
 
 # Generated files
-/doc/
 /gen/
 tmp/
 

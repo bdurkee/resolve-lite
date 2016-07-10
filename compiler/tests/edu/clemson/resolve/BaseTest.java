@@ -1,9 +1,9 @@
 package edu.clemson.resolve;
 
 import edu.clemson.resolve.compiler.DefaultCompilerListener;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
 import edu.clemson.resolve.compiler.RESOLVEMessage;
 import org.antlr.v4.runtime.misc.Utils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -30,8 +30,8 @@ public abstract class BaseTest {
     public static final String PATHSEP = System.getProperty("path.separator");
 
     /**
-     * The base test directory is the directory where generated files get placed
-     * during unit test execution.
+     * The base returnEnsuresArgSubstitutions directory is the directory where generated files get placed
+     * during unit returnEnsuresArgSubstitutions execution.
      * <p>
      * The value for this property is the {@code java.io.tmpdir} system
      * property.</p>
@@ -47,24 +47,27 @@ public abstract class BaseTest {
      */
     protected String stderrDuringGenClassExec;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         tmpdir = new File(BASE_TEST_DIR).getAbsolutePath();
     }
 
-    @org.junit.Rule public final TestRule testWatcher = new TestWatcher() {
-        @Override protected void succeeded(Description description) {
+    @org.junit.Rule
+    public final TestRule testWatcher = new TestWatcher() {
+        @Override
+        protected void succeeded(Description description) {
             eraseTempDir();
         }
     };
 
     protected void eraseFiles() {
-        if (tmpdir == null) {
+        if ( tmpdir==null ) {
             return;
         }
         File tmpdirF = new File(tmpdir);
         String[] files = tmpdirF.list();
-        for(int i = 0; files!=null && i < files.length; i++) {
-            new File(tmpdir+"/"+files[i]).delete();
+        for ( int i = 0; files!=null && i<files.length; i++ ) {
+            new File(tmpdir + "/" + files[i]).delete();
         }
     }
 
@@ -81,39 +84,37 @@ public abstract class BaseTest {
     }
 
     protected RESOLVECompiler newCompiler() {
-        return new RESOLVECompiler(new String[] {"-o", tmpdir});
+        return new RESOLVECompiler(new String[]{ "-o", tmpdir });
     }
 
     public void testErrors(String[] pairs, String moduleName) {
         testErrors(pairs, moduleName, new String[]{});
     }
 
-    public void testErrors(String[] pairs, String moduleName,
-                           String ... compilerOptions) {
-        for (int i = 0; i < pairs.length; i+=2) {
+    public void testErrors(String[] pairs,
+                           String moduleName,
+                           String... compilerOptions) {
+        for ( int i = 0; i<pairs.length; i += 2 ) {
             String input = pairs[i];
             String expected = pairs[i + 1];
 
-            String fileName = moduleName+RESOLVECompiler.FILE_EXTENSION;
-            ErrorQueue errors = resolve(fileName, input, false,
-                    compilerOptions);
+            String fileName = moduleName + RESOLVECompiler.NATIVE_FILE_EXTENSION;
+            ErrorQueue errors = resolve(fileName, input, false, compilerOptions);
 
             String actual = errors.toString(true);
             actual = actual.replace(tmpdir + File.separator, "");
             System.err.println(actual);
             String msg = input;
-            msg = msg.replace("\n","\\n");
-            msg = msg.replace("\r","\\r");
-            msg = msg.replace("\t","\\t");
+            msg = msg.replace("\n", "\\n");
+            msg = msg.replace("\r", "\\r");
+            msg = msg.replace("\t", "\\t");
 
-            assertEquals("error in: "+msg, expected, actual);
+            assertEquals("error in: " + msg, expected, actual);
         }
     }
 
-    protected String execCode(String resolveFileName, String moduleStr,
-            String startModuleName, boolean debug) {
-        boolean success = rawGenerateAndCompileCode(
-                resolveFileName, moduleStr, startModuleName, false);
+    protected String execCode(String resolveFileName, String moduleStr, String startModuleName, boolean debug) {
+        boolean success = rawGenerateAndCompileCode(resolveFileName, moduleStr, startModuleName, false);
         assertTrue(success);
         String output = execClass(startModuleName);
         if ( stderrDuringGenClassExec!=null && stderrDuringGenClassExec.length()>0 ) {
@@ -129,65 +130,65 @@ public abstract class BaseTest {
                                                 String moduleStr,
                                                 String moduleName,
                                                 boolean defaultListener) {
-        ErrorQueue errorQueue = resolve(resolveFileName, moduleStr,
-                defaultListener, "-genCode");
-        if (!errorQueue.errors.isEmpty()) return false;
+        ErrorQueue errorQueue = resolve(resolveFileName, moduleStr, defaultListener, "-genCode");
+        if ( !errorQueue.errors.isEmpty() ) return false;
         List<String> files = new ArrayList<>();
-        if (moduleName != null) {
-            files.add(moduleName+".java");
+        if ( moduleName!=null ) {
+            files.add(moduleName + ".java");
         }
         return compile(files.toArray(new String[files.size()]));
     }
 
-    protected ErrorQueue resolve(String moduleFileName, String moduleStr,
-                             boolean defaultListener, String ... extraOptions) {
+    protected ErrorQueue resolve(String moduleFileName,
+                                 String moduleStr,
+                                 boolean defaultListener,
+                                 String... extraOptions) {
         mkdir(tmpdir);
         writeFile(tmpdir, moduleFileName, moduleStr);
         return resolve(moduleFileName, defaultListener, extraOptions);
     }
 
     protected ErrorQueue resolve(String moduleFileName,
-                             boolean defaultListener, String ... extraOptions) {
+                                 boolean defaultListener,
+                                 String... extraOptions) {
         final List<String> options = new ArrayList<>();
         Collections.addAll(options, extraOptions);
-        if ( !options.contains("-o") ) {
+        if (!options.contains("-o")) {
             options.add("-o");
             options.add(tmpdir);
         }
-        if ( !options.contains("-lib") ) {
+        if (!options.contains("-lib")) {
             options.add("-lib");
             options.add(tmpdir);
         }
-        options.add(new File(tmpdir, moduleFileName).toString());
+        options.add(new File(moduleFileName).toString());
         final String[] optionsA = new String[options.size()];
         options.toArray(optionsA);
         RESOLVECompiler resolve = new RESOLVECompiler(optionsA);
         ErrorQueue equeue = new ErrorQueue(resolve);
         resolve.addListener(equeue);
-        if (defaultListener) {
+        if ( defaultListener ) {
             resolve.addListener(new DefaultCompilerListener(resolve));
         }
         resolve.processCommandLineTargets();
 
-        if ( (!defaultListener && !equeue.errors.isEmpty()) ||
-                resolve.errMgr.getErrorCount() > 0) {
-            System.err.println("resolve reports errors from "+options);
-            for (int i = 0; i < equeue.errors.size(); i++) {
+        if ( (!defaultListener && !equeue.errors.isEmpty()) || resolve.errMgr.getErrorCount()>0 ) {
+            System.err.println("resolve reports errors from " + options);
+            for ( int i = 0; i<equeue.errors.size(); i++ ) {
                 RESOLVEMessage msg = equeue.errors.get(i);
                 System.err.println(msg);
             }
             System.out.println("!!!\nmodule:");
             try {
-                System.out.println(new String(Utils.readFile(tmpdir+"/"+moduleFileName)));
-            }
-            catch (IOException ioe) {
+                System.out.println(new String(Utils.readFile(tmpdir + "/" + moduleFileName)));
+            } catch (IOException ioe) {
                 System.err.println(ioe.toString());
             }
             System.out.println("###");
         }
         if ( !defaultListener && !equeue.warnings.isEmpty() ) {
-            System.err.println("resolve reports warnings from "+options);
-            for (int i = 0; i < equeue.warnings.size(); i++) {
+            System.err.println("resolve reports warnings from " + options);
+            for ( int i = 0; i<equeue.warnings.size(); i++ ) {
                 RESOLVEMessage msg = equeue.warnings.get(i);
                 System.err.println(msg);
             }
@@ -195,9 +196,9 @@ public abstract class BaseTest {
         return equeue;
     }
 
-    protected boolean compile(String ... fileNames) {
+    protected boolean compile(String... fileNames) {
         List<File> files = new ArrayList<>();
-        for (String fileName : fileNames) {
+        for ( String fileName : fileNames ) {
             File f = new File(tmpdir, fileName);
             files.add(f);
         }
@@ -217,8 +218,7 @@ public abstract class BaseTest {
 
         try {
             fileManager.close();
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             ioe.printStackTrace(System.err);
         }
         return ok;
@@ -226,12 +226,10 @@ public abstract class BaseTest {
 
     public String execClass(String className) {
         try {
-            String[] args = new String[] {
-                    "java", "-classpath", tmpdir+ PATHSEP +CLASSPATH,
+            String[] args = new String[]{
+                    "java", "-classpath", tmpdir + PATHSEP + CLASSPATH,
                     className, new File(tmpdir, "input").getAbsolutePath()
             };
-//			String cmdLine = Utils.join(args, " ");
-//			System.err.println("execParser: "+cmdLine);
             Process process =
                     Runtime.getRuntime().exec(args, null, new File(tmpdir));
             StreamVacuum stdoutVacuum = new StreamVacuum(process.getInputStream());
@@ -244,11 +242,10 @@ public abstract class BaseTest {
             String output = stdoutVacuum.toString();
             if ( stderrVacuum.toString().length()>0 ) {
                 this.stderrDuringGenClassExec = stderrVacuum.toString();
-                System.err.println("exec stderrVacuum: "+ stderrVacuum);
+                System.err.println("exec stderrVacuum: " + stderrVacuum);
             }
             return output;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("can't exec generated class");
             e.printStackTrace(System.err);
         }
@@ -259,31 +256,37 @@ public abstract class BaseTest {
         StringBuilder buf = new StringBuilder();
         BufferedReader in;
         Thread sucker;
+
         public StreamVacuum(InputStream in) {
-            this.in = new BufferedReader( new InputStreamReader(in) );
+            this.in = new BufferedReader(new InputStreamReader(in));
         }
+
         public void start() {
             sucker = new Thread(this);
             sucker.start();
         }
-        @Override public void run() {
+
+        @Override
+        public void run() {
             try {
                 String line = in.readLine();
-                while (line!=null) {
+                while ( line!=null ) {
                     buf.append(line);
                     buf.append('\n');
                     line = in.readLine();
                 }
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 System.err.println("can't read output from process");
             }
         }
+
         /** wait for the thread to finish */
         public void join() throws InterruptedException {
             sucker.join();
         }
-        @Override public String toString() {
+
+        @Override
+        public String toString() {
             return buf.toString();
         }
     }
@@ -298,15 +301,15 @@ public abstract class BaseTest {
      *              in the {@code modules}).
      */
     protected void writeModules(String[] modules, String... names) {
-        if (modules.length != names.length) {
+        if ( modules.length!=names.length ) {
             throw new IllegalArgumentException(
                     "modules.length != names.length!");
         }
         mkdir(tmpdir);
-        for (int i = 0; i < modules.length; i++) {
+        for ( int i = 0; i<modules.length; i++ ) {
             String inputModule = modules[i];
-            String fileName = names[i]+RESOLVECompiler.FILE_EXTENSION;
-            //write all of our test modules to tmpdir
+            String fileName = names[i] + RESOLVECompiler.NATIVE_FILE_EXTENSION;
+            //write all of our returnEnsuresArgSubstitutions modules to tmpdir
             writeFile(tmpdir, fileName, inputModule);
         }
     }
@@ -314,8 +317,7 @@ public abstract class BaseTest {
     public static void writeFile(String dir, String fileName, String content) {
         try {
             Utils.writeFile(dir + "/" + fileName, content, "UTF-8");
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             System.err.println("can't write file");
             ioe.printStackTrace(System.err);
         }

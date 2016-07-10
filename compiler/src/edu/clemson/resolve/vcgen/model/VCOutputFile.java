@@ -1,32 +1,35 @@
 package edu.clemson.resolve.vcgen.model;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.codegen.model.ModelElement;
 import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VC;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class VCOutputFile extends OutputModelObject {
 
-    private int assertiveBatchCt;
+    private int currentVcNumber;
+    private final RESOLVECompiler compiler;
 
     /**
-     * All completed {@link AssertiveBlock} objects; where each
-     * represents a vc or group of vcs that must be satisfied to verify a parsed
-     * program.
+     * All raw {@link AssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
+     * must be satisfied to verify the program under consideration.
      */
-    @ModelElement public List<AssertiveBlock> chunks = new ArrayList<>();
+    @ModelElement
+    public List<AssertiveBlock> chunks = new ArrayList<>();
 
-    /**
-     * The final list of immutable vcs.
-     */
-    @ModelElement public List<VC> finalVcs = new ArrayList<>();
+    /** The final list of immutable vcs. */
+    @ModelElement
+    public List<VC> finalVcs = new ArrayList<>();
 
-    public VCOutputFile() {
-        assertiveBatchCt = 0;
+    public VCOutputFile(@NotNull RESOLVECompiler rc) {
+        this.currentVcNumber = 1;
+        this.compiler = rc;
     }
 
     public List<VC> getFinalVCs() {
@@ -35,39 +38,55 @@ public class VCOutputFile extends OutputModelObject {
 
     public void addAssertiveBlock(AssertiveBlock b) {
         chunks.add(b);
-        addVCsInContext(b, assertiveBatchCt);
-        assertiveBatchCt++;
+        addVCsInContext(b);
     }
 
     /**
-     * Each {@code AssertiveBlock} contains a set of VCs that refer to
-     * the same set of free variables.  This method adds each {@code VC} to the
-     * final list.
+     * A convenience method for tools looking to annotate lines by {@link VC} information
      *
-     * @param batch the set of {@code VC}s in context.
-     * @param sectionNumber The batch number so that we can mirror the numbering
-     *                      used by the Verifier. (Ideally, we should eventually
-     *                      embed the name of each {@code VC} from the Verifier
-     *                      with its name for greater robustness.)
+     * @return A mapping from line number to the VCs arising from that particular line.
      */
-    private void addVCsInContext(final AssertiveBlock batch,
-                                 final int sectionNumber) {
-        List<PExp> vcs = batch.getFinalConfirm().getConfirmExp()
-                .splitIntoSequents();
-        //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
-        int vcIndex = 1;
-        for (PExp vc : vcs) {
-            List<? extends PExp> args = vc.getSubExpressions();
-            if (!(vc instanceof PApply)) continue;
-            //args.get(0) would be the function name portion of the PApply;
-            //so we actually do args.get(1) to get the first arg (lhs)
-            VC curVC = new VC(sectionNumber + "_" + vcIndex,
-                    args.get(1), args.get(2));
-
-            finalVcs.add(curVC);
-            vcIndex++;
+    public Map<Integer, List<VC>> getVCsGroupedByLineNumber() {
+        Map<Integer, List<VC>> result = new LinkedHashMap<>();
+        for (VC vc : finalVcs) {
+            int line = vc.getLocation().getLine();
+            result.putIfAbsent(line, new ArrayList<>());
+            result.get(line).add(vc);
         }
+        return result;
     }
 
+    private void addVCsInContext(final AssertiveBlock batch) {
 
+        VCConfirm batchedConfirm = batch.getFinalConfirm();
+        List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
+        //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
+
+        PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
+            @Override
+            public int compare(VC o1, VC o2) {
+                return o1.getNumber() <= o2.getNumber() ? -1 : 1;
+            }
+        });
+        for (PExp e : sequentComponents) {
+            List<? extends PExp> args = e.getSubExpressions();
+            if (!(e instanceof PApply)) continue;   //TODO: Why is this here again?
+
+            PExp antecedentExp = args.get(1);
+            PExp consequentExp = args.get(2);
+            if (args.get(2).isObviouslyTrue()) continue;
+
+            if (consequentExp.getVCLocation() == null) {
+                compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, consequentExp.toString());
+                continue;
+            }
+            VC curVC = new VC(consequentExp.getVCLocation().getLine(), antecedentExp, consequentExp);
+            vcTempBatchOrderedByLine.add(curVC);
+        }
+        VC vc = null;
+        while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
+            finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
+            currentVcNumber++;
+        }
+    }
 }

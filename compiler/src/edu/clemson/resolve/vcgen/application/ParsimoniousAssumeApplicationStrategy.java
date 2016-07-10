@@ -1,80 +1,63 @@
 package edu.clemson.resolve.vcgen.application;
 
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCAssume;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class ParsimoniousAssumeApplicationStrategy
-        implements
-            StatRuleApplicationStrategy<VCAssume> {
+public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
 
-    @Override public AssertiveBlock applyRule(VCAssertiveBlockBuilder block,
-                                              VCAssume stat) {
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
-        PExp confirmExp = block.finalConfirm.getConfirmExp();
+        PExp RP = block.finalConfirm.getConfirmExp();
 
-        Set<String> allAssumptionSymbolNames = assumeExp.getSymbolNames();
-        Map<PExp, Set<String>> assumesToSymbols = new HashMap<>();
-
+        Map<PExp, PExp> concEqualitySubstitutions = new LinkedHashMap<>();
+        List<PExp> assumeConjunctsWithoutConcEqualities = new LinkedList<>();
         for (PExp assume : assumeExp.splitIntoConjuncts()) {
-            assumesToSymbols.put(assume, assume.getSymbolNames());
-        }
-
-        for (PExp confirm : confirmExp.splitIntoConjuncts()) {
-            Set<String> curIntersection = new HashSet<>();
-            confirm.getSymbolNames().retainAll(allAssumptionSymbolNames);
-
-            if (curIntersection.isEmpty()) continue;
-            for (PExp assume : assumesToSymbols.keySet()) {
-                assumesToSymbols.get(assume).retainAll(curIntersection);
-                if (!curIntersection.isEmpty()) {
-
-                }
-            }
-        }
-
-    /*    Map<PExp, PExp> equalsReplacements = new HashMap<>();
-        List<PExp> assumeConjuncts = assumeExp.splitIntoConjuncts();
-
-        List<PExp> relevantAssumptions = new ArrayList<>();
-        for (PExp assume : assumeConjuncts) {
+            boolean isConceptual = false;
             if (assume.isEquality()) {
-                PApply assumeAsPSymbol = (PApply)assume;
-                PExp left = assumeAsPSymbol.getArguments().get(0);
-                PExp right = assumeAsPSymbol.getArguments().get(1);
-                if (left.isVariable()) {
-                    if (!RP.staysSameAfterSubstitution(left, right)) {
-                        equalsReplacements.put(left, right); continue;
-                    }
+                PExp lhs = assume.getSubExpressions().get(1);
+                PExp rhs = assume.getSubExpressions().get(2);
+                if (lhs.isVariable() && lhs.containsName("conc")) {
+                    concEqualitySubstitutions.put(lhs, rhs);
+                    isConceptual = true;
                 }
             }
-            //if we're an equality that didn't affect RP (see above) then
-            if (assume.hasSymbolNamesInCommonWith(RP, true, true) &&
-                    !assume.isObviouslyTrue()) {
-                relevantAssumptions.add(assume);
+            if (!isConceptual) {
+                assumeConjunctsWithoutConcEqualities.add(assume);
             }
         }
-        RP = RP.substitute(equalsReplacements);
+        //now substitute any conc equalities into RP
+        RP = RP.substitute(concEqualitySubstitutions);
+        //beta reduce any lambdas present now...
 
-        PExp newAssume = null;
-        if (relevantAssumptions.isEmpty()) {
-            block.finalConfirm(RP);
+        List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
+        for (PExp assume : assumeConjunctsWithoutConcEqualities) {
+            Set<String> intersection = assumeExp.getSymbolNames(true, true);
+            intersection.retainAll(RP.getSymbolNames(true, true));
+            if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
+                parsimoniousAssumeConjuncts.add(assume);
+            }
+        }
+        //this will be the pruned assume expr
+        if (!parsimoniousAssumeConjuncts.isEmpty()) {
+            assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
+            block.finalConfirm(block.g.formImplies(assumeExp, RP));
         }
         else {
-            newAssume = block.g.formConjuncts(relevantAssumptions);
-            block.finalConfirm(block.g.formImplies(newAssume, RP));
-        }*/
+            block.finalConfirm(RP);
+        }
         return block.snapshot();
     }
 
-    @Override public String getDescription() {
+    @NotNull
+    @Override
+    public String getDescription() {
         return "parsimonious assume application";
     }
 }

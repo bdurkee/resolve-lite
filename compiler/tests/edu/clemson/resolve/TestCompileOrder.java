@@ -1,15 +1,18 @@
 package edu.clemson.resolve;
 
-import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.compiler.RESOLVECompiler;
+import edu.clemson.resolve.misc.LogManager;
+import edu.clemson.resolve.misc.Utils;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class TestCompileOrder extends BaseTest {
 
-    @Test public void testBasicLinearOrdering() throws Exception {
-        String[] modules = new String[] {
+/*    @Test
+    public void testBasicLinearOrdering() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n uses V;\n end U;",
                 "Precis V;\n end V;"
@@ -19,8 +22,9 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test public void testTrivialOrdering() throws Exception {
-        String[] modules = new String[] {
+    @Test
+    public void testTrivialOrdering() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n end T;",
         };
         String expected = "populating: T";
@@ -28,8 +32,9 @@ public class TestCompileOrder extends BaseTest {
         testOrdering(expected, "T");
     }
 
-    @Test public void testTrivialOrdering2() throws Exception {
-        String[] modules = new String[] {
+    @Test
+    public void testTrivialOrdering2() throws Exception {
+        String[] modules = new String[]{
                 "Precis T;\n uses U;\n end T;",
                 "Precis U;\n end U;",
         };
@@ -37,27 +42,15 @@ public class TestCompileOrder extends BaseTest {
         writeModules(modules, "T", "U");
         testOrdering(expected, "T");
     }
-
-    @Test public void testFlawedOrdering() throws Exception {
-        String[] modules = new String[] {
-                "Precis U;\n uses X;\n end U;",
-                "Precis X;\n uses Y, V;\n end U;",
-                "Precis V;\n uses U;\n end V;"
-        };
-        String[] pairs = new String[] {
-                "Precis Flawed;\n uses U;\n end Flawed;",
-                "error(" + ErrorKind.MISSING_IMPORT_FILE.code + "): X.resolve:2:6: module X was unable to find the file corresponding to uses reference 'Y'" + "\n"+
-                "error(" + ErrorKind.CIRCULAR_DEPENDENCY.code + "): V.resolve:2:6: circular dependency: U depends on V, but V also depends on U"
-        };
-        writeModules(modules, "U", "X", "V");
-        super.testErrors(pairs, "Flawed");
-    }
-
+*/
     //Todo: When facilities, enhancements, and other constructs are
-    //are eventually added, we're going to want to test compilation ordering
+    //are eventually added, we're going to want to returnEnsuresArgSubstitutions compilation ordering
     //on the things they implicitly import.
-    private void testOrdering(String expected, String root) {
-        ErrorQueue e = resolve(root+RESOLVECompiler.FILE_EXTENSION, false);
-        assertEquals(expected, e.toInfoString());
+    public void testOrdering(String expected, String root) {
+        ErrorQueue e = resolve(root + RESOLVECompiler.NATIVE_FILE_EXTENSION, false);
+        LogManager l = e.compiler.logMgr;
+        List<String> msgs = Utils.apply(l.getRecords(), LogManager.Record::getMsg);
+        String actual = Utils.join(msgs, "\n");
+        assertEquals(expected, actual);
     }
 }

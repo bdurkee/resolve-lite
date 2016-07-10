@@ -28,12 +28,14 @@
 
     <modules>
         <module>compiler</module>
+        <module>runtime</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <resolve.testinprocess>true</resolve.testinprocess>
+        <dir>${project.basedir}</dir>
         <java.version>1.8</java.version>
         <antlr4.version>4.5.1</antlr4.version>
         <resolve.version>0.0.1</resolve.version>
