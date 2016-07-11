@@ -331,7 +331,7 @@ public class RESOLVECompiler {
                 }
             }
             if (module != null) {
-                if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
+                if (pathExists(g, module.getModuleIdentifier(), root.getModuleIdentifier())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
                             importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
@@ -355,18 +355,18 @@ public class RESOLVECompiler {
     }
 
     private boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                               @NotNull String src,
-                               @NotNull String dest) {
+                               @NotNull ModuleIdentifier src,
+                               @NotNull ModuleIdentifier dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if (!g.containsVertex(src)) {
+        if (!g.containsVertex(src.getFile().getAbsolutePath())) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src.getFile().getAbsolutePath());
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if (next.equals(dest)) {
+            if (next.equals(dest.getFile().getAbsolutePath())) {
                 return true;
             }
         }
