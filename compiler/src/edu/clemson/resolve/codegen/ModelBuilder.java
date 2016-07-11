@@ -478,31 +478,32 @@ public class ModelBuilder extends ResolveBaseListener {
         ModuleFile file = buildFile();
         file.genPackage = buildPackage();
 
-        ExtensionImplModule impl = new ExtensionImplModule(ctx.name.getText(), ctx.extension.getText(), ctx.concept.getText(), file);
+        ExtensionImplModule impl = new ExtensionImplModule(ctx.name.getText(), ctx.concept.getText(),
+                ctx.extension.getText(), file);
         Scope conceptScope = null;
-        /*try {
-            conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
+        try {
+            conceptScope = symtab.getModuleScope(moduleScope.getImportWithName(ctx.concept));
             impl.addDelegateMethods(conceptScope.getSymbolsOfType(OperationSymbol.class, TypeModelSymbol.class));
         } catch (NoSuchModuleException e) {
-        }*/
+        }
         if (ctx.implBlock() != null) {
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().operationProcedureDecl(), built));
             impl.funcImpls.addAll(Utils.collect(FunctionImpl.class, ctx.implBlock().procedureDecl(), built));
         }
-       /* try {
+        try {
             //first the concept spec
             List<ModuleParameterSymbol> allSymsFromConceptAndExtAndThisModule =
-                    symtab.getModuleScope(new ModuleIdentifier(ctx.concept))
+                    symtab.getModuleScope(moduleScope.getImportWithName(ctx.concept))
                             .getSymbolsOfType(ModuleParameterSymbol.class);
             //then the extension spec
             allSymsFromConceptAndExtAndThisModule.addAll(
-                    symtab.getModuleScope(new ModuleIdentifier(ctx.extension))
+                    symtab.getModuleScope(moduleScope.getImportWithName(ctx.extension))
                             .getSymbolsOfType(ModuleParameterSymbol.class));
             //now this
             allSymsFromConceptAndExtAndThisModule.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allSymsFromConceptAndExtAndThisModule);
-        } catch (NoSuchModuleException e) {
-        }*/
+        } catch (NoSuchModuleException e) {//shouldn't happen
+        }
         impl.addCtor();
         file.module = impl;
         built.put(ctx, file);
@@ -583,20 +584,29 @@ public class ModelBuilder extends ResolveBaseListener {
         else { // if the reference was qualified, let's see if it was a facility or module.
             try {
                 Symbol s = moduleScope.queryForOne(new NameQuery(null, refQualifier.getText(), true));
-                if (s instanceof FacilitySymbol) {
-                    ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
-                    ModuleIdentifier id = ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
-                    String name = null;
-                    if (isLocallyAccessibleSymbol(s)) {
-                        name = s.getName();
-                    }
-                    else {
-                        name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
-                                + "." + s.getName();
-                    }
-                    String qual = Utils.stripFileExtension(id.getPathRelativeToRootDir().toString());
-                    return new FacilityQualifier(qual.replaceAll(File.separator, "."), name.replaceAll(File.separator, "."));
+                ModuleIdentifier relevantFacilitySpec = ((FacilitySymbol) s).getFacility().getSpecification().getModuleIdentifier();
+                ModuleIdentifier sEnclosingModule = s.getModuleIdentifier();
+
+                if (!((FacilitySymbol) s).getEnhancements().isEmpty()) {
+                    //Ok, we're dealing with an enhanced facility.. we need to know, specifically, which facility
+                    //specification refName lives in. So let's do a quick query to find out.
+                    Symbol s1 = moduleScope.queryForOne(new NameQuery(refQualifier, refName, true));
+
+                    //TODO: Use map from facility s to get the spec, this will do the impl (which I think will still
+                    //work, but who knows..)
+                    relevantFacilitySpec = s1.getModuleIdentifier();
                 }
+                String name = null;
+                if (isLocallyAccessibleSymbol(s)) {
+                    name = s.getName();
+                }
+                else {
+                    name = Utils.stripFileExtension(sEnclosingModule.getPathRelativeToRootDir().toString())
+                            + "." + s.getName();
+                }
+                String qual = Utils.stripFileExtension(relevantFacilitySpec.getPathRelativeToRootDir().toString());
+                return new FacilityQualifier(qual.replaceAll(File.separator, "."), name.replaceAll(File.separator, "."));
+
             } catch (NoSuchSymbolException e) {
                 //not dealing with a facility... the qualifier must be a module then..
                 Symbol s = null;

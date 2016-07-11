@@ -54,6 +54,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return new HashSet<>(importedModules);
     }
 
+    //TODO: Use a map instead... but need to
     @NotNull
     public ModuleIdentifier getImportWithName(@NotNull Token name) throws NoSuchModuleException {
         for (ModuleIdentifier e : importedModules) {

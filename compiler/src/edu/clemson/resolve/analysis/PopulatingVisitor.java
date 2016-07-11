@@ -137,6 +137,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+        try {
+            //concept impls implicitly get the uses items of the parent concept
+            ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
+            ModuleIdentifier extensionIdent = moduleScope.getImportWithName(ctx.extension);
+
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(conceptIdent);
+            ModuleScopeBuilder extensionScope = symtab.getModuleScope(conceptIdent);
+
+            moduleScope.addImports(conceptScope.getImports())
+                    .addImports(extensionScope.getImports())
+                    .addInheritedModules(conceptIdent, extensionIdent)
+                    .addAliases(conceptScope.getAliases())
+                    .addAliases(extensionScope.getAliases());
+        } catch (NoSuchModuleException e) {
+            noSuchModule(e);
+        }
+        super.visitChildren(ctx);
+        return null;
+    }
+
+    @Override
     public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
         try {
             //concept exts implicitly get the uses items of the parent
@@ -233,8 +255,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MathClssftn x = tr.mathClssftns.get(ctx.type());
             try {
                 symtab.getInnermostActiveScope().addBinding(ctx.name.getText(),
-                        ctx.getParent(), new MathNamedClssftn(
-                                g, ctx.name.getText(), x.typeRefDepth - 1, x));
+                        ctx.getParent(),
+                        new MathNamedClssftn(g, ctx.name.getText(), x.typeRefDepth - 1, x));
             } catch (DuplicateSymbolException e) {
                 //This shouldn't be possible--the operation declaration has a
                 //scope all its own and we're the first ones to get to
@@ -452,7 +474,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                         modelType.getTypeRefDepth() - 1,
                         modelType);
         try {
-
             exemplarSymbol =
                     symtab.getInnermostActiveScope().addBinding(
                             ctx.exemplar.getText(), ctx,
@@ -607,8 +628,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
         }
     }
-
-    // prog exprs
 
     //---------------------------------------------------
     // P R O G    E X P    T Y P I N G
