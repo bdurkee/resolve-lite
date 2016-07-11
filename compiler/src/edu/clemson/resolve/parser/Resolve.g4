@@ -210,14 +210,13 @@ varDeclGroup
 
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClause?
-        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+        (externally='externally')? 'implemented' 'by' impl=ID (implArgs=moduleArgumentList)? implFrom=fromClause?
+        (extensionPairing)* ';'?
     ;
 
 extensionPairing
-    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)?
+    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'implemented' 'by' impl=ID (implArgs=moduleArgumentList)? implFrom=fromClause?
     ;
 
 moduleArgumentList

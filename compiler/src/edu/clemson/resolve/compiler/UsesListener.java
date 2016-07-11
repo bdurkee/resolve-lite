@@ -76,6 +76,17 @@ public class UsesListener extends ResolveBaseListener {
         resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
     }
 
+    @Override
+    public void exitExtensionPairing(ResolveParser.ExtensionPairingContext ctx) {
+        ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
+                ctx.specFrom.moduleLibraryIdentifier() : null;
+        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.implFrom != null ?
+                ctx.implFrom.moduleLibraryIdentifier() : null;
+
+        resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
+        resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
+    }
+
     private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
                                                  boolean isExternal,
                                                  @Nullable ResolveParser.ModuleLibraryIdentifierContext from) {
