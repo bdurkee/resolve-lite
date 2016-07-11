@@ -86,7 +86,7 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testPAltAndPLambdaEquals() throws Exception {
-        Assert.assertEquals(true, parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise}}")
+        Assert.assertEquals(true, parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise;}}")
                 .equals(parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise;}}")));
 
         Assert.assertEquals(true, parseMathAssertionExp(g, "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")

@@ -123,6 +123,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
         try {
+            //concept impls implicitly get the uses items of the parent concept
             ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
             ModuleScopeBuilder conceptScope = symtab.getModuleScope(conceptIdent);
             moduleScope.addImports(conceptScope.getImports())
@@ -137,14 +138,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
-      /*  try {
-            //implementations implicitly gain the parenting concept's useslist
-            ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.concept));
-            moduleScope.addImports(conceptScope.getImports());
-            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.concept));
+        try {
+            //concept exts implicitly get the uses items of the parent
+            ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
+            ModuleScopeBuilder conceptScope = symtab.getModuleScope(conceptIdent);
+            moduleScope.addImports(conceptScope.getImports())
+                    .addInheritedModules(conceptIdent)
+                    .addAliases(conceptScope.getAliases());
         } catch (NoSuchModuleException e) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.concept, ctx.concept.getText());
-        }*/
+            noSuchModule(e);
+        }
         super.visitChildren(ctx);
         return null;
     }

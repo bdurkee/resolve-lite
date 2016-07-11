@@ -617,6 +617,8 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     private boolean isLocallyAccessibleSymbol(@NotNull Symbol s) {
+        if (withinFacilityModule()) return false; //everything is static in this translated context (meaning this.) will result in error,
+        //so returning false will mean full qualification.
         ModuleIdentifier id = s.getModuleIdentifier();
         if (moduleScope.getModuleIdentifier().equals(id)) return true;
         else if (moduleScope.getInheritedIdentifiers().contains(s.getModuleIdentifier())) return true;
