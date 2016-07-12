@@ -91,7 +91,7 @@ public class DumbMathClssftnHandler {
     public final Map<MathClssftn, MathClssftn> relationships = new HashMap<>();
 
     public boolean isSubtype(@NotNull MathClssftn subtype, @NotNull MathClssftn supertype) {
-        boolean result = (supertype == ENTITY || supertype == CLS);
+        boolean result = (supertype == ENTITY || supertype == CLS || supertype == EL);
         if (!result) {
             MathClssftn subtypesEnclosingType = subtype.enclosingClassification;
             MathClssftn foundRelationship = relationships.get(subtype);

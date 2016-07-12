@@ -1268,13 +1268,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyName.start = t;
         dummyName.stop = t;
         dummyName.parent = dummyNode;
-        
+
         dummyName.addChild(t);
         dummyNode.addChild(dummyName);
         dummyNode.name = dummyName;
 
-        MathClssftnWrappingSymbol s = getIntendedMathSymbol(null, t, ctx);
-        if (s == null) tr.mathClssftns.put(ctx, g.INVALID); //handle case where we don't find s.
         typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
         return null;
     }
