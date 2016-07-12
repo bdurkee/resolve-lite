@@ -133,6 +133,7 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
             globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
             globalScope.define(new MathClssftnWrappingSymbol(g, "Cls", g.CLS));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "Empty_Set", g.SSET));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "and", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∧", g.BOOLEAN_FUNCTION));
