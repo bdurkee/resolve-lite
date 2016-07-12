@@ -348,7 +348,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | (MATH_UNICODE_SYM|SYM)+ | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' | (SYM|ID)+)    //TODO: Maybe use BOOL instead?
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )    //TODO: Maybe use BOOL instead?
     ;
 
 mathSymbolNameNoID
@@ -412,7 +412,7 @@ mathExp
     |   '(' mathAssertionExp ')'                                                            #mathNestedExp
     |   lhs=mathExp op='.' rhs=mathExp                                                      #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'                                 #mathPrefixAppExp
-    |   mathExp '`' mathSymbolNameNoID mathExp (',' mathExp)* mathSymbolNameNoID            #mathNonStdAppExp
+    |   mathExp '`' mathSymbolNameNoID mathExp (',' mathExp)* mathSymbolNameNoID '`'        #mathNonStdAppExp
     |   mathExp (':'|'⦂') mathExp                                                           #mathClssftnAssertionExp
     |   mathExp mathSymbolExp mathExp                                                       #mathInfixAppExp
     ;
