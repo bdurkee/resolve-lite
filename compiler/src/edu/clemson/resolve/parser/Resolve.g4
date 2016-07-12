@@ -319,7 +319,7 @@ mathDefnSig
     :   mathPrefixDefnSigs
     |   mathInfixDefnSig
     |   mathOutfixDefnSig
- //   |   mathPostfixDefnSig
+    |   mathPostfixDefnSig
     ;
 
 mathPrefixDefnSig
@@ -341,13 +341,14 @@ mathOutfixDefnSig
         rightSym=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
     ;
 
-//mathPostfixDefnSig
-//    :   '('mathVarDecl')' '`' lop=mathSymbolNameNoID mathVarDecl rop=mathSymbolNameNoID '`' ':' mathClssftnExp
-//    ;
+mathPostfixDefnSig
+    :   '(' mathVarDecl ')' '`' lop=mathSymbolNameNoID mathVarDecl
+        rop=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
+    ;
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )    //TODO: Maybe use BOOL instead?
+    :   (ID | (MATH_UNICODE_SYM|SYM)+ | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' | (SYM|ID)+)    //TODO: Maybe use BOOL instead?
     ;
 
 mathSymbolNameNoID
@@ -407,13 +408,13 @@ mathQuantifiedExp
     ;
 
 mathExp
-    :   mathPrimeExp                                        #mathPrimaryExp
-    |   '(' mathAssertionExp ')'                            #mathNestedExp
-    |   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')' #mathPrefixAppExp
-//    |   mathExp lop='[' mathExp (',' mathExp)* rop=']'    #mathBracketAppExp
-    |   mathExp (':'|'⦂') mathExp                           #mathClssftnAssertionExp
-    |   mathExp mathSymbolExp mathExp                       #mathInfixAppExp
+    :   mathPrimeExp                                                                        #mathPrimaryExp
+    |   '(' mathAssertionExp ')'                                                            #mathNestedExp
+    |   lhs=mathExp op='.' rhs=mathExp                                                      #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'                                 #mathPrefixAppExp
+    |   mathExp '`' mathSymbolNameNoID mathExp (',' mathExp)* mathSymbolNameNoID            #mathNonStdAppExp
+    |   mathExp (':'|'⦂') mathExp                                                           #mathClssftnAssertionExp
+    |   mathExp mathSymbolExp mathExp                                                       #mathInfixAppExp
     ;
 
 mathPrimeExp
@@ -467,7 +468,7 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT : [0-9]+ ;
-SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|[<->])+ ;
+SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|'['|']'|[<->])+ ;
 
 MATH_UNICODE_SYM
     :   [\u2200-\u22FF]
