@@ -1254,6 +1254,32 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
+        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
+        dummyNode.start = ctx.lop.start;
+        dummyNode.stop = ctx.rop.stop;  //maybe lop.stop?
+        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
+
+        Token left = ctx.mathSymbolNameNoID(0).getStart();
+        Token right = ctx.mathSymbolNameNoID(1).getStart();
+
+        CommonToken t = new CommonToken(left);
+        t.setText(left.getText() + ".." + right.getText());
+        dummyName.start = t;
+        dummyName.stop = t;
+        dummyName.parent = dummyNode;
+        
+        dummyName.addChild(t);
+        dummyNode.addChild(dummyName);
+        dummyNode.name = dummyName;
+
+        MathClssftnWrappingSymbol s = getIntendedMathSymbol(null, t, ctx);
+        if (s == null) tr.mathClssftns.put(ctx, g.INVALID); //handle case where we don't find s.
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
+        return null;
+    }
+
+    @Override
     public Void visitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
         ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(null, 0);
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(null, 0);
@@ -1285,8 +1311,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         String asString = ctx.getText();
         MathClssftn t = exactNamedMathClssftns.get(nameExp);
         //if we're a name identifying a function, get our function type.
-        if (t instanceof MathNamedClssftn &&
-                t.getEnclosingClassification() instanceof MathFunctionClssftn) {
+        if (t instanceof MathNamedClssftn && t.getEnclosingClassification() instanceof MathFunctionClssftn) {
             t = ((MathNamedClssftn) t).enclosingClassification;
         }
         if (!(t instanceof MathFunctionClssftn)) {
