@@ -337,7 +337,7 @@ mathInfixDefnSig
     ;
 
 mathOutfixDefnSig
-    :   '`' leftSym=mathSymbolNameNoID mathVarDecl
+    :   '`' leftSym=mathSymbolNameNoID '(' mathVarDecl ')'
         rightSym=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
     ;
 

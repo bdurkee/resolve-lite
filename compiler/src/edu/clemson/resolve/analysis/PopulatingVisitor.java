@@ -996,6 +996,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitMathOutfixDefnSig(ResolveParser.MathOutfixDefnSigContext ctx) {
+        CommonToken name = new CommonToken(ctx.leftSym.getStart());
+        name.setText(ctx.leftSym.getText() + ".." + ctx.rightSym.getText());
+        List<ResolveParser.MathVarDeclContext> params = new ArrayList<>();
+        params.add(ctx.mathVarDecl());
+        try {
+            insertMathDefnSignature(ctx, params, ctx.mathClssftnExp(), name);
+        } catch (DuplicateSymbolException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void insertMathDefnSignature(@NotNull ParserRuleContext ctx,
                                          @NotNull List<? extends ParseTree> formals,
                                          @NotNull ResolveParser.MathClssftnExpContext type,
@@ -1241,7 +1255,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
-        typeMathFunctionAppExp(ctx, ctx.mathSqBrOpExp(), ctx.mathExp());
+        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(null, 0);
+        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(null, 0);
+
+        Token left = ctx.mathSymbolNameNoID(0).getStart();
+        Token right = ctx.mathSymbolNameNoID(1).getStart();
+
+        CommonToken t = new CommonToken(left);
+        t.setText(left.getText() + ".." + right.getText());
+        dummyName.addChild(t);
+        dummyNode.addChild(dummyName);
+
+        int i;
+        //typeMathFunctionAppExp(ctx, ctx.mathSqBrOpExp(), ctx.mathExp());
         return null;
     }
 
@@ -1249,13 +1275,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull ParseTree... args) {
         typeMathFunctionAppExp(ctx, nameExp, Arrays.asList(args));
-    }
-
-    //this one is basically for outfix ops.
-    private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
-                                        @NotNull MathFunctionClssftn fc,
-                                        @NotNull List<? extends ParseTree> args) {
-        
     }
 
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
@@ -1291,7 +1310,81 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
         }
+        try {
+            MathClssftn oldExpectedFuncType = expectedFuncType;
 
+            expectedFuncType = (MathFunctionClssftn) expectedFuncType.deschematize(actualArgumentTypes);
+            if (!oldExpectedFuncType.toString().equals(expectedFuncType.toString())) {
+                compiler.log("expected function type: " + oldExpectedFuncType);
+                compiler.log("   deschematizes to: " + expectedFuncType);
+            }
+        } catch (BindingException e) {
+            compiler.log("formal params in: '" + asString +  "' don't bind against the actual arg types");
+        }
+        //we have to redo this since deschematize above might've changed the
+        //args
+        formalParameterTypes = expectedFuncType.getParamTypes();
+
+        List<MathClssftn> actualValues = Utils.apply(args, exactNamedMathClssftns::get);
+
+        Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
+        Iterator<MathClssftn> actualsIter = actualArgumentTypes.iterator();
+        Iterator<MathClssftn> formalsIter = formalParameterTypes.iterator();
+        Iterator<MathClssftn> actualValuesIter = actualValues.iterator();
+
+        //SUBTYPE AND EQUALITY CHECK FOR ARGS HAPPENS HERE
+        while (actualsIter.hasNext()) {
+            MathClssftn actual = actualsIter.next();
+            MathClssftn formal = formalsIter.next();
+            ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
+
+            if (!g.isSubtype(actual, formal)) {
+                compiler.errMgr.semanticError(
+                        ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
+                        actual.toString(), formal.toString());
+            }
+
+            MathClssftn actualVal = actualValuesIter.next();
+            //if someone tries to pass a literal (say, 'true') for some
+            //formal x : SSET ... we need a notion of 'value' to check this.
+            //the if below is where this happens.
+            if (actualVal != null && actualVal != g.INVALID
+                    && actualVal.typeRefDepth == 0
+                    && formal.typeRefDepth >= 2) {
+                //its ok if we're a schematic type whose enclosing classification is a set
+                if (actualVal.identifiesSchematicType && actualVal.enclosingClassification.typeRefDepth >= 1) {
+                    continue;
+                }
+                compiler.errMgr.semanticError(
+                        ErrorKind.INVALID_APPLICATION_ARG2, argCtx.getStart(),
+                        actualVal.toString());
+            }
+        }
+
+        //If we're describing a type, then the range (as a result of the function is too broad),
+        //so we'll annotate the type of this application with its (verbose) application type.
+        //but it's enclosing type will of course still be the range.
+        if (walkingType && expectedFuncType.getRangeClssftn().getTypeRefDepth() <= 1) {
+            exactNamedMathClssftns.put(ctx, g.INVALID);
+            tr.mathClssftns.put(ctx, g.INVALID);
+        }
+        else if (walkingType) {
+            List<MathClssftn> actualNamedArgumentTypes = Utils.apply(args, exactNamedMathClssftns::get);
+            MathClssftn appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
+            exactNamedMathClssftns.put(ctx, appType);
+            tr.mathClssftns.put(ctx, appType);
+        }
+        else {
+            //the classification of an f-application exp is the range of f,
+            //according to the rule:
+            //  C \ f : C x D -> R
+            //  C \ E1 : C
+            //  C \ E2 : D
+            //  ---------------------
+            //  C \ f(E1, E2) : R
+            exactNamedMathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
+            tr.mathClssftns.put(ctx, expectedFuncType.getRangeClssftn());
+        }
     }
 
     //modifies actualArgTypes
