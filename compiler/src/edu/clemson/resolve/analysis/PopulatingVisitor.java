@@ -1279,19 +1279,23 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(null, 0);
-        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(null, 0);
+        //construct a 'name' node for this non std application
+        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
+        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
+        dummyNode.name = dummyName;
 
         Token left = ctx.mathSymbolNameNoID(0).getStart();
         Token right = ctx.mathSymbolNameNoID(1).getStart();
 
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());
+        dummyNode.start = t; dummyNode.stop = t;
+        dummyName.start = t; dummyName.stop = t;
+
         dummyName.addChild(t);
         dummyNode.addChild(dummyName);
 
-        int i;
-        //typeMathFunctionAppExp(ctx, ctx.mathSqBrOpExp(), ctx.mathExp());
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
         return null;
     }
 
