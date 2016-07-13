@@ -311,8 +311,9 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
+//had better be an assertion involving the use of ':' or '⦂'
 mathClssftnAssertionDecl
-    :   'Classification' 'Assertion' ':'
+    :   'Classification' 'Corollary' ':'
             mathAssertionExp ';'
     ;
 

@@ -1511,7 +1511,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         else {
             MathClssftn t = g.POWERSET_FUNCTION.getApplicationType(
-                    "Powerset", exactNamedMathClssftns.get(ctx.mathExp(0)));
+                    "Powerset", tr.mathClssftns.get(ctx.mathExp(0)));
             tr.mathClssftns.put(ctx, t);
         }
         return null;

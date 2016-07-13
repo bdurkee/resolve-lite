@@ -90,8 +90,8 @@ public class DumbMathClssftnHandler {
 
     public final Map<MathClssftn, List<MathClssftn>> relationships = new HashMap<>();
     public void addRelationship(MathClssftn s, MathClssftn t) {
-        List<MathClssftn> l = new ArrayList<>();
         if (relationships.get(s) == null) {
+            List<MathClssftn> l = new ArrayList<>();
             l.add(t);
             relationships.put(s, l);
         }
@@ -118,14 +118,18 @@ public class DumbMathClssftnHandler {
                     }
                 }
             }
-            if (subtype.equals(supertype)) result = true;
-            else if (relationships.get(subtype) != null) {
+
+            //first check relationships
+            if (relationships.get(subtype) != null) {
                 for (MathClssftn r : relationships.get(subtype)) {
                     if (r.equals(supertype)) {
                         return true;
                     }
                 }
             }
+
+            if (subtype.equals(supertype)) result = true;
+
             //not too sure about the two below..
             //1
             else if (supertype == SSET && subtype.enclosingClassification == SSET) {
