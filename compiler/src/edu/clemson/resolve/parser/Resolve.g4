@@ -342,7 +342,7 @@ mathOutfixDefnSig
     ;
 
 mathPostfixDefnSig
-    :   '(' mathVarDecl ')' '`' lop=mathSymbolNameNoID mathVarDecl
+    :   '(' mathVarDecl ')' '`' lop=mathSymbolNameNoID '(' mathVarDecl ')'
         rop=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
     ;
 
