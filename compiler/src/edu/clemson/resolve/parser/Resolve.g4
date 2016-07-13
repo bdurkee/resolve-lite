@@ -91,7 +91,7 @@ precisBlock
         | mathCategoricalDefnDecl
         | mathInductiveDefnDecl
         | mathTheoremDecl
-        | mathClssftnTheoremDecl
+        | mathClssftnAssertionDecl
         )*
     ;
 
@@ -311,8 +311,9 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-mathClssftnTheoremDecl
-    :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
+mathClssftnAssertionDecl
+    :   'Classification' 'Assertion' ':'
+            mathAssertionExp ';'
     ;
 
 mathDefnSig

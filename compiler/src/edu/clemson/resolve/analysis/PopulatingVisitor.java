@@ -882,12 +882,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     // math constructs
 
+    boolean visitingClsstnAssertion = false;
+
     @Override
-    public Void visitMathClssftnTheoremDecl(ResolveParser.MathClssftnTheoremDeclContext ctx) {
-        ctx.mathExp().forEach(this::visit);
-        MathClssftn x = exactNamedMathClssftns.get(ctx.mathExp(0));
-        MathClssftn y = exactNamedMathClssftns.get(ctx.mathExp(1));
-        g.relationships.put(x, y);
+    public Void visitMathClssftnAssertionDecl(ResolveParser.MathClssftnAssertionDeclContext ctx) {
+        visitingClsstnAssertion = true;
+        this.visit(ctx.mathAssertionExp());
+        visitingClsstnAssertion = false;
         return null;
     }
 
@@ -1147,6 +1148,20 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitMathClssftnAssertionExp(ResolveParser.MathClssftnAssertionExpContext ctx) {
         this.visit(ctx.mathExp(1)); //visit the asserted clssfctn
         MathClssftn rhsColonType = exactNamedMathClssftns.get(ctx.mathExp(1));
+        if (visitingClsstnAssertion) {
+            this.visit(ctx.mathExp(0));
+            MathClssftn lhs = exactNamedMathClssftns.get(ctx.mathExp(0));
+            if (lhs instanceof MathNamedClssftn) {
+                g.relationships.put(lhs, rhsColonType);
+            }
+            else if (lhs instanceof MathFunctionApplicationClssftn) {
+                MathFunctionApplicationClssftn asFnApp = (MathFunctionApplicationClssftn)lhs;
+                g.relationships.put(asFnApp, rhsColonType);
+            }
+            return null;
+        }
+
+
         boolean walkingEntails = Utils.getFirstAncestorOfType(ctx, ResolveParser.EntailsClauseContext.class) != null;
         if (walkingEntails) {
             entailsRetype = rhsColonType;
@@ -1396,6 +1411,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, g.INVALID);
         }
         else if (walkingType) {
+            List<MathClssftn> actualNamedArgumentTypes = Utils.apply(args, exactNamedMathClssftns::get);
+            MathClssftn appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
+            exactNamedMathClssftns.put(ctx, appType);
+            tr.mathClssftns.put(ctx, appType);
+        }
+        else if (visitingClsstnAssertion) {
             List<MathClssftn> actualNamedArgumentTypes = Utils.apply(args, exactNamedMathClssftns::get);
             MathClssftn appType = expectedFuncType.getApplicationType(nameExp.getText(), actualNamedArgumentTypes);
             exactNamedMathClssftns.put(ctx, appType);

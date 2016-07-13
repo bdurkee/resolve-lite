@@ -41,9 +41,13 @@ public class MathFunctionApplicationClssftn extends MathClssftn {
         return result;
     }
 
+    @NotNull
+    public MathFunctionClssftn getFunction() {
+        return function;
+    }
+
     @Override
-    public MathClssftn withVariablesSubstituted(
-            Map<String, MathClssftn> substitutions) {
+    public MathClssftn withVariablesSubstituted(Map<String, MathClssftn> substitutions) {
         MathFunctionClssftn newNameType =
                 (MathFunctionClssftn) function.withVariablesSubstituted(substitutions);
         List<MathClssftn> newArgs = new ArrayList<>();

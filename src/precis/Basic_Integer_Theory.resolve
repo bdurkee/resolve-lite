@@ -12,7 +12,8 @@ Precis Basic_Integer_Theory;
         (i.) ⨩(0) = 0;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
-    Type Theorem N_Subset_of_Z : N : Z;
+	Classification Assertion: 
+		N : Z;
 
     Theorem I1 :
         ∀ n : Z, Is_Neg(n) implies (NB(n) = ⨩(n));

@@ -94,6 +94,21 @@ public class DumbMathClssftnHandler {
         boolean result = (supertype == ENTITY || supertype == CLS || supertype == EL);
         if (!result) {
             MathClssftn subtypesEnclosingType = subtype.enclosingClassification;
+
+            //hook this in to handle a more complex subtype assertion of the form:
+            // Math Classification Assertion: Forall T : SSet, F(T) : X
+            //where X is a free variable and T is bound
+            for (MathClssftn e : relationships.keySet()) {
+                if (e instanceof MathFunctionApplicationClssftn &&
+                        subtype instanceof MathFunctionApplicationClssftn) {
+                    MathFunctionApplicationClssftn eAsFunctionApp = (MathFunctionApplicationClssftn)e;
+                    MathFunctionApplicationClssftn subtypeAsFunctionApp = (MathFunctionApplicationClssftn)subtype;
+                    if (eAsFunctionApp.getFunction().equals(subtypeAsFunctionApp.getFunction()) &&
+                            eAsFunctionApp.getName().equals(subtypeAsFunctionApp.getName())) {
+                        return true;
+                    }
+                }
+            }
             MathClssftn foundRelationship = relationships.get(subtype);
             //if we're equal, we're a trivial subtype
             if (subtype.equals(supertype)) result = true;
