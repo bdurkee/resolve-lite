@@ -88,8 +88,17 @@ public class DumbMathClssftnHandler {
         }
     }
 
-    public final Map<MathClssftn, MathClssftn> relationships = new HashMap<>();
-
+    public final Map<MathClssftn, List<MathClssftn>> relationships = new HashMap<>();
+    public void addRelationship(MathClssftn s, MathClssftn t) {
+        List<MathClssftn> l = new ArrayList<>();
+        if (relationships.get(s) == null) {
+            l.add(t);
+            relationships.put(s, l);
+        }
+        else {
+            relationships.get(s).add(t);
+        }
+    }
     public boolean isSubtype(@NotNull MathClssftn subtype, @NotNull MathClssftn supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS || supertype == EL);
         if (!result) {
@@ -109,11 +118,13 @@ public class DumbMathClssftnHandler {
                     }
                 }
             }
-            MathClssftn foundRelationship = relationships.get(subtype);
-            //if we're equal, we're a trivial subtype
             if (subtype.equals(supertype)) result = true;
-            else if (foundRelationship != null && foundRelationship.equals(supertype)) {
-                result = true;
+            else if (relationships.get(subtype) != null) {
+                for (MathClssftn r : relationships.get(subtype)) {
+                    if (r.equals(supertype)) {
+                        return true;
+                    }
+                }
             }
             //not too sure about the two below..
             //1

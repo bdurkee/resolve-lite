@@ -1152,16 +1152,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             this.visit(ctx.mathExp(0));
             MathClssftn lhs = exactNamedMathClssftns.get(ctx.mathExp(0));
             if (lhs instanceof MathNamedClssftn) {
-                g.relationships.put(lhs, rhsColonType);
+                g.addRelationship(lhs, rhsColonType);
             }
             else if (lhs instanceof MathFunctionApplicationClssftn) {
                 MathFunctionApplicationClssftn asFnApp = (MathFunctionApplicationClssftn)lhs;
-                g.relationships.put(asFnApp, rhsColonType);
+                g.addRelationship(asFnApp, rhsColonType);
             }
             return null;
         }
-
-
         boolean walkingEntails = Utils.getFirstAncestorOfType(ctx, ResolveParser.EntailsClauseContext.class) != null;
         if (walkingEntails) {
             entailsRetype = rhsColonType;
