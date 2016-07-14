@@ -12,7 +12,7 @@ Precis Basic_Integer_Theory;
         (i.) ⨩(0) = 0;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
-	Classification Assertion: 
+	Classification Corollary :
 		N : Z;
 
     Theorem I1 :
