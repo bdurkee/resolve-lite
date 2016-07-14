@@ -147,7 +147,7 @@ specModuleInit
 
 typeImplInit
     :   'initialization'
-        (varDeclGroup)* //(stmt)*
+        (varDeclGroup)* (stmt)*
         'end' ';'
     ;
 
