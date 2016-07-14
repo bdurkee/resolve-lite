@@ -121,7 +121,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '::')? name=ID             #namedType
+    :   (qualifier=ID '::')? name=ID            #namedType
     |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 
@@ -210,13 +210,15 @@ varDeclGroup
 
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID (implArgs=moduleArgumentList)? implFrom=fromClause?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? implFrom=fromClause?
         (extensionPairing)* ';'?
     ;
 
 extensionPairing
     :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID (implArgs=moduleArgumentList)? implFrom=fromClause?
+        (externally='externally')? 'implemented' 'by' impl=ID
+        (implArgs=moduleArgumentList)? implFrom=fromClause?
     ;
 
 moduleArgumentList
@@ -481,7 +483,7 @@ MATH_UNICODE_SYM
     ;
 
 CHAR: '\'' . '\'' ;
-RAW_STRING :  '\'' (ESC | ~["\\])* '\'' ;
-STRING :  '"' (ESC | ~["\\])* '"' ;
-fragment ESC :   '\\' ["\bfnrt] ;
+RAW_STRING : '\'' (ESC | ~["\\])* '\'' ;
+STRING : '"' (ESC | ~["\\])* '"' ;
+fragment ESC : '\\' ["\bfnrt] ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

@@ -384,10 +384,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /**
      * Really just checks two things before we add an {@link FacilitySymbol} to the table:
      * <ol>
-     * <li>That the number of actuals supplied to module {@code i}
-     * matches the number of formals</li>
-     * <li>The number prog types (or even generics) supplied matches the number
-     * of formal type parameters.</li>
+     *  <li>That the number of actuals supplied to module {@code i}
+     *      matches the number of formals</li>
+     *  <li>The number prog types (or even generics) supplied matches the number
+     *      of formal type parameters.</li>
      * </ol>
      */
     private void sanityCheckParameterizationArgs(@NotNull List<ResolveParser.ProgExpContext> actuals,

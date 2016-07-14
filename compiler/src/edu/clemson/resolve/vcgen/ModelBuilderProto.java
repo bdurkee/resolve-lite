@@ -343,9 +343,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         try {
             List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name, paramSyms.stream()
-                    .map(ProgParameterSymbol::getDeclaredType)
-                    .collect(Collectors.toList())));
+            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name,
+                    Utils.apply(paramSyms, ProgParameterSymbol::getDeclaredType)));
 
             //This is the requires for the operation with some substutions made (see corrFnExp rule in HH-diss)
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getRequires());
