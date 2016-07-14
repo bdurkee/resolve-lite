@@ -1,5 +1,4 @@
 Facility Standard_Integers;
-    uses concepts.int.Integer_Template;
 
     Facility Std_Ints is Integer_Template
         externally

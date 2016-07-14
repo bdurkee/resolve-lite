@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
@@ -464,7 +464,7 @@ public class PApply extends PExp {
         protected Token vcLocation;
         protected String vcExplanation;
 
-        protected MathClassification applicationType;
+        protected MathClssftn applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
         protected boolean bracketApp = false;
 
@@ -505,7 +505,7 @@ public class PApply extends PExp {
             return this;
         }
 
-        public PApplyBuilder applicationType(@Nullable MathClassification type) {
+        public PApplyBuilder applicationType(@Nullable MathClssftn type) {
             this.applicationType = type;
             return this;
         }

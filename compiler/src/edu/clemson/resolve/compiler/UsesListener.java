@@ -27,6 +27,7 @@ public class UsesListener extends ResolveBaseListener {
     private final RESOLVECompiler compiler;
     public final Set<ModuleIdentifier> uses = new HashSet<>();
     public final Set<ModuleIdentifier> extUses = new HashSet<>();
+    public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
     public UsesListener(@NotNull RESOLVECompiler rc) {
         this.compiler = rc;
@@ -34,13 +35,23 @@ public class UsesListener extends ResolveBaseListener {
 
     @Override
     public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        for (ResolveParser.UsesSpecContext u : ctx.usesSpec()) {
+        for (ResolveParser.ModuleIdentifierSpecContext u : ctx.usesSpecs().moduleIdentifierSpec()) {
             File f = resolveImport(compiler, u);
             if (f == null) {
                 compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, u.ID().getSymbol(), u.ID().getText());
                 continue;
             }
-            uses.add(new ModuleIdentifier(u.ID().getSymbol(), f));
+            ModuleIdentifier e = new ModuleIdentifier(u.ID().getSymbol(), f);
+            if (u.aliasClause() != null) {
+                String alias = u.aliasClause().ID().getText();
+                if (aliases.containsKey(alias)) {
+                    //TODO: error, duplicate alias
+                }
+                else {
+                    aliases.put(alias, e);
+                }
+            }
+            uses.add(e);
         }
     }
 
@@ -56,10 +67,21 @@ public class UsesListener extends ResolveBaseListener {
     // so right now, because we don't have implicit imports working yet, Stack_Template
     @Override
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        ResolveParser.QualifiedFromPathContext specFrom = ctx.specFrom != null ?
-                ctx.specFrom.qualifiedFromPath() : null;
-        ResolveParser.QualifiedFromPathContext implFrom = ctx.implFrom != null ?
-                ctx.implFrom.qualifiedFromPath() : null;
+        ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
+                ctx.specFrom.moduleLibraryIdentifier() : null;
+        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.implFrom != null ?
+                ctx.implFrom.moduleLibraryIdentifier() : null;
+
+        resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
+        resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
+    }
+
+    @Override
+    public void exitExtensionPairing(ResolveParser.ExtensionPairingContext ctx) {
+        ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
+                ctx.specFrom.moduleLibraryIdentifier() : null;
+        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.implFrom != null ?
+                ctx.implFrom.moduleLibraryIdentifier() : null;
 
         resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
         resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
@@ -67,7 +89,7 @@ public class UsesListener extends ResolveBaseListener {
 
     private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
                                                  boolean isExternal,
-                                                 @Nullable ResolveParser.QualifiedFromPathContext from) {
+                                                 @Nullable ResolveParser.ModuleLibraryIdentifierContext from) {
         if (!isExternal) {
             //we're not an external implementation
             File resolve = resolveImport(compiler, t, from);
@@ -182,15 +204,15 @@ public class UsesListener extends ResolveBaseListener {
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull ResolveParser.UsesSpecContext u) {
-        return resolveImport(compiler, u.ID().getSymbol(), u.fromClauseSpec() != null ?
-                u.fromClauseSpec().qualifiedFromPath() : null, RESOLVECompiler.NATIVE_FILE_EXTENSION);
+                                     @NotNull ResolveParser.ModuleIdentifierSpecContext u) {
+        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ?
+                u.fromClause().moduleLibraryIdentifier() : null, RESOLVECompiler.NATIVE_FILE_EXTENSION);
     }
 
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull Token usesToken,
-                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
+                                     @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
                                      @NotNull String ... extensions) {
         List<String> exts = (extensions.length == 0) ?
                 Collections.singletonList(RESOLVECompiler.NATIVE_FILE_EXTENSION) :
@@ -201,7 +223,7 @@ public class UsesListener extends ResolveBaseListener {
     @Nullable
     public static File resolveImport(@NotNull RESOLVECompiler compiler,
                                      @NotNull Token usesToken,
-                                     @Nullable ResolveParser.QualifiedFromPathContext fromPathCtx,
+                                     @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
                                      @NotNull List<String> extensions) {
         //first check to see if we're on RESOLVEPATH
         Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();

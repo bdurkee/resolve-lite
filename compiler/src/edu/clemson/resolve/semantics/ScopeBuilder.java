@@ -52,8 +52,8 @@ public class ScopeBuilder extends SyntacticScope {
     public MathClssftnWrappingSymbol addBinding(String name,
                                                 Quantification q,
                                                 ParserRuleContext definingTree,
-                                                MathClassification type,
-                                                MathClassification typeValue)
+                                                MathClssftn type,
+                                                MathClssftn typeValue)
             throws DuplicateSymbolException {
 
         MathClssftnWrappingSymbol entry =
@@ -65,15 +65,15 @@ public class ScopeBuilder extends SyntacticScope {
     public MathClssftnWrappingSymbol addBinding(String name,
                                                 Quantification q,
                                                 ParserRuleContext definingTree,
-                                                MathClassification type)
+                                                MathClssftn type)
             throws DuplicateSymbolException {
         return addBinding(name, q, definingTree, type, null);
     }
 
     public MathClssftnWrappingSymbol addBinding(String name,
                                                 ParserRuleContext definingTree,
-                                                MathClassification type,
-                                                MathClassification typeValue)
+                                                MathClssftn type,
+                                                MathClssftn typeValue)
             throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type,
                 typeValue);
@@ -81,7 +81,7 @@ public class ScopeBuilder extends SyntacticScope {
 
     public MathClssftnWrappingSymbol addBinding(String name,
                                                 ParserRuleContext definingTree,
-                                                MathClassification type)
+                                                MathClssftn type)
             throws DuplicateSymbolException {
         return addBinding(name, Quantification.NONE, definingTree, type);
     }

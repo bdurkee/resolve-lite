@@ -1,6 +1,6 @@
 package edu.clemson.resolve.codegen;
 
-import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.ErrorKind;
@@ -41,8 +41,11 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
         return walk(buildModuleOutputModel());
     }
 
+    //output dir is a function of where the original file/module was located.
     @Override
-    protected void write(@NotNull ModuleIdentifier moduleIdentifier, @NotNull ST code, @NotNull String outputFileName) {
+    protected void write(@NotNull ModuleIdentifier moduleIdentifier,
+                         @NotNull ST code,
+                         @NotNull String outputFileName) {
         try {
             Writer w = compiler.getOutputFileWriter(moduleIdentifier,
                     outputFileName, new Function<String, File>() {

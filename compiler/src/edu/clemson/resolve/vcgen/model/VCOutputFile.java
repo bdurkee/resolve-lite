@@ -1,8 +1,9 @@
 package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.codegen.model.ModelElement;
-import edu.clemson.resolve.codegen.model.OutputModelObject;
+import edu.clemson.resolve.codegen.Model;
+import edu.clemson.resolve.codegen.Model.OutputModelObject;
+import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;

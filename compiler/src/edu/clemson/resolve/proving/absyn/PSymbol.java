@@ -4,7 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.programtype.ProgType;
@@ -259,7 +259,7 @@ public class PSymbol extends PExp {
         protected boolean incoming = false;
         protected boolean literal = false;
         protected Quantification quantification = Quantification.NONE;
-        protected MathClassification mathType, mathTypeValue;
+        protected MathClssftn mathType, mathTypeValue;
         protected ProgType progType, progTypeValue;
         protected Token vcLocation;
         protected String vcExplanation;
@@ -334,7 +334,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathClssfctn(MathClassification e) {
+        public PSymbolBuilder mathClssfctn(MathClssftn e) {
             this.mathType = e;
             return this;
         }

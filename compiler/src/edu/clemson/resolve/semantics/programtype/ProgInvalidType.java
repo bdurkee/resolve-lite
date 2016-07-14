@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class ProgInvalidType extends ProgType {
 
     @NotNull
     @Override
-    public MathClassification toMath() {
+    public MathClssftn toMath() {
         return getTypeGraph().INVALID;
     }
 

@@ -11,10 +11,15 @@ public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final Set<ModuleIdentifier> importedModules = new HashSet<>();
 
-    /** The set of all modules {@code this} either extends or inherits from. */
-    private final Set<ModuleIdentifier> locallyInheritedModules = new LinkedHashSet<>();
+    /**
+     * The set of all modules {@code this} either extends or inherits from. This set should be a subset of
+     * {@link #importedModules}.
+     */
+    private final Set<ModuleIdentifier> inheritedModules = new LinkedHashSet<>();
+    private final Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
-    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g, @NotNull ModuleIdentifier e,
+    ModuleScopeBuilder(@NotNull DumbMathClssftnHandler g,
+                       @NotNull ModuleIdentifier e,
                        @Nullable ParserRuleContext definingTree,
                        @NotNull Scope parent,
                        @NotNull MathSymbolTable symbolTable) {
@@ -22,8 +27,14 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     @NotNull
+    public ModuleScopeBuilder addAliases(@NotNull Map<String, ModuleIdentifier> aliases) {
+        this.aliases.putAll(aliases);
+        return this;
+    }
+
+    @NotNull
     public ModuleScopeBuilder addInheritedModules(@NotNull ModuleIdentifier... i) {
-        locallyInheritedModules.addAll(Arrays.asList(i));
+        inheritedModules.addAll(Arrays.asList(i));
         return this;
     }
 
@@ -43,14 +54,23 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return new HashSet<>(importedModules);
     }
 
+    //TODO: Use a map instead... but need to
     @NotNull
-    public ModuleIdentifier getImportWithName(@NotNull Token name) {
+    public ModuleIdentifier getImportWithName(@NotNull Token name) throws NoSuchModuleException {
         for (ModuleIdentifier e : importedModules) {
             if (e.getNameToken().getText().equals(name.getText())) {
                 return e;
             }
         }
-        return ModuleIdentifier.createInvalidModuleIdentifier(name);
+        throw new NoSuchModuleException(name);
+    }
+
+    @NotNull
+    public ModuleIdentifier getAlias(@NotNull Token name) throws NoSuchModuleException {
+        if (aliases.get(name.getText()) == null) {
+            throw new NoSuchModuleException(name);
+        }
+        return aliases.get(name.getText());
     }
 
     @NotNull
@@ -60,6 +80,10 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     }
 
     public Set<ModuleIdentifier> getInheritedIdentifiers() {
-        return new LinkedHashSet<>(locallyInheritedModules);
+        return new LinkedHashSet<>(inheritedModules);
+    }
+
+    public Map<String, ModuleIdentifier> getAliases() {
+        return aliases;
     }
 }

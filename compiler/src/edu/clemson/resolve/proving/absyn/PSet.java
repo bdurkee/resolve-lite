@@ -3,7 +3,7 @@ package edu.clemson.resolve.proving.absyn;
 import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -14,12 +14,12 @@ public class PSet extends PExp {
     private final List<PExp> elements = new ArrayList<>();
 
     //TODO: Give me a real HashDuple (one based on my actual elements!)
-    public PSet(@NotNull MathClassification type, @NotNull List<PExp> elements) {
+    public PSet(@NotNull MathClssftn type, @NotNull List<PExp> elements) {
         super(new HashDuple(0, 56), type);
         this.elements.addAll(elements);
     }
 
-    public PSet(@NotNull MathClassification type,
+    public PSet(@NotNull MathClssftn type,
                 @NotNull List<PExp> elements,
                 @Nullable Token vcLocation,
                 @Nullable String vcExplanation) {

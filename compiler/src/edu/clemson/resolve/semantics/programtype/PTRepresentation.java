@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 import edu.clemson.resolve.semantics.symbol.ProgReprTypeSymbol;
@@ -74,7 +74,7 @@ public class PTRepresentation extends ProgNamedType {
 
     @NotNull
     @Override
-    public MathClassification toMath() {
+    public MathClssftn toMath() {
         if (baseType == null) return g.INVALID;
         return baseType.toMath();
     }

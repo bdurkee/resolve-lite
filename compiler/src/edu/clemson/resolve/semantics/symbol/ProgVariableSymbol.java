@@ -3,8 +3,8 @@ package edu.clemson.resolve.semantics.symbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
-import edu.clemson.resolve.semantics.MathNamedClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathNamedClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.programtype.ProgType;
@@ -23,12 +23,11 @@ public class ProgVariableSymbol extends Symbol {
                               @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.type = type;
-        MathClassification m = type.toMath();
+        MathClssftn m = type.toMath();
         this.mathSymbolAlterEgo =
                 new MathClssftnWrappingSymbol(type.getTypeGraph(), name, Quantification.NONE,
-                        new MathNamedClassification(type.getTypeGraph(),
-                                name, m.typeRefDepth - 1, m), definingTree,
-                        moduleIdentifier);
+                        new MathNamedClssftn(type.getTypeGraph(),
+                                name, m.typeRefDepth - 1, m), definingTree, moduleIdentifier);
     }
 
     @NotNull

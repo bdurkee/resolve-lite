@@ -39,13 +39,10 @@ import org.antlr.v4.runtime.Token;
  */
 public class LanguageSemanticsMessage extends RESOLVEMessage {
 
-    public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken,
-                                    Object... args) {
+    public LanguageSemanticsMessage(ErrorKind etype, Token offendingToken, Object... args) {
         super(etype, offendingToken, args);
         if (offendingToken != null) {
-            this.fileName =
-                    Utils.groomFileName(offendingToken.getTokenSource()
-                            .getSourceName());
+            this.fileName = Utils.groomFileName(offendingToken.getTokenSource().getSourceName());
             this.line = offendingToken.getLine();
             this.charPosition = offendingToken.getCharPositionInLine();
         }

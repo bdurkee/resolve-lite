@@ -10,7 +10,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.antlr.v4.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathInvalidClassification;
+import edu.clemson.resolve.semantics.MathInvalidClssftn;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -77,8 +77,10 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(parseMathAssertionExp(g, "conc.s"), parseMathAssertionExp(g, "conc.s"));
 
         Assert.assertNotEquals(parseMathAssertionExp(g, "foo"), parseMathAssertionExp(g, "bar.foo"));
-        Assert.assertEquals(parseMathAssertionExp(g, "bar.f.x"), parseMathAssertionExp(g, "bar.f.x"));
-        Assert.assertNotEquals(parseMathAssertionExp(g, "bar.f.x"), parseMathAssertionExp(g, "bar.f.y"));
+        Assert.assertEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "bar::f.x"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "bar::f.y"));
+        Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "baz::f.x"));
+
         Assert.assertEquals(parseMathAssertionExp(g, "||S||"), parseMathAssertionExp(g, "||S||"));
     }
 
@@ -98,11 +100,11 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testIsObviouslyTrue() throws Exception {
-        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = y + x").isObviouslyTrue());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "x + y = (y + x)").isObviouslyTrue());
         Assert.assertEquals(true, parseMathAssertionExp(g, "true").isObviouslyTrue());
         Assert.assertEquals(false, parseMathAssertionExp(g, "false").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = x * 3 + 2").isObviouslyTrue());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = x + y").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "x * 3 + 2 = (x * 3 + 2)").isObviouslyTrue());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "+(x, y) = (x + y)").isObviouslyTrue());
     }
 
     @Test
@@ -112,9 +114,9 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testIsEquality() throws Exception {
-        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = y + x").isEquality());
-        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = y + x").isEquality());
-        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and y + x").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "y + x = (y + x)").isEquality());
+        Assert.assertEquals(true, parseMathAssertionExp(g, "1 = (y + x)").isEquality());
+        Assert.assertEquals(false, parseMathAssertionExp(g, "1 and (y + x)").isEquality());
     }
 
     @Test
@@ -178,7 +180,7 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSplitIntoConjuncts() {
-        PExp result = parseMathAssertionExp(g, "x and y = 2 and P.Lab = λ q : Z,(true)");
+        PExp result = parseMathAssertionExp(g, "x and (y = 2) and (P.Lab = λ q : Z,(true))");
         List<PExp> conjuncts = result.splitIntoConjuncts();
         //Assert.assertEquals(2, conjuncts.size());
         Iterator<? extends PExp> exps = conjuncts.iterator();
@@ -284,7 +286,7 @@ public class TestPExp extends BaseTest {
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
-                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream().collect(Collectors.toSet());
+                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream().collect(Collectors.toSet());                                 
         Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }
@@ -408,7 +410,7 @@ public class TestPExp extends BaseTest {
      * <p>Also: Building even moderately sized {@link PExp}s is a pain; building one with real type information is an
      * even bigger pain. Thus, for test methods where this function is used, know that we don't care about types so much
      * as we do about correct expression structure and quantifier distribution. So instead of real type information we
-     * typically just use {@link MathInvalidClassification}.</p>
+     * typically just use {@link MathInvalidClssftn}.</p>
      * <p>
      * <p>If you <em>want</em> to test something math type related, just construct smaller exprs manually using
      * {@link PSymbol.PSymbolBuilder} or {@link PApply.PApplyBuilder}; otherwise parse the larger expr using this

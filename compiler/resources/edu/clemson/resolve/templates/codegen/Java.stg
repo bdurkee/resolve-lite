@@ -47,6 +47,12 @@ fileHeader(resolveFileName, RESOLVEVersion) ::= <<
 /** Generated from <resolveFileName> by RESOLVE version <RESOLVEVersion>. This file should not be modified. */
 >>
 
+PrecisModule(precis) ::= <<
+public class <precis.name> {
+    //non-executable precis (or precis-ext)
+}
+>>
+
 ConceptModule(concept, types, funcs) ::= <<
 public interface <concept.name> {
     <types; separator="\n">
@@ -54,7 +60,7 @@ public interface <concept.name> {
 }
 >>
 
-ExtensionModule(ext, types, funcs) ::= <<
+SpecExtensionModule(ext, types, funcs) ::= <<
 public interface <ext.name> extends <ext.concept> {
     <types; separator="\n">
     <funcs; separator="\n">
@@ -202,7 +208,7 @@ public RType init<func.name>() {
 }
 >>
 
-ConceptDelegateMethod(method) ::= <<
+ConceptDelegateMethodDef(method) ::= <<
 @Override public <if(method.hasReturn)>RType <else>void <endif><method.name><\\>
 (<method.parameters : {p | RType <p>}; separator=", ">) {
     <if(method.hasReturn)>return <endif>delegate.<method.name><\\>
@@ -211,8 +217,7 @@ ConceptDelegateMethod(method) ::= <<
 >>
 
 FacilityDef(facility, root) ::= <<
-public <if(facility.isStatic)>static <endif>final <facility.concept> <\\>
-<if(toStdFacilityName.(facility.name))>INSTANCE<else><facility.name><endif> = <root>;
+public <if(facility.isStatic)>static <endif>final <facility.concept> <facility.name> = <root>;
 >>
 
 DecoratedFacilityInstantiation(init, args, child) ::= <%
@@ -317,8 +322,7 @@ new BaseOperationParameter() {
 TypeInit(init, q) ::= "<q>.init<init.typeName>(<init.initialValue>)"
 
 FacilityQualifier(q) ::= <%
-((<q.fullyQualifiedSymbolSpecName>)<if(toStdFacilityName.(q.facilityName))>
-<toStdFacilityName.(q.facilityName)><else><q.facilityName><endif>)%>
+((<q.fullyQualifiedSymbolSpecName>)<q.facilityName>)%>
 
 NormalQualifier(q) ::= "<q.name>"
 
@@ -327,13 +331,6 @@ toJavaPrimitive ::= [
     "Integer":"int",
     "Character":"char",
     "Char_Str":"String"
-]
-
-toStdFacilityName ::= [
-    "Std_Bools":"Standard_Booleans.INSTANCE",
-    "Std_Ints":"Standard_Integers.INSTANCE",
-    "Std_Chars":"Standard_Characters.INSTANCE",
-    "Std_Char_Strs":"Standard_Char_Strings.INSTANCE"
 ]
 
 externalClassCode(code) ::= "<code>"

@@ -19,12 +19,11 @@ public class FacilitySymbol extends Symbol {
     private MathSymbolTable scopeRepo;
 
     /**
-     * A mapping from the rule contexts representing an module arg list
-     * to all the various {@link ProgTypeSymbol}s that represent the actual
-     * versions of formal (generic) type params.
+     * A mapping from the rule contexts representing an module arg list to all the various {@link ProgTypeSymbol}s that represent the
+     * actual versions of formal (generic) type params.
      * <p>
-     * Right now I'm really only especially concerned about these as they
-     * factor into the searching process in {@link ModuleParameterization}.</p>
+     * Right now I'm really only especially concerned about these as they factor into the searching process in
+     * {@link ModuleParameterization}.</p>
      */
     @NotNull
     private final ParseTreeProperty<List<ProgTypeSymbol>> actualGenerics;
@@ -41,49 +40,44 @@ public class FacilitySymbol extends Symbol {
         this.actualGenerics = actualGenerics;
         List<ProgTypeSymbol> specGenericArgs =
                 actualGenerics.get(facility.specArgs);
-
         try {
             ModuleScopeBuilder m = scopeRepo.getModuleScope(moduleIdentifier);
             ModuleParameterization spec = new ModuleParameterization(
                     m.getImportWithName(facility.spec),
                     specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
-            ModuleParameterization impl = new ModuleParameterization(
-                    m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
+            ModuleParameterization impl = null;
 
+            if (facility.externally == null) {
+                impl = new ModuleParameterization(
+                        m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
+            }
             this.type = new SpecImplementationPairing(spec, impl);
+            //These are realized by the concept realization
+            /*for (EnhancementItem realizationEnhancement : facility
+                    .getEnhancements()) {
 
+                spec =
+                        new ModuleParameterization(new ModuleIdentifier(
+                                realizationEnhancement.getNameToken().getNameToken()),
+                                realizationEnhancement.getParams(), this,
+                                mySourceRepository);
+
+                myEnhancements.add(spec);
+                myEnhancementRealizations.put(spec, realization);
+            }*/
+            //These are realized by individual extension implementations
+            for (ResolveParser.ExtensionPairingContext extension : facility.extensionPairing()) {
+                specGenericArgs = actualGenerics.get(extension.specArgs);
+                ModuleParameterization extSpec = new ModuleParameterization(m.getImportWithName(extension.spec),
+                        specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
+
+                impl = new ModuleParameterization(m.getImportWithName(extension.impl),  new ArrayList<>(), this, scopeRepo);
+                enhancements.add(extSpec);
+                enhancementImplementations.put(extSpec, impl);
+            }
         } catch (NoSuchModuleException e) {
             //shouldn't happen at this point..
         }
-        //These are realized by the concept realization
-        /*for (EnhancementItem realizationEnhancement : facility
-                .getEnhancements()) {
-
-            spec =
-                    new ModuleParameterization(new ModuleIdentifier(
-                            realizationEnhancement.getNameToken().getNameToken()),
-                            realizationEnhancement.getParams(), this,
-                            mySourceRepository);
-
-            myEnhancements.add(spec);
-            myEnhancementRealizations.put(spec, realization);
-        }*/
-
-        //These are realized by individual extension implementations
-        /*for (ResolveParser.ExtensionPairingContext extension :
-                facility.extensionPairing()) {
-            specGenericArgs = actualGenerics.get(extension.specArgs);
-            spec = new ModuleParameterization(new ModuleIdentifier(extension.spec),
-                    specGenericArgs == null ?
-                            new ArrayList<>() : specGenericArgs,
-                    this, scopeRepo);
-
-            impl = new ModuleParameterization(
-                    new ModuleIdentifier(extension.impl),
-                    new ArrayList<>(), this, scopeRepo);
-            enhancements.add(spec);
-            enhancementImplementations.put(spec, impl);
-        }*/
     }
 
     @NotNull

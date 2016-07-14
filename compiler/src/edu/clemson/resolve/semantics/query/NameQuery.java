@@ -25,7 +25,7 @@ public class NameQuery extends BaseMultimatchSymbolQuery<Symbol> implements Mult
                 facilityStrategy, localPriority), new NameSearcher(name, false));
     }
 
-    public NameQuery(@Nullable Token qualifier, @NotNull Token name, boolean localPriority) {
-        this(qualifier, name.getText(), ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE, localPriority);
+    public NameQuery(@Nullable Token qualifier, @NotNull String name, boolean localPriority) {
+        this(qualifier, name, ImportStrategy.IMPORT_NAMED, FacilityStrategy.FACILITY_IGNORE, localPriority);
     }
 }

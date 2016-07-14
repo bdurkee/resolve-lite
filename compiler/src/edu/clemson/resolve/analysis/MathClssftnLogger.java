@@ -6,14 +6,14 @@ import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 
 class MathClssftnLogger extends ResolveBaseListener {
 
-    private final ParseTreeProperty<MathClassification> types;
+    private final ParseTreeProperty<MathClssftn> types;
     private final RESOLVECompiler compiler;
 
-    MathClssftnLogger(@NotNull RESOLVECompiler rc, @NotNull ParseTreeProperty<MathClassification> types) {
+    MathClssftnLogger(@NotNull RESOLVECompiler rc, @NotNull ParseTreeProperty<MathClssftn> types) {
         this.types = types;
         this.compiler = rc;
     }
@@ -44,16 +44,6 @@ class MathClssftnLogger extends ResolveBaseListener {
     }
 
     @Override
-    public void exitMathBooleanLiteralExp(ResolveParser.MathBooleanLiteralExpContext ctx) {
-        logClssftn(ctx);
-    }
-
-    @Override
-    public void exitMathIntegerLiteralExp(ResolveParser.MathIntegerLiteralExpContext ctx) {
-        logClssftn(ctx);
-    }
-
-    @Override
     public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         logClssftn(ctx);
     }
@@ -79,7 +69,7 @@ class MathClssftnLogger extends ResolveBaseListener {
     }
 
     private void logClssftn(@NotNull ParserRuleContext ctx) {
-        MathClassification t = types.get(ctx);
+        MathClssftn t = types.get(ctx);
         if (t == null) {
             compiler.log("[" + ctx.getClass().getSimpleName() + "]" + ctx.getText() + " : null");
             return;

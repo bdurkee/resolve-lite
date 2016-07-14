@@ -2,8 +2,8 @@ package edu.clemson.resolve.semantics.programtype;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathNamedClassification;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathNamedClssftn;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
@@ -26,8 +26,8 @@ public class ProgGenericType extends ProgType {
 
     @NotNull
     @Override
-    public MathClassification toMath() {
-        return new MathNamedClassification(getTypeGraph(), name, g.SSET.typeRefDepth - 1, g.SSET);
+    public MathClssftn toMath() {
+        return new MathNamedClssftn(getTypeGraph(), name, g.SSET.typeRefDepth - 1, g.SSET);
     }
 
     @NotNull

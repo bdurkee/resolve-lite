@@ -127,7 +127,7 @@ public class ProgParameterSymbol extends Symbol {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
-                            new MathNamedClassification(g, name, level, type.toMath()),
+                            new MathNamedClssftn(g, name, level, type.toMath()),
                             definingTree, moduleIdentifier);
         }
         this.progVariableAlterEgo =

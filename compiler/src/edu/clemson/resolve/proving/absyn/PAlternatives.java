@@ -2,7 +2,7 @@ package edu.clemson.resolve.proving.absyn;
 
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -15,14 +15,14 @@ public class PAlternatives extends PExp {
     private final PExp otherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
-                         PExp otherwiseClauseResult, MathClassification type) {
+                         PExp otherwiseClauseResult, MathClssftn type) {
         this(conditions, results, otherwiseClauseResult, type, null, null);
     }
 
     public PAlternatives(@NotNull List<PExp> conditions,
                          @NotNull List<PExp> results,
                          @Nullable PExp otherwiseClauseResult,
-                         @NotNull MathClassification type,
+                         @NotNull MathClssftn type,
                          @Nullable Token vcLocation,
                          @Nullable String vcExplanation) {
         super(calculateStructureHash(conditions, results,

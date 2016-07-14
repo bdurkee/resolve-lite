@@ -1,16 +1,16 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.misc.HardCodedProgOps;
+import edu.clemson.resolve.misc.StdTemplateProgOps;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.proving.absyn.PApply.DisplayStyle.*;
 
@@ -106,7 +105,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void enterMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
-        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
+        for (ResolveParser.MathSymbolNameContext term : ctx.mathVarDeclGroup().mathSymbolName()) {
             String quantifier = ctx.q.getText();
             quantifiedVars.put(term.getText(), getQuantificationMode(ctx.q));
         }
@@ -115,10 +114,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     public Quantification getQuantificationMode(@NotNull Token q) {
         Quantification result = Quantification.NONE;
         switch (q.getType()) {
-            case ResolveParser.FORALL:
+            case ResolveLexer.FORALL:
                 result = Quantification.UNIVERSAL;
                 break;
-            case ResolveParser.EXISTS:
+            case ResolveLexer.EXISTS:
                 result = Quantification.EXISTENTIAL;
                 break;
         }
@@ -128,7 +127,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> declaredVars = new ArrayList<>();
-        for (TerminalNode term : ctx.mathVarDeclGroup().ID()) {
+        for (ResolveParser.MathSymbolNameContext term : ctx.mathVarDeclGroup().mathSymbolName()) {
             quantifiedVars.remove(term.getText());
             declaredVars.add(new PLambda.MathSymbolDeclaration(term.getText(),
                     getMathClssfctn(ctx.mathVarDeclGroup().mathClssftnExp())));
@@ -166,13 +165,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
         PApplyBuilder result =
-                new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop, ctx.rop))
+                new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop.getStart(), ctx.rop.getStart()))
                         .applicationType(getMathClssfctn(ctx))
                         .style(OUTFIX)
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
     }
-
+/*
     @Override
     public void exitMathBracketAppExp(ResolveParser.MathBracketAppExpContext ctx) {
         PApplyBuilder result =
@@ -181,71 +180,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .style(PREFIX, true)
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
-    }
-
-    /*
-        mathSqBrOpExp : op='[' ;
-        mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
-        mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
-        mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
-        mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
-        mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
-        mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
-        mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
-        mathImpliesOpExp : (qualifier=ID '::')? op='implies';
-        mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'iff');
-    */
-    @Override
-    public void exitMathSqBrOpExp(ResolveParser.MathSqBrOpExpContext ctx) {
-        CommonToken t = new CommonToken(ctx.op);
-        t.setText("[..]");
-        repo.put(ctx, buildOperatorPSymbol(ctx, null, t));
-    }
-
-    @Override
-    public void exitMathMultOpExp(ResolveParser.MathMultOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathAddOpExp(ResolveParser.MathAddOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathJoiningOpExp(ResolveParser.MathJoiningOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathArrowOpExp(ResolveParser.MathArrowOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathRelationalOpExp(ResolveParser.MathRelationalOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathEqualityOpExp(ResolveParser.MathEqualityOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathSetContainmentOpExp(ResolveParser.MathSetContainmentOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathImpliesOpExp(ResolveParser.MathImpliesOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
-
-    @Override
-    public void exitMathBooleanOpExp(ResolveParser.MathBooleanOpExpContext ctx) {
-        repo.put(ctx, buildOperatorPSymbol(ctx, ctx.qualifier, ctx.op));
-    }
+    }*/
 
     private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
                                          @Nullable Token qualifier,
@@ -259,7 +194,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
-        MathClassification t = getMathClssfctn(ctx);
+        MathClssftn t = getMathClssfctn(ctx);
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
@@ -272,7 +207,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathLambdaExp(ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
-        parameters.add(new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().ID().getText(), getMathClssfctn(ctx)));
+        parameters.add(new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(), getMathClssfctn(ctx)));
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 
@@ -292,7 +227,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 otherwiseResult = repo.get(alt.result);
             }
         }
-        MathClassification x = getMathClssfctn(ctx);
+        MathClssftn x = getMathClssfctn(ctx);
         PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, getMathClssfctn(ctx));
         repo.put(ctx, result);
     }
@@ -305,22 +240,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathSelectorExp(ResolveParser.MathSelectorExpContext ctx) {
         repo.put(ctx, new PSelector(repo.get(ctx.lhs), repo.get(ctx.rhs)));
-    }
-
-    @Override
-    public void exitMathBooleanLiteralExp(ResolveParser.MathBooleanLiteralExpContext ctx) {
-        PSymbolBuilder result = new PSymbolBuilder(ctx.getText())
-                .mathClssfctn(getMathClssfctn(ctx))
-                .literal(true);
-        repo.put(ctx, result.build());
-    }
-
-    @Override
-    public void exitMathIntegerLiteralExp(ResolveParser.MathIntegerLiteralExpContext ctx) {
-        PSymbolBuilder result = new PSymbolBuilder(ctx.getText())
-                .mathClssfctn(getMathClssfctn(ctx))
-                .literal(true);
-        repo.put(ctx, result.build());
     }
 
     @Override
@@ -357,14 +276,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
-        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNamedExp()))
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progSymbolExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
     }
 
     @Override
-    public void exitProgNamedExp(ResolveParser.ProgNamedExpContext ctx) {
+    public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
                 .mathClssfctn(getMathClssfctn(ctx))
@@ -378,10 +297,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override
-    public void exitProgInfixExp(
-            ResolveParser.ProgInfixExpContext ctx) {
+    public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
-        HardCodedProgOps.BuiltInOpAttributes attr = HardCodedProgOps.convert(ctx.op, argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(
+                ctx.name.getStart(), argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())
                 .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
@@ -391,11 +310,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
-    }
-
-    @Override
-    public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
-        repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override
@@ -415,7 +329,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @NotNull
     private PExp buildLiteral(@NotNull String literalText,
-                              @NotNull MathClassification type,
+                              @NotNull MathClssftn type,
                               @Nullable ProgType progType) {
         PSymbolBuilder result =
                 new PSymbolBuilder(literalText).mathClssfctn(type)
@@ -425,7 +339,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @NotNull
-    private MathClassification getMathClssfctn(ParseTree t) {
+    private MathClssftn getMathClssfctn(ParseTree t) {
         return annotations.mathClssftns.get(t) == null ? g.INVALID : annotations.mathClssftns.get(t);
     }
 }

@@ -331,7 +331,7 @@ public class RESOLVECompiler {
                 }
             }
             if (module != null) {
-                if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
+                if (pathExists(g, module.getModuleIdentifier(), root.getModuleIdentifier())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
                             importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
@@ -355,18 +355,18 @@ public class RESOLVECompiler {
     }
 
     private boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                               @NotNull String src,
-                               @NotNull String dest) {
+                               @NotNull ModuleIdentifier src,
+                               @NotNull ModuleIdentifier dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if (!g.containsVertex(src)) {
+        if (!g.containsVertex(src.getFile().getAbsolutePath())) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src.getFile().getAbsolutePath());
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if (next.equals(dest)) {
+            if (next.equals(dest.getFile().getAbsolutePath())) {
                 return true;
             }
         }
@@ -410,7 +410,8 @@ public class RESOLVECompiler {
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.uses, l.extUses);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors,
+                l.uses, l.extUses, l.aliases);
     }
 
     @NotNull
@@ -426,15 +427,15 @@ public class RESOLVECompiler {
     }
 
     /**
-     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
-     * will be created. The final filename is sensitive to the output directory and the directory where the soure file
-     * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
+     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it will be created. The
+     * final filename is sensitive to the output directory and the directory where the soure file was found in.  If -o is /tmp and the
+     * original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
-     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project
-     * root directory {@code libDirectory}, which is specified by the user.
+     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project root directory
+     * {@code libDirectory}, which is specified by the user.
      * <p>
-     * If no -o is specified, then just write to the directory where the sourcefile was found; and if
-     * {@code outputDirectory==null} then write a String.
+     * If no -o is specified, then just write to the directory where the sourcefile was found; and if {@code outputDirectory==null} then
+     * write a String.
      */
     public Writer getOutputFileWriter(@NotNull ModuleIdentifier module,
                                       @NotNull String outputFileName) throws IOException {

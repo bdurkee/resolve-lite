@@ -288,8 +288,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     }
 
     @Override
-    public void enterOperationProcedureDecl(
-            ResolveParser.OperationProcedureDeclContext ctx) {
+    public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
