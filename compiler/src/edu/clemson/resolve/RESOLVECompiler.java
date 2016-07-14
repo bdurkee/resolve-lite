@@ -427,15 +427,15 @@ public class RESOLVECompiler {
     }
 
     /**
-     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
-     * will be created. The final filename is sensitive to the output directory and the directory where the soure file
-     * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
+     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it will be created. The
+     * final filename is sensitive to the output directory and the directory where the soure file was found in.  If -o is /tmp and the
+     * original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
-     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project
-     * root directory {@code libDirectory}, which is specified by the user.
+     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project root directory
+     * {@code libDirectory}, which is specified by the user.
      * <p>
-     * If no -o is specified, then just write to the directory where the sourcefile was found; and if
-     * {@code outputDirectory==null} then write a String.
+     * If no -o is specified, then just write to the directory where the sourcefile was found; and if {@code outputDirectory==null} then
+     * write a String.
      */
     public Writer getOutputFileWriter(@NotNull ModuleIdentifier module,
                                       @NotNull String outputFileName) throws IOException {

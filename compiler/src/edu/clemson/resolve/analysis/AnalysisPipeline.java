@@ -35,7 +35,6 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
 
             MathClssftnLogger pl = new MathClssftnLogger(compiler, unit.mathClssftns);
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
-
         }
     }
 }

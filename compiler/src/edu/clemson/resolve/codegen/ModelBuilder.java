@@ -401,8 +401,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptImplModuleDecl(
-            ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public void exitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         ConceptImplModule impl = new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
         if (ctx.implBlock() != null) {
