@@ -75,8 +75,6 @@ public final class CongruenceClassProver {
         }
         List<VC> preprocessedVcs = preprocessVCs(vcs);
         for (VC vc : preprocessedVcs) {
-            // make every PExp a PSymbol
-            //vc.convertAllToPsymbols(m_typeGraph);
             //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
         }
     }
@@ -84,6 +82,14 @@ public final class CongruenceClassProver {
     private List<VC> preprocessVCs(List<VC> vcs) {
         List<VC> result = new ArrayList<>();
         for (VC vc : vcs) {
+            PExp newAntecedent = vc.getAntecedent();
+            PExp newConsequent = vc.getConsequent();
+
+            liftLambdas();
+            convertPAlternativesToCF();
+            replaceLambdaSymbols();
+            normalizeConditions();
+            uniquelyNameQuantifiers();
             // make every PExp a PSymbol
             //vc.convertAllToPsymbols(m_typeGraph);
             //result.add()
