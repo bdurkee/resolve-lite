@@ -9,6 +9,7 @@ import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
 import edu.clemson.resolve.vcgen.VC;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,6 +18,41 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public final class CongruenceClassProver {
+/*
+    private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
+    private final List<TheoremCongruenceClosureImpl> m_theorems;
+
+    private final ModuleScopeBuilder m_scope;
+    private final long DEFAULTTIMEOUT = 5000;
+    private final boolean SHOWRESULTSIFNOTPROVED = true;
+    private final DumbMathClssftnHandler m_typeGraph;
+    private final Set<String> m_nonQuantifiedTheoremSymbols;
+    private final Set<TheoremCongruenceClosureImpl> m_smallEndEquations;
+
+    private final int DEFAULTTRIES = -1;
+    private String m_results;
+    private boolean printVCEachStep = false;
+    private long myTimeout;
+    private long totalTime = 0;
+
+    private final RESOLVECompiler compiler;
+
+    public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
+                                 @NotNull DumbMathClssftnHandler g,
+                                 @NotNull List<VC> vcs,
+                                 @NotNull ModuleScopeBuilder scope) {
+        this.compiler = compiler;
+    }*/
+
+
+
+
+
+
+
+
+
+
 /*
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;

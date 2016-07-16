@@ -30,8 +30,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
 
                 //give the vc output info into the AnnotatedModule
                 unit.setVCs(vcs);
-                //ST x = gen.generateAssertions();
-                //System.out.println(x.render());
+                ST x = gen.generateAssertions();
+                System.out.println(x.render());
 
                 //List<VC> proverInput = vcs.getFinalVCs();
                 int i;
