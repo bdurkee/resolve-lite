@@ -1,18 +1,24 @@
 
 package edu.clemson.resolve.proving;
 
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.vcgen.VC;
+
 import java.util.*;
 
 public class VerificationConditionCongruenceClosureImpl {
- /*   private final Registry m_registry;
-    private final TypeGraph m_typegraph;
+
+    private final Registry m_registry;
+    private final DumbMathClssftnHandler m_typegraph;
     public final String m_name;
     public final String m_VC_string;
-    private final Antecedent m_antecedent;
-    private final Consequent m_consequent;
+    private final PExp m_antecedent;
+    private final PExp m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
-    private final MTType m_z;
-    private final MTType m_n;
+    private final MathClssftn m_z;
+    private final MathClssftn m_n;
     protected final Set<String> m_goal;
 
     public static enum STATUS {
@@ -22,10 +28,10 @@ public class VerificationConditionCongruenceClosureImpl {
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
 
     // currently support only unchained equalities, so each sublist is size 2.
-    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
-                                                      MTType z, MTType n) {
+    public VerificationConditionCongruenceClosureImpl(DumbMathClssftnHandler g, VC vc,
+                                                      MathClssftn z, MathClssftn n) {
         m_typegraph = g;
-        m_name = vc.getName();
+        m_name = Integer.toString(vc.getNumber());
         m_VC_string = vc.toString();
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
@@ -146,5 +152,5 @@ public class VerificationConditionCongruenceClosureImpl {
         }
         r += "\n";
         return r;
-    }*/
+    }
 }

@@ -128,6 +128,12 @@ public class PQuantified extends PExp {
         return assertion.getSymbolNames(excludeApplications, excludeLiterals);
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        return assertion.getQuantifiedVariables();
+    }
+
     @Override
     public String toString() {
         List<String> symNames = Utils.apply(declaredSymbols, PLambda.MathSymbolDeclaration::getName);

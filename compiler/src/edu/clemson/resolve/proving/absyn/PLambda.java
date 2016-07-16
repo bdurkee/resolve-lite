@@ -164,6 +164,12 @@ public class PLambda extends PExp {
         return bodyFunctions;
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        return body.getFreeVariables();
+    }
+
     public static class MathSymbolDeclaration {
         public final String name;
         public final MathClssftn type;

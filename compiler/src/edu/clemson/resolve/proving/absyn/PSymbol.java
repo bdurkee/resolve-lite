@@ -220,6 +220,16 @@ public class PSymbol extends PExp {
         return new LinkedList<>();
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>();
+        if (quantification == Quantification.NONE) {
+            result.add(this);
+        }
+        return result;
+    }
+
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);

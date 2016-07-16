@@ -5,10 +5,8 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Created by mike on 4/3/2014.
- */
 public class TheoremCongruenceClosureImpl {
 
     private final boolean isEquality;
@@ -85,7 +83,10 @@ public class TheoremCongruenceClosureImpl {
 
     public Set<String> getNonQuantifiedSymbols() {
         if (m_all_literals == null) {
-            m_all_literals = ((PSymbol) m_theorem).getNonQuantifiedSymbols();
+            m_all_literals = m_theorem.getFreeVariables()
+                    .stream()
+                    .map(PSymbol::getName)
+                    .collect(Collectors.toSet());
 
             m_all_literals.remove("=B");
             m_all_literals.remove("andB");
@@ -108,9 +109,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("+Z");
             m_all_literals.remove("+N");
         }
-
         return m_all_literals;
-
     }
 /*
     public int applyTo(VerificationConditionCongruenceClosureImpl vc,
@@ -332,7 +331,7 @@ public class TheoremCongruenceClosureImpl {
                 results.addAll(t_results);
         }
         return results;
-    }
+    }*/
 
     @Override
     public String toString() {
@@ -341,5 +340,5 @@ public class TheoremCongruenceClosureImpl {
         r += "\nif found\n" + m_matchConj + "\ninsert\n" + m_insertExpr;
         r += "\n--------------------------------------\n";
         return r;
-    }*/
+    }
 }

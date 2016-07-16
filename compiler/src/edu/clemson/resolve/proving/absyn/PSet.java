@@ -135,6 +135,12 @@ public class PSet extends PExp {
 
     @NotNull
     @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        return new HashSet<>();
+    }
+
+    @NotNull
+    @Override
     public List<PExp> getFunctionApplicationsNoCache() {
         return new ArrayList<>();
     }

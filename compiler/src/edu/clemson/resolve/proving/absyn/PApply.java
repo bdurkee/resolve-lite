@@ -377,6 +377,15 @@ public class PApply extends PExp {
         return result;
     }
 
+
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+        Utils.apply(getSubExpressions(), result, PExp::getFreeVariables);
+        return result;
+    }
+
     @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);

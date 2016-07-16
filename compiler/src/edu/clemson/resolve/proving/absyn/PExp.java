@@ -382,6 +382,18 @@ public abstract class PExp {
     public abstract List<PExp> getFunctionApplicationsNoCache();
 
     @NotNull
+    public final Set<PSymbol> getFreeVariables() {
+        if (cachedQuantifiedVariables == null) {
+            //We're immutable, so only do this once
+            cachedQuantifiedVariables = Collections.unmodifiableSet(getQuantifiedVariablesNoCache());
+        }
+        return cachedQuantifiedVariables;
+    }
+
+    @NotNull
+    public abstract Set<PSymbol> getFreeVariablesNoCache();
+
+    @NotNull
     public final Set<String> getSymbolNames() {
         return getSymbolNames(false, false);
     }

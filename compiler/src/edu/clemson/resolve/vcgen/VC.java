@@ -30,6 +30,12 @@ public final class VC extends OutputModelObject {
         this.location = consequent.getVCLocation();
     }
 
+    /** Same thing as {@link #getNumber} but gives back a string instead */
+    @NotNull
+    public String getName() {
+        return Integer.toString(number);
+    }
+
     public int getNumber() {
         return number;
     }
@@ -56,7 +62,7 @@ public final class VC extends OutputModelObject {
 
     @Override public String toString() {
         String retval =
-                "========== " + number + " ==========\n" + antecedent
+                "========== " + getName() + " ==========\n" + antecedent
                             + "  -->\n" + consequent;
         return retval;
     }
