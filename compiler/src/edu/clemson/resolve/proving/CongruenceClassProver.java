@@ -73,16 +73,23 @@ public final class CongruenceClassProver {
             compiler.info("warning: could not find some fundamental base sorts/classifications " +
                     "used by the prover: N and/or Z");
         }
-
-        for (VC vc : vcs) {
-            //if(!vc.getName().equals("3_2"))continue;
+        List<VC> preprocessedVcs = preprocessVCs(vcs);
+        for (VC vc : preprocessedVcs) {
             // make every PExp a PSymbol
-            vc.convertAllToPsymbols(m_typeGraph);
-            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
-
+            //vc.convertAllToPsymbols(m_typeGraph);
+            //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
         }
     }
 
+    private List<VC> preprocessVCs(List<VC> vcs) {
+        List<VC> result = new ArrayList<>();
+        for (VC vc : vcs) {
+            // make every PExp a PSymbol
+            //vc.convertAllToPsymbols(m_typeGraph);
+            //result.add()
+        }
+        return result;
+    }
 
     @Nullable
     private static MathClssftnWrappingSymbol getMathSymbol(@NotNull Scope s, @NotNull String name)

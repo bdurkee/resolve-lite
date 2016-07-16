@@ -1652,7 +1652,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                                             @NotNull ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(qualifier, symbolName.getText(), ctx.getStart()));
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName.getText()));
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), symbolName, symbolName.getText());
         } catch (NoSuchModuleException nsme) {
