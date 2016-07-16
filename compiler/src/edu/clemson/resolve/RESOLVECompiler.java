@@ -78,12 +78,14 @@ public class RESOLVECompiler {
     //TODO: Change package of this to pkgLibDirectory or libDirectory.. something like that...
     public String libDirectory;
     public String outputDirectory;
+    public String genCode;
+    public String timeout;
+    public String tries;
+
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
     public boolean prove = false;
-    public String genCode;
-
     public boolean log = false;
     public boolean printEnv = false;
 
@@ -95,6 +97,8 @@ public class RESOLVECompiler {
             new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
             new Option("prove", "-prove", "attempt to prove generated VCs for the current file"),
+            new Option("timeout", "-timeout", OptionArgType.STRING, "how much time to spend attempting to dispatch a given vc (in milliseconds)"),
+            new Option("tries", "-numTries", OptionArgType.STRING, "number of tries to dispatch a vc"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
             new Option("printEnv", "-env", "print path variables"),
     };

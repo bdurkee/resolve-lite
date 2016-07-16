@@ -30,8 +30,7 @@ public class NormalizedAtomicExpression {
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
-    public NormalizedAtomicExpression(
-            ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
+    public NormalizedAtomicExpression(ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
         m_conj = conj;
         m_registry = m_conj.getRegistry();
         arity = intArray.length - 1;

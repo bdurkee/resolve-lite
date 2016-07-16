@@ -1,8 +1,10 @@
 package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.RESOLVECompiler;
+import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.query.MathSymbolQuery;
 import edu.clemson.resolve.semantics.query.NameQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
@@ -10,6 +12,7 @@ import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
 import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -18,23 +21,28 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public final class CongruenceClassProver {
-/*
-    private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
-    private final List<TheoremCongruenceClosureImpl> m_theorems;
 
+    private static final long DEFAULT_TIMEOUT = 5000;
+    private static final int DEFAULT_TRIES = -1;
+    private static final boolean SHOW_RESULTS_IF_NOT_PROVED = true;
+
+    private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs = new ArrayList<>();
+    private final List<TheoremCongruenceClosureImpl> m_theorems = new ArrayList<>();
+    private final Set<String> m_nonQuantifiedTheoremSymbols = new HashSet<>();
+    private final Set<TheoremCongruenceClosureImpl> m_smallEndEquations = new HashSet<>();
+
+    @NotNull
     private final ModuleScopeBuilder m_scope;
-    private final long DEFAULTTIMEOUT = 5000;
-    private final boolean SHOWRESULTSIFNOTPROVED = true;
+    @NotNull
     private final DumbMathClssftnHandler m_typeGraph;
-    private final Set<String> m_nonQuantifiedTheoremSymbols;
-    private final Set<TheoremCongruenceClosureImpl> m_smallEndEquations;
 
-    private final int DEFAULTTRIES = -1;
+
     private String m_results;
     private boolean printVCEachStep = false;
-    private long myTimeout;
+    private long timeout;
     private long totalTime = 0;
 
+    private final int numTriesBeforeQuitting;
     private final RESOLVECompiler compiler;
 
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
@@ -42,16 +50,45 @@ public final class CongruenceClassProver {
                                  @NotNull List<VC> vcs,
                                  @NotNull ModuleScopeBuilder scope) {
         this.compiler = compiler;
-    }*/
+        this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
+        this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
+        this.totalTime = System.currentTimeMillis();
+        this.m_typeGraph = g;
+        this.m_scope = scope;
+
+        try {
+            List<TheoremSymbol> theoremEntries =
+                    scope.query(new SymbolTypeQuery<TheoremSymbol>(TheoremSymbol.class,
+                            MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+        } catch (NoSuchModuleException|UnexpectedSymbolException e) {
+        }
+
+        MathClssftn z = null;
+        MathClssftn n = null;
+        try {
+            z = getMathSymbol(scope, "Z").getClassification();
+            n = getMathSymbol(scope, "N").getClassification();
+        } catch (SymbolTableException e) {
+            compiler.info("warning: could not find some fundamental base sorts/classifications " +
+                    "used by the prover: N and/or Z");
+        }
+
+        for (VC vc : vcs) {
+            //if(!vc.getName().equals("3_2"))continue;
+            // make every PExp a PSymbol
+            vc.convertAllToPsymbols(m_typeGraph);
+            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
+
+        }
+    }
 
 
-
-
-
-
-
-
-
+    @Nullable
+    private static MathClssftnWrappingSymbol getMathSymbol(@NotNull Scope s, @NotNull String name)
+            throws SymbolTableException {
+        return s.queryForOne(new MathSymbolQuery(null, name));
+    }
 
 /*
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;

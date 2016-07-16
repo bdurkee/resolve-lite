@@ -14,10 +14,10 @@ import static edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy.IMPOR
 public class MathSymbolQuery extends ResultProcessingQuery<Symbol, MathClssftnWrappingSymbol> {
 
     public MathSymbolQuery(@Nullable Token qualifier, @NotNull Token name) {
-        this(qualifier, name.getText(), name);
+        this(qualifier, name.getText());
     }
 
-    public MathSymbolQuery(@Nullable Token qualifier, @NotNull String name, @NotNull Token l) {
+    public MathSymbolQuery(@Nullable Token qualifier, @NotNull String name) {
         super(new BaseSymbolQuery<Symbol>(new PossiblyQualifiedPath(qualifier,
                 IMPORT_NAMED, FACILITY_IGNORE, true), new NameSearcher(name, true)), Symbol::toMathSymbol);
     }
