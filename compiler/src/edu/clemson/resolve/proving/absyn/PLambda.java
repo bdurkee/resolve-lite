@@ -180,6 +180,14 @@ public class PLambda extends PExp {
             this.type = type;
         }
 
+        public String getName() {
+            return name;
+        }
+
+        public MathClssftn getClssftn() {
+            return type;
+        }
+
         public PSymbol asPSymbol() {
             return new PSymbol.PSymbolBuilder(name).mathClssfctn(type).build();
         }

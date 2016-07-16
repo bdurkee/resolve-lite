@@ -301,7 +301,7 @@ public class PApply extends PExp {
     public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getTopLevelOperationName().equals("and")) {
+        if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
         else if (getTopLevelOperationName().equals("implies")) {

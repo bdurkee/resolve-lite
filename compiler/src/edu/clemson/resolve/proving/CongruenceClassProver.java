@@ -75,7 +75,7 @@ public final class CongruenceClassProver {
         }
         List<VC> preprocessedVcs = preprocessVCs(vcs);
         for (VC vc : preprocessedVcs) {
-            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
+            //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
         }
     }
 

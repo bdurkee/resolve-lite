@@ -1,22 +1,16 @@
-/**
- * TheoremCongruenceClosureImpl.java
- * ---------------------------------
- * Copyright (c) 2016
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
 package edu.clemson.resolve.proving;
+
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+
+import java.util.*;
 
 /**
  * Created by mike on 4/3/2014.
  */
 public class TheoremCongruenceClosureImpl {
-/*
+
     private final boolean isEquality;
     private final Registry m_theoremRegistry;
     private final ConjunctionOfNormalizedAtomicExpressions m_matchConj;
@@ -49,20 +43,15 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_bindings = new ArrayList<Map<String, String>>(128);
         m_selectedBindings = new HashSet<Map<String, String>>(128);
-        m_matchConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        null);
+        m_matchConj = new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry, null);
         if (mustMatch.getSubExpressions().size() > 0) {
             if (enterToMatchAndBindAsEquivalentToTrue)
                 m_matchConj.addExpression(mustMatch);
             else
                 m_matchConj.addFormula(mustMatch);
         }
-        m_matchRequired =
-                new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet
-                        .keySet());
-        Collections.sort(m_matchRequired,
-                new NormalizedAtomicExpression.numQuantsComparator());
+        m_matchRequired = new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet.keySet());
+        Collections.sort(m_matchRequired, new NormalizedAtomicExpression.numQuantsComparator());
         m_insertExpr = toInsert;
         m_insert_qvars = new HashSet<String>();
         for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
@@ -84,13 +73,11 @@ public class TheoremCongruenceClosureImpl {
             Map<String, Integer> ops = n.getOperatorsAsStrings(false);
             Set<String> intersection = new HashSet<String>(insert_quants);
             intersection.retainAll(ops.keySet());
-            if (!m_matchRequired.contains(n) && !ops.containsKey("_g")
-                    && !intersection.isEmpty()) {
+            if (!m_matchRequired.contains(n) && !ops.containsKey("_g") && !intersection.isEmpty()) {
                 m_noMatchRequired.add(n);
             }
         }
-        Collections.sort(m_noMatchRequired,
-                new NormalizedAtomicExpression.numQuantsComparator());
+        Collections.sort(m_noMatchRequired, new NormalizedAtomicExpression.numQuantsComparator());
         if (m_theorem.getQuantifiedVariables().isEmpty()) {
             m_noQuants = true;
         }
@@ -125,7 +112,7 @@ public class TheoremCongruenceClosureImpl {
         return m_all_literals;
 
     }
-
+/*
     public int applyTo(VerificationConditionCongruenceClosureImpl vc,
             long endTime) {
         Set<Map<String, String>> sResults;
