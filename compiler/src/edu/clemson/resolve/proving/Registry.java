@@ -62,8 +62,7 @@ public class Registry {
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
         m_typeDictionary = new TreeMap<String, MathClssftn>();
-        addSymbol("=B", new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
-                Usage.LITERAL); // = as a predicate function, not as an assertion
+        addSymbol("=B", g.EQUALITY_FUNCTION, Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
         assert (getIndexForSymbol("=B") == 0);
@@ -87,8 +86,7 @@ public class Registry {
             return m_cached_isSubtype.get(catKey);
         }
         else {
-            //boolean is = a.isSubtypeOf(b);
-            boolean is = false;
+            boolean is = a.isSubtypeOf(b);
             m_cached_isSubtype.put(catKey, is);
             return is;
         }
@@ -100,7 +98,7 @@ public class Registry {
 
     public Set<String> getSetMatchingType(MathClssftn t) {
         assert t != null : "request for null type";
-        Set<String> rSet = new HashSet<>();
+        Set<String> rSet = new HashSet<String>();
         Set<MathClssftn> allTypesInSet = m_typeToSetOfOperators.keySet();
         assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
         assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
@@ -119,7 +117,7 @@ public class Registry {
 
     public Set<String> getParentsByType(MathClssftn t) {
         Set<String> rSet = getSetMatchingType(t);
-        Set<String> fSet = new HashSet<>();
+        Set<String> fSet = new HashSet<String>();
         for (String s : rSet) {
             int id = getIndexForSymbol(s);
             if (m_symbolIndexParentArray.get(id) == id) {
