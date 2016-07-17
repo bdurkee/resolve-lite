@@ -1,0 +1,13 @@
+prover checklist:
+
+1. CongruenceClassProver 						[unfinished]
+2. ConjunctionofNormalizedAtomicExp 			[unfinished]
+3. TheoremCongruenceClosureImpl					[unfinished]
+4. Utilities									[paused]
+
+5. NormalizedAtomicExpression 					[done]
+6. PExpWithScore								[done]
+7. Registry										[done]
+8. TheoremPrioritizer							[done]
+9. TheoremWithScore								[done]
+10. VerificationConditionCongruenceClosureImpl	[done]

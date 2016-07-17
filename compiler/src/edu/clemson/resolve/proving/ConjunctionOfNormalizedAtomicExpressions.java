@@ -89,7 +89,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (m_expSet.containsKey(na) && m_expSet.get(na).readRoot() >= 0) {
                 int r = m_expSet.get(na).readRoot();
                 String rs = m_registry.getSymbolForIndex(r);
-                return new PSymbol(m_registry.getTypeByIndex(r), null, rs);
+                return new PSymbol.PSymbolBuilder(rs).mathClssfctn(m_registry.getTypeByIndex(r)).build();
             }
             else
                 return new PSymbol(exp.getType(), exp.getTypeValue(), exp.getTopLevelOperationName(), args);
