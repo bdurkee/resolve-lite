@@ -46,7 +46,7 @@ public class VerificationConditionCongruenceClosureImpl {
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
         addPExp(m_consequent.splitIntoConjuncts().iterator(), false);
-        addPExp(m_consequent.splitIntoConjuncts().iterator(), true);
+        addPExp(m_antecedent.splitIntoConjuncts().iterator(), true);
 
         // seed with (true = false) = false
         PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
@@ -118,8 +118,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr =
-                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
+            PExp curr = Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
             }
@@ -141,8 +140,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected void addGoal(String a) {
         String r = m_registry.getRootSymbolForSymbol(a);
-        if (m_goal.contains(r))
-            return;
+        if (m_goal.contains(r)) return;
         m_goal.add(r);
     }
 
