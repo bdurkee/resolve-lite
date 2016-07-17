@@ -24,15 +24,13 @@ public class NormalizedAtomicExpression {
     private final int[] m_expression;
     private int m_classConstant;
     private int arity; // number of arguments
-    private final ConjunctionOfNormalizedAtomicExpressions m_conj;
     private final Registry m_registry;
     private Map<String, Integer> m_opMmap;
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
-    public NormalizedAtomicExpression(ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
-        m_conj = conj;
-        m_registry = m_conj.getRegistry();
+    public NormalizedAtomicExpression(Registry registry, int[] intArray) {
+        m_registry = registry;
         arity = intArray.length - 1;
         if (!m_registry.isCommutative(intArray[0])) {
             m_expression = intArray;
@@ -59,25 +57,6 @@ public class NormalizedAtomicExpression {
 
     protected Registry getRegistry() {
         return m_registry;
-    }
-
-    protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k) {
-        int bid = -4;
-        for (int i = 0; i <= oe.arity; ++i) {
-            if (oe.readPosition(i) == k && bid == -4) {
-                bid = readPosition(i);
-            }
-            else if (oe.readPosition(i) == k && readPosition(i) != bid) {
-                return -1;
-            }
-        }
-        if (oe.readRoot() == k) {
-            if (bid == -4)
-                return readRoot();
-            else if (readRoot() != bid)
-                return -1;
-        }
-        return bid;
     }
 
     protected Set<Integer> getOpIds() {
@@ -219,7 +198,7 @@ public class NormalizedAtomicExpression {
         }
         NormalizedAtomicExpression rNa = this;
         if (changed) {
-            rNa = new NormalizedAtomicExpression(m_conj, na);
+            rNa = new NormalizedAtomicExpression(m_registry, na);
             rNa.writeToRoot(readRoot());
         }
         assert (changed == (rNa != this));
@@ -243,7 +222,7 @@ public class NormalizedAtomicExpression {
             roots[i] = m_registry.findAndCompress(m_expression[i]);
         }
         NormalizedAtomicExpression rn =
-                new NormalizedAtomicExpression(m_conj, roots);
+                new NormalizedAtomicExpression(m_registry, roots);
         return rn;
     }
 
@@ -309,7 +288,7 @@ public class NormalizedAtomicExpression {
         for (String k : getOperatorsAsStrings(false).keySet()) {
             if (m_registry.getUsage(k).equals(Registry.Usage.FORALL)
                     || m_registry.getUsage(k).equals(
-                            Registry.Usage.HASARGS_FORALL)
+                    Registry.Usage.HASARGS_FORALL)
                     || m_registry.getUsage(k).equals(Registry.Usage.CREATED)) {
                 c++;
             }
@@ -319,10 +298,10 @@ public class NormalizedAtomicExpression {
 
     public static class numQuantsComparator
             implements
-                Comparator<NormalizedAtomicExpression> {
+            Comparator<NormalizedAtomicExpression> {
 
         public int compare(NormalizedAtomicExpression nae1,
-                NormalizedAtomicExpression nae2) {
+                           NormalizedAtomicExpression nae2) {
             return nae1.numberOfQuants() - nae2.numberOfQuants();
         }
     }

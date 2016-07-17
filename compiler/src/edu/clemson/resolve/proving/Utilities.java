@@ -49,8 +49,19 @@ public class Utilities {
         else if (pTop.equals("<") && z != null && n != null
                 && argList.get(0).getMathClssftn().isSubtypeOf(z)
                 && argList.get(1).getMathClssftn().isSubtypeOf(z)) {
-
+            // x < y to x + 1 <= y
+           /* argsTemp.add(argList.get(0));
+            argsTemp.add(new PSymbol.PSymbolBuilder("1").mathClssfctn(n).build());
+            PSymbol plus1 =
+                    new PSymbol(argList.get(0).getType(), null, "+"
+                            + argList.get(0).getType().toString(), argsTemp);
+            argsTemp.clear();
+            argsTemp.add(plus1);
+            argsTemp.add(argList.get(1));
+            return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);*/
         }
+        //TODO: Finish these transformations
+        return p;
     }
 
 }
