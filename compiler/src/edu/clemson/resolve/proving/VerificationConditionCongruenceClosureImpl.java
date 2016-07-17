@@ -7,10 +7,12 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.vcgen.VC;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class VerificationConditionCongruenceClosureImpl {
+
     private final Registry m_registry;
     private final DumbMathClssftnHandler m_typegraph;
     public final String m_name;
@@ -43,50 +45,33 @@ public class VerificationConditionCongruenceClosureImpl {
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
-        addPExp(m_consequent.splitIntoConjuncts(), false);
-        addPExp(m_antecedent.iterator(), true);
+        addPExp(m_consequent.splitIntoConjuncts().iterator(), false);
+        addPExp(m_consequent.splitIntoConjuncts().iterator(), true);
 
         // seed with (true = false) = false
-        ArrayList<PExp> args = new ArrayList<PExp>();
-        PSymbol fls = g.getFalseExp();
-        PSymbol tr = g.getTrueExp();
-        args.add(tr);
-        args.add(fls);
-
         PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
         PApply trEqF = new PApply.PApplyBuilder(boolEqFuncName)
-                .arguments(args)
+                .arguments(g.getTrueExp(), g.getFalseExp())
                 .build();
-        args.clear();
-
-        args.add(trEqF);
-        args.add(fls);
         PApply trEqFEqF = new PApply.PApplyBuilder(boolEqFuncName)
-                .arguments(args)
+                .arguments(trEqF, g.getFalseExp())
                 .build();
-        args.clear();
         m_conjunction.addExpression(trEqFEqF);
 
-
         // seed with true and true.  Need this for search: x and y, when x and y are both true
-        args.add(tr);
-        args.add(tr);
-        PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(tandt);
-        args.add(tr);
-        PSymbol tandteqt = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+        PApply tandt = g.formConjunct(g.getTrueExp(), g.getTrueExp());
+        PApply tandteqt = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(tandt, g.getTrueExp())
+                .build();
         m_conjunction.addExpression(tandteqt);
-        args.clear();
-        // seed with true and false = false
-        args.add(tr);
-        args.add(fls);
-        PSymbol tandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(tandf);
-        args.add(fls);
-        PSymbol tandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+
+        // seed with (true and false) = false
+        PApply tandf = g.formConjunct(g.getTrueExp(), g.getFalseExp());
+        PApply tandfeqf = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(tandf, g.getFalseExp())
+                .build();
         m_conjunction.addExpression(tandfeqf);
+
         // seed with false and false = false
         args.clear();
         args.add(fls);
