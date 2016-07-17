@@ -52,35 +52,47 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
         PApply trEqF = new PApply.PApplyBuilder(boolEqFuncName)
                 .arguments(g.getTrueExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
                 .build();
         PApply trEqFEqF = new PApply.PApplyBuilder(boolEqFuncName)
                 .arguments(trEqF, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
                 .build();
         m_conjunction.addExpression(trEqFEqF);
 
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
-        PApply tandt = g.formConjunct(g.getTrueExp(), g.getTrueExp());
+        PSymbol boolAndName = new PSymbol.PSymbolBuilder("andB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+
+        // seed with (true and true) = true.  Need this for search: x and y, when x and y are both true
+        PApply tandt = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getTrueExp(), g.getTrueExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         PApply tandteqt = new PApply.PApplyBuilder(boolEqFuncName)
                 .arguments(tandt, g.getTrueExp())
+                .applicationType(g.BOOLEAN)
                 .build();
         m_conjunction.addExpression(tandteqt);
 
         // seed with (true and false) = false
-        PApply tandf = g.formConjunct(g.getTrueExp(), g.getFalseExp());
+        PApply tandf = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getTrueExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         PApply tandfeqf = new PApply.PApplyBuilder(boolEqFuncName)
                 .arguments(tandf, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
                 .build();
         m_conjunction.addExpression(tandfeqf);
 
-        // seed with false and false = false
-        args.clear();
-        args.add(fls);
-        args.add(fls);
-        PSymbol fandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(fandf);
-        args.add(fls);
-        PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+        // seed with (false and false) = false
+        PApply fandf = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getFalseExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
+        PApply fandfeqf = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(fandf, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         m_conjunction.addExpression(fandfeqf);
     }
 
