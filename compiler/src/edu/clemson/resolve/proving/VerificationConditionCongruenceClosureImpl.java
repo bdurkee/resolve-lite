@@ -1,7 +1,9 @@
 
 package edu.clemson.resolve.proving;
 
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.vcgen.VC;
@@ -9,7 +11,6 @@ import edu.clemson.resolve.vcgen.VC;
 import java.util.*;
 
 public class VerificationConditionCongruenceClosureImpl {
-
     private final Registry m_registry;
     private final DumbMathClssftnHandler m_typegraph;
     public final String m_name;
@@ -28,7 +29,8 @@ public class VerificationConditionCongruenceClosureImpl {
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
 
     // currently support only unchained equalities, so each sublist is size 2.
-    public VerificationConditionCongruenceClosureImpl(DumbMathClssftnHandler g, VC vc,
+    public VerificationConditionCongruenceClosureImpl(@NotNull DumbMathClssftnHandler g,
+                                                      @NotNull VC vc,
                                                       MathClssftn z, MathClssftn n) {
         m_typegraph = g;
         m_name = Integer.toString(vc.getNumber());
@@ -41,22 +43,30 @@ public class VerificationConditionCongruenceClosureImpl {
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
-        addPExp(m_consequent.iterator(), false);
+        addPExp(m_consequent.splitIntoConjuncts(), false);
         addPExp(m_antecedent.iterator(), true);
 
         // seed with (true = false) = false
         ArrayList<PExp> args = new ArrayList<PExp>();
-        PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
-        PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
+        PSymbol fls = g.getFalseExp();
+        PSymbol tr = g.getTrueExp();
         args.add(tr);
         args.add(fls);
-        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+
+        PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
+        PApply trEqF = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(args)
+                .build();
         args.clear();
+
         args.add(trEqF);
         args.add(fls);
-        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+        PApply trEqFEqF = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(args)
+                .build();
         args.clear();
         m_conjunction.addExpression(trEqFEqF);
+
 
         // seed with true and true.  Need this for search: x and y, when x and y are both true
         args.add(tr);
