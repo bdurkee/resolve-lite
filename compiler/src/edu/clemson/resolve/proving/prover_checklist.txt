@@ -1,9 +1,9 @@
 prover checklist:
 
-1. CongruenceClassProver 						[unfinished]
+1. CongruenceClassProver 						[paused/done]
 2. ConjunctionofNormalizedAtomicExp 			[done]
 3. TheoremCongruenceClosureImpl					[done]
-4. Utilities									[paused]
+4. Utilities									[paused/done]
 
 5. NormalizedAtomicExpression 					[done]
 6. PExpWithScore								[done]

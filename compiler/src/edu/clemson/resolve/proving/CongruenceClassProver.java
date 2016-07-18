@@ -207,6 +207,48 @@ public final class CongruenceClassProver {
         m_theorems.add(t);
     }
 
+    // Temporarily coding conversion theorem for natural / integer addition
+    // forall x,y:N, +N(x,y) = +Z(x,y) match left only
+    void sumConversion(MathClssftn n, MathClssftn z) {
+
+        PSymbol x = new PSymbol.PSymbolBuilder("x")
+                .quantification(Quantification.UNIVERSAL)
+                .mathClssfctn(n)
+                .build();
+
+        PSymbol y = new PSymbol.PSymbolBuilder("y")
+                .quantification(Quantification.UNIVERSAL)
+                .mathClssfctn(n)
+                .build();
+
+        PSymbol nPlusName = new PSymbol.PSymbolBuilder("+N")
+                .mathClssfctn(new MathFunctionClssftn(m_typeGraph, n, n, n))
+                .build();
+        //+N(x,y)
+        PApply nPlusApp = new PApply.PApplyBuilder(nPlusName)
+                .arguments(x, y)
+                .applicationType(n)
+                .build();
+
+        PSymbol zPlusName = new PSymbol.PSymbolBuilder("+Z")
+                .mathClssfctn(new MathFunctionClssftn(m_typeGraph, z, z, z))
+                .build();
+        //+Z(x,y)
+        PApply zPlusApp = new PApply.PApplyBuilder(zPlusName)
+                .arguments(x, y)
+                .applicationType(z)
+                .build();
+
+        //+N(x,y) =B +Z(x,y)
+        PApply eq = new PApply.PApplyBuilder(Utilities.buildEqBName(m_typeGraph))
+                .arguments(nPlusApp, zPlusApp)
+                .applicationType(m_typeGraph.BOOLEAN)
+                .build();
+        String name = "Integer / Natural Sum Conversion";
+        addEqualityTheorem(true, eq, name + "_left");
+        addEqualityTheorem(false, eq, name + "_right");
+    }
+
     private String proofFileName() {
         String filePath = tr.getModuleIdentifier().getFile().getPath();
         int temp = filePath.lastIndexOf(".");
