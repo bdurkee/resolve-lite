@@ -99,7 +99,7 @@ public class PSymbol extends PExp {
 
     @Override
     public boolean isVariable() {
-        return !isLiteral();
+        return !isFunctionApplication();
     }
 
     @Override

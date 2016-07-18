@@ -6,6 +6,7 @@ import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.CongruenceClassProver;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
 import java.util.List;
@@ -34,9 +35,14 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 unit.setVCs(vcs);
                 ST x = gen.generateAssertions();
                 System.out.println(x.render());
+                List<VC> proverInput = vcs.getFinalVCs();
 
+                VCClassftnPrintingListener p = new VCClassftnPrintingListener(compiler);
+                for (VC vc : proverInput) {
+                    vc.getAntecedent().accept(p);
+                    vc.getConsequent().accept(p);
+                }
                 if (compiler.prove) {
-                    List<VC> proverInput = vcs.getFinalVCs();
                     CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
                             compiler.symbolTable.getTypeGraph(), proverInput);
                 }

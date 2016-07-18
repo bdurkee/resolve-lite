@@ -124,15 +124,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         String name = expression.getTopLevelOperationName();
 
-        if (name.equals("=B")) {
-            int lhs = addFormula(expression.getSubExpressions().get(0));
-            int rhs = addFormula(expression.getSubExpressions().get(1));
+        if (name.equals("=B") && expression instanceof PApply) {
+            int lhs = addFormula(expression.getSubExpressions().get(1));
+            int rhs = addFormula(expression.getSubExpressions().get(2));
             return mergeOperators(lhs, rhs);
         }
-        else if (name.equals("andB")) {
+        else if (name.equals("andB") && expression instanceof PApply) {
             String r = "";
-            r += addExpression(expression.getSubExpressions().get(0));
             r += addExpression(expression.getSubExpressions().get(1));
+            r += addExpression(expression.getSubExpressions().get(2));
             return r;
         }
         else {
@@ -190,9 +190,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      should return int for true if known to be equal, otherwise return root representative.
      */
     protected int addFormula(PExp formula) {
-        if (formula.getTopLevelOperationName().equals("=B")) {
-            int lhs = addFormula(formula.getSubExpressions().get(0));
-            PExp r = formula.getSubExpressions().get(1);
+        if (formula.getTopLevelOperationName().equals("=B") && formula instanceof PApply) {
+            int lhs = addFormula(((PApply) formula).getArguments().get(1));
+            PExp r = formula.getSubExpressions().get(2);
             int rhs = addFormula(r);
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
