@@ -1,9 +1,11 @@
 package edu.clemson.resolve.proving;
 
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
+import edu.clemson.resolve.semantics.Quantification;
 
 import java.util.*;
 
@@ -63,6 +65,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return new PSymbol.PSymbolBuilder(s).mathClssfctn(exp.getMathClssftn()).build();
             }
         }
+
+        if (!(exp instanceof PApply)) {
+            throw new IllegalStateException("prover: in conjunction of normalized atomic exps, the exp parameter" +
+                    "is something that I don't know how to handle");
+        }
         //MIKE: NOTE -- Just using a normal iterator over the PExp's subexpressions now.
         Iterator<? extends PExp> it = exp.getSubExpressions().iterator();
 
@@ -91,8 +98,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 String rs = m_registry.getSymbolForIndex(r);
                 return new PSymbol.PSymbolBuilder(rs).mathClssfctn(m_registry.getTypeByIndex(r)).build();
             }
-            else
-                return new PSymbol(exp.getType(), exp.getTypeValue(), exp.getTopLevelOperationName(), args);
+            else {
+                PSymbol name = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
+                        .mathClssfctn(((PApply) exp).getFunctionPortion().getMathClssftn())
+                        .build();
+                return new PApply.PApplyBuilder(name).arguments(args)
+                        .applicationType(exp.getMathClssftn())
+                        .build();
+            }
         }
         else {
             return new PSymbol(exp.getType(), exp.getTypeValue(), exp
@@ -141,7 +154,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         else if (ps.isFunction()
                 || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
-            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+            if (ps.getQuantification().equals(Quantification.UNIVERSAL.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
             else {
@@ -149,7 +162,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
 
         }
-        else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+        else if (ps.getQuantification().equals(Quantification.UNIVERSAL)) {
             usage = Registry.Usage.FORALL;
         }
         // The type stored with expressions is actually the range type
@@ -174,7 +187,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      should return int for true if known to be equal, otherwise return root representative.
      */
     protected int addFormula(PExp formula) {
-        if (formula.getTopLevelOperation().equals("=B")) {
+        if (formula.getTopLevelOperationName().equals("=B")) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             PExp r = formula.getSubExpressions().get(1);
             int rhs = addFormula(r);
@@ -193,6 +206,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // }
         }
         PSymbol asPsymbol;
+
+        //TODO TODO: Now can be PApply for function applications.
         if (!(formula instanceof PSymbol)) {
             System.err.println("unhandled PExp: " + formula.toString());
             throw new RuntimeException();
@@ -698,14 +713,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 String ac =
                         (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
                                 : m_registry.getSymbolForIndex(e.readRoot()));
-                if (wc.equals(""))
-                    continue;
-                if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac))
-                    continue next; // this clause ensures usage of same symbol where required.
-                MTType wildType =
-                        searchReg.getTypeByIndex(searchReg
-                                .getIndexForSymbol(wc));
-                MTType localType =
+                if (wc.equals("")) continue;
+                if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac)) continue next; // this clause ensures usage of same symbol where required.
+                MathClssftn wildType = searchReg.getTypeByIndex(searchReg.getIndexForSymbol(wc));
+                MathClssftn localType =
                         m_registry.getTypeByIndex(m_registry
                                 .getIndexForSymbol(ac));
                 if (!m_registry.isSubtype(localType, wildType))
