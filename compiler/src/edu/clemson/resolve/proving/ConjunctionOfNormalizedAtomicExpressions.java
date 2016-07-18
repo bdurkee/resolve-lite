@@ -99,17 +99,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return new PSymbol.PSymbolBuilder(rs).mathClssfctn(m_registry.getTypeByIndex(r)).build();
             }
             else {
-                PSymbol name = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
+                PSymbol nameExp = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
                         .mathClssfctn(((PApply) exp).getFunctionPortion().getMathClssftn())
                         .build();
-                return new PApply.PApplyBuilder(name).arguments(args)
+                return new PApply.PApplyBuilder(nameExp).arguments(args)
                         .applicationType(exp.getMathClssftn())
                         .build();
             }
         }
         else {
-            return new PSymbol(exp.getType(), exp.getTypeValue(), exp
-                    .getTopLevelOperation(), args);
+            PSymbol nameExp = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
+                    .mathClssfctn(((PApply) exp).getFunctionPortion().getMathClssftn())
+                    .build();
+            return new PApply.PApplyBuilder(nameExp).arguments(args)
+                    .applicationType(exp.getMathClssftn())
+                    .build();
         }
     }
 
@@ -144,7 +148,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     // adds a particular symbol to the registry
-    protected int addPsymbol(PSymbol ps) {
+
+    //NOTE: Changed the parameter here to PExp to facilitate both PSymbol and PApply
+    protected int addPsymbol(PExp ps) {
         String name = ps.getTopLevelOperationName();
         if (m_registry.m_symbolToIndex.containsKey(name)) return m_registry.m_symbolToIndex.get(name);
         MathClssftn type = ps.getMathClssftn();
@@ -152,31 +158,28 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-        else if (ps.isFunction()
-                || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
-            if (ps.getQuantification().equals(Quantification.UNIVERSAL.FOR_ALL)) {
+        else if (ps.isFunctionApplication()) {
+            if (ps.getQuantification().equals(Quantification.UNIVERSAL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
             else {
                 usage = Registry.Usage.HASARGS_SINGULAR;
             }
-
         }
         else if (ps.getQuantification().equals(Quantification.UNIVERSAL)) {
             usage = Registry.Usage.FORALL;
         }
+
         // The type stored with expressions is actually the range type
         // Ex: (S = T):B.
         // However, I need to store types for functions/relations.
         // Building these here.
         // It would be far better to handle this upstream.
         // Currently PExps from theorems have correct type set already
-        if (ps.getSubExpressions().size() > 0) {
-            List<MTType> paramList = new ArrayList<MTType>();
-            for (PExp pParam : ps.getSubExpressions()) {
-                paramList.add(pParam.getType());
-            }
-            type = new MTFunction(m_registry.m_typeGraph, type, paramList);
+
+        // UPDATE: This should give you what your looking for in that case.
+        if (ps instanceof PApply) {
+            type = ((PApply) ps).getFunctionPortion().getMathClssftn();
         }
         return m_registry.addSymbol(name, type, usage);
     }
@@ -205,17 +208,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return addAtomicFormula(pred);
             // }
         }
-        PSymbol asPsymbol;
-
         //TODO TODO: Now can be PApply for function applications.
-        if (!(formula instanceof PSymbol)) {
+        if (!(formula instanceof PSymbol || formula instanceof PApply)) {
             System.err.println("unhandled PExp: " + formula.toString());
             throw new RuntimeException();
-
         }
-        else
-            asPsymbol = (PSymbol) formula;
-        int intRepOfOp = addPsymbol(asPsymbol);
+        int intRepOfOp = addPsymbol(formula);
         // base case
         if (formula.isVariable()) {
             return intRepOfOp;
@@ -224,7 +222,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int[] ne = new int[formula.getSubExpressions().size() + 1];
         ne[0] = intRepOfOp;
         int pos = 1;
-        PExpSubexpressionIterator it = formula.getSubExpressionIterator();
+
+        Iterator<? extends PExp> it = formula.getSubExpressions().iterator();
+        if (formula instanceof PApply) {    //I presume that you only want an iterator over args, getSubExpressions
+            //for a PApply will include the name portion of the function (which of course is independent from the args)
+            it = ((PApply) formula).getArguments().iterator();
+        }
         while (it.hasNext()) {
             PExp p = it.next();
             int root = addFormula(p);
@@ -247,11 +250,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     private int addAtomicFormula(NormalizedAtomicExpression atomicFormula) {
         // Return root if atomic formula is present
-        if (m_expSet.containsKey(atomicFormula))
-            return m_expSet.get(atomicFormula).readRoot();
+        if (m_expSet.containsKey(atomicFormula)) return m_expSet.get(atomicFormula).readRoot();
         // no such formula exists
-        MTType typeOfFormula =
-                m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        MTType typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         // this is the full type and is necessarily a function type
 
         MTType rangeType = ((MTFunction) typeOfFormula).getRange();
