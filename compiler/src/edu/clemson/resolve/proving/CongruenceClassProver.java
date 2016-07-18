@@ -139,10 +139,17 @@ public final class CongruenceClassProver {
         return result;
     }
 
+    //TODO: Need to use one with import recursive...
     @Nullable
     private static MathClssftnWrappingSymbol getMathSymbol(@NotNull Scope s, @NotNull String name)
             throws SymbolTableException {
-        return s.queryForOne(new MathSymbolQuery(null, name));
+        Symbol result = s.queryForOne(new NameQuery(null, name,
+                MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                MathSymbolTable.FacilityStrategy.FACILITY_GENERIC, false));
+        if (!(result instanceof MathClssftnWrappingSymbol)) {
+            throw new NoSuchSymbolException();
+        }
+        return (MathClssftnWrappingSymbol)result;
     }
 
     private void addEqualityTheorem(boolean matchLeft, PExp theorem, String thName) {
