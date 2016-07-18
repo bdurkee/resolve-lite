@@ -4,6 +4,7 @@ import edu.clemson.resolve.compiler.AbstractCompilationPipeline;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.CongruenceClassProver;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.stringtemplate.v4.ST;
 
@@ -18,7 +19,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
     @Override
     public void process() {
         for (AnnotatedModule unit : compilationUnits) {
-            if (compiler.targetNames.contains(unit.getNameToken().getText()) && compiler.vcs) {
+            //prove implies genn'ing vcs...
+            if (compiler.targetNames.contains(unit.getNameToken().getText()) && (compiler.vcs || compiler.prove)) {
                 if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptExtModuleDeclContext) continue;
@@ -33,7 +35,12 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 ST x = gen.generateAssertions();
                 System.out.println(x.render());
 
-                //List<VC> proverInput = vcs.getFinalVCs();
+                if (compiler.prove) {
+                    List<VC> proverInput = vcs.getFinalVCs();
+                    CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
+                            compiler.symbolTable.getTypeGraph(), proverInput);
+                }
+
                 int i;
                 i=0;
             }

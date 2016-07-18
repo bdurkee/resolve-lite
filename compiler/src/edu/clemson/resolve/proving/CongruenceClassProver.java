@@ -51,21 +51,24 @@ public final class CongruenceClassProver {
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
                                  @NotNull DumbMathClssftnHandler g,
-                                 @NotNull List<VC> vcs,
-                                 @NotNull ModuleScopeBuilder scope) {
+                                 @NotNull List<VC> vcs) {
         this.compiler = compiler;
         this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
         this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
         this.totalTime = System.currentTimeMillis();
         this.m_typeGraph = g;
-        this.m_scope = scope;
+        try {
+            this.m_scope = compiler.symbolTable.getModuleScope(target.getModuleIdentifier());
+        } catch (NoSuchModuleException e) {
+            throw new RuntimeException("prover couldn't obtain modulescope for whatever reason..");
+        }
         this.tr = target;
 
         MathClssftn z = null;
         MathClssftn n = null;
         try {
-            z = getMathSymbol(scope, "Z").getClassification();
-            n = getMathSymbol(scope, "N").getClassification();
+            z = getMathSymbol(m_scope, "Z").getClassification();
+            n = getMathSymbol(m_scope, "N").getClassification();
         } catch (SymbolTableException e) {
             compiler.info("warning: could not find some fundamental base sorts/classifications " +
                     "used by the prover: N and/or Z");
@@ -77,7 +80,7 @@ public final class CongruenceClassProver {
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
             theoremSymbols.addAll(
-                    scope.query(new SymbolTypeQuery<TheoremSymbol>(TheoremSymbol.class,
+                    m_scope.query(new SymbolTypeQuery<TheoremSymbol>(TheoremSymbol.class,
                             MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE)));
         } catch (NoSuchModuleException|UnexpectedSymbolException e) {
