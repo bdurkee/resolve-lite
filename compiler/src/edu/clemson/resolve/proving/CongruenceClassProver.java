@@ -249,6 +249,186 @@ public final class CongruenceClassProver {
         addEqualityTheorem(false, eq, name + "_right");
     }
 
+    //START
+    
+    public void start() throws IOException {
+
+        String summary = "";
+        int i = 0;
+        int numUnproved = 0;
+        for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
+            //printVCEachStep = true;
+            //if (!vcc.m_name.equals("0_2")) continue;
+            long startTime = System.nanoTime();
+            String whyQuit = "";
+            // Skip proof loop
+            if (numTriesBeforeQuitting >= 0 && numUnproved >= numTriesBeforeQuitting) {
+                summary += vcc.m_name + " skipped\n";
+                ++i;
+                continue;
+            }
+            VerificationConditionCongruenceClosureImpl.STATUS proved =
+                    prove(vcc);
+            if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+                whyQuit += " Proved ";
+            }
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+                whyQuit += " Proved (Assumption(s) false) ";
+            }
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+                whyQuit += " Out of theorems, or timed out ";
+                numUnproved++;
+            }
+            else
+                whyQuit += " Goal false "; // this isn't currently reachable
+
+            long endTime = System.nanoTime();
+            long delayNS = endTime - startTime;
+            long delayMS =
+                    TimeUnit.MILLISECONDS
+                            .convert(delayNS, TimeUnit.NANOSECONDS);
+            summary += vcc.m_name + whyQuit + " time: " + delayMS + " ms\n";
+            i++;
+
+        }
+        totalTime = System.currentTimeMillis() - totalTime;
+        summary +=
+                "Elapsed time from construction: " + totalTime + " ms" + "\n";
+        String div = divLine("Summary");
+        summary = div + summary + div;
+        outputProofFile();
+    }
+
+    private String divLine(String label) {
+        if (label.length() > 78) {
+            label = label.substring(0, 77);
+        }
+        label = " " + label + " ";
+        char[] div = new char[80];
+        Arrays.fill(div, '=');
+        int start = 40 - label.length() / 2;
+        for (int i = start, j = 0; j < label.length(); ++i, ++j) {
+            div[i] = label.charAt(j);
+        }
+        return new String(div) + "\n";
+    }
+
+    /* while not proved do
+        rank theorems
+            while top rank below threshold score do
+                apply top rank if not in exclusion list
+                insert top rank
+                add inserted expression to exclusion list
+                choose new top rank
+
+     */
+    protected VerificationConditionCongruenceClosureImpl.STATUS prove(
+            VerificationConditionCongruenceClosureImpl vcc) {
+        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
+                new ArrayList<TheoremCongruenceClosureImpl>();
+        theoremsForThisVC.addAll(m_theorems);
+        long startTime = System.currentTimeMillis();
+        long endTime = timeout + startTime;
+        Map<String, Integer> theoremAppliedCount =
+                new HashMap<String, Integer>();
+        VerificationConditionCongruenceClosureImpl.STATUS status =
+                vcc.isProved();
+        String div = divLine(vcc.m_name);
+        String theseResults =
+                div + ("Before application of theorems: " + vcc + "\n");
+
+        int iteration = 0;
+        // ++++++ Create new PQ for instantiated theorems
+        chooseNewTheorem: while (status
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+                && System.currentTimeMillis() <= endTime) {
+            long time_at_theorem_pq_creation = System.currentTimeMillis();
+            // ++++++ Creates new PQ with all the theorems
+            TheoremPrioritizer rankedTheorems =
+                    new TheoremPrioritizer(theoremsForThisVC,
+                            theoremAppliedCount, vcc,
+                            m_nonQuantifiedTheoremSymbols, m_smallEndEquations);
+            int max_Theorems_to_choose = 1;
+            int num_Theorems_chosen = 0;
+            while (!rankedTheorems.m_pQueue.isEmpty()
+                    && status
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+                    && (num_Theorems_chosen < max_Theorems_to_choose || rankedTheorems.m_pQueue
+                    .peek().m_score <= 1)) {
+                // +++++++ Chooses top of uninstantiated theorem PQ
+                long time_at_selection = System.currentTimeMillis();
+                int theoremScore = rankedTheorems.m_pQueue.peek().m_score;
+                TheoremCongruenceClosureImpl cur = rankedTheorems.poll();
+                // Mark as used
+                int count = 0;
+                if (theoremAppliedCount.containsKey(cur.m_name))
+                    count = theoremAppliedCount.get(cur.m_name);
+                theoremAppliedCount.put(cur.m_name, ++count);
+                // We are using it, even if it makes no difference
+                int instThMatches = cur.applyTo(vcc, endTime);
+                PExpWithScore tMatch = cur.getNext();
+                if (tMatch != null) {
+                    String substitutionMade = "";
+                    int innerctr = 0;
+                    long t2 = System.currentTimeMillis();
+                    substitutionMade =
+                            vcc.getConjunct().addExpressionAndTrackChanges(
+                                    tMatch.m_theorem, endTime,
+                                    tMatch.m_theoremDefinitionString);
+                    if (cur.m_noQuants) {
+                        theoremsForThisVC.remove(cur);
+                    }
+                    if (!substitutionMade.equals("")) {
+                        long curTime = System.currentTimeMillis();
+                        theseResults +=
+                                "Iter:"
+                                        + iteration++
+                                        + "."
+                                        + (innerctr++)
+                                        + " Iter Time: "
+                                        + (curTime - time_at_theorem_pq_creation)
+                                        + " Search Time for this theorem: "
+                                        + (curTime - time_at_selection)
+                                        + " Elapsed Time: "
+                                        + (curTime - startTime) + "\n["
+                                        + theoremScore + "]" + cur.m_name
+                                        + "\n" + tMatch.toString() + "\t"
+                                        + substitutionMade + "\n\n";
+                        if (printVCEachStep)
+                            theseResults += vcc.toString();
+                        status = vcc.isProved();
+                        num_Theorems_chosen++;
+                        //continue chooseNewTheorem;
+                    }
+                    if (substitutionMade == "") {
+                        theseResults +=
+                                "Emptied queue for "
+                                        + cur.m_name
+                                        + " with no new results ["
+                                        + (System.currentTimeMillis() - time_at_selection)
+                                        + "ms]\n\n";
+                    }
+                }
+                else {
+                    theseResults +=
+                            "Could not find any matches for "
+                                    + cur.m_name
+                                    + "["
+                                    + (System.currentTimeMillis() - time_at_selection)
+                                    + "ms]\n\n";
+                }
+            }
+        }
+        m_results += theseResults + div;
+        return vcc.isProved();
+
+    }
+
+
+
     private String proofFileName() {
         String filePath = tr.getModuleIdentifier().getFile().getPath();
         int temp = filePath.lastIndexOf(".");
