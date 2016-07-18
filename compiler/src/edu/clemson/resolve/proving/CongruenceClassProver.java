@@ -250,7 +250,7 @@ public final class CongruenceClassProver {
     }
 
     //START
-    
+
     public void start() throws IOException {
 
         String summary = "";
@@ -267,36 +267,30 @@ public final class CongruenceClassProver {
                 ++i;
                 continue;
             }
-            VerificationConditionCongruenceClosureImpl.STATUS proved =
-                    prove(vcc);
-            if (proved
-                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+            VerificationConditionCongruenceClosureImpl.STATUS proved = prove(vcc);
+            if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
                 whyQuit += " Proved ";
             }
-            else if (proved
-                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
                 whyQuit += " Proved (Assumption(s) false) ";
             }
-            else if (proved
-                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
                 whyQuit += " Out of theorems, or timed out ";
                 numUnproved++;
             }
-            else
+            else {
                 whyQuit += " Goal false "; // this isn't currently reachable
+            }
 
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
-            long delayMS =
-                    TimeUnit.MILLISECONDS
-                            .convert(delayNS, TimeUnit.NANOSECONDS);
+            long delayMS = TimeUnit.MILLISECONDS.convert(delayNS, TimeUnit.NANOSECONDS);
             summary += vcc.m_name + whyQuit + " time: " + delayMS + " ms\n";
             i++;
 
         }
         totalTime = System.currentTimeMillis() - totalTime;
-        summary +=
-                "Elapsed time from construction: " + totalTime + " ms" + "\n";
+        summary += "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
         outputProofFile();
@@ -323,22 +317,17 @@ public final class CongruenceClassProver {
                 insert top rank
                 add inserted expression to exclusion list
                 choose new top rank
-
      */
     protected VerificationConditionCongruenceClosureImpl.STATUS prove(
             VerificationConditionCongruenceClosureImpl vcc) {
-        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
-                new ArrayList<TheoremCongruenceClosureImpl>();
+        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC = new ArrayList<>();
         theoremsForThisVC.addAll(m_theorems);
         long startTime = System.currentTimeMillis();
         long endTime = timeout + startTime;
-        Map<String, Integer> theoremAppliedCount =
-                new HashMap<String, Integer>();
-        VerificationConditionCongruenceClosureImpl.STATUS status =
-                vcc.isProved();
+        Map<String, Integer> theoremAppliedCount = new HashMap<>();
+        VerificationConditionCongruenceClosureImpl.STATUS status = vcc.isProved();
         String div = divLine(vcc.m_name);
-        String theseResults =
-                div + ("Before application of theorems: " + vcc + "\n");
+        String theseResults = div + ("Before application of theorems: " + vcc + "\n");
 
         int iteration = 0;
         // ++++++ Create new PQ for instantiated theorems
@@ -364,8 +353,7 @@ public final class CongruenceClassProver {
                 TheoremCongruenceClosureImpl cur = rankedTheorems.poll();
                 // Mark as used
                 int count = 0;
-                if (theoremAppliedCount.containsKey(cur.m_name))
-                    count = theoremAppliedCount.get(cur.m_name);
+                if (theoremAppliedCount.containsKey(cur.m_name)) count = theoremAppliedCount.get(cur.m_name);
                 theoremAppliedCount.put(cur.m_name, ++count);
                 // We are using it, even if it makes no difference
                 int instThMatches = cur.applyTo(vcc, endTime);
@@ -397,8 +385,7 @@ public final class CongruenceClassProver {
                                         + theoremScore + "]" + cur.m_name
                                         + "\n" + tMatch.toString() + "\t"
                                         + substitutionMade + "\n\n";
-                        if (printVCEachStep)
-                            theseResults += vcc.toString();
+                        if (printVCEachStep) theseResults += vcc.toString();
                         status = vcc.isProved();
                         num_Theorems_chosen++;
                         //continue chooseNewTheorem;
