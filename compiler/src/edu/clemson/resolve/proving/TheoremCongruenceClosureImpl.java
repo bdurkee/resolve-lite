@@ -3,6 +3,8 @@ package edu.clemson.resolve.proving;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.Quantification;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,7 +113,7 @@ public class TheoremCongruenceClosureImpl {
         }
         return m_all_literals;
     }
-/*
+
     public int applyTo(VerificationConditionCongruenceClosureImpl vc,
             long endTime) {
         Set<Map<String, String>> sResults;
@@ -192,37 +194,33 @@ public class TheoremCongruenceClosureImpl {
         Map<String, String> curBinding = m_bindings.remove(0);
         m_selectedBindings.add(curBinding);
         for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
-            String thKey = p.getTopLevelOperation();
+            String thKey = p.getTopLevelOperationName();
             String thVal = "";
             if (curBinding.containsKey(thKey)) {
                 thVal = curBinding.get(thKey);
             }
-            else if (curBinding.containsKey(m_theoremRegistry
-                    .getRootSymbolForSymbol(thKey))) {
-                thVal =
-                        curBinding.get(m_theoremRegistry
-                                .getRootSymbolForSymbol(thKey));
+            else if (curBinding.containsKey(m_theoremRegistry.getRootSymbolForSymbol(thKey))) {
+                thVal = curBinding.get(m_theoremRegistry.getRootSymbolForSymbol(thKey));
             }
-            if (thVal.equals(""))
-                return getNext();
-            MTType quanType =
-                    m_theoremRegistry.getTypeByIndex(m_theoremRegistry
-                            .getIndexForSymbol(thKey));
-            quantToLit.put(new PSymbol(quanType, null, thKey,
-                    PSymbol.Quantification.FOR_ALL), new PSymbol(quanType,
-                    null, thVal, PSymbol.Quantification.NONE));
+            if (thVal.equals("")) return getNext();
+
+            MathClssftn quanType = m_theoremRegistry.getTypeByIndex(m_theoremRegistry.getIndexForSymbol(thKey));
+            PSymbol x = new PSymbol.PSymbolBuilder(thKey).mathClssfctn(quanType)
+                    .quantification(Quantification.UNIVERSAL).build();
+            PSymbol y = new PSymbol.PSymbolBuilder(thVal).mathClssfctn(quanType)
+                    .quantification(Quantification.NONE).build();
+            quantToLit.put(x, y);
         }
 
         PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
         modifiedInsert = m_lastVC.getConjunct().find(modifiedInsert);
         // Discard s = s
-        if ((modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
+        if ((modifiedInsert.getTopLevelOperationName().equals("=") && modifiedInsert
                 .getSubExpressions().get(0).toString().equals(
                         modifiedInsert.getSubExpressions().get(1).toString()))) {
             return getNext();
         }
-        return new PExpWithScore(modifiedInsert, curBinding, m_theorem
-                .toString());
+        return new PExpWithScore(modifiedInsert, curBinding, m_theorem.toString());
     }
 
     // variables to bind are the quantified vars the quantified statement
@@ -234,8 +232,7 @@ public class TheoremCongruenceClosureImpl {
 
             String curSym = m_theoremRegistry.getSymbolForIndex(i);
             Registry.Usage us = m_theoremRegistry.getUsage(curSym);
-            if (us == Registry.Usage.CREATED || us == Registry.Usage.FORALL
-                    || us == Registry.Usage.HASARGS_FORALL) {
+            if (us == Registry.Usage.CREATED || us == Registry.Usage.FORALL || us == Registry.Usage.HASARGS_FORALL) {
                 initBindings.put(curSym, "");
 
             }
@@ -247,18 +244,17 @@ public class TheoremCongruenceClosureImpl {
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
         // Case where no match conj. is produced.
         // Example: S = Empty_String. Relevant info is only in registry.
-        Set<Map<String, String>> allValidBindings =
-                new HashSet<Map<String, String>>();
+        Set<Map<String, String>> allValidBindings = new HashSet<>();
         // x = constant?
         if (partMatchedisConstantEquation) {
-            HashMap<String, String> wildToActual =
-                    new HashMap<String, String>();
+            HashMap<String, String> wildToActual = new HashMap<>();
             for (String wild : m_theoremRegistry.getForAlls()) {
 
                 String actual = m_theoremRegistry.getRootSymbolForSymbol(wild);
                 // wildcard is not parent
-                if (!actual.equals(wild))
+                if (!actual.equals(wild)) {
                     wildToActual.put(wild, actual);
+                }
                 // wildcard is parent, bind to child
                 else {
                     Set<String> ch = m_theoremRegistry.getChildren(wild);
@@ -283,35 +279,28 @@ public class TheoremCongruenceClosureImpl {
         }
         // only valid for preds other than equality
         Set<String> foralls = m_theoremRegistry.getForAlls();
-        if (foralls.size() != 1)
-            return null;
+        if (foralls.size() != 1) return null;
         String wild = foralls.iterator().next();
-        MathClassification t =
-                m_theoremRegistry.getTypeByIndex(m_theoremRegistry
-                        .getIndexForSymbol(wild));
+        MathClssftn t = m_theoremRegistry.getTypeByIndex(m_theoremRegistry.getIndexForSymbol(wild));
 
         for (String actual : vc.getRegistry().getParentsByType(t)) {
-            HashMap<String, String> wildToActual =
-                    new HashMap<String, String>();
+            HashMap<String, String> wildToActual = new HashMap<String, String>();
             wildToActual.put(wild, actual);
-            if (!wild.equals(actual)) // can be = with constants in theorems
+            if (!wild.equals(actual)) { // can be = with constants in theorems
                 allValidBindings.add(wildToActual);
+            }
         }
         return allValidBindings;
 
     }
 
-    private Set<Map<String, String>> findValidBindings(
-            VerificationConditionCongruenceClosureImpl vc, long endTime) {
-
-        Set<Map<String, String>> results =
-                new HashSet<Map<String, String>>();
+    private Set<Map<String, String>> findValidBindings(VerificationConditionCongruenceClosureImpl vc, long endTime) {
+        Set<Map<String, String>> results = new HashSet<>();
         Map<String, String> initBindings = getInitBindings();
         if (m_theoremRegistry.m_symbolToIndex.containsKey("_g")) {
             // each goal gets a new map with _g bound to the goal
             for (String g : vc.m_goal) {
-                Map<String, String> gBinds =
-                        new HashMap<String, String>(initBindings);
+                Map<String, String> gBinds = new HashMap<String, String>(initBindings);
                 gBinds.put("_g", g);
                 results.add(gBinds);
             }
@@ -325,13 +314,11 @@ public class TheoremCongruenceClosureImpl {
         Set<Map<String, String>> t_results;
         for (NormalizedAtomicExpression e_t : m_noMatchRequired) {
             t_results = vc.getConjunct().getMatchesForOverrideSet(e_t, results);
-            if (t_results.isEmpty())
-                continue;
-            else
-                results.addAll(t_results);
+            if (t_results.isEmpty()) continue;
+            else results.addAll(t_results);
         }
         return results;
-    }*/
+    }
 
     @Override
     public String toString() {

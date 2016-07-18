@@ -64,4 +64,18 @@ public class Utilities {
         return p;
     }
 
+    /** Builds and returns a typed {@link PSymbol} for the name/function "=B" */
+    protected static PSymbol buildEqBName(@NotNull DumbMathClssftnHandler g) {
+        return new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
+    }
+
+    /** Builds and returns a typed {@link PSymbol} for the name/function "orB" */
+    protected static PSymbol buildOrBName(@NotNull DumbMathClssftnHandler g) {
+        return new PSymbol.PSymbolBuilder("orB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+    }
+
+    /** Builds and returns a typed {@link PSymbol} for the name/function "andB" */
+    protected static PSymbol buildAndBName(@NotNull DumbMathClssftnHandler g) {
+        return new PSymbol.PSymbolBuilder("andB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+    }
 }

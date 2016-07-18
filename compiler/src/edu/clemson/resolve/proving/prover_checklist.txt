@@ -1,8 +1,8 @@
 prover checklist:
 
 1. CongruenceClassProver 						[unfinished]
-2. ConjunctionofNormalizedAtomicExp 			[unfinished]
-3. TheoremCongruenceClosureImpl					[unfinished]
+2. ConjunctionofNormalizedAtomicExp 			[done]
+3. TheoremCongruenceClosureImpl					[done]
 4. Utilities									[paused]
 
 5. NormalizedAtomicExpression 					[done]

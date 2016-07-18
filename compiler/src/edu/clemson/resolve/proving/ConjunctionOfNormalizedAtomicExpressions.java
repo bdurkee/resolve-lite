@@ -252,10 +252,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // Return root if atomic formula is present
         if (m_expSet.containsKey(atomicFormula)) return m_expSet.get(atomicFormula).readRoot();
         // no such formula exists
-        MTType typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        MathClssftn typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         // this is the full type and is necessarily a function type
 
-        MTType rangeType = ((MTFunction) typeOfFormula).getRange();
+        MathClssftn rangeType = ((MathFunctionClssftn) typeOfFormula).getRangeClssftn();
         String symName =
                 m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
         assert rangeType != null : symName + " has null type";
