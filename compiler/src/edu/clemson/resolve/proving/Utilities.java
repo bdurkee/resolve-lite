@@ -9,13 +9,17 @@ import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Utilities {
 
     public static PExp replacePExp(PExp p, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
         ArrayList<PExp> argList = new ArrayList<>();
         ArrayList<PExp> argsTemp = new ArrayList<>();
-        for (PExp pa : p.getSubExpressions()) {
+        List<? extends PExp> subexps = p.getSubExpressions();
+        if (p instanceof PApply) subexps = ((PApply) p).getArguments();
+
+        for (PExp pa : subexps) {
             argList.add(replacePExp(pa, g, z, n));
         }
         String pTop = p.getTopLevelOperationName();

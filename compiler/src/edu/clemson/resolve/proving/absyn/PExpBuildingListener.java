@@ -45,7 +45,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull DumbMathClssftnHandler g, @NotNull AnnotatedModule annotations) {
-        this(g, annotations, false);
+        this(g, annotations, true);
     }
 
     /**

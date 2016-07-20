@@ -900,9 +900,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClssftn x = tr.mathClssftns.get(ctx.mathAssertionExp());
         expectType(ctx.mathAssertionExp(), g.BOOLEAN);
         try {
-            //PExp assertion = getMathExpASTFor(ctx.mathAssertionExp());
+            PExp assertion = getPExpFor(ctx.mathAssertionExp());
             symtab.getInnermostActiveScope().define(
-                    new TheoremSymbol(g, ctx.name.getText(), g.getTrueExp(), ctx, getRootModuleIdentifier()));
+                    new TheoremSymbol(g, ctx.name.getText(), assertion, ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         }
