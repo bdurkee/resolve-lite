@@ -191,9 +191,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     protected int addFormula(PExp formula) {
         if (formula.getTopLevelOperationName().equals("=B") && formula instanceof PApply) {
-            int lhs = addFormula(((PApply) formula).getArguments().get(1));
-            PExp r = formula.getSubExpressions().get(2);
-            int rhs = addFormula(r);
+
+            //remember, we're a PApply here so getSubexpressions().get(0) would be the function name.
+            int lhs = addFormula(formula.getSubExpressions().get(1));
+            int rhs = addFormula(formula.getSubExpressions().get(2));
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
             // This prevents matching of (i=i)=true, which is not built in
@@ -219,15 +220,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return intRepOfOp;
         }
 
-        int[] ne = new int[formula.getSubExpressions().size() + 1];
-        ne[0] = intRepOfOp;
-        int pos = 1;
-
         Iterator<? extends PExp> it = formula.getSubExpressions().iterator();
+        int subexpsize = formula.getSubExpressions().size();
         if (formula instanceof PApply) {    //I presume that you only want an iterator over args, getSubExpressions
             //for a PApply will include the name portion of the function (which of course is independent from the args)
             it = ((PApply) formula).getArguments().iterator();
+            subexpsize = ((PApply) formula).getArguments().size();
         }
+
+        int[] ne = new int[subexpsize + 1];
+        ne[0] = intRepOfOp;
+        int pos = 1;
+
+
         while (it.hasNext()) {
             PExp p = it.next();
             int root = addFormula(p);

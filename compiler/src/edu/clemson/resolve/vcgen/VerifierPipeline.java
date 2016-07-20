@@ -9,6 +9,7 @@ import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class VerifierPipeline extends AbstractCompilationPipeline {
@@ -35,8 +36,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 unit.setVCs(vcs);
                 ST x = gen.generateAssertions();
                 System.out.println(x.render());
-                List<VC> proverInput = vcs.getFinalVCs();
-
+                List<VC> proverInput = new ArrayList<>(); //vcs.getFinalVCs();
+                proverInput.add(vcs.getFinalVCs().get(1));
                 VCClassftnPrintingListener p = new VCClassftnPrintingListener(compiler);
                 for (VC vc : proverInput) {
                     vc.getAntecedent().accept(p);

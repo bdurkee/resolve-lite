@@ -5,6 +5,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +65,22 @@ public class Utilities {
             argsTemp.add(argList.get(1));
             return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);*/
         }
-        //TODO: Finish these transformations
+        // New: 5/8/16. Tag operators with range type if they aren't quantified.
+        else if (argList.size() > 0 && p instanceof PApply) {
+            if (p.getQuantification().equals(Quantification.NONE)) pTop += p.getMathClssftn().toString();
+            PExp appWithNameChanged = p;
+
+            //TODO: its tough to change the "name" of an operator now -- because they are are expressions as well..
+            //hence the ugliness of the if below.
+            //maybe change the recursive structure of this method to accomodate this better?
+            if (((PApply) p).getFunctionPortion() instanceof PSymbol) {
+                PSymbol name = new PSymbol.PSymbolBuilder((PSymbol)((PApply) p)
+                        .getFunctionPortion()).name(pTop).build();
+                appWithNameChanged = new PApply.PApplyBuilder(name).applicationType(p.getMathClssftn())
+                        .arguments(argList).build();
+            }
+            return appWithNameChanged;
+        }
         return p;
     }
 
