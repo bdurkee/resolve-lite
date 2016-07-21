@@ -1,6 +1,5 @@
 package edu.clemson.resolve.vcgen;
 
-import com.sun.tools.javac.resources.compiler;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;

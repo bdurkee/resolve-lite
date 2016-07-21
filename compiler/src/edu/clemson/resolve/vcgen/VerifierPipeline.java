@@ -9,6 +9,7 @@ import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,12 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 if (compiler.prove) {
                     CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
                             compiler.symbolTable.getTypeGraph(), proverInput);
+                    try {
+                        prover.start();
+                    }
+                    catch (IOException ioe) {
+                        throw new RuntimeException(ioe);
+                    }
                 }
 
                 int i;
