@@ -48,6 +48,8 @@ public class TheoremPrioritizer {
             //int score = calculateScore(t.getFunctionNames());
             int score;
             //if (!shouldExclude(t.getFunctionNames())) {
+            Set<String> quantSyms =t.getNonQuantifiedSymbols();
+
             if (!shouldExclude(t.getNonQuantifiedSymbols())) {
                 score =
                         calculateScoreMinimum(t.getNonQuantifiedSymbols(),

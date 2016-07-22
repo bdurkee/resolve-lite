@@ -46,6 +46,7 @@ public abstract class PExp {
 
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
+    private Set<PSymbol> cachedFreeVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
     public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type) {
@@ -383,11 +384,11 @@ public abstract class PExp {
 
     @NotNull
     public final Set<PSymbol> getFreeVariables() {
-        if (cachedQuantifiedVariables == null) {
+        if (cachedFreeVariables == null) {
             //We're immutable, so only do this once
-            cachedQuantifiedVariables = Collections.unmodifiableSet(getQuantifiedVariablesNoCache());
+            cachedFreeVariables = Collections.unmodifiableSet(getFreeVariablesNoCache());
         }
-        return cachedQuantifiedVariables;
+        return cachedFreeVariables;
     }
 
     @NotNull
