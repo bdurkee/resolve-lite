@@ -101,11 +101,12 @@ public final class CongruenceClassProver {
                     //O.k. it seems we can safely assume the assertion (at the top level at least) will be an instance
                     //of a function application (PApply)
                     addGoalSearchingTheorem((PApply)assertion, eName);
+                    //first arg (.get(1)) of function implies, second arg (.get(2))
                     t =
                             new TheoremCongruenceClosureImpl(g, assertion,
-                                    assertion.getSubExpressions().get(0),
                                     assertion.getSubExpressions().get(1),
-                                    assertion.getSubExpressions().get(1), true,
+                                    assertion.getSubExpressions().get(2),
+                                    assertion.getSubExpressions().get(2), true,
                                     false, eName);
                 }
                 else {
