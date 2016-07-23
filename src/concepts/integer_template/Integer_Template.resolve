@@ -3,6 +3,7 @@ Concept Integer_Template;
 
     Definition min_int : Z;
     Definition max_int : Z;
+    constraints 0 ≤ min_int and (1 ≤ max_int);
 
     Type family Integer
                 is modeled by Z;

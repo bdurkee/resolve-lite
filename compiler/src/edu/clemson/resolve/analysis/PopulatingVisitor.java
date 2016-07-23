@@ -77,6 +77,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /** Holds a ref to a type model symbol while walking it (or its repr). */
     private TypeModelSymbol curTypeReprModelSymbol = null;
 
+    /** Keeps a count of the number of global constraints in the module currently being populated. */
+    private int globalSpecCount = 0;
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
                              @NotNull AnnotatedModule annotatedTree) {
@@ -493,8 +496,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new TypeModelSymbol(symtab.getTypeGraph(),
                             ctx.name.getText(), modelType,
                             new ProgFamilyType(modelType, ctx.name.getText(),
-                                    ctx.exemplar.getText(), g.getTrueExp(),
-                                    g.getTrueExp(), getRootModuleIdentifier()),
+                                    ctx.exemplar.getText(), constraint,
+                                    initEnsures, getRootModuleIdentifier()),
                             exemplarSymbol, ctx, getRootModuleIdentifier());
             symtab.getInnermostActiveScope().define(progType);
         } catch (DuplicateSymbolException e) {
@@ -1120,6 +1123,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
+        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
+        }
+        return null;
+    }
+
+    private void insertGlobalAssertion(ParserRuleContext ctx,
+                                       GlobalMathAssertionSymbol.ClauseType type,
+                                       ResolveParser.MathAssertionExpContext assertion) {
+        String name = ctx.getText() + "_" + globalSpecCount++;
+        PExp assertionAsPExp = getPExpFor(assertion);
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
+                            ctx, getRootModuleIdentifier()));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
+        }
+    }
+
+    @Override
     public Void visitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
         this.visit(ctx.mathAssertionExp());
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
@@ -1689,8 +1719,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /**
      * Given some context {@code ctx} and a
-     * {@code child} context; this method visits {@code child} and chains/passes
-     * its found {@link MathClssftn} upto {@code ctx}.
+     * {@code child} context; this method visits {@code child} and chains/passes its found {@link MathClssftn}
+     * upto {@code ctx}.
      *
      * @param ctx   a parent {@code ParseTree}
      * @param child one of {@code ctx}s children
