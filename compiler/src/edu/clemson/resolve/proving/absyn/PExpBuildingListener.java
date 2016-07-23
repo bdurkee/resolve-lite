@@ -154,12 +154,27 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitMathInfixAppExp(ResolveParser.MathInfixAppExpContext ctx) {
-        PApplyBuilder result =
-                new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
-                        .applicationType(getMathClssfctn(ctx))
-                        .style(INFIX)
-                        .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
-        repo.put(ctx, result.build());
+        PExp left = repo.get(ctx.mathExp(0));
+        PExp right = repo.get(ctx.mathExp(1));
+
+        //hardcode hook to handle chained relationals (generalize this at the syntax level with some
+        //special syntax)
+        if ((left.getTopLevelOperationName().equals("≤") || left.getTopLevelOperationName().equals("<")) &&
+                (ctx.getChild(1).getText().equals("≤") || ctx.getChild(1).getText().equals("<"))) {
+            PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
+                    .applicationType(getMathClssfctn(ctx))
+                    .style(INFIX)
+                    .arguments(left.getSubExpressions().get(2), right).build();
+            PApply result = g.formConjunct(left, newRight);
+            repo.put(ctx, result);
+        }
+        else {
+            PApplyBuilder result = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
+                    .applicationType(getMathClssfctn(ctx))
+                    .style(INFIX)
+                    .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
+            repo.put(ctx, result.build());
+        }
     }
 
     @Override
