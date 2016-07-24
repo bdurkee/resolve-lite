@@ -202,7 +202,7 @@ public final class CongruenceClassProver {
 
         //create p(x) or _g
         PApply pOrG = new PApply.PApplyBuilder(Utilities.buildOrBName(m_typeGraph))
-                .arguments(theorem.getSubExpressions().get(0), goal)
+                .arguments(theorem.getSubExpressions().get(1), goal)
                 .applicationType(m_typeGraph.BOOLEAN)
                 .build();
 
