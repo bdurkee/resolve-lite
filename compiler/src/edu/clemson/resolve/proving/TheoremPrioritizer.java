@@ -48,8 +48,8 @@ public class TheoremPrioritizer {
             //int score = calculateScore(t.getFunctionNames());
             int score;
             //if (!shouldExclude(t.getFunctionNames())) {
-            Set<String> quantSyms =t.getNonQuantifiedSymbols();
-
+            Set<String> unQuantSyms = t.getNonQuantifiedSymbols();
+            //VC #1 in my system corresponds to VC 0_3 in the old system (for my minimal int do_nothing example anyways..)
             if (!shouldExclude(t.getNonQuantifiedSymbols())) {
                 score =
                         calculateScoreMinimum(t.getNonQuantifiedSymbols(),

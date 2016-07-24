@@ -347,6 +347,8 @@ public final class CongruenceClassProver {
                 && System.currentTimeMillis() <= endTime) {
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             // ++++++ Creates new PQ with all the theorems
+
+            //NOTE: DAN, DONE ON A PER VC BASIS. A thm prioritizer per vc.
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
                             theoremAppliedCount, vcc,
