@@ -58,9 +58,9 @@ Precis Basic_Integer_Theory;
     Theorem I3: ∀ n : Z, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
 
     //thms needed for Int_Do_Nothing...
-	//Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i - j = k) = (k + j = i);
-	//Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
-	//Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z))
+	Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i - j = k) = (k + j = i);
+	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
+	Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
 	//Theorem Negs_LT_Zero: ∀ i : Z, i ≤ 0 implies (⨩(i) ≤ 0);
     //Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
 

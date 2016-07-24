@@ -92,10 +92,14 @@ public class TheoremCongruenceClosureImpl {
 
             m_all_literals.remove("=B");
             m_all_literals.remove("andB");
+            m_all_literals.remove("∧B");
+
             m_all_literals.remove("impliesB");
             m_all_literals.remove("true");
             m_all_literals.remove("false");
             m_all_literals.remove("/=B");
+            m_all_literals.remove("≠B");
+
             m_all_literals.remove("Empty_String");
             m_all_literals.remove("0");
             m_all_literals.remove("1");
@@ -108,6 +112,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("8");
             m_all_literals.remove("9");
             m_all_literals.remove("orB");
+            m_all_literals.remove("∨B");
             m_all_literals.remove("+Z");
             m_all_literals.remove("+N");
         }

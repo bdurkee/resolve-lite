@@ -5,6 +5,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
@@ -64,6 +65,33 @@ public class Utilities {
             argsTemp.add(plus1);
             argsTemp.add(argList.get(1));
             return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);*/
+        }
+        // x - y to x + (-y)
+        else if (z != null && pTop.equals("-") &&
+                p instanceof PApply && ((PApply) p).getArguments().size() == 2) {
+            //⨩
+            PSymbol uMinus = new PSymbol.PSymbolBuilder("⨩" + z)
+                    .mathClssfctn(new MathFunctionClssftn(g, z, z))
+                    .build();
+
+            //⨩(y)
+            PApply negY = new PApply.PApplyBuilder(uMinus)
+                    .arguments(((PApply) p).getArguments().get(1))
+                    .applicationType(p.getMathClssftn())
+                    .build();
+
+            //+
+            MathClssftn argType = ((PApply) p).getArguments().get(0).getMathClssftn();
+            PSymbol plus = new PSymbol.PSymbolBuilder("+" + argType)
+                    .mathClssfctn(new MathFunctionClssftn(g, argType, argType, argType))
+                    .build();
+
+            //x + ⨩(y)
+            PApply xPlusNegY = new PApply.PApplyBuilder(plus)
+                    .arguments(((PApply) p).getArguments().get(0), negY)
+                    .applicationType(p.getMathClssftn())
+                    .build();
+            return xPlusNegY;
         }
         // New: 5/8/16. Tag operators with range type if they aren't quantified.
         else if (argList.size() > 0 && p instanceof PApply) {

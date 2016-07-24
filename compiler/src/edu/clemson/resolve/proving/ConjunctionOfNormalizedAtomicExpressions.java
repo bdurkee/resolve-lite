@@ -129,7 +129,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int rhs = addFormula(expression.getSubExpressions().get(2));
             return mergeOperators(lhs, rhs);
         }
-        else if (name.equals("andB") && expression instanceof PApply) {
+        else if ((name.equals("andB") || name.equals("∧B")) && expression instanceof PApply) {
             String r = "";
             r += addExpression(expression.getSubExpressions().get(1));
             r += addExpression(expression.getSubExpressions().get(2));
