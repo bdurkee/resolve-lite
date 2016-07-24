@@ -99,7 +99,7 @@ public final class CongruenceClassProver {
                 if (assertion.getTopLevelOperationName().equals("impliesB")) {
 
                     //O.k. it seems we can safely assume the assertion (at the top level at least) will be an instance
-                    //of a function application (PApply)
+                    //of a function application (PApply) TODO: bp this(103) when m_theorems is size 7
                     addGoalSearchingTheorem((PApply)assertion, eName);
                     //first arg (.get(1)) of function implies, second arg (.get(2))
                     t =
