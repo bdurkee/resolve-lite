@@ -9,7 +9,7 @@ Concept Integer_Template;
                 is modeled by Z;
         exemplar I;
         constraints
-            min_int ≤ I ≤ max_int;
+            min_int ≤ I and (I ≤ max_int);
         initialization
             ensures I = 0;
 

@@ -220,9 +220,10 @@ public class TheoremCongruenceClosureImpl {
         PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
         modifiedInsert = m_lastVC.getConjunct().find(modifiedInsert);
         // Discard s = s
-        if ((modifiedInsert.getTopLevelOperationName().equals("=") && modifiedInsert
-                .getSubExpressions().get(0).toString().equals(
-                        modifiedInsert.getSubExpressions().get(1).toString()))) {
+        // if name is =B and left arg (index 1) == right arg (index 2)
+        if ((modifiedInsert.getTopLevelOperationName().equals("=B") && modifiedInsert
+                .getSubExpressions().get(1).toString().equals(
+                        modifiedInsert.getSubExpressions().get(2).toString()))) {
             return getNext();
         }
         return new PExpWithScore(modifiedInsert, curBinding, m_theorem.toString());

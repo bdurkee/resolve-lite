@@ -71,7 +71,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     "is something that I don't know how to handle");
         }
         //MIKE: NOTE -- Just using a normal iterator over the PExp's subexpressions now.
-        Iterator<? extends PExp> it = exp.getSubExpressions().iterator();
+        Iterator<? extends PExp> it = ((PApply) exp).getArguments().iterator();
 
         ArrayList<PExp> args = new ArrayList<PExp>();
         boolean irreducable = false;
