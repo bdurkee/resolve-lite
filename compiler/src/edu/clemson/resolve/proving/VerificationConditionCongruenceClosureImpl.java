@@ -46,14 +46,14 @@ public class VerificationConditionCongruenceClosureImpl {
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
         addPExp(m_consequent.splitIntoConjuncts().iterator(), false);
-        List<PExp> x = new ArrayList<>();
+/*        List<PExp> x = new ArrayList<>();
         List<PExp> antecedentParts = m_antecedent.splitIntoConjuncts();
 
         x.add(antecedentParts.get(5));
         x.add(antecedentParts.get(4));
         x.add(antecedentParts.get(3));
-
-        addPExp(x.iterator(), true);
+*/
+        addPExp(m_antecedent.splitIntoConjuncts().iterator(), true);
 
         // seed with (true = false) = false
         PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
