@@ -304,6 +304,7 @@ public final class CongruenceClassProver {
         summary += "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
+        System.out.println(m_results + summary);
         outputProofFile();
     }
 

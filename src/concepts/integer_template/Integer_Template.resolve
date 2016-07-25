@@ -22,8 +22,8 @@ Concept Integer_Template;
     Operation Decrement
             (updates i: Integer);
         requires
-           min_int ≤ (i - 1);
-        ensures	i = (@i - 1);
+           min_int ≤ (i + -(1));
+        ensures	i = (@i + -(1));
 
     Operation Are_Equal
             (evaluates i, j : Integer)
@@ -39,8 +39,8 @@ Concept Integer_Template;
             (evaluates i : Integer)
                 : Integer;
         requires
-            min_int ≤ ⨩(i) ≤ max_int;
-        ensures Negate = ⨩(i);
+            min_int ≤ -(i) ≤ max_int;
+        ensures Negate = -(i);
 
     Operation Less_Or_Equal
             (evaluates i, j : Integer)
@@ -77,8 +77,8 @@ Concept Integer_Template;
             (evaluates i, j : Integer)
                 : Integer;
         requires
-            min_int ≤ (i - j) ≤ max_int;
-        ensures Difference = (i - j);
+            min_int ≤ (i ⨩ j) ≤ max_int;
+        ensures Difference = (i ⨩ j);
 
     Operation Product
             (evaluates i, j : Integer)

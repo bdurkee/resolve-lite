@@ -8,23 +8,23 @@ Precis Basic_Integer_Theory;
         (i.) Is_Neg(n);
         (ii.) Is_Neg(NB(n)) = ⌐(Is_Neg(n));
 
-    Inductive Definition ⨩(n : Z) : Z is
-        (i.) ⨩(0) = 0;
-        (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
+    Inductive Definition -(n : Z) : Z is
+        (i.) -(0) = 0;
+        (ii.) -(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
 	Classification Corollary :
 		N : Z;
 
     Inductive Definition suc(n : Z) : Z is
         (i.) suc(0) = NB(NB(0));
-        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨩(n) otherwise;}};
+        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); -(n) otherwise;}};
 
     Inductive Definition (m : Z) + (n : Z) : Z is
         (i.) m + 0 = m;
-        (ii.) m + NB(n) = {{⨩(m) + n if Is_Neg(n);
-                suc(⨩(m) + n) otherwise;}};
+        (ii.) m + NB(n) = {{-(m) + n if Is_Neg(n);
+                suc(-(m) + n) otherwise;}};
 
-    Definition (m : Z) - (n : Z) : Z;
+    Definition (m : Z) ⨩ (n : Z) : Z;
 
     Definition NN : Powerset(Z) is {n : Z s.t. ⌐(Is_Neg(n))};
         //won't typecheck at the moment
@@ -35,7 +35,7 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) < (n : Z) : B;
 
-    Definition (m : Z) ≤ (n : Z) : B is n + ⨩(m) ∈ NN;
+    Definition (m : Z) ≤ (n : Z) : B is n + -(m) ∈ NN;
         //Corollary leq1: Is_Transitive(≤);
         //Corollary leq2: Is_Antisymmetric(≤);
         //Corollary leq3: Is_Total(≤);
@@ -51,16 +51,16 @@ Precis Basic_Integer_Theory;
 
     Inductive Definition (m : Z) * (n : Z) : Z is
         (i.) m * 0 = 0;
-        (ii.) m * NB(n) = {{⨩(m * n) if Is_Neg(n); ⨩(m * n + m) otherwise; }};
+        (ii.) m * NB(n) = {{-(m * n) if Is_Neg(n); -(m * n + m) otherwise; }};
 
     Theorem one_N: 1 = 1;
 
     Theorem I3: ∀ n : Z, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
 
     //thms needed for Int_Do_Nothing...
-	Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i - j = k) = (i = (k + j));
-	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
-	Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
+	Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i + -(j) = k) = (i = (k + j));
+	//Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
+	//Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
 	//Theorem Negs_LT_Zero: ∀ i : Z, i ≤ 0 implies (⨩(i) ≤ 0);
     //Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
 
