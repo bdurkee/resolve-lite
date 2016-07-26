@@ -45,8 +45,15 @@ public class VerificationConditionCongruenceClosureImpl {
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
+
         addPExp(m_consequent.splitIntoConjuncts().iterator(), false);
-        addPExp(m_antecedent.splitIntoConjuncts().iterator(), true);
+
+        List<PExp> ants = new ArrayList<>(m_antecedent.splitIntoConjuncts());
+        //just a test
+        /*if (this.m_name.equals("3")) {
+            ants.remove(4);
+        }*/
+        addPExp(ants.iterator(), true);
 
         // seed with (true = false) = false
         PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();

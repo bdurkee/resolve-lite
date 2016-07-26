@@ -125,7 +125,7 @@ public final class CongruenceClassProver {
             }
         }
         if (n != null && z != null) {
-            sumConversion(n, z);
+            //sumConversion(n, z);
         }
         m_results = "";
     }

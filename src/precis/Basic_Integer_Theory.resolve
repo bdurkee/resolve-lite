@@ -65,6 +65,7 @@ Precis Basic_Integer_Theory;
 
 	Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
 
+	Theorem Nested_Subt_1: ∀ i, j : Z, (i + j - j) = i;
 	//Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
 	//Theorem Negs_LT_Zero: ∀ i : Z, i ≤ 0 implies (⨩(i) ≤ 0);
 

@@ -67,7 +67,7 @@ public class Utilities {
             return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);*/
         }
         // x - y to x + (-y)
-        else if (z != null && pTop.equals("-") &&
+       /* else if (z != null && pTop.equals("-") &&
                 p instanceof PApply && ((PApply) p).getArguments().size() == 2) {
             //⨩
             PSymbol uMinus = new PSymbol.PSymbolBuilder("⨩" + z)
@@ -92,7 +92,7 @@ public class Utilities {
                     .applicationType(p.getMathClssftn())
                     .build();
             return xPlusNegY;
-        }
+        }*/
         // New: 5/8/16. Tag operators with range type if they aren't quantified.
         else if (argList.size() > 0 && p instanceof PApply) {
             if (p.getQuantification().equals(Quantification.NONE)) pTop += p.getMathClssftn().toString();
