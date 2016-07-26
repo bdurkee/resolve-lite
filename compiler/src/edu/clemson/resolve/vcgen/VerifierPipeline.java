@@ -43,11 +43,11 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                     vc.getAntecedent().accept(p);
                     vc.getConsequent().accept(p);
                 }*/
-                List<VC> pvcs = new ArrayList<>();
-                pvcs.add(vco.getFinalVCs().get(0));
+                //List<VC> pvcs = new ArrayList<>();
+                //pvcs.add(vco.getFinalVCs().get(0));
                 if (compiler.prove) {
                     CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
-                            compiler.symbolTable.getTypeGraph(), pvcs);
+                            compiler.symbolTable.getTypeGraph(), vco.getFinalVCs());
                     try {
                         prover.start();
                     }
