@@ -268,8 +268,8 @@ public abstract class PExp {
     public abstract String getTopLevelOperationName();
 
     /**
-     * Returns {@code true} iff this expression represents a primitive such as
-     * {@code 1..n} or some boolean value; {@code false} otherwise.
+     * Returns {@code true} iff this expression represents a primitive such as {@code 1..n} or some boolean value;
+     * {@code false} otherwise.
      *
      * @return whether or not this
      */
@@ -289,8 +289,8 @@ public abstract class PExp {
     }
 
     /**
-     * Converts {@code this} expression, containing an arbitrary number of
-     * conjuncts with possibly nested implications, into a list of sequents.
+     * Converts {@code this} expression, containing an arbitrary number of conjuncts with possibly nested implications,
+     * into a list of sequents.
      *
      * @return a list of sequents derived from {@code this}
      */
