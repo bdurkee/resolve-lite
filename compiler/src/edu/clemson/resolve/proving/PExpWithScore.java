@@ -13,7 +13,8 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
     protected Set<String> m_theorem_symbols;
     protected Map<String, String> m_bMap;
 
-    public PExpWithScore(PExp theorem, Map<String, String> bMap, String justification) {
+    public PExpWithScore(PExp theorem, Map<String, String> bMap,
+                         String justification) {
         m_theorem = theorem;
         m_theoremDefinitionString = justification;
         m_theorem_symbols = m_theorem.getSymbolNames();

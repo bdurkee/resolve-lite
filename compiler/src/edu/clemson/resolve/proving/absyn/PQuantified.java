@@ -128,9 +128,15 @@ public class PQuantified extends PExp {
         return assertion.getSymbolNames(excludeApplications, excludeLiterals);
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        return assertion.getQuantifiedVariables();
+    }
+
     @Override
     public String toString() {
-        List<String> symNames = declaredSymbols.stream().map(d -> d.name).collect(Collectors.toList());
+        List<String> symNames = Utils.apply(declaredSymbols, PLambda.MathSymbolDeclaration::getName);
         String qType = quantificationType == Quantification.UNIVERSAL ? "∀" : "∃";
         return qType + " " + Utils.join(symNames, ", ") + ":" +
                 declaredSymbols.get(0).type + " " + assertion.toString();

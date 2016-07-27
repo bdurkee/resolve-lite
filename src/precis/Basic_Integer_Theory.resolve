@@ -15,11 +15,6 @@ Precis Basic_Integer_Theory;
 	Classification Corollary :
 		N : Z;
 
-    Theorem I1 :
-        ∀ n : Z, Is_Neg(n) implies (NB(n) = ⨩(n));
-
-    Theorem I2 : ∀ n : Z, ⨩(⨩(n)) = n;
-
     Inductive Definition suc(n : Z) : Z is
         (i.) suc(0) = NB(NB(0));
         (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨩(n) otherwise;}};
@@ -40,15 +35,15 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) < (n : Z) : B;
 
-    Definition (m : Z) ≤ (n : Z) : B is (n + ⨩(m) ∈ NN);
-        Corollary leq1: Is_Transitive(≤);
-        Corollary leq2: Is_Antisymmetric(≤);
-        Corollary leq3: Is_Total(≤);
+    Definition (m : Z) ≤ (n : Z) : B is n + ⨩(m) ∈ NN;
+        //Corollary leq1: Is_Transitive(≤);
+        //Corollary leq2: Is_Antisymmetric(≤);
+        //Corollary leq3: Is_Total(≤);
 
     Definition (m : Z) ≥ (n : Z) : B;
 
     Definition 1 : Z is suc(0);
-        Corollary one1: ∀ m : Z, suc(m) = (m + 1);
+        //Corollary one1: ∀ m : Z, suc(m) = (m + 1);
 
     Definition 2 : Z is suc(1);
     Definition 3 : Z is suc(2);
@@ -57,4 +52,20 @@ Precis Basic_Integer_Theory;
     Inductive Definition (m : Z) * (n : Z) : Z is
         (i.) m * 0 = 0;
         (ii.) m * NB(n) = {{⨩(m * n) if Is_Neg(n); ⨩(m * n + m) otherwise; }};
+
+    Theorem one_N: 1 = 1;
+
+    Theorem I3: ∀ n : Z, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
+
+	Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i - j = k) = (i = (k + j));
+
+	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
+
+	Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
+
+	Theorem Nested_Subt_1: ∀ i, j : Z, (i + j - j) = i;
+
+	//Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
+	//Theorem Negs_LT_Zero: ∀ i : Z, i ≤ 0 implies (⨩(i) ≤ 0);
+
 end Basic_Integer_Theory;

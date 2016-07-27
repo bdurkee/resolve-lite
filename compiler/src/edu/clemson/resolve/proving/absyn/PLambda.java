@@ -164,6 +164,12 @@ public class PLambda extends PExp {
         return bodyFunctions;
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        return body.getFreeVariables();
+    }
+
     public static class MathSymbolDeclaration {
         public final String name;
         public final MathClssftn type;
@@ -178,6 +184,14 @@ public class PLambda extends PExp {
             }
             this.name = name;
             this.type = type;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public MathClssftn getClssftn() {
+            return type;
         }
 
         public PSymbol asPSymbol() {

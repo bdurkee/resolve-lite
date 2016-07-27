@@ -2,8 +2,6 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.codegen.Model;
 import edu.clemson.resolve.codegen.Model.OutputModelObject;
-import edu.clemson.resolve.proving.Antecedent;
-import edu.clemson.resolve.proving.Consequent;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
@@ -20,26 +18,21 @@ public final class VC extends OutputModelObject {
     private final String explanation;
 
     private final Token location;
-
-    private final Antecedent antecedent;
-    private final Consequent consequent;
+    private final PExp antecedent, consequent;
 
     public VC(int number, PExp antecedent, PExp consequent) {
-        this(number, new Antecedent(antecedent), new Consequent(consequent));
-    }
-
-    public VC(int number, Antecedent antecedent, Consequent consequent) {
         this.number = number;
         this.antecedent = antecedent;
         this.consequent = consequent;
 
-        if (consequent.size() != 1) {
-            throw new UnsupportedOperationException("Only VCs with a single consequent are supported at the moment, " +
-                    "the {@link PExp:split()} method is likely at fault here");
-        }
-        PExp consequentExp = consequent.get(0);
-        this.explanation = consequentExp.getVCExplanation();
-        this.location = consequentExp.getVCLocation();
+        this.explanation = consequent.getVCExplanation();
+        this.location = consequent.getVCLocation();
+    }
+
+    /** Same thing as {@link #getNumber} but gives back a string instead */
+    @NotNull
+    public String getName() {
+        return Integer.toString(number);
     }
 
     public int getNumber() {
@@ -57,19 +50,19 @@ public final class VC extends OutputModelObject {
     }
 
     @NotNull
-    public Antecedent getAntecedent() {
+    public PExp getAntecedent() {
         return antecedent;
     }
 
     @NotNull
-    public Consequent getConsequent() {
+    public PExp getConsequent() {
         return consequent;
     }
 
-    /*@Override public String toString() {
+    @Override public String toString() {
         String retval =
-                "========== " + getNameToken() + " ==========\n" + antecedent
+                "========== " + getName() + " ==========\n" + antecedent
                             + "  -->\n" + consequent;
         return retval;
-    }*/
+    }
 }

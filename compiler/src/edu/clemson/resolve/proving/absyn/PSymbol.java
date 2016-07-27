@@ -99,7 +99,7 @@ public class PSymbol extends PExp {
 
     @Override
     public boolean isVariable() {
-        return !isLiteral();
+        return !isFunctionApplication();
     }
 
     @Override
@@ -218,6 +218,16 @@ public class PSymbol extends PExp {
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
         return new LinkedList<>();
+    }
+
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>();
+        if (quantification == Quantification.NONE) {
+            result.add(this);
+        }
+        return result;
     }
 
     @Override

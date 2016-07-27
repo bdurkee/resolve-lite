@@ -287,6 +287,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         //outputFile.addAssertiveBlock(block.build());
     }
 
+    //TODO: Would be really cool if we could hover over a given and get information about where it came from
+    //"constraint for type Integer", etc.
     @Override
     public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
@@ -300,8 +302,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, s,
                         "Proc_Decl_rule=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
-                        .assume(getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
-                                this::extractAssumptionsFromParameter))
+                        .assume(getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(), this::extractAssumptionsFromParameter))
+                        .assume(getAssertionsFromFormalParameters(paramSyms, this::extractAssumptionsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
@@ -343,9 +345,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         try {
             List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name, paramSyms.stream()
-                    .map(ProgParameterSymbol::getDeclaredType)
-                    .collect(Collectors.toList())));
+            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name,
+                    Utils.apply(paramSyms, ProgParameterSymbol::getDeclaredType)));
 
             //This is the requires for the operation with some substutions made (see corrFnExp rule in HH-diss)
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getRequires());
@@ -520,13 +521,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
             ProgNamedType declaredType = (ProgNamedType) p.getDeclaredType();
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof ProgFamilyType) {
-                /*PExp constraint = ((PTFamily) declaredType).getConstraint();
+                PExp constraint = ((ProgFamilyType) declaredType).getConstraint();
 
                 constraint = constraint.substitute(
                         getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
                         declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
-                */
             }
             else if (declaredType instanceof PTRepresentation) {
                 ProgReprTypeSymbol repr = ((PTRepresentation) declaredType).getReprTypeSymbol();

@@ -278,6 +278,19 @@ public class PAlternatives extends PExp {
         }
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>(); //i'd like to preserve first found order
+
+        for (Alternative a : alternatives) {
+            result.addAll(a.condition.getFreeVariables());
+            result.addAll(a.result.getFreeVariables());
+        }
+        result.addAll(otherwiseClauseResult.getFreeVariables());
+        return result;
+    }
+
     private static class UnboxCondition implements Function<Alternative, PExp> {
         public final static UnboxCondition INSTANCE = new UnboxCondition();
 

@@ -77,6 +77,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /** Holds a ref to a type model symbol while walking it (or its repr). */
     private TypeModelSymbol curTypeReprModelSymbol = null;
 
+    /** Keeps a count of the number of global constraints in the module currently being populated. */
+    private int globalSpecCount = 0;
+
     public PopulatingVisitor(@NotNull RESOLVECompiler rc,
                              @NotNull MathSymbolTable symtab,
                              @NotNull AnnotatedModule annotatedTree) {
@@ -384,10 +387,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     /**
      * Really just checks two things before we add an {@link FacilitySymbol} to the table:
      * <ol>
-     * <li>That the number of actuals supplied to module {@code i}
-     * matches the number of formals</li>
-     * <li>The number prog types (or even generics) supplied matches the number
-     * of formal type parameters.</li>
+     *  <li>That the number of actuals supplied to module {@code i}
+     *      matches the number of formals</li>
+     *  <li>The number prog types (or even generics) supplied matches the number
+     *      of formal type parameters.</li>
      * </ol>
      */
     private void sanityCheckParameterizationArgs(@NotNull List<ResolveParser.ProgExpContext> actuals,
@@ -493,8 +496,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new TypeModelSymbol(symtab.getTypeGraph(),
                             ctx.name.getText(), modelType,
                             new ProgFamilyType(modelType, ctx.name.getText(),
-                                    ctx.exemplar.getText(), g.getTrueExp(),
-                                    g.getTrueExp(), getRootModuleIdentifier()),
+                                    ctx.exemplar.getText(), constraint,
+                                    initEnsures, getRootModuleIdentifier()),
                             exemplarSymbol, ctx, getRootModuleIdentifier());
             symtab.getInnermostActiveScope().define(progType);
         } catch (DuplicateSymbolException e) {
@@ -900,9 +903,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         MathClssftn x = tr.mathClssftns.get(ctx.mathAssertionExp());
         expectType(ctx.mathAssertionExp(), g.BOOLEAN);
         try {
-            //PExp assertion = getMathExpASTFor(ctx.mathAssertionExp());
+            PExp assertion = getPExpFor(ctx.mathAssertionExp());
             symtab.getInnermostActiveScope().define(
-                    new TheoremSymbol(g, ctx.name.getText(), g.getTrueExp(), ctx, getRootModuleIdentifier()));
+                    new TheoremSymbol(g, ctx.name.getText(), assertion, ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         }
@@ -1116,6 +1119,33 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
                         ctx.getStart(), e.getOffendingSymbol().getName());
             }
+        }
+    }
+
+    @Override
+    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
+        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
+        }
+        return null;
+    }
+
+    private void insertGlobalAssertion(ParserRuleContext ctx,
+                                       GlobalMathAssertionSymbol.ClauseType type,
+                                       ResolveParser.MathAssertionExpContext assertion) {
+        String name = ctx.getText() + "_" + globalSpecCount++;
+        PExp assertionAsPExp = getPExpFor(assertion);
+        try {
+            symtab.getInnermostActiveScope().define(
+                    new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
+                            ctx, getRootModuleIdentifier()));
+        } catch (DuplicateSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
+                    ctx.getStart(), ctx.getText());
         }
     }
 
@@ -1652,7 +1682,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                                             @NotNull ParserRuleContext ctx) {
         try {
             return symtab.getInnermostActiveScope()
-                    .queryForOne(new MathSymbolQuery(qualifier, symbolName.getText(), ctx.getStart()));
+                    .queryForOne(new MathSymbolQuery(qualifier, symbolName.getText()));
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), symbolName, symbolName.getText());
         } catch (NoSuchModuleException nsme) {
@@ -1689,8 +1719,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     /**
      * Given some context {@code ctx} and a
-     * {@code child} context; this method visits {@code child} and chains/passes
-     * its found {@link MathClssftn} upto {@code ctx}.
+     * {@code child} context; this method visits {@code child} and chains/passes its found {@link MathClssftn}
+     * upto {@code ctx}.
      *
      * @param ctx   a parent {@code ParseTree}
      * @param child one of {@code ctx}s children

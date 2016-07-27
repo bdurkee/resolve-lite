@@ -46,6 +46,7 @@ public abstract class PExp {
 
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
+    private Set<PSymbol> cachedFreeVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
     public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type) {
@@ -267,8 +268,8 @@ public abstract class PExp {
     public abstract String getTopLevelOperationName();
 
     /**
-     * Returns {@code true} iff this expression represents a primitive such as
-     * {@code 1..n} or some boolean value; {@code false} otherwise.
+     * Returns {@code true} iff this expression represents a primitive such as {@code 1..n} or some boolean value;
+     * {@code false} otherwise.
      *
      * @return whether or not this
      */
@@ -288,8 +289,8 @@ public abstract class PExp {
     }
 
     /**
-     * Converts {@code this} expression, containing an arbitrary number of
-     * conjuncts with possibly nested implications, into a list of sequents.
+     * Converts {@code this} expression, containing an arbitrary number of conjuncts with possibly nested implications,
+     * into a list of sequents.
      *
      * @return a list of sequents derived from {@code this}
      */
@@ -380,6 +381,18 @@ public abstract class PExp {
 
     @NotNull
     public abstract List<PExp> getFunctionApplicationsNoCache();
+
+    @NotNull
+    public final Set<PSymbol> getFreeVariables() {
+        if (cachedFreeVariables == null) {
+            //We're immutable, so only do this once
+            cachedFreeVariables = Collections.unmodifiableSet(getFreeVariablesNoCache());
+        }
+        return cachedFreeVariables;
+    }
+
+    @NotNull
+    public abstract Set<PSymbol> getFreeVariablesNoCache();
 
     @NotNull
     public final Set<String> getSymbolNames() {

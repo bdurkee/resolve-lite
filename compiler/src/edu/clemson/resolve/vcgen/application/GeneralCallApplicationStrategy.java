@@ -12,7 +12,6 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCCall;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -87,15 +86,15 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
                 ProgParameterSymbol curFormal = formalIter.next();
                 PExp curActual = (PExp) argIter.next();
 
-                //t ~> NQV(RP, a), @t ~> a
+                //t ~> NPV(RP, a), @t ~> a
                 if (curFormal.getMode() == ParameterMode.UPDATES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NQV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NPV(RP, (PSymbol) curActual));
                     newAssumeSubtitutions.put(new PSymbolBuilder(
                             curFormal.asPSymbol()).incoming(true).build(), (PSymbol) curActual);
                 }
-                //v ~> NQV(RP, b)
+                //v ~> NPV(RP, b)
                 else if (curFormal.getMode() == ParameterMode.REPLACES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NQV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NPV(RP, (PSymbol) curActual));
                 }
                 //@y ~> e, @z ~> f
                 else if (curFormal.getMode() == ParameterMode.ALTERS || curFormal.getMode() == ParameterMode.CLEARS) {
@@ -113,7 +112,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
             }
 
             //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
-            //Post [ t ~> NQV(RP, a), @t ~> a, u ~> Math(exp), v ~> NQV(RP, b),
+            //Post [ t ~> NPV(RP, a), @t ~> a, u ~> Math(exp), v ~> NPV(RP, b),
             //       w ~> c, x ~> d, @y ~> e, @z ~> f]
             block.assume(newAssume.substitute(newAssumeSubtitutions).substitute(returnEnsuresArgSubstitutions));
 
@@ -121,7 +120,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
             //substitutions occur prior to conjuncting this -- consult the
             //rule and see for yourself
             /* for (ProgParameterSymbol p : op.getParameters()) {
-                //T7.Is_Initial(NQV(RP, f));
+                //T7.Is_Initial(NPV(RP, f));
                 //TODO: See todo above
                 if (p.getMode() == CLEARS) {
                     PExp initPred =
@@ -139,28 +138,29 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
             for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
-                    confirmSubstitutions.put(actualArg, NQV(RP, (PSymbol) actualArg));
+                    confirmSubstitutions.put(actualArg, NPV(RP, (PSymbol) actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
         }
     }
 
-    /** "Next Question-mark Variable" */
-    public static PSymbol NQV(PExp RP, PSymbol oldSym) {
+    /** "Next Prime Variable" */
+    public static PSymbol NPV(PExp RP, PSymbol oldSym) {
         // Add an extra question mark to the front of oldSym
-        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName()).build();
+        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName() ).build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
         if (RP.containsName(oldSym.getName())) {
-            return NQV(RP, newOldSym);
+            return NPV(RP, newOldSym);
         }
         // Don't need to apply the question mark here.
         else if (RP.containsName(newOldSym.getName())) {
-            return NQV(RP, newOldSym);
+            return NPV(RP, newOldSym);
         }
         else {
             // Return the new variable expression with the question mark
+            int i = oldSym.getName().length() - 1;
             if (oldSym.getName().charAt(0) != '?') {
                 return newOldSym;
             }

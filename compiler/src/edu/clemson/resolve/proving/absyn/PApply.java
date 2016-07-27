@@ -301,7 +301,7 @@ public class PApply extends PExp {
     public List<PExp> split(PExp assumptions) {
         List<PExp> result = new ArrayList<>();
         DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getTopLevelOperationName().equals("and")) {
+        if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
         else if (getTopLevelOperationName().equals("implies")) {
@@ -374,6 +374,15 @@ public class PApply extends PExp {
         for (PExp argument : arguments) {
             result.addAll(argument.getSymbolNames(excludeApplications, excludeLiterals));
         }
+        return result;
+    }
+
+
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+        Utils.apply(getSubExpressions(), result, PExp::getFreeVariables);
         return result;
     }
 

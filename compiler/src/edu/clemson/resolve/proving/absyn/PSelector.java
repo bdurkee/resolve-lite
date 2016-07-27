@@ -156,6 +156,14 @@ public class PSelector extends PExp {
         return result;*/
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>(left.getQuantifiedVariables());
+        result.addAll(right.getFreeVariables());
+        return result;
+    }
+
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PSelector);

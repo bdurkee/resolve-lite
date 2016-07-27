@@ -1,13 +1,14 @@
 package edu.clemson.resolve.proving;
 
+import edu.clemson.resolve.proving.absyn.PApply;
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
+import edu.clemson.resolve.semantics.Quantification;
 
 import java.util.*;
 
-/**
- * Created by mike on 4/3/2014.
- */
 public class ConjunctionOfNormalizedAtomicExpressions {
 
     private final Registry m_registry;
@@ -42,9 +43,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected Registry getRegistry() {
         return m_registry;
     }
-/*
+
     protected String addExpressionAndTrackChanges(PExp expression,
-            long timeToEnd, String justification) {
+                                                  long timeToEnd, String justification) {
         m_timeToEnd = timeToEnd;
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
@@ -61,174 +62,191 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return exp;
             }
             else {
-                return new PSymbol.PSymbolBuilder(s).build();
+                return new PSymbol.PSymbolBuilder(s).mathClssfctn(exp.getMathClssftn()).build();
             }
         }
-        PExpSubexpressionIterator it = exp.getSubExpressionIterator();
+
+        if (!(exp instanceof PApply)) {
+            throw new IllegalStateException("prover: in conjunction of normalized atomic exps, the exp parameter" +
+                    "is something that I don't know how to handle");
+        }
+        //MIKE: NOTE -- Just using a normal iterator over the PExp's subexpressions now.
+        Iterator<? extends PExp> it = ((PApply) exp).getArguments().iterator();
+
         ArrayList<PExp> args = new ArrayList<PExp>();
         boolean irreducable = false;
         while (it.hasNext()) {
             PExp cur = it.next();
             PExp fcur = find(cur);
             if (fcur.getSubExpressions().size() > 0
-                    || !m_registry.m_symbolToIndex.containsKey(fcur
-                            .getTopLevelOperation()))
+                    || !m_registry.m_symbolToIndex.containsKey(fcur.getTopLevelOperationName()))
                 irreducable = true;
             args.add(fcur);
         }
         String op =
-                m_registry.getRootSymbolForSymbol(exp.getTopLevelOperation());
+                m_registry.getRootSymbolForSymbol(exp.getTopLevelOperationName());
         if (!irreducable && !op.equals("")) {
             int[] ia;
             ia = new int[args.size() + 1];
             ia[0] = m_registry.getIndexForSymbol(op);
             for (int i = 1; i < ia.length; ++i) {
-                ia[i] =
-                        m_registry.getIndexForSymbol(args.get(i - 1)
-                                .getTopLevelOperation());
+                ia[i] = m_registry.getIndexForSymbol(args.get(i - 1).getTopLevelOperationName());
             }
-            NormalizedAtomicExpression na =
-                    new NormalizedAtomicExpression(this, ia);
+            NormalizedAtomicExpression na = new NormalizedAtomicExpression(getRegistry(), ia);
             if (m_expSet.containsKey(na) && m_expSet.get(na).readRoot() >= 0) {
                 int r = m_expSet.get(na).readRoot();
                 String rs = m_registry.getSymbolForIndex(r);
-                return new PSymbol(m_registry.getTypeByIndex(r), null, rs);
+                return new PSymbol.PSymbolBuilder(rs).mathClssfctn(m_registry.getTypeByIndex(r)).build();
             }
-            else
-                return new PSymbol(exp.getType(), exp.getTypeValue(), exp
-                        .getTopLevelOperation(), args);
+            else {
+                PSymbol nameExp = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
+                        .mathClssfctn(((PApply) exp).getFunctionPortion().getMathClssftn())
+                        .build();
+                return new PApply.PApplyBuilder(nameExp).arguments(args)
+                        .applicationType(exp.getMathClssftn())
+                        .build();
+            }
         }
         else {
-            return new PSymbol(exp.getType(), exp.getTypeValue(), exp
-                    .getTopLevelOperation(), args);
+            PSymbol nameExp = new PSymbol.PSymbolBuilder(exp.getTopLevelOperationName())
+                    .mathClssfctn(((PApply) exp).getFunctionPortion().getMathClssftn())
+                    .build();
+            return new PApply.PApplyBuilder(nameExp).arguments(args)
+                    .applicationType(exp.getMathClssftn())
+                    .build();
         }
     }
 
     // Top level
     protected String addExpression(PExp expression) {
-        if (m_evaluates_to_false
-                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+        if (m_evaluates_to_false || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
             return "";
         }
-        String name = expression.getTopLevelOperation();
+        String name = expression.getTopLevelOperationName();
 
-        if (name.equals("=B")) {
-            int lhs = addFormula(expression.getSubExpressions().get(0));
-            int rhs = addFormula(expression.getSubExpressions().get(1));
+        if (name.equals("=B") && expression instanceof PApply) {
+            int lhs = addFormula(expression.getSubExpressions().get(1));
+            int rhs = addFormula(expression.getSubExpressions().get(2));
             return mergeOperators(lhs, rhs);
         }
-        else if (name.equals("andB")) {
+        else if ((name.equals("andB") || name.equals("∧B")) && expression instanceof PApply) {
             String r = "";
-            r += addExpression(expression.getSubExpressions().get(0));
             r += addExpression(expression.getSubExpressions().get(1));
+            r += addExpression(expression.getSubExpressions().get(2));
             return r;
         }
         else {
-            MTType type = expression.getType();
-            PSymbol asPsymbol = (PSymbol) expression;
+            MathClssftn type = expression.getMathClssftn();
             int root = addFormula(expression);
             if (m_evaluates_to_false)
                 return "";
             if (type.isBoolean()) {
-                return mergeOperators(m_registry.getIndexForSymbol("true"),
-                        root);
+                return mergeOperators(m_registry.getIndexForSymbol("true"), root);
             }
         }
         return "";
     }
 
     // adds a particular symbol to the registry
-    //TODO. See changes to pexp hierarchy.
-    protected int addPsymbol(PSymbol ps) {
-        String name = ps.getTopLevelOperation();
-        if (m_registry.m_symbolToIndex.containsKey(name))
-            return m_registry.m_symbolToIndex.get(name);
-        MathClassification type = ps.getMathClssftn();
+
+    //NOTE: Changed the parameter here to PExp to facilitate both PSymbol and PApply
+    protected int addPsymbol(PExp ps) {
+        String name = ps.getTopLevelOperationName();
+        if (m_registry.m_symbolToIndex.containsKey(name)) return m_registry.m_symbolToIndex.get(name);
+        MathClssftn type = ps.getMathClssftn();
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-        else if (ps.isFunction()
-                || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
-            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+        else if (ps.isFunctionApplication()) {
+            if (ps.getQuantification().equals(Quantification.UNIVERSAL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
             else {
                 usage = Registry.Usage.HASARGS_SINGULAR;
             }
-
         }
         else if (ps.getQuantification().equals(Quantification.UNIVERSAL)) {
             usage = Registry.Usage.FORALL;
         }
+
         // The type stored with expressions is actually the range type
         // Ex: (S = T):B.
         // However, I need to store types for functions/relations.
         // Building these here.
         // It would be far better to handle this upstream.
         // Currently PExps from theorems have correct type set already
-        if (ps.getSubExpressions().size() > 0) {
-            List<MathClassification> paramList = new ArrayList<>();
-            for (PExp pParam : ps.getSubExpressions()) {
-                paramList.add(pParam.getType());
-            }
-            type = new MTFunction(m_registry.m_typeGraph, type, paramList);
+
+        // UPDATE: This should give you what your looking for in that case.
+        if (ps instanceof PApply) {
+            type = ((PApply) ps).getFunctionPortion().getMathClssftn();
         }
         return m_registry.addSymbol(name, type, usage);
     }
 
-    //experimentally handling =
-    // i.e.: (|?S| = 0) = (?S = Empty_String))
-    // is broken down by addExpression so (|?S| = 0) is an argument
-    // should return int for true if known to be equal, otherwise return root representative.
+    /* experimentally handling =
+     i.e.: (|?S| = 0) = (?S = Empty_String))
+     is broken down by addExpression so (|?S| = 0) is an argument
+     should return int for true if known to be equal, otherwise return root representative.
+     */
     protected int addFormula(PExp formula) {
-        if (formula.getTopLevelOperation().equals("=B")) {
-            int lhs = addFormula(formula.getSubExpressions().get(0));
-            PExp r = formula.getSubExpressions().get(1);
-            int rhs = addFormula(r);
+        if (formula.getTopLevelOperationName().equals("=B") && formula instanceof PApply) {
+
+            //remember, we're a PApply here so getSubexpressions().get(0) would be the function name.
+            int lhs = addFormula(formula.getSubExpressions().get(1));
+            int rhs = addFormula(formula.getSubExpressions().get(2));
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
             // This prevents matching of (i=i)=true, which is not built in
+            /*if (lhs == rhs) {
+                return m_registry.getIndexForSymbol("true");
+            }
+            else {*/
             // insert =(lhs,rhs) = someNewRoot
             int questEq = m_registry.getIndexForSymbol("=B");
             NormalizedAtomicExpression pred =
-                    new NormalizedAtomicExpression(this, new int[] { questEq,
-                            lhs, rhs });
+                    new NormalizedAtomicExpression(getRegistry(), new int[] { questEq, lhs, rhs });
             return addAtomicFormula(pred);
             // }
         }
-        PSymbol asPsymbol;
-        if (!(formula instanceof PSymbol)) {
+        //TODO TODO: Now can be PApply for function applications.
+        if (!(formula instanceof PSymbol || formula instanceof PApply)) {
             System.err.println("unhandled PExp: " + formula.toString());
             throw new RuntimeException();
-
         }
-        else
-            asPsymbol = (PSymbol) formula;
-        int intRepOfOp = addPsymbol(asPsymbol);
+        int intRepOfOp = addPsymbol(formula);
         // base case
         if (formula.isVariable()) {
             return intRepOfOp;
         }
 
-        int[] ne = new int[formula.getSubExpressions().size() + 1];
+        Iterator<? extends PExp> it = formula.getSubExpressions().iterator();
+        int subexpsize = formula.getSubExpressions().size();
+        if (formula instanceof PApply) {    //I presume that you only want an iterator over args, getSubExpressions
+            //for a PApply will include the name portion of the function (which of course is independent from the args)
+            it = ((PApply) formula).getArguments().iterator();
+            subexpsize = ((PApply) formula).getArguments().size();
+        }
+
+        int[] ne = new int[subexpsize + 1];
         ne[0] = intRepOfOp;
         int pos = 1;
-        PExpSubexpressionIterator it = formula.getSubExpressionIterator();
+
+
         while (it.hasNext()) {
             PExp p = it.next();
             int root = addFormula(p);
             ne[pos++] = root;
         }
         NormalizedAtomicExpression newExpr =
-                new NormalizedAtomicExpression(this, ne);
+                new NormalizedAtomicExpression(getRegistry(), ne);
         if (m_evaluates_to_false) {
             return -1;
         }
         newExpr = newExpr.rootOps();
         return addAtomicFormula(newExpr);
     }
-*/
+
     /**
      * @param atomicFormula one sided expression. (= new root) is appended and
      *                      expression is inserted if no match of the side is found. Otherwise
@@ -237,11 +255,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     private int addAtomicFormula(NormalizedAtomicExpression atomicFormula) {
         // Return root if atomic formula is present
-        if (m_expSet.containsKey(atomicFormula))
-            return m_expSet.get(atomicFormula).readRoot();
+        if (m_expSet.containsKey(atomicFormula)) return m_expSet.get(atomicFormula).readRoot();
         // no such formula exists
-        MathClssftn typeOfFormula =
-                m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        MathClssftn typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         // this is the full type and is necessarily a function type
 
         MathClssftn rangeType = ((MathFunctionClssftn) typeOfFormula).getRangeClssftn();
@@ -259,12 +275,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         applyBuiltInLogic(atomicFormula, hTank);
         addExprToSet(atomicFormula);
         while (!hTank.isEmpty()) {
-            //mergeOperators(hTank.pop(), hTank.pop());
+            mergeOperators(hTank.pop(), hTank.pop());
         }
         return m_registry.findAndCompress(rhs);
 
     }
-/*
+
     protected String mergeOperators(int a, int b) {
         int t = m_registry.getIndexForSymbol("true");
         int f = m_registry.getIndexForSymbol("false");
@@ -318,7 +334,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         return rString;
     }
-*/
+
     // need to choose literals over vars for theorem matching purposes
     // i.e. the theorem expression should keep the literals
     protected int chooseSymbolToKeep(int a, int b) {
@@ -371,7 +387,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_expSet.remove(nae);
     }
 
-    private void applyBuiltInLogic(NormalizedAtomicExpression nm, Stack<Integer> tank) {
+    private void applyBuiltInLogic(NormalizedAtomicExpression nm,
+                                   Stack<Integer> tank) {
         // turn off if this is not part of a VC
         if (m_VC == null)
             return;
@@ -455,7 +472,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 return;
             }
             // x or some goal g = some goal g
-        /*    if (m_VC != null
+            if (m_VC != null
                     && m_VC.m_goal.contains(m_registry.getSymbolForIndex(rhs))) {
                 if (rhs == arg1) {
                     m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
@@ -464,7 +481,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     m_VC.addGoal(m_registry.getSymbolForIndex(arg1));
                 }
                 return;
-            }*/
+            }
             // constant t arg
             if (arg1 == tr) {
                 // (t or p) = q |= t/q
@@ -540,16 +557,20 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Set<NormalizedAtomicExpression> getUses(int symk) {
-        HashSet<NormalizedAtomicExpression> rSet = new HashSet<>();
-        Map<Integer, Set<NormalizedAtomicExpression>> usesByPos = m_useMap.get(symk);
-        for (Map.Entry<Integer, Set<NormalizedAtomicExpression>> me : usesByPos.entrySet()) {
+        HashSet<NormalizedAtomicExpression> rSet =
+                new HashSet<NormalizedAtomicExpression>();
+        Map<Integer, Set<NormalizedAtomicExpression>> usesByPos =
+                m_useMap.get(symk);
+        for (Map.Entry<Integer, Set<NormalizedAtomicExpression>> me : usesByPos
+                .entrySet()) {
             rSet.addAll(me.getValue());
         }
         return rSet;
     }
 
     protected Set<NormalizedAtomicExpression> getUses(int symk, int pos) {
-        HashSet<NormalizedAtomicExpression> rSet = new HashSet<>();
+        HashSet<NormalizedAtomicExpression> rSet =
+                new HashSet<NormalizedAtomicExpression>();
         rSet.addAll(m_useMap.get(symk).get(pos));
         return rSet;
     }
@@ -557,7 +578,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Return list of modified predicates by their position. Only these can cause new merges.
     // b is replaced by a
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
-        if (m_evaluates_to_false || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
+        if (m_evaluates_to_false
+                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
             return null;
         }
         if (m_useMap.get(b) == null) {
@@ -603,9 +625,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
-    protected Set<NormalizedAtomicExpression> multiKeyUseMapSearch(Set<String> keys) {
+    protected Set<NormalizedAtomicExpression> multiKeyUseMapSearch(
+            Set<String> keys) {
 
-        Set<NormalizedAtomicExpression> resultSet = new HashSet<>();
+        Set<NormalizedAtomicExpression> resultSet =
+                new HashSet<NormalizedAtomicExpression>();
         boolean firstkey = true;
         for (String k : keys) {
             int rKey = m_registry.getIndexForSymbol(k);
@@ -626,34 +650,28 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return resultSet;
     }
 
-    protected Set<Map<String, String>> getMatchesForOverrideSet(NormalizedAtomicExpression expr,
-                                                                Set<Map<String, String>> foreignSymbolOverrideSet) {
-        Set<Map<String, String>> rSet = new HashSet<>();
+    protected Set<java.util.Map<String, String>> getMatchesForOverrideSet(NormalizedAtomicExpression expr,
+                                                                          Set<Map<String, String>> foreignSymbolOverrideSet) {
+        Set<java.util.Map<String, String>> rSet = new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverrideSet) {
-            Set<Map<String, String>> results = getBindingsForSearchExpr(expr, fs_m);
+            Set<java.util.Map<String, String>> results = getBindingsForSearchExpr(expr, fs_m);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
         return rSet;
     }
 
-    protected Set<Map<String, String>> getBindingsForSearchExpr(
-            NormalizedAtomicExpression expr,
-            Map<String, String> foreignSymbolOverride) {
-        int[] searchKeys =
-                expr.rootedLiterals(foreignSymbolOverride, m_registry);
-        if (searchKeys == null)
-            return null;
-        String[] unMappedWildCards =
-                expr.unMappedWildcards(foreignSymbolOverride);
+    protected Set<Map<String, String>> getBindingsForSearchExpr(NormalizedAtomicExpression expr,
+                                                                Map<String, String> foreignSymbolOverride) {
+        int[] searchKeys = expr.rootedLiterals(foreignSymbolOverride, m_registry);
+        if (searchKeys == null) return null;
+        String[] unMappedWildCards = expr.unMappedWildcards(foreignSymbolOverride);
         Set<Map<String, String>> rSet;
-        boolean isCommutOp =
-                expr.getRegistry().isCommutative(expr.readPosition(0));
+        boolean isCommutOp = expr.getRegistry().isCommutative(expr.readPosition(0));
         // only supporting arity 2 commutative search
         // do additional search with swapped args if only one arg is blank
         // if neither is blank, do search with ordered args instead
-        if (isCommutOp && searchKeys.length == 4
-                && (searchKeys[1] != searchKeys[2])) {
+        if (isCommutOp && searchKeys.length == 4 && (searchKeys[1] != searchKeys[2])) {
             if (!(searchKeys[1] == -1 || searchKeys[2] == -1)) {
                 // neither blank. order keys.
                 if (searchKeys[1] > searchKeys[2]) {
@@ -662,16 +680,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     searchKeys[2] = t;
                     return computeBindings(
                             getExprsMatchingAtPosition(searchKeys),
-                            foreignSymbolOverride, unMappedWildCards, expr
-                                    .getRegistry());
+                            foreignSymbolOverride, unMappedWildCards, expr.getRegistry());
                 }
             }
             else {
                 // only one blank. 2 searches
                 rSet =
                         computeBindings(getExprsMatchingAtPosition(searchKeys),
-                                foreignSymbolOverride, unMappedWildCards, expr
-                                        .getRegistry());
+                                foreignSymbolOverride, unMappedWildCards, expr.getRegistry());
                 int t = searchKeys[1];
                 String s = unMappedWildCards[1];
                 searchKeys[1] = searchKeys[2];
@@ -703,13 +719,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 String ac =
                         (i < unmappedWildcards.length - 1 ? e.readSymbol(i)
                                 : m_registry.getSymbolForIndex(e.readRoot()));
-                if (wc.equals(""))
-                    continue;
-                if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac))
-                    continue next; // this clause ensures usage of same symbol where required.
-                MathClssftn wildType =
-                        searchReg.getTypeByIndex(searchReg
-                                .getIndexForSymbol(wc));
+                if (wc.equals("")) continue;
+                if (!bmap.get(wc).equals("") && !bmap.get(wc).equals(ac)) continue next; // this clause ensures usage of same symbol where required.
+                MathClssftn wildType = searchReg.getTypeByIndex(searchReg.getIndexForSymbol(wc));
                 MathClssftn localType =
                         m_registry.getTypeByIndex(m_registry
                                 .getIndexForSymbol(ac));

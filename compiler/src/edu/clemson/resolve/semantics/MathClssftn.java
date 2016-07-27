@@ -53,6 +53,10 @@ public abstract class MathClssftn {
         return result;
     }
 
+    public final boolean isBoolean() {
+        return (g.BOOLEAN == this);
+    }
+
     public static boolean checkAlphaEquivalence(MathClssftn t1, MathClssftn t2)
             throws TypeMismatchException {
         if (t1 == t2 || isEquivalentDependentType(t1, t2)) return true;
