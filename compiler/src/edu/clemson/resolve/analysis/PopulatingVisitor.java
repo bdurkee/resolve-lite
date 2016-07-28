@@ -11,6 +11,7 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -446,7 +447,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             Token qualifier = ctx.qualifier;
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(qualifier, ctx.name.getText(), true))
+                            .queryForOne(new NameQuery(qualifier, ctx.name.getText(),
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE, true))
                             .toProgTypeSymbol();
 
             tr.progTypes.put(ctx, type.getProgramType());
@@ -864,7 +867,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
                             FacilityStrategy.FACILITY_INSTANTIATE,
-                            MathSymbolTable.ImportStrategy.IMPORT_NAMED, true));
+                            ImportStrategy.IMPORT_NAMED, true));
 
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
