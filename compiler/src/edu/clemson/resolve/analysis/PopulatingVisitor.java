@@ -1712,8 +1712,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * Returns the {@link FacilitySymbol} responsible for bringing/making {@code s} accesible to whatever
+     * scope tree {@code ctx} happens to inhabit; {@code null} if multiple or none are found. So think of {@code ctx}
+     * as the tree context where s is referenced from.
+     */
     @Nullable
-    public FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @NotNull Symbol s) {
+    private FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @NotNull Symbol s) {
         try {
             List<FacilitySymbol> facilities = moduleScope.query(new SymbolTypeQuery<>(FacilitySymbol.class));
             List<FacilitySymbol> result = new ArrayList<>();
@@ -1730,7 +1735,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             noSuchModule(e);
         } catch (UnexpectedSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    s.getDefiningTree().getStart(), e.getTheUnexpectedSymbolDescription());
+                    ctx.getStart(), e.getTheUnexpectedSymbolDescription());
         }
         return null;
     }
