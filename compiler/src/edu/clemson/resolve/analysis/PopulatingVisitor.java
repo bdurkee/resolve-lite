@@ -12,6 +12,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy;
+import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -451,7 +452,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_INSTANTIATE, true))
                             .toProgTypeSymbol();
-
+            if (qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(ctx, type);
+                if (s != null) {
+                    ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, type.getProgramType());
             tr.mathClssftns.put(ctx, type.getModelType());
             //MathClassification x = type.getModelType();
@@ -709,6 +715,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     parentFacilityArgListCtx).add(namedSymbol.toProgTypeSymbol());
                 }
             }
+            if (ctx.qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(ctx, namedSymbol);
+                if (s != null) {
+                    ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, programType);
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
             return null;
@@ -784,7 +796,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
-        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        typeOperationRefExp(ctx, ctx.progSymbolExp(), ctx.progExp());
         return null;
     }
 
@@ -854,27 +866,27 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        typeOperationRefExp(ctx, name.qualifier, name.name.getStart(), args);
-    }
-
-    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
-                                       @Nullable Token qualifier,
-                                       @NotNull Token name,
-                                       @NotNull List<ResolveParser.ProgExpContext> args) {
         List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
         //every other call
         try {
+            Token qualifier = name.qualifier != null ? name.qualifier : null;
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
-                    new OperationQuery(qualifier, name, argTypes,
+                    new OperationQuery(qualifier, name.name.getStart(), argTypes,
                             FacilityStrategy.FACILITY_INSTANTIATE,
                             ImportStrategy.IMPORT_NAMED, true));
 
+            if (name.qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(name, opSym);
+                if (s != null) {
+                    name.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, opSym.getReturnType());
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = Utils.apply(args, ResolveParser.ProgExpContext::getText);
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name, name.getText(), argStrList, argTypes);
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name.name.getStart(), name.getText(), argStrList, argTypes);
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "an operation", name.getText(),
@@ -1696,6 +1708,29 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a math symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
+        }
+        return null;
+    }
+
+    @Nullable
+    public FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @NotNull Symbol s) {
+        try {
+            List<FacilitySymbol> facilities = moduleScope.query(new SymbolTypeQuery<>(FacilitySymbol.class));
+            List<FacilitySymbol> result = new ArrayList<>();
+            for (FacilitySymbol f : facilities) {
+                if (f.getFacility().getSpecification().getModuleIdentifier().equals(s.getModuleIdentifier())) {
+                    result.add(f);
+                }
+            }
+            if (result.size() > 1) {
+                compiler.errMgr.semanticError(ErrorKind.AMBIGUOUS_FACILITY, ctx.getStart(), s.getName());
+            }
+            return !result.isEmpty() ? result.get(0) : null;
+        } catch (NoSuchModuleException e) {
+            noSuchModule(e);
+        } catch (UnexpectedSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    s.getDefiningTree().getStart(), e.getTheUnexpectedSymbolDescription());
         }
         return null;
     }

@@ -228,7 +228,7 @@ moduleArgumentList
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'
+    :   ('Infix'|'Postfix')? 'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
