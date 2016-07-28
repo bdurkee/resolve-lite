@@ -280,6 +280,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp name=progSymbolExp progExp              #progInfixExp
+    |   progExp name=progSymbolName                     #progPostfixExp
     ;
 
 progPrimary

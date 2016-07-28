@@ -274,6 +274,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.endScope();
 
         insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        if (ctx.alt != null) {
+            //sugared name support
+            insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        }
         return null;
     }
 
