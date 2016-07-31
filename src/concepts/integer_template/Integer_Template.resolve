@@ -13,7 +13,7 @@ Concept Integer_Template;
         initialization
             ensures I = 0;
 
-    Postfix Operation Increment ++
+    Operation Increment
             (updates i : Integer);
         requires
             i + 1 ≤ max_int;

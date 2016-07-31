@@ -302,8 +302,7 @@ progSymbolName
     ;
 
 progLiteralExp
-    :   BOOL                #progBooleanLiteralExp
-    |   INT                 #progIntegerLiteralExp
+    :   INT                 #progIntegerLiteralExp
     |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
@@ -353,7 +352,7 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )    //TODO: Maybe use BOOL instead?
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | '|' )
     ;
 
 mathSymbolNameNoID
@@ -466,7 +465,6 @@ mathAlternativeItemExp
 
 FORALL : ('Forall'|'∀');
 EXISTS : ('Exists'|'∃');
-BOOL: ('true'|'false');
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
