@@ -17,10 +17,7 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathCartesianClssftn.Element;
@@ -502,8 +499,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.initializationClause() != null) this.visit(ctx.initializationClause());
         symtab.endScope();
         try {
-            PExp constraint = getPExpFor(ctx.constraintsClause());
-            PExp initEnsures = getPExpFor(ctx.initializationClause());
+            PExp constraint = ctx.constraintsClause() != null ? getPExpFor(ctx.constraintsClause().mathAssertionExp()) : g.getTrueExp();
+            PExp initEnsures = ctx.initializationClause() != null ?
+                    getPExpFor(ctx.initializationClause().ensuresClause().mathAssertionExp()) :
+                    g.getTrueExp();
 
             ProgTypeSymbol progType =
                     new TypeModelSymbol(symtab.getTypeGraph(),
@@ -795,12 +794,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    //TODO: Eventually we'll have syntax so users can supply this
     @Override
     public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
-        typeOperationRefExp(ctx, ctx.progSymbolExp(), ctx.progExp());
+        ResolveParser.ProgSymbolExpContext sym = new ResolveParser.ProgSymbolExpContext(ctx.getParent(), 0);
+        ResolveParser.ProgSymbolNameContext symName = new ResolveParser.ProgSymbolNameContext(sym, 0);
+        sym.qualifier = attr.qualifier;
+        symName.start = attr.name;
+        sym.name = symName;
+        typeOperationRefExp(ctx, sym, ctx.progExp());
         return null;
     }
 
