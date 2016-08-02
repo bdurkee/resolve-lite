@@ -159,12 +159,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         //hardcode hook to handle chained relationals (generalize this at the syntax level with some
         //special syntax)
-        if ((left.getTopLevelOperationName().equals("≤") || left.getTopLevelOperationName().equals("<")) &&
-                (ctx.getChild(1).getText().equals("≤") || ctx.getChild(1).getText().equals("<"))) {
+        String x = left.getTopLevelOperationName();
+        //or if our left is an 'and' whose right child is < or <=
+        PExp left2 = getBottommostFormula(left);
+        if ((ctx.mathSymbolExp().name.getText().equals("≤") || ctx.mathSymbolExp().name.getText().equals("<")) &&
+                (left2.getTopLevelOperationName().equals("≤") || left2.getTopLevelOperationName().equals("<"))) {
             PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
                     .applicationType(getMathClssfctn(ctx))
                     .style(INFIX)
-                    .arguments(left.getSubExpressions().get(2), right).build();
+                    .arguments(left2.getSubExpressions().get(2), right).build();
             PApply result = g.formConjunct(left, newRight);
             repo.put(ctx, result);
         }
@@ -175,6 +178,15 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                     .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
             repo.put(ctx, result.build());
         }
+    }
+
+    @NotNull
+    public PExp getBottommostFormula(@NotNull PExp l) {
+        PExp result = l;
+        while (result.getTopLevelOperationName().equals("and") && result instanceof PApply) {
+            result = ((PApply) result).getArguments().get(1); //keep getting rhs
+        }
+        return result;
     }
 
     @Override

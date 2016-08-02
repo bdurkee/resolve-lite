@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
@@ -26,6 +27,13 @@ import java.util.*;
  * @author dtwelch
  */
 public class AnnotatedModule {
+
+    /**
+     * Any infix application that's defined (via a definition) to be chainable (i.e.: one where x OP y OP z is,
+     * internally, interpreted as "x OP y and y OP z"). Note that any operator defined
+     * to be chainable had better be a predicate as it will become an argument to binary "and".
+     */
+    public ParseTreeProperty<Boolean> chainableInfixAppCtxs = new ParseTreeProperty<>();
 
     public ParseTreeProperty<MathClssftn> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();

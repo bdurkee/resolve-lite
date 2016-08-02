@@ -205,9 +205,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
         } catch (SymbolTableException e) {
         }
 
-        List<PExp> opParamAntecedents = new ArrayList<>();
-        // Utils.apply(getAllModuleParameterSyms(), opParamAntecedents,
-        //         this::extractAssumptionsFromParameter);
+        List<PExp> opParamAntecedents =
+                getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
+                        this::extractAssumptionsFromParameter);
+
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
                         "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
@@ -236,18 +237,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp correspondence = g.getTrueExp();
         if (currentTypeReprSym == null) return;
         correspondence = currentTypeReprSym.getCorrespondence();
+
         if (currentTypeReprSym.getDefinition() != null) {
             constraint = currentTypeReprSym.getDefinition().getProgramType().getConstraint();
         }
         VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         PExp newConstraint = constraint.substitute(
                 currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
-
+        newConstraint = newConstraint.withVCInfo(ctx.getStart(), "Constraint for type: " + ctx.name.getText());
         block.assume(correspondence.splitIntoConjuncts());
-        throw new UnsupportedOperationException("re-institute the final confirm for this dan");
-
-        //block.finalConfirm(newConstraint, "Constraint clause for model type " + ctx.name.getText());
-        //outputFile.addAssertiveBlock(block.build());
+        //throw new UnsupportedOperationException("re-institute the final confirm for this dan");
+        block.finalConfirm(newConstraint);
+        outputFile.addAssertiveBlock(block.build());
     }
 
     @Override
