@@ -19,6 +19,7 @@ public final class VC extends OutputModelObject {
 
     private final Token location;
     private final PExp antecedent, consequent;
+    private final List<PExp> antecedentPieces = new ArrayList<>();
 
     public VC(int number, PExp antecedent, PExp consequent) {
         this.number = number;
@@ -27,6 +28,7 @@ public final class VC extends OutputModelObject {
 
         this.explanation = consequent.getVCExplanation();
         this.location = consequent.getVCLocation();
+        this.antecedentPieces.addAll(antecedent.splitIntoConjuncts());
     }
 
     /** Same thing as {@link #getNumber} but gives back a string instead */

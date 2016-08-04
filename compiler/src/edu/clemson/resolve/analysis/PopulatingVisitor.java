@@ -67,11 +67,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public ParseTreeProperty<Boolean> chainableSyms = new ParseTreeProperty<>();
 
     /**
-     * A reference to the expr context that represents the previous segment
-     * accessed in a {@link ResolveParser.MathSelectorExpContext} or
-     * {@link ResolveParser.ProgSelectorExpContext}, no need to worry about
-     * overlap here as we use two separate expr hierarchies. This is
-     * {@code null} the rest of the time.
+     * A reference to the expr context that represents the previous segment accessed in a
+     * {@link ResolveParser.MathSelectorExpContext} or {@link ResolveParser.ProgSelectorExpContext}, no need to worry
+     * about overlap here as we use two separate expr hierarchies. This is {@code null} the rest of the time.
      */
     private ParserRuleContext prevSelectorAccess = null;
 
@@ -463,7 +461,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             tr.progTypes.put(ctx, type.getProgramType());
             tr.mathClssftns.put(ctx, type.getModelType());
-            //MathClassification x = type.getModelType();
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.name, ctx.name.getText());
@@ -1505,28 +1502,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             MathClssftn x = tr.mathClssftns.get(((ResolveParser.MathInfixAppExpContext) ctx).mathExp(1));
             actualArgTypes.set(0, x);
         }
-        //ugly hook to handle chained operator applications like 0 <= i <= j or
-        //j >= i >= 0
-        /*if (nameExp instanceof ResolveParser.MathSymbolExpContext) {
-            String nameWithoutQual = ((ResolveParser.MathSymbolExpContext) nameExp).name.getText();
-            Token qualifier = ((ResolveParser.MathSymbolExpContext) nameExp).qualifier;
-            if ((nameWithoutQual.equals("<=") || nameWithoutQual.equals("<") || nameWithoutQual.equals("≤")) &&
-                    args.size() == 2 &&
-                    args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
-                ResolveParser.MathInfixAppExpContext argAsInfixApp =
-                        (ResolveParser.MathInfixAppExpContext) args.get(0);
-                if (!(argAsInfixApp.getChild(1) instanceof ResolveParser.MathSymbolExpContext)) return;
-                ResolveParser.MathSymbolExpContext symExp =
-                        (ResolveParser.MathSymbolExpContext) argAsInfixApp.getChild(1);
-                String symExpName = symExp.name.getText();
-                if (symExpName.equals("<=") ||
-                        symExpName.equals("≤") ||
-                        symExpName.equals("<")) {
-                    MathClssftn x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
-                    actualArgTypes.set(0, x);
-                }
-            } //end ugly hook.
-        }*/
     }
 
     @Override

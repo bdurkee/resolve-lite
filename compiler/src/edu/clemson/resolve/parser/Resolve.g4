@@ -12,7 +12,7 @@ moduleDecl
     ;
 
 precisModuleDecl
-    :   'Precis' name=ID ';'
+    :   ('Meta')? 'Precis' name=ID ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF

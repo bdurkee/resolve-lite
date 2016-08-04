@@ -1,8 +1,6 @@
 package edu.clemson.resolve.proving;
 
-import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.proving.absyn.*;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
@@ -11,7 +9,9 @@ import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Utilities {
 
@@ -110,6 +110,26 @@ public class Utilities {
             return appWithNameChanged;
         }
         return p;
+    }
+
+    protected static PExp flattenPSelectors(@NotNull PExp e) {
+        PSelectorFlattener l = new PSelectorFlattener();
+        e.accept(l);
+        return e.substitute(l.substitutions);
+    }
+
+    public static class PSelectorFlattener extends PExpListener {
+        public Map<PExp, PExp> substitutions = new HashMap<>();
+
+        @Override
+        public void endPSelector(PSelector e) {
+            PSymbol s = new PSymbol.PSymbolBuilder(e.getLeft() + "." + e.getRight())
+                    .mathClssfctn(e.getMathClssftn())
+                    .quantification(e.getQuantification())
+                    .incoming(e.isIncoming())
+                    .build();
+            substitutions.put(e, s);
+        }
     }
 
     /** Builds and returns a typed {@link PSymbol} for the name/function "=B" */

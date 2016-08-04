@@ -77,7 +77,10 @@ public final class CongruenceClassProver {
         int i = 0;
         models = new PerVCProverModel[vcs.size()];
 
-        List<VC> preprocessedVcs = preprocessVCs(vcs);
+        //List<VC> preprocessedVcs = preprocessVCs(vcs);
+        List<VC> preprocessedVcs = new ArrayList<>();
+        PExp test = preprocessVCs(vcs).get(2);
+        preprocessedVcs.add();
         for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
             models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
@@ -137,12 +140,15 @@ public final class CongruenceClassProver {
         for (VC vc : vcs) {
             PExp newAntecedent = vc.getAntecedent();
             PExp newConsequent = vc.getConsequent();
+            newAntecedent = Utilities.flattenPSelectors(newAntecedent);
+            newConsequent = Utilities.flattenPSelectors(newConsequent);
 
+            result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
             // make every PExp a PSymbol
             //vc.convertAllToPsymbols(m_typeGraph);
             //result.add()
         }
-        result.addAll(vcs); //TODO: Not doing the conversions now. (I don't use lambdas right now, etc)
+        //result.addAll(vcs); //TODO: Not doing the conversions now. (I don't use lambdas right now, etc)
         return result;
     }
 
