@@ -157,8 +157,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PExp left = repo.get(ctx.mathExp(0));
         PExp right = repo.get(ctx.mathExp(1));
 
+        ParserRuleContext leftCtx = ctx.mathExp(0);
         //hardcode hook to handle chained relationals (generalize this at the syntax level with some
         //special syntax)
+        if (annotations.chainableCtx(ctx) && annotations.chainableCtx(leftCtx)) {
+            PExp left2 = getBottommostFormula(left);
+            PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
+                    .applicationType(getMathClssfctn(ctx))
+                    .style(INFIX)
+                    .arguments(left2.getSubExpressions().get(2), right).build();
+            PApply result = g.formConjunct(left, newRight);
+            repo.put(ctx, result);
+        }
+
         String x = left.getTopLevelOperationName();
         //or if our left is an 'and' whose right child is < or <=
         PExp left2 = getBottommostFormula(left);
@@ -179,6 +190,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
             repo.put(ctx, result.build());
         }
     }
+
 
     @NotNull
     public PExp getBottommostFormula(@NotNull PExp l) {

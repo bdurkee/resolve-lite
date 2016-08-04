@@ -33,7 +33,7 @@ public class AnnotatedModule {
      * internally, interpreted as "x OP y and y OP z"). Note that any operator defined
      * to be chainable had better be a predicate as it will become an argument to binary "and".
      */
-    public ParseTreeProperty<Boolean> chainableInfixAppCtxs = new ParseTreeProperty<>();
+    public ParseTreeProperty<Boolean> chainableInfixApps = new ParseTreeProperty<>();
 
     public ParseTreeProperty<MathClssftn> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
@@ -111,6 +111,14 @@ public class AnnotatedModule {
     public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @Nullable ParserRuleContext ctx) {
         PExp result = mathASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
+    }
+
+    public boolean chainableCtx(@NotNull ParserRuleContext ctx) {
+        boolean result = chainableInfixApps.get(ctx) != null;
+        if (result) {
+            result = chainableInfixApps.get(ctx);
+        }
+        return result;
     }
 
     @NotNull

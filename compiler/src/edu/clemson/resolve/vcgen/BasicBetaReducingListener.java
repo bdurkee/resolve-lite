@@ -1,9 +1,11 @@
 package edu.clemson.resolve.vcgen;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PLambda;
+import edu.clemson.resolve.proving.absyn.PLambda.MathSymbolDeclaration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,8 +16,7 @@ import java.util.stream.Collectors;
  * supplied actuals.
  * <p>
  * Note: This listener will therefore only mutate parts of an expression where
- * the first class name portion of some {@link PApply} is an instance of
- * {@link PLambda}.</p>
+ * the first class name portion of some {@link PApply} is an instance of {@link PLambda}.</p>
  */
 public class BasicBetaReducingListener extends PExpListener {
 
@@ -35,8 +36,7 @@ public class BasicBetaReducingListener extends PExpListener {
         PExp name = e.getFunctionPortion();
         if (name instanceof PLambda) {
             PLambda asPLambda = (PLambda) name;
-            List<PExp> boundVars = asPLambda.getParameters().stream().map(PLambda.MathSymbolDeclaration::asPSymbol)
-                    .collect(Collectors.toList());
+            List<PExp> boundVars = Utils.apply(asPLambda.getParameters(), MathSymbolDeclaration::asPSymbol);
             reducedExp = reducedExp.substitute(e, asPLambda.getBody().substitute(boundVars, e.getArguments()));
         }
     }

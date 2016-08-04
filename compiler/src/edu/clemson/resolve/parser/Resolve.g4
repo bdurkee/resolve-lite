@@ -366,7 +366,7 @@ mathCategoricalDefnDecl
     ;
 
 mathStandardDefnDecl
-    :   ('Implicit')? 'Definition' mathDefnSig
+    :   (chainable='Chainable')? ('Implicit')? 'Definition' mathDefnSig
         ('is' body=mathAssertionExp)? ';'
     ;
 

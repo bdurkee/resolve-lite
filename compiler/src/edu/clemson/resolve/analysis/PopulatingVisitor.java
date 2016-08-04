@@ -29,7 +29,6 @@ import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -64,6 +63,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     public ParseTreeProperty<MathClssftn> exactNamedMathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<String> progExpCallQualifiers = new ParseTreeProperty<>();
+
+    public ParseTreeProperty<Boolean> chainableSyms = new ParseTreeProperty<>();
+
     /**
      * A reference to the expr context that represents the previous segment
      * accessed in a {@link ResolveParser.MathSelectorExpContext} or
@@ -1059,7 +1061,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //next, visit the definition's 'return type' to give it a type
         this.visit(type);
         MathClssftn colonRhsType = exactNamedMathClssftns.get(type);
-
+        ParserRuleContext defnTopLevel =
+                Utils.getFirstAncestorOfType(ctx, ResolveParser.MathStandardDefnDeclContext.class);
+        boolean chainableOperator = false;
+        if (defnTopLevel != null) {
+            chainableOperator = ((ResolveParser.MathStandardDefnDeclContext)defnTopLevel).chainable != null;
+        }
         MathClssftn defnType = null;
         if (colonRhsType.typeRefDepth > 0) {
             int newTypeDepth = colonRhsType.typeRefDepth - 1;
@@ -1077,10 +1084,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             paramNames.add(t.getText());
                         }
                     } catch (ClassCastException cce) {
-                        ResolveParser.MathVarDeclContext singularDecl =
-                                (ResolveParser.MathVarDeclContext) formal;
-                        MathClssftn ty = exactNamedMathClssftns.get(
-                                singularDecl.mathClssftnExp());
+                        ResolveParser.MathVarDeclContext singularDecl = (ResolveParser.MathVarDeclContext) formal;
+                        MathClssftn ty = exactNamedMathClssftns.get(singularDecl.mathClssftnExp());
                         paramTypes.add(ty);
                         paramNames.add(singularDecl.mathSymbolName().getText());
                     }
@@ -1089,19 +1094,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 for (Token t : names) {
                     MathClssftn asNamed = new MathNamedClssftn(g, t.getText(), newTypeDepth, defnType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator));
                 }
             }
             else {
                 for (Token t : names) {
                     defnType = new MathNamedClssftn(g, t.getText(), newTypeDepth, colonRhsType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType));
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator));
                 }
             }
         }
         else {
             for (Token t : names) {
-                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
+                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator));
             }
         }
     }
@@ -1322,10 +1327,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
-        dummyNode.start = ctx.lop.start;
-        dummyNode.stop = ctx.rop.stop;  //maybe lop.stop?
-        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
+        ResolveParser.MathSymbolExpContext dummyPrefixNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
+        dummyPrefixNode.start = ctx.lop.start;
+        dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
+        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
 
         Token left = ctx.mathSymbolNameNoID(0).getStart();
         Token right = ctx.mathSymbolNameNoID(1).getStart();
@@ -1334,13 +1339,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         t.setText(left.getText() + ".." + right.getText());
         dummyName.start = t;
         dummyName.stop = t;
-        dummyName.parent = dummyNode;
+        dummyName.parent = dummyPrefixNode;
 
         dummyName.addChild(t);
-        dummyNode.addChild(dummyName);
-        dummyNode.name = dummyName;
+        dummyPrefixNode.addChild(dummyName);
+        dummyPrefixNode.name = dummyName;
 
-        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
+        typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
         return null;
     }
 
@@ -1376,6 +1381,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
+        tr.chainableInfixApps.put(ctx, chainableSyms.get(nameExp));
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClssftn t = exactNamedMathClssftns.get(nameExp);
@@ -1492,10 +1498,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                              @NotNull ParserRuleContext nameExp,
                                              @NotNull List<? extends ParseTree> args,
                                              @NotNull List<MathClssftn> actualArgTypes) {
-
+        if (!(ctx instanceof ResolveParser.MathInfixAppExpContext)) return;
+        ParserRuleContext left = ((ResolveParser.MathInfixAppExpContext) ctx).mathExp(0);
+        String here = ctx.getText();
+        if (tr.chainableCtx(ctx) && tr.chainableCtx(left)) {
+            MathClssftn x = tr.mathClssftns.get(((ResolveParser.MathInfixAppExpContext) ctx).mathExp(1));
+            actualArgTypes.set(0, x);
+        }
         //ugly hook to handle chained operator applications like 0 <= i <= j or
         //j >= i >= 0
-        if (nameExp instanceof ResolveParser.MathSymbolExpContext) {
+        /*if (nameExp instanceof ResolveParser.MathSymbolExpContext) {
             String nameWithoutQual = ((ResolveParser.MathSymbolExpContext) nameExp).name.getText();
             Token qualifier = ((ResolveParser.MathSymbolExpContext) nameExp).qualifier;
             if ((nameWithoutQual.equals("<=") || nameWithoutQual.equals("<") || nameWithoutQual.equals("≤")) &&
@@ -1514,7 +1526,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     actualArgTypes.set(0, x);
                 }
             } //end ugly hook.
-        }
+        }*/
     }
 
     @Override
@@ -1698,6 +1710,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
+        chainableSyms.put(ctx, s.isChainable());
     }
 
     @Nullable
