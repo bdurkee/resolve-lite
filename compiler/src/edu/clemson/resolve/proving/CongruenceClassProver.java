@@ -79,13 +79,16 @@ public final class CongruenceClassProver {
 
         //List<VC> preprocessedVcs = preprocessVCs(vcs);
         List<VC> preprocessedVcs = new ArrayList<>();
-        PExp test = preprocessVCs(vcs).get(2);
-        preprocessedVcs.add();
-        for (VC vc : preprocessedVcs) {
+
+        VC test = buildTestVC1(m_scope, g, z, n);
+        m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
+
+        //preprocessedVcs.add(test);
+       /* for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
             models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
                     vc.getConsequent().splitIntoConjuncts());
-        }
+        }*/
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
             theoremSymbols.addAll(
@@ -134,6 +137,157 @@ public final class CongruenceClassProver {
         }
         m_results = "";
     }
+
+    private VC buildTestVC1(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(z).build();
+        PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(z).build();
+
+        PSymbol LTE = new PSymbol.PSymbolBuilder("≤")
+                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                .build();
+        PSymbol LT = new PSymbol.PSymbolBuilder("<")
+                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                .build();
+
+        //0 <= P.Curr_Place
+        PApply zeroLTEpcurrplace = new PApply.PApplyBuilder(LTE)
+                .applicationType(g.BOOLEAN)
+                .arguments(zero, pcurrPlace)
+                .build();
+
+        PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(z).build();
+
+        //P.Curr_Place <= P.Length
+        PApply pcurrplaceLTEplength = new PApply.PApplyBuilder(LTE)
+                .applicationType(g.BOOLEAN)
+                .arguments(pcurrPlace, plength)
+                .build();
+
+        PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(z).build();
+
+        //P.Length < Max_Length
+        PApply plengthLTmaxlength = new PApply.PApplyBuilder(LT)
+                .applicationType(g.BOOLEAN)
+                .arguments(plength, maxlength)
+                .build();
+
+        List<PExp> ants = new ArrayList<>();
+        ants.add(zeroLTEpcurrplace);
+        ants.add(pcurrplaceLTEplength);
+        ants.add(plengthLTmaxlength);
+
+        //P.Curr_Place <= Max_Length
+        PApply pcurrplaceLTEmaxlength = new PApply.PApplyBuilder(LTE)
+                .applicationType(g.BOOLEAN)
+                .arguments(pcurrPlace, maxlength)
+                .build();
+
+        PExp antecedent = g.formConjuncts(zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
+        PExp consequent = pcurrplaceLTEmaxlength;
+        VC result = new VC(1, antecedent, consequent);
+        return result;
+    }
+
+    private VC buildTestVC3(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        VC result = null;
+        try {
+            MathClssftnWrappingSymbol ia = s.queryForOne(new MathSymbolQuery(null, "IA"));
+            MathClssftnWrappingSymbol scd = s.queryForOne(new MathSymbolQuery(null, "SCD"));
+            MathClssftnWrappingSymbol cen = s.queryForOne(new MathSymbolQuery(null, "Cen"));
+            MathClssftnWrappingSymbol sp_loc = s.queryForOne(new MathSymbolQuery(null, "Sp_Loc"));
+            MathClssftnWrappingSymbol ss = s.queryForOne(new MathSymbolQuery(null, "SS"));
+            MathClssftnWrappingSymbol n2 = s.queryForOne(new MathSymbolQuery(null, "N2"));
+
+            PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(z).build();
+            PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(z).build();
+
+            PSymbol LTE = new PSymbol.PSymbolBuilder("≤")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                    .build();
+            PSymbol LT = new PSymbol.PSymbolBuilder("<")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                    .build();
+
+            PApply zeroLTEpcurrplace = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(zero, pcurrPlace)
+                    .build();
+
+            PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(z).build();
+
+            //P.Curr_Place <= P.Length
+            PApply pcurrplaceLTEplength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(pcurrPlace, plength)
+                    .build();
+
+            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(z).build();
+            PApply plengthLTmaxlength = new PApply.PApplyBuilder(LT)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(plength, maxlength)
+                    .build();
+
+            //P.Curr_Place <= Max_Length
+            PApply pcurrplaceLTEmaxlength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(pcurrPlace, maxlength)
+                    .build();
+
+            PExp antecedent = g.formConjuncts(zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
+            PExp consequent = pcurrplaceLTEmaxlength;
+            result = new VC(3, antecedent, consequent);
+            return result;
+            //givens:
+            //0 <= P.Curr_Place
+            //P.Curr_Place <= P.Length
+            //P.Length < Max_Length
+
+            //goal:
+            //SCD(IA(SS, Cen, P.Length)) <= Max_Length
+
+            //SS
+            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
+
+            //k
+            PSymbol k_exp = null;
+            try {
+                k_exp = new PSymbol(n2.getTypeValue(), null, "k");
+            } catch (SymbolNotOfKindTypeException e) {
+                e.printStackTrace();
+            }
+
+            //Cen(k)
+            args.clear();
+            args.add(k_exp);
+            PSymbol cen_exp = new PSymbol(((MTFunction)cen.getType()).getRange(), null, "Cen", args);
+
+            //IA(SS, Cen, P.Length)
+            args.clear();
+            //args.add(ss_exp);
+            args.add(cen_exp);
+            args.add(plength);
+            PSymbol ia_exp = new PSymbol(((MTFunction)ia.getType()).getRange(), null, "IA", args);
+
+            //SCD(IA(SS, Cen, P.Length))
+            args.clear();
+            args.add(ia_exp);
+            PSymbol scd_exp = new PSymbol(((MTFunction)scd.getType()).getRange(), null, "SCD", args);
+
+            //SCD(IA(SS, Cen, P.Length)) <= Max_Length
+            args.clear();
+            args.add(scd_exp);
+            args.add(maxlength);
+            PSymbol scdLTEmaxlength = new PSymbol(g.BOOLEAN, null, "<=", args);
+
+            PExp antecedent = new Antecedent(ants);
+            Consequent consequent = new Consequent(scdLTEmaxlength);
+            result = new VC("0_3", antecedent, consequent);*/
+        } catch (SymbolTableException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 
     private List<VC> preprocessVCs(List<VC> vcs) {
         List<VC> result = new ArrayList<>();

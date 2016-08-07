@@ -131,7 +131,8 @@ public class VerificationConditionCongruenceClosureImpl {
             }
             else {
                 // Temp: replace with eliminate()
-                if (curr.getTopLevelOperationName().equals("orB") && curr instanceof PApply) {
+                if ((curr.getTopLevelOperationName().equals("orB") || curr.getTopLevelOperationName().equals("∨B"))
+                        && curr instanceof PApply) {
                     addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(1))));
                     addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(2))));
                 }

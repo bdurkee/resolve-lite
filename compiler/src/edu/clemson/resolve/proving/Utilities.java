@@ -56,15 +56,18 @@ public class Utilities {
                 && argList.get(0).getMathClssftn().isSubtypeOf(z)
                 && argList.get(1).getMathClssftn().isSubtypeOf(z)) {
             // x < y to x + 1 <= y
-           /* argsTemp.add(argList.get(0));
-            argsTemp.add(new PSymbol.PSymbolBuilder("1").mathClssfctn(n).build());
-            PSymbol plus1 =
-                    new PSymbol(argList.get(0).getType(), null, "+"
-                            + argList.get(0).getType().toString(), argsTemp);
-            argsTemp.clear();
-            argsTemp.add(plus1);
-            argsTemp.add(argList.get(1));
-            return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);*/
+            PSymbol PLUS = new PSymbol.PSymbolBuilder("+" + argList.get(0).getMathClssftn())
+                    .mathClssfctn(new MathFunctionClssftn(g, z, z, z))
+                    .build();
+            PSymbol LTE = new PSymbol.PSymbolBuilder("≤" + "B")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                    .build();
+            PSymbol one = new PSymbol.PSymbolBuilder("1").mathClssfctn(z).build();
+            PApply xplus1 = new PApply.PApplyBuilder(PLUS).arguments(argList.get(0), one).applicationType(z).build();
+
+            return new PApply.PApplyBuilder(LTE) .applicationType(g.BOOLEAN)
+                    .arguments(xplus1, argList.get(1))
+                    .build();
         }
         // x - y to x + (-y)
        /* else if (z != null && pTop.equals("-") &&
@@ -139,11 +142,15 @@ public class Utilities {
 
     /** Builds and returns a typed {@link PSymbol} for the name/function "orB" */
     protected static PSymbol buildOrBName(@NotNull DumbMathClssftnHandler g) {
-        return new PSymbol.PSymbolBuilder("orB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+        return new PSymbol.PSymbolBuilder("∨B").mathClssfctn(g.BOOLEAN_FUNCTION).build();
     }
 
     /** Builds and returns a typed {@link PSymbol} for the name/function "andB" */
     protected static PSymbol buildAndBName(@NotNull DumbMathClssftnHandler g) {
-        return new PSymbol.PSymbolBuilder("andB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+        return new PSymbol.PSymbolBuilder("∧B").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+    }
+
+    protected static boolean equalsDisjunct(@NotNull String o) {
+        return o.equals("∨B") || o.equals("orB");
     }
 }

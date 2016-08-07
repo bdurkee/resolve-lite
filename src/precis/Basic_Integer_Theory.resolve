@@ -65,7 +65,25 @@ Precis Basic_Integer_Theory;
 
 	Theorem Nested_Subt_1: ∀ i, j : Z, (i + j - j) = i;
 
-	//Theorem LTE_Sum: ∀ w, x, y, z : Z, w ≤ (x + z) ∧ (x ≤ y) implies (w ≤ (y + z));
-	//Theorem Negs_LT_Zero: ∀ i : Z, i ≤ 0 implies (⨩(i) ≤ 0);
+	Corollary LTE_1a: ∀ i, j, k : Z, i ≤ j ∧ (j ≤ k) implies (i ≤ k);   //expand Is_Transitive(≤);
+    //TODO: Have special keyword which dictates when an application ought to be expanded.
+    //For intance, Corollary lte1: expand Is_Transitive(≤);
 
+    Corollary LTE_3: ∀ m, n : Z, m ≤ n ∨ (n ≤ m);       //expand Is_Total(≤)
+	Corollary LTE_3a: ∀ n : Z, n ≤ n;                   //expand Is_Reflexive(≤)
+/*
+    Definition N2 : Powerset(N);
+	Definition Sp_Loc : SSet;
+	Definition SS : Sp_Loc -> Sp_Loc;
+
+	Definition SCD (p : Sp_Loc) : Z;
+	Definition Cen (k : N2) : Sp_Loc;
+
+	Definition IA (x : Sp_Loc, n : Z) : Sp_Loc;
+
+	Corollary scd3:
+		∀ n : Z,
+		∀ k : N2,
+			SCD(IA(Cen(k), n)) = n;
+*/
 end Basic_Integer_Theory;

@@ -76,7 +76,10 @@ public class Registry {
         m_commutative_operators.add("+Z");
         m_commutative_operators.add("=B");
         m_commutative_operators.add("andB");
+        m_commutative_operators.add("∧B");
         m_commutative_operators.add("orB");
+        m_commutative_operators.add("∨B");
+
         m_cached_isSubtype = new HashMap<String, Boolean>();
     }
 
