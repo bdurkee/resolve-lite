@@ -80,7 +80,7 @@ public final class CongruenceClassProver {
         //List<VC> preprocessedVcs = preprocessVCs(vcs);
         List<VC> preprocessedVcs = new ArrayList<>();
 
-        VC test = buildTestVC1(m_scope, g, z, n);
+        VC test = buildTestVC3(m_scope, g, z, n);
         m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
 
         //preprocessedVcs.add(test);
@@ -133,7 +133,7 @@ public final class CongruenceClassProver {
             }
         }
         if (n != null && z != null) {
-            //sumConversion(n, z);
+            sumConversion(n, z);
         }
         m_results = "";
     }
@@ -155,7 +155,7 @@ public final class CongruenceClassProver {
                 .arguments(zero, pcurrPlace)
                 .build();
 
-        PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(z).build();
+        PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(n).build();
 
         //P.Curr_Place <= P.Length
         PApply pcurrplaceLTEplength = new PApply.PApplyBuilder(LTE)
@@ -221,7 +221,7 @@ public final class CongruenceClassProver {
                     .arguments(pcurrPlace, plength)
                     .build();
 
-            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(z).build();
+            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(n).build();
             PApply plengthLTmaxlength = new PApply.PApplyBuilder(LT)
                     .applicationType(g.BOOLEAN)
                     .arguments(plength, maxlength)
@@ -233,10 +233,74 @@ public final class CongruenceClassProver {
                     .arguments(pcurrPlace, maxlength)
                     .build();
 
-            PExp antecedent = g.formConjuncts(zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
-            PExp consequent = pcurrplaceLTEmaxlength;
+            //SS
+            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
+*/
+            //k
+            PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
+                    .mathClssfctn(n2.getClassification())
+                    .build();
+
+            //Cen
+            PSymbol cen_exp = new PSymbol.PSymbolBuilder("Cen")
+                    .mathClssfctn(cen.getClassification().enclosingClassification)
+                    .build();
+
+            //Cen(k)
+            MathClssftn sp_loc_type = new MathFunctionApplicationClssftn(g,
+                    new MathFunctionClssftn(g, g.SSET, n2.getClassification()), "Sp_Loc", n2.getClassification());
+            PApply cen_app_exp = new PApply.PApplyBuilder(cen_exp)
+                    .applicationType(sp_loc_type)
+                    .arguments(k_exp)
+                    .build();
+
+            //SS
+            PSymbol ss_exp = new PSymbol.PSymbolBuilder("SS")
+                    .mathClssfctn(ss.getClassification().enclosingClassification)
+                    .build();
+            //SS(k)
+            MathFunctionClssftn ss_app_type = new MathFunctionClssftn(g, sp_loc_type, sp_loc_type);
+           //MathClssftn ss_app_type = new MathFunctionApplicationClssftn()
+            PApply ss_app_exp = new PApply.PApplyBuilder(ss_exp)
+                    .applicationType(ss_app_type)
+                    .arguments(k_exp)
+                    .build();
+
+            //IA
+            PSymbol ia_exp = new PSymbol.PSymbolBuilder("IA")
+                    .mathClssfctn(ia.getClassification().enclosingClassification)
+                    .build();
+
+            //IA(SS(k), Cen(k), P.Length)
+            PApply ia_app_exp = new PApply.PApplyBuilder(ia_exp)
+                    .applicationType(sp_loc_type)
+                    .arguments(ss_app_exp, cen_app_exp, plength)
+                    .build();
+
+            int i;
+            i=0;
+            //SCD
+            PSymbol scd_exp = new PSymbol.PSymbolBuilder("SCD")
+                    .mathClssfctn(scd.getClassification().enclosingClassification)
+                    .build();
+            //SCD(IA(SS, Cen, P.Length))
+            PApply scd_app_exp = new PApply.PApplyBuilder(scd_exp)
+                    .applicationType(n)
+                    .arguments(ia_app_exp)
+                    .build();
+
+            PApply scdLTEmaxlength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(scd_app_exp, maxlength)
+                    .build();
+
+            PExp antecedent = g.formConjuncts(zeroLTEpcurrplace/*, pcurrplaceLTEplength, plengthLTmaxlength*/);
+            //PExp consequent = scdLTEmaxlength;
+            //PExp consequent = pcurrplaceLTEmaxlength;
+            PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
+            PExp consequent = new PApply.PApplyBuilder(eq).applicationType(g.BOOLEAN).arguments(ss_app_exp, cen_exp).build();
             result = new VC(3, antecedent, consequent);
-            return result;
+
             //givens:
             //0 <= P.Curr_Place
             //P.Curr_Place <= P.Length
@@ -244,44 +308,6 @@ public final class CongruenceClassProver {
 
             //goal:
             //SCD(IA(SS, Cen, P.Length)) <= Max_Length
-
-            //SS
-            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
-
-            //k
-            PSymbol k_exp = null;
-            try {
-                k_exp = new PSymbol(n2.getTypeValue(), null, "k");
-            } catch (SymbolNotOfKindTypeException e) {
-                e.printStackTrace();
-            }
-
-            //Cen(k)
-            args.clear();
-            args.add(k_exp);
-            PSymbol cen_exp = new PSymbol(((MTFunction)cen.getType()).getRange(), null, "Cen", args);
-
-            //IA(SS, Cen, P.Length)
-            args.clear();
-            //args.add(ss_exp);
-            args.add(cen_exp);
-            args.add(plength);
-            PSymbol ia_exp = new PSymbol(((MTFunction)ia.getType()).getRange(), null, "IA", args);
-
-            //SCD(IA(SS, Cen, P.Length))
-            args.clear();
-            args.add(ia_exp);
-            PSymbol scd_exp = new PSymbol(((MTFunction)scd.getType()).getRange(), null, "SCD", args);
-
-            //SCD(IA(SS, Cen, P.Length)) <= Max_Length
-            args.clear();
-            args.add(scd_exp);
-            args.add(maxlength);
-            PSymbol scdLTEmaxlength = new PSymbol(g.BOOLEAN, null, "<=", args);
-
-            PExp antecedent = new Antecedent(ants);
-            Consequent consequent = new Consequent(scdLTEmaxlength);
-            result = new VC("0_3", antecedent, consequent);*/
         } catch (SymbolTableException e) {
             e.printStackTrace();
         }

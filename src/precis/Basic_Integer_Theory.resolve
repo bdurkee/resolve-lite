@@ -71,19 +71,5 @@ Precis Basic_Integer_Theory;
 
     Corollary LTE_3: ∀ m, n : Z, m ≤ n ∨ (n ≤ m);       //expand Is_Total(≤)
 	Corollary LTE_3a: ∀ n : Z, n ≤ n;                   //expand Is_Reflexive(≤)
-/*
-    Definition N2 : Powerset(N);
-	Definition Sp_Loc : SSet;
-	Definition SS : Sp_Loc -> Sp_Loc;
 
-	Definition SCD (p : Sp_Loc) : Z;
-	Definition Cen (k : N2) : Sp_Loc;
-
-	Definition IA (x : Sp_Loc, n : Z) : Sp_Loc;
-
-	Corollary scd3:
-		∀ n : Z,
-		∀ k : N2,
-			SCD(IA(Cen(k), n)) = n;
-*/
 end Basic_Integer_Theory;
