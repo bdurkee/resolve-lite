@@ -213,7 +213,7 @@ public final class CongruenceClassProver {
                     .arguments(zero, pcurrPlace)
                     .build();
 
-            PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(z).build();
+            PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(n).build();
 
             //P.Curr_Place <= P.Length
             PApply pcurrplaceLTEplength = new PApply.PApplyBuilder(LTE)
@@ -289,16 +289,16 @@ public final class CongruenceClassProver {
                     .arguments(ia_app_exp)
                     .build();
 
-            PApply scdLTEmaxlength = new PApply.PApplyBuilder(LTE)
+            PApply scdLTmaxlength = new PApply.PApplyBuilder(LT)
                     .applicationType(g.BOOLEAN)
                     .arguments(scd_app_exp, maxlength)
                     .build();
 
-            PExp antecedent = g.formConjuncts(zeroLTEpcurrplace/*, pcurrplaceLTEplength, plengthLTmaxlength*/);
-            //PExp consequent = scdLTEmaxlength;
+            PExp antecedent = g.formConjuncts(pcurrplaceLTEplength, plengthLTmaxlength);
+            PExp consequent = scdLTmaxlength;
             //PExp consequent = pcurrplaceLTEmaxlength;
-            PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
-            PExp consequent = new PApply.PApplyBuilder(eq).applicationType(g.BOOLEAN).arguments(ss_app_exp, cen_exp).build();
+            //PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
+            //PExp consequent = new PApply.PApplyBuilder(eq).applicationType(g.BOOLEAN).arguments(ss_app_exp, cen_exp).build();
             result = new VC(3, antecedent, consequent);
 
             //givens:
