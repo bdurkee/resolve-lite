@@ -198,16 +198,30 @@ public final class CongruenceClassProver {
             MathClssftnWrappingSymbol ss = s.queryForOne(new MathSymbolQuery(null, "SS"));
             MathClssftnWrappingSymbol n2 = s.queryForOne(new MathSymbolQuery(null, "N2"));
 
-            PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(z).build();
-            PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(z).build();
+            PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(n).build();
+            PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(n).build();
 
             PSymbol LTE = new PSymbol.PSymbolBuilder("≤")
-                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
+                    .build();
+            PSymbol LTE_z = new PSymbol.PSymbolBuilder("≤")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
                     .build();
             PSymbol LT = new PSymbol.PSymbolBuilder("<")
-                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, z, z))
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
                     .build();
 
+            PSymbol min_int = new PSymbol.PSymbolBuilder("min_int")
+                    .mathClssfctn(z)
+                    .build();
+            PSymbol k = new PSymbol.PSymbolBuilder("k")
+                    .mathClssfctn(n2.getClassification())
+                    .build();
+
+            PApply min_intLTEk = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(min_int, k)
+                    .build();
             PApply zeroLTEpcurrplace = new PApply.PApplyBuilder(LTE)
                     .applicationType(g.BOOLEAN)
                     .arguments(zero, pcurrPlace)
@@ -271,11 +285,10 @@ public final class CongruenceClassProver {
                     .mathClssfctn(ia.getClassification().enclosingClassification)
                     .build();
 
-            PSymbol plength2 = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(n).build();
             //IA(SS(k), Cen(k), P.Length)
             PApply ia_app_exp = new PApply.PApplyBuilder(ia_exp)
                     .applicationType(sp_loc_type)
-                    .arguments(ss_app_exp, cen_app_exp, plength2)
+                    .arguments(ss_app_exp, cen_app_exp, plength)
                     .build();
 
             int i;
@@ -295,7 +308,7 @@ public final class CongruenceClassProver {
                     .arguments(scd_app_exp, maxlength)
                     .build();
 
-            PExp antecedent = g.formConjuncts(pcurrplaceLTEplength, plengthLTmaxlength);
+            PExp antecedent = g.formConjuncts(min_intLTEk, zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
             PExp consequent = scdLTmaxlength;
             //PExp consequent = pcurrplaceLTEmaxlength;
             //PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
