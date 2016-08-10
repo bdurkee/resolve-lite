@@ -1177,8 +1177,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
+        this.visit(ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override
+    public Void visitConventionsClause(ResolveParser.ConventionsClauseContext ctx) {
+        if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
+        this.visit(ctx.mathAssertionExp());
         return null;
     }
 

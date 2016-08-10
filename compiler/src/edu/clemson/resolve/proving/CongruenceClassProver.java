@@ -271,10 +271,11 @@ public final class CongruenceClassProver {
                     .mathClssfctn(ia.getClassification().enclosingClassification)
                     .build();
 
+            PSymbol plength2 = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(n).build();
             //IA(SS(k), Cen(k), P.Length)
             PApply ia_app_exp = new PApply.PApplyBuilder(ia_exp)
                     .applicationType(sp_loc_type)
-                    .arguments(ss_app_exp, cen_app_exp, plength)
+                    .arguments(ss_app_exp, cen_app_exp, plength2)
                     .build();
 
             int i;
