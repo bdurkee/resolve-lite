@@ -214,6 +214,10 @@ public final class CongruenceClassProver {
             PSymbol min_int = new PSymbol.PSymbolBuilder("min_int")
                     .mathClssfctn(z)
                     .build();
+            PSymbol max_int = new PSymbol.PSymbolBuilder("max_int")
+                    .mathClssfctn(z)
+                    .build();
+
             PSymbol k = new PSymbol.PSymbolBuilder("k")
                     .mathClssfctn(n2.getClassification())
                     .build();
@@ -222,6 +226,23 @@ public final class CongruenceClassProver {
                     .applicationType(g.BOOLEAN)
                     .arguments(min_int, k)
                     .build();
+            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(n).build();
+
+            PApply k_LTE_max_int = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(k, max_int)
+                    .build();
+
+            PApply min_intLTEmax_length = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(min_int, maxlength)
+                    .build();
+
+            PApply max_lengthLTEmax_int = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(maxlength, max_int)
+                    .build();
+
             PApply zeroLTEpcurrplace = new PApply.PApplyBuilder(LTE)
                     .applicationType(g.BOOLEAN)
                     .arguments(zero, pcurrPlace)
@@ -235,7 +256,6 @@ public final class CongruenceClassProver {
                     .arguments(pcurrPlace, plength)
                     .build();
 
-            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(n).build();
             PApply plengthLTmaxlength = new PApply.PApplyBuilder(LT)
                     .applicationType(g.BOOLEAN)
                     .arguments(plength, maxlength)
@@ -308,7 +328,7 @@ public final class CongruenceClassProver {
                     .arguments(scd_app_exp, maxlength)
                     .build();
 
-            PExp antecedent = g.formConjuncts(min_intLTEk, zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
+            PExp antecedent = g.formConjuncts(min_intLTEk, k_LTE_max_int, min_intLTEmax_length, max_lengthLTEmax_int, zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
             PExp consequent = scdLTmaxlength;
             //PExp consequent = pcurrplaceLTEmaxlength;
             //PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
@@ -328,6 +348,187 @@ public final class CongruenceClassProver {
         return result;
     }
 
+    private VC buildTestVC4(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        VC result = null;
+        try {
+            MathClssftnWrappingSymbol ia = s.queryForOne(new MathSymbolQuery(null, "IA"));
+            MathClssftnWrappingSymbol scd = s.queryForOne(new MathSymbolQuery(null, "SCD"));
+            MathClssftnWrappingSymbol cen = s.queryForOne(new MathSymbolQuery(null, "Cen"));
+            MathClssftnWrappingSymbol sp_loc = s.queryForOne(new MathSymbolQuery(null, "Sp_Loc"));
+            MathClssftnWrappingSymbol ss = s.queryForOne(new MathSymbolQuery(null, "SS"));
+            MathClssftnWrappingSymbol n2 = s.queryForOne(new MathSymbolQuery(null, "N2"));
+            MathClssftnWrappingSymbol is_inside_of = s.queryForOne(new MathSymbolQuery(null, "Is_Inside_of"));
+
+            PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(n).build();
+            PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(n).build();
+
+            PSymbol LTE = new PSymbol.PSymbolBuilder("≤")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
+                    .build();
+            PSymbol LTE_z = new PSymbol.PSymbolBuilder("≤")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
+                    .build();
+            PSymbol LT = new PSymbol.PSymbolBuilder("<")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, n, n))
+                    .build();
+
+            PSymbol min_int = new PSymbol.PSymbolBuilder("min_int")
+                    .mathClssfctn(z)
+                    .build();
+            PSymbol max_int = new PSymbol.PSymbolBuilder("max_int")
+                    .mathClssfctn(z)
+                    .build();
+
+            PSymbol k = new PSymbol.PSymbolBuilder("k")
+                    .mathClssfctn(n2.getClassification())
+                    .build();
+
+            PApply min_intLTEk = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(min_int, k)
+                    .build();
+            PSymbol maxlength = new PSymbol.PSymbolBuilder("Max_Length").mathClssfctn(n).build();
+
+            PApply k_LTE_max_int = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(k, max_int)
+                    .build();
+
+            PApply min_intLTEmax_length = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(min_int, maxlength)
+                    .build();
+
+            PApply max_lengthLTEmax_int = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(maxlength, max_int)
+                    .build();
+
+            PApply zeroLTEpcurrplace = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(zero, pcurrPlace)
+                    .build();
+
+            PSymbol plength = new PSymbol.PSymbolBuilder("P.Length").mathClssfctn(n).build();
+
+            //P.Curr_Place <= P.Length
+            PApply pcurrplaceLTEplength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(pcurrPlace, plength)
+                    .build();
+
+            //P.Length <= Max_Length
+            PApply plengthLTEmaxlength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(plength, maxlength)
+                    .build();
+
+            //P.Curr_Place <= Max_Length
+            PApply pcurrplaceLTEmaxlength = new PApply.PApplyBuilder(LTE)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(pcurrPlace, maxlength)
+                    .build();
+
+            //SS
+            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
+*/
+            //k
+            PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
+                    .mathClssfctn(n2.getClassification())
+                    .build();
+
+            //Cen
+            PSymbol cen_exp = new PSymbol.PSymbolBuilder("Cen")
+                    .mathClssfctn(cen.getClassification().enclosingClassification)
+                    .build();
+
+            //Cen(k)
+            MathClssftn sp_loc_type = new MathFunctionApplicationClssftn(g,
+                    new MathFunctionClssftn(g, g.SSET, n2.getClassification()), "Sp_Loc", n2.getClassification());
+            PApply cen_app_exp = new PApply.PApplyBuilder(cen_exp)
+                    .applicationType(sp_loc_type)
+                    .arguments(k_exp)
+                    .build();
+
+            //SS
+            PSymbol ss_exp = new PSymbol.PSymbolBuilder("SS")
+                    .mathClssfctn(ss.getClassification().enclosingClassification)
+                    .build();
+            //SS(k)
+            MathFunctionClssftn ss_app_type = new MathFunctionClssftn(g, sp_loc_type, sp_loc_type);
+            //MathClssftn ss_app_type = new MathFunctionApplicationClssftn()
+            PApply ss_app_exp = new PApply.PApplyBuilder(ss_exp)
+                    .applicationType(ss_app_type)
+                    .arguments(k_exp)
+                    .build();
+
+            //IA
+            PSymbol ia_exp = new PSymbol.PSymbolBuilder("IA")
+                    .mathClssfctn(ia.getClassification().enclosingClassification)
+                    .build();
+
+            //IA(SS(k), Cen(k), P.Length)
+            PApply ia_app_exp = new PApply.PApplyBuilder(ia_exp)
+                    .applicationType(sp_loc_type)
+                    .arguments(ss_app_exp, cen_app_exp, plength)
+                    .build();
+
+            int i;
+            i=0;
+            //SCD
+            PSymbol scd_exp = new PSymbol.PSymbolBuilder("SCD")
+                    .mathClssfctn(scd.getClassification().enclosingClassification)
+                    .build();
+            //SCD(IA(SS, Cen, P.Length))
+            PApply scd_app_exp = new PApply.PApplyBuilder(scd_exp)
+                    .applicationType(n)
+                    .arguments(ia_app_exp)
+                    .build();
+
+            PApply scdLTmaxlength = new PApply.PApplyBuilder(LT)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(scd_app_exp, maxlength)
+                    .build();
+
+            //IA
+            PSymbol ia_exp0 = new PSymbol.PSymbolBuilder("IA")
+                    .mathClssfctn(ia.getClassification().enclosingClassification)
+                    .build();
+
+            //IA(SS(k), Cen(k), P.Curr_Place)
+            PApply ia_app_exp0 = new PApply.PApplyBuilder(ia_exp)
+                    .applicationType(sp_loc_type)
+                    .arguments(ss_app_exp, cen_app_exp, pcurrPlace)
+                    .build();
+            PApply ia_app_exp1 = ia_app_exp;
+            PSymbol inside_of_exp = new PSymbol.PSymbolBuilder("Is_Inside_of")
+                    .mathClssfctn(is_inside_of.getClassification().enclosingClassification)
+                    .build();
+
+            PApply ia_app_exp0_IsInsideOf_ia_app_exp1 = new PApply.PApplyBuilder(inside_of_exp)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(ia_app_exp0, ia_app_exp1)
+                    .build();
+
+            PExp antecedent = g.formConjuncts(min_intLTEk, k_LTE_max_int, min_intLTEmax_length, max_lengthLTEmax_int, zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTEmaxlength );
+            PExp consequent = ia_app_exp0_IsInsideOf_ia_app_exp1;
+            //PExp consequent = pcurrplaceLTEmaxlength;
+            //PExp eq = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
+            //PExp consequent = new PApply.PApplyBuilder(eq).applicationType(g.BOOLEAN).arguments(ss_app_exp, cen_exp).build();
+            result = new VC(4, antecedent, consequent);
+
+            //givens:
+            //0 <= P.Curr_Place
+            //P.Curr_Place <= P.Length
+            //P.Length < Max_Length
+
+            //goal:
+            //SCD(IA(SS, Cen, P.Length)) <= Max_Length
+        } catch (SymbolTableException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
     private List<VC> preprocessVCs(List<VC> vcs) {
         List<VC> result = new ArrayList<>();

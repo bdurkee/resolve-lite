@@ -204,7 +204,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     new UnqualifiedNameQuery(ctx.name.getText())).toProgReprTypeSymbol();
         } catch (SymbolTableException e) {
         }
-
         List<PExp> opParamAntecedents =
                 getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
                         this::extractAssumptionsFromParameter);

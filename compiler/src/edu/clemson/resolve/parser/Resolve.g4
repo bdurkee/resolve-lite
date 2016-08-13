@@ -409,7 +409,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
     ;
 
 mathExp
@@ -445,7 +445,7 @@ mathOutfixAppExp
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl 's.t.' mathAssertionExp '}'
+    :   '{' mathVarDecl '∣' mathAssertionExp '}'
     ;
 
 mathSetExp

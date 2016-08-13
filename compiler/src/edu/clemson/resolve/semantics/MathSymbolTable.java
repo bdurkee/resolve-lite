@@ -145,6 +145,8 @@ public class MathSymbolTable {
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "Powerset", g.POWERSET_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "℘", g.POWERSET_FUNCTION));
+
             globalScope.define(new MathClssftnWrappingSymbol(g, "conc", g.BOOLEAN));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "is_in",
