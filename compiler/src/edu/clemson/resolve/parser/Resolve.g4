@@ -21,6 +21,7 @@ precisModuleDecl
 precisExtModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
+        (usesList)?
         precisBlock
         'end' closename=ID ';'
     ;
@@ -316,8 +317,7 @@ mathTheoremDecl
 
 //had better be an assertion involving the use of ':' or '⦂'
 mathClssftnAssertionDecl
-    :   'Classification' 'Corollary' ':'
-            mathAssertionExp ';'
+    :   'Classification' 'Corollary' ':' mathAssertionExp ';'
     ;
 
 mathDefnSig

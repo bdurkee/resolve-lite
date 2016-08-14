@@ -384,7 +384,10 @@ public class RESOLVECompiler {
             if (!file.isAbsolute()) {
                 file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
-            if (!file.exists()) return null;
+            if (!file.exists()) {
+                errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
+                return null;
+            }
             return parseModule(new ANTLRFileStream(file.getCanonicalPath()));
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);

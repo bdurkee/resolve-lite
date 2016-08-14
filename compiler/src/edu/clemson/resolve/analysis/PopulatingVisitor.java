@@ -110,14 +110,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
-      /*  try {
-            //exts implicitly gain the parenting precis's useslist
-            ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.precis));
-            moduleScope.addImports(conceptScope.getImports());
-            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
+        try {
+            //precis exts implicitly get the uses items of the parent precis
+            ModuleIdentifier precisIdent = moduleScope.getImportWithName(ctx.precis);
+            ModuleScopeBuilder precisScope = symtab.getModuleScope(precisIdent);
+            moduleScope.addImports(precisScope.getImports())
+                    .addInheritedModules(precisIdent)
+                    .addAliases(precisScope.getAliases());
         } catch (NoSuchModuleException e) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.precis, ctx.precis.getText());
-        }*/
+            noSuchModule(e);
+        }
         super.visitChildren(ctx);
         return null;
     }
