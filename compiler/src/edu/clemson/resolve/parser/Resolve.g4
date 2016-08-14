@@ -353,11 +353,11 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL)
     ;
 
 mathSymbolNameNoID
-    :   (MATH_UNICODE_SYM | SYM | '|' )
+    :   (MATH_UNICODE_SYM | SYM)
     ;
 
 mathCategoricalDefnDecl
@@ -476,7 +476,9 @@ INT : [0-9]+ ;
 SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|'['|']'|[<->])+ ;
 
 MATH_UNICODE_SYM
-    :   [\u2200-\u22FF]
+    :   [\u2100-\u214F]
+    |   [\u2200-\u22FF]
+    |   [\u27C0-\u27EF]
     |   [\u27F0-\u27FF]
     |   [\u2A00-\u2AFF]
     |   [\u2300-\u23BF]

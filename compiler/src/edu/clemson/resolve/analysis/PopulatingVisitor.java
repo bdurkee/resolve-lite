@@ -890,7 +890,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 }
             }
             tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.progTypes.put(name, opSym.getReturnType());
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
+            tr.mathClssftns.put(name, opSym.getReturnType().toMath());
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = Utils.apply(args, ResolveParser.ProgExpContext::getText);
