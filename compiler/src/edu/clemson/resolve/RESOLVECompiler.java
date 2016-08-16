@@ -223,7 +223,6 @@ public class RESOLVECompiler {
             resolve.help();
             resolve.exit(0);
         }
-        resolve.version();
         try {
             resolve.processCommandLineTargets();
         } finally {
