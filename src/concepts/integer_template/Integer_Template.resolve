@@ -3,7 +3,7 @@ Concept Integer_Template;
 
     Definition min_int : Z;
     Definition max_int : Z;
-    constraints min_int ≤ 0 and (1 ≤ max_int);
+    constraints min_int ≤ 0 ∧ (1 ≤ max_int);
 
     Type family Integer
                 is modeled by Z;
@@ -28,12 +28,12 @@ Concept Integer_Template;
     Operation Are_Equal
             (evaluates i, j : Integer)
                 : Boolean;
-        ensures i = j;
+        ensures Are_Equal = (i = j);
 
     Operation Are_Not_Equal
             (evaluates i, j : Integer)
                 : Boolean;
-        ensures i ≠ j;
+        ensures Are_Not_Equal = (i ≠ j);
 
     Operation Negate
             (evaluates i : Integer)

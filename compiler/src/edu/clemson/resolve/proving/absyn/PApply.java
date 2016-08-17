@@ -65,7 +65,11 @@ public class PApply extends PExp {
         INFIX {
             @Override
             protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ") + ")";
+                String result = Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ");
+                if (s.getTopLevelOperationName().equals("∧")) {
+                    return result;
+                }
+                return "(" + result + ")";
             }
 
             @Override

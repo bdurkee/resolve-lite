@@ -1,6 +1,5 @@
 package edu.clemson.resolve.compiler;
 
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
 import org.antlr.v4.runtime.Token;
@@ -42,7 +41,7 @@ public class AnnotatedModule {
      * {@link edu.clemson.resolve.parser.ResolveParser.ProgExpContext}, this map keeps a pointer to its corresponding
      * AST (represented by {@link PExp}).
      */
-    public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
+    public ParseTreeProperty<PExp> exprASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
@@ -109,7 +108,7 @@ public class AnnotatedModule {
 
     @NotNull
     public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @Nullable ParserRuleContext ctx) {
-        PExp result = mathASTs.get(ctx);
+        PExp result = exprASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
     }
 

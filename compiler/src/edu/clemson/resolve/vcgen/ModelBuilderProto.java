@@ -7,7 +7,6 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.vcgen.application.*;
@@ -114,7 +113,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             return; //shouldn't happen...
         }
         List<PExp> specArgs = ctx.specArgs.progExp().stream()
-                .map(tr.mathASTs::get)
+                .map(tr.exprASTs::get)
                 .filter(e -> !(e.getProgType() instanceof ProgGenericType))
                 .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(specArgs);
@@ -142,7 +141,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                     .map(GlobalMathAssertionSymbol::getEnclosedExp)
                     .findAny();
 
-            List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.mathASTs::get).collect(Collectors.toList());
+            List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(implArgs);
             List<PExp> formalImplArgs =
                     Utils.apply(spec.getSymbolsOfType(ProgParameterSymbol.class), ProgParameterSymbol::asPSymbol);
@@ -359,7 +358,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                             //TODO: constraints should be added on demand via NOTICE:...
-                            .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                            //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
@@ -456,7 +455,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     @Override
     public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
-        PApply callExp = (PApply) tr.mathASTs.get(ctx.progParamExp());
+        PApply callExp = (PApply) tr.exprASTs.get(ctx.progParamExp());
         OperationSymbol op = getOperation(moduleScope, callExp);
         if (inSimpleForm(op.getEnsures(), op.getParameters())) {
             //TODO: Use log instead!
@@ -477,8 +476,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        SWAP_APPLICATION, tr.mathASTs.get(ctx.left),
-                        tr.mathASTs.get(ctx.right));
+                        SWAP_APPLICATION, tr.exprASTs.get(ctx.left),
+                        tr.exprASTs.get(ctx.right));
         stats.put(ctx, s);
     }
 
@@ -487,8 +486,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
                         FUNCTION_ASSIGN_APPLICATION,
-                        tr.mathASTs.get(ctx.left),
-                        tr.mathASTs.get(ctx.right));
+                        tr.exprASTs.get(ctx.left),
+                        tr.exprASTs.get(ctx.right));
         stats.put(ctx, s);
     }
 

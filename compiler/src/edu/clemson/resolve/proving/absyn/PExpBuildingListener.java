@@ -11,11 +11,9 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.programtype.ProgType;
@@ -61,7 +59,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         this.g = g;
         this.annotations = annotations;
         this.skipDummyQuantifierNodes = skipDummyQuantifiedNodes;
-        this.repo = annotations.mathASTs;
+        this.repo = annotations.exprASTs;
     }
 
     /**
