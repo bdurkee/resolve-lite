@@ -204,7 +204,7 @@ recordVarDeclGroup
     ;
 
 varDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'?
+    :   'Var' ID (',' ID)* ':' type ';'
     ;
 
 // facility decls

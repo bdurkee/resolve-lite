@@ -352,14 +352,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
-
+            Set<PExp> l = getModuleLevelAssertionsOfType(ClauseType.REQUIRES);
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
                             .facilitySpecializations(facilitySpecFormalActualMappings)
                             .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                            //constraints should be added on demand via NOTICE:...
-                            //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                            //TODO: constraints should be added on demand via NOTICE:...
+                            .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                             .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                             .assume(corrFnExpRequires)
                             .remember();
@@ -390,12 +390,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
         //postcondition[params 1..i <-- corr_fn_exp]
 
-        List<PExp> paramConsequents = new ArrayList<>();
-        Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
+       List<PExp> paramConsequents = new ArrayList<>();
+       Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
 
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats))
-               // .confirm(paramConsequents) //assumes for correspondence reprs included here
                 .assume(corrFnExps)
+                .confirm(ctx, g.formConjuncts(paramConsequents))
                 .finalConfirm(corrFnExpEnsures);
 
         outputFile.addAssertiveBlock(block.build());
@@ -595,7 +595,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp));
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
-                PExp equalsExp = g.formEquals(paramExp, incParamExp);
+                PExp equalsExp = g.formEquals(paramExp, incParamExp)
+                        .withVCInfo(p.getDefiningTree().getStart(), "Ensure parameter " +
+                                p.getName() + " is restored");
                 result.add(equalsExp);
             }
             else if (p.getMode() == ParameterMode.CLEARS) {

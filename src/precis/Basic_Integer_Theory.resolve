@@ -26,7 +26,7 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) - (n : Z) : Z;
 
-    Definition NN : Powerset(Z) is {n : Z ∣ ⌐(Is_Neg(n))};
+    Definition NN : ℘(Z) is {n : Z ∣ ⌐(Is_Neg(n))};
         //won't typecheck at the moment
         //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
         //Corollary nn2: ∀ n : NN, suc(n) : NN;

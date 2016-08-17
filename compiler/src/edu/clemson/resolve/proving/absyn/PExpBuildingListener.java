@@ -157,24 +157,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         PExp left = repo.get(ctx.mathExp(0));
         PExp right = repo.get(ctx.mathExp(1));
 
-        ParserRuleContext leftCtx = ctx.mathExp(0);
         //hardcode hook to handle chained relationals (generalize this at the syntax level with some
         //special syntax)
-        if (annotations.chainableCtx(ctx) && annotations.chainableCtx(leftCtx)) {
+        if (annotations.chainableCtx(ctx) && annotations.chainableCtx(ctx.mathExp(0))) {
             PExp left2 = getBottommostFormula(left);
-            PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
-                    .applicationType(getMathClssfctn(ctx))
-                    .style(INFIX)
-                    .arguments(left2.getSubExpressions().get(2), right).build();
-            PApply result = g.formConjunct(left, newRight);
-            repo.put(ctx, result);
-        }
-
-        String x = left.getTopLevelOperationName();
-        //or if our left is an 'and' whose right child is < or <=
-        PExp left2 = getBottommostFormula(left);
-        if ((ctx.mathSymbolExp().name.getText().equals("≤") || ctx.mathSymbolExp().name.getText().equals("<")) &&
-                (left2.getTopLevelOperationName().equals("≤") || left2.getTopLevelOperationName().equals("<"))) {
             PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
                     .applicationType(getMathClssfctn(ctx))
                     .style(INFIX)
@@ -191,7 +177,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         }
     }
 
-
     @NotNull
     public PExp getBottommostFormula(@NotNull PExp l) {
         PExp result = l;
@@ -203,10 +188,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
+        PSymbol operator = new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText())
+                .mathClssfctn(getMathClssfctn(ctx))
+                .quantification(quantifiedVars.get(ctx.lop.getText()))
+                .build();
         PApplyBuilder result =
-                new PApplyBuilder(buildOperatorPSymbol(ctx, ctx.lop.getStart(), ctx.rop.getStart()))
-                        .applicationType(getMathClssfctn(ctx))
-                        .style(OUTFIX)
+                new PApplyBuilder(operator)
+                        .applicationType(getMathClssfctn(ctx)).style(OUTFIX)
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
     }
@@ -220,16 +208,6 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
     }*/
-
-    private PSymbol buildOperatorPSymbol(@NotNull ParserRuleContext ctx,
-                                         @Nullable Token qualifier,
-                                         @NotNull Token operator) {
-        return new PSymbolBuilder(operator.getText())
-                .qualifier(qualifier)
-                .mathClssfctn(getMathClssfctn(ctx))
-                .quantification(quantifiedVars.get(operator.getText()))
-                .build();
-    }
 
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {

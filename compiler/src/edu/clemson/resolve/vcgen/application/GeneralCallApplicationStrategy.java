@@ -148,7 +148,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
     /** "Next Prime Variable" */
     public static PSymbol NPV(PExp RP, PSymbol oldSym) {
         // Add an extra question mark to the front of oldSym
-        PSymbol newOldSym = new PSymbolBuilder(oldSym, "?" + oldSym.getName() ).build();
+        PSymbol newOldSym = new PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
 
         // Applies the question mark to oldVar if it is our first time visiting.
         if (RP.containsName(oldSym.getName())) {
@@ -161,7 +161,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
         else {
             // Return the new variable expression with the question mark
             int i = oldSym.getName().length() - 1;
-            if (oldSym.getName().charAt(0) != '?') {
+            if (oldSym.getName().charAt(i) != '′') {
                 return newOldSym;
             }
         }

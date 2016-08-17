@@ -1152,17 +1152,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override
-    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
-        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
-            insertGlobalAssertion(ctx,
-                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
-                    ctx.mathAssertionExp());
-        }
-        return null;
-    }
+
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
@@ -1183,6 +1173,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
         this.visit(ctx.mathAssertionExp());
+        if (ctx.getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.REQUIRES,
+                    ctx.mathAssertionExp());
+        }
         return null;
     }
 
@@ -1190,6 +1185,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitConventionsClause(ResolveParser.ConventionsClauseContext ctx) {
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
         this.visit(ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override
+    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
+        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
+        }
         return null;
     }
 
