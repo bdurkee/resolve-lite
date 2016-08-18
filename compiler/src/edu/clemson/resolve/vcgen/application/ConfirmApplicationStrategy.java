@@ -19,7 +19,12 @@ public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy
             newFinalConfirm = stat.getConfirmExp();
         }
         else {
-            newFinalConfirm = g.formConjunct(stat.getConfirmExp(), block.finalConfirm.getConfirmExp());
+            if (stat.getConfirmExp().equals(g.getTrueExp())) {
+                newFinalConfirm = block.finalConfirm.getConfirmExp(); //no need to conjuct true to the final conf
+            }
+            else {
+                newFinalConfirm = g.formConjunct(stat.getConfirmExp(), block.finalConfirm.getConfirmExp());
+            }
         }
         block.finalConfirm(newFinalConfirm);
         return block.snapshot();

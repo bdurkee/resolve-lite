@@ -75,7 +75,6 @@ public class VCOutputFile extends OutputModelObject {
 
             PExp antecedentExp = args.get(1);
             PExp consequentExp = args.get(2);
-            if (args.get(2).isObviouslyTrue()) continue;
 
             if (consequentExp.getVCLocation() == null) {
                 compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, consequentExp.toString());

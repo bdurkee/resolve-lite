@@ -48,8 +48,8 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
     //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to reduce that..
     public static class FunctionAssignRuleApplyingListener extends PExpListener {
         private final ParserRuleContext ctx;
-        public Map<PExp, PExp> substitutions = new HashMap<>();
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
+        public final Map<PExp, PExp> substitutions = new HashMap<>();
 
         public FunctionAssignRuleApplyingListener(ParserRuleContext ctx,
                                                   VCAssertiveBlock.VCAssertiveBlockBuilder block) {
@@ -62,7 +62,6 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
             OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(block.scope, (PApply) e);
 
             PApply eSubstituted = (PApply) e.substitute(substitutions);
-            substitutions.clear();
 
             List<PExp> actuals = eSubstituted.getArguments();
             List<PExp> formals = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);

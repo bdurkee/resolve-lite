@@ -1,0 +1,23 @@
+Meta Precis Class_Theory;
+
+    Definition Cls ⦂ Hyp_Powerset(ME);
+/*
+    Definition HSD(C ⦂ Cls) ⦂ Hyp_Powerset(ME);
+        Corollary HSD_1: ∀ C, D ⦂ HSD(C) = HSD(D) implies C = D;
+
+    Definition (x : HSD(El)) : (C ⦂ Cls) ⦂ Hyp_B;
+
+    Definition (C ⦂ Cls) ⊆ (D ⦂ Cls) ⦂ Hyp_B is ∀ x : El, x ∈ C implies (x ∈ D);
+        Corollary S_1: ⦰ ⊆ El;
+        Corollary S_2: ∀ C ⦂ Cls, ⦰ ⊆ El ∧ (C ⊆ El);
+        Corollary S_3: ∀ C ⦂ Cls, C ⊆ C;
+        Corollary S_4: ∀ C, D ⦂ Cls, C ⊆ D ∧ (D ⊆ C) implies (C = D);
+        Corollary S_5: ∀ C, D, E ⦂ Cls, C ⊆ D ∧ (D ⊆ E) implies (C ⊆ E);
+        Corollary S_6: ∀ C, D ⦂ Cls, C ⊆ D iff (HSD(C) ⫑ HSD(D))
+
+    Definition (C ⦂ Cls) ~ (D ⦂ Cls) ⦂ Cls is {x : C | ¬(x) ∈ D};
+        Corollary CM_1: ∀ C ⦂ Cls, C ~ ⦰ = C;
+        Corollary CM_2: ∀ C ⦂ Cls, ⦰ ~ C = ⦰;
+        Corollary CM_3:
+*/
+end Class_Theory;

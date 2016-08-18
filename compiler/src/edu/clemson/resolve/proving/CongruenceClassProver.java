@@ -80,7 +80,7 @@ public final class CongruenceClassProver {
         //List<VC> preprocessedVcs = preprocessVCs(vcs);
         List<VC> preprocessedVcs = new ArrayList<>();
 
-        VC test = buildTestVC3(m_scope, g, z, n);
+        VC test = buildTestVC5(m_scope, g, z, n);
         m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
 
         //preprocessedVcs.add(test);
@@ -524,6 +524,70 @@ public final class CongruenceClassProver {
 
             //goal:
             //SCD(IA(SS, Cen, P.Length)) <= Max_Length
+        } catch (SymbolTableException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public VC buildTestVC5(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        VC result = null;
+        try {
+            MathClssftnWrappingSymbol ia = s.queryForOne(new MathSymbolQuery(null, "IA"));
+            MathClssftnWrappingSymbol scd = s.queryForOne(new MathSymbolQuery(null, "SCD"));
+            MathClssftnWrappingSymbol cen = s.queryForOne(new MathSymbolQuery(null, "Cen"));
+            MathClssftnWrappingSymbol sp_loc = s.queryForOne(new MathSymbolQuery(null, "Sp_Loc"));
+            MathClssftnWrappingSymbol ss = s.queryForOne(new MathSymbolQuery(null, "SS"));
+            MathClssftnWrappingSymbol n2 = s.queryForOne(new MathSymbolQuery(null, "N2"));
+            MathClssftnWrappingSymbol is_inside_of = s.queryForOne(new MathSymbolQuery(null, "Is_Inside_of"));
+
+            MathClssftn sp_loc_type = new MathFunctionApplicationClssftn(g,
+                    new MathFunctionClssftn(g, g.SSET, n2.getClassification()), "Sp_Loc", n2.getClassification());
+
+            PSymbol pcurrLoc = new PSymbol.PSymbolBuilder("P.Curr_Loc").mathClssfctn(sp_loc_type).build();
+            PSymbol ptrmnlLoc = new PSymbol.PSymbolBuilder("P.Trmnl_Loc").mathClssfctn(sp_loc_type).build();
+
+            //=
+            PSymbol EQ = new PSymbol.PSymbolBuilder("=").mathClssfctn(g.EQUALITY_FUNCTION).build();
+
+            //SCD
+            PSymbol scd_exp = new PSymbol.PSymbolBuilder("SCD")
+                    .mathClssfctn(scd.getClassification().enclosingClassification)
+                    .build();
+
+            //SCD(P.Curr_Loc)
+            PApply scd_app_exp1 = new PApply.PApplyBuilder(scd_exp)
+                    .applicationType(n)
+                    .arguments(pcurrLoc)
+                    .build();
+
+            //SCD(P.Trmnl_Loc)
+            PApply scd_app_exp2 = new PApply.PApplyBuilder(scd_exp)
+                    .applicationType(n)
+                    .arguments(ptrmnlLoc)
+                    .build();
+
+            //SCD(P.Curr_Loc) = SCD(P.Trmnl_Loc)
+            PApply scd_equals_app = new PApply.PApplyBuilder(EQ)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(scd_app_exp1, scd_app_exp2)
+                    .build();
+
+            //P.Curr_Loc = P.Trmnl_Loc
+            PApply loc_equals_app = new PApply.PApplyBuilder(EQ)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(pcurrLoc, ptrmnlLoc)
+                    .build();
+
+            //(SCD(P.Curr_Loc) = SCD(P.Trmnl_Loc)) = (P.Curr_Loc = P.Trmnl_Loc)
+            PApply top_lvl_equals = new PApply.PApplyBuilder(EQ)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(scd_equals_app, loc_equals_app)
+                    .build();
+
+            PExp antecedent = g.getTrueExp();
+            PExp consequent = top_lvl_equals;
+            result = new VC(5, antecedent, consequent);
         } catch (SymbolTableException e) {
             e.printStackTrace();
         }

@@ -45,9 +45,9 @@ Precis Basic_Integer_Theory;
     Definition 1 : Z is suc(0);
         //Corollary one1: ∀ m : Z, suc(m) = (m + 1);
 
-    Definition 2 : Z is suc(1);
-    Definition 3 : Z is suc(2);
-    Definition 4 : Z is suc(3);
+    /*Literal*/ Definition 2 : Z is suc(1);
+    /*Literal*/ Definition 3 : Z is suc(2);
+    /*Literal*/ Definition 4 : Z is suc(3);
 
     Inductive Definition (m : Z) * (n : Z) : Z is
         (i.) m * 0 = 0;
