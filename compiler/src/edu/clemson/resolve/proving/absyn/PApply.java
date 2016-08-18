@@ -66,7 +66,8 @@ public class PApply extends PExp {
             @Override
             protected String toString(PApply s) {
                 String result = Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ");
-                if (s.getTopLevelOperationName().equals("∧")) {
+                String top = s.getTopLevelOperationName();
+                if (top.equals("∧") || top.equals("and")) {
                     return result;
                 }
                 return "(" + result + ")";
