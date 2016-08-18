@@ -27,6 +27,13 @@ import java.util.*;
  */
 public class AnnotatedModule {
 
+    /**
+     * Any infix application that's defined (via a definition) to be chainable (i.e.: one where x OP y OP z is,
+     * internally, interpreted as "x OP y and y OP z"). Note that any operator defined
+     * to be chainable had better be a predicate as it will become an argument to binary "and".
+     */
+    public ParseTreeProperty<Boolean> chainableInfixApps = new ParseTreeProperty<>();
+
     public ParseTreeProperty<MathClssftn> mathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<ProgType> progTypes = new ParseTreeProperty<>();
     /**
@@ -34,7 +41,7 @@ public class AnnotatedModule {
      * {@link edu.clemson.resolve.parser.ResolveParser.ProgExpContext}, this map keeps a pointer to its corresponding
      * AST (represented by {@link PExp}).
      */
-    public ParseTreeProperty<PExp> mathASTs = new ParseTreeProperty<>();
+    public ParseTreeProperty<PExp> exprASTs = new ParseTreeProperty<>();
 
     public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
 
@@ -101,8 +108,16 @@ public class AnnotatedModule {
 
     @NotNull
     public PExp getMathExpASTFor(@NotNull DumbMathClssftnHandler g, @Nullable ParserRuleContext ctx) {
-        PExp result = mathASTs.get(ctx);
+        PExp result = exprASTs.get(ctx);
         return result != null ? result : g.getTrueExp();
+    }
+
+    public boolean chainableCtx(@NotNull ParserRuleContext ctx) {
+        boolean result = chainableInfixApps.get(ctx) != null;
+        if (result) {
+            result = chainableInfixApps.get(ctx);
+        }
+        return result;
     }
 
     @NotNull

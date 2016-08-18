@@ -32,6 +32,13 @@ import java.util.*;
  */
 public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCCall> {
 
+    //UH, how could an explicit call, if they have no returns be involved in anything nested....?!
+    //I'm really confused as to why general and explicit call rules have all their logic in a visitor. Seems
+    //like their should be ONE visitor that applies the function assignment logic for each of the nested
+    //exprs -- THEN we either apply the general or explicit call rule to the bottom, outermost call exp.
+
+    //TODO: Get rid of pexplistener for these guys. Just apply the function assign call rule to any evaluates
+    // parameters.
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {

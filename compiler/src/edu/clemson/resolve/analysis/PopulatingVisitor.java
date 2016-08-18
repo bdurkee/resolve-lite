@@ -11,14 +11,13 @@ import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpBuildingListener;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.MathSymbolTable.ImportStrategy;
+import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathCartesianClssftn.Element;
@@ -30,7 +29,6 @@ import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
@@ -65,12 +63,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     public ParseTreeProperty<MathClssftn> exactNamedMathClssftns = new ParseTreeProperty<>();
     public ParseTreeProperty<String> progExpCallQualifiers = new ParseTreeProperty<>();
+
+    public ParseTreeProperty<Boolean> chainableSyms = new ParseTreeProperty<>();
+
     /**
-     * A reference to the expr context that represents the previous segment
-     * accessed in a {@link ResolveParser.MathSelectorExpContext} or
-     * {@link ResolveParser.ProgSelectorExpContext}, no need to worry about
-     * overlap here as we use two separate expr hierarchies. This is
-     * {@code null} the rest of the time.
+     * A reference to the expr context that represents the previous segment accessed in a
+     * {@link ResolveParser.MathSelectorExpContext} or {@link ResolveParser.ProgSelectorExpContext}, no need to worry
+     * about overlap here as we use two separate expr hierarchies. This is {@code null} the rest of the time.
      */
     private ParserRuleContext prevSelectorAccess = null;
 
@@ -111,14 +110,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitPrecisExtModuleDecl(ResolveParser.PrecisExtModuleDeclContext ctx) {
-      /*  try {
-            //exts implicitly gain the parenting precis's useslist
-            ModuleScopeBuilder conceptScope = symtab.getModuleScope(new ModuleIdentifier(ctx.precis));
-            moduleScope.addImports(conceptScope.getImports());
-            moduleScope.addInheritedModules(new ModuleIdentifier(ctx.precis));
+        try {
+            //precis exts implicitly get the uses items of the parent precis
+            ModuleIdentifier precisIdent = moduleScope.getImportWithName(ctx.precis);
+            ModuleScopeBuilder precisScope = symtab.getModuleScope(precisIdent);
+            moduleScope.addImports(precisScope.getImports())
+                    .addInheritedModules(precisIdent)
+                    .addAliases(precisScope.getAliases());
         } catch (NoSuchModuleException e) {
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, ctx.precis, ctx.precis.getText());
-        }*/
+            noSuchModule(e);
+        }
         super.visitChildren(ctx);
         return null;
     }
@@ -272,6 +273,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         symtab.endScope();
 
         insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        if (ctx.alt != null) {
+            //sugared name support
+            insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        }
         return null;
     }
 
@@ -446,12 +451,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             Token qualifier = ctx.qualifier;
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
-                            .queryForOne(new NameQuery(qualifier, ctx.name.getText(), true))
+                            .queryForOne(new NameQuery(qualifier, ctx.name.getText(),
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE, true))
                             .toProgTypeSymbol();
-
+            if (qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(ctx, type);
+                if (s != null) {
+                    ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, type.getProgramType());
             tr.mathClssftns.put(ctx, type.getModelType());
-            //MathClassification x = type.getModelType();
             return null;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             compiler.errMgr.semanticError(e.getErrorKind(), ctx.name, ctx.name.getText());
@@ -489,8 +500,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.initializationClause() != null) this.visit(ctx.initializationClause());
         symtab.endScope();
         try {
-            PExp constraint = getPExpFor(ctx.constraintsClause());
-            PExp initEnsures = getPExpFor(ctx.initializationClause());
+            PExp constraint = ctx.constraintsClause() != null ? getPExpFor(ctx.constraintsClause().mathAssertionExp()) : g.getTrueExp();
+            PExp initEnsures = ctx.initializationClause() != null ?
+                    getPExpFor(ctx.initializationClause().ensuresClause().mathAssertionExp()) :
+                    g.getTrueExp();
 
             ProgTypeSymbol progType =
                     new TypeModelSymbol(symtab.getTypeGraph(),
@@ -706,6 +719,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                     parentFacilityArgListCtx).add(namedSymbol.toProgTypeSymbol());
                 }
             }
+            if (ctx.qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(ctx, namedSymbol);
+                if (s != null) {
+                    ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, programType);
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
             return null;
@@ -776,12 +795,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
+    //TODO: Eventually we'll have syntax so users can supply this
     @Override
     public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
-        typeOperationRefExp(ctx, attr.qualifier, attr.name, ctx.progExp());
+        ResolveParser.ProgSymbolExpContext sym = new ResolveParser.ProgSymbolExpContext(ctx.getParent(), 0);
+        ResolveParser.ProgSymbolNameContext symName = new ResolveParser.ProgSymbolNameContext(sym, 0);
+        sym.qualifier = attr.qualifier;
+        symName.start = attr.name;
+        sym.name = symName;
+        typeOperationRefExp(ctx, sym, ctx.progExp());
         return null;
     }
 
@@ -851,27 +876,29 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @NotNull ResolveParser.ProgSymbolExpContext name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
-        typeOperationRefExp(ctx, name.qualifier, name.name.getStart(), args);
-    }
-
-    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
-                                       @Nullable Token qualifier,
-                                       @NotNull Token name,
-                                       @NotNull List<ResolveParser.ProgExpContext> args) {
         List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
         //every other call
         try {
+            Token qualifier = name.qualifier != null ? name.qualifier : null;
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
-                    new OperationQuery(qualifier, name, argTypes,
+                    new OperationQuery(qualifier, name.name.getStart(), argTypes,
                             FacilityStrategy.FACILITY_INSTANTIATE,
-                            MathSymbolTable.ImportStrategy.IMPORT_NAMED, true));
+                            ImportStrategy.IMPORT_NAMED, true));
 
+            if (name.qualifier == null) {
+                FacilitySymbol s = getFacilityForSymbol(name, opSym);
+                if (s != null) {
+                    name.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+                }
+            }
             tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.progTypes.put(name, opSym.getReturnType());
             tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
+            tr.mathClssftns.put(name, opSym.getReturnType().toMath());
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = Utils.apply(args, ResolveParser.ProgExpContext::getText);
-            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name, name.getText(), argStrList, argTypes);
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name.name.getStart(), name.getText(), argStrList, argTypes);
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "an operation", name.getText(),
@@ -1035,7 +1062,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         //next, visit the definition's 'return type' to give it a type
         this.visit(type);
         MathClssftn colonRhsType = exactNamedMathClssftns.get(type);
-
+        ParserRuleContext defnTopLevel =
+                Utils.getFirstAncestorOfType(ctx, ResolveParser.MathStandardDefnDeclContext.class);
+        boolean chainableOperator = false;
+        if (defnTopLevel != null) {
+            chainableOperator = ((ResolveParser.MathStandardDefnDeclContext)defnTopLevel).chainable != null;
+        }
         MathClssftn defnType = null;
         if (colonRhsType.typeRefDepth > 0) {
             int newTypeDepth = colonRhsType.typeRefDepth - 1;
@@ -1053,10 +1085,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             paramNames.add(t.getText());
                         }
                     } catch (ClassCastException cce) {
-                        ResolveParser.MathVarDeclContext singularDecl =
-                                (ResolveParser.MathVarDeclContext) formal;
-                        MathClssftn ty = exactNamedMathClssftns.get(
-                                singularDecl.mathClssftnExp());
+                        ResolveParser.MathVarDeclContext singularDecl = (ResolveParser.MathVarDeclContext) formal;
+                        MathClssftn ty = exactNamedMathClssftns.get(singularDecl.mathClssftnExp());
                         paramTypes.add(ty);
                         paramNames.add(singularDecl.mathSymbolName().getText());
                     }
@@ -1065,19 +1095,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 for (Token t : names) {
                     MathClssftn asNamed = new MathNamedClssftn(g, t.getText(), newTypeDepth, defnType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed));
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator));
                 }
             }
             else {
                 for (Token t : names) {
                     defnType = new MathNamedClssftn(g, t.getText(), newTypeDepth, colonRhsType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType));
+                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator));
                 }
             }
         }
         else {
             for (Token t : names) {
-                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID));
+                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator));
             }
         }
     }
@@ -1122,17 +1152,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-    @Override
-    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
-        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
-        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
-            insertGlobalAssertion(ctx,
-                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
-                    ctx.mathAssertionExp());
-        }
-        return null;
-    }
+
 
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
@@ -1151,8 +1171,32 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitRequiresClause(ResolveParser.RequiresClauseContext ctx) {
-        this.visit(ctx.mathAssertionExp());
         if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
+        this.visit(ctx.mathAssertionExp());
+        if (ctx.getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.REQUIRES,
+                    ctx.mathAssertionExp());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitConventionsClause(ResolveParser.ConventionsClauseContext ctx) {
+        if (ctx.entailsClause() != null) this.visit(ctx.entailsClause());
+        this.visit(ctx.mathAssertionExp());
+        return null;
+    }
+
+    @Override
+    public Void visitConstraintsClause(ResolveParser.ConstraintsClauseContext ctx) {
+        this.visit(ctx.mathAssertionExp());
+        expectType(ctx.mathAssertionExp(), g.BOOLEAN);
+        if (ctx.getParent().getParent().getParent() instanceof ResolveParser.ModuleDeclContext) {
+            insertGlobalAssertion(ctx,
+                    GlobalMathAssertionSymbol.ClauseType.CONSTRAINT,
+                    ctx.mathAssertionExp());
+        }
         return null;
     }
 
@@ -1298,10 +1342,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
-        dummyNode.start = ctx.lop.start;
-        dummyNode.stop = ctx.rop.stop;  //maybe lop.stop?
-        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
+        ResolveParser.MathSymbolExpContext dummyPrefixNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
+        dummyPrefixNode.start = ctx.lop.start;
+        dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
+        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
 
         Token left = ctx.mathSymbolNameNoID(0).getStart();
         Token right = ctx.mathSymbolNameNoID(1).getStart();
@@ -1310,13 +1354,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         t.setText(left.getText() + ".." + right.getText());
         dummyName.start = t;
         dummyName.stop = t;
-        dummyName.parent = dummyNode;
+        dummyName.parent = dummyPrefixNode;
 
         dummyName.addChild(t);
-        dummyNode.addChild(dummyName);
-        dummyNode.name = dummyName;
+        dummyPrefixNode.addChild(dummyName);
+        dummyPrefixNode.name = dummyName;
 
-        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
+        typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
         return null;
     }
 
@@ -1352,6 +1396,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
+        tr.chainableInfixApps.put(ctx, chainableSyms.get(nameExp));
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClssftn t = exactNamedMathClssftns.get(nameExp);
@@ -1468,28 +1513,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                              @NotNull ParserRuleContext nameExp,
                                              @NotNull List<? extends ParseTree> args,
                                              @NotNull List<MathClssftn> actualArgTypes) {
-
-        //ugly hook to handle chained operator applications like 0 <= i <= j or
-        //j >= i >= 0
-        if (nameExp instanceof ResolveParser.MathSymbolExpContext) {
-            String nameWithoutQual = ((ResolveParser.MathSymbolExpContext) nameExp).name.getText();
-            Token qualifier = ((ResolveParser.MathSymbolExpContext) nameExp).qualifier;
-            if ((nameWithoutQual.equals("<=") || nameWithoutQual.equals("<") || nameWithoutQual.equals("≤")) &&
-                    args.size() == 2 &&
-                    args.get(0) instanceof ResolveParser.MathInfixAppExpContext) {
-                ResolveParser.MathInfixAppExpContext argAsInfixApp =
-                        (ResolveParser.MathInfixAppExpContext) args.get(0);
-                if (!(argAsInfixApp.getChild(1) instanceof ResolveParser.MathSymbolExpContext)) return;
-                ResolveParser.MathSymbolExpContext symExp =
-                        (ResolveParser.MathSymbolExpContext) argAsInfixApp.getChild(1);
-                String symExpName = symExp.name.getText();
-                if (symExpName.equals("<=") ||
-                        symExpName.equals("≤") ||
-                        symExpName.equals("<")) {
-                    MathClssftn x = tr.mathClssftns.get(argAsInfixApp.getChild(2));
-                    actualArgTypes.set(0, x);
-                }
-            } //end ugly hook.
+        if (!(ctx instanceof ResolveParser.MathInfixAppExpContext)) return;
+        ParserRuleContext left = ((ResolveParser.MathInfixAppExpContext) ctx).mathExp(0);
+        String here = ctx.getText();
+        if (tr.chainableCtx(ctx) && tr.chainableCtx(left)) {
+            MathClssftn x = tr.mathClssftns.get(((ResolveParser.MathInfixAppExpContext) ctx).mathExp(1));
+            actualArgTypes.set(0, x);
         }
     }
 
@@ -1674,6 +1703,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         else {
             tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
+        chainableSyms.put(ctx, s.isChainable());
     }
 
     @Nullable
@@ -1693,6 +1723,34 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
                     ctx.getStart(), "a math symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link FacilitySymbol} responsible for bringing/making {@code s} accesible to whatever
+     * scope tree {@code ctx} happens to inhabit; {@code null} if multiple or none are found. So think of {@code ctx}
+     * as the tree context where s is referenced from.
+     */
+    @Nullable
+    private FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @NotNull Symbol s) {
+        try {
+            List<FacilitySymbol> facilities = moduleScope.query(new SymbolTypeQuery<>(FacilitySymbol.class));
+            List<FacilitySymbol> result = new ArrayList<>();
+            for (FacilitySymbol f : facilities) {
+                if (f.getFacility().getSpecification().getModuleIdentifier().equals(s.getModuleIdentifier())) {
+                    result.add(f);
+                }
+            }
+            if (result.size() > 1) {
+                compiler.errMgr.semanticError(ErrorKind.AMBIGUOUS_FACILITY, ctx.getStart(), s.getName());
+            }
+            return !result.isEmpty() ? result.get(0) : null;
+        } catch (NoSuchModuleException e) {
+            noSuchModule(e);
+        } catch (UnexpectedSymbolException e) {
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
+                    ctx.getStart(), e.getTheUnexpectedSymbolDescription());
         }
         return null;
     }

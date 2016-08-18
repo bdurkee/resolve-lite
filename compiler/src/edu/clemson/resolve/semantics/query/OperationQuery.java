@@ -27,7 +27,6 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
                           boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy, facilityStrategy, localPriority),
                 new OperationSearcher(name.getText(), argumentTypes, localPriority));
-        String y = "";
     }
 
     public OperationQuery(@Nullable Token qualifier, @NotNull String name, @NotNull List<ProgType> argumentTypes) {

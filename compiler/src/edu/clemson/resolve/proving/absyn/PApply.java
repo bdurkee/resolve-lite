@@ -65,7 +65,8 @@ public class PApply extends PExp {
         INFIX {
             @Override
             protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ") + ")";
+                String result = Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ");
+                return "(" + result + ")";
             }
 
             @Override
@@ -283,7 +284,9 @@ public class PApply extends PExp {
 
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
-        if (arguments.size() == 2 && functionPortion.getTopLevelOperationName().equals("and")) {
+        if (arguments.size() == 2 &&
+                (functionPortion.getTopLevelOperationName().equals("and") ||
+                        functionPortion.getTopLevelOperationName().equals("∧"))) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }
@@ -294,7 +297,16 @@ public class PApply extends PExp {
 
     @Override
     public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
-        return new PApplyBuilder(this).vcInfo(location, explanation).build();
+        PExp name = functionPortion.withVCInfo(location, explanation);
+        //distribute vc info down into subexps
+        PApplyBuilder builder = new PApplyBuilder(name).vcInfo(location, explanation)
+                .applicationType(getMathClssftn())
+                .style(displayStyle);
+
+        for (PExp e : getArguments()) {
+            builder.arguments(e.withVCInfo(location, explanation));
+        }
+        return builder.build();
     }
 
     @NotNull

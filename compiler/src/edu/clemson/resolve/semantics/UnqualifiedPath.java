@@ -76,8 +76,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 source.addMatches(searcher, results, searchedScopes, genericInstantiations, instantiatingFacility,
                         SearchContext.SOURCE_MODULE);
 
-        if (searcher instanceof SymbolTypeSearcher &&
-                !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
+        if (!finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
             finished = searchFacilities(searcher, results, source, genericInstantiations, searchedScopes, repo);
         }
 

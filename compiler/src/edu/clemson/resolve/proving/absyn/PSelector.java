@@ -55,6 +55,16 @@ public class PSelector extends PExp {
         return result;
     }
 
+    @NotNull
+    public PExp getLeft() {
+        return left;
+    }
+
+    @NotNull
+    public PExp getRight() {
+        return right;
+    }
+
     @Override
     public boolean isIncoming() {
         return left.isIncoming();

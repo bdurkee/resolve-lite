@@ -30,7 +30,7 @@ public class TheoremSymbol extends Symbol {
         this.assertion = theoremAssertion;
         this.mathSymbolAlterEgo =
                 new MathClssftnWrappingSymbol(g, name, Quantification.NONE, g.BOOLEAN,
-                        definingTree, moduleIdentifier);
+                        definingTree, false, moduleIdentifier);
     }
 
     @NotNull

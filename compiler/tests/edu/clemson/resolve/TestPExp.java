@@ -373,14 +373,14 @@ public class TestPExp extends BaseTest {
         partitions = e.split();
         Assert.assertEquals(3, partitions.size());
         Assert.assertEquals("(P implies Pre)", partitions.get(0).toString());
-        Assert.assertEquals("((P and Post) implies Q)", partitions.get(1).toString());
-        Assert.assertEquals("((P and Post) implies R)", partitions.get(2).toString());
+        Assert.assertEquals("((P ∧ Post) implies Q)", partitions.get(1).toString());
+        Assert.assertEquals("((P ∧ Post) implies R)", partitions.get(2).toString());
 
         e = parseMathAssertionExp(g, "(P implies (Q implies (R implies (T and true))))");
         partitions = e.split();
         Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(((P and Q) and R) implies T)", partitions.get(0).toString());
-        Assert.assertEquals("(((P and Q) and R) implies true)", partitions.get(1).toString());
+        Assert.assertEquals("(((P ∧ Q) ∧ R) implies T)", partitions.get(0).toString());
+        Assert.assertEquals("(((P ∧ Q) ∧ R) implies true)", partitions.get(1).toString());
     }
 
     protected static ParseTree getTree(String input) {

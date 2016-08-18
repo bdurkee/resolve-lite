@@ -76,6 +76,11 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }*/
 
+        public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, Collection<PExp> confirms) {
+            Utils.apply(confirms, e -> confirm(ctx, e));
+            return this;
+        }
+
         public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm) {
             if (confirm == null) {
                 confirm = g.getTrueExp();

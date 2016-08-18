@@ -55,7 +55,6 @@ public class ScopeBuilder extends SyntacticScope {
                                                 MathClssftn type,
                                                 MathClssftn typeValue)
             throws DuplicateSymbolException {
-
         MathClssftnWrappingSymbol entry =
                 new MathClssftnWrappingSymbol(typeGraph, name, q, type, definingTree, moduleIdentifier);
         symbols.put(name, entry);

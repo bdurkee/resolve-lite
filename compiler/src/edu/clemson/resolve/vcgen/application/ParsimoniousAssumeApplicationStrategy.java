@@ -1,6 +1,7 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCAssume;
@@ -35,6 +36,10 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
         //now substitute any conc equalities into RP
         RP = RP.substitute(concEqualitySubstitutions);
         //beta reduce any lambdas present now...
+
+        BasicBetaReducingListener br = new BasicBetaReducingListener(RP);
+        RP.accept(br);
+        RP = br.getReducedExp();
 
         List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
         for (PExp assume : assumeConjunctsWithoutConcEqualities) {

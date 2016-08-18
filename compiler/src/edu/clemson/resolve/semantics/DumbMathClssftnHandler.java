@@ -179,7 +179,7 @@ public class DumbMathClssftnHandler {
 
     @NotNull
     public PApply formConjunct(@NotNull PExp left, @NotNull PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("and").mathClssfctn(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("∧").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)
@@ -188,7 +188,7 @@ public class DumbMathClssftnHandler {
 
     @NotNull
     public PApply formDisjunct(PExp left, PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("or").mathClssfctn(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("∨").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)

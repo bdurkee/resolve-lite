@@ -410,11 +410,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 && (rhs == tr || rhs == fl))
             return;
         // guard: return if all var and op is not equals or or
-        if (!(op.equals("=B") || op.equals("orB")) && arg1 != tr && arg1 != fl
+        if (!(op.equals("=B") || op.equals("∨B")) && arg1 != tr && arg1 != fl
                 && (arg2 != tr && arg2 != fl) && (rhs != tr && rhs != fl))
             return;
         // rules for and
-        if (op.equals("andB")) {
+        if (op.equals("andB") || op.equals("∧B")) {
             // constant rhs
             if (rhs == tr) {
                 // (p and q) = t |= t/p, t/q
@@ -457,7 +457,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             return;
         }
-        if (op.equals("orB")) {
+        if (op.equals("orB") || op.equals("∨B")) {
             // constant f rhs
             if (rhs == fl) {
                 // p or q = f |= f/p/q

@@ -12,7 +12,7 @@ moduleDecl
     ;
 
 precisModuleDecl
-    :   'Precis' name=ID ';'
+    :   ('Meta')? 'Precis' name=ID ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF
@@ -21,6 +21,7 @@ precisModuleDecl
 precisExtModuleDecl
     :   'Precis' 'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
+        (usesList)?
         precisBlock
         'end' closename=ID ';'
     ;
@@ -203,7 +204,7 @@ recordVarDeclGroup
     ;
 
 varDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'?
+    :   'Var' ID (',' ID)* ':' type ';'
     ;
 
 // facility decls
@@ -228,7 +229,7 @@ moduleArgumentList
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'
+    :   ('Infix'|'Postfix')? 'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
@@ -280,6 +281,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp name=progSymbolExp progExp              #progInfixExp
+    |   progExp name=progSymbolName                     #progPostfixExp
     ;
 
 progPrimary
@@ -315,8 +317,7 @@ mathTheoremDecl
 
 //had better be an assertion involving the use of ':' or '⦂'
 mathClssftnAssertionDecl
-    :   'Classification' 'Corollary' ':'
-            mathAssertionExp ';'
+    :   'Classification' 'Corollary' ':' mathAssertionExp ';'
     ;
 
 mathDefnSig
@@ -352,11 +353,11 @@ mathPostfixDefnSig
 
 //the bar needs to be there because of the set restriction exp
 mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '|' )    //TODO: Maybe use BOOL instead?
+    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL)
     ;
 
 mathSymbolNameNoID
-    :   (MATH_UNICODE_SYM | SYM | '|' )
+    :   (MATH_UNICODE_SYM | SYM)
     ;
 
 mathCategoricalDefnDecl
@@ -365,7 +366,7 @@ mathCategoricalDefnDecl
     ;
 
 mathStandardDefnDecl
-    :   ('Implicit')? 'Definition' mathDefnSig
+    :   (chainable='Chainable')? ('Implicit')? 'Definition' mathDefnSig
         ('is' body=mathAssertionExp)? ';'
     ;
 
@@ -408,7 +409,7 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
     ;
 
 mathExp
@@ -444,7 +445,7 @@ mathOutfixAppExp
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl 's.t.' mathAssertionExp '}'
+    :   '{' mathVarDecl '∣' mathAssertionExp '}'
     ;
 
 mathSetExp
@@ -465,7 +466,7 @@ mathAlternativeItemExp
 
 FORALL : ('Forall'|'∀');
 EXISTS : ('Exists'|'∃');
-BOOL: ('true'|'false');
+BOOL : ('true'|'false');
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
@@ -475,7 +476,9 @@ INT : [0-9]+ ;
 SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|'['|']'|[<->])+ ;
 
 MATH_UNICODE_SYM
-    :   [\u2200-\u22FF]
+    :   [\u2100-\u214F]
+    |   [\u2200-\u22FF]
+    |   [\u27C0-\u27EF]
     |   [\u27F0-\u27FF]
     |   [\u2A00-\u2AFF]
     |   [\u2300-\u23BF]
