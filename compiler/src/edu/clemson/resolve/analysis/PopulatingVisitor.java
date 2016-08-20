@@ -910,7 +910,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, g.INVALID);
     }
 
-    // math constructs
+    // mathFor constructs
 
     boolean visitingClsstnAssertion = false;
 
@@ -1721,7 +1721,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     nsme.getRequestedModule().getText());
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.getStart(), "a math symbol", symbolName,
+                    ctx.getStart(), "a mathFor symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
         }
         return null;

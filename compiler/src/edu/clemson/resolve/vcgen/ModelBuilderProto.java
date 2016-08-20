@@ -481,6 +481,18 @@ public class ModelBuilderProto extends ResolveBaseListener {
         stats.put(ctx, s);
     }
 
+    //if stmts are kinda special, they don't really add a new rulebackedstat to a block.. but rather modify the
+    //existing (active assertive block) then of course add a NEW block for the negation (else) part.
+    @Override
+    public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
+        FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
+                new FunctionAssignApplicationStrategy.Invk_Cond(ctx.progExp(), assertiveBlocks.peek());
+        PExp progIfCondition = tr.exprASTs.get(ctx.progExp());
+        progIfCondition.accept(invokeConditionListener);
+        assertiveBlocks.peek().assume(invokeConditionListener.mathFor(progIfCondition));
+        assertiveBlocks.peek().stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+    }
+
     @Override
     public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
         VCRuleBackedStat s =

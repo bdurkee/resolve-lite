@@ -412,7 +412,7 @@ public class TestPExp extends BaseTest {
      * as we do about correct expression structure and quantifier distribution. So instead of real type information we
      * typically just use {@link MathInvalidClssftn}.</p>
      * <p>
-     * <p>If you <em>want</em> to test something math type related, just construct smaller exprs manually using
+     * <p>If you <em>want</em> to test something mathFor type related, just construct smaller exprs manually using
      * {@link PSymbol.PSymbolBuilder} or {@link PApply.PApplyBuilder}; otherwise parse the larger expr using this
      * method.</p>
      *

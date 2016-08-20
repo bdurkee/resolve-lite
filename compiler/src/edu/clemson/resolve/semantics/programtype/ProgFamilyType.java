@@ -68,7 +68,7 @@ public class ProgFamilyType extends ProgNamedType {
                 (Map<MathClassification, MathClassification>) (Map<?, MathClassification>) MathNamedClassification.toMTNamedMap(
                         getTypeGraph(), stringToMathType);
 
-        //Todo: Not currently substituting generics into math expressions..
+        //Todo: Not currently substituting generics into mathFor expressions..
         MathClassification newModel =
                 myModel.getCopyWithVariablesSubstituted(stringToMathType);
 

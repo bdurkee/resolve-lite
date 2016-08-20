@@ -97,7 +97,7 @@ public enum ErrorKind {
     APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
             " application, but it isn't a function", ErrorSeverity.ERROR),
 
-    INCORRECT_FUNCTION_ARG_COUNT(17, "no such math function: <arg>" +
+    INCORRECT_FUNCTION_ARG_COUNT(17, "no such mathFor function: <arg>" +
             "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
 
     ILLEGAL_IMPLICIT_CLSSFTN_PARAM(62, "the implicit classification parameter" +

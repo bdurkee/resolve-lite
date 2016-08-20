@@ -309,7 +309,7 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-// math constructs
+// mathFor constructs
 
 mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'

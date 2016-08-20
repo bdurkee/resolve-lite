@@ -35,8 +35,8 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
         }
 
         //Apply the listener to the (potentially) nested calls on the right hand side.
-        FunctionAssignRuleApplyingListener l =
-                new FunctionAssignRuleApplyingListener(block.definingTree, block);
+        Invk_Cond l =
+                new Invk_Cond(block.definingTree, block);
         right.accept(l);
 
         //Q[v ~> f[x ~> u]]).
@@ -46,13 +46,13 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
 
     //TODO for the explicit and general call rule applications, we'll need to iterate over the params, and
     //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to reduce that..
-    public static class FunctionAssignRuleApplyingListener extends PExpListener {
+    public static class Invk_Cond extends PExpListener {
         private final ParserRuleContext ctx;
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
         public final Map<PExp, PExp> substitutions = new HashMap<>();
 
-        public FunctionAssignRuleApplyingListener(ParserRuleContext ctx,
-                                                  VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        public Invk_Cond(ParserRuleContext ctx,
+                         VCAssertiveBlock.VCAssertiveBlockBuilder block) {
             this.block = block;
             this.ctx = ctx;
         }
@@ -89,11 +89,15 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
             for (PSymbol f : ensuresRight.getIncomingVariables()) {
                 Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
             }
-            /* Now we substitute the formals for actuals in the rhs of the ensures (f), THEN replace all
-             * occurences of v in Q with the modified f (formally, Q[v ~> f[x ~> u]]).
+            /* v := op(u);   then the op = Oper op (x); ensures op = f/_x_\;
+             * Now we substitute the formals for actuals in the rhs of the ensures (f),
              */
             ensuresRight = ensuresRight.substitute(formals, actuals);
             substitutions.put(e, ensuresRight);
+        }
+
+        public PExp mathFor(PExp programmingExp) {
+            return substitutions.get(programmingExp);
         }
     }
 
