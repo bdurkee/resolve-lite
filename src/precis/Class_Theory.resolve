@@ -1,4 +1,4 @@
-Meta Precis Class_Theory;
+Precis Class_Theory;
 
     Definition Cls ⦂ Hyp_Powerset(ME);
 /*

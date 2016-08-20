@@ -79,11 +79,11 @@ public final class CongruenceClassProver {
         if (compiler.proverListener != null) {
             this.proverListener = compiler.proverListener;
         }
-        //List<VC> preprocessedVcs = preprocessVCs(vcs);
-        List<VC> preprocessedVcs = new ArrayList<>();
+        List<VC> preprocessedVcs = preprocessVCs(vcs);
+        //List<VC> preprocessedVcs = new ArrayList<>();
 
-        VC test = buildTestVC5(m_scope, g, z, n);
-        preprocessedVcs.add(test);
+        //VC test = buildTestVC5(m_scope, g, z, n);
+        //preprocessedVcs.add(test);
         //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
 
         //preprocessedVcs.add(test);
@@ -603,8 +603,8 @@ public final class CongruenceClassProver {
         for (VC vc : vcs) {
             PExp newAntecedent = vc.getAntecedent();
             PExp newConsequent = vc.getConsequent();
-            newAntecedent = Utilities.flattenPSelectors(newAntecedent);
-            newConsequent = Utilities.flattenPSelectors(newConsequent);
+            //newAntecedent = Utilities.flattenPSelectors(newAntecedent);
+            //newConsequent = Utilities.flattenPSelectors(newConsequent);
 
             result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
             // make every PExp a PSymbol
