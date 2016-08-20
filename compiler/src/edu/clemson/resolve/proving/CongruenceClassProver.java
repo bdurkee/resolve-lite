@@ -53,8 +53,7 @@ public final class CongruenceClassProver {
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
                                  @NotNull DumbMathClssftnHandler g,
-                                 @NotNull List<VC> vcs,
-                                 @Nullable ProverListener listener) {
+                                 @NotNull List<VC> vcs) {
         this.compiler = compiler;
         this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
         this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
@@ -77,8 +76,8 @@ public final class CongruenceClassProver {
                     "used by the prover: N and/or Z");
         }
         models = new PerVCProverModel[vcs.size()];
-        if (listener != null) {
-            this.proverListener = listener;
+        if (compiler.proverListener != null) {
+            this.proverListener = compiler.proverListener;
         }
         //List<VC> preprocessedVcs = preprocessVCs(vcs);
         List<VC> preprocessedVcs = new ArrayList<>();

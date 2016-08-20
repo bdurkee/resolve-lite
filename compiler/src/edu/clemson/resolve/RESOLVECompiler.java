@@ -107,7 +107,7 @@ public class RESOLVECompiler {
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
 
     @Nullable
-    private ProverListener proverListener = null;
+    public ProverListener proverListener = null;
 
     /**
      * Track separately so if a listener is added, it's the only one (instead of it plus the default stderr listener).
