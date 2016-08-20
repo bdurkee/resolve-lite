@@ -48,11 +48,13 @@ public final class CongruenceClassProver {
     private final int numTriesBeforeQuitting;
     private final RESOLVECompiler compiler;
     private final AnnotatedModule tr;
+    private ProverListener proverListener;
 
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
                                  @NotNull DumbMathClssftnHandler g,
-                                 @NotNull List<VC> vcs) {
+                                 @NotNull List<VC> vcs,
+                                 @Nullable ProverListener listener) {
         this.compiler = compiler;
         this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
         this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
@@ -74,21 +76,24 @@ public final class CongruenceClassProver {
             compiler.info("warning: could not find some fundamental base sorts/classifications " +
                     "used by the prover: N and/or Z");
         }
-        int i = 0;
         models = new PerVCProverModel[vcs.size()];
-
+        if (listener != null) {
+            this.proverListener = listener;
+        }
         //List<VC> preprocessedVcs = preprocessVCs(vcs);
         List<VC> preprocessedVcs = new ArrayList<>();
 
         VC test = buildTestVC5(m_scope, g, z, n);
-        m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
+        preprocessedVcs.add(test);
+        //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
 
         //preprocessedVcs.add(test);
-       /* for (VC vc : preprocessedVcs) {
+        int i = 0;
+        for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
             models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
                     vc.getConsequent().splitIntoConjuncts());
-        }*/
+        }
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
             theoremSymbols.addAll(
@@ -745,6 +750,9 @@ public final class CongruenceClassProver {
             String whyQuit = "";
             // Skip proof loop
             if (numTriesBeforeQuitting >= 0 && numUnproved >= numTriesBeforeQuitting) {
+                if (proverListener != null) {
+                    proverListener.vcResult(false, models[i], new Metrics(0, 0));
+                }
                 summary += vcc.m_name + " skipped\n";
                 ++i;
                 continue;
@@ -768,6 +776,13 @@ public final class CongruenceClassProver {
             long delayNS = endTime - startTime;
             long delayMS = TimeUnit.MILLISECONDS.convert(delayNS, TimeUnit.NANOSECONDS);
             summary += vcc.m_name + whyQuit + " time: " + delayMS + " ms\n";
+            if (proverListener != null) {
+                this.proverListener
+                        .vcResult(
+                                (proved == (VerificationConditionCongruenceClosureImpl.STATUS.PROVED) ||
+                                        (proved == VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)),
+                                models[i], new Metrics(delayMS, timeout));
+            }
             i++;
 
         }

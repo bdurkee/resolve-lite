@@ -23,6 +23,18 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
         PApply callExp = (PApply) stat.getStatComponents().get(0);
+        OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(block.scope, callExp);
+
+        Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
+
+        //first reduce any nested calls passed as arguments to evaluate mode parameters.
+       /* for (PExp arg : callExp.getArguments()) {
+            ProgParameterSymbol p = formalParamIter.next();
+            if (p.getMode() == ParameterMode.EVALUATES) {
+                FunctionAssignRuleApplyingListener l = new FunctionAssignRuleApplyingListener(stat.getDefiningContext(), block)
+
+            }
+        }*/
         GeneralCallRuleSubstitutor applier = new GeneralCallRuleSubstitutor(stat.getDefiningContext(), block);
         callExp.accept(applier);
         return block.finalConfirm(applier.getCompletedExp()).snapshot();

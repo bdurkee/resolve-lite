@@ -8,6 +8,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
+import edu.clemson.resolve.proving.ProverListener;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -104,6 +105,9 @@ public class RESOLVECompiler {
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
+
+    @Nullable
+    private ProverListener proverListener = null;
 
     /**
      * Track separately so if a listener is added, it's the only one (instead of it plus the default stderr listener).
@@ -483,6 +487,10 @@ public class RESOLVECompiler {
         osw = new OutputStreamWriter(fos);
 
         return new BufferedWriter(osw);
+    }
+
+    public void addProverListener(@Nullable ProverListener pl) {
+        if (pl != null) proverListener = pl;
     }
 
     public void addListener(@Nullable RESOLVECompilerListener cl) {
