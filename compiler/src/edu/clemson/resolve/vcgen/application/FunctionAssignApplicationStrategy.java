@@ -35,8 +35,7 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
         }
 
         //Apply the listener to the (potentially) nested calls on the right hand side.
-        Invk_Cond l =
-                new Invk_Cond(block.definingTree, block);
+        Invk_Cond l = new Invk_Cond(block.definingTree, block);
         right.accept(l);
 
         //Q[v ~> f[x ~> u]]).
