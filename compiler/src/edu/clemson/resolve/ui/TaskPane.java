@@ -26,7 +26,7 @@ public class TaskPane extends JPanel {
     private Icon icon;
     private boolean special;
     private boolean scrollOnExpand;
-    private JXCollapsiblePane collapsePane;
+    private CollapsiblePane collapsePane;
 
     public TaskPane() {
         this((String) null);
@@ -41,7 +41,7 @@ public class TaskPane extends JPanel {
     }
 
     public TaskPane(String title, Icon icon) {
-        collapsePane = new JXCollapsiblePane();
+        collapsePane = new CollapsiblePane();
         collapsePane.setOpaque(false);
         super.setLayout(new BorderLayout(0, 0));
         super.addImpl(collapsePane, BorderLayout.CENTER, -1);

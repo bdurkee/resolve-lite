@@ -20,8 +20,6 @@
  */
 package edu.clemson.resolve.ui;
 
-import org.jdesktop.beans.JavaBean;
-import org.jdesktop.swingx.util.Separator;
 
 import java.awt.*;
 
@@ -31,7 +29,6 @@ import java.awt.*;
  * @author fred
  * @author Karl Schaefer
  */
-@JavaBean
 public class VerticalLayout extends AbstractLayoutManager {
     private static final long serialVersionUID = 5342270033773736441L;
     
