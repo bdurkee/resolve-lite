@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static edu.clemson.resolve.semantics.Quantification.*;
 import static junit.framework.TestCase.assertEquals;
@@ -40,7 +41,7 @@ public class TestPExp extends BaseTest {
         Iterator<? extends PExp> exps = subexprs.iterator();
         Assert.assertEquals("+", exps.next().toString());
         Assert.assertEquals("x", exps.next().toString());
-        Assert.assertEquals("y", exps.next().toString());
+        Assert.assertEquals("z", exps.next().toString());
 
         result = parseMathAssertionExp(g, "x(z + 1) + y");
         exps = result.getSubExpressions().iterator();
@@ -286,7 +287,7 @@ public class TestPExp extends BaseTest {
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
-                Arrays.asList("g", "u", "z", "f", "w", "x", "b", "k").stream().collect(Collectors.toSet());                                 
+                Stream.of("g", "u", "z", "f", "w", "x", "b", "k").collect(Collectors.toSet());
         Assert.assertEquals(expectedNames.size(), incomingNames.size());
         Assert.assertEquals(true, incomingNames.containsAll(expectedNames));
     }
@@ -301,7 +302,7 @@ public class TestPExp extends BaseTest {
                                 + "g(@u) + (h(@z, @w, f(@u)))");
         Set<String> quantifiedNames = result.getQuantifiedVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
-        Set<String> expectedNames = Arrays.asList("u", "z", "f", "h").stream().collect(Collectors.toSet());
+        Set<String> expectedNames = Stream.of("u", "z", "f", "h").collect(Collectors.toSet());
         Assert.assertEquals(4, quantifiedNames.size());
         Assert.assertEquals(true, quantifiedNames.containsAll(expectedNames));
     }
