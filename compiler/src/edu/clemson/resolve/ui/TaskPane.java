@@ -26,6 +26,7 @@ public class TaskPane extends JPanel {
     private Icon icon;
     private boolean special;
     private boolean scrollOnExpand;
+    private JXCollapsiblePane collapsePane;
 
     public TaskPane() {
         this((String) null);

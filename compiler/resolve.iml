@@ -21,6 +21,9 @@
     <orderEntry type="library" name="Maven: com.intellij:annotations:12.0" level="project" />
     <orderEntry type="library" name="Maven: org.jgrapht:jgrapht-core:0.9.0" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.swinglabs:swingx:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: com.jhlabs:filters:2.0.235" level="project" />
+    <orderEntry type="library" name="Maven: org.swinglabs:swing-worker:1.1" level="project" />
     <orderEntry type="module" module-name="resolve-runtime" />
     <orderEntry type="library" name="Maven: org.antlr:ST4:4.0.8" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr-runtime:3.5.2" level="project" />
