@@ -153,6 +153,10 @@ public class CollapsiblePane extends JPanel {
      */
     private boolean collapsed = false;
 
+    public CollapsiblePane() {
+        this(Direction.UP);
+    }
+
     public CollapsiblePane(Direction direction) {
         super.setLayout(new BorderLayout());
         this.direction = direction;
@@ -166,9 +170,11 @@ public class CollapsiblePane extends JPanel {
         // add an action to automatically toggle the state of the pane
         getActionMap().put(TOGGLE_ACTION, new ToggleAction());
     }
+
     public void setCollapsed(boolean val) {
         boolean oldValue = isCollapsed();
         this.collapsed = val;
+
 
             wrapper.collapsedState = isCollapsed();
             wrapper.getView().setVisible(!isCollapsed());

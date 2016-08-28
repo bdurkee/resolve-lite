@@ -11,18 +11,13 @@ import java.awt.*;
  */
 public class TaskPaneDemo extends JPanel {
 
-    private TaskPane systemGroup;
-    private TaskPane officeGroup;
-    private TaskPane seeAlsoGroup;
-    private TaskPane detailsGroup;
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame();
 
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.getContentPane().add(new TaskPaneDemo());
+                frame.add(new TaskPaneDemo());
                 frame.setPreferredSize(new Dimension(800, 600));
                 frame.pack();
                 frame.setLocationRelativeTo(null);
@@ -42,10 +37,10 @@ public class TaskPaneDemo extends JPanel {
         VCPaneContainer tpc = new VCPaneContainer();
 
         // "System" GROUP
-        systemGroup = new TaskPane();
+        TaskPane systemGroup = new TaskPane();
         systemGroup.setName("systemGroup");
         tpc.add(systemGroup);
-
+/*
         // "Office" GROUP
         officeGroup = new TaskPane();
         officeGroup.setName("officeGroup");
@@ -55,9 +50,8 @@ public class TaskPaneDemo extends JPanel {
         seeAlsoGroup = new TaskPane();
         seeAlsoGroup.setName("seeAlsoGroup");
         tpc.add(seeAlsoGroup);
-
-        // "Details" GROUP
-        detailsGroup = new TaskPane();
+*/
+        TaskPane detailsGroup = new TaskPane();
         detailsGroup.setName("detailsGroup");
 
         //TODO better injection for editor area

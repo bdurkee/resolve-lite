@@ -33,11 +33,11 @@
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr4.version}</version>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
             <version>1.6.1</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>edu.clemson</groupId>
             <artifactId>resolve-runtime</artifactId>
