@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class CollapsiblePane extends JPanel {
+public class CollapsiblePane extends JXPanel {
 
     /**
      * JXCollapsible has a built-in toggle action which can be bound to buttons. Accesses the action through

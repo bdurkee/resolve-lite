@@ -50,7 +50,7 @@ public class TaskPaneDemo extends JPanel {
         seeAlsoGroup = new TaskPane();
         seeAlsoGroup.setName("seeAlsoGroup");
         tpc.add(seeAlsoGroup);
-*/
+
         TaskPane detailsGroup = new TaskPane();
         detailsGroup.setName("detailsGroup");
 
@@ -75,7 +75,7 @@ public class TaskPaneDemo extends JPanel {
 
         detailsGroup.add(area);
 
-        tpc.add(detailsGroup);
+        tpc.add(detailsGroup);*/
 
         add(new JScrollPane(tpc));
     }

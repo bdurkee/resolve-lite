@@ -21,14 +21,6 @@
 
 package edu.clemson.resolve.ui;
 
-import org.jdesktop.beans.JavaBean;
-import org.jdesktop.swingx.ScrollableSizeHint;
-import org.jdesktop.swingx.SwingXUtilities;
-import org.jdesktop.swingx.painter.AbstractPainter;
-import org.jdesktop.swingx.painter.Painter;
-import org.jdesktop.swingx.util.Contract;
-import org.jdesktop.swingx.util.JVM;
-
 import javax.swing.*;
 import javax.swing.plaf.synth.SynthLookAndFeel;
 import java.awt.*;
@@ -36,8 +28,6 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
-
-import static org.jdesktop.swingx.util.GraphicsUtilities.createCompatibleTranslucentImage;
 
 /**
  * <p>
@@ -47,7 +37,6 @@ import static org.jdesktop.swingx.util.GraphicsUtilities.createCompatibleTranslu
  * <p>
  * {@code JXPanel} is {@link Scrollable} by default. It provides reasonable implementations of all
  * of the interface methods. In addition, it supports the setting of common scrolling approaches
- * defined in {@link org.jdesktop.swingx.ScrollableSizeHint}.
  * </p>
  * <h3>Alpha Support</h3>
  * <p>
@@ -89,7 +78,7 @@ import static org.jdesktop.swingx.util.GraphicsUtilities.createCompatibleTranslu
  * @see Painter
  */
 @SuppressWarnings("nls")
-public class JXPanel extends JPanel implements AlphaPaintable, BackgroundPaintable, Scrollable {
+public class JXPanel extends JPanel implements AlphaPaintable, Scrollable {
 //    private boolean scrollableTracksViewportHeight = true;
 //    private boolean scrollableTracksViewportWidth = true;
 
@@ -540,10 +529,10 @@ public class JXPanel extends JPanel implements AlphaPaintable, BackgroundPaintab
      * true by default. This property affects the width, height,
      * and initial transform passed to the background painter.
      */
-    @Override
-    public boolean isPaintBorderInsets() {
-        return paintBorderInsets;
-    }
+    //@Override
+    //public boolean isPaintBorderInsets() {
+    //    return paintBorderInsets;
+    //}
     
     /**
      * Sets the paintBorderInsets property.
@@ -554,12 +543,12 @@ public class JXPanel extends JPanel implements AlphaPaintable, BackgroundPaintab
      * 
      * This is a bound property.
      */
-    @Override
+    /*@Override
     public void setPaintBorderInsets(boolean paintBorderInsets) {
         boolean old = this.isPaintBorderInsets();
         this.paintBorderInsets = paintBorderInsets;
         firePropertyChange("paintBorderInsets", old, isPaintBorderInsets());
-    }
+    }*/
     
     //support for Java 7 painting improvements
     protected boolean isPaintingOrigin() {
@@ -614,42 +603,7 @@ public class JXPanel extends JPanel implements AlphaPaintable, BackgroundPaintab
     @Override
     @SuppressWarnings("unchecked")
     protected void paintComponent(Graphics g) {
-        if (isPatch()) {
-            paintComponentPatch(g);
-            return;
-        }
-        Graphics2D g2 = (Graphics2D) g.create();
-        
-        try {
-            // we should be painting the background behind the painter if we have one
-            // this prevents issues with buffer reuse where visual artifacts sneak in
-            if (isOpaque() || UIManager.getLookAndFeel() instanceof SynthLookAndFeel) {
-                //this will paint the foreground if a JXPanel subclass is 
-                //unfortunate enough to have one
-                super.paintComponent(g2);
-            } else if (getAlpha() < 1f) {
-                g.setColor(getBackground());
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
-            
-            if (getBackgroundPainter() != null) {
-                if (isPaintBorderInsets()) {
-                    getBackgroundPainter().paint(g2, this, getWidth(), getHeight());
-                } else {
-                    Insets insets = getInsets();
-                    g.translate(insets.left, insets.top);
-                    getBackgroundPainter().paint(g2, this, getWidth() - insets.left - insets.right,
-                            getHeight() - insets.top - insets.bottom);
-                    g.translate(-insets.left, -insets.top);
-                }
-            }
-            
-            //force the foreground to paint again...workaround for folks that 
-            //incorrectly extend JXPanel instead of JComponent
-            getUI().paint(g2, this);
-        } finally {
-            g2.dispose();
-        }
+        super.paintComponent(g);
     }
  
 //--------------------- experimental patch

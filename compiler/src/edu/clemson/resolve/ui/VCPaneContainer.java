@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 
-public class VCPaneContainer extends JPanel {
+public class VCPaneContainer extends JXPanel {
 
     private ScrollableSizeHint scrollableWidthHint = ScrollableSizeHint.FIT;
     private ScrollableSizeHint scrollableHeightHint = ScrollableSizeHint.FIT;
@@ -27,22 +27,4 @@ public class VCPaneContainer extends JPanel {
         return scrollableHeightHint;
     }
 
-    /**
-     * Sets the vertical sizing hint. The hint is used by the Scrollable implementation
-     * to service the getScrollableTracksHeight.
-     *
-     * @param hint the vertical sizing hint, must not be null
-     *   and must be vertical.
-     *
-     * @throws NullPointerException if null
-     *
-     * @see ScrollableSizeHint
-     */
-    public final void setScrollableHeightHint(@NotNull ScrollableSizeHint hint) {
-        ScrollableSizeHint oldValue = getScrollableHeightHint();
-        if (oldValue == hint) return;
-        this.scrollableHeightHint = hint;
-        revalidate();
-        firePropertyChange("scrollableHeightHint", oldValue, getScrollableHeightHint());
-    }
 }
