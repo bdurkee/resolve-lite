@@ -32,9 +32,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.html.HTMLDocument;
 
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
-
 /**
  * A demo for the {@code JXTaskPane}.
  *
@@ -44,10 +41,10 @@ import org.jdesktop.swingx.JXTaskPaneContainer;
 
 @SuppressWarnings("serial")
 public class Demo extends JPanel {
-    private JXTaskPane systemGroup;
-    private JXTaskPane officeGroup;
-    private JXTaskPane seeAlsoGroup;
-    private JXTaskPane detailsGroup;
+    private TaskPane systemGroup;
+    private TaskPane officeGroup;
+    private TaskPane seeAlsoGroup;
+    private TaskPane detailsGroup;
 
     /**
      * main method allows us to run as a standalone demo.
@@ -78,9 +75,9 @@ public class Demo extends JPanel {
 
     private void createTaskPaneDemo() {
         //JXTaskPaneContainer tpc = new JXTaskPaneContainer();
-        JPanel tpc = new JPanel();
+        VCPaneContainer tpc = new VCPaneContainer();
         // "System" GROUP
-        systemGroup = new JXTaskPane();
+        systemGroup = new TaskPane();
         systemGroup.setName("systemGroup");
         tpc.add(systemGroup);
 /*
