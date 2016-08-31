@@ -61,12 +61,13 @@ Precis Basic_Integer_Theory;
 
 	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
 
-	Theorem Nested_Subt_1: ∀ i, j : Z, (i + j - j) = i;
+	Theorem Nested_Subt_1: ∀ i, j : Z, (i + (j - j)) = i;
+	
 
-	Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
+	//Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
 
 	Corollary LTE_1a: ∀ i, j, k : Z, i ≤ j ∧ (j ≤ k) implies (i ≤ k);   //expand Is_Transitive(≤);
-    //TODO: Have special keyword which dictates when an application ought to be expanded.
+    //tod: Have special keyword which dictates when an application ought to be expanded.
     //For intance, Corollary lte1: expand Is_Transitive(≤);
 
     Corollary LTE_3: ∀ m, n : Z, m ≤ n ∨ (n ≤ m);       //expand Is_Total(≤)

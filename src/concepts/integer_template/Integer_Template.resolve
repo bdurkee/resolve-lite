@@ -55,7 +55,7 @@ Concept Integer_Template;
             Less = (1 + i ≤ j);
 
     Operation Greater
-            (evaluates i, j: Integer)
+            (evaluates i, j : Integer)
                 : Boolean;
         ensures
             Greater = (1 + j ≤ i);
