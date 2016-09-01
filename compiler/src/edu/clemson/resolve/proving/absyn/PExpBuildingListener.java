@@ -187,7 +187,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
         PSymbol operator = new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText())
-                .mathClssfctn(getMathClssfctn(ctx))
+                .mathClssfctn(getMathClssfctn(ctx.lop))
                 .quantification(quantifiedVars.get(ctx.lop.getText()))
                 .build();
         PApplyBuilder result =
@@ -314,8 +314,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
-        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(
-                ctx.name.getStart(), argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())
                 .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.

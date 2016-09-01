@@ -1359,8 +1359,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyName.addChild(t);
         dummyPrefixNode.addChild(dummyName);
         dummyPrefixNode.name = dummyName;
-
         typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
+
+        //TODO: For now, I assign the first class function type of the outfix application to the
+        //left hand side of the operator..
+        tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
         return null;
     }
 
