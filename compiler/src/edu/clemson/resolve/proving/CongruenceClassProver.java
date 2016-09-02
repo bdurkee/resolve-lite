@@ -756,21 +756,29 @@ public final class CongruenceClassProver {
                 ++i;
                 continue;
             }
-            VerificationConditionCongruenceClosureImpl.STATUS proved = prove(vcc);
-            if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
-                whyQuit += " Proved ";
-            }
-            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
-                whyQuit += " Proved (Assumption(s) false) ";
-            }
-            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
-                whyQuit += " Out of theorems, or timed out ";
+
+            VerificationConditionCongruenceClosureImpl.STATUS proved = null;
+            if (isCancelled()) {
+                whyQuit += "Cancelled";
+                proved = VerificationConditionCongruenceClosureImpl.STATUS.CANCELLED;
                 numUnproved++;
             }
             else {
-                whyQuit += " Goal false "; // this isn't currently reachable
+                proved = prove(vcc);
+                if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+                    whyQuit += " Proved ";
+                }
+                else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+                    whyQuit += " Proved (Assumption(s) false) ";
+                }
+                else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+                    whyQuit += " Out of theorems, or timed out ";
+                    numUnproved++;
+                }
+                else {
+                    whyQuit += " Goal false "; // this isn't currently reachable
+                }
             }
-
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
             long delayMS = TimeUnit.MILLISECONDS.convert(delayNS, TimeUnit.NANOSECONDS);
@@ -830,7 +838,7 @@ public final class CongruenceClassProver {
         // ++++++ Create new PQ for instantiated theorems
         chooseNewTheorem: while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
-                && System.currentTimeMillis() <= endTime) {
+                && System.currentTimeMillis() <= endTime && !isCancelled()) {
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             // ++++++ Creates new PQ with all the theorems
 
@@ -841,7 +849,7 @@ public final class CongruenceClassProver {
                             m_nonQuantifiedTheoremSymbols, m_smallEndEquations);
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
-            while (!rankedTheorems.m_pQueue.isEmpty()
+            while (!isCancelled() && !rankedTheorems.m_pQueue.isEmpty()
                     && status
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && (num_Theorems_chosen < max_Theorems_to_choose || rankedTheorems.m_pQueue
@@ -913,6 +921,9 @@ public final class CongruenceClassProver {
 
     }
 
+    public boolean isCancelled() {
+        return proverListener != null && proverListener.isCancelled();
+    }
 
 
     private String proofFileName() {

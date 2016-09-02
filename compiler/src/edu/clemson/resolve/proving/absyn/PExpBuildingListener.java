@@ -39,7 +39,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * Constructs a new {@code PExpBuildingListener} given an {@link AnnotatedModule} with it's associated expression
      * tree mappings.
      *
-     * @param g           a typegraph
+     * @param g           a clssftnhandler
      * @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull DumbMathClssftnHandler g, @NotNull AnnotatedModule annotations) {
