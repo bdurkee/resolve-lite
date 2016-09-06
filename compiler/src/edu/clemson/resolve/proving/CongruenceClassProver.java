@@ -603,8 +603,8 @@ public final class CongruenceClassProver {
         for (VC vc : vcs) {
             PExp newAntecedent = vc.getAntecedent();
             PExp newConsequent = vc.getConsequent();
-            //newAntecedent = Utilities.flattenPSelectors(newAntecedent);
-            //newConsequent = Utilities.flattenPSelectors(newConsequent);
+            newAntecedent = Utilities.flattenPSelectors(newAntecedent);
+            newConsequent = Utilities.flattenPSelectors(newConsequent);
 
             result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
             // make every PExp a PSymbol
