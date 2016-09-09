@@ -541,8 +541,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
             else if (declaredType instanceof PTRepresentation) {
                 ProgReprTypeSymbol repr = ((PTRepresentation) declaredType).getReprTypeSymbol();
+                if (repr == null) return resultingAssumptions;
                 PExp convention = repr.getConvention();
-
                 resultingAssumptions.add(convention.substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
                 // ASSUME RC (repr convention -- since we're a repr)
                 resultingAssumptions.add(repr.getCorrespondence());
@@ -576,8 +576,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp)
-                        .withVCInfo(block.definingTree.getStart(), "Ensure parameter " +
-                                p.getName() + " is restored");
+                        .withVCInfo(block.definingTree.getStart(), "Ensure parameter " + p.getName() + " is restored");
                 block.confirm(block.definingTree, equalsExp);
             }
             else if (p.getMode() == ParameterMode.CLEARS) {

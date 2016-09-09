@@ -178,7 +178,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull
     public PExp getBottommostFormula(@NotNull PExp l) {
         PExp result = l;
-        while (result.getTopLevelOperationName().equals("and") && result instanceof PApply) {
+        while ((result.getTopLevelOperationName().equals("and") ||
+                result.getTopLevelOperationName().equals("∧")) && result instanceof PApply) {
             result = ((PApply) result).getArguments().get(1); //keep getting rhs
         }
         return result;
