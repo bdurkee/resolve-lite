@@ -8,3 +8,5 @@ are relevant to its operation. A formal model of the environment can then be con
 model of the proposed software to determine whether the software would interact with its environment to produce
 desirable behavior.
 
+<img src="https://github.com/dtwelch/resolve-lite/dev/doc/tpcods/code_blocks/01_a.png" width="600">
+
