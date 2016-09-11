@@ -102,6 +102,7 @@ in the previous section.
 ### The obligatory "hello world" example
 Now that we have the compiler setup, go ahead create a new file called
 `Hello.resolve` and punch in the following bit of RESOLVE:
+
 ![hello_world_code](doc/images/01.png)
 
 To run, open the terminal, cd to the directory where you've
