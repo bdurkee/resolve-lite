@@ -1,0 +1,12 @@
+Precis Extension Basic_Relativization_Ext for Basic_String_Theory;
+	uses Basic_String_Theory;
+
+	Classification Corollary: El ⦂ Cls;
+	Definition Str(ξ ⦂ Cls) ⦂ Cls;
+	
+		Classification Corollary: ∀ ξ ⦂ Cls, Λ : Str(ξ);
+		
+	    Classification Corollary: ∀ φ : SSet, Str(φ) : SSet;
+		Classification Corollary: ∀ ξ ⦂ Cls, ∀ α : Str(ξ), ∀ x : ξ, ext(α, x) : Str(ξ);
+	
+end Basic_Relativization_Ext;

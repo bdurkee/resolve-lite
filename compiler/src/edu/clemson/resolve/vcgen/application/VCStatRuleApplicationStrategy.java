@@ -13,4 +13,6 @@ public interface VCStatRuleApplicationStrategy<T extends VCRuleBackedStat> {
 
     @NotNull
     public String getDescription();
+
+
 }

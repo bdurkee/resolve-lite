@@ -602,7 +602,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
                 PExp convention = repr.getConvention();
                 PExp corrFnExp = repr.getCorrespondence();
-                result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp));
+                result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp)
+                        .withVCInfo(p.getDefiningTree().getStart(), "Convention for type " +
+                                t.getName()));
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp)

@@ -116,6 +116,7 @@ facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
         | typeRepresentationDecl
+        | mathStandardDefnDecl
         )*
     ;
 
