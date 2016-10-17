@@ -86,6 +86,12 @@ Concept Integer_Template;
         ensures
             Product = (i Basic_Integer_Theory::+ j);
 
+    Operation Mod
+            (evaluates i, j : Integer)
+                : Integer;
+        ensures
+            Mod = (i Basic_Integer_Theory::mod j);
+
     Operation Write
             (evaluates a : Integer);
 

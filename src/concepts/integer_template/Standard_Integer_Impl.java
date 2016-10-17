@@ -100,6 +100,10 @@ public class Standard_Integer_Impl extends RESOLVEBase implements Integer_Templa
         return new Integer(((Integer)i1).val * ((Integer)i2).val);
     }
 
+    @Override public RType Mod(RType i1, RType i2) {
+        return new Integer(((Integer)i1).val % ((Integer)i2).val);
+    }
+
     @Override public RType Negate(RType i1) {
         return new Integer(-((Integer)i1).val);
     }
