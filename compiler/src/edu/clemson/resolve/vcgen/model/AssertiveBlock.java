@@ -4,6 +4,7 @@ import edu.clemson.resolve.codegen.Model;
 import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,11 @@ public abstract class AssertiveBlock extends OutputModelObject {
         this.stats.addAll(stats);
         this.applicationSteps.addAll(applicationSteps);
         this.blockDescription = blockDescription;
+    }
+
+    @NotNull
+    public DumbMathClssftnHandler getClassificationHandler() {
+        return g;
     }
 
     public String getDescription() {

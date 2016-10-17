@@ -11,6 +11,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.vcgen.application.*;
+import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.model.VCCall;
 import edu.clemson.resolve.vcgen.model.VCOutputFile;
@@ -497,6 +498,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         //add new assertive block for else part...
         if (ctx.elseStmt() != null) {
+            AssertiveBlock x = new VCAssertiveBlockBuilder(assertiveBlocks.peek())
             //TODO: thinking we need to make a copy of an assertive block...
             PExp negName = new PSymbolBuilder("⌐")
                     .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))

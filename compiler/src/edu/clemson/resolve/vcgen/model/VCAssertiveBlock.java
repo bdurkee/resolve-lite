@@ -47,6 +47,19 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.description = description;
         }
 
+        public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder block) {
+            this.g = block.g;
+            this.definingTree = block.definingTree;
+            this.finalConfirm = block.finalConfirm;
+            this.finalConfirm = new VCConfirm(definingTree, this, g.getTrueExp());
+            this.scope = block.scope;
+            this.description = block.description;
+
+            this.stats.addAll(block.stats);
+            this.applicationSteps.addAll(block.applicationSteps);
+            this.facilitySpecializations.putAll(block.facilitySpecializations);
+        }
+
         public VCAssertiveBlockBuilder facilitySpecializations(Map<String, Map<PExp, PExp>> mappings) {
             facilitySpecializations.putAll(mappings);
             return this;
