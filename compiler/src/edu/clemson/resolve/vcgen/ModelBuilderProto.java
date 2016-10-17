@@ -7,6 +7,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.vcgen.application.*;
@@ -489,17 +490,33 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 new FunctionAssignApplicationStrategy.Invk_Cond(ctx.progExp(), assertiveBlocks.peek());
         PExp progIfCondition = tr.exprASTs.get(ctx.progExp());
         progIfCondition.accept(invokeConditionListener);
-        assertiveBlocks.peek().assume(invokeConditionListener.mathFor(progIfCondition));
-        assertiveBlocks.peek().stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
+        PExp mathCond = invokeConditionListener.mathFor(progIfCondition);
+        assertiveBlocks.peek().assume(mathCond);
+        List<VCRuleBackedStat> ifPartStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
+        assertiveBlocks.peek().stats(ifPartStmts);
+
+        //add new assertive block for else part...
+        if (ctx.elseStmt() != null) {
+            //TODO: thinking we need to make a copy of an assertive block...
+            PExp negName = new PSymbolBuilder("⌐")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
+                    .build();
+            PExp negatedMathCond = new PApply.PApplyBuilder(negName)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(mathCond)
+                    .build();
+
+
+        }
     }
 
     @Override
     public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
+        PExp left = tr.exprASTs.get(ctx.left);
+        PExp right = tr.exprASTs.get(ctx.right);
         VCRuleBackedStat s =
                 new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        FUNCTION_ASSIGN_APPLICATION,
-                        tr.exprASTs.get(ctx.left),
-                        tr.exprASTs.get(ctx.right));
+                        FUNCTION_ASSIGN_APPLICATION, left, right);
         stats.put(ctx, s);
     }
 

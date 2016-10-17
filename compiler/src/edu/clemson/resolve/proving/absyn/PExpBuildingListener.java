@@ -328,6 +328,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override
+    public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
+    }
+
+    @Override
     public void exitProgIntegerLiteralExp(ResolveParser.ProgIntegerLiteralExpContext ctx) {
         repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
     }
