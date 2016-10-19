@@ -451,6 +451,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return simple;
     }
 
+
+    
     @Override
     public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
@@ -479,26 +481,33 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         tr.exprASTs.get(ctx.right));
         stats.put(ctx, s);
     }
-    private VCAssertiveBlockBuilder currElseBlock = null;
+
+    private final Deque<VCAssertiveBlockBuilder> elseBlocks = new LinkedList<>();
 
     //this is kind of tricky! We need a separate assertive code the negation of each if
     @Override
     public void enterIfStmt(ResolveParser.IfStmtContext ctx) {
-        currElseBlock = new VCAssertiveBlockBuilder(assertiveBlocks.peek());
     }
 
     @Override
     public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
         PExp progCondition = tr.exprASTs.get(ctx.progExp());
 
-        //copy the current assertive code before we mess with it in the case where the condition is satisfied
 
+        //copy the current assertive code before we mess with it in the case where the condition is satisfied
+assertiveBlocks.push();
         //we know the if part isn't null because we're here.
         List<VCRuleBackedStat> ifPartStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
         VCIfElse ifStat = new VCIfElse(ctx, assertiveBlocks.peek(), IF_ELSE_APPLICATION, ifPartStmts, true, progCondition);
         stats.put(ctx, ifStat);
 
+        List<VCRuleBackedStat> elsePartStmts = ctx.elseStmt() != null ?
+                Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
 
+        VCIfElse elseStat = new VCIfElse(ctx, elseBlocks.peek(), IF_ELSE_APPLICATION, elsePartStmts, false, progCondition);
+        elseBlocks.peek().stats(elseStat);
+        outputFile.addAssertiveBlock(elseBlocks.peek().build());
+        elseBlocks.pop();
         //block
     }
 
