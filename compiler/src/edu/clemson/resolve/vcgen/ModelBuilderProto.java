@@ -7,15 +7,11 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.vcgen.application.*;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
+import edu.clemson.resolve.vcgen.model.*;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCCall;
-import edu.clemson.resolve.vcgen.model.VCOutputFile;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -56,9 +52,9 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
     //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
     //stats.getComponents().get(0), etc.
-    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION =
-            new FunctionAssignApplicationStrategy();
+    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
     private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
+    private final static VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
 
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
@@ -290,6 +286,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     //TODO: Would be really cool if we could hover over a given and get information about where it came from
     //"constraint for type Integer", etc.
+
     @Override
     public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
@@ -482,34 +479,27 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         tr.exprASTs.get(ctx.right));
         stats.put(ctx, s);
     }
+    private VCAssertiveBlockBuilder currElseBlock = null;
 
-    //if stmts are kinda special, they don't really add a new rulebackedstat to a block.. but rather modify the
-    //existing (active assertive block) then of course add a NEW block for the negation (else) part.
+    //this is kind of tricky! We need a separate assertive code the negation of each if
+    @Override
+    public void enterIfStmt(ResolveParser.IfStmtContext ctx) {
+        currElseBlock = new VCAssertiveBlockBuilder(assertiveBlocks.peek());
+    }
+
     @Override
     public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
-        FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
-                new FunctionAssignApplicationStrategy.Invk_Cond(ctx.progExp(), assertiveBlocks.peek());
-        PExp progIfCondition = tr.exprASTs.get(ctx.progExp());
-        progIfCondition.accept(invokeConditionListener);
-        PExp mathCond = invokeConditionListener.mathFor(progIfCondition);
-        assertiveBlocks.peek().assume(mathCond);
+        PExp progCondition = tr.exprASTs.get(ctx.progExp());
+
+        //copy the current assertive code before we mess with it in the case where the condition is satisfied
+
+        //we know the if part isn't null because we're here.
         List<VCRuleBackedStat> ifPartStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
-        assertiveBlocks.peek().stats(ifPartStmts);
-
-        //add new assertive block for else part...
-        if (ctx.elseStmt() != null) {
-            VCAssertiveBlockBuilder elsePart = new VCAssertiveBlockBuilder(assertiveBlocks.peek());
-            //TODO: thinking we need to make a copy of an assertive block...
-            PExp negName = new PSymbolBuilder("⌐")
-                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
-                    .build();
-            PExp negatedMathCond = new PApply.PApplyBuilder(negName)
-                    .applicationType(g.BOOLEAN)
-                    .arguments(mathCond)
-                    .build();
+        VCIfElse ifStat = new VCIfElse(ctx, assertiveBlocks.peek(), IF_ELSE_APPLICATION, ifPartStmts, true, progCondition);
+        stats.put(ctx, ifStat);
 
 
-        }
+        //block
     }
 
     @Override

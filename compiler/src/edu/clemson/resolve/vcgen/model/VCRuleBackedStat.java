@@ -22,6 +22,8 @@ public class VCRuleBackedStat extends OutputModelObject {
     private final VCStatRuleApplicationStrategy applicationStrategy;
     private final VCAssertiveBlockBuilder enclosingBlock;
 
+    //TODO: Perhaps more than one block should be able to be read in.. for if else, etc. There can be multiple active
+    //VCAssertiveBlockBuilders...?
     public VCRuleBackedStat(ParserRuleContext ctx,
                             VCAssertiveBlockBuilder block,
                             VCStatRuleApplicationStrategy apply,

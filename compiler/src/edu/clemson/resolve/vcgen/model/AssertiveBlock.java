@@ -36,11 +36,6 @@ public abstract class AssertiveBlock extends OutputModelObject {
         this.blockDescription = blockDescription;
     }
 
-    @NotNull
-    public DumbMathClssftnHandler getClassificationHandler() {
-        return g;
-    }
-
     public String getDescription() {
         return blockDescription;
     }

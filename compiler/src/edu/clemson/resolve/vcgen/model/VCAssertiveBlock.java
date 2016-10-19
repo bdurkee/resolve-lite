@@ -47,6 +47,11 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.description = description;
         }
 
+        /**
+         * A copy constructor for an assertive block builder.
+         *
+         * @param block The {@code VCAssertiveBlockBuilder} from which {@code this} will be initialized.
+         */
         public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder block) {
             this.g = block.g;
             this.definingTree = block.definingTree;

@@ -69,4 +69,6 @@ VCRuleBackedStat(code) ::= "<code.text>"
 
 VCCall(code) ::= "<code.text>"
 
+VCIfElse(code) ::= "<code.text>"
+
 fileExtension() ::= ".asrt"
