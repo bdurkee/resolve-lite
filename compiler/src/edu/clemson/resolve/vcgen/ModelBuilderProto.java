@@ -4,6 +4,7 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
+import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -451,8 +452,35 @@ public class ModelBuilderProto extends ResolveBaseListener {
         return simple;
     }
 
+    private static class StmtListener extends ResolveBaseListener {
+        public final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
+        public final VCAssertiveBlockBuilder builder;
 
-    
+        public StmtListener(VCAssertiveBlockBuilder activeBuilder) {
+            this.builder = activeBuilder;
+        }
+
+        @Override
+        public void postCallStmt(ResolveParser.CallStmtContext ctx) {
+            VCRuleBackedStat s = null;
+            PApply callExp = (PApply) tr.exprASTs.get(ctx.progParamExp());
+            OperationSymbol op = getOperation(moduleScope, callExp);
+            if (inSimpleForm(op.getEnsures(), op.getParameters())) {
+                //TODO: Use log instead!
+                //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
+                s = new VCCall(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
+            }
+            else {
+                //TODO: Use log instead!
+                //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
+                s = new VCCall(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
+            }
+            stats.put(ctx, s);
+            return null;
+        }
+    }
+
+
     @Override
     public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
         VCRuleBackedStat s = null;
