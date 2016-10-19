@@ -14,27 +14,15 @@ import java.util.List;
 
 public class VCIfElse extends VCRuleBackedStat {
 
-    private final List<VCRuleBackedStat> bodyStatements = new ArrayList<>();
-
-    /**
-     * {@code true} if this instance represents the if part (with body); false if {@code this} represents
-     * the else part.
-     */
-    private final boolean forIf;
+    private final List<VCRuleBackedStat> bodyStmts = new ArrayList<>();
 
     public VCIfElse(ParserRuleContext ctx,
                     VCAssertiveBlock.VCAssertiveBlockBuilder block,
                     VCStatRuleApplicationStrategy apply,
                     List<VCRuleBackedStat> bodyStats,
-                    boolean forIf,
                     PExp progCondition) {
         super(ctx, block, apply, progCondition);
-        this.forIf = forIf;
-        this.bodyStatements.addAll(bodyStats);
-    }
-
-    public boolean isForIf() {
-        return forIf;
+        this.bodyStmts.addAll(bodyStats);
     }
 
     @NotNull
@@ -43,19 +31,19 @@ public class VCIfElse extends VCRuleBackedStat {
     }
 
     @NotNull
-    public PExp negateMathCondition(PExp mathematicalCondition) {
+    public PExp negateMathCondition(PExp mathConditionToNegate) {
         DumbMathClssftnHandler g = getEnclosingBlock().g;
         PExp name = new PSymbol.PSymbolBuilder("⌐")
                 .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
                 .build();
         return new PApply.PApplyBuilder(name)
                 .applicationType(g.BOOLEAN)
-                .arguments(mathematicalCondition)
+                .arguments(mathConditionToNegate)
                 .build();
     }
 
     @NotNull
-    public List<VCRuleBackedStat> getBodyStatements() {
-        return bodyStatements;
+    public List<VCRuleBackedStat> getBodyStmts() {
+        return bodyStmts;
     }
 }

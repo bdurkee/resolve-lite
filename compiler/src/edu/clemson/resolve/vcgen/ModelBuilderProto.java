@@ -4,7 +4,6 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveBaseListener;
-import edu.clemson.resolve.parser.ResolveBaseVisitor;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -16,6 +15,7 @@ import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.programtype.PTRepresentation;
@@ -33,8 +33,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
-import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.getOperation;
 
+//TODO: CAN CHANGE TO VISITOR I THINK.
 public class ModelBuilderProto extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
@@ -55,7 +55,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //stats.getComponents().get(0), etc.
     private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
     private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
-    private final static VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
+    private final static VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
+    private final static VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
@@ -262,7 +263,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getAssertionsFromModuleFormalParameters(moduleParamSyms,
                                 this::extractAssumptionsFromParameter));
-
         assertiveBlocks.push(block);
     }
 
@@ -293,7 +293,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-        //precondition[params 1..i <-- conc.X]
+        //precondition[params 1..i ~> conc.X]
         PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.requiresClause()));
 
@@ -307,15 +307,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
                         .remember();
+        VCAssertiveBlockBuilder blockForElses = new VCAssertiveBlockBuilder(block);
 
-        assertiveBlocks.push(block);
-    }
+        StmtListener l = new StmtListener(block, tr.exprASTs, false);
+        ParseTreeWalker.DEFAULT.walk(new StmtListener(block, tr.exprASTs, false), ctx);   //walk all stmts in this context, processing all satisfied if branches
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
 
-    @Override
-    public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
-        Scope s = symtab.getScope(ctx);
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
+
+        alterBlock
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
@@ -324,9 +323,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
-
-        //add verification statements to the assertive context/block
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
 
         //add any additional confirms from the parameters, etc
         for (ProgParameterSymbol p : paramSyms) {
@@ -388,7 +384,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getEnsures())
                 .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
         //postcondition[params 1..i <-- corr_fn_exp]
-
        List<PExp> paramConsequents = new ArrayList<>();
        Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
 
@@ -421,133 +416,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
             }
         }
     }*/
-
-    //-----------------------------------------------
-    // S T A T S
-    //-----------------------------------------------
-
-    @Override
-    public void exitStmt(ResolveParser.StmtContext ctx) {
-        stats.put(ctx, stats.get(ctx.getChild(0)));
-    }
-
-    //TODO: TEST THIS
-    private boolean inSimpleForm(@NotNull PExp ensures, @NotNull List<ProgParameterSymbol> params) {
-        boolean simple = false;
-       /* if (ensures instanceof PApply) {
-            PApply ensuresAsPApply = (PApply) ensures;
-            List<PExp> args = ensuresAsPApply.getArguments();
-            if (ensuresAsPApply.isEquality()) {
-                if (inSimpleForm(args.get(0), params)) simple = true;
-            }
-            else if (ensuresAsPApply.isConjunct()) {
-                if (inSimpleForm(args.get(0), params) && inSimpleForm(args.get(1), params)) simple = true;
-            }
-        }
-        else if (ensures instanceof PSymbol) {
-            for (ProgParameterSymbol p : params) {
-                if (p.getMode() == ParameterMode.UPDATES && p.asPSymbol().equals(ensures)) simple = true;
-            }
-        }*/
-        return simple;
-    }
-
-    private static class StmtListener extends ResolveBaseListener {
-        public final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
-        public final VCAssertiveBlockBuilder builder;
-
-        public StmtListener(VCAssertiveBlockBuilder activeBuilder) {
-            this.builder = activeBuilder;
-        }
-
-        @Override
-        public void postCallStmt(ResolveParser.CallStmtContext ctx) {
-            VCRuleBackedStat s = null;
-            PApply callExp = (PApply) tr.exprASTs.get(ctx.progParamExp());
-            OperationSymbol op = getOperation(moduleScope, callExp);
-            if (inSimpleForm(op.getEnsures(), op.getParameters())) {
-                //TODO: Use log instead!
-                //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
-                s = new VCCall(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
-            }
-            else {
-                //TODO: Use log instead!
-                //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
-                s = new VCCall(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
-            }
-            stats.put(ctx, s);
-            return null;
-        }
-    }
-
-
-    @Override
-    public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
-        VCRuleBackedStat s = null;
-        PApply callExp = (PApply) tr.exprASTs.get(ctx.progParamExp());
-        OperationSymbol op = getOperation(moduleScope, callExp);
-        if (inSimpleForm(op.getEnsures(), op.getParameters())) {
-            //TODO: Use log instead!
-            //gen.getCompiler().info("APPLYING EXPLICIT (SIMPLE) CALL RULE");
-            s = new VCCall(ctx, assertiveBlocks.peek(), EXPLICIT_CALL_APPLICATION, callExp);
-        }
-        else {
-            //TODO: Use log instead!
-            //gen.getCompiler().info("APPLYING GENERAL CALL RULE");
-            s = new VCCall(ctx, assertiveBlocks.peek(), GENERAL_CALL_APPLICATION, callExp);
-        }
-        stats.put(ctx, s);
-    }
-
-    //if the immediate parent is a callStmtCtx then add an actual stmt for this guy,
-    //otherwise,
-    @Override
-    public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
-        VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        SWAP_APPLICATION, tr.exprASTs.get(ctx.left),
-                        tr.exprASTs.get(ctx.right));
-        stats.put(ctx, s);
-    }
-
-    private final Deque<VCAssertiveBlockBuilder> elseBlocks = new LinkedList<>();
-
-    //this is kind of tricky! We need a separate assertive code the negation of each if
-    @Override
-    public void enterIfStmt(ResolveParser.IfStmtContext ctx) {
-    }
-
-    @Override
-    public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
-        PExp progCondition = tr.exprASTs.get(ctx.progExp());
-
-
-        //copy the current assertive code before we mess with it in the case where the condition is satisfied
-assertiveBlocks.push();
-        //we know the if part isn't null because we're here.
-        List<VCRuleBackedStat> ifPartStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
-        VCIfElse ifStat = new VCIfElse(ctx, assertiveBlocks.peek(), IF_ELSE_APPLICATION, ifPartStmts, true, progCondition);
-        stats.put(ctx, ifStat);
-
-        List<VCRuleBackedStat> elsePartStmts = ctx.elseStmt() != null ?
-                Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
-
-        VCIfElse elseStat = new VCIfElse(ctx, elseBlocks.peek(), IF_ELSE_APPLICATION, elsePartStmts, false, progCondition);
-        elseBlocks.peek().stats(elseStat);
-        outputFile.addAssertiveBlock(elseBlocks.peek().build());
-        elseBlocks.pop();
-        //block
-    }
-
-    @Override
-    public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
-        PExp left = tr.exprASTs.get(ctx.left);
-        PExp right = tr.exprASTs.get(ctx.right);
-        VCRuleBackedStat s =
-                new VCRuleBackedStat(ctx, assertiveBlocks.peek(),
-                        FUNCTION_ASSIGN_APPLICATION, left, right);
-        stats.put(ctx, s);
-    }
 
     private List<PExp> getAssertionsFromModuleFormalParameters(List<ModuleParameterSymbol> parameters,
                                                                Function<ProgParameterSymbol, List<PExp>> extract) {
@@ -723,5 +591,73 @@ assertiveBlocks.push();
             }
         }
         return resultingClause == null ? g.getTrueExp() : resultingClause;
+    }
+
+    //-----------------------------------------------
+    // S T A T S
+    //-----------------------------------------------
+
+    private static class StmtListener extends ResolveBaseListener {
+
+        final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
+        final VCAssertiveBlockBuilder builder;
+        final ParseTreeProperty<PExp> asts;
+
+        /**
+         * {@code true} if we're processing the negation of ifs for this traversal through the
+         * stmts; {@code false} otherwise
+         */
+        final boolean traversingNegativePath;
+
+        public StmtListener(VCAssertiveBlockBuilder activeBuilder,
+                            ParseTreeProperty<PExp> asts,
+                            boolean traversingNegativePath) {
+            this.builder = activeBuilder;
+            this.asts = asts;
+            this.traversingNegativePath = traversingNegativePath;
+        }
+
+        @Override
+        public void exitStmt(ResolveParser.StmtContext ctx) {
+            stats.put(ctx, stats.get(ctx.getChild(0)));
+        }
+
+        @Override
+        public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
+            VCCall s = new VCCall(ctx, builder, GENERAL_CALL_APPLICATION, (PApply) asts.get(ctx.progParamExp()));
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
+            PExp left = asts.get(ctx.left);
+            PExp right = asts.get(ctx.right);
+            VCRuleBackedStat s = new VCRuleBackedStat(ctx, builder, FUNCTION_ASSIGN_APPLICATION, left, right);
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
+            PExp progCondition = asts.get(ctx.progExp());
+            VCIfElse s = null;
+            if (!traversingNegativePath) {
+                List<VCRuleBackedStat> thenStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
+                s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, true, progCondition);
+            }
+            else {
+                List<VCRuleBackedStat> thenStmts = ctx.elseStmt() != null ?
+                        Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats) : new ArrayList<>();
+                s = new VCIfElse(ctx, builder, ELSE_APPLICATION, thenStmts, true, progCondition);
+            }
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
+            VCRuleBackedStat s =
+                    new VCRuleBackedStat(ctx, builder, SWAP_APPLICATION,
+                            asts.get(ctx.left), asts.get(ctx.right));
+            stats.put(ctx, s);
+        }
     }
 }
