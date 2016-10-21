@@ -1,15 +1,12 @@
 package edu.clemson.resolve.vcgen.model;
 
-import edu.clemson.resolve.codegen.Model;
 import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,9 +31,15 @@ public class VCRuleBackedStat extends OutputModelObject {
         this.definingCtx = ctx;
     }
 
+    public VCRuleBackedStat(VCRuleBackedStat copy) {
+        this.statComponents.addAll(copy.getStatComponents());
+        this.applicationStrategy = copy.getApplicationStrategy();
+        this.enclosingBlock = copy.getEnclosingBlock();
+        this.definingCtx = copy.getDefiningContext();
+    }
+
     public String getText() {
-        if (definingCtx != null) return Utils.getRawText(definingCtx);
-        return "";
+        return Utils.getRawText(definingCtx);
     }
 
     @NotNull
@@ -51,6 +54,10 @@ public class VCRuleBackedStat extends OutputModelObject {
 
     public String getApplicationDescription() {
         return applicationStrategy.getDescription();
+    }
+
+    public VCStatRuleApplicationStrategy getApplicationStrategy() {
+        return applicationStrategy;
     }
 
     public VCAssertiveBlockBuilder getEnclosingBlock() {

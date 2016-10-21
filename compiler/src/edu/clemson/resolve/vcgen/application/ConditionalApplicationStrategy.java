@@ -39,12 +39,11 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
         @Override
         public AssertiveBlock applyRule(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
                                         @NotNull VCIfElse stat) {
-            //get the math exp form of the 'if condition'...
-            PExp mathCondition = getMathCondition(block, stat);
-            PExp negatedCondition = stat.negateMathCondition(stat.negateMathCondition(mathCondition));
+            //get the netated math exp form of the 'if condition'...
+            PExp negatedCondition = stat.negateMathCondition(getMathCondition(block, stat));
 
             block.assume(negatedCondition);
-            block.stats(stat.getBodyStmts());
+           // block.stats(stat.getBodyStmts());
             return block.snapshot();
         }
 
@@ -56,8 +55,8 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
     }
 
     @NotNull
-    protected PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                                    @NotNull VCIfElse stat) {
+    PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+                          @NotNull VCIfElse stat) {
         PExp progIfCondition = stat.getIfCondition();
         ResolveParser.IfStmtContext ifCtx = (ResolveParser.IfStmtContext) stat.getDefiningContext();
         FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =

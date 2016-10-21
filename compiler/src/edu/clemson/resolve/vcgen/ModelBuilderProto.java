@@ -305,16 +305,24 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getAssertionsFromFormalParameters(paramSyms, this::extractAssumptionsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        .assume(corrFnExpRequires)
-                        .remember();
-        VCAssertiveBlockBuilder blockForElses = new VCAssertiveBlockBuilder(block);
+                        .assume(corrFnExpRequires);
+                        //.remember();
 
-        StmtListener l = new StmtListener(block, tr.exprASTs, false);
-        ParseTreeWalker.DEFAULT.walk(new StmtListener(block, tr.exprASTs, false), ctx);   //walk all stmts in this context, processing all satisfied if branches
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
+        VCAssertiveBlockBuilder positiveBlock = new VCAssertiveBlockBuilder(block);
+        VCAssertiveBlockBuilder negativeBlock = new VCAssertiveBlockBuilder(block);
 
+        //positive stats
+        StmtListener l = new StmtListener(positiveBlock, tr.exprASTs, false);
+        ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
+        positiveBlock.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
 
-        alterBlock
+        //if we encountered an if on our first path down through the code, we need to process separate blocks for the
+        //negation as well.
+        if (l.encounteredBranch) {
+            l = new StmtListener(negativeBlock, tr.exprASTs, true);
+            ParseTreeWalker.DEFAULT.walk(l, ctx);
+            negativeBlock.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
+        }
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
@@ -326,12 +334,19 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         //add any additional confirms from the parameters, etc
         for (ProgParameterSymbol p : paramSyms) {
-            confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
+            confirmParameterConsequentsForBlock(positiveBlock, p); //modfies 'block' with additional confims!
+            //if there were branches in the statments, also confirm consequents in the
+            //assertive code for those as well
+            if (l.encounteredBranch) confirmParameterConsequentsForBlock(negativeBlock, p); //modfies 'block' with additional confims!
+
         }
-        //TODO: Tomorrow look at the verification statements in the assertive context for
-        //int_do_nothing, then
+
+        if (l.encounteredBranch) {
+            block.finalConfirm(corrFnExpEnsures);
+            outputFile.addAssertiveBlock(negativeBlock.build());
+        }
         block.finalConfirm(corrFnExpEnsures);
-        outputFile.addAssertiveBlock(block.build());
+        outputFile.addAssertiveBlock(positiveBlock.build());
     }
 
     @Override
@@ -602,6 +617,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
         final VCAssertiveBlockBuilder builder;
         final ParseTreeProperty<PExp> asts;
+        boolean encounteredBranch = false;
 
         /**
          * {@code true} if we're processing the negation of ifs for this traversal through the
@@ -638,16 +654,17 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         @Override
         public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
+            encounteredBranch = true;
             PExp progCondition = asts.get(ctx.progExp());
             VCIfElse s = null;
             if (!traversingNegativePath) {
                 List<VCRuleBackedStat> thenStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
-                s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, true, progCondition);
+                s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, progCondition);
             }
             else {
-                List<VCRuleBackedStat> thenStmts = ctx.elseStmt() != null ?
-                        Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats) : new ArrayList<>();
-                s = new VCIfElse(ctx, builder, ELSE_APPLICATION, thenStmts, true, progCondition);
+                List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
+                        Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
+                s = new VCIfElse(ctx, builder, ELSE_APPLICATION, elseStmts, progCondition);
             }
             stats.put(ctx, s);
         }

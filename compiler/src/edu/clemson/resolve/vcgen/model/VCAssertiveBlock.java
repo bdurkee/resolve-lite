@@ -56,11 +56,14 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.g = block.g;
             this.definingTree = block.definingTree;
             this.finalConfirm = block.finalConfirm;
-            this.finalConfirm = new VCConfirm(definingTree, this, g.getTrueExp());
             this.scope = block.scope;
             this.description = block.description;
 
-            this.stats.addAll(block.stats);
+            //this.stats.addAll(block.stats);
+            //the stats need to be deep copied with 'this' as the enclosingblock
+            for (VCRuleBackedStat x : block.stats) {
+                if (x instanceof VCAssume) this.assume(x.statComponents);
+            }
             this.applicationSteps.addAll(block.applicationSteps);
             this.facilitySpecializations.putAll(block.facilitySpecializations);
         }
