@@ -58,6 +58,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     private final static VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
     private final static VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
+    /** A map from facility name to another map from formal parameter names to their actual substitutions. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
     private final VCOutputFile outputFile;
@@ -339,13 +340,12 @@ public class ModelBuilderProto extends ResolveBaseListener {
             if (l.encounteredBranch) confirmParameterConsequentsForBlock(negativeBlock, p); //modfies 'block' with additional confims!
 
         }
-
+        block.finalConfirm(corrFnExpEnsures);
+        outputFile.addAssertiveBlock(block.build());
         if (l.encounteredBranch) {
             block.finalConfirm(corrFnExpEnsures);
             outputFile.addAssertiveBlock(negativeBlock.build());
         }
-        block.finalConfirm(corrFnExpEnsures);
-        outputFile.addAssertiveBlock(block.build());
     }
 
     @Override
