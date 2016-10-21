@@ -305,16 +305,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(getAssertionsFromFormalParameters(paramSyms, this::extractAssumptionsFromParameter))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        .assume(corrFnExpRequires);
-                        //.remember();
+                        .assume(corrFnExpRequires)
+                        .remember();
 
-        VCAssertiveBlockBuilder positiveBlock = new VCAssertiveBlockBuilder(block);
         VCAssertiveBlockBuilder negativeBlock = new VCAssertiveBlockBuilder(block);
 
         //positive stats
-        StmtListener l = new StmtListener(positiveBlock, tr.exprASTs, false);
+        StmtListener l = new StmtListener(block, tr.exprASTs, false);
         ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
-        positiveBlock.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
 
         //if we encountered an if on our first path down through the code, we need to process separate blocks for the
         //negation as well.
@@ -334,7 +333,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         //add any additional confirms from the parameters, etc
         for (ProgParameterSymbol p : paramSyms) {
-            confirmParameterConsequentsForBlock(positiveBlock, p); //modfies 'block' with additional confims!
+            confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
             //if there were branches in the statments, also confirm consequents in the
             //assertive code for those as well
             if (l.encounteredBranch) confirmParameterConsequentsForBlock(negativeBlock, p); //modfies 'block' with additional confims!
@@ -346,7 +345,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             outputFile.addAssertiveBlock(negativeBlock.build());
         }
         block.finalConfirm(corrFnExpEnsures);
-        outputFile.addAssertiveBlock(positiveBlock.build());
+        outputFile.addAssertiveBlock(block.build());
     }
 
     @Override

@@ -50,22 +50,23 @@ public class VCAssertiveBlock extends AssertiveBlock {
         /**
          * A copy constructor for an assertive block builder.
          *
-         * @param block The {@code VCAssertiveBlockBuilder} from which {@code this} will be initialized.
+         * @param o The {@code VCAssertiveBlockBuilder} from which {@code this} will be initialized.
          */
-        public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder block) {
-            this.g = block.g;
-            this.definingTree = block.definingTree;
-            this.finalConfirm = block.finalConfirm;
-            this.scope = block.scope;
-            this.description = block.description;
+        public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder o) {
+            this.g = o.g;
+            this.definingTree = o.definingTree;
+            this.finalConfirm = o.finalConfirm;
+            this.scope = o.scope;
+            this.description = o.description;
 
-            //this.stats.addAll(block.stats);
             //the stats need to be deep copied with 'this' as the enclosingblock
-            for (VCRuleBackedStat x : block.stats) {
-                if (x instanceof VCAssume) this.assume(x.statComponents);
+            for (VCRuleBackedStat s : o.stats) {
+                if (s instanceof VCAssume) this.assume(s.statComponents);
+                else if (s instanceof VCRemember) this.remember();
+                else if (s instanceof VCConfirm) this.confirm(s.getDefiningContext(), ((VCConfirm) s).getConfirmExp());
             }
-            this.applicationSteps.addAll(block.applicationSteps);
-            this.facilitySpecializations.putAll(block.facilitySpecializations);
+            this.applicationSteps.addAll(o.applicationSteps);
+            this.facilitySpecializations.putAll(o.facilitySpecializations);
         }
 
         public VCAssertiveBlockBuilder facilitySpecializations(Map<String, Map<PExp, PExp>> mappings) {
