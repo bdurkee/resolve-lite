@@ -9,6 +9,7 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.programtype.ProgGenericType;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.model.*;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -104,11 +105,13 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     @Override
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-        /*ModuleScopeBuilder spec = null, impl = null;
+       /* ModuleScopeBuilder spec = null, impl = null;
         try {
-            spec = symtab.getModuleScope(new ModuleIdentifier(ctx.spec));
+            ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
+            spec = symtab.getModuleScope(concept);
             if (ctx.externally == null) {
-                impl = symtab.getModuleScope(new ModuleIdentifier(ctx.impl));
+                ModuleIdentifier imp = moduleScope.getImportWithName(ctx.impl);
+                impl = symtab.getModuleScope(imp);
             }
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
@@ -290,7 +293,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //"constraint for type Integer", etc.
 
     @Override
-    public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+    public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
@@ -343,7 +346,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlock(block.build());
         if (l.encounteredBranch) {
-            block.finalConfirm(corrFnExpEnsures);
+            negativeBlock.finalConfirm(corrFnExpEnsures);
             outputFile.addAssertiveBlock(negativeBlock.build());
         }
     }

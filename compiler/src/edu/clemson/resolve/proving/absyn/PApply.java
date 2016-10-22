@@ -316,7 +316,7 @@ public class PApply extends PExp {
         if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
-        else if (getTopLevelOperationName().equals("implies")) {
+        else if (getTopLevelOperationName().equals("implies") || getTopLevelOperationName().equals("⟹")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
             //tempList = arguments.get(0).split(assumptions);
