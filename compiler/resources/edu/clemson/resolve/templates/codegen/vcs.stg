@@ -46,7 +46,7 @@ RuleApplicationStep(app, step) ::= <<
 >>
 
 VC(vc) ::= <<
-\< <vc.name> >
+\< <vc.name>: <vc.explanation> >
 <vc.antecedent>
 --->
 <vc.consequent>
