@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.model;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -49,6 +50,14 @@ public class VCIfElse extends VCRuleBackedStat {
                 .applicationType(g.BOOLEAN)
                 .arguments(mathConditionToNegate)
                 .build();
+    }
+
+    @NotNull
+    public VCIfElse copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
+        List<VCRuleBackedStat> thens = Utils.apply(thenStmts, e -> copyWithBlock(b));
+        List<VCRuleBackedStat> elses = Utils.apply(elseStmts, e -> copyWithBlock(b));
+
+        return new VCIfElse(getDefiningContext(), );
     }
 
     @NotNull

@@ -23,7 +23,19 @@ public class VCRuleBackedStat extends OutputModelObject {
                             VCAssertiveBlockBuilder block,
                             VCStatRuleApplicationStrategy apply,
                             PExp... e) {
-        this.statComponents.addAll(Arrays.asList(e));
+        this(ctx, block, apply, Arrays.asList(e));
+    }
+
+    public VCRuleBackedStat(VCRuleBackedStat old) {
+        this(old.getDefiningContext(), old.getEnclosingBlock(), old.getApplicationStrategy(),
+                old.getStatComponents());
+    }
+
+    public VCRuleBackedStat(ParserRuleContext ctx,
+                            VCAssertiveBlockBuilder block,
+                            VCStatRuleApplicationStrategy apply,
+                            List<PExp> e) {
+        this.statComponents.addAll(e);
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
         this.definingCtx = ctx;
@@ -38,9 +50,18 @@ public class VCRuleBackedStat extends OutputModelObject {
         return statComponents;
     }
 
+    @NotNull
+    public VCRuleBackedStat copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+        return new VCRuleBackedStat(definingCtx, b, applicationStrategy, statComponents);
+    }
+
     @SuppressWarnings("unchecked")
     public AssertiveBlock applyBackingRule() {
         return applicationStrategy.applyRule(enclosingBlock, this);
+    }
+
+    public VCStatRuleApplicationStrategy getApplicationStrategy() {
+        return applicationStrategy;
     }
 
     public String getApplicationDescription() {

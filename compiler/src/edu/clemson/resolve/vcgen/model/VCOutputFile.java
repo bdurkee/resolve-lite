@@ -37,9 +37,15 @@ public class VCOutputFile extends OutputModelObject {
         return this.finalVcs;
     }
 
-    public void addAssertiveBlock(AssertiveBlock b) {
-        chunks.add(b);
-        addVCsInContext(b);
+    public void addAssertiveBlocks(List<VCAssertiveBlock> blocks) {
+        for (VCAssertiveBlock block : blocks) {
+            addAssertiveBlock(block);
+        }
+    }
+
+    public void addAssertiveBlock(VCAssertiveBlock block) {
+        chunks.add(block);
+        addVCsInContext(block);
     }
 
     /**

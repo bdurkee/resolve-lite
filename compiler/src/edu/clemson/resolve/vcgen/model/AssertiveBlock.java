@@ -21,15 +21,20 @@ public abstract class AssertiveBlock extends OutputModelObject {
     public final VCConfirm finalConfirm;
     @ModelElement
     public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+    @ModelElement
+    public final List<VCRuleBackedStat> stats = new ArrayList<>();
 
     public AssertiveBlock(@Nullable ParserRuleContext definingTree,
                           @NotNull VCConfirm finalConfirm,
                           @NotNull List<RuleApplicationStep> applicationSteps,
+                          @NotNull List<VCRuleBackedStat> stats,
                           @NotNull String blockDescription) {
         this.definingTree = definingTree;
         this.finalConfirm = finalConfirm;
-        this.applicationSteps.addAll(applicationSteps);
         this.blockDescription = blockDescription;
+
+        this.applicationSteps.addAll(applicationSteps);
+        this.stats.addAll(stats);
     }
 
     public String getDescription() {

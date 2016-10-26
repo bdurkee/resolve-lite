@@ -312,8 +312,6 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .assume(corrFnExpRequires)
                         .remember();
 
-        VCAssertiveBlockBuilder negativeBlock = new VCAssertiveBlockBuilder(block);
-
         //positive stats
         StmtListener l = new StmtListener(block, tr.exprASTs, false);
         ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
@@ -606,6 +604,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
         final VCAssertiveBlockBuilder builder;
         final ParseTreeProperty<PExp> asts;
+        List<VCAssertiveBlockBuilder> branches = new ArrayList<>();
 
         /**
          * {@code true} if we're processing the negation of ifs for this traversal through the
@@ -647,12 +646,15 @@ public class ModelBuilderProto extends ResolveBaseListener {
             List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
                     Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
             VCIfElse s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, elseStmts, progCondition);
+            branches.add(builder);
+            branches.add(new VCAssertiveBlockBuilder(builder));
             stats.put(ctx, s);
         }
 
         @Override
         public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
-            VCRuleBackedStat s = new VCRuleBackedStat(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
+            VCRuleBackedStat s = new VCRuleBackedStat(ctx, builder, SWAP_APPLICATION,
+                    asts.get(ctx.left), asts.get(ctx.right));
             stats.put(ctx, s);
         }
     }

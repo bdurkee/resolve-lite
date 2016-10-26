@@ -14,16 +14,18 @@ import java.util.*;
 public class VCAssertiveBlock extends AssertiveBlock {
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
-        super(builder.definingTree, builder.finalConfirm, builder.applicationSteps, builder.description);
+        super(builder.definingTree, builder.finalConfirm, builder.applicationSteps,
+                builder.stats, builder.description);
     }
 
+
+    //TODO: Change the Utils.Builder<VCAssertiveBlock> to List<VCAssertiveBlock>
     public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
 
         public final DumbMathClssftnHandler g;
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
-        public List<VCIfElse> ifElses = new ArrayList<>();
 
         final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
         final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
@@ -60,10 +62,19 @@ public class VCAssertiveBlock extends AssertiveBlock {
             this.description = o.description;
 
             //the stats need to be deep copied with 'this' as the enclosingblock
+
+            //TODO: Look at this again...
             for (VCRuleBackedStat s : o.stats) {
                 if (s instanceof VCAssume) this.assume(s.statComponents);
                 else if (s instanceof VCRemember) this.remember();
                 else if (s instanceof VCConfirm) this.confirm(s.getDefiningContext(), ((VCConfirm) s).getConfirmExp());
+                else if (s instanceof VCCall) this.stats(new VCCall(s.getDefiningContext(),
+                        this, s.getApplicationStrategy(), ((VCCall) s).getCallExp()));
+                else if (s instanceof VCIfElse) this.stats(new VCIfElse(s.getDefiningContext(),
+                        this, s.getApplicationStrategy(), ((VCIfElse) s).getThenStmts(),
+                        ((VCIfElse) s).getElseStmts(),
+                        ((VCIfElse) s).getIfCondition())); //Here is the instantiation where 'this' needs to go in.. it needs
+                else this.stats(new VCRuleBackedStat(s));
             }
             this.applicationSteps.addAll(o.applicationSteps);
             this.facilitySpecializations.putAll(o.facilitySpecializations);
@@ -144,6 +155,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         @NotNull
         @Override
         public VCAssertiveBlock build() {
+            //List<VCAssertiveBlockBuilder> negatives = getNegativeBlocks(new VCAssertiveBlockBuilder(this));
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
@@ -153,25 +165,39 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return new VCAssertiveBlock(this);
         }
 
-            //TODO : Trying to get duplicate blocks for branches while processing the statements in reverse..
+        //TODO : Trying to get duplicate blocks for branches while processing the statements in reverse..
         //this seems like one of the better ways to handle the branching if stmts.
         @NotNull
         public List<VCAssertiveBlock> buildWithBranches() {
             List<VCAssertiveBlock> result = new ArrayList<>();
-            ListIterator<VCRuleBackedStat> iter = stats.listIterator(stats.size());
-
-            while (iter.hasPrevious()) {
-
-                VCRuleBackedStat currentStat = iter.previous();
+           /* while (!stats.isEmpty()) {
+                VCRuleBackedStat currentStat = stats.removeLast();
                 if (currentStat instanceof VCIfElse) {
-                }
-                if (currentStat instanceof VCIfElse) {
-                    stats.addLast(new VCIfElse((VCIfElse) currentStat, ModelBuilderProto.ELSE_APPLICATION));
+                    VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(this);
+                    neg.stats.add(new VCIfElse((VCIfElse) currentStat, ModelBuilderProto.ELSE_APPLICATION));
+
+                    int i=0;
                 }
                 applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
                         currentStat.getApplicationDescription()));
             }
-            return new VCAssertiveBlock(this);
+            result.addAll(positives);*/
+            return result;
+        }
+
+        private List<VCAssertiveBlockBuilder> getNegativeBlocks(VCAssertiveBlockBuilder b) {
+            List<VCAssertiveBlockBuilder> result = new ArrayList<>();
+            while (!b.stats.isEmpty()) {
+                VCRuleBackedStat currentStat = b.stats.removeLast();
+                if (currentStat instanceof VCIfElse) {
+                    VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(b);
+                    neg.stats.add(new VCIfElse((VCIfElse) currentStat, ModelBuilderProto.ELSE_APPLICATION));
+                    result.add(neg);
+                }
+                b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
+                        currentStat.getApplicationDescription()));
+            }
+            return result;
         }
 
     }
