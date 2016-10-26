@@ -14,15 +14,18 @@ import java.util.List;
 
 public class VCIfElse extends VCRuleBackedStat {
 
-    private final List<VCRuleBackedStat> bodyStmts = new ArrayList<>();
+    private final List<VCRuleBackedStat> thenStmts = new ArrayList<>();
+    private final List<VCRuleBackedStat> elseStmts = new ArrayList<>();
 
     public VCIfElse(ParserRuleContext ctx,
                     VCAssertiveBlock.VCAssertiveBlockBuilder block,
                     VCStatRuleApplicationStrategy apply,
-                    List<VCRuleBackedStat> bodyStats,
+                    List<VCRuleBackedStat> thenStmts,
+                    List<VCRuleBackedStat> elseStmts,
                     PExp progCondition) {
         super(ctx, block, apply, progCondition);
-        this.bodyStmts.addAll(bodyStats);
+        this.thenStmts.addAll(thenStmts);
+        this.elseStmts.addAll(elseStmts);
     }
 
     @NotNull
@@ -43,7 +46,12 @@ public class VCIfElse extends VCRuleBackedStat {
     }
 
     @NotNull
-    public List<VCRuleBackedStat> getBodyStmts() {
-        return bodyStmts;
+    public List<VCRuleBackedStat> getThenStmts() {
+        return thenStmts;
+    }
+
+    @NotNull
+    public List<VCRuleBackedStat> getElseStmts() {
+        return elseStmts;
     }
 }

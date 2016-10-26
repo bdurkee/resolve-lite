@@ -22,7 +22,7 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
             PExp mathCond = invokeConditionListener.mathFor(progIfCondition);
 
             block.assume(mathCond);
-            block.stats(stat.getBodyStmts());
+            block.stats(stat.getThenStmts());
             return block.snapshot();
         }
 
