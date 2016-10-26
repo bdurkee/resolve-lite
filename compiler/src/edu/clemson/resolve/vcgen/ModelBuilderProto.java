@@ -54,10 +54,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
     //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
     //stats.getComponents().get(0), etc.
-    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
-    private final static VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
-    private final static VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
-    private final static VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
+    private static final VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
+    private static final VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
     /** A map from facility name to another map from formal parameter names to their actual substitutions. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();

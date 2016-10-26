@@ -27,7 +27,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
         Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
 
-        //first reduce any nested calls passed as arguments to evaluate mode parameters.
+        //first applyBackingRule any nested calls passed as arguments to evaluate mode parameters.
        /* for (PExp arg : callExp.getArguments()) {
             ProgParameterSymbol p = formalParamIter.next();
             if (p.getMode() == ParameterMode.EVALUATES) {

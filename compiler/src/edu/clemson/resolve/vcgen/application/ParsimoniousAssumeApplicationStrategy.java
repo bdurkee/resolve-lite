@@ -35,7 +35,7 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
         }
         //now substitute any conc equalities into RP
         RP = RP.substitute(concEqualitySubstitutions);
-        //beta reduce any lambdas present now...
+        //beta applyBackingRule any lambdas present now...
 
         BasicBetaReducingListener br = new BasicBetaReducingListener(RP);
         RP.accept(br);

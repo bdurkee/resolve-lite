@@ -19,8 +19,6 @@ public class VCRuleBackedStat extends OutputModelObject {
     private final VCStatRuleApplicationStrategy applicationStrategy;
     private final VCAssertiveBlockBuilder enclosingBlock;
 
-    //TODO: Perhaps more than one block should be able to be read in.. for if else, etc. There can be multiple active
-    //VCAssertiveBlockBuilders...?
     public VCRuleBackedStat(ParserRuleContext ctx,
                             VCAssertiveBlockBuilder block,
                             VCStatRuleApplicationStrategy apply,
@@ -29,13 +27,6 @@ public class VCRuleBackedStat extends OutputModelObject {
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
         this.definingCtx = ctx;
-    }
-
-    public VCRuleBackedStat(VCRuleBackedStat copy) {
-        this.statComponents.addAll(copy.getStatComponents());
-        this.applicationStrategy = copy.getApplicationStrategy();
-        this.enclosingBlock = copy.getEnclosingBlock();
-        this.definingCtx = copy.getDefiningContext();
     }
 
     public String getText() {
@@ -48,16 +39,12 @@ public class VCRuleBackedStat extends OutputModelObject {
     }
 
     @SuppressWarnings("unchecked")
-    public AssertiveBlock reduce() {
+    public AssertiveBlock applyBackingRule() {
         return applicationStrategy.applyRule(enclosingBlock, this);
     }
 
     public String getApplicationDescription() {
         return applicationStrategy.getDescription();
-    }
-
-    public VCStatRuleApplicationStrategy getApplicationStrategy() {
-        return applicationStrategy;
     }
 
     public VCAssertiveBlockBuilder getEnclosingBlock() {

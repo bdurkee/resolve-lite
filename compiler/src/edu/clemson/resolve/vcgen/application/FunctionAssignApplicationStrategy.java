@@ -44,7 +44,7 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
     }
 
     //TODO for the explicit and general call rule applications, we'll need to iterate over the params, and
-    //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to reduce that..
+    //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to applyBackingRule that..
     public static class Invk_Cond extends PExpListener {
         private final ParserRuleContext ctx;
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;

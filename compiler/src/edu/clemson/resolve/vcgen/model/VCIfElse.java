@@ -28,6 +28,12 @@ public class VCIfElse extends VCRuleBackedStat {
         this.elseStmts.addAll(elseStmts);
     }
 
+    //used primarily for flipping
+    public VCIfElse(VCIfElse existing, VCStatRuleApplicationStrategy apply) {
+        this(existing.getDefiningContext(), existing.getEnclosingBlock(), apply,
+                existing.thenStmts, existing.elseStmts, existing.getIfCondition());
+    }
+
     @NotNull
     public PExp getIfCondition() {
         return statComponents.get(0);

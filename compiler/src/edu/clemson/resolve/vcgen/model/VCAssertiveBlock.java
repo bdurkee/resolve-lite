@@ -2,9 +2,9 @@ package edu.clemson.resolve.vcgen.model;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.Scope;
@@ -14,8 +14,7 @@ import java.util.*;
 public class VCAssertiveBlock extends AssertiveBlock {
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
-        super(builder.definingTree, builder.finalConfirm, builder.stats,
-                builder.applicationSteps, builder.description);
+        super(builder.definingTree, builder.finalConfirm, builder.applicationSteps, builder.description);
     }
 
     public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
@@ -24,11 +23,12 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final ParserRuleContext definingTree;
         public final Scope scope;
         public VCConfirm finalConfirm;
+        public List<VCIfElse> ifElses = new ArrayList<>();
 
-        public final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
-        public final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
-        public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
-        public final String description;
+        final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
+        final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+        final String description;
 
         public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
             Map<PExp, PExp> result = facilitySpecializations.get(facility);
@@ -93,11 +93,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
-        /*public VCAssertiveBlockBuilder confirm(Collection<PExp> confirms) {
-            confirms.forEach(this::confirm);
-            return this;
-        }*/
-
         public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, Collection<PExp> confirms) {
             Utils.apply(confirms, e -> confirm(ctx, e));
             return this;
@@ -152,10 +147,32 @@ public class VCAssertiveBlock extends AssertiveBlock {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(new RuleApplicationStep(currentStat.reduce(),
+                applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
                         currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);
         }
+
+            //TODO : Trying to get duplicate blocks for branches while processing the statements in reverse..
+        //this seems like one of the better ways to handle the branching if stmts.
+        @NotNull
+        public List<VCAssertiveBlock> buildWithBranches() {
+            List<VCAssertiveBlock> result = new ArrayList<>();
+            ListIterator<VCRuleBackedStat> iter = stats.listIterator(stats.size());
+
+            while (iter.hasPrevious()) {
+
+                VCRuleBackedStat currentStat = iter.previous();
+                if (currentStat instanceof VCIfElse) {
+                }
+                if (currentStat instanceof VCIfElse) {
+                    stats.addLast(new VCIfElse((VCIfElse) currentStat, ModelBuilderProto.ELSE_APPLICATION));
+                }
+                applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
+                        currentStat.getApplicationDescription()));
+            }
+            return new VCAssertiveBlock(this);
+        }
+
     }
 }
