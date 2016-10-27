@@ -40,6 +40,4 @@ public class VCAssign extends VCRuleBackedStat {
     public VCRuleBackedStat copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCAssign(definingCtx, b, applicationStrategy, left, right);
     }
-
-
 }

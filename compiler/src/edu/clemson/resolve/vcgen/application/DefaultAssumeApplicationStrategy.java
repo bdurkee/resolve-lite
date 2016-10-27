@@ -12,7 +12,7 @@ public class DefaultAssumeApplicationStrategy implements VCStatRuleApplicationSt
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
         PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
-        PExp assumeExp = stat.getStatComponents().get(0);
+        PExp assumeExp = stat.getAssumeExp();
         if (curFinalConfirmExp.isObviouslyTrue()) {
             block.finalConfirm(assumeExp);
         }

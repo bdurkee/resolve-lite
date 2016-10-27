@@ -8,6 +8,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.model.AssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.model.VCAssign;
 import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
@@ -19,14 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCRuleBackedStat> {
+public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssign> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
-        PExp left = stat.getStatComponents().get(0);
-        PExp right = stat.getStatComponents().get(1);
+    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssign stat) {
+        PExp left = stat.getLeft();
+        PExp right = stat.getRight();
 
         if (!(right.isFunctionApplication())) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();

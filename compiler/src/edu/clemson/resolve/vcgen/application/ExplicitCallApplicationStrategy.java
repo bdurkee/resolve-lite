@@ -42,7 +42,7 @@ public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStr
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
-        PApply callExp = stat.getCallExp();
+        PApply callExp = stat.getProgCallExp();
         Token callLocation = stat.getDefiningContext().getStart();
 
         ExplicitCallRuleApplyingListener applier =

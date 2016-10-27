@@ -54,8 +54,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
     //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
     //stats.getComponents().get(0), etc.
-    private static final VCStatRuleApplicationStrategy<VCRuleBackedStat> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
-    private static final VCStatRuleApplicationStrategy<VCRuleBackedStat> SWAP_APPLICATION = new SwapApplicationStrategy();
+    private static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
+    private static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
     public static final VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
     public static final VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
@@ -635,7 +635,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
             PExp left = asts.get(ctx.left);
             PExp right = asts.get(ctx.right);
-            VCRuleBackedStat s = new VCRuleBackedStat(ctx, builder, FUNCTION_ASSIGN_APPLICATION, left, right);
+            VCRuleBackedStat s = new VCAssign(ctx, builder, FUNCTION_ASSIGN_APPLICATION, left, right);
             stats.put(ctx, s);
         }
 
@@ -653,8 +653,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
         @Override
         public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
-            VCRuleBackedStat s = new VCRuleBackedStat(ctx, builder, SWAP_APPLICATION,
-                    asts.get(ctx.left), asts.get(ctx.right));
+            VCSwap s = new VCSwap(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
             stats.put(ctx, s);
         }
     }

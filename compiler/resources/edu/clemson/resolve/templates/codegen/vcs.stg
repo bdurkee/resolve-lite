@@ -71,4 +71,8 @@ VCCall(code) ::= "<code.text>"
 
 VCIfElse(code) ::= "<code.text>"
 
+VCSwap(code) ::= "<code.text>"
+
+VCAssign(code) ::= "<code.text>"
+
 fileExtension() ::= ".asrt"

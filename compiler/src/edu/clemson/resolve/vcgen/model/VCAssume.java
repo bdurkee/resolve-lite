@@ -3,30 +3,33 @@ package edu.clemson.resolve.vcgen.model;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.DefaultAssumeApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public class VCAssume extends VCRuleBackedStat {
 
     protected boolean isStipulatedAssumption = false;
     protected VCStatRuleApplicationStrategy<VCAssume> apply;
+    private final PExp assume;
 
-    public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block, PExp... e) {
-        this(block, new DefaultAssumeApplicationStrategy(), e);
+    public VCAssume(VCAssertiveBlockBuilder block, PExp assume) {
+        this(block, new DefaultAssumeApplicationStrategy(), assume);
     }
 
-    public VCAssume(VCAssertiveBlock.VCAssertiveBlockBuilder block,
+    public VCAssume(VCAssertiveBlockBuilder block,
                     VCStatRuleApplicationStrategy<VCAssume> strategy,
-                    PExp... e) {
-        super(null, block, strategy, e);
+                    PExp assume) {
+        super(null, block, strategy);
         this.apply = strategy;
+        this.assume = assume;
     }
 
     public PExp getAssumeExp() {
-        return statComponents.get(0);
+        return assume;
     }
 
     @NotNull
-    public VCAssume copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
+    public VCAssume copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCAssume(b, apply, getAssumeExp());
     }
 }
