@@ -10,17 +10,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class VCConfirm extends VCRuleBackedStat {
 
-    public VCConfirm(ParserRuleContext definingCtx, VCAssertiveBlockBuilder block, PExp e) {
-        super(definingCtx, block, new ConfirmApplicationStrategy(), e);
+    private final PExp confirm;
+
+    public VCConfirm(ParserRuleContext definingCtx, VCAssertiveBlockBuilder block, PExp confirm) {
+        super(definingCtx, block, new ConfirmApplicationStrategy());
+        this.confirm = confirm;
     }
 
     @NotNull
     public PExp getConfirmExp() {
-        return statComponents.get(0);
+        return confirm;
     }
 
     @NotNull
     public VCConfirm copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
-        return new VCConfirm(getDefiningContext(), b, getConfirmExp());
+        return new VCConfirm(definingCtx, b, confirm);
     }
 }

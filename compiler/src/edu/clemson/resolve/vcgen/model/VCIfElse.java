@@ -17,6 +17,7 @@ public class VCIfElse extends VCRuleBackedStat {
 
     private final List<VCRuleBackedStat> thenStmts = new ArrayList<>();
     private final List<VCRuleBackedStat> elseStmts = new ArrayList<>();
+    private final PExp progCondition;
 
     public VCIfElse(ParserRuleContext ctx,
                     VCAssertiveBlock.VCAssertiveBlockBuilder block,
@@ -24,7 +25,9 @@ public class VCIfElse extends VCRuleBackedStat {
                     List<VCRuleBackedStat> thenStmts,
                     List<VCRuleBackedStat> elseStmts,
                     PExp progCondition) {
-        super(ctx, block, apply, progCondition);
+        super(ctx, block, apply);
+
+        this.progCondition = progCondition;
         this.thenStmts.addAll(thenStmts);
         this.elseStmts.addAll(elseStmts);
     }
@@ -32,31 +35,19 @@ public class VCIfElse extends VCRuleBackedStat {
     //used primarily for flipping
     public VCIfElse(VCIfElse existing, VCStatRuleApplicationStrategy apply) {
         this(existing.getDefiningContext(), existing.enclosingBlock, apply,
-                existing.thenStmts, existing.elseStmts, existing.getIfCondition());
+                existing.thenStmts, existing.elseStmts, existing.getProgIfCondition());
     }
 
     @NotNull
-    public PExp getIfCondition() {
-        return statComponents.get(0);
-    }
-
-    @NotNull
-    public PExp negateMathCondition(PExp mathConditionToNegate) {
-        DumbMathClssftnHandler g = enclosingBlock.g;
-        PExp name = new PSymbol.PSymbolBuilder("⌐")
-                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
-                .build();
-        return new PApply.PApplyBuilder(name)
-                .applicationType(g.BOOLEAN)
-                .arguments(mathConditionToNegate)
-                .build();
+    public PExp getProgIfCondition() {
+        return progCondition;
     }
 
     @NotNull
     public VCIfElse copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
         return new VCIfElse(definingCtx, b, applicationStrategy,
                 Utils.apply(thenStmts, e -> e.copyWithBlock(b)),
-                Utils.apply(elseStmts, e -> e.copyWithBlock(b)), getIfCondition());
+                Utils.apply(elseStmts, e -> e.copyWithBlock(b)), getProgIfCondition());
     }
 
     @NotNull

@@ -1,8 +1,14 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.vcgen.model.*;
+import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ConditionalApplicationStrategy implements VCStatRuleApplicationStrategy<VCIfElse> {
@@ -11,10 +17,10 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
 
         @NotNull
         @Override
-        public AssertiveBlock applyRule(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+        public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
                                         @NotNull VCIfElse stat) {
             //get the math exp form of the 'if condition'...
-            PExp progIfCondition = stat.getIfCondition();
+            PExp progIfCondition = stat.getProgIfCondition();
             ResolveParser.IfStmtContext ifCtx = (ResolveParser.IfStmtContext) stat.getDefiningContext();
             FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
                     new FunctionAssignApplicationStrategy.Invk_Cond(ifCtx.progExp(), block);
@@ -37,10 +43,10 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
 
         @NotNull
         @Override
-        public AssertiveBlock applyRule(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+        public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
                                         @NotNull VCIfElse stat) {
-            //get the netated math exp form of the 'if condition'...
-            PExp negatedCondition = stat.negateMathCondition(getMathCondition(block, stat));
+            //get the negated math exp form of the 'if condition'...
+            PExp negatedCondition = negateMathCondition(block.g, getMathCondition(block, stat));
             block.assume(negatedCondition);
             block.stats(stat.getElseStmts());
             return block.snapshot();
@@ -54,9 +60,20 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
     }
 
     @NotNull
+    private static PExp negateMathCondition(DumbMathClssftnHandler g, PExp mathConditionToNegate) {
+        PExp name = new PSymbol.PSymbolBuilder("⌐")
+                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
+                .build();
+        return new PApply.PApplyBuilder(name)
+                .applicationType(g.BOOLEAN)
+                .arguments(mathConditionToNegate)
+                .build();
+    }
+
+    @NotNull
     PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
                           @NotNull VCIfElse stat) {
-        PExp progCondition = stat.getIfCondition();
+        PExp progCondition = stat.getProgIfCondition();
         ResolveParser.IfStmtContext ifCtx = (ResolveParser.IfStmtContext) stat.getDefiningContext();
         FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
                 new FunctionAssignApplicationStrategy.Invk_Cond(ifCtx.progExp(), block);
