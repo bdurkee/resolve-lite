@@ -54,10 +54,9 @@ public class VCIfElse extends VCRuleBackedStat {
 
     @NotNull
     public VCIfElse copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
-        List<VCRuleBackedStat> thens = Utils.apply(thenStmts, e -> copyWithBlock(b));
-        List<VCRuleBackedStat> elses = Utils.apply(elseStmts, e -> copyWithBlock(b));
-
-        return new VCIfElse(getDefiningContext(), );
+        return new VCIfElse(getDefiningContext(), b, getApplicationStrategy(),
+                Utils.apply(thenStmts, e -> e.copyWithBlock(b)),
+                Utils.apply(elseStmts, e -> e.copyWithBlock(b)), getIfCondition());
     }
 
     @NotNull

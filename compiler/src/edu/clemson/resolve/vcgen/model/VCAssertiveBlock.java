@@ -70,10 +70,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 else if (s instanceof VCConfirm) this.confirm(s.getDefiningContext(), ((VCConfirm) s).getConfirmExp());
                 else if (s instanceof VCCall) this.stats(new VCCall(s.getDefiningContext(),
                         this, s.getApplicationStrategy(), ((VCCall) s).getCallExp()));
-                else if (s instanceof VCIfElse) this.stats(new VCIfElse(s.getDefiningContext(),
-                        this, s.getApplicationStrategy(), ((VCIfElse) s).getThenStmts(),
-                        ((VCIfElse) s).getElseStmts(),
-                        ((VCIfElse) s).getIfCondition())); //Here is the instantiation where 'this' needs to go in.. it needs
+                else if (s instanceof VCIfElse) this.stats(s.copyWithBlock(this)); //Here is the instantiation where 'this' needs to go in.. it needs
                 else this.stats(new VCRuleBackedStat(s));
             }
             this.applicationSteps.addAll(o.applicationSteps);
@@ -155,7 +152,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         @NotNull
         @Override
         public VCAssertiveBlock build() {
-            //List<VCAssertiveBlockBuilder> negatives = getNegativeBlocks(new VCAssertiveBlockBuilder(this));
+            List<VCAssertiveBlockBuilder> negatives = getNegativeBlocks(new VCAssertiveBlockBuilder(this));
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
