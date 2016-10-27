@@ -20,7 +20,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
 
     //TODO: Change the Utils.Builder<VCAssertiveBlock> to List<VCAssertiveBlock>
-    public static class VCAssertiveBlockBuilder implements Utils.Builder<VCAssertiveBlock> {
+    public static class VCAssertiveBlockBuilder implements Utils.Builder<List<VCAssertiveBlock>> {
 
         public final DumbMathClssftnHandler g;
         public final ParserRuleContext definingTree;
@@ -57,7 +57,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder o) {
             this.g = o.g;
             this.definingTree = o.definingTree;
-            this.finalConfirm = o.finalConfirm.copyWithBlock(o);
+            this.finalConfirm = o.finalConfirm.copyWithBlock(this);
             this.scope = o.scope;
             this.description = o.description;
 
@@ -138,13 +138,30 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         /**
-         * Applies the appropriate rule to each stat within this builder. In other words, a call to this will fully
-         * develop the final confirm for this particular block of assertive code.
+         * Applies the appropriate rule to each stat within this builder
+         * (and also the rules for any branches arising from this). In other words, a call to this will fully
+         * develop the final confirm for this particular block of assertive code, as well as its branching blocks.
          */
         @NotNull
         @Override
-        public VCAssertiveBlock build() {
-            //List<VCAssertiveBlockBuilder> negatives = getNegativeBlocks(new VCAssertiveBlockBuilder(this));
+        public List<VCAssertiveBlock> build() {
+            List<VCAssertiveBlock> result = new ArrayList<>();
+            List<VCAssertiveBlockBuilder> builders = new ArrayList<>();
+            builders.add(this);
+            List<VCAssertiveBlockBuilder> x = getBranchesForThisBlock(new VCAssertiveBlockBuilder(this));
+            builders.addAll(x);
+
+            System.out.println("entering apply rules phase");
+
+            for (VCAssertiveBlockBuilder b : builders) {
+                result.add(b.applyRules());
+            }
+            System.out.println("exiting apply rules phase");
+
+            return result;
+        }
+
+        private VCAssertiveBlock applyRules() {
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
@@ -154,7 +171,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return new VCAssertiveBlock(this);
         }
 
-        private List<VCAssertiveBlockBuilder> getNegativeBlocks(VCAssertiveBlockBuilder b) {
+        private List<VCAssertiveBlockBuilder> getBranchesForThisBlock(VCAssertiveBlockBuilder b) {
             List<VCAssertiveBlockBuilder> result = new ArrayList<>();
             while (!b.stats.isEmpty()) {
                 VCRuleBackedStat currentStat = b.stats.removeLast();

@@ -250,7 +250,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         block.assume(correspondence.splitIntoConjuncts());
         //throw new UnsupportedOperationException("re-institute the final confirm for this dan");
         block.finalConfirm(newConstraint);
-        outputFile.addAssertiveBlock(block.build());
+        outputFile.addAssertiveBlocks(block.build());
     }
 
     @Override
@@ -333,7 +333,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
             confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
         }
         block.finalConfirm(corrFnExpEnsures);
-        outputFile.addAssertiveBlock(block.build());
+        outputFile.addAssertiveBlocks(block.build());
     }
 
     @Override
@@ -394,7 +394,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                 .confirm(ctx, g.formConjuncts(paramConsequents))
                 .finalConfirm(corrFnExpEnsures);
 
-        outputFile.addAssertiveBlock(block.build());
+        //outputFile.addAssertiveBlock(block.build());
         currentProcOpSym = null;
     }
 

@@ -38,14 +38,12 @@ public class VCOutputFile extends OutputModelObject {
     }
 
     public void addAssertiveBlocks(List<VCAssertiveBlock> blocks) {
+        int i;
+        i=0;
         for (VCAssertiveBlock block : blocks) {
-            addAssertiveBlock(block);
+            chunks.add(block);
+            addVCsInContext(block);
         }
-    }
-
-    public void addAssertiveBlock(VCAssertiveBlock block) {
-        chunks.add(block);
-        addVCsInContext(block);
     }
 
     /**

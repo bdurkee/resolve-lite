@@ -31,14 +31,14 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 VCGenerator gen = new VCGenerator(compiler, unit);
                 //TODO: Use log instead!
                 //compiler.info("generating vcs for: " + unit.getNameToken().getText());
-                VCOutputFile vco = gen.getVCOutput();
+                //VCOutputFile vco = gen.getVCOutput();
 
                 //give the vc output info into the AnnotatedModule
-                unit.setVCs(vco);
+                //unit.setVCs(vco);
                 ST x = gen.generateAssertions();
                 System.out.println(x.render());
-                List<VC> proverInput = vco.getFinalVCs();
-                VCClassftnPrintingListener p = new VCClassftnPrintingListener(compiler);
+                //List<VC> proverInput = vco.getFinalVCs();
+                //VCClassftnPrintingListener p = new VCClassftnPrintingListener(compiler);
                 /*for (VC vc : proverInput) {
                     vc.getAntecedent().accept(p);
                     vc.getConsequent().accept(p);
@@ -46,14 +46,14 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 //List<VC> pvcs = new ArrayList<>();
                 //pvcs.add(vco.getFinalVCs().get(0));
                 if (compiler.prove) {
-                    CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
+                   /* CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
                             compiler.symbolTable.getTypeGraph(), vco.getFinalVCs());
                     try {
                         prover.start();
                     }
                     catch (IOException ioe) {
                         throw new RuntimeException(ioe);
-                    }
+                    }*/
                 }
 
                 int i;
