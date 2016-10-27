@@ -31,7 +31,7 @@ public class VCIfElse extends VCRuleBackedStat {
 
     //used primarily for flipping
     public VCIfElse(VCIfElse existing, VCStatRuleApplicationStrategy apply) {
-        this(existing.getDefiningContext(), existing.getEnclosingBlock(), apply,
+        this(existing.getDefiningContext(), existing.enclosingBlock, apply,
                 existing.thenStmts, existing.elseStmts, existing.getIfCondition());
     }
 
@@ -42,7 +42,7 @@ public class VCIfElse extends VCRuleBackedStat {
 
     @NotNull
     public PExp negateMathCondition(PExp mathConditionToNegate) {
-        DumbMathClssftnHandler g = getEnclosingBlock().g;
+        DumbMathClssftnHandler g = enclosingBlock.g;
         PExp name = new PSymbol.PSymbolBuilder("⌐")
                 .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
                 .build();
@@ -54,7 +54,7 @@ public class VCIfElse extends VCRuleBackedStat {
 
     @NotNull
     public VCIfElse copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
-        return new VCIfElse(getDefiningContext(), b, getApplicationStrategy(),
+        return new VCIfElse(definingCtx, b, applicationStrategy,
                 Utils.apply(thenStmts, e -> e.copyWithBlock(b)),
                 Utils.apply(elseStmts, e -> e.copyWithBlock(b)), getIfCondition());
     }

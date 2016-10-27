@@ -19,4 +19,8 @@ public class VCCall extends VCRuleBackedStat {
         return (PApply) statComponents.get(0);
     }
 
+    @NotNull
+    public VCCall copyWithBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
+        return new VCCall(getDefiningContext(), b, applicationStrategy, getCallExp());
+    }
 }

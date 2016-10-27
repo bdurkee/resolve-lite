@@ -18,4 +18,9 @@ public class VCConfirm extends VCRuleBackedStat {
     public PExp getConfirmExp() {
         return statComponents.get(0);
     }
+
+    @NotNull
+    public VCConfirm copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+        return new VCConfirm(getDefiningContext(), b, getConfirmExp());
+    }
 }
