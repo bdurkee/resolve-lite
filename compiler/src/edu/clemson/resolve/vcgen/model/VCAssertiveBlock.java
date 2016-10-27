@@ -177,7 +177,12 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 VCRuleBackedStat currentStat = b.stats.removeLast();
                 if (currentStat instanceof VCIfElse) {
                     VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(b);
-                    neg.stats.add(new VCIfElse((VCIfElse) currentStat, ModelBuilderProto.ELSE_APPLICATION));
+                    VCIfElse ie = (VCIfElse) currentStat;
+                    neg.stats.add(
+                            new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
+                                    ie.getThenStmts(),
+                                    ie.getElseStmts(),
+                                    ie.getProgIfCondition()));
                     result.add(neg);
                 }
                 b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),

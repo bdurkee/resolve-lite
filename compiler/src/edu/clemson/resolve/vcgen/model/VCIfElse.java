@@ -6,7 +6,11 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
+import edu.clemson.resolve.vcgen.ModelBuilderProto;
+import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.IfApplicationStrategy;
+import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.ElseApplicationStrategy;
 import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
@@ -32,10 +36,11 @@ public class VCIfElse extends VCRuleBackedStat {
         this.elseStmts.addAll(elseStmts);
     }
 
-    //used primarily for flipping
-    public VCIfElse(VCIfElse existing, VCStatRuleApplicationStrategy apply) {
-        this(existing.getDefiningContext(), existing.enclosingBlock, apply,
-                existing.thenStmts, existing.elseStmts, existing.getProgIfCondition());
+    @NotNull
+    public ConditionalApplicationStrategy getOppositeConditionalStrategy() {
+        return applicationStrategy instanceof IfApplicationStrategy ?
+                ModelBuilderProto.ELSE_APPLICATION :
+                ModelBuilderProto.IF_APPLICATION;
     }
 
     @NotNull

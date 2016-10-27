@@ -65,7 +65,6 @@ VCAssume(assume) ::= "Assume <assume.assumeExp>;"
 
 VCConfirm(confirm) ::= "Confirm <confirm.confirmExp>;"
 
-VCRuleBackedStat(code) ::= "<code.text>"
 
 VCCall(code) ::= "<code.text>"
 

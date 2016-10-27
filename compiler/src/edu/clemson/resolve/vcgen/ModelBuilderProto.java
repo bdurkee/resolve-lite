@@ -56,8 +56,8 @@ public class ModelBuilderProto extends ResolveBaseListener {
     //stats.getComponents().get(0), etc.
     private static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
     private static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCIfElse> IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCIfElse> ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
+    public static final ConditionalApplicationStrategy IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
+    public static final ConditionalApplicationStrategy ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
     /** A map from facility name to another map from formal parameter names to their actual substitutions. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
@@ -313,7 +313,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
                         .remember();
 
         //positive stats
-        StmtListener l = new StmtListener(block, tr.exprASTs, false);
+        StmtListener l = new StmtListener(block, tr.exprASTs);
         ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
 
@@ -606,18 +606,10 @@ public class ModelBuilderProto extends ResolveBaseListener {
         final ParseTreeProperty<PExp> asts;
         List<VCAssertiveBlockBuilder> branches = new ArrayList<>();
 
-        /**
-         * {@code true} if we're processing the negation of ifs for this traversal through the
-         * stmts; {@code false} otherwise
-         */
-        final boolean traversingNegativePath;
-
         public StmtListener(VCAssertiveBlockBuilder activeBuilder,
-                            ParseTreeProperty<PExp> asts,
-                            boolean traversingNegativePath) {
+                            ParseTreeProperty<PExp> asts) {
             this.builder = activeBuilder;
             this.asts = asts;
-            this.traversingNegativePath = traversingNegativePath;
         }
 
         @Override
@@ -635,7 +627,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         public void exitAssignStmt(ResolveParser.AssignStmtContext ctx) {
             PExp left = asts.get(ctx.left);
             PExp right = asts.get(ctx.right);
-            VCRuleBackedStat s = new VCAssign(ctx, builder, FUNCTION_ASSIGN_APPLICATION, left, right);
+            VCAssign s = new VCAssign(ctx, builder, FUNCTION_ASSIGN_APPLICATION, left, right);
             stats.put(ctx, s);
         }
 
