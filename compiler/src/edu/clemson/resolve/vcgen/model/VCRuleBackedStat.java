@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+//TODO: Not sure these actually need to be outputModelObjects... Change it and see...
 public abstract class VCRuleBackedStat extends OutputModelObject {
 
     final ParserRuleContext definingCtx;

@@ -147,13 +147,14 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public List<VCAssertiveBlock> build() {
             List<VCAssertiveBlock> result = new ArrayList<>();
             List<VCAssertiveBlockBuilder> builders = new ArrayList<>();
-            builders.add(this);
+            //builders.add(this);
             List<VCAssertiveBlockBuilder> x = getBranchesForThisBlock(new VCAssertiveBlockBuilder(this));
-            builders.addAll(x);
+            //builders.addAll(x);
+            builders.add(x.get(1));
+
             for (VCAssertiveBlockBuilder b : builders) {
                 result.add(b.applyRules());
             }
-
             return result;
         }
 
@@ -179,13 +180,14 @@ public class VCAssertiveBlock extends AssertiveBlock {
                     VCIfElse ie = (VCIfElse) currentStat;
 
                     //TODO: Ok, I know that the outputmodel walker is looping indefinitely if there's aliasing
-                    //going on this big mess of a thing I call assertive code. What I don't know yet is *why*
-                    //to trigger it, instead of making copies of each else stmt, just pass references to the new
+                    //going on this big mess of a thing I call assertive code. What I don't know yet is *why*..
+                    //To trigger it, instead of making copies of each else stmt, just pass references to the new
                     //vcIfElse you construct here...
                     neg.stats.add(
                             new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
                                     Utils.apply(ie.getThenStmts(), e -> e.copyWithBlock(neg)),
-                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
+                                    //Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
+                                    ie.getElseStmts(),
                                     ie.getProgIfCondition()));
                     result.add(neg);
                 }
