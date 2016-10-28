@@ -150,18 +150,17 @@ public class VCAssertiveBlock extends AssertiveBlock {
             builders.add(this);
             List<VCAssertiveBlockBuilder> x = getBranchesForThisBlock(new VCAssertiveBlockBuilder(this));
             builders.addAll(x);
-
-            System.out.println("entering apply rules phase");
-
             for (VCAssertiveBlockBuilder b : builders) {
                 result.add(b.applyRules());
             }
-            System.out.println("exiting apply rules phase");
 
             return result;
         }
 
         private VCAssertiveBlock applyRules() {
+
+            //in case we're applying rules in a block arising from a branch, I want to get rid of excess (prior) applications..
+            applicationSteps.clear();
             applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
