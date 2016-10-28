@@ -54,8 +54,7 @@ VC(vc) ::= <<
 >>
 
 VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<
-<first(stats)>
-    <rest(stats); separator="\n">
+<stats; separator="\n">
 <finalConfirm>
 >>
 

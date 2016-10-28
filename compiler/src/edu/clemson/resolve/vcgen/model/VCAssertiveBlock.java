@@ -177,10 +177,15 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 if (currentStat instanceof VCIfElse) {
                     VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(b);
                     VCIfElse ie = (VCIfElse) currentStat;
+
+                    //TODO: Ok, I know that the outputmodel walker is looping indefinitely if there's aliasing
+                    //going on this big mess of a thing I call assertive code. What I don't know yet is *why*
+                    //to trigger it, instead of making copies of each else stmt, just pass references to the new
+                    //vcIfElse you construct here...
                     neg.stats.add(
                             new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
-                                    ie.getThenStmts(),
-                                    ie.getElseStmts(),
+                                    Utils.apply(ie.getThenStmts(), e -> e.copyWithBlock(neg)),
+                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
                                     ie.getProgIfCondition()));
                     result.add(neg);
                 }
