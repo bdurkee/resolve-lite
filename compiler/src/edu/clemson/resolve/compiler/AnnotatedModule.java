@@ -1,7 +1,7 @@
 package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.model.VCOutputFile;
+import edu.clemson.resolve.vcgen.VCOutputFile;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;

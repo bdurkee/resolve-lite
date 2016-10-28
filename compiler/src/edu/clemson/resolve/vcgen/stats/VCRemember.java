@@ -1,11 +1,9 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen.stats;
 
-import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.application.RememberApplicationStrategy;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class VCRemember extends VCRuleBackedStat {
 
@@ -14,7 +12,12 @@ public class VCRemember extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCRemember copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+    public VCRemember copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCRemember(b);
+    }
+
+    @Override
+    public String toString() {
+        return "Remember;";
     }
 }

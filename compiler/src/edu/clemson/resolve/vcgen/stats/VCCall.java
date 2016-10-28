@@ -1,9 +1,9 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen.stats;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +24,12 @@ public class VCCall extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCCall copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+    public VCCall copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCCall(getDefiningContext(), b, applicationStrategy, progCall);
+    }
+
+    @Override
+    public String toString() {
+        return progCall + ";";
     }
 }

@@ -5,11 +5,10 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCAssign;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCAssign;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
@@ -104,6 +103,6 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
     @NotNull
     @Override
     public String getDescription() {
-        return "function assignment rule application";
+        return "Function assignment rule application";
     }
 }

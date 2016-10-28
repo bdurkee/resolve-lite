@@ -6,8 +6,10 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
-import edu.clemson.resolve.vcgen.model.*;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.stats.*;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
 import org.jetbrains.annotations.NotNull;
 

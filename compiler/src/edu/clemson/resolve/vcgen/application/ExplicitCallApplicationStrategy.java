@@ -6,10 +6,11 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCCall;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCGen;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCCall;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -27,7 +28,7 @@ import java.util.*;
  * 1. no return
  * 2. whose ensure's clause consists of only equality exprs whose lhs is a
  * variable referencing a parameter having mode updates
- * See {@link edu.clemson.resolve.vcgen.ModelBuilderProto#inSimpleForm(PExp, List)} for
+ * See {@link VCGen#inSimpleForm(PExp, List)} for
  * more info on what consitutes a call as 'simple' or explicit.
  */
 public class ExplicitCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCCall> {

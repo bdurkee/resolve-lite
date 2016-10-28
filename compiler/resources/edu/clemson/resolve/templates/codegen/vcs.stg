@@ -39,6 +39,11 @@ VCOutputFile(vcs, chunks, finalVcs) ::= <<
 <c.applicationSteps; separator="\n">}; separator="\n"> <!now print the steps!>
 >>
 
+VCAssertiveBlock(assertCode, applicationSteps) ::= <<
+<assertCode.stats; separator="\n">
+<assertCode.finalConfirm>
+>>
+
 RuleApplicationStep(app, step) ::= <<
 <app.description>
 <step>
@@ -52,25 +57,5 @@ VC(vc) ::= <<
 <vc.consequent>
 
 >>
-
-VCAssertiveBlock(assertCode, stats, finalConfirm, applicationSteps) ::= <<
-<stats; separator="\n">
-<finalConfirm>
->>
-
-VCRemember(remember) ::= "Remember;"
-
-VCAssume(assume) ::= "Assume <assume.assumeExp>;"
-
-VCConfirm(confirm) ::= "Confirm <confirm.confirmExp>;"
-
-
-VCCall(code) ::= "<code.text>"
-
-VCIfElse(code) ::= "<code.text>"
-
-VCSwap(code) ::= "<code.text>"
-
-VCAssign(code) ::= "<code.text>"
 
 fileExtension() ::= ".asrt"

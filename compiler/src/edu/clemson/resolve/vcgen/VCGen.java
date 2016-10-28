@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen;
 
+import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.misc.Utils;
@@ -9,10 +10,9 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
-import edu.clemson.resolve.semantics.programtype.ProgGenericType;
 import edu.clemson.resolve.vcgen.application.*;
-import edu.clemson.resolve.vcgen.model.*;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.*;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
 
 //TODO: CAN CHANGE TO VISITOR I THINK.
-public class ModelBuilderProto extends ResolveBaseListener {
+public class VCGen extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
@@ -71,14 +71,14 @@ public class ModelBuilderProto extends ResolveBaseListener {
 
     private OperationSymbol currentProcOpSym = null;
     private boolean withinCallStmt = false;
-    private final VCGenerator gen;
+    private final RESOLVECompiler compiler;
 
-    public ModelBuilderProto(VCGenerator gen, MathSymbolTable symtab) {
-        this.symtab = symtab;
-        this.tr = gen.getModule();
+    public VCGen(RESOLVECompiler compiler, AnnotatedModule module) {
+        this.symtab = compiler.symbolTable;
+        this.tr = module;
         this.g = symtab.getTypeGraph();
-        this.gen = gen;
-        this.outputFile = new VCOutputFile(gen.getCompiler());
+        this.outputFile = new VCOutputFile(compiler);
+        this.compiler = compiler;
     }
 
     public VCOutputFile getOutputFile() {
@@ -90,7 +90,7 @@ public class ModelBuilderProto extends ResolveBaseListener {
         try {
             moduleScope = symtab.getModuleScope(tr.getModuleIdentifier());
         } catch (NoSuchModuleException e) {//shouldn't happen, but eh.
-            gen.getCompiler().errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleCtxName(ctx));
+            compiler.errMgr.semanticError(ErrorKind.NO_SUCH_MODULE, Utils.getModuleCtxName(ctx));
         }
     }
 

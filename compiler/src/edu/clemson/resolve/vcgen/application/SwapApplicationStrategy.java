@@ -1,9 +1,8 @@
 package edu.clemson.resolve.vcgen.application;
 
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
-import edu.clemson.resolve.vcgen.model.VCSwap;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCSwap;
 import org.jetbrains.annotations.NotNull;
 
 public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VCSwap> {
@@ -28,6 +27,6 @@ public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VC
     @NotNull
     @Override
     public String getDescription() {
-        return "swap rule application";
+        return "Swap rule application";
     }
 }

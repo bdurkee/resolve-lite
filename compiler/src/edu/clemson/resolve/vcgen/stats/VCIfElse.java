@@ -1,17 +1,12 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathFunctionClssftn;
-import edu.clemson.resolve.vcgen.ModelBuilderProto;
+import edu.clemson.resolve.vcgen.VCGen;
 import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.IfApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.ElseApplicationStrategy;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,8 +34,8 @@ public class VCIfElse extends VCRuleBackedStat {
     @NotNull
     public ConditionalApplicationStrategy getOppositeConditionalStrategy() {
         return applicationStrategy instanceof IfApplicationStrategy ?
-                ModelBuilderProto.ELSE_APPLICATION :
-                ModelBuilderProto.IF_APPLICATION;
+                VCGen.ELSE_APPLICATION :
+                VCGen.IF_APPLICATION;
     }
 
     @NotNull
@@ -49,10 +44,10 @@ public class VCIfElse extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCIfElse copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+    public VCIfElse copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCIfElse(definingCtx, b, applicationStrategy,
-                Utils.apply(thenStmts, e -> e.copyWithBlock(b)),
-                Utils.apply(elseStmts, e -> e.copyWithBlock(b)), progCondition);
+                Utils.apply(thenStmts, e -> e.copyWithEnclosingBlock(b)),
+                Utils.apply(elseStmts, e -> e.copyWithEnclosingBlock(b)), progCondition);
     }
 
     @NotNull
@@ -64,4 +59,14 @@ public class VCIfElse extends VCRuleBackedStat {
     public List<VCRuleBackedStat> getElseStmts() {
         return elseStmts;
     }
+
+    @Override
+    public String toString() {
+        String result = "If " + progCondition + " then\n\t";
+        result += Utils.join(thenStmts, "\n\t");
+        result += "\nend;";
+        return result;
+    }
+
+
 }

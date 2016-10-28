@@ -2,9 +2,9 @@ package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCConfirm;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy<VCConfirm> {
@@ -33,6 +33,6 @@ public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy
     @NotNull
     @Override
     public String getDescription() {
-        return "confirm rule application";
+        return "Confirm rule application";
     }
 }

@@ -1,19 +1,14 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen.stats;
 
-import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 //TODO: Not sure these actually need to be outputModelObjects... Change it and see...
-public abstract class VCRuleBackedStat extends OutputModelObject {
+public abstract class VCRuleBackedStat {
 
     final ParserRuleContext definingCtx;
     final VCStatRuleApplicationStrategy applicationStrategy;
@@ -27,12 +22,14 @@ public abstract class VCRuleBackedStat extends OutputModelObject {
         this.definingCtx = ctx;
     }
 
-    public String getText() {
-        return Utils.getRawText(definingCtx);
-    }
-
+    /**
+     * Creates a deep copy of {@code this} statement with enclosing block {@code b}.
+     *
+     * @param b The enclosing {@link VCAssertiveBlockBuilder} for this statement.
+     * @return a deep copy of this statement.
+     */
     @NotNull
-    public abstract VCRuleBackedStat copyWithBlock(@NotNull VCAssertiveBlockBuilder b);
+    public abstract VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b);
 
     @SuppressWarnings("unchecked")
     public AssertiveBlock applyBackingRule() {

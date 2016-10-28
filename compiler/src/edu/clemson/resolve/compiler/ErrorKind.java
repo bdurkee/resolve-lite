@@ -148,10 +148,10 @@ public enum ErrorKind {
     /**
      * Compiler Error 31:
      * <p>
-     * no mapping to template name for output model class <em>class</em>.</p>
+     * no mapping to template name for output stats class <em>class</em>.</p>
      */
     NO_MODEL_TO_TEMPLATE_MAPPING(31, "no mapping to template name for output "
-            + "model class <arg>", ErrorSeverity.ERROR),
+            + "stats class <arg>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 32: missing code generation template <em>template</em>.

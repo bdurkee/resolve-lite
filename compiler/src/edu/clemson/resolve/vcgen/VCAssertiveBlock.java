@@ -1,9 +1,9 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.ModelBuilderProto;
 import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
+import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
@@ -57,13 +57,13 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public VCAssertiveBlockBuilder(VCAssertiveBlockBuilder o) {
             this.g = o.g;
             this.definingTree = o.definingTree;
-            this.finalConfirm = o.finalConfirm.copyWithBlock(this);
+            this.finalConfirm = o.finalConfirm.copyWithEnclosingBlock(this);
             this.scope = o.scope;
             this.description = o.description;
 
             //deep copy stats with this block as enclosing..
             for (VCRuleBackedStat s : o.stats) {
-                this.stats.add(s.copyWithBlock(this));
+                this.stats.add(s.copyWithEnclosingBlock(this));
             }
             this.applicationSteps.addAll(o.applicationSteps);
             this.facilitySpecializations.putAll(o.facilitySpecializations);
@@ -147,13 +147,11 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public List<VCAssertiveBlock> build() {
             List<VCAssertiveBlock> result = new ArrayList<>();
             List<VCAssertiveBlockBuilder> builders = new ArrayList<>();
-            //builders.add(this);
+            builders.add(this);
             List<VCAssertiveBlockBuilder> x = getBranchesForThisBlock(new VCAssertiveBlockBuilder(this));
-            //builders.addAll(x);
-            builders.add(x.get(1));
-
+            builders.addAll(x);
             for (VCAssertiveBlockBuilder b : builders) {
-                result.add(b.applyRules());
+               result.add(b.applyRules());
             }
             return result;
         }
@@ -162,10 +160,10 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
             //in case we're applying rules in a block arising from a branch, I want to get rid of excess (prior) applications..
             applicationSteps.clear();
-            applicationSteps.add(new RuleApplicationStep(this.snapshot(), ""));
+            applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
+                applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
                         currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);
@@ -179,23 +177,17 @@ public class VCAssertiveBlock extends AssertiveBlock {
                     VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(b);
                     VCIfElse ie = (VCIfElse) currentStat;
 
-                    //TODO: Ok, I know that the outputmodel walker is looping indefinitely if there's aliasing
-                    //going on this big mess of a thing I call assertive code. What I don't know yet is *why*..
-                    //To trigger it, instead of making copies of each else stmt, just pass references to the new
-                    //vcIfElse you construct here...
                     neg.stats.add(
                             new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
-                                    Utils.apply(ie.getThenStmts(), e -> e.copyWithBlock(neg)),
-                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
-                                    //ie.getElseStmts(),
+                                    Utils.apply(ie.getThenStmts(), e -> e.copyWithEnclosingBlock(neg)),
+                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)),
                                     ie.getProgIfCondition()));
                     result.add(neg);
                 }
-                b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule(),
+                b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
                         currentStat.getApplicationDescription()));
             }
             return result;
         }
-
     }
 }

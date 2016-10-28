@@ -16,7 +16,7 @@ import java.util.Map;
 public class ProgReprTypeSymbol extends Symbol {
 
     /**
-     * A backing field for our (type model) {@code definition} parameter. This
+     * A backing field for our (type stats) {@code definition} parameter. This
      * might be {@code null} in the case where we represent a facility bound
      * type representation.
      */

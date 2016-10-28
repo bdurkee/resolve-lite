@@ -73,7 +73,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private ParserRuleContext prevSelectorAccess = null;
 
-    /** Holds a ref to a type model symbol while walking it (or its repr). */
+    /** Holds a ref to a type stats symbol while walking it (or its repr). */
     private TypeModelSymbol curTypeReprModelSymbol = null;
 
     /** Keeps a count of the number of global constraints in the module currently being populated. */
@@ -531,7 +531,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
-            //won't have a model.
+            //won't have a stats.
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         } catch (NoSuchModuleException nsme) {

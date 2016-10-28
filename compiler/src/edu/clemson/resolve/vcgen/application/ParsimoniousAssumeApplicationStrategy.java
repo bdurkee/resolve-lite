@@ -2,9 +2,9 @@ package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCAssume;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCAssume;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -63,6 +63,6 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
     @NotNull
     @Override
     public String getDescription() {
-        return "parsimonious assume application";
+        return "Parsimonious assume application";
     }
 }

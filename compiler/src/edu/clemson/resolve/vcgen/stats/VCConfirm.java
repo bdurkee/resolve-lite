@@ -1,12 +1,10 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen.stats;
 
-import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.application.ConfirmApplicationStrategy;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class VCConfirm extends VCRuleBackedStat {
 
@@ -23,7 +21,12 @@ public class VCConfirm extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCConfirm copyWithBlock(@NotNull VCAssertiveBlockBuilder b) {
+    public VCConfirm copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCConfirm(definingCtx, b, confirm);
+    }
+
+    @Override
+    public String toString() {
+        return "Confirm " + confirm + ";";
     }
 }

@@ -62,7 +62,7 @@ public final class PerVCProverModel {
     private int myConsequentsHash;
 
     /**
-     * <p>A list of listeners to be contacted when the model changes. Note that
+     * <p>A list of listeners to be contacted when the stats changes. Note that
      * the behavior of change listening is modified by
      * <code>myChangeEventMode</code>.</p>
      */

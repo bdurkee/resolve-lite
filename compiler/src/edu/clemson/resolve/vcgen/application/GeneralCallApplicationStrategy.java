@@ -9,9 +9,9 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCCall;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCCall;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -183,7 +183,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
     @NotNull
     @Override
     public String getDescription() {
-        return "general call rule application";
+        return "General call rule application";
     }
 
 }

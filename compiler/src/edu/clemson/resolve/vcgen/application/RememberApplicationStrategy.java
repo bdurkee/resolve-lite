@@ -1,9 +1,9 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCRemember;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCRemember;
 import org.jetbrains.annotations.NotNull;
 
 public class RememberApplicationStrategy implements VCStatRuleApplicationStrategy<VCRemember> {
@@ -18,6 +18,6 @@ public class RememberApplicationStrategy implements VCStatRuleApplicationStrateg
     @NotNull
     @Override
     public String getDescription() {
-        return "remember rule application";
+        return "Remember rule application";
     }
 }

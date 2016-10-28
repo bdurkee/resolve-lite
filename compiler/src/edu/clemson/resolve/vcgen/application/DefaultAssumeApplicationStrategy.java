@@ -1,9 +1,9 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCAssume;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCAssume;
 import org.jetbrains.annotations.NotNull;
 
 public class DefaultAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
@@ -25,6 +25,6 @@ public class DefaultAssumeApplicationStrategy implements VCStatRuleApplicationSt
     @NotNull
     @Override
     public String getDescription() {
-        return "assume confirm rule application";
+        return "Assume-Confirm rule application";
     }
 }

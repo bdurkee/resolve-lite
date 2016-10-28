@@ -1,18 +1,16 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.codegen.Model;
-import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.VC;
+import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class VCOutputFile extends OutputModelObject {
+public class VCOutputFile {
 
     private int currentVcNumber;
     private final RESOLVECompiler compiler;
@@ -90,5 +88,35 @@ public class VCOutputFile extends OutputModelObject {
             finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
             currentVcNumber++;
         }
+    }
+
+    /*
+    <finalVcs;separator="\n">
+
+        <chunks : {c|<c.assertCode.description>
+        <c.assertCode.text>    <!print out the big, starting construct!>
+
+        \< S T E P S >
+        <c.applicationSteps; separator="\n">}; separator="\n"> <!now print the steps!>
+>>
+     */
+    @Override
+    public String toString() {
+        String result = "";
+
+        for (VC vc : finalVcs) {
+            result += vc.toString() + "\n\n";
+        }
+
+        for (AssertiveBlock b : chunks) {
+            result += b.getDescription() + "\n";
+            result += b.getText() + "\n";
+            result += "<S T E P S>\n";
+
+            for (RuleApplicationStep step : b.getApplicationSteps()) {
+                result += step + "\n\n";
+            }
+        }
+        return result;
     }
 }
