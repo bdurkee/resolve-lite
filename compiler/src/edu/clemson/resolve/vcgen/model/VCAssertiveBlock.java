@@ -186,8 +186,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
                     neg.stats.add(
                             new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
                                     Utils.apply(ie.getThenStmts(), e -> e.copyWithBlock(neg)),
-                                    //Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
-                                    ie.getElseStmts(),
+                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithBlock(neg)),
+                                    //ie.getElseStmts(),
                                     ie.getProgIfCondition()));
                     result.add(neg);
                 }
