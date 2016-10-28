@@ -5,8 +5,7 @@ import edu.clemson.resolve.vcgen.AssertiveBlock;
 
 public class RuleApplicationStep {
 
-    public String step;
-    public String description;
+    private final String step, description;
 
     public RuleApplicationStep(String step, String description) {
         this.step = step;

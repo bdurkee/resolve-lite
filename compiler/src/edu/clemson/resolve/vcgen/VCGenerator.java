@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
 
 //TODO: CAN CHANGE TO VISITOR I THINK.
-public class VCGen extends ResolveBaseListener {
+public class VCGenerator extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
@@ -73,7 +73,7 @@ public class VCGen extends ResolveBaseListener {
     private boolean withinCallStmt = false;
     private final RESOLVECompiler compiler;
 
-    public VCGen(RESOLVECompiler compiler, AnnotatedModule module) {
+    public VCGenerator(RESOLVECompiler compiler, AnnotatedModule module) {
         this.symtab = compiler.symbolTable;
         this.tr = module;
         this.g = symtab.getTypeGraph();
@@ -648,5 +648,26 @@ public class VCGen extends ResolveBaseListener {
             VCSwap s = new VCSwap(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
             stats.put(ctx, s);
         }
+    }
+
+    //TODO: TEST THIS
+    public static boolean inSimpleForm(@NotNull PExp ensures, @NotNull List<ProgParameterSymbol> params) {
+        boolean simple = false;
+       /* if (ensures instanceof PApply) {
+            PApply ensuresAsPApply = (PApply) ensures;
+            List<PExp> args = ensuresAsPApply.getArguments();
+            if (ensuresAsPApply.isEquality()) {
+                if (inSimpleForm(args.get(0), params)) simple = true;
+            }
+            else if (ensuresAsPApply.isConjunct()) {
+                if (inSimpleForm(args.get(0), params) && inSimpleForm(args.get(1), params)) simple = true;
+            }
+        }
+        else if (ensures instanceof PSymbol) {
+            for (ProgParameterSymbol p : params) {
+                if (p.getMode() == ParameterMode.UPDATES && p.asPSymbol().equals(ensures)) simple = true;
+            }
+        }*/
+        return simple;
     }
 }

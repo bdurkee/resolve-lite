@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.VCGen;
+import edu.clemson.resolve.vcgen.VCGenerator;
 import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.IfApplicationStrategy;
@@ -34,8 +34,8 @@ public class VCIfElse extends VCRuleBackedStat {
     @NotNull
     public ConditionalApplicationStrategy getOppositeConditionalStrategy() {
         return applicationStrategy instanceof IfApplicationStrategy ?
-                VCGen.ELSE_APPLICATION :
-                VCGen.IF_APPLICATION;
+                VCGenerator.ELSE_APPLICATION :
+                VCGenerator.IF_APPLICATION;
     }
 
     @NotNull
@@ -62,11 +62,11 @@ public class VCIfElse extends VCRuleBackedStat {
 
     @Override
     public String toString() {
-        String result = "If " + progCondition + " then\n\t";
-        result += Utils.join(thenStmts, "\n\t");
-        result += "\nend;";
+        String result = "If " + progCondition + " then\n";
+        for (VCRuleBackedStat stmt : thenStmts) {
+            result += "\t" + stmt + "\n";
+        }
+        result += "end;";
         return result;
     }
-
-
 }

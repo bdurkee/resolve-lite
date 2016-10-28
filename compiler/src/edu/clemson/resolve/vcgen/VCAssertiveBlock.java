@@ -148,7 +148,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             List<VCAssertiveBlock> result = new ArrayList<>();
             List<VCAssertiveBlockBuilder> builders = new ArrayList<>();
             builders.add(this);
-            List<VCAssertiveBlockBuilder> x = getBranchesForThisBlock(new VCAssertiveBlockBuilder(this));
+            List<VCAssertiveBlockBuilder> x = getBranchingAssertiveBlocks(new VCAssertiveBlockBuilder(this));
             builders.addAll(x);
             for (VCAssertiveBlockBuilder b : builders) {
                result.add(b.applyRules());
@@ -157,9 +157,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         private VCAssertiveBlock applyRules() {
-
             //in case we're applying rules in a block arising from a branch, I want to get rid of excess (prior) applications..
-            applicationSteps.clear();
             applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
@@ -169,7 +167,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return new VCAssertiveBlock(this);
         }
 
-        private List<VCAssertiveBlockBuilder> getBranchesForThisBlock(VCAssertiveBlockBuilder b) {
+        private List<VCAssertiveBlockBuilder> getBranchingAssertiveBlocks(VCAssertiveBlockBuilder b) {
             List<VCAssertiveBlockBuilder> result = new ArrayList<>();
             while (!b.stats.isEmpty()) {
                 VCRuleBackedStat currentStat = b.stats.removeLast();
@@ -182,6 +180,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
                                     Utils.apply(ie.getThenStmts(), e -> e.copyWithEnclosingBlock(neg)),
                                     Utils.apply(ie.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)),
                                     ie.getProgIfCondition()));
+                    neg.applicationSteps.clear();
                     result.add(neg);
                 }
                 b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),

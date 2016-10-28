@@ -5,7 +5,6 @@ import edu.clemson.resolve.compiler.AnnotatedModule;
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.parser.ResolveParser;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.stringtemplate.v4.ST;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptExtModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisExtModuleDeclContext) continue;
-                VCGen gen = new VCGen(compiler, unit);
+                VCGenerator gen = new VCGenerator(compiler, unit);
                 ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
                 VCOutputFile x = gen.getOutputFile();
                 System.out.println(x);

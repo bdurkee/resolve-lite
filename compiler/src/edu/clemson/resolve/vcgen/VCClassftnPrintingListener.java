@@ -9,9 +9,6 @@ import edu.clemson.resolve.semantics.MathClssftn;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by daniel on 7/18/16.
- */
 public class VCClassftnPrintingListener extends PExpListener {
 
     private final RESOLVECompiler compiler;
