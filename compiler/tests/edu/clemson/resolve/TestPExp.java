@@ -187,7 +187,7 @@ public class TestPExp extends BaseTest {
         Iterator<? extends PExp> exps = conjuncts.iterator();
         Assert.assertEquals("x", exps.next().toString());
         Assert.assertEquals("(y = 2)", exps.next().toString());
- //       Assert.assertEquals("(P.Lab = λ q:Inv,true)", exps.next().toString());
+ //       Assert.assertEquals("(P.Lab = λ q:Inv,true)", exps.next().printNested());
 /*
         result = parseMathAssertionExp(g, "f(p and (q and z))");
         Assert.assertEquals(1, result.splitIntoConjuncts().size());
@@ -345,7 +345,7 @@ public class TestPExp extends BaseTest {
     public void testSubstituteOnSelector() {
         PExp result = parseMathAssertionExp(g, "conc.P.Lab(conc.P.Trmnl_Loc)")
                 .substitute(parseMathAssertionExp(g, "conc.P.Lab"), parseMathAssertionExp(g, "X"));
-//        Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.toString());
+//        Assert.assertEquals("X(conc.P.Trmnl_Loc)", result.printNested());
     }
 
     @Test

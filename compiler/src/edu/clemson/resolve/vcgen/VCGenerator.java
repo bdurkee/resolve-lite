@@ -192,7 +192,7 @@ public class VCGenerator extends ResolveBaseListener {
        /* if (applier.returnEnsuresArgSubstitutions.isEmpty()) {
             throw new IllegalStateException("something's screwy: " +
                     "shouldn't of tried applying " +
-                    "call rule to: " + exp.toString()+".. " +
+                    "call rule to: " + exp.printNested()+".. " +
                     "could happen too right now if there's no spec for the op");
         }*/
         return applier.returnEnsuresArgSubstitutions.get(exp);

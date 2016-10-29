@@ -9,6 +9,9 @@ import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.IfAp
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,13 +63,46 @@ public class VCIfElse extends VCRuleBackedStat {
         return elseStmts;
     }
 
+    /*
     @Override
-    public String toString() {
-        String result = "If " + progCondition + " then\n";
+    public String printNested() {
+        return printNested("  ");
+    }
+
+    protected String printNested( String indentWs) {
+        String prevIndentWs = indentWs;
+        String result = prevIndentWs.equals("  ") ? "" : indentWs;
+        result += "If " + progCondition + " then\n";
         for (VCRuleBackedStat stmt : thenStmts) {
-            result += "\t" + stmt + "\n";
+            if (stmt instanceof VCIfElse) {
+                VCIfElse stmtAsIfElse = (VCIfElse)stmt;
+                indentWs += indentWs;
+                result += stmtAsIfElse.printNested(indentWs + indentWs);
+
+                if (!stmtAsIfElse.getElseStmts().isEmpty()) {
+
+                }
+            }
+            else {
+                result += indentWs + stmt + "\n";
+            }
         }
         result += "end;";
         return result;
+    }*/
+
+    @Override
+    public String toString() {
+        STGroup g = new STGroupString("IfElseStmt(condition, ifStats, elseStats) ::= " +
+                "<<If <condition> then\n" +
+                "    <ifStats; separator=\"\n\">\n" +
+                "end;>>");
+        ST t = g.getInstanceOf("IfElseStmt");
+        t.add("condition", progCondition);
+        t.add("ifStats", thenStmts);
+        t.add("elseStats", elseStmts);
+       // x.add("condition", progCondition);
+       // x.add("thenStats", thenStmts);
+        return t.render();
     }
 }
