@@ -417,6 +417,10 @@ public abstract class PExp {
     @Override
     public abstract boolean equals(Object o);
 
+    public String render() {
+        return "";
+    }
+
     /**
      * Returns a map of equalities contained in the top level of {@code this} of the form:
      * {@code [variable name] = [some expr]}.

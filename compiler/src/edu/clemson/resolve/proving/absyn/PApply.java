@@ -66,7 +66,7 @@ public class PApply extends PExp {
             @Override
             protected String toString(PApply s) {
                 String result = Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ");
-                return "(" + result + ")";
+                return  result;
             }
 
             @Override
@@ -487,6 +487,8 @@ public class PApply extends PExp {
 
         protected MathClssftn applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
+
+        //TODO: Bracket based app should have a left and right...
         protected boolean bracketApp = false;
 
         /**

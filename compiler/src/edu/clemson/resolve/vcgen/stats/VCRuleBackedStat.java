@@ -7,7 +7,6 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
-//TODO: Not sure these actually need to be outputModelObjects... Change it and see...
 public abstract class VCRuleBackedStat {
 
     final ParserRuleContext definingCtx;
