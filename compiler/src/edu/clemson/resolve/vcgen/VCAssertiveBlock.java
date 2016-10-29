@@ -18,8 +18,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
                 builder.stats, builder.description);
     }
 
-
-    //TODO: Change the Utils.Builder<VCAssertiveBlock> to List<VCAssertiveBlock>
     public static class VCAssertiveBlockBuilder implements Utils.Builder<List<VCAssertiveBlock>> {
 
         public final DumbMathClssftnHandler g;
@@ -167,12 +165,12 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return new VCAssertiveBlock(this);
         }
 
-        private List<VCAssertiveBlockBuilder> getBranchingAssertiveBlocks(VCAssertiveBlockBuilder b) {
+        private List<VCAssertiveBlockBuilder> getBranchingAssertiveBlocks(VCAssertiveBlockBuilder original) {
             List<VCAssertiveBlockBuilder> result = new ArrayList<>();
-            while (!b.stats.isEmpty()) {
-                VCRuleBackedStat currentStat = b.stats.removeLast();
+            while (!original.stats.isEmpty()) {
+                VCRuleBackedStat currentStat = original.stats.removeLast();
                 if (currentStat instanceof VCIfElse) {
-                    VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(b);
+                    VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(original);
                     VCIfElse ie = (VCIfElse) currentStat;
 
                     neg.stats.add(
@@ -183,7 +181,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
                     neg.applicationSteps.clear();
                     result.add(neg);
                 }
-                b.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
+                original.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
                         currentStat.getApplicationDescription()));
             }
             return result;

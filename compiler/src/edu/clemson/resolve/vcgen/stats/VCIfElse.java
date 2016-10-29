@@ -63,46 +63,18 @@ public class VCIfElse extends VCRuleBackedStat {
         return elseStmts;
     }
 
-    /*
-    @Override
-    public String printNested() {
-        return printNested("  ");
-    }
-
-    protected String printNested( String indentWs) {
-        String prevIndentWs = indentWs;
-        String result = prevIndentWs.equals("  ") ? "" : indentWs;
-        result += "If " + progCondition + " then\n";
-        for (VCRuleBackedStat stmt : thenStmts) {
-            if (stmt instanceof VCIfElse) {
-                VCIfElse stmtAsIfElse = (VCIfElse)stmt;
-                indentWs += indentWs;
-                result += stmtAsIfElse.printNested(indentWs + indentWs);
-
-                if (!stmtAsIfElse.getElseStmts().isEmpty()) {
-
-                }
-            }
-            else {
-                result += indentWs + stmt + "\n";
-            }
-        }
-        result += "end;";
-        return result;
-    }*/
-
     @Override
     public String toString() {
         STGroup g = new STGroupString("IfElseStmt(condition, ifStats, elseStats) ::= " +
                 "<<If <condition> then\n" +
                 "    <ifStats; separator=\"\n\">\n" +
+                "<if(elseStats)>else\n" +
+                "    <elseStats; separator=\"\n\"> <endif>\n\n" +
                 "end;>>");
         ST t = g.getInstanceOf("IfElseStmt");
         t.add("condition", progCondition);
         t.add("ifStats", thenStmts);
         t.add("elseStats", elseStmts);
-       // x.add("condition", progCondition);
-       // x.add("thenStats", thenStmts);
         return t.render();
     }
 }
