@@ -1,4 +1,4 @@
-Precis Extension Basic_Relativization_Ext for Basic_String_Theory;
+Extension Basic_Relativization_Ext for Basic_String_Theory;
 	uses Basic_String_Theory;
 
 	Classification Corollary: El ⦂ Cls;

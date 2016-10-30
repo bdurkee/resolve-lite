@@ -12,14 +12,14 @@ moduleDecl
     ;
 
 precisModuleDecl
-    :   ('Meta')? 'Precis' name=ID ';'
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF
     ;
 
 precisExtModuleDecl
-    :   'Precis' 'Extension' name=ID 'for' precis=ID
+    :   'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
         (usesList)?
         precisBlock
@@ -35,7 +35,7 @@ conceptModuleDecl
     ;
 
 conceptExtModuleDecl
-    :   'Concept' 'Extension' name=ID specModuleParameterList?
+    :   'Enhancement' name=ID specModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         conceptBlock
@@ -43,7 +43,7 @@ conceptExtModuleDecl
     ;
 
 conceptImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+    :   'Realization' name=ID implModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         implBlock
@@ -51,7 +51,7 @@ conceptImplModuleDecl
     ;
 
 conceptExtImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+    :   'Realization' name=ID implModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?
         implBlock
@@ -212,7 +212,7 @@ varDeclGroup
 
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID
+        (externally='externally')? 'realized' 'by' impl=ID
         (implArgs=moduleArgumentList)? implFrom=fromClause?
         (extensionPairing)* ';'?
     ;
@@ -438,7 +438,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   incoming='@'? (qualifier=ID '::')? name=mathSymbolName
+    :   incoming='#'? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathOutfixAppExp

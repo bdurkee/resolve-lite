@@ -17,13 +17,13 @@ Concept Integer_Template;
             (updates i : Integer);
         requires
             i + 1 ≤ max_int;
-        ensures i = (@i + 1);
+        ensures i = (#i + 1);
 
     Operation Decrement
             (updates i : Integer);
         requires
            min_int ≤ (i - 1);
-        ensures	i = (@i - 1);
+        ensures	i = (#i - 1);
 
     Operation Are_Equal
             (evaluates i, j : Integer)

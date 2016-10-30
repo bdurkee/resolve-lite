@@ -10,6 +10,7 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
+import edu.clemson.resolve.semantics.programtype.*;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -19,9 +20,6 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.programtype.PTRepresentation;
-import edu.clemson.resolve.semantics.programtype.ProgFamilyType;
-import edu.clemson.resolve.semantics.programtype.ProgNamedType;
 import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
@@ -100,12 +98,8 @@ public class VCGenerator extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
         block.assume(g.getTrueExp());
-        assertiveBlocks.push(block);
-    }
 
-    @Override
-    public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
-       /* ModuleScopeBuilder spec = null, impl = null;
+        ModuleScopeBuilder spec = null, impl = null;
         try {
             ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
             spec = symtab.getModuleScope(concept);
@@ -116,12 +110,16 @@ public class VCGenerator extends ResolveBaseListener {
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-        List<PExp> specArgs = ctx.specArgs.progExp().stream()
-                .map(tr.exprASTs::get)
-                .filter(e -> !(e.getProgType() instanceof ProgGenericType))
-                .collect(Collectors.toList());
-        List<PExp> reducedSpecArgs = reduceArgs(specArgs);
 
+        List<ProgType> specArsgs = ctx.specArgs.progExp().stream()
+                .map(e -> tr.progTypes.get(e))
+                .collect(Collectors.toList());
+        List<ParserRuleContext> specArgs = ctx.specArgs.progExp().stream()
+                .filter(e -> !(tr.progTypes.get(e) instanceof ProgGenericType || tr.progTypes.get(e) instanceof ProgNamedType))
+                .collect(Collectors.toList());
+        List<PExp> reducedSpecArgs = reduceArgs(block, specArgs);
+
+        List<ModuleParameterSymbol> formalSpecArgs1 = spec.getSymbolsOfType(ModuleParameterSymbol.class);
         List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class)
                 .stream().filter(e -> !e.isModuleTypeParameter())
                 .map(ModuleParameterSymbol::asPSymbol)
@@ -144,7 +142,7 @@ public class VCGenerator extends ResolveBaseListener {
                     .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
                     .map(GlobalMathAssertionSymbol::getEnclosedExp)
                     .findAny();
-
+/*
             List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(implArgs);
             List<PExp> formalImplArgs =
@@ -157,28 +155,29 @@ public class VCGenerator extends ResolveBaseListener {
 
                 //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
                 result = g.formConjunct(RPC, result);
-            }
+            }*/
         }
         //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
         result = result.substitute(specFormalsToActuals);
         if (!result.isObviouslyTrue()) {
             assertiveBlocks.peek().finalConfirm(result);
         }
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        outputFile.addAssertiveBlock(block.build());*/
+        outputFile.addAssertiveBlocks(block.build());
     }
 
 
-    private List<PExp> reduceArgs(List<ParserRuleContext> args) {
+    private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<ParserRuleContext> args) {
         List<PExp> result = new ArrayList<>();
         for (ParserRuleContext arg : args) {
-            PExp argAsPExp = tr.getMathExpASTFor(g, arg);
-            if (argAsPExp instanceof PApply) { //i.e., we're dealing with a function application
-                PExp e = applyCallRuleToExp(arg, assertiveBlocks.peek(), (PApply) argAsPExp);
-                result.add(e);
+            PExp progArgExp = tr.getMathExpASTFor(g, arg);
+            if (progArgExp instanceof PApply) { //i.e., we're dealing with a function application
+                FunctionAssignApplicationStrategy.Invk_Cond ivkCondListener =
+                        new FunctionAssignApplicationStrategy.Invk_Cond(b.definingTree, b);
+                progArgExp.accept(ivkCondListener);
+                result.add(ivkCondListener.mathFor(progArgExp));
             }
             else {
-                result.add(argAsPExp);
+                result.add(progArgExp);
             }
         }
         return result;
@@ -289,11 +288,8 @@ public class VCGenerator extends ResolveBaseListener {
         //outputFile.addAssertiveBlock(block.build());
     }
 
-    //TODO: Would be really cool if we could hover over a given and get information about where it came from
-    //"constraint for type Integer", etc.
-
     @Override
-    public void exitOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+    public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
@@ -316,9 +312,6 @@ public class VCGenerator extends ResolveBaseListener {
         StmtListener l = new StmtListener(block, tr.exprASTs);
         ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
-
-        //IDEA: Take the block, look through all of its enclosed statements for IfElseStats, and clone and negate em manually
-        // (e.g. change the application strategy).. And maybe even wait till we do all the confirms!
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
