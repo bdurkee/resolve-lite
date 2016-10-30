@@ -249,7 +249,7 @@ public class PSymbol extends PExp {
     @Override
     public String toString() {
         String result = "";
-        if (incomingFlag) result += "@";
+        if (incomingFlag) result += "#";
         if (leftPrint != null && rightPrint != null) {
             result = leftPrint + result + rightPrint;
         }
