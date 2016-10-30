@@ -21,6 +21,16 @@ public class VCSwap extends VCRuleBackedStat {
     }
 
     @NotNull
+    public PExp getLeft() {
+        return left;
+    }
+
+    @NotNull
+    public PExp getRight() {
+        return right;
+    }
+
+    @NotNull
     @Override
     public VCSwap copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCSwap(definingCtx, b, applicationStrategy, left, right);
