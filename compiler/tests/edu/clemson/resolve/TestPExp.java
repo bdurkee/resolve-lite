@@ -50,12 +50,12 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals("x((z + 1))", exps.next().toString());
         Assert.assertEquals("y", exps.next().toString());
 
-        result = parseMathAssertionExp(g, "{{@x if true; @y if true and x; false otherwise;}}");
+        result = parseMathAssertionExp(g, "{{#x if true; #y if true and x; false otherwise;}}");
         exps = result.getSubExpressions().iterator();
         Assert.assertEquals(5, result.getSubExpressions().size());
-        Assert.assertEquals("@x", exps.next().toString());
+        Assert.assertEquals("#x", exps.next().toString());
         Assert.assertEquals("true", exps.next().toString());
-        Assert.assertEquals("@y", exps.next().toString());
+        Assert.assertEquals("#y", exps.next().toString());
         Assert.assertEquals("(true and x)", exps.next().toString());
         Assert.assertEquals("false", exps.next().toString());
     }
@@ -256,7 +256,7 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testWithIncomingSignsRemoved() {
-        PExp result = parseMathAssertionExp(g, "F(@I, J, @S.Top, @f(x)(y))");
+        PExp result = parseMathAssertionExp(g, "F(#I, J, #S.Top, #f(x)(y))");
         Assert.assertEquals(false, result.isIncoming());
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();
         boolean[] expected = {false, true, false, true, true};
@@ -282,8 +282,8 @@ public class TestPExp extends BaseTest {
         PExp result =
                 parseMathAssertionExp(g,
                         "Forall x, y, z : Z, Exists u, v, w : N," +
-                                "@g(@u) + (h(@z, @w, @f(@u))) + " +
-                                "λ q : Z,{{@x if g(x); @b(@k) otherwise;}}");
+                                "#g(#u) + (h(#z, #w, #f(#u))) + " +
+                                "λ q : Z,{{#x if g(x); #b(#k) otherwise;}}");
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
@@ -299,7 +299,7 @@ public class TestPExp extends BaseTest {
                         g,
                         "Forall x, y, z : Z, Exists u, v : N," +
                                 "Forall f, h : Z * Z -> B, "
-                                + "g(@u) + (h(@z, @w, f(@u)))");
+                                + "g(#u) + (h(#z, #w, f(#u)))");
         Set<String> quantifiedNames = result.getQuantifiedVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames = Stream.of("u", "z", "f", "h").collect(Collectors.toSet());
@@ -350,8 +350,8 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSubstituteOnLambda() {
-        PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{@e if j = i; @e(q) otherwise;}}")
-                .substitute(parseMathAssertionExp(g, "@e"), parseMathAssertionExp(g, "Y"));
+        PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{#e if j = i; #e(q) otherwise;}}")
+                .substitute(parseMathAssertionExp(g, "#e"), parseMathAssertionExp(g, "Y"));
         Assert.assertEquals("(X = λ q:Inv,{{Y if (j = i);Y(q) otherwise;}})", result.toString());
     }
 

@@ -8,6 +8,8 @@ Precis Basic_Natural_Number_Theory;
         (i.)    m + 0 = m;
         (ii.)   m + suc(n) = suc(m + n);
 
+    Definition (m : N) - (n : N) : N;
+
     Definition (m : N) ≥ (n : N) : B;
     Chainable Definition (m : N) ≤ (n : N) : B;
     Definition (m : N) > (n : N) : B;

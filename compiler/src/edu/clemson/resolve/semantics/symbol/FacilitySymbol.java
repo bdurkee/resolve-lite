@@ -19,7 +19,7 @@ public class FacilitySymbol extends Symbol {
     private MathSymbolTable scopeRepo;
 
     /**
-     * A mapping from the rule contexts representing an module arg list to all the various {@link ProgTypeSymbol}s that represent the
+     * A mapping from the rule contexts representing an module arg lists to all the various {@link ProgTypeSymbol}s that represent the
      * actual versions of formal (generic) type params.
      * <p>
      * Right now I'm really only especially concerned about these as they factor into the searching process in

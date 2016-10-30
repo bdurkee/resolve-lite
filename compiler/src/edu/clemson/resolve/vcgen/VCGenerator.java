@@ -11,6 +11,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.programtype.*;
+import edu.clemson.resolve.semantics.query.NameQuery;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -114,14 +115,12 @@ public class VCGenerator extends ResolveBaseListener {
         List<ProgType> specArsgs = ctx.specArgs.progExp().stream()
                 .map(e -> tr.progTypes.get(e))
                 .collect(Collectors.toList());
-        List<ParserRuleContext> specArgs = ctx.specArgs.progExp().stream()
-                .filter(e -> !(tr.progTypes.get(e) instanceof ProgGenericType || tr.progTypes.get(e) instanceof ProgNamedType))
+        List<PExp> specArgs = ctx.specArgs.progExp().stream()
+                .map(e -> tr.exprASTs.get(e))
                 .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(block, specArgs);
 
-        List<ModuleParameterSymbol> formalSpecArgs1 = spec.getSymbolsOfType(ModuleParameterSymbol.class);
-        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class)
-                .stream().filter(e -> !e.isModuleTypeParameter())
+        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class).stream()
                 .map(ModuleParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
 
@@ -134,8 +133,7 @@ public class VCGenerator extends ResolveBaseListener {
                 .map(GlobalMathAssertionSymbol::getEnclosedExp)
                 .findAny();
 
-        PExp result = g.getTrueExp();
-        if (specReq.isPresent()) result = specReq.get();
+        PExp result = specReq.isPresent() ? specReq.get() : g.getTrueExp();
         if (ctx.externally == null && impl != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream()
@@ -159,25 +157,25 @@ public class VCGenerator extends ResolveBaseListener {
         }
         //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
         result = result.substitute(specFormalsToActuals);
-        if (!result.isObviouslyTrue()) {
-            assertiveBlocks.peek().finalConfirm(result);
-        }
+        block.finalConfirm(result);
+        //if (!result.isObviouslyTrue()) {
+        //    assertiveBlocks.peek().finalConfirm(result);
+        //}
         outputFile.addAssertiveBlocks(block.build());
     }
 
 
-    private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<ParserRuleContext> args) {
+    private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<PExp> args) {
         List<PExp> result = new ArrayList<>();
-        for (ParserRuleContext arg : args) {
-            PExp progArgExp = tr.getMathExpASTFor(g, arg);
-            if (progArgExp instanceof PApply) { //i.e., we're dealing with a function application
+        for (PExp progArg : args) {
+            if (progArg instanceof PApply) { //i.e., we're dealing with a function application
                 FunctionAssignApplicationStrategy.Invk_Cond ivkCondListener =
                         new FunctionAssignApplicationStrategy.Invk_Cond(b.definingTree, b);
-                progArgExp.accept(ivkCondListener);
-                result.add(ivkCondListener.mathFor(progArgExp));
+                progArg.accept(ivkCondListener);
+                result.add(ivkCondListener.mathFor(progArg));
             }
             else {
-                result.add(progArgExp);
+                result.add(progArg);
             }
         }
         return result;
