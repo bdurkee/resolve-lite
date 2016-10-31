@@ -248,6 +248,10 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean isLiteralTrue() {
+        return false;
+    }
+
     public boolean isVariable() {
         return false;
     }

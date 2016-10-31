@@ -11,6 +11,7 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ConditionalApplicationStrategy implements VCStatRuleApplicationStrategy<VCIfElse> {
@@ -21,14 +22,7 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
         @Override
         public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
                                         @NotNull VCIfElse stat) {
-            //get the math exp form of the 'if condition'...
-            PExp progIfCondition = stat.getProgIfCondition();
-            ResolveParser.IfStmtContext ifCtx = (ResolveParser.IfStmtContext) stat.getDefiningContext();
-            FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
-                    new FunctionAssignApplicationStrategy.Invk_Cond(ifCtx.progExp(), block);
-            progIfCondition.accept(invokeConditionListener);
-            PExp mathCond = invokeConditionListener.mathFor(progIfCondition);
-
+            PExp mathCond = getMathCondition(block, stat);
             block.assume(mathCond);
             block.stats(stat.getThenStmts());
             return block.snapshot();
@@ -76,9 +70,18 @@ public abstract class ConditionalApplicationStrategy implements VCStatRuleApplic
     PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
                           @NotNull VCIfElse stat) {
         PExp progCondition = stat.getProgIfCondition();
-        ResolveParser.IfStmtContext ifCtx = (ResolveParser.IfStmtContext) stat.getDefiningContext();
+
+        //This is either going to be a while or an if underlying (both have branch conditions)
+        ResolveParser.ProgExpContext progConditionNode = null;
+        ParserRuleContext o = stat.getDefiningContext();
+        if (o instanceof ResolveParser.IfStmtContext) {
+            progConditionNode = ((ResolveParser.IfStmtContext)o).progExp();
+        }
+        else {
+            progConditionNode = ((ResolveParser.WhileStmtContext)o).progExp();
+        }
         FunctionAssignApplicationStrategy.Invk_Cond invokeConditionListener =
-                new FunctionAssignApplicationStrategy.Invk_Cond(ifCtx.progExp(), block);
+                new FunctionAssignApplicationStrategy.Invk_Cond(progConditionNode, block);
         progCondition.accept(invokeConditionListener);
         PExp mathCond = invokeConditionListener.mathFor(progCondition);
         return mathCond;

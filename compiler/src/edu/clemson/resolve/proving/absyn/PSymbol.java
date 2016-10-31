@@ -118,6 +118,10 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    public boolean isLiteralTrue() {
+        return name.equals("true");
+    }
+
     @Override
     public boolean isObviouslyTrue() {
         return name.equalsIgnoreCase("true");

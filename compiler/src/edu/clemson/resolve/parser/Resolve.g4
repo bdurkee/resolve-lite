@@ -395,7 +395,7 @@ conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
-decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
+decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
 
 // mathematical expressions

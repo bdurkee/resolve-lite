@@ -33,9 +33,11 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         PExp invariantAndProgressAssumption = stat.getInvariant();
 
         //C :: code; Confirm Invariant
-        block.confirm(whileNode.maintainingClause(),
-                stat.getInvariant().withVCInfo(whileNode.maintainingClause().getStart(),
-                        "While loop invariant base case"));
+        if (!stat.getInvariant().equals(block.g.getTrueExp())) {
+            block.confirm(whileNode.maintainingClause(),
+                    stat.getInvariant().withVCInfo(whileNode.maintainingClause().getStart(),
+                            "While loop invariant base case"));
+        }
 
         List<VCRuleBackedStat> thenStmts = stat.getBody();
         List<VCRuleBackedStat> elseStmts = new ArrayList<>();
@@ -51,6 +53,8 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
                 .mathClssfctn(new MathFunctionClssftn(block.g, block.g.BOOLEAN, nat, nat))
                 .build();
         PApply progressClaimExp = new PApply.PApplyBuilder(lt)
+                .applicationType(block.g.BOOLEAN)
+                .style(PApply.DisplayStyle.INFIX)
                 .arguments(decreasing, nqvPVal)
                 .build();
 
@@ -63,12 +67,14 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         //Confirm RP;
         elseStmts.add(block.finalConfirm.copyWithEnclosingBlock(block));
 
-//TODO: We don't need a branch satifisfied flag...
+        //TODO: We don't need a branch satifisfied flag...
         //ConditionalApplicationStrategy strategy = stat.branchSatisfied() ?
         //        VCGenerator.IF_APPLICATION : VCGenerator.ELSE_APPLICATION;
-        VCIfElse s = new VCIfElse(block.definingTree, block, VCGenerator.IF_APPLICATION,
+        VCIfElse s = new VCIfElse(stat.getDefiningContext(), block, VCGenerator.IF_APPLICATION,
                 thenStmts, elseStmts, stat.getProgCondition());
-        block.confirm(block.definingTree, block.g.getTrueExp());
+        block.stats(s);
+        block.finalConfirm(block.g.getTrueExp()
+                .withVCInfo(whileNode.getStart(), "While loop termination"));
         return block.snapshot();
     }
 

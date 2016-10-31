@@ -85,6 +85,7 @@ public class VCOutputFile {
         }
         VC vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
+            if (vc.getConsequent().isLiteralTrue()) continue;
             finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
             currentVcNumber++;
         }

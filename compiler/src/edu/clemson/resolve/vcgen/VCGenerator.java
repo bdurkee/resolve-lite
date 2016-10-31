@@ -622,12 +622,12 @@ public class VCGenerator extends ResolveBaseListener {
         @Override
         public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
             PExp progCondition = asts.get(ctx.progExp());
-            PExp maintainingClause = asts.get(ctx.maintainingClause());
-            PExp decreasingClause = ctx.decreasingClause() != null ? asts.get(ctx.decreasingClause()) : null;
+            PExp maintainingClause = asts.get(ctx.maintainingClause().mathAssertionExp());
+            PExp decreasingClause = ctx.decreasingClause() != null ? asts.get(ctx.decreasingClause().mathExp()) : null;
             //TODO: Changing...
             List<VCRuleBackedStat> body = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
             VCWhile s = new VCWhile(ctx, builder, WHILE_APPLICATION, progCondition,
-                    maintainingClause, decreasingClause, body, true);
+                    maintainingClause, decreasingClause, body);
             stats.put(ctx, s);
         }
 

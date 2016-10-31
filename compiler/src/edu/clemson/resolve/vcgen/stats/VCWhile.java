@@ -7,10 +7,14 @@ import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: Ok, I think we are going to have to flip the while loop...
 public class VCWhile extends VCRuleBackedStat {
 
     private final PExp progCondition, maintaining, decreasing;
@@ -56,5 +60,22 @@ public class VCWhile extends VCRuleBackedStat {
         return new VCWhile(definingCtx, b, applicationStrategy,
                 progCondition, maintaining,
                 decreasing, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)));
+    }
+
+    @Override
+    public String toString() {
+        STGroup g = new STGroupString("WhileStmt(condition, maintaining, decreasing, body) ::= " +
+                "<<While <condition> \n" +
+                "    maintaining <maintaining>;\n" +
+                "    decreasing <decreasing>;\n" +
+                "do\n" +
+                "    <body; separator=\"\n\">\n" +
+                "end;>>");
+        ST t = g.getInstanceOf("WhileStmt");
+        t.add("condition", progCondition);
+        t.add("maintaining", maintaining);
+        t.add("decreasing", decreasing);
+        t.add("body", body);
+        return t.render();
     }
 }
