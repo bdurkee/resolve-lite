@@ -35,14 +35,6 @@ public class VCIfElse extends VCRuleBackedStat {
         this.elseStmts.addAll(elseStmts);
     }
 
-    public VCIfElse(ParserRuleContext ctx,
-                    VCAssertiveBlockBuilder block,
-                    VCStatRuleApplicationStrategy apply,
-                    List<VCRuleBackedStat> thenStmts,
-                    PExp progCondition) {
-        this(ctx, block, apply, thenStmts, new ArrayList<VCRuleBackedStat>(), progCondition);
-    }
-
     @NotNull
     public ConditionalApplicationStrategy getOppositeConditionalStrategy() {
         return applicationStrategy instanceof IfApplicationStrategy ?

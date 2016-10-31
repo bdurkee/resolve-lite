@@ -64,11 +64,10 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         elseStmts.add(block.finalConfirm.copyWithEnclosingBlock(block));
 
 //TODO: We don't need a branch satifisfied flag...
-        ConditionalApplicationStrategy strategy = stat.branchSatisfied() ?
-                VCGenerator.IF_APPLICATION : VCGenerator.ELSE_APPLICATION;
-
-
-        VCIfElse s = new VCIfElse(block.definingTree, block, strategy, , stat.getProgCondition());
+        //ConditionalApplicationStrategy strategy = stat.branchSatisfied() ?
+        //        VCGenerator.IF_APPLICATION : VCGenerator.ELSE_APPLICATION;
+        VCIfElse s = new VCIfElse(block.definingTree, block, VCGenerator.IF_APPLICATION,
+                thenStmts, elseStmts, stat.getProgCondition());
         block.confirm(block.definingTree, block.g.getTrueExp());
         return block.snapshot();
     }

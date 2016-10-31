@@ -15,7 +15,6 @@ public class VCWhile extends VCRuleBackedStat {
 
     private final PExp progCondition, maintaining, decreasing;
     private final List<VCRuleBackedStat> body = new ArrayList<>();
-    private final boolean branchSatisfied;
 
     public VCWhile(ParserRuleContext ctx,
                    VCAssertiveBlockBuilder block,
@@ -23,18 +22,12 @@ public class VCWhile extends VCRuleBackedStat {
                    PExp condition,
                    PExp maintaining,
                    PExp decreasing,
-                   List<VCRuleBackedStat> stmts,
-                   boolean satisfiedCondition) {
+                   List<VCRuleBackedStat> stmts) {
         super(ctx, block, apply);
         this.progCondition = condition;
         this.maintaining = maintaining;
         this.decreasing = decreasing;
         this.body.addAll(stmts);
-        this.branchSatisfied = satisfiedCondition;
-    }
-
-    public boolean branchSatisfied() {
-        return branchSatisfied;
     }
 
     @NotNull
@@ -58,17 +51,10 @@ public class VCWhile extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCWhile withFlippedBranch(VCAssertiveBlockBuilder b) {
-        return new VCWhile(definingCtx, b, applicationStrategy,
-                progCondition, maintaining,
-                decreasing, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)), !branchSatisfied);
-    }
-
-    @NotNull
     @Override
     public VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCWhile(definingCtx, b, applicationStrategy,
                 progCondition, maintaining,
-                decreasing, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)), branchSatisfied);
+                decreasing, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)));
     }
 }
