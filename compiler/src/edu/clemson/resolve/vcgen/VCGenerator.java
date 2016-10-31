@@ -438,7 +438,6 @@ public class VCGenerator extends ResolveBaseListener {
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof ProgFamilyType) {
                 PExp constraint = ((ProgFamilyType) declaredType).getConstraint();
-
                 constraint = constraint.substitute(
                         getSpecializationsForFacility(p.getTypeQualifier()));
                 resultingAssumptions.add(constraint.substitute(
