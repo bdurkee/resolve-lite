@@ -134,15 +134,14 @@ public class VCGenerator extends ResolveBaseListener {
                 .findAny();
 
         PExp result = specReq.isPresent() ? specReq.get() : g.getTrueExp();
-        if (ctx.externally == null && impl != null) {
+        if (ctx.externally == null && impl != null && ctx.implArgs != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream()
                     .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
                     .map(GlobalMathAssertionSymbol::getEnclosedExp)
                     .findAny();
-/*
             List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
-            List<PExp> reducedImplArgs = reduceArgs(implArgs);
+            List<PExp> reducedImplArgs = reduceArgs(block, implArgs);
             List<PExp> formalImplArgs =
                     Utils.apply(spec.getSymbolsOfType(ProgParameterSymbol.class), ProgParameterSymbol::asPSymbol);
             Map<PExp, PExp> implFormalsToActuals = Utils.zip(formalImplArgs, reducedImplArgs);
@@ -153,15 +152,14 @@ public class VCGenerator extends ResolveBaseListener {
 
                 //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
                 result = g.formConjunct(RPC, result);
-            }*/
+            }
         }
         //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
         result = result.substitute(specFormalsToActuals);
-        block.finalConfirm(result);
-        //if (!result.isObviouslyTrue()) {
-        //    assertiveBlocks.peek().finalConfirm(result);
-        //}
-        outputFile.addAssertiveBlocks(block.build());
+        if (!result.isObviouslyTrue()) {
+            block.finalConfirm(result);
+            outputFile.addAssertiveBlocks(block.build());
+        }
     }
 
 

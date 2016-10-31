@@ -63,8 +63,8 @@ public final class VC extends OutputModelObject {
 
     @Override public String toString() {
         String retval =
-                "========== " + getName() + " ==========\n" + antecedent
-                            + "\n  --->\n" + consequent;
+                "========== " + getName() + " ==========\n" + antecedent.toString(false)
+                            + "\n  --->\n" + consequent.toString(false);
         return retval;
     }
 }

@@ -27,6 +27,6 @@ public class VCConfirm extends VCRuleBackedStat {
 
     @Override
     public String toString() {
-        return "Confirm " + confirm + ";";
+        return "Confirm " + confirm.toString(false) + ";";
     }
 }

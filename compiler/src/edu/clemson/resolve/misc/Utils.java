@@ -82,6 +82,14 @@ public class Utils {
     }
 
     @NotNull
+    public static <T> String join(@NotNull Collection<T> data, @NotNull String separator, Function<T, String> f) {
+        for (T t : data) {
+            f.apply(t);
+        }
+        return join(data.iterator(), separator, "", "");
+    }
+
+    @NotNull
     public static <T> String join(@NotNull Collection<T> data, @NotNull String separator) {
         return join(data.iterator(), separator, "", "");
     }

@@ -417,6 +417,11 @@ public abstract class PExp {
     @Override
     public abstract boolean equals(Object o);
 
+    //default
+    public String toString(boolean parenthesizeApplications) {
+        return toString();
+    }
+
     public String render() {
         return "";
     }

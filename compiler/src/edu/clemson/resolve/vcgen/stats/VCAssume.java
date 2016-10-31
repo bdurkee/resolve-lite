@@ -36,6 +36,6 @@ public class VCAssume extends VCRuleBackedStat {
 
     @Override
     public String toString() {
-        return "Assume " + assume + ";";
+        return "Assume " + assume.toString(false) + ";";
     }
 }

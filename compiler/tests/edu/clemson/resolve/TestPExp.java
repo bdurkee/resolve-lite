@@ -357,31 +357,31 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSplitIntoSequents() {
-        PExp e = parseMathAssertionExp(g, "(Post implies (Q and R))");
+        PExp e = parseMathAssertionExp(g, "(Post ⟹ (Q and R))");
         List<PExp> partitions = e.split();
         Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(Post implies Q)", partitions.get(0).toString());
-        Assert.assertEquals("(Post implies R)", partitions.get(1).toString());
+        Assert.assertEquals("(Post ⟹ Q)", partitions.get(0).toString());
+        Assert.assertEquals("(Post ⟹ R)", partitions.get(1).toString());
 
-        e = parseMathAssertionExp(g, "(Pre and (Post implies (Q and R)))");
+        e = parseMathAssertionExp(g, "(Pre and (Post ⟹ (Q and R)))");
         partitions = e.split();
         Assert.assertEquals(3, partitions.size());
-        Assert.assertEquals("(true implies Pre)", partitions.get(0).toString());
-        Assert.assertEquals("(Post implies Q)", partitions.get(1).toString());
-        Assert.assertEquals("(Post implies R)", partitions.get(2).toString());
+        Assert.assertEquals("(true ⟹ Pre)", partitions.get(0).toString());
+        Assert.assertEquals("(Post ⟹ Q)", partitions.get(1).toString());
+        Assert.assertEquals("(Post ⟹ R)", partitions.get(2).toString());
 
-        e = parseMathAssertionExp(g, "(P implies (Pre and (Post implies (Q and R))))");
+        e = parseMathAssertionExp(g, "(P ⟹ (Pre and (Post ⟹ (Q and R))))");
         partitions = e.split();
         Assert.assertEquals(3, partitions.size());
-        Assert.assertEquals("(P implies Pre)", partitions.get(0).toString());
-        Assert.assertEquals("((P ∧ Post) implies Q)", partitions.get(1).toString());
-        Assert.assertEquals("((P ∧ Post) implies R)", partitions.get(2).toString());
+        Assert.assertEquals("(P ⟹ Pre)", partitions.get(0).toString());
+        Assert.assertEquals("((P ∧ Post) ⟹ Q)", partitions.get(1).toString());
+        Assert.assertEquals("((P ∧ Post) ⟹ R)", partitions.get(2).toString());
 
-        e = parseMathAssertionExp(g, "(P implies (Q implies (R implies (T and true))))");
+        e = parseMathAssertionExp(g, "(P ⟹ (Q ⟹ (R ⟹ (T and true))))");
         partitions = e.split();
         Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(((P ∧ Q) ∧ R) implies T)", partitions.get(0).toString());
-        Assert.assertEquals("(((P ∧ Q) ∧ R) implies true)", partitions.get(1).toString());
+        Assert.assertEquals("(((P ∧ Q) ∧ R) ⟹ T)", partitions.get(0).toString());
+        Assert.assertEquals("(((P ∧ Q) ∧ R) ⟹ true)", partitions.get(1).toString());
     }
 
     protected static ParseTree getTree(String input) {
