@@ -627,7 +627,7 @@ public class VCGenerator extends ResolveBaseListener {
             //TODO: Changing...
             List<VCRuleBackedStat> body = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
             VCWhile s = new VCWhile(ctx, builder, WHILE_APPLICATION, progCondition,
-                    maintainingClause, decreasingClause, body);
+                    maintainingClause, decreasingClause, body, true);
             stats.put(ctx, s);
         }
 

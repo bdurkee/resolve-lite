@@ -18,6 +18,7 @@ import edu.clemson.resolve.vcgen.stats.VCWhile;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<VCWhile> {
@@ -36,34 +37,38 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
                 stat.getInvariant().withVCInfo(whileNode.maintainingClause().getStart(),
                         "While loop invariant base case"));
 
-        List<VCRuleBackedStat> body = stat.getBody();
-        VCConfirm terminationConfirm = new VCConfirm(block.definingTree, block, stat.getInvariant()
-                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop termination"));
+        List<VCRuleBackedStat> thenStmts = stat.getBody();
+        List<VCRuleBackedStat> elseStmts = new ArrayList<>();
+        PSymbol pVal = createPVal(block.g, block.scope);
+        PExp nqvPVal = VCGenerator.NPV(block.finalConfirm.getConfirmExp(), pVal);
+        invariantAndProgressAssumption = block.g.formConjunct(
+                invariantAndProgressAssumption, block.g.formEquals(nqvPVal, pVal));
+        PExp invariant = stat.getInvariant();
 
-        if (decreasing != null) {
-            PSymbol pVal = createPVal(block.g, block.scope);
-            PExp nqvPVal = VCGenerator.NPV(block.finalConfirm.getConfirmExp(), pVal);
-            invariantAndProgressAssumption = block.g.formConjunct(
-                    invariantAndProgressAssumption, block.g.formEquals(nqvPVal, pVal));
+        //decreasing < nqvPVal
+        MathClssftn nat = getNat(block.g, block.scope);
+        PSymbol lt = new PSymbol.PSymbolBuilder("<")
+                .mathClssfctn(new MathFunctionClssftn(block.g, block.g.BOOLEAN, nat, nat))
+                .build();
+        PApply progressClaimExp = new PApply.PApplyBuilder(lt)
+                .arguments(decreasing, nqvPVal)
+                .build();
 
-            //decreasing < nqvPVal
-            MathClssftn nat = getNat(block.g, block.scope);
-            PSymbol lt = new PSymbol.PSymbolBuilder("<")
-                    .mathClssfctn(new MathFunctionClssftn(block.g, block.g.BOOLEAN, nat, nat))
-                    .build();
-            PApply terminationProgConfirm = new PApply.PApplyBuilder(lt)
-                    .arguments(decreasing, nqvPVal)
-                    .build();
-            terminationConfirm =
-        }
-        //block.assume(invariantAndProgressAssumption);
+        //Confirm Inv /\ P_Exp < NPV(RP, P_Val);
+        PExp terminationMetricExp = block.g.formConjunct(invariant, progressClaimExp)
+                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop termination");
+        VCConfirm terminationConfirm = new VCConfirm(block.definingTree, block, terminationMetricExp);
+        thenStmts.add(terminationConfirm);
 
+        //Confirm RP;
+        elseStmts.add(block.finalConfirm.copyWithEnclosingBlock(block));
+
+//TODO: We don't need a branch satifisfied flag...
         ConditionalApplicationStrategy strategy = stat.branchSatisfied() ?
                 VCGenerator.IF_APPLICATION : VCGenerator.ELSE_APPLICATION;
 
 
         VCIfElse s = new VCIfElse(block.definingTree, block, strategy, , stat.getProgCondition());
-        block.stats(s);
         block.confirm(block.definingTree, block.g.getTrueExp());
         return block.snapshot();
     }
