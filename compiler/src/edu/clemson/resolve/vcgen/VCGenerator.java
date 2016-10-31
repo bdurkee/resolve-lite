@@ -8,6 +8,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.programtype.*;
@@ -41,24 +42,15 @@ public class VCGenerator extends ResolveBaseListener {
     private final MathSymbolTable symtab;
     private final DumbMathClssftnHandler g;
 
-    //TODO: in applyCallRule() in ModelBuilderProto, we should be going through
-    //one of these static fields to apply the rule, we should make a class that
-    //extends VCRuleBackedStat called VCCall which simply wraps a PExp representing
-    //a call.
-    public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
-            new ExplicitCallApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
-            new GeneralCallApplicationStrategy();
-    //TODO:
-    //Also have VCFuncAssign extends VCruleBackedStat, then you can have fields
-    //which do things like getLhs(), getCall(), etc. That'd be nicer than doing
-    //stats.getComponents().get(0), etc.
+    public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION = new ExplicitCallApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION = new GeneralCallApplicationStrategy();
     private static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
     private static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
+    private static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
     public static final ConditionalApplicationStrategy IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
     public static final ConditionalApplicationStrategy ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
 
-    /** A map from facility name to another map from formal parameter names to their actual substitutions. */
+    /** A mapping from facility name to function that maps facility formal parameter names to their actuals. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
     private final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
     private final VCOutputFile outputFile;
@@ -592,10 +584,8 @@ public class VCGenerator extends ResolveBaseListener {
         final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
         final VCAssertiveBlockBuilder builder;
         final ParseTreeProperty<PExp> asts;
-        List<VCAssertiveBlockBuilder> branches = new ArrayList<>();
 
-        public StmtListener(VCAssertiveBlockBuilder activeBuilder,
-                            ParseTreeProperty<PExp> asts) {
+        StmtListener(VCAssertiveBlockBuilder activeBuilder, ParseTreeProperty<PExp> asts) {
             this.builder = activeBuilder;
             this.asts = asts;
         }
@@ -626,8 +616,18 @@ public class VCGenerator extends ResolveBaseListener {
             List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
                     Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
             VCIfElse s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, elseStmts, progCondition);
-            branches.add(builder);
-            branches.add(new VCAssertiveBlockBuilder(builder));
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
+            PExp progCondition = asts.get(ctx.progExp());
+            PExp maintainingClause = asts.get(ctx.maintainingClause());
+            PExp decreasingClause = ctx.decreasingClause() != null ? asts.get(ctx.decreasingClause()) : null;
+            //TODO: Changing...
+            List<VCRuleBackedStat> body = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
+            VCWhile s = new VCWhile(ctx, builder, WHILE_APPLICATION, progCondition,
+                    maintainingClause, decreasingClause, body);
             stats.put(ctx, s);
         }
 
@@ -636,6 +636,29 @@ public class VCGenerator extends ResolveBaseListener {
             VCSwap s = new VCSwap(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
             stats.put(ctx, s);
         }
+    }
+
+    /** "Next Prime Variable" */
+    public static PSymbol NPV(PExp RP, PSymbol oldSym) {
+        // Add an extra question mark to the front of oldSym
+        PSymbol newOldSym = new PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
+
+        // Applies the question mark to oldVar if it is our first time visiting.
+        if (RP.containsName(oldSym.getName())) {
+            return NPV(RP, newOldSym);
+        }
+        // Don't need to apply the question mark here.
+        else if (RP.containsName(newOldSym.getName())) {
+            return NPV(RP, newOldSym);
+        }
+        else {
+            // Return the new variable expression with the question mark
+            int i = oldSym.getName().length() - 1;
+            if (oldSym.getName().charAt(i) != '′') {
+                return newOldSym;
+            }
+        }
+        return oldSym;
     }
 
     //TODO: TEST THIS

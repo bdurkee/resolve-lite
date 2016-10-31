@@ -16,6 +16,7 @@ import org.stringtemplate.v4.STGroupString;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: Make it easier to flip the condition here...
 public class VCIfElse extends VCRuleBackedStat {
 
     private final List<VCRuleBackedStat> thenStmts = new ArrayList<>();
@@ -32,6 +33,14 @@ public class VCIfElse extends VCRuleBackedStat {
         this.progCondition = progCondition;
         this.thenStmts.addAll(thenStmts);
         this.elseStmts.addAll(elseStmts);
+    }
+
+    public VCIfElse(ParserRuleContext ctx,
+                    VCAssertiveBlockBuilder block,
+                    VCStatRuleApplicationStrategy apply,
+                    List<VCRuleBackedStat> thenStmts,
+                    PExp progCondition) {
+        this(ctx, block, apply, thenStmts, new ArrayList<VCRuleBackedStat>(), progCondition);
     }
 
     @NotNull
