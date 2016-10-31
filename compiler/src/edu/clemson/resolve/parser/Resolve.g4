@@ -268,7 +268,7 @@ callStmt : progParamExp ';' ;
 
 whileStmt
     :   'While' progExp
-        changingClause? maintainingClause decreasingClause?
+        changingClause? maintainingClause decreasingClause
         'do' stmt* 'end' ';'
     ;
 
