@@ -43,6 +43,11 @@ public class VCIfElse extends VCRuleBackedStat {
     }
 
     @NotNull
+    public void flipStrategy() {
+        this.applicationStrategy = getOppositeConditionalStrategy();
+    }
+
+    @NotNull
     public PExp getProgIfCondition() {
         return progCondition;
     }
@@ -62,6 +67,12 @@ public class VCIfElse extends VCRuleBackedStat {
     @NotNull
     public List<VCRuleBackedStat> getElseStmts() {
         return elseStmts;
+    }
+
+    //substitutes s for t
+    @Override
+    public VCRuleBackedStat withSubstitution(VCRuleBackedStat s, VCRuleBackedStat t) {
+        return this;
     }
 
     @Override

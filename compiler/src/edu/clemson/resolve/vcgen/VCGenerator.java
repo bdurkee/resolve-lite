@@ -612,13 +612,15 @@ public class VCGenerator extends ResolveBaseListener {
             stats.put(ctx, s);
         }
 
+        //TODO: Maybe if else applications should just be expanded at the statement level...
+        //so for instance, since we do exitIfStmt just add all the flattened statements in...
         @Override
         public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
             PExp progCondition = asts.get(ctx.progExp());
             List<VCRuleBackedStat> thenStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
             List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
                     Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
-            VCIfElse s = new VCIfElse(ctx, builder, IF_APPLICATION, thenStmts, elseStmts, progCondition);
+            VCIfElse s = new VCIfElse(ctx, builder, new IfElseApplicationStrategy(), thenStmts, elseStmts, progCondition);
             stats.put(ctx, s);
         }
 

@@ -25,10 +25,12 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public final Scope scope;
         public VCConfirm finalConfirm;
 
-        final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
-        final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
-        final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
-        final String description;
+        public final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
+        protected final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
+        protected final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+        protected final String description;
+
+        public final Deque<VCAssertiveBlockBuilder> branchingBlocks = new LinkedList<>();
 
         public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
             Map<PExp, PExp> result = facilitySpecializations.get(facility);
@@ -143,13 +145,21 @@ public class VCAssertiveBlock extends AssertiveBlock {
         @NotNull
         @Override
         public List<VCAssertiveBlock> build() {
+            List<VCAssertiveBlock> result = loopAssertiveStack();
+            return result;
+        }
+
+        //TODO: We need another apply method for rules which takes a stack to track branches that is distinct from
+        //assertive code!
+        private List<VCAssertiveBlock> loopAssertiveStack() {
             List<VCAssertiveBlock> result = new ArrayList<>();
-            List<VCAssertiveBlockBuilder> builders = new ArrayList<>();
-            builders.add(this);
-            List<VCAssertiveBlockBuilder> x = getBranchingAssertiveBlocks(new VCAssertiveBlockBuilder(this));
-            builders.addAll(x);
-            for (VCAssertiveBlockBuilder b : builders) {
-               result.add(b.applyRules());
+
+            this.branchingBlocks.push(this);
+            while (!branchingBlocks.isEmpty()) {
+                VCAssertiveBlockBuilder curr = branchingBlocks.pop();
+                result.add(curr.applyRules());
+                int i;
+                i=0;
             }
             return result;
         }
@@ -165,26 +175,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return new VCAssertiveBlock(this);
         }
 
-        private List<VCAssertiveBlockBuilder> getBranchingAssertiveBlocks(VCAssertiveBlockBuilder original) {
-            List<VCAssertiveBlockBuilder> result = new ArrayList<>();
-            while (!original.stats.isEmpty()) {
-                VCRuleBackedStat currentStat = original.stats.removeLast();
-                if (currentStat instanceof VCIfElse) {
-                    VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(original);
-                    VCIfElse ie = (VCIfElse) currentStat;
 
-                    neg.stats.add(
-                            new VCIfElse(ie.getDefiningContext(), neg, ie.getOppositeConditionalStrategy(),
-                                    Utils.apply(ie.getThenStmts(), e -> e.copyWithEnclosingBlock(neg)),
-                                    Utils.apply(ie.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)),
-                                    ie.getProgIfCondition()));
-                    neg.applicationSteps.clear();
-                    result.add(neg);
-                }
-                original.applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
-                        currentStat.getApplicationDescription()));
-            }
-            return result;
-        }
     }
 }

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class VCRuleBackedStat {
 
     final ParserRuleContext definingCtx;
-    final VCStatRuleApplicationStrategy applicationStrategy;
+    VCStatRuleApplicationStrategy applicationStrategy;
     final VCAssertiveBlockBuilder enclosingBlock;
 
     public VCRuleBackedStat(ParserRuleContext ctx,
@@ -19,6 +19,11 @@ public abstract class VCRuleBackedStat {
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
         this.definingCtx = ctx;
+    }
+
+    //substitutes s for t
+    public VCRuleBackedStat withSubstitution(VCRuleBackedStat s, VCRuleBackedStat t) {
+        return this;
     }
 
     /**
