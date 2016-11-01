@@ -145,13 +145,6 @@ public class VCAssertiveBlock extends AssertiveBlock {
         @NotNull
         @Override
         public List<VCAssertiveBlock> build() {
-            List<VCAssertiveBlock> result = loopAssertiveStack();
-            return result;
-        }
-
-        //TODO: We need another apply method for rules which takes a stack to track branches that is distinct from
-        //assertive code!
-        private List<VCAssertiveBlock> loopAssertiveStack() {
             List<VCAssertiveBlock> result = new ArrayList<>();
             Deque<VCAssertiveBlockBuilder> branches = new LinkedList<>();
 
@@ -167,7 +160,8 @@ public class VCAssertiveBlock extends AssertiveBlock {
 
         private VCAssertiveBlock applyRules(Deque<VCAssertiveBlockBuilder> branchAccumulator) {
             //in case we're applying rules in a block arising from a branch, I want to
-            //get rid of excess (prior) applications..
+            //get rid of excess (prior) applications that are left over from the deep copy..
+            //TODO: ^^ maybe do this at the site of the copy? It's kind of out of context here
             applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
@@ -177,7 +171,5 @@ public class VCAssertiveBlock extends AssertiveBlock {
             }
             return new VCAssertiveBlock(this);
         }
-
-
     }
 }
