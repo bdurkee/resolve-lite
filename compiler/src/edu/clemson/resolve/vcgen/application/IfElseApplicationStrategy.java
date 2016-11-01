@@ -33,6 +33,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
         PExp negatedCondition = negateMathCondition(block.g, mathCond);
         neg.assume(negatedCondition);
         neg.stats(Utils.apply(stat.getElseStmts(), e->e.copyWithEnclosingBlock(neg)));
+        neg.applicationSteps.clear();
         branches.push(neg);
         return block.snapshot();
     }

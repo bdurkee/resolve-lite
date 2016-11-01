@@ -26,8 +26,9 @@ public class VCAssertiveBlock extends AssertiveBlock {
         public VCConfirm finalConfirm;
 
         public final Map<String, Map<PExp, PExp>> facilitySpecializations = new HashMap<>();
+        public final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+
         protected final LinkedList<VCRuleBackedStat> stats = new LinkedList<>();
-        protected final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
         protected final String description;
 
         public final Deque<VCAssertiveBlockBuilder> branchingBlocks = new LinkedList<>();
