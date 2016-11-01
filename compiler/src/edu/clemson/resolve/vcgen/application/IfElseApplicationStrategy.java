@@ -48,6 +48,29 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
         PExp name = new PSymbol.PSymbolBuilder("⌐")
                 .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
                 .build();
+        if (mathConditionToNegate.getTopLevelOperationName().equals("=")) {
+            name = new PSymbol.PSymbolBuilder("≠")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY))
+                    .build();
+            return new PApply.PApplyBuilder(name)
+                    .applicationType(g.BOOLEAN)
+                    .style(PApply.DisplayStyle.INFIX)
+                    .arguments(mathConditionToNegate.getSubExpressions().get(1),
+                            mathConditionToNegate.getSubExpressions().get(2))
+                    .build();
+        }
+        else if (mathConditionToNegate.getTopLevelOperationName().equals("≠")) {
+            name = new PSymbol.PSymbolBuilder("=")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY))
+                    .build();
+            return new PApply.PApplyBuilder(name)
+                    .applicationType(g.BOOLEAN)
+                    .style(PApply.DisplayStyle.INFIX)
+                    .arguments(mathConditionToNegate.getSubExpressions().get(1),
+                            mathConditionToNegate.getSubExpressions().get(2))
+                    .build();
+        }
+
         return new PApply.PApplyBuilder(name)
                 .applicationType(g.BOOLEAN)
                 .arguments(mathConditionToNegate)

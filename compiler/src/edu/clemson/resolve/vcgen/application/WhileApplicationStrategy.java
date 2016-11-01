@@ -23,10 +23,12 @@ import java.util.Deque;
 import java.util.List;
 
 public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<VCWhile> {
-/*
+
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCWhile stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCWhile stat) {
         ResolveParser.WhileStmtContext whileNode = (ResolveParser.WhileStmtContext) stat.getDefiningContext();
 
         //TODO: Look into this crap where the confirm needs a ctx...maybe it's needed.. can't remember..
@@ -69,15 +71,16 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         //Confirm RP;
         elseStmts.add(block.finalConfirm.copyWithEnclosingBlock(block));
 
-        //TODO: We don't need a branch satifisfied flag...
-        //ConditionalApplicationStrategy strategy = stat.branchSatisfied() ?
-        //        VCGenerator.IF_APPLICATION : VCGenerator.ELSE_APPLICATION;
-        VCIfElse s = new VCIfElse(stat.getDefiningContext(), block, VCGenerator.IF_APPLICATION,
-                thenStmts, elseStmts, stat.getProgCondition());
-        block.stats(s);
-        block.finalConfirm(block.g.getTrueExp()
-                .withVCInfo(whileNode.getStart(), "While loop termination"));
+        block.stats(new VCIfElse(stat.getDefiningContext(), block, thenStmts, elseStmts, stat.getProgCondition()));
+        block.finalConfirm(block.g.getTrueExp().withVCInfo(whileNode.getStart(), "While loop termination"));
+
         return block.snapshot();
+    }
+
+    @NotNull
+    @Override
+    public String getDescription() {
+        return "While rule application";
     }
 
     //TODO: Eventually could have a throws clause... to warn the user that card (or nat) was unable to be found...
@@ -97,17 +100,5 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
             //readily available in scope...)
         }
         return g.INVALID;
-    }*/
-
-    @NotNull
-    @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches, @NotNull VCAssertiveBlockBuilder block, @NotNull VCWhile stat) {
-        return null;
-    }
-
-    @NotNull
-    @Override
-    public String getDescription() {
-        return "While rule application";
     }
 }
