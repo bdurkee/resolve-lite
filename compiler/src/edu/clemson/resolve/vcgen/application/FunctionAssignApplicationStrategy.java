@@ -14,17 +14,16 @@ import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssign> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssign stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCAssign stat) {
         PExp left = stat.getLeft();
         PExp right = stat.getRight();
 

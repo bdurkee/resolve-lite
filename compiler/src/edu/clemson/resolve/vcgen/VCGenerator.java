@@ -42,13 +42,16 @@ public class VCGenerator extends ResolveBaseListener {
     private final MathSymbolTable symtab;
     private final DumbMathClssftnHandler g;
 
-    public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION = new ExplicitCallApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION = new GeneralCallApplicationStrategy();
-    private static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION = new FunctionAssignApplicationStrategy();
-    private static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
-    private static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
-    public static final ConditionalApplicationStrategy IF_APPLICATION = new ConditionalApplicationStrategy.IfApplicationStrategy();
-    public static final ConditionalApplicationStrategy ELSE_APPLICATION = new ConditionalApplicationStrategy.ElseApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
+
+    public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
+            new ExplicitCallApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
+            new GeneralCallApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
+            new FunctionAssignApplicationStrategy();
 
     /** A mapping from facility name to function that maps facility formal parameter names to their actuals. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
@@ -620,7 +623,7 @@ public class VCGenerator extends ResolveBaseListener {
             List<VCRuleBackedStat> thenStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
             List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
                     Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
-            VCIfElse s = new VCIfElse(ctx, builder, new IfElseApplicationStrategy(), thenStmts, elseStmts, progCondition);
+            VCIfElse s = new VCIfElse(ctx, builder, thenStmts, elseStmts, progCondition);
             stats.put(ctx, s);
         }
 

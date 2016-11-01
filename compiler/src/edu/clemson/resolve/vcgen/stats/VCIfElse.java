@@ -3,9 +3,8 @@ package edu.clemson.resolve.vcgen.stats;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VCGenerator;
-import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy;
+import edu.clemson.resolve.vcgen.application.IfElseApplicationStrategy;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.application.ConditionalApplicationStrategy.IfApplicationStrategy;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
@@ -25,26 +24,13 @@ public class VCIfElse extends VCRuleBackedStat {
 
     public VCIfElse(ParserRuleContext ctx,
                     VCAssertiveBlockBuilder block,
-                    VCStatRuleApplicationStrategy apply,
                     List<VCRuleBackedStat> thenStmts,
                     List<VCRuleBackedStat> elseStmts,
                     PExp progCondition) {
-        super(ctx, block, apply);
+        super(ctx, block, new IfElseApplicationStrategy());
         this.progCondition = progCondition;
         this.thenStmts.addAll(thenStmts);
         this.elseStmts.addAll(elseStmts);
-    }
-
-    @NotNull
-    public ConditionalApplicationStrategy getOppositeConditionalStrategy() {
-        return applicationStrategy instanceof IfApplicationStrategy ?
-                VCGenerator.ELSE_APPLICATION :
-                VCGenerator.IF_APPLICATION;
-    }
-
-    @NotNull
-    public void flipStrategy() {
-        this.applicationStrategy = getOppositeConditionalStrategy();
     }
 
     @NotNull
@@ -54,7 +40,7 @@ public class VCIfElse extends VCRuleBackedStat {
 
     @NotNull
     public VCIfElse copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
-        return new VCIfElse(definingCtx, b, applicationStrategy,
+        return new VCIfElse(definingCtx, b,
                 Utils.apply(thenStmts, e -> e.copyWithEnclosingBlock(b)),
                 Utils.apply(elseStmts, e -> e.copyWithEnclosingBlock(b)), progCondition);
     }

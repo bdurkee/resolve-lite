@@ -13,7 +13,9 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCAssume stat) {
         PExp assumeExp = stat.getAssumeExp();
         PExp RP = block.finalConfirm.getConfirmExp();
 

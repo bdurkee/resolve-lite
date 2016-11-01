@@ -153,23 +153,26 @@ public class VCAssertiveBlock extends AssertiveBlock {
         //assertive code!
         private List<VCAssertiveBlock> loopAssertiveStack() {
             List<VCAssertiveBlock> result = new ArrayList<>();
+            Deque<VCAssertiveBlockBuilder> branches = new LinkedList<>();
 
-            this.branchingBlocks.push(this);
-            while (!branchingBlocks.isEmpty()) {
-                VCAssertiveBlockBuilder curr = branchingBlocks.pop();
-                result.add(curr.applyRules());
+            branches.push(this);
+            while (!branches.isEmpty()) {
+                VCAssertiveBlockBuilder curr = branches.pop();
+                result.add(curr.applyRules(branches));
                 int i;
                 i=0;
             }
             return result;
         }
 
-        private VCAssertiveBlock applyRules() {
-            //in case we're applying rules in a block arising from a branch, I want to get rid of excess (prior) applications..
+        private VCAssertiveBlock applyRules(Deque<VCAssertiveBlockBuilder> branchAccumulator) {
+            //in case we're applying rules in a block arising from a branch, I want to
+            //get rid of excess (prior) applications..
             applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
-                applicationSteps.add(new RuleApplicationStep(currentStat.applyBackingRule().toString(),
+                applicationSteps.add(new RuleApplicationStep(
+                        currentStat.applyBackingRule(branchAccumulator).toString(),
                         currentStat.getApplicationDescription()));
             }
             return new VCAssertiveBlock(this);

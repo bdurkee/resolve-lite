@@ -7,11 +7,15 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Deque;
+
 public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy<VCConfirm> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCConfirm stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCConfirm stat) {
         PExp newFinalConfirm = null;
         DumbMathClssftnHandler g = block.g;
 

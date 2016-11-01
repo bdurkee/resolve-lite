@@ -22,7 +22,9 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCCall stat) {
         PApply callExp = (PApply) stat.getProgCallExp();
         OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(block.scope, callExp);
 

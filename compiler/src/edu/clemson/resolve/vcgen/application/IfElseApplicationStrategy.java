@@ -14,22 +14,15 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Deque;
 import java.util.List;
 
 public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<VCIfElse> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRuleWithBranching(List<VCAssertiveBlockBuilder> branches,
-                                                 @NotNull VCAssertiveBlockBuilder block,
-                                                 @NotNull VCIfElse stat) {
-
-        return block.snapshot();
-    }
-
-    @NotNull
-    @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block,
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
+                                    @NotNull VCAssertiveBlockBuilder block,
                                     @NotNull VCIfElse stat) {
         VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(block);
 
@@ -40,8 +33,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
         PExp negatedCondition = negateMathCondition(block.g, mathCond);
         neg.assume(negatedCondition);
         neg.stats(Utils.apply(stat.getElseStmts(), e->e.copyWithEnclosingBlock(neg)));
-        block.branchingBlocks.push(neg);
-
+        branches.push(neg);
         return block.snapshot();
     }
 

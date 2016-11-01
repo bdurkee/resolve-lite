@@ -6,11 +6,15 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCAssume;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Deque;
+
 public class DefaultAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCAssume stat) {
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCAssume stat) {
         PExp curFinalConfirmExp = block.finalConfirm.getConfirmExp();
         PExp assumeExp = stat.getAssumeExp();
         if (curFinalConfirmExp.isObviouslyTrue()) {

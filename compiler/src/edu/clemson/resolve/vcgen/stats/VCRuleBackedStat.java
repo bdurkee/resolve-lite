@@ -7,6 +7,8 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Deque;
+
 public abstract class VCRuleBackedStat {
 
     final ParserRuleContext definingCtx;
@@ -36,8 +38,8 @@ public abstract class VCRuleBackedStat {
     public abstract VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b);
 
     @SuppressWarnings("unchecked")
-    public AssertiveBlock applyBackingRule() {
-        return applicationStrategy.applyRule(enclosingBlock, this);
+    public AssertiveBlock applyBackingRule(Deque<VCAssertiveBlockBuilder> accumulator) {
+        return applicationStrategy.applyRule(accumulator, enclosingBlock, this);
     }
 
     public String getApplicationDescription() {

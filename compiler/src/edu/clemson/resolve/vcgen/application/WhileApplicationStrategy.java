@@ -19,10 +19,11 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<VCWhile> {
-
+/*
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCWhile stat) {
@@ -96,6 +97,12 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
             //readily available in scope...)
         }
         return g.INVALID;
+    }*/
+
+    @NotNull
+    @Override
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches, @NotNull VCAssertiveBlockBuilder block, @NotNull VCWhile stat) {
+        return null;
     }
 
     @NotNull
