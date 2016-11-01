@@ -45,11 +45,8 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
 
     @NotNull
     private static PExp negateMathCondition(DumbMathClssftnHandler g, PExp mathConditionToNegate) {
-        PExp name = new PSymbol.PSymbolBuilder("⌐")
-                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
-                .build();
         if (mathConditionToNegate.getTopLevelOperationName().equals("=")) {
-            name = new PSymbol.PSymbolBuilder("≠")
+            PSymbol name = new PSymbol.PSymbolBuilder("≠")
                     .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY))
                     .build();
             return new PApply.PApplyBuilder(name)
@@ -60,7 +57,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
                     .build();
         }
         else if (mathConditionToNegate.getTopLevelOperationName().equals("≠")) {
-            name = new PSymbol.PSymbolBuilder("=")
+            PSymbol name = new PSymbol.PSymbolBuilder("=")
                     .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY))
                     .build();
             return new PApply.PApplyBuilder(name)
@@ -70,16 +67,20 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
                             mathConditionToNegate.getSubExpressions().get(2))
                     .build();
         }
-
-        return new PApply.PApplyBuilder(name)
-                .applicationType(g.BOOLEAN)
-                .arguments(mathConditionToNegate)
-                .build();
+        else {
+            PExp name = new PSymbol.PSymbolBuilder("⌐")
+                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
+                    .build();
+            return new PApply.PApplyBuilder(name)
+                    .applicationType(g.BOOLEAN)
+                    .arguments(mathConditionToNegate)
+                    .build();
+        }
     }
 
     @NotNull
-    PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                          @NotNull VCIfElse stat) {
+    private PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+                                  @NotNull VCIfElse stat) {
         PExp progCondition = stat.getProgIfCondition();
 
         //This is either going to be a while or an if underlying (both have branch conditions)

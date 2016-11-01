@@ -23,11 +23,6 @@ public abstract class VCRuleBackedStat {
         this.definingCtx = ctx;
     }
 
-    //substitutes s for t
-    public VCRuleBackedStat withSubstitution(VCRuleBackedStat s, VCRuleBackedStat t) {
-        return this;
-    }
-
     /**
      * Creates a deep copy of {@code this} statement with enclosing block {@code b}.
      *

@@ -15,7 +15,6 @@ import org.stringtemplate.v4.STGroupString;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: Make it easier to flip the condition here...
 public class VCIfElse extends VCRuleBackedStat {
 
     private final List<VCRuleBackedStat> thenStmts = new ArrayList<>();
@@ -53,12 +52,6 @@ public class VCIfElse extends VCRuleBackedStat {
     @NotNull
     public List<VCRuleBackedStat> getElseStmts() {
         return elseStmts;
-    }
-
-    //substitutes s for t
-    @Override
-    public VCRuleBackedStat withSubstitution(VCRuleBackedStat s, VCRuleBackedStat t) {
-        return this;
     }
 
     @Override
