@@ -44,7 +44,8 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         PSymbol pVal = createPVal(block.g, block.scope);
         PExp nqvPVal = VCGenerator.NPV(block.finalConfirm.getConfirmExp(), pVal);
         invariantAndProgressAssumption = block.g.formConjunct(
-                invariantAndProgressAssumption, block.g.formEquals(nqvPVal, pVal));
+                invariantAndProgressAssumption, block.g.formEquals(nqvPVal, decreasing));
+        block.assume(invariantAndProgressAssumption);
         PExp invariant = stat.getInvariant();
 
         //decreasing < nqvPVal
