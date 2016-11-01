@@ -90,7 +90,7 @@ public class VCGenerator extends ResolveBaseListener {
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
-        block.assume(g.getTrueExp());
+        //block.assume(g.getTrueExp());
 
         ModuleScopeBuilder spec = null, impl = null;
         try {
@@ -126,6 +126,8 @@ public class VCGenerator extends ResolveBaseListener {
                 .findAny();
 
         PExp result = specReq.isPresent() ? specReq.get() : g.getTrueExp();
+        result = result.withVCInfo(ctx.getStart(), "Requires clause for concept: " + ctx.spec.getText()
+                + " in facility instantiation rule");
         if (ctx.externally == null && impl != null && ctx.implArgs != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream()
@@ -140,13 +142,14 @@ public class VCGenerator extends ResolveBaseListener {
 
             if (implReq.isPresent()) {
                 //RPC[rn ~> rn_exp, RR ~> IRR]
-                PExp RPC = implReq.get().substitute(implFormalsToActuals);
+                PExp RPC = implReq.get().substitute(implFormalsToActuals).withVCInfo(ctx.getStart(),
+                        "Requires clause for realization: " + ctx.impl.getText() + " in facility instantiation rule");
 
                 //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
                 result = g.formConjunct(RPC, result);
             }
         }
-        //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)[n ~> n_exp, r ~> IR]
+        //(RPC[rn ~> rn_exp, RR ~> IRR] /\ CPC)[n ~> n_exp, r ~> IR]
         result = result.substitute(specFormalsToActuals);
         if (!result.isObviouslyTrue()) {
             block.finalConfirm(result);
@@ -158,7 +161,7 @@ public class VCGenerator extends ResolveBaseListener {
     private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<PExp> args) {
         List<PExp> result = new ArrayList<>();
         for (PExp progArg : args) {
-            if (progArg instanceof PApply) { //i.e., we're dealing with a function application
+            if (progArg instanceof PApply) { //i.e., we're dealing with a program call
                 FunctionAssignApplicationStrategy.Invk_Cond ivkCondListener =
                         new FunctionAssignApplicationStrategy.Invk_Cond(b.definingTree, b);
                 progArg.accept(ivkCondListener);

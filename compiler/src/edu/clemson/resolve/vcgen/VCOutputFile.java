@@ -91,16 +91,6 @@ public class VCOutputFile {
         }
     }
 
-    /*
-    <finalVcs;separator="\n">
-
-        <chunks : {c|<c.assertCode.description>
-        <c.assertCode.text>    <!print out the big, starting construct!>
-
-        \< S T E P S >
-        <c.applicationSteps; separator="\n">}; separator="\n"> <!now print the steps!>
->>
-     */
     @Override
     public String toString() {
         String result = "";
