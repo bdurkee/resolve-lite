@@ -10,11 +10,18 @@ import org.jetbrains.annotations.NotNull;
 
 public class VCVar extends VCRuleBackedStat {
 
+    private final String name;
     private final ProgType type;
 
-    public VCVar(ParserRuleContext ctx, VCAssertiveBlockBuilder block, ProgType type) {
+    public VCVar(ParserRuleContext ctx, VCAssertiveBlockBuilder block, String name, ProgType type) {
         super(ctx, block, new VarApplicationStrategy());
+        this.name = name;
         this.type = type;
+    }
+
+    @NotNull
+    public String getName() {
+        return name;
     }
 
     @NotNull
@@ -25,6 +32,11 @@ public class VCVar extends VCRuleBackedStat {
     @NotNull
     @Override
     public VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
-        return new VCVar(definingCtx, b, type);
+        return new VCVar(definingCtx, b, name, type);
+    }
+
+    @Override
+    public String toString() {
+        return name + " : " + type;
     }
 }

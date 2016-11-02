@@ -301,10 +301,16 @@ public class VCGenerator extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
                         .remember();
-        addAssumptionsForVars(block, ctx.varDeclGroup());
-        //positive stats
+        //var decls/stats
+        for (ResolveParser.VarDeclGroupContext v : ctx.varDeclGroup()) {
+            ProgType type = tr.progTypes.get(v.type());
+            for (TerminalNode t : v.ID()) {
+                block.stats(new VCVar(v, block, t.getText(), type));
+            }
+        }
+        //stats
         StmtListener l = new StmtListener(block, tr.exprASTs);
-        ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
+        ParseTreeWalker.DEFAULT.walk(l, ctx);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,

@@ -25,36 +25,35 @@ public class VarApplicationStrategy implements VCStatRuleApplicationStrategy<VCV
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                     @NotNull VCAssertiveBlockBuilder block,
                                     @NotNull VCVar stat) {
-        for (ResolveParser.VarDeclGroupContext v : groups) {
-            ProgType type = tr.progTypes.get(v.type());
-            for (TerminalNode t : v.ID()) {
-                PSymbol var = new PSymbol.PSymbolBuilder(t.getText())
-                        .progType(type).mathClssfctn(type.toMath())
-                        .build();
-                if (type instanceof ProgNamedType) {
+        ProgType type = stat.getVarType();
+        PSymbol var = new PSymbol.PSymbolBuilder(stat.getName())
+                .progType(type).mathClssfctn(type.toMath())
+                .build();
 
-                    PSymbol exemplar = ((ProgNamedType) type).getExemplarAsPSymbol();
-                    PExp init = ((ProgNamedType) type).getInitializationEnsures();
-                    init = init.substitute(exemplar, var);
+        if (type instanceof ProgNamedType) {
+            PSymbol exemplar = ((ProgNamedType) type).getExemplarAsPSymbol();
+            PExp init = ((ProgNamedType) type).getInitializationEnsures();
+            init = init.substitute(exemplar, var);
+            ResolveParser.VarDeclGroupContext concreteNode =
+                    (ResolveParser.VarDeclGroupContext) stat.getDefiningContext();
+            //substitute by the facility the type came through
 
-                    //substitute by the facility the type came through
-                    if (v.type() instanceof ResolveParser.NamedTypeContext) {
-                        ResolveParser.NamedTypeContext namedTypeNode =
-                                (ResolveParser.NamedTypeContext) v.type();
-                        Map<PExp, PExp> facilitySubstitutions =
-                                facilitySpecFormalActualMappings.get(namedTypeNode.qualifier.getText());
-                        if (namedTypeNode.qualifier != null && facilitySubstitutions != null) {
-                            init = init.substitute(facilitySubstitutions);
-                        }
-                    }
-                    block.assume(init);
-                }
-                else if (type instanceof ProgGenericType) {
-
+            //get the qualifier out of the concrete syntax.
+            if (concreteNode.type() instanceof ResolveParser.NamedTypeContext) {
+                ResolveParser.NamedTypeContext namedTypeNode =
+                        (ResolveParser.NamedTypeContext) concreteNode.type();
+                Map<PExp, PExp> facilitySubstitutions =
+                        block.facilitySpecializations.get(namedTypeNode.qualifier.getText());
+                if (namedTypeNode.qualifier != null && facilitySubstitutions != null) {
+                    init = init.substitute(facilitySubstitutions);
                 }
             }
+            block.assume(init);
         }
-        return null;
+        else if (type instanceof ProgGenericType) {
+            //TODO: handle generics
+        }
+        return block.snapshot();
     }
 
     @NotNull
