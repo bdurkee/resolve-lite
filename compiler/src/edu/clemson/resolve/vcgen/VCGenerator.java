@@ -12,7 +12,6 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.programtype.*;
-import edu.clemson.resolve.semantics.query.NameQuery;
 import edu.clemson.resolve.vcgen.application.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -20,6 +19,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.query.OperationQuery;
@@ -301,7 +301,7 @@ public class VCGenerator extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(corrFnExpRequires)
                         .remember();
-
+        addAssumptionsForVars(block, ctx.varDeclGroup());
         //positive stats
         StmtListener l = new StmtListener(block, tr.exprASTs);
         ParseTreeWalker.DEFAULT.walk(l, ctx);   //walk all stmts in this context, processing all satisfied if branches
@@ -321,6 +321,11 @@ public class VCGenerator extends ResolveBaseListener {
         }
         block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlocks(block.build());
+    }
+
+    private void addAssumptionsForVars(VCAssertiveBlockBuilder block,
+                                       List<ResolveParser.VarDeclGroupContext> groups) {
+
     }
 
     @Override
@@ -538,15 +543,17 @@ public class VCGenerator extends ResolveBaseListener {
         } catch (NoSuchModuleException | UnexpectedSymbolException e) {
         }
         return assertions.stream()
-                .map(assertion -> substituteByFacilities(facilities, assertion))
+                .map(assertion -> substituteGlobalAssertionByAppropriateFacility(facilities, assertion))
                 .collect(Collectors.toSet());
     }
 
-    private PExp substituteByFacilities(List<FacilitySymbol> facilities,
-                                        GlobalMathAssertionSymbol e) {
+    private PExp substituteGlobalAssertionByAppropriateFacility(List<FacilitySymbol> facilities,
+                                                                GlobalMathAssertionSymbol e) {
         for (FacilitySymbol facility : facilities) {
-            if (facility.getFacility().getSpecification().getModuleIdentifier().equals(e.getModuleIdentifier())) {
-                return e.getEnclosedExp().substitute(getSpecializationsForFacility(facility.getName()));
+            if (facility.getFacility().getSpecification()
+                    .getModuleIdentifier().equals(e.getModuleIdentifier())) {
+                return e.getEnclosedExp().substitute(
+                        getSpecializationsForFacility(facility.getName()));
             }
         }
         return e.getEnclosedExp();

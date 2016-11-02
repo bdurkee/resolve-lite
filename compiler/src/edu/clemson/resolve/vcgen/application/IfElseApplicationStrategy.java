@@ -28,11 +28,11 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
 
         PExp mathCond = getMathCondition(block, stat);
         block.assume(mathCond);
-        block.stats(Utils.apply(stat.getThenStmts(), e->e.copyWithEnclosingBlock(block)));
+        block.stats(Utils.apply(stat.getThenStmts(), e -> e.copyWithEnclosingBlock(block)));
 
         PExp negatedCondition = negateMathCondition(block.g, mathCond);
         neg.assume(negatedCondition);
-        neg.stats(Utils.apply(stat.getElseStmts(), e->e.copyWithEnclosingBlock(neg)));
+        neg.stats(Utils.apply(stat.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)));
         neg.applicationSteps.clear();
         branches.push(neg);
         return block.snapshot();
@@ -46,7 +46,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
 
     @NotNull
     private static PExp negateMathCondition(DumbMathClssftnHandler g, PExp mathConditionToNegate) {
-        if (mathConditionToNegate.getTopLevelOperationName().equals("=")) {
+        /*if (mathConditionToNegate.getTopLevelOperationName().equals("=")) {
             PSymbol name = new PSymbol.PSymbolBuilder("≠")
                     .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY))
                     .build();
@@ -68,15 +68,15 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
                             mathConditionToNegate.getSubExpressions().get(2))
                     .build();
         }
-        else {
-            PExp name = new PSymbol.PSymbolBuilder("⌐")
-                    .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
-                    .build();
-            return new PApply.PApplyBuilder(name)
-                    .applicationType(g.BOOLEAN)
-                    .arguments(mathConditionToNegate)
-                    .build();
-        }
+        else {*/
+        PExp name = new PSymbol.PSymbolBuilder("⌐")
+                .mathClssfctn(new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN))
+                .build();
+        return new PApply.PApplyBuilder(name)
+                .applicationType(g.BOOLEAN)
+                .arguments(mathConditionToNegate)
+                .build();
+        //}
     }
 
     @NotNull
