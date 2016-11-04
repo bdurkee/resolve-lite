@@ -81,11 +81,15 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
+            return assume(assume, false);
+        }
+
+        public VCAssertiveBlockBuilder assume(PExp assume, boolean stipulate) {
             if (assume == null) {
                 return this;
             }
-            //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), assume));
-            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), assume));
+            //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), stipulate, assume));
+            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), stipulate, assume));
             return this;
         }
 

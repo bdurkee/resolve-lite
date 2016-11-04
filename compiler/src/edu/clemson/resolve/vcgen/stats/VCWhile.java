@@ -38,6 +38,7 @@ public class VCWhile extends VCRuleBackedStat {
         this.maintaining = maintaining;
         this.decreasing = decreasing;
         this.body.addAll(stmts);
+        this.changingVariables.addAll(changing);
     }
 
     @NotNull

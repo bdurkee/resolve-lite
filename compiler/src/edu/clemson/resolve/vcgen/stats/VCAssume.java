@@ -13,16 +13,18 @@ public class VCAssume extends VCRuleBackedStat {
     protected VCStatRuleApplicationStrategy<VCAssume> apply;
     private final PExp assume;
 
-    public VCAssume(VCAssertiveBlockBuilder block, PExp assume) {
-        this(block, new DefaultAssumeApplicationStrategy(), assume);
+    public VCAssume(VCAssertiveBlockBuilder block, boolean stipulate, PExp assume) {
+        this(block, new DefaultAssumeApplicationStrategy(), false, assume);
     }
 
     public VCAssume(VCAssertiveBlockBuilder block,
                     VCStatRuleApplicationStrategy<VCAssume> strategy,
+                    boolean stipulate,
                     PExp assume) {
         super(null, block, strategy);
         this.apply = strategy;
         this.assume = assume;
+        this.isStipulatedAssumption = stipulate;
     }
 
     public PExp getAssumeExp() {
@@ -31,7 +33,7 @@ public class VCAssume extends VCRuleBackedStat {
 
     @NotNull
     public VCAssume copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
-        return new VCAssume(b, apply, getAssumeExp());
+        return new VCAssume(b, apply, isStipulatedAssumption, getAssumeExp());
     }
 
     @Override

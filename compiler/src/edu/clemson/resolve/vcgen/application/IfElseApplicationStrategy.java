@@ -31,11 +31,11 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
         VCAssertiveBlockBuilder neg = new VCAssertiveBlockBuilder(block);
 
         PExp mathCond = getMathCondition(block, stat);
-        block.assume(mathCond);
+        block.assume(mathCond, true); //make sure we "stipulate" the assumption
         block.stats(Utils.apply(stat.getThenStmts(), e -> e.copyWithEnclosingBlock(block))); //deep copy stat list
 
         PExp negatedCondition = negateMathCondition(block.g, mathCond);
-        neg.assume(negatedCondition);
+        neg.assume(negatedCondition, true); //make sure we "stipulate" the assumption
         neg.stats(Utils.apply(stat.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)));
         neg.applicationSteps.clear();
         neg.applicationSteps.add(new RuleApplicationStep(neg.snapshot().toString(), NEGATED_BRANCH_DESCRIPTION));

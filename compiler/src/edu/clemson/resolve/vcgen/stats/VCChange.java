@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.stats;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -33,5 +34,10 @@ public class VCChange extends VCRuleBackedStat {
     public VCRuleBackedStat copyWithEnclosingBlock(
             @NotNull VCAssertiveBlockBuilder b) {
         return new VCChange(definingCtx, b, changeVariables);
+    }
+
+    @Override
+    public String toString() {
+        return "Changing " + Utils.join(changeVariables, ", ") + ";";
     }
 }

@@ -4,120 +4,106 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCAssume;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssume> {
+public class ParsimoniousAssumeApplicationStrategy
+        implements
+            VCStatRuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                     @NotNull VCAssertiveBlockBuilder block,
                                     @NotNull VCAssume stat) {
-        PExp assumeExp = stat.getAssumeExp();
-        PExp RP = block.finalConfirm.getConfirmExp();
+        List<PExp> assumeExpList = stat.getAssumeExp().splitIntoConjuncts();
+        List<PExp> confirmExpList = block.finalConfirm.getConfirmExp().splitIntoConjuncts();
 
-        Map<PExp, PExp> concEqualitySubstitutions = new LinkedHashMap<>();
-        List<PExp> assumeConjunctsWithoutConcEqualities = new LinkedList<>();
-        for (PExp assume : assumeExp.splitIntoConjuncts()) {
-            boolean isConceptual = false;
-            if (assume.isEquality()) {
-                PExp lhs = assume.getSubExpressions().get(1);
-                PExp rhs = assume.getSubExpressions().get(2);
-                if (lhs.isVariable() && lhs.containsName("conc")) {
-                    concEqualitySubstitutions.put(lhs, rhs);
-                    isConceptual = true;
-                }
-            }
-            if (!isConceptual) {
-                assumeConjunctsWithoutConcEqualities.add(assume);
-            }
-        }
-        //now substitute any conc equalities into RP
-        RP = RP.substitute(concEqualitySubstitutions);
-        //beta applyBackingRule any lambdas present now...
-
-        BasicBetaReducingListener br = new BasicBetaReducingListener(RP);
-        RP.accept(br);
-        RP = br.getReducedExp();
-
-        //assumeConjunctsWithoutConcEqualities
-
-
-        List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
-        for (PExp assume : assumeConjunctsWithoutConcEqualities) {
-            Set<String> intersection = assumeExp.getSymbolNames(true, true);
-            intersection.retainAll(RP.getSymbolNames(true, true));
-            if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
-                parsimoniousAssumeConjuncts.add(assume);
-            }
-        }
-        //this will be the pruned assume expr
-        if (!parsimoniousAssumeConjuncts.isEmpty()) {
-            assumeExp = block.g.formConjuncts(parsimoniousAssumeConjuncts);
-            block.finalConfirm(block.g.formImplies(assumeExp, RP));
-        }
-        else {
-            block.finalConfirm(RP);
-        }
+        PExp newFinalConfirm = formParsimoniousVC(block.g, confirmExpList, assumeExpList);
+        block.finalConfirm(newFinalConfirm);
         return block.snapshot();
     }
-/*
+
     private PExp formParsimoniousVC(DumbMathClssftnHandler g,
                                     List<PExp> assumeExps,
                                     List<PExp> confirmExps) {
-        for (int i = 0; i < confirmExps.size(); i++) {
-            PExp currentConfirmExp = confirmExps.get(i);
+        for (PExp confirm : confirmExps) {
 
-            // Make a deep copy of the assume expression list
-            List<PExp> assumeExpCopyList = new ArrayList<>();
-            for (PExp assumeExp : assumeExps) {
-                assumeExpCopyList.add(assumeExp);
+        }
+    }
+
+    private PExp formImplication(DumbMathClssftnHandler g, PExp confirmExp,
+                                 List<PExp> assumeExps,
+                                 boolean isStipulatedAssumption) {
+        if (isStipulatedAssumption) {
+            for (PExp assume : assumeExps) {
+                confirmExp = g.formImplies(assume, confirmExp);
             }
+            return confirmExp;
+        }
+        boolean checkList = assumeExps.size() > 0;
 
-            // Stores the remaining assume expressions
-            // we have not substituted. Note that if the expression
-            // is part of a stipulate assume statement, we keep
-            // the assume no matter what.
-            List<PExp> remAssumeExpList = new ArrayList<>();
+        // Loop until we no longer add more expressions or we have added all
+        // expressions in the remaining assume expression list.
+        while (checkList) {
+            List<PExp> tmpExpList = new ArrayList<>();
+            boolean formedImplies = false;
 
-            // Loop through each assume expression
-            for (int j = 0; j < assumeExpCopyList.size(); j++) {
-                PExp currentAssumeExp = assumeExpCopyList.get(j);
-                PExp tmp;
-                boolean hasVerificationVar = false;
-                boolean isConceptualVar = false;
-                boolean doneReplacement = false;
-
-                tmp = currentConfirmExp;
-
-
-                // Update the current confirm expression
-                // if we did a replacement.
-                if (doneReplacement) {
-                    currentConfirmExp = tmp;
-                }
-                else {
-                    // Check to see if this a verification
-                    // variable. If yes, we don't keep this assume.
-                    // Otherwise, we need to store this for the
-                    // step that generates the parsimonious vcs.
-                    if (!hasVerificationVar) {
-                        remAssumeExpList.add(Exp.copy(currentAssumeExp));
-                    }
-                }
-
-                // Use the remaining assume expression list
+            for (PExp assume : assumeExps) {
                 // Create a new implies expression if there are common symbols
                 // in the assume and in the confirm. (Parsimonious step)
-                PExp newConfirmExp =
-                        g.formImplies(currentConfirmExp, remAssumeExpList);
-                confirmExpList.set(i, newConfirmExp);
+                Set<String> intersection = Utilities.getSymbols(confirmExp);
+                intersection.retainAll(Utilities.getSymbols(assumeExp));
+
+                if (!intersection.isEmpty()) {
+                    // Don't form implies if we have "Assume true"
+                    if (!assumeExp.isLiteralTrue()) {
+                        confirmExp =
+                                myTypeGraph.formImplies(
+                                        Exp.copy(assumeExp), Exp
+                                                .copy(confirmExp));
+                        formedImplies = true;
+                    }
+                }
+                else {
+                    // Form implies if we have "Assume false"
+                    if (assumeExp.isLiteralFalse()) {
+                        confirmExp =
+                                myTypeGraph.formImplies(
+                                        Exp.copy(assumeExp), Exp
+                                                .copy(confirmExp));
+                        formedImplies = true;
+                    }
+                    else {
+                        tmpExpList.add(assumeExp);
+                    }
+                }
             }
-    }*/
+
+            remAssumeExpList = tmpExpList;
+            if (remAssumeExpList.size() > 0) {
+                // Check to see if we formed an implication
+                if (formedImplies) {
+                    // Loop again to see if we can form any more implications
+                    checkList = true;
+                }
+                else {
+                    // If no implications are formed, then none of the remaining
+                    // expressions will be helpful.
+                    checkList = false;
+                }
+            }
+            else {
+                // Since we are done with all assume expressions, we can quit
+                // out of the loop.
+                checkList = false;
+            }
+        }
+    }
 
     @NotNull
     @Override
