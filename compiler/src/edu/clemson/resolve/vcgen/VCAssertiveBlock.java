@@ -160,10 +160,9 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         private VCAssertiveBlock applyRules(Deque<VCAssertiveBlockBuilder> branchAccumulator) {
-            //in case we're applying rules in a block arising from a branch, I want to
-            //get rid of excess (prior) applications that are left over from the deep copy..
-            //TODO: ^^ maybe do this at the site of the copy? It's kind of out of context here
-            applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
+            if (this.applicationSteps.isEmpty()) {
+                applicationSteps.add(new RuleApplicationStep(this.snapshot().toString(), "Start"));
+            }
             while (!stats.isEmpty()) {
                 VCRuleBackedStat currentStat = stats.removeLast();
                 applicationSteps.add(new RuleApplicationStep(

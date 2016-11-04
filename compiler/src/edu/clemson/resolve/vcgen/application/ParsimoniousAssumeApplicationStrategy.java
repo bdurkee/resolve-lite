@@ -1,6 +1,7 @@
 package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.vcgen.BasicBetaReducingListener;
 import edu.clemson.resolve.vcgen.AssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -43,6 +44,9 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
         RP.accept(br);
         RP = br.getReducedExp();
 
+        //assumeConjunctsWithoutConcEqualities
+
+
         List<PExp> parsimoniousAssumeConjuncts = new LinkedList<>();
         for (PExp assume : assumeConjunctsWithoutConcEqualities) {
             Set<String> intersection = assumeExp.getSymbolNames(true, true);
@@ -61,6 +65,59 @@ public class ParsimoniousAssumeApplicationStrategy implements VCStatRuleApplicat
         }
         return block.snapshot();
     }
+/*
+    private PExp formParsimoniousVC(DumbMathClssftnHandler g,
+                                    List<PExp> assumeExps,
+                                    List<PExp> confirmExps) {
+        for (int i = 0; i < confirmExps.size(); i++) {
+            PExp currentConfirmExp = confirmExps.get(i);
+
+            // Make a deep copy of the assume expression list
+            List<PExp> assumeExpCopyList = new ArrayList<>();
+            for (PExp assumeExp : assumeExps) {
+                assumeExpCopyList.add(assumeExp);
+            }
+
+            // Stores the remaining assume expressions
+            // we have not substituted. Note that if the expression
+            // is part of a stipulate assume statement, we keep
+            // the assume no matter what.
+            List<PExp> remAssumeExpList = new ArrayList<>();
+
+            // Loop through each assume expression
+            for (int j = 0; j < assumeExpCopyList.size(); j++) {
+                PExp currentAssumeExp = assumeExpCopyList.get(j);
+                PExp tmp;
+                boolean hasVerificationVar = false;
+                boolean isConceptualVar = false;
+                boolean doneReplacement = false;
+
+                tmp = currentConfirmExp;
+
+
+                // Update the current confirm expression
+                // if we did a replacement.
+                if (doneReplacement) {
+                    currentConfirmExp = tmp;
+                }
+                else {
+                    // Check to see if this a verification
+                    // variable. If yes, we don't keep this assume.
+                    // Otherwise, we need to store this for the
+                    // step that generates the parsimonious vcs.
+                    if (!hasVerificationVar) {
+                        remAssumeExpList.add(Exp.copy(currentAssumeExp));
+                    }
+                }
+
+                // Use the remaining assume expression list
+                // Create a new implies expression if there are common symbols
+                // in the assume and in the confirm. (Parsimonious step)
+                PExp newConfirmExp =
+                        g.formImplies(currentConfirmExp, remAssumeExpList);
+                confirmExpList.set(i, newConfirmExp);
+            }
+    }*/
 
     @NotNull
     @Override

@@ -37,6 +37,6 @@ public class VCVar extends VCRuleBackedStat {
 
     @Override
     public String toString() {
-        return name + " : " + type;
+        return "Var " + name + " : " + type;
     }
 }

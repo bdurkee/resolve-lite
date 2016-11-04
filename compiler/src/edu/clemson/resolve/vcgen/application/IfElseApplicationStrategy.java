@@ -8,6 +8,7 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.RuleApplicationStep;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.stats.VCIfElse;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -19,6 +20,9 @@ import java.util.List;
 
 public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<VCIfElse> {
 
+    public static final String DEFAULT_DESCRIPTION = "If rule application";
+    public static final String NEGATED_BRANCH_DESCRIPTION = "Negated if-else rule (branch) application";
+
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
@@ -28,12 +32,13 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
 
         PExp mathCond = getMathCondition(block, stat);
         block.assume(mathCond);
-        block.stats(Utils.apply(stat.getThenStmts(), e -> e.copyWithEnclosingBlock(block)));
+        block.stats(Utils.apply(stat.getThenStmts(), e -> e.copyWithEnclosingBlock(block))); //deep copy stat list
 
         PExp negatedCondition = negateMathCondition(block.g, mathCond);
         neg.assume(negatedCondition);
         neg.stats(Utils.apply(stat.getElseStmts(), e -> e.copyWithEnclosingBlock(neg)));
         neg.applicationSteps.clear();
+        neg.applicationSteps.add(new RuleApplicationStep(neg.snapshot().toString(), NEGATED_BRANCH_DESCRIPTION));
         branches.push(neg);
         return block.snapshot();
     }
@@ -41,7 +46,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
     @NotNull
     @Override
     public String getDescription() {
-        return "If-else app";
+        return DEFAULT_DESCRIPTION;
     }
 
     @NotNull
@@ -80,7 +85,7 @@ public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<
     }
 
     @NotNull
-    private PExp getMathCondition(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder block,
+    private PExp getMathCondition(@NotNull VCAssertiveBlockBuilder block,
                                   @NotNull VCIfElse stat) {
         PExp progCondition = stat.getProgIfCondition();
 

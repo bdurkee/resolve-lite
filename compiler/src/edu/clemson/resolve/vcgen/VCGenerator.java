@@ -645,10 +645,17 @@ public class VCGenerator extends ResolveBaseListener {
             PExp progCondition = asts.get(ctx.progExp());
             PExp maintainingClause = asts.get(ctx.maintainingClause().mathAssertionExp());
             PExp decreasingClause = ctx.decreasingClause() != null ? asts.get(ctx.decreasingClause().mathExp()) : null;
-            //TODO: Changing...
             List<VCRuleBackedStat> body = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
+
+            //now collect changing vars..
+            Set<PSymbol> changing = new LinkedHashSet<>();
+            if (ctx.changingClause() != null) {
+                for (ResolveParser.MathExpContext e : ctx.changingClause().mathExp()) {
+                    changing.add((PSymbol) asts.get(e));
+                }
+            }
             VCWhile s = new VCWhile(ctx, builder, WHILE_APPLICATION, progCondition,
-                    maintainingClause, decreasingClause, body);
+                    maintainingClause, decreasingClause, changing, body);
             stats.put(ctx, s);
         }
 

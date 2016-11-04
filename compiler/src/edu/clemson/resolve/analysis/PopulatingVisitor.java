@@ -449,6 +449,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
         try {
             Token qualifier = ctx.qualifier;
+
+            //TODO: implement the instantiateGenerics function so we can actually get stuff
+            //like Str(Z) as the math type in facilities, enhancements, etc.
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(qualifier, ctx.name.getText(),

@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -10,11 +11,8 @@ import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.vcgen.AssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCGenerator;
-import edu.clemson.resolve.vcgen.stats.VCConfirm;
+import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.stats.VCIfElse;
-import edu.clemson.resolve.vcgen.stats.VCRuleBackedStat;
-import edu.clemson.resolve.vcgen.stats.VCWhile;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,10 +40,15 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
                             "While loop invariant base case"));
         }
 
-        List<VCRuleBackedStat> thenStmts = stat.getBody();
+        List<VCRuleBackedStat> thenStmts = Utils.apply(stat.getBody(), e->e.copyWithEnclosingBlock(block));
         List<VCRuleBackedStat> elseStmts = new ArrayList<>();
         PSymbol pVal = createPVal(block.g, block.scope);
         PExp nqvPVal = VCGenerator.NPV(block.finalConfirm.getConfirmExp(), pVal);
+
+        if (whileNode.changingClause() != null) {
+            block.stats(new VCChange(whileNode.changingClause(), block, stat.getChangingVariables()));
+        }
+        //Assume the invariant and NQV(RP, P_Val) = P_Exp
         invariantAndProgressAssumption = block.g.formConjunct(
                 invariantAndProgressAssumption, block.g.formEquals(nqvPVal, decreasing));
         block.assume(invariantAndProgressAssumption);
@@ -53,13 +56,27 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
 
         //decreasing < nqvPVal
         MathClssftn nat = getNat(block.g, block.scope);
-        PSymbol lt = new PSymbol.PSymbolBuilder("<")
+        PSymbol plus = new PSymbol.PSymbolBuilder("+")
+                .mathClssfctn(new MathFunctionClssftn(block.g, nat, nat, nat))
+                .build();
+        PSymbol one = new PSymbol.PSymbolBuilder("1")
+                .mathClssfctn(nat)
+                .build();
+        //decreasingExp + 1
+        PApply decreasingPlusOne = new PApply.PApplyBuilder(plus)
+                .applicationType(nat)
+                .arguments(decreasing, one)
+                .style(PApply.DisplayStyle.INFIX)
+                .build();
+
+        //decreasingExp + 1 ≤ NQV(P_Val)
+        PSymbol lte = new PSymbol.PSymbolBuilder("≤")
                 .mathClssfctn(new MathFunctionClssftn(block.g, block.g.BOOLEAN, nat, nat))
                 .build();
-        PApply progressClaimExp = new PApply.PApplyBuilder(lt)
+        PApply progressClaimExp = new PApply.PApplyBuilder(lte)
                 .applicationType(block.g.BOOLEAN)
                 .style(PApply.DisplayStyle.INFIX)
-                .arguments(decreasing, nqvPVal)
+                .arguments(decreasingPlusOne, nqvPVal)
                 .build();
 
         //Confirm Inv /\ P_Exp < NPV(RP, P_Val);

@@ -2,6 +2,7 @@ package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -12,12 +13,16 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupString;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-//TODO: Ok, I think we are going to have to flip the while loop...
 public class VCWhile extends VCRuleBackedStat {
 
     private final PExp progCondition, maintaining, decreasing;
+
+    /** I want to preserve order of the original change list */
+    private final Set<PSymbol> changingVariables = new LinkedHashSet<>();
     private final List<VCRuleBackedStat> body = new ArrayList<>();
 
     public VCWhile(ParserRuleContext ctx,
@@ -26,6 +31,7 @@ public class VCWhile extends VCRuleBackedStat {
                    PExp condition,
                    PExp maintaining,
                    PExp decreasing,
+                   Set<PSymbol> changing,
                    List<VCRuleBackedStat> stmts) {
         super(ctx, block, apply);
         this.progCondition = condition;
@@ -50,6 +56,11 @@ public class VCWhile extends VCRuleBackedStat {
     }
 
     @NotNull
+    public Set<PSymbol> getChangingVariables() {
+        return changingVariables;
+    }
+
+    @NotNull
     public PExp getProgCondition() {
         return progCondition;
     }
@@ -58,8 +69,8 @@ public class VCWhile extends VCRuleBackedStat {
     @Override
     public VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCWhile(definingCtx, b, applicationStrategy,
-                progCondition, maintaining,
-                decreasing, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)));
+                progCondition, maintaining, decreasing,
+                changingVariables, Utils.apply(body, e -> e.copyWithEnclosingBlock(b)));
     }
 
     @Override
