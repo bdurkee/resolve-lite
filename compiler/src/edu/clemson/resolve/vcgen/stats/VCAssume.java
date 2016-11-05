@@ -31,6 +31,10 @@ public class VCAssume extends VCRuleBackedStat {
         return assume;
     }
 
+    public boolean isStipulatedAssumption() {
+        return isStipulatedAssumption;
+    }
+
     @NotNull
     public VCAssume copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
         return new VCAssume(b, apply, isStipulatedAssumption, getAssumeExp());
