@@ -61,6 +61,7 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
                 .build();
         PSymbol one = new PSymbol.PSymbolBuilder("1")
                 .mathClssfctn(nat)
+                .literal(true)
                 .build();
         //decreasingExp + 1
         PApply decreasingPlusOne = new PApply.PApplyBuilder(plus)

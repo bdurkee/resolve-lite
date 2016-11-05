@@ -211,12 +211,24 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         MathClssftn t = getMathClssfctn(ctx);
+
+        //makes the case for having a special rule for math integers at the grammar level..
+        boolean representsLiteral = false;
+        try {
+            Integer.parseInt(ctx.getText());
+            representsLiteral = true;
+        }
+        catch (NumberFormatException nfe) {
+            representsLiteral = false;
+        }
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
                         .incoming(ctx.incoming != null)
+                        .literal(representsLiteral)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathClssfctn(getMathClssfctn(ctx));
+        representsLiteral = false;
         repo.put(ctx, result.build());
     }
 
