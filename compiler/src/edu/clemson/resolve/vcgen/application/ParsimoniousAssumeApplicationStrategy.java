@@ -1,5 +1,6 @@
 package edu.clemson.resolve.vcgen.application;
 
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
@@ -17,7 +18,7 @@ public class ParsimoniousAssumeApplicationStrategy
         implements
             VCStatRuleApplicationStrategy<VCAssume> {
 
-/*    @NotNull
+    @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                     @NotNull VCAssertiveBlockBuilder block,
@@ -31,6 +32,7 @@ public class ParsimoniousAssumeApplicationStrategy
         for (PExp assume : allAssumptions) {
             if (stat.isStipulatedAssumption()) {
                 remainingAssumptions.add(assume);
+                continue;
             }
             if (assume.isEquality()) {
                 PExp lhs = assume.getSubExpressions().get(1);
@@ -91,22 +93,25 @@ public class ParsimoniousAssumeApplicationStrategy
     private PExp performParsimoniousStep(DumbMathClssftnHandler g,
                                          List<PExp> assumptions,
                                          PExp existingConfirm, boolean stipulated) {
-        List<PExp> newConfirmPieces = new ArrayList<>();
+        Map<PExp, PExp> confirmsToModifiedConfirms = new LinkedHashMap<>();
+        List<PExp> confirms = existingConfirm.splitIntoConjuncts();
+        confirmsToModifiedConfirms = Utils.zip(confirms, confirms);
+
         for (PExp assume : assumptions) {
-            for (PExp confirm : existingConfirm.splitIntoConjuncts()) {
+            for (PExp confirm : confirms) {
                 Set<String> intersection = assume.getSymbolNames(true, true);
                 intersection.retainAll(confirm.getSymbolNames(true, true));
                 if ((!intersection.isEmpty() && !assume.isObviouslyTrue()) || stipulated) {
-                    newConfirmPieces.add(g.formImplies(assume, confirm));
-                } else {
-                    newConfirmPieces.add(confirm);
+                    PExp existing = confirmsToModifiedConfirms.get(confirm);
+                    confirmsToModifiedConfirms.put(confirm, g.formImplies(assume, existing));
                 }
             }
         }
-        return newConfirmPieces.isEmpty() ? existingConfirm : g.formConjuncts(newConfirmPieces);
-    }*/
+        List<PExp> result = new ArrayList<>(confirmsToModifiedConfirms.values());
+        return g.formConjuncts(result);
+    }
 
-
+/*
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
@@ -332,7 +337,7 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         return confirmExp;
-    }
+    }*/
 
     @NotNull
     @Override
