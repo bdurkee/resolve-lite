@@ -17,17 +17,21 @@ public class ParsimoniousAssumeApplicationStrategy
         implements
             VCStatRuleApplicationStrategy<VCAssume> {
 
-    @NotNull
+/*    @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                     @NotNull VCAssertiveBlockBuilder block,
                                     @NotNull VCAssume stat) {
         List<PExp> allAssumptions = stat.getAssumeExp().splitIntoConjuncts();
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
-
+        PExp existingConfirm = block.finalConfirm.getConfirmExp();
         List<PExp> remainingAssumptions = new ArrayList<>();
+        List<PExp> nonEffectualEqualities = new ArrayList<>();
 
         for (PExp assume : allAssumptions) {
+            if (stat.isStipulatedAssumption()) {
+                remainingAssumptions.add(assume);
+            }
             if (assume.isEquality()) {
                 PExp lhs = assume.getSubExpressions().get(1);
                 PExp rhs = assume.getSubExpressions().get(2);
@@ -48,10 +52,17 @@ public class ParsimoniousAssumeApplicationStrategy
                 //left replaceablility
                 else if (lhs.isVariable()) {
                     equalitySubstitutions.put(lhs, rhs);
+                    //if we didn't do a replacement, then add it
+                    if (existingConfirm.substitute(lhs, rhs).equals(existingConfirm)) {
+                        nonEffectualEqualities.add(assume);
+                    }
                 }
                 //right replaceability
                 else if (rhs.isVariable()) {
                     equalitySubstitutions.put(rhs, lhs);
+                    if (existingConfirm.substitute(rhs, lhs).equals(existingConfirm)) {
+                        nonEffectualEqualities.add(assume);
+                    }
                 }
                 //not replaceable...
                 else {
@@ -59,6 +70,7 @@ public class ParsimoniousAssumeApplicationStrategy
                 }
             }
             else {
+                //if we haven't done a replacement, then add it as well..
                 remainingAssumptions.add(assume);
             }
         }
@@ -66,31 +78,35 @@ public class ParsimoniousAssumeApplicationStrategy
         for (PExp assumption : remainingAssumptions) {
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
+        remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
+
         PExp substitutedConfirm = block.finalConfirm.getConfirmExp()
                 .substitute(equalitySubstitutions);
         PExp newFinalConfirm = performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
-                substitutedConfirm.splitIntoConjuncts());
+                substitutedConfirm, stat.isStipulatedAssumption());
         block.finalConfirm(newFinalConfirm);
         return block.snapshot();
     }
 
     private PExp performParsimoniousStep(DumbMathClssftnHandler g,
                                          List<PExp> assumptions,
-                                         List<PExp> confirms) {
-        List<PExp> formedImplications = new ArrayList<>();
+                                         PExp existingConfirm, boolean stipulated) {
+        List<PExp> newConfirmPieces = new ArrayList<>();
         for (PExp assume : assumptions) {
-            for (PExp confirm : confirms) {
+            for (PExp confirm : existingConfirm.splitIntoConjuncts()) {
                 Set<String> intersection = assume.getSymbolNames(true, true);
                 intersection.retainAll(confirm.getSymbolNames(true, true));
-                if (!intersection.isEmpty() && !assume.isObviouslyTrue()) {
-                    formedImplications.add(g.formImplies(assume, confirm));
+                if ((!intersection.isEmpty() && !assume.isObviouslyTrue()) || stipulated) {
+                    newConfirmPieces.add(g.formImplies(assume, confirm));
+                } else {
+                    newConfirmPieces.add(confirm);
                 }
             }
         }
-        return g.formConjuncts(formedImplications);
-    }
+        return newConfirmPieces.isEmpty() ? existingConfirm : g.formConjuncts(newConfirmPieces);
+    }*/
 
-    /*
+
     @NotNull
     @Override
     public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
@@ -316,7 +332,7 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         return confirmExp;
-    }*/
+    }
 
     @NotNull
     @Override
