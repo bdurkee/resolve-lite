@@ -216,7 +216,7 @@ public class DumbMathClssftnHandler {
 
     @NotNull
     public final PApply formImplies(PExp left, PExp right) {
-        return new PApplyBuilder(new PSymbolBuilder("implies").mathClssfctn(BOOLEAN_FUNCTION).build())
+        return new PApplyBuilder(new PSymbolBuilder("⟹").mathClssfctn(BOOLEAN_FUNCTION).build())
                 .applicationType(BOOLEAN)
                 .style(DisplayStyle.INFIX)
                 .arguments(left, right)

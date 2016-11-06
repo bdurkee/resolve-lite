@@ -97,7 +97,7 @@ public enum ErrorKind {
     APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
             " application, but it isn't a function", ErrorSeverity.ERROR),
 
-    INCORRECT_FUNCTION_ARG_COUNT(17, "no such math function: <arg>" +
+    INCORRECT_FUNCTION_ARG_COUNT(17, "no such mathFor function: <arg>" +
             "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
 
     ILLEGAL_IMPLICIT_CLSSFTN_PARAM(62, "the implicit classification parameter" +
@@ -148,10 +148,10 @@ public enum ErrorKind {
     /**
      * Compiler Error 31:
      * <p>
-     * no mapping to template name for output model class <em>class</em>.</p>
+     * no mapping to template name for output stats class <em>class</em>.</p>
      */
     NO_MODEL_TO_TEMPLATE_MAPPING(31, "no mapping to template name for output "
-            + "model class <arg>", ErrorSeverity.ERROR),
+            + "stats class <arg>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 32: missing code generation template <em>template</em>.

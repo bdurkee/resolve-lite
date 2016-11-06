@@ -48,6 +48,7 @@ public final class CongruenceClassProver {
     private final int numTriesBeforeQuitting;
     private final RESOLVECompiler compiler;
     private final AnnotatedModule tr;
+    private ProverListener proverListener;
 
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
@@ -74,21 +75,24 @@ public final class CongruenceClassProver {
             compiler.info("warning: could not find some fundamental base sorts/classifications " +
                     "used by the prover: N and/or Z");
         }
-        int i = 0;
         models = new PerVCProverModel[vcs.size()];
+        if (compiler.proverListener != null) {
+            this.proverListener = compiler.proverListener;
+        }
+        List<VC> preprocessedVcs = preprocessVCs(vcs);
+        //List<VC> preprocessedVcs = new ArrayList<>();
 
-        //List<VC> preprocessedVcs = preprocessVCs(vcs);
-        List<VC> preprocessedVcs = new ArrayList<>();
-
-        VC test = buildTestVC5(m_scope, g, z, n);
-        m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
+        //VC test = buildTestVC5(m_scope, g, z, n);
+        //preprocessedVcs.add(test);
+        //m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, test, z, n));
 
         //preprocessedVcs.add(test);
-       /* for (VC vc : preprocessedVcs) {
+        int i = 0;
+        for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
             models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
                     vc.getConsequent().splitIntoConjuncts());
-        }*/
+        }
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
             theoremSymbols.addAll(
@@ -133,7 +137,7 @@ public final class CongruenceClassProver {
             }
         }
         if (n != null && z != null) {
-            sumConversion(n, z);
+           sumConversion(n, z);
         }
         m_results = "";
     }
@@ -745,29 +749,47 @@ public final class CongruenceClassProver {
             String whyQuit = "";
             // Skip proof loop
             if (numTriesBeforeQuitting >= 0 && numUnproved >= numTriesBeforeQuitting) {
+                if (proverListener != null) {
+                    proverListener.vcResult(false, models[i], new Metrics(0, 0));
+                }
                 summary += vcc.m_name + " skipped\n";
                 ++i;
                 continue;
             }
-            VerificationConditionCongruenceClosureImpl.STATUS proved = prove(vcc);
-            if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
-                whyQuit += " Proved ";
-            }
-            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
-                whyQuit += " Proved (Assumption(s) false) ";
-            }
-            else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
-                whyQuit += " Out of theorems, or timed out ";
+
+            VerificationConditionCongruenceClosureImpl.STATUS proved = null;
+            if (isCancelled()) {
+                whyQuit += "Cancelled";
+                proved = VerificationConditionCongruenceClosureImpl.STATUS.CANCELLED;
                 numUnproved++;
             }
             else {
-                whyQuit += " Goal false "; // this isn't currently reachable
+                proved = prove(vcc);
+                if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+                    whyQuit += " Proved ";
+                }
+                else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+                    whyQuit += " Proved (Assumption(s) false) ";
+                }
+                else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+                    whyQuit += " Out of theorems, or timed out ";
+                    numUnproved++;
+                }
+                else {
+                    whyQuit += " Goal false "; // this isn't currently reachable
+                }
             }
-
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
             long delayMS = TimeUnit.MILLISECONDS.convert(delayNS, TimeUnit.NANOSECONDS);
             summary += vcc.m_name + whyQuit + " time: " + delayMS + " ms\n";
+            if (proverListener != null) {
+                this.proverListener
+                        .vcResult(
+                                (proved == (VerificationConditionCongruenceClosureImpl.STATUS.PROVED) ||
+                                        (proved == VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)),
+                                models[i], new Metrics(delayMS, timeout));
+            }
             i++;
 
         }
@@ -816,7 +838,7 @@ public final class CongruenceClassProver {
         // ++++++ Create new PQ for instantiated theorems
         chooseNewTheorem: while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
-                && System.currentTimeMillis() <= endTime) {
+                && System.currentTimeMillis() <= endTime && !isCancelled()) {
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             // ++++++ Creates new PQ with all the theorems
 
@@ -827,7 +849,7 @@ public final class CongruenceClassProver {
                             m_nonQuantifiedTheoremSymbols, m_smallEndEquations);
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
-            while (!rankedTheorems.m_pQueue.isEmpty()
+            while (!isCancelled() && !rankedTheorems.m_pQueue.isEmpty()
                     && status
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && (num_Theorems_chosen < max_Theorems_to_choose || rankedTheorems.m_pQueue
@@ -899,6 +921,9 @@ public final class CongruenceClassProver {
 
     }
 
+    public boolean isCancelled() {
+        return proverListener != null && proverListener.isCancelled();
+    }
 
 
     private String proofFileName() {

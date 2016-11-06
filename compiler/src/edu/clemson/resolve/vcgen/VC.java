@@ -62,9 +62,19 @@ public final class VC extends OutputModelObject {
     }
 
     @Override public String toString() {
-        String retval =
-                "========== " + getName() + " ==========\n" + antecedent
-                            + "  -->\n" + consequent;
+        Token location = consequent.getVCLocation();
+        String explanation = consequent.getVCExplanation();
+
+        String retval = "========== " + getName() + " ==========\n";
+        if (location != null && explanation != null) {
+            retval = retval + consequent.getVCExplanation() + " (" + location.getLine() + ")\n";
+        }
+        int i = 1;
+        for (PExp e : antecedentPieces) {
+            retval += i + ". " + e.toString(false) + "\n";
+            i++;
+        }
+        retval += "⊢\n" + consequent.toString(false);
         return retval;
     }
 }

@@ -10,6 +10,8 @@ lib/
 /gen/
 tmp/
 
+*.jar
+
 # Configurable build files
 bilder.py
 bilder.pyc

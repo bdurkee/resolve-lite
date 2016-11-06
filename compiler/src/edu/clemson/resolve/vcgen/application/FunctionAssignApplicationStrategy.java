@@ -5,28 +5,27 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCRuleBackedStat;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.stats.VCAssign;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCRuleBackedStat> {
+public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssign> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCRuleBackedStat stat) {
-        PExp left = stat.getStatComponents().get(0);
-        PExp right = stat.getStatComponents().get(1);
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCAssign stat) {
+        PExp left = stat.getLeft();
+        PExp right = stat.getRight();
 
         if (!(right.isFunctionApplication())) {
             PExp workingConfirm = block.finalConfirm.getConfirmExp();
@@ -35,8 +34,7 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
         }
 
         //Apply the listener to the (potentially) nested calls on the right hand side.
-        FunctionAssignRuleApplyingListener l =
-                new FunctionAssignRuleApplyingListener(block.definingTree, block);
+        Invk_Cond l = new Invk_Cond(block.definingTree, block);
         right.accept(l);
 
         //Q[v ~> f[x ~> u]]).
@@ -45,14 +43,14 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
     }
 
     //TODO for the explicit and general call rule applications, we'll need to iterate over the params, and
-    //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to reduce that..
-    public static class FunctionAssignRuleApplyingListener extends PExpListener {
+    //whenever we see an evaluates mode parameter, this is where we'll invoke this rule to applyBackingRule that..
+    public static class Invk_Cond extends PExpListener {
         private final ParserRuleContext ctx;
         private final VCAssertiveBlock.VCAssertiveBlockBuilder block;
         public final Map<PExp, PExp> substitutions = new HashMap<>();
 
-        public FunctionAssignRuleApplyingListener(ParserRuleContext ctx,
-                                                  VCAssertiveBlock.VCAssertiveBlockBuilder block) {
+        public Invk_Cond(ParserRuleContext ctx,
+                         VCAssertiveBlock.VCAssertiveBlockBuilder block) {
             this.block = block;
             this.ctx = ctx;
         }
@@ -89,17 +87,21 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
             for (PSymbol f : ensuresRight.getIncomingVariables()) {
                 Collections.replaceAll(formals, f.withIncomingSignsErased(), f);
             }
-            /* Now we substitute the formals for actuals in the rhs of the ensures (f), THEN replace all
-             * occurences of v in Q with the modified f (formally, Q[v ~> f[x ~> u]]).
+            /* v := op(u);   then the op = Oper op (x); ensures op = f/_x_\;
+             * Now we substitute the formals for actuals in the rhs of the ensures (f),
              */
             ensuresRight = ensuresRight.substitute(formals, actuals);
             substitutions.put(e, ensuresRight);
+        }
+
+        public PExp mathFor(PExp programmingExp) {
+            return substitutions.get(programmingExp);
         }
     }
 
     @NotNull
     @Override
     public String getDescription() {
-        return "function assignment rule application";
+        return "Function assignment rule application";
     }
 }

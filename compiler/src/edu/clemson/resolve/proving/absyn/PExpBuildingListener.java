@@ -39,7 +39,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
      * Constructs a new {@code PExpBuildingListener} given an {@link AnnotatedModule} with it's associated expression
      * tree mappings.
      *
-     * @param g           a typegraph
+     * @param g           a clssftnhandler
      * @param annotations annotations to be used for constructing expressions
      */
     public PExpBuildingListener(@NotNull DumbMathClssftnHandler g, @NotNull AnnotatedModule annotations) {
@@ -178,7 +178,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @NotNull
     public PExp getBottommostFormula(@NotNull PExp l) {
         PExp result = l;
-        while (result.getTopLevelOperationName().equals("and") && result instanceof PApply) {
+        while ((result.getTopLevelOperationName().equals("and") ||
+                result.getTopLevelOperationName().equals("∧")) && result instanceof PApply) {
             result = ((PApply) result).getArguments().get(1); //keep getting rhs
         }
         return result;
@@ -187,7 +188,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
         PSymbol operator = new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText())
-                .mathClssfctn(getMathClssfctn(ctx))
+                .mathClssfctn(getMathClssfctn(ctx.lop))
                 .quantification(quantifiedVars.get(ctx.lop.getText()))
                 .build();
         PApplyBuilder result =
@@ -210,12 +211,24 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         MathClssftn t = getMathClssfctn(ctx);
+
+        //makes the case for having a special rule for math integers at the grammar level..
+        boolean representsLiteral = false;
+        try {
+            Integer.parseInt(ctx.getText());
+            representsLiteral = true;
+        }
+        catch (NumberFormatException nfe) {
+            representsLiteral = false;
+        }
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
                         .incoming(ctx.incoming != null)
+                        .literal(representsLiteral)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathClssfctn(getMathClssfctn(ctx));
+        representsLiteral = false;
         repo.put(ctx, result.build());
     }
 
@@ -314,8 +327,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
-        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(
-                ctx.name.getStart(), argTypes);
+        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         PSymbol operator = new PSymbolBuilder(attr.name.getText())
                 .qualifier(attr.qualifier.getText())
                 .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
@@ -325,6 +337,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
+    }
+
+    @Override
+    public void exitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
+        repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
     }
 
     @Override

@@ -80,7 +80,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
     @NotNull
     @Override
     public String getSymbolDescription() {
-        return "a math symbol";
+        return "a mathFor symbol";
     }
 
     @NotNull

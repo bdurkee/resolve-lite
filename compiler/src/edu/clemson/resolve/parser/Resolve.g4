@@ -12,14 +12,14 @@ moduleDecl
     ;
 
 precisModuleDecl
-    :   ('Meta')? 'Precis' name=ID ';'
+    :   'Precis' name=ID ';'
         (usesList)?
         precisBlock
         'end' closename=ID ';' EOF
     ;
 
 precisExtModuleDecl
-    :   'Precis' 'Extension' name=ID 'for' precis=ID
+    :   'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
         (usesList)?
         precisBlock
@@ -35,7 +35,7 @@ conceptModuleDecl
     ;
 
 conceptExtModuleDecl
-    :   'Concept' 'Extension' name=ID specModuleParameterList?
+    :   'Enhancement' name=ID specModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         conceptBlock
@@ -43,7 +43,7 @@ conceptExtModuleDecl
     ;
 
 conceptImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+    :   'Realization' name=ID implModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         implBlock
@@ -51,7 +51,7 @@ conceptImplModuleDecl
     ;
 
 conceptExtImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+    :   'Realization' name=ID implModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?
         implBlock
@@ -116,6 +116,7 @@ facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
         | typeRepresentationDecl
+        | mathStandardDefnDecl
         )*
     ;
 
@@ -211,7 +212,7 @@ varDeclGroup
 
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID
+        (externally='externally')? 'realized' 'by' impl=ID
         (implArgs=moduleArgumentList)? implFrom=fromClause?
         (extensionPairing)* ';'?
     ;
@@ -267,7 +268,7 @@ callStmt : progParamExp ';' ;
 
 whileStmt
     :   'While' progExp
-        changingClause? maintainingClause? decreasingClause?
+        changingClause? maintainingClause decreasingClause
         'do' stmt* 'end' ';'
     ;
 
@@ -309,7 +310,7 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-// math constructs
+// mathFor constructs
 
 mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
@@ -394,7 +395,7 @@ conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
-decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
+decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
 
 // mathematical expressions
@@ -437,7 +438,7 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   incoming='@'? (qualifier=ID '::')? name=mathSymbolName
+    :   incoming='#'? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathOutfixAppExp

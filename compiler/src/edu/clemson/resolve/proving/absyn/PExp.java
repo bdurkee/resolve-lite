@@ -152,7 +152,7 @@ public abstract class PExp {
      *
      * @param other some {@code MathClassification}.
      *
-     * @return whether or not the math types of this or {@code other} matches
+     * @return whether or not the mathFor types of this or {@code other} matches
      */
     public boolean typeMatches(MathClssftn other) {
         //return other.isSubtypeOf(getClassification());
@@ -245,6 +245,10 @@ public abstract class PExp {
     }
 
     public boolean isLiteralFalse() {
+        return false;
+    }
+
+    public boolean isLiteralTrue() {
         return false;
     }
 
@@ -416,6 +420,15 @@ public abstract class PExp {
      */
     @Override
     public abstract boolean equals(Object o);
+
+    //default
+    public String toString(boolean parenthesizeApplications) {
+        return toString();
+    }
+
+    public String render() {
+        return "";
+    }
 
     /**
      * Returns a map of equalities contained in the top level of {@code this} of the form:

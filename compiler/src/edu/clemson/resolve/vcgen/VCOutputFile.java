@@ -1,18 +1,16 @@
-package edu.clemson.resolve.vcgen.model;
+package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.codegen.Model;
-import edu.clemson.resolve.codegen.Model.OutputModelObject;
 import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.VC;
+import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class VCOutputFile extends OutputModelObject {
+public class VCOutputFile {
 
     private int currentVcNumber;
     private final RESOLVECompiler compiler;
@@ -37,9 +35,11 @@ public class VCOutputFile extends OutputModelObject {
         return this.finalVcs;
     }
 
-    public void addAssertiveBlock(AssertiveBlock b) {
-        chunks.add(b);
-        addVCsInContext(b);
+    public void addAssertiveBlocks(List<VCAssertiveBlock> blocks) {
+        for (VCAssertiveBlock block : blocks) {
+            chunks.add(block);
+            addVCsInContext(block);
+        }
     }
 
     /**
@@ -85,8 +85,29 @@ public class VCOutputFile extends OutputModelObject {
         }
         VC vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
+            if (vc.getConsequent().isLiteralTrue()) continue;
             finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
             currentVcNumber++;
         }
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+
+        for (VC vc : finalVcs) {
+            result += vc.toString() + "\n\n";
+        }
+
+        for (AssertiveBlock b : chunks) {
+            result += b.getDescription() + "\n";
+            result += b.getText() + "\n";
+            result += "<S T E P S>\n";
+
+            for (RuleApplicationStep step : b.getApplicationSteps()) {
+                result += step + "\n\n";
+            }
+        }
+        return result;
     }
 }

@@ -73,7 +73,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      */
     private ParserRuleContext prevSelectorAccess = null;
 
-    /** Holds a ref to a type model symbol while walking it (or its repr). */
+    /** Holds a ref to a type stats symbol while walking it (or its repr). */
     private TypeModelSymbol curTypeReprModelSymbol = null;
 
     /** Keeps a count of the number of global constraints in the module currently being populated. */
@@ -449,6 +449,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitNamedType(ResolveParser.NamedTypeContext ctx) {
         try {
             Token qualifier = ctx.qualifier;
+
+            //TODO: implement the instantiateGenerics function so we can actually get stuff
+            //like Str(Z) as the math type in facilities, enhancements, etc.
             ProgTypeSymbol type =
                     symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(qualifier, ctx.name.getText(),
@@ -531,7 +534,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
-            //won't have a model.
+            //won't have a stats.
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         } catch (NoSuchModuleException nsme) {
@@ -910,7 +913,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, g.INVALID);
     }
 
-    // math constructs
+    // mathFor constructs
 
     boolean visitingClsstnAssertion = false;
 
@@ -1359,8 +1362,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyName.addChild(t);
         dummyPrefixNode.addChild(dummyName);
         dummyPrefixNode.name = dummyName;
-
         typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
+
+        //TODO: For now, I assign the first class function type of the outfix application to the
+        //left hand side of the operator..
+        tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
         return null;
     }
 
@@ -1721,7 +1727,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     nsme.getRequestedModule().getText());
         } catch (UnexpectedSymbolException use) {
             compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.getStart(), "a math symbol", symbolName,
+                    ctx.getStart(), "a mathFor symbol", symbolName,
                     use.getTheUnexpectedSymbolDescription());
         }
         return null;

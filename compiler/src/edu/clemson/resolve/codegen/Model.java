@@ -131,7 +131,7 @@ public class Model {
                     funcImpls.add(buildGetterMethod(s.getName()));
                     //Note that the variables representing these parameters
                     //do not have inits... they get assigned within ctor
-                    //for this class (which is a separate model object)
+                    //for this class (which is a separate stats object)
                     memberVars.add(new VariableDef(s.getName(), null));
                 }
                 else if (s.isModuleTypeParameter()) {

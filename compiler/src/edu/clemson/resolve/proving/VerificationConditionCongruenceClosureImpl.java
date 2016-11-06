@@ -25,7 +25,7 @@ public class VerificationConditionCongruenceClosureImpl {
     protected final Set<String> m_goal;
 
     public static enum STATUS {
-        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
+        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE, CANCELLED
     }
 
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this

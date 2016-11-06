@@ -1,13 +1,9 @@
 package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.semantics.BindingException;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -45,7 +41,7 @@ public final class PerVCProverModel {
      * <p>A friendly name of what we're trying to prove. Should go well with
      * "Proving XXX" and "Proof for XXX".</p>
      */
-    private final String myTheoremName;
+    private final String myVCName;
     /**
      * <p>A hashmap of local theorems for quick searching. Its keyset is always
      * the same as the set of
@@ -66,7 +62,7 @@ public final class PerVCProverModel {
     private int myConsequentsHash;
 
     /**
-     * <p>A list of listeners to be contacted when the model changes. Note that
+     * <p>A list of listeners to be contacted when the stats changes. Note that
      * the behavior of change listening is modified by
      * <code>myChangeEventMode</code>.</p>
      */
@@ -77,13 +73,13 @@ public final class PerVCProverModel {
 
     public PerVCProverModel(DumbMathClssftnHandler g, String proofFor,
                             List<PExp> antecedents, List<PExp> consequents) {
-        myTheoremName = proofFor;
+        myVCName = proofFor;
         myLocalTheoremSetForReturning = myLocalTheoremsSet.keySet();
         myTypeGraph = g;
     }
 
-    public String getTheoremName() {
-        return myTheoremName;
+    public String getVCName() {
+        return myVCName;
     }
 
     public void setChangeEventMode(ChangeEventMode m) {

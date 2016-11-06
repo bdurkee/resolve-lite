@@ -17,13 +17,13 @@ Concept Integer_Template;
             (updates i : Integer);
         requires
             i + 1 ≤ max_int;
-        ensures i = (@i + 1);
+        ensures i = (#i + 1);
 
     Operation Decrement
             (updates i : Integer);
         requires
            min_int ≤ (i - 1);
-        ensures	i = (@i - 1);
+        ensures	i = (#i - 1);
 
     Operation Are_Equal
             (evaluates i, j : Integer)
@@ -55,7 +55,7 @@ Concept Integer_Template;
             Less = (1 + i ≤ j);
 
     Operation Greater
-            (evaluates i, j: Integer)
+            (evaluates i, j : Integer)
                 : Boolean;
         ensures
             Greater = (1 + j ≤ i);
@@ -85,6 +85,12 @@ Concept Integer_Template;
                 : Integer;
         ensures
             Product = (i Basic_Integer_Theory::+ j);
+
+    Operation Mod
+            (evaluates i, j : Integer)
+                : Integer;
+        ensures
+            Mod = (i Basic_Integer_Theory::mod j);
 
     Operation Write
             (evaluates a : Integer);

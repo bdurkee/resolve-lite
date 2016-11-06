@@ -9,9 +9,10 @@ import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.symbol.OperationSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
-import edu.clemson.resolve.vcgen.model.AssertiveBlock;
-import edu.clemson.resolve.vcgen.model.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.model.VCCall;
+import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.VCGenerator;
+import edu.clemson.resolve.vcgen.stats.VCCall;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,8 +22,22 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull VCAssertiveBlockBuilder block, @NotNull VCCall stat) {
-        PApply callExp = (PApply) stat.getStatComponents().get(0);
+    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                    @NotNull VCAssertiveBlockBuilder block,
+                                    @NotNull VCCall stat) {
+        PApply callExp = (PApply) stat.getProgCallExp();
+        OperationSymbol op = ExplicitCallApplicationStrategy.getOperation(block.scope, callExp);
+
+        Iterator<ProgParameterSymbol> formalParamIter = op.getParameters().iterator();
+
+        //first applyBackingRule any nested calls passed as arguments to evaluate mode parameters.
+       /* for (PExp arg : callExp.getArguments()) {
+            ProgParameterSymbol p = formalParamIter.next();
+            if (p.getMode() == ParameterMode.EVALUATES) {
+                FunctionAssignRuleApplyingListener l = new FunctionAssignRuleApplyingListener(stat.getDefiningContext(), block)
+
+            }
+        }*/
         GeneralCallRuleSubstitutor applier = new GeneralCallRuleSubstitutor(stat.getDefiningContext(), block);
         callExp.accept(applier);
         return block.finalConfirm(applier.getCompletedExp()).snapshot();
@@ -88,13 +103,13 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
                 //t ~> NPV(RP, a), @t ~> a
                 if (curFormal.getMode() == ParameterMode.UPDATES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NPV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGenerator.NPV(RP, (PSymbol) curActual));
                     newAssumeSubtitutions.put(new PSymbolBuilder(
                             curFormal.asPSymbol()).incoming(true).build(), (PSymbol) curActual);
                 }
                 //v ~> NPV(RP, b)
                 else if (curFormal.getMode() == ParameterMode.REPLACES) {
-                    newAssumeSubtitutions.put(curFormal.asPSymbol(), NPV(RP, (PSymbol) curActual));
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGenerator.NPV(RP, (PSymbol) curActual));
                 }
                 //@y ~> e, @z ~> f
                 else if (curFormal.getMode() == ParameterMode.ALTERS || curFormal.getMode() == ParameterMode.CLEARS) {
@@ -138,40 +153,17 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
             for (PExp actualArg : e.getArguments()) {
                 ProgParameterSymbol curFormal = formalIter.next();
                 if (distinguishedModes.contains(curFormal.getMode())) {
-                    confirmSubstitutions.put(actualArg, NPV(RP, (PSymbol) actualArg));
+                    confirmSubstitutions.put(actualArg, VCGenerator.NPV(RP, (PSymbol) actualArg));
                 }
             }
             block.finalConfirm(RP.substitute(confirmSubstitutions));
         }
     }
 
-    /** "Next Prime Variable" */
-    public static PSymbol NPV(PExp RP, PSymbol oldSym) {
-        // Add an extra question mark to the front of oldSym
-        PSymbol newOldSym = new PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
-
-        // Applies the question mark to oldVar if it is our first time visiting.
-        if (RP.containsName(oldSym.getName())) {
-            return NPV(RP, newOldSym);
-        }
-        // Don't need to apply the question mark here.
-        else if (RP.containsName(newOldSym.getName())) {
-            return NPV(RP, newOldSym);
-        }
-        else {
-            // Return the new variable expression with the question mark
-            int i = oldSym.getName().length() - 1;
-            if (oldSym.getName().charAt(i) != '′') {
-                return newOldSym;
-            }
-        }
-        return oldSym;
-    }
-
     @NotNull
     @Override
     public String getDescription() {
-        return "general call rule application";
+        return "General call rule application";
     }
 
 }

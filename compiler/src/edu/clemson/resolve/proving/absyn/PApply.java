@@ -37,12 +37,12 @@ public class PApply extends PExp {
         /** Traditional prefix style applications of the form: {@code F(x)} */
         PREFIX {
             @Override
-            protected String toString(PApply s) {
+            protected String toString(PApply s, boolean parenthesizeApps) {
                 if (s.isBracketBasedApp) {
                     return s.arguments.get(0) + "[" + s.arguments.get(1) + "]";
                 }
                 else {
-                    return s.functionPortion.toString() + "(" + Utils.join(s.arguments, ", ") + ")";
+                    return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
                 }
             }
 
@@ -64,9 +64,12 @@ public class PApply extends PExp {
         /** Binary infix style applications where the arguments are on either side of the function: {@code x F y} */
         INFIX {
             @Override
-            protected String toString(PApply s) {
-                String result = Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ");
-                return "(" + result + ")";
+            protected String toString(PApply s, boolean parenthesizeApps) {
+                PExp left = s.arguments.get(0);
+                PExp right = s.arguments.get(1);
+                String result = left.toString(parenthesizeApps) + " " + s.functionPortion.getTopLevelOperationName() + " "
+                        + right.toString(parenthesizeApps);
+                return parenthesizeApps ?  "(" + result + ")" : result;
             }
 
             @Override
@@ -87,7 +90,7 @@ public class PApply extends PExp {
         /** Postfix style applications where the operator proceeds its argumemts: {@code x y F} */
         POSTFIX {
             @Override
-            protected String toString(PApply s) {
+            protected String toString(PApply s, boolean parenthesizeApps) {
                 String retval = Utils.join(s.arguments, ", ");
 
                 if (s.arguments.size() > 1) {
@@ -117,7 +120,7 @@ public class PApply extends PExp {
          */
         OUTFIX {
             @Override
-            protected String toString(PApply s) {
+            protected String toString(PApply s, boolean parenthesizeApps) {
                 assert s.functionPortion instanceof PSymbol;
                 PSymbol f = (PSymbol) s.functionPortion;
                 return f.getLeftPrint() + Utils.join(s.arguments, ", ") + f.getRightPrint();
@@ -145,7 +148,7 @@ public class PApply extends PExp {
          * @param s some application
          * @return a string representation.
          */
-        protected abstract String toString(PApply s);
+        protected abstract String toString(PApply s, boolean parenthesizeApps);
 
         /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
@@ -316,7 +319,7 @@ public class PApply extends PExp {
         if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
             arguments.forEach(a -> result.addAll(a.split(assumptions)));
         }
-        else if (getTopLevelOperationName().equals("implies")) {
+        else if (getTopLevelOperationName().equals("implies") || getTopLevelOperationName().equals("⟹")) {
             PExp tempLeft, tempRight;
             tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
             //tempList = arguments.get(0).split(assumptions);
@@ -466,9 +469,32 @@ public class PApply extends PExp {
         return result;
     }
 
+    //default toString is conservative in that it places many parentheses
     @Override
     public String toString() {
-        return displayStyle.toString(this);
+        return displayStyle.toString(this, true);
+    }
+
+    //default
+    @Override
+    public String toString(boolean parenthesizeApplications) {
+        return displayStyle.toString(this, parenthesizeApplications);
+    }
+
+    @NotNull
+    protected static String pexpJoin(@NotNull Collection<PExp> exps, boolean parenthesizeApplications) {
+        String result = "";
+        boolean first = true;
+        for (PExp e : exps) {
+            if (first) {
+                result += e.toString(parenthesizeApplications);
+                first = false;
+            }
+            else {
+                result += ", " + e.toString(parenthesizeApplications);
+            }
+        }
+        return result;
     }
 
     /**
@@ -487,6 +513,8 @@ public class PApply extends PExp {
 
         protected MathClssftn applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
+
+        //TODO: Bracket based app should have a left and right...
         protected boolean bracketApp = false;
 
         /**
