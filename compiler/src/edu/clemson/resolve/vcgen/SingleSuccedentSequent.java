@@ -14,17 +14,17 @@ import java.util.Collection;
 public interface SingleSuccedentSequent {
 
     @NotNull
-    public Collection<PExp> getAntecedents();
+    public Collection<PExp> getLeftFormulas();
 
     /**
      * Returns {@code true} iff {@code this} sequent contains the specified expression in its left hand
      * side; {@code false} otherwise.
      *
-     * @param e the wff being searched for
+     * @param formula the wff being searched for
      * @return {@code true} if the left hand side of the sequent contains the specified
      * expression
      */
-    public boolean containsAntecedent(PExp e);
+    public boolean containsFormula(PExp formula);
 
     /**
      * Returns the expression in the right hand side of {@code this} sequent or {@code null} if the right hand side of
@@ -33,5 +33,5 @@ public interface SingleSuccedentSequent {
      * @return the formula on the right or <code>null</code>.
      */
     @Nullable
-    public PExp getSuccedent();
+    public PExp getRight();
 }

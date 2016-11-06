@@ -11,32 +11,30 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
-import edu.clemson.resolve.semantics.programtype.*;
-import edu.clemson.resolve.vcgen.application.*;
-import edu.clemson.resolve.vcgen.stats.*;
-import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import edu.clemson.resolve.semantics.programtype.PTRepresentation;
+import edu.clemson.resolve.semantics.programtype.ProgFamilyType;
+import edu.clemson.resolve.semantics.programtype.ProgNamedType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 import edu.clemson.resolve.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.application.*;
+import edu.clemson.resolve.vcgen.stats.*;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static edu.clemson.resolve.vcgen.application.ExplicitCallApplicationStrategy.ExplicitCallRuleApplyingListener;
-
-//TODO: CAN CHANGE TO VISITOR I THINK.
-public class VCGenerator extends ResolveBaseListener {
+//Note: This is the newer one..
+public class VCGen extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
     private final MathSymbolTable symtab;
@@ -60,14 +58,9 @@ public class VCGenerator extends ResolveBaseListener {
     private ModuleScopeBuilder moduleScope = null;
 
     private ProgReprTypeSymbol currentTypeReprSym = null;
-
-    private final Deque<VCAssertiveBlockBuilder> assertiveBlocks = new LinkedList<>();
-
-    private OperationSymbol currentProcOpSym = null;
-    private boolean withinCallStmt = false;
     private final RESOLVECompiler compiler;
 
-    public VCGenerator(RESOLVECompiler compiler, AnnotatedModule module) {
+    public VCGen(RESOLVECompiler compiler, AnnotatedModule module) {
         this.symtab = compiler.symbolTable;
         this.tr = module;
         this.g = symtab.getTypeGraph();
@@ -249,25 +242,6 @@ public class VCGenerator extends ResolveBaseListener {
         assertiveBlocks.push(block);
     }
 
-    @Override
-    public void exitTypeImplInit(ResolveParser.TypeImplInitContext ctx) {
-        PExp typeInitEnsures = g.getTrueExp();
-        PExp convention = currentTypeReprSym.getConvention();
-        PExp correspondence = currentTypeReprSym.getCorrespondence();
-        if (currentTypeReprSym.getDefinition() != null) {
-            typeInitEnsures = currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures();
-        }
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
-        PExp newInitEnsures = typeInitEnsures.substitute(
-                currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
-        //block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats));
-        //block.confirm(convention);  //order here is important
-        block.assume(correspondence);
-        throw new UnsupportedOperationException("re-institute the final confirm for this dan");
-       // block.finalConfirm(newInitEnsures, "Initialization-ensures clause of " + currentTypeReprSym.getName());
-        //outputFile.addAssertiveBlock(block.build());
-    }
-
     //we'll need the "sequent_form" of the initial confirm, which, in most cases (at least with
     //the components we presently have), will simply be
     @Override
@@ -325,10 +299,11 @@ public class VCGenerator extends ResolveBaseListener {
     @Override
     public void enterProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
+        OperationSymbol op = null;
         try {
             List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
-            currentProcOpSym = s.queryForOne(new OperationQuery(null, ctx.name,
+            op = s.queryForOne(new OperationQuery(null, ctx.name,
                     Utils.apply(paramSyms, ProgParameterSymbol::getDeclaredType)));
 
             //This is the requires for the operation with some substutions made (see corrFnExp rule in HH-diss)
@@ -352,7 +327,6 @@ public class VCGenerator extends ResolveBaseListener {
 
         Scope scope = symtab.getScope(ctx);
         List<ProgParameterSymbol> paramSyms = scope.getSymbolsOfType(ProgParameterSymbol.class);
-        VCAssertiveBlockBuilder block = assertiveBlocks.pop();
         List<ProgParameterSymbol> formalParameters = new ArrayList<>();
         try {
             formalParameters = scope.query(new SymbolTypeQuery<ProgParameterSymbol>(ProgParameterSymbol.class));
@@ -377,35 +351,7 @@ public class VCGenerator extends ResolveBaseListener {
                 .finalConfirm(corrFnExpEnsures);
 */
         outputFile.addAssertiveBlocks(block.build());
-        //outputFile.addAssertiveBlock(block.build());
-        currentProcOpSym = null;
     }
-
-    @Override
-    public void exitProcedureDecl(ResolveParser.ProcedureDeclContext ctx) {
-
-    }
-
-    /*@Override public void exitVariableDeclGroup(
-            ResolveParser.VariableDeclGroupContext ctx) {
-        PTType type = tr.progTypeValues.get(ctx.type());
-        MTType mathClssfctn = tr.mathTypeValues.get(ctx.type());
-        for (TerminalNode t : ctx.ID()) {
-
-            if (type instanceof PTNamed) {
-                PExp init = ((PTNamed)type).getInitializationEnsures();
-                PSymbol v = new PSymbol.PSymbolBuilder(t.getText())
-                        .mathClssfctn(mathClssfctn).progType(type).build();
-                init = init.substitute(((PTNamed) type)
-                        .getExemplarAsPSymbol(), v);
-                assertiveBlocks.peek().assume(init);
-            }
-            else { //generic case
-                assertiveBlocks.peek().assume(
-                        g.formInitializationPredicate(type, t.getText()));
-            }
-        }
-    }*/
 
     private List<PExp> getAssertionsFromModuleFormalParameters(List<ModuleParameterSymbol> parameters,
                                                                Function<ProgParameterSymbol, List<PExp>> extract) {

@@ -20,17 +20,17 @@ public class ListBackedSingleSucceedentSequent implements SingleSuccedentSequent
 
     @NotNull
     @Override
-    public List<PExp> getAntecedents() {
+    public List<PExp> getLeftFormulas() {
         return antecedents;
     }
 
     @Override
-    public boolean containsAntecedent(PExp e) {
+    public boolean containsFormula(PExp formula) {
         return false;
     }
 
     @Override
-    public PExp getSuccedent() {
+    public PExp getRight() {
         return succeedent;
     }
 }
