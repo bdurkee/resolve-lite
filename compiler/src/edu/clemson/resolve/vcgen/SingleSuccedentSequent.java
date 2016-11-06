@@ -21,7 +21,7 @@ public interface SingleSuccedentSequent {
      * @return {@code true} if the left hand side of the sequent contains the specified
      * expression
      */
-    public abstract boolean containsAntecedent(PExp e);
+    public boolean containsAntecedent(PExp e);
 
     /**
      * Returns the expression in the right hand side of {@code this} sequent or {@code null} if the
