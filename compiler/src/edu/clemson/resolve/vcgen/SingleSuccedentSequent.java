@@ -5,8 +5,9 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import java.util.Collection;
 
 /**
- * Interface modelling a sequent of the form <code>{S} ==&gt; T</code> where
- * {@code S} is a set of mathematical expressions and {@code T} is a propositional formula.
+ * An interface modeling a sequents with a single succedent. Specifically, sequents of the form
+ * <code>{S} ==&gt; T</code> where {@code S} is a set of mathematical expressions and {@code T} is a
+ * propositional formula.
  */
 public interface SingleSuccedentSequent {
 
