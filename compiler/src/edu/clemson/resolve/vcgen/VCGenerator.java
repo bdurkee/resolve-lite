@@ -304,7 +304,7 @@ public class VCGenerator extends ResolveBaseListener {
                         .assume(corrFnExpRequires)
                         .remember();
         //var decls/stats
-        for (ResolveParser.VarDeclGroupContext v : ctx.varDeclGroup()) {
+        /*for (ResolveParser.VarDeclGroupContext v : ctx.varDeclGroup()) {
             ProgType type = tr.progTypes.get(v.type());
             for (TerminalNode t : v.ID()) {
                 block.stats(new VCVar(v, block, t.getText(), type));
@@ -314,7 +314,7 @@ public class VCGenerator extends ResolveBaseListener {
         StmtListener l = new StmtListener(block, tr.exprASTs);
         ParseTreeWalker.DEFAULT.walk(l, ctx);
         block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
-
+        */
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
         corrFnExpEnsures = corrFnExpEnsures.withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
@@ -349,7 +349,7 @@ public class VCGenerator extends ResolveBaseListener {
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, currentProcOpSym.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
-            Set<PExp> l = getModuleLevelAssertionsOfType(ClauseType.REQUIRES);
+
             VCAssertiveBlockBuilder block =
                     new VCAssertiveBlockBuilder(g, s,
                             "Correct_Op_Hypo=" + ctx.name.getText(), ctx)

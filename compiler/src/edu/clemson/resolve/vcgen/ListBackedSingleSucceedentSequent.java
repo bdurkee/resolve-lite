@@ -1,9 +1,11 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ListBackedSingleSucceedentSequent implements SingleSuccedentSequent {
@@ -13,9 +15,10 @@ public class ListBackedSingleSucceedentSequent implements SingleSuccedentSequent
 
     /** Builds an empty sequent. */
     public ListBackedSingleSucceedentSequent() {
-        this.antecedents = new ArrayList<>();
+        this.antecedents = new LinkedList<>();
     }
 
+    @NotNull
     @Override
     public List<PExp> getAntecedents() {
         return antecedents;
