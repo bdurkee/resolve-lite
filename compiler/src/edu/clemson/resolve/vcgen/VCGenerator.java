@@ -282,6 +282,8 @@ public class VCGenerator extends ResolveBaseListener {
         //outputFile.addAssertiveBlock(block.build());
     }
 
+    //we'll need the "sequent_form" of the initial confirm, which, in most cases (at least with
+    //the components we presently have), will simply be
     @Override
     public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
         Scope s = symtab.getScope(ctx);
