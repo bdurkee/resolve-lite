@@ -7,6 +7,7 @@ import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCAssume;
+import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -82,15 +83,35 @@ public class ParsimoniousAssumeApplicationStrategy
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
         remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
-
-       /* PExp substitutedConfirm = block.finalConfirm.getConfirmExp()
-                .substitute(equalitySubstitutions);*/
-        //PExp newFinalConfirm = performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
-        //        substitutedConfirm, stat.isStipulatedAssumption());
-        //block.finalConfirm(newFinalConfirm);
+        VCConfirm substitutedConfirm = block.finalConfirm.withSequentSubstituted(equalitySubstitutions);
+        List<Sequent> newFinalConfirmSequents =
+                performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
+                substitutedConfirm.getSequents(), stat.isStipulatedAssumption());
+        block.finalConfirm(newFinalConfirmSequents);
         return block.snapshot();
     }
 
+    private List<Sequent> performParsimoniousStep(DumbMathClssftnHandler g,
+                                                  List<PExp> assumptions,
+                                                  List<Sequent> sequents,
+                                                  boolean stipulated) {
+        Map<PExp, PExp> confirmsToModifiedConfirms = new LinkedHashMap<>();
+        List<Sequent> result = new LinkedList<>();
+
+        for (Sequent sequent : sequents) {
+            for (PExp assume : assumptions) {
+                Set<String> intersection = assume.getSymbolNames(true, true);
+                intersection.retainAll(getSymbolNamesFromSequent(sequent));
+                if ((!intersection.isEmpty() && !assume.isObviouslyTrue()) || stipulated) {
+                    sequent = sequent.addLeft(assume);
+                }
+            }
+            result.add(sequent);
+        }
+        return result;
+    }
+
+/*
     private PExp performParsimoniousStep(DumbMathClssftnHandler g,
                                          List<PExp> assumptions,
                                          PExp existingConfirm, boolean stipulated) {
@@ -110,12 +131,23 @@ public class ParsimoniousAssumeApplicationStrategy
         }
         List<PExp> result = new ArrayList<>(confirmsToModifiedConfirms.values());
         return g.formConjuncts(result);
-    }
+    }*/
 
-    /** Returns {@code true} if the substitution [s <~ t] affects any sequent in {@code sequents}. */
+    /**
+     * Returns {@code true} if the substitution wff[s <~ t] affects a wff of any sequent
+     * in {@code sequents}.
+     *
+     * @param sequents  the collection of sequents to test.
+     * @param s         the expression to replace.
+     * @param t         the (substitute) replacement expression.
+     */
     private boolean substitutesAny(List<Sequent> sequents, PExp s, PExp t) {
         for (Sequent sequent : sequents) {
-            for (PExp wff : sequent.getAllFormulas()) {
+            for (PExp wff : sequent.getLeftFormulas()) {
+                PExp substituted = wff.substitute(s, t);
+                if (!wff.equals(substituted)) return true;
+            }
+            for (PExp wff : sequent.getRightFormulas()) {
                 PExp substituted = wff.substitute(s, t);
                 if (!wff.equals(substituted)) return true;
             }

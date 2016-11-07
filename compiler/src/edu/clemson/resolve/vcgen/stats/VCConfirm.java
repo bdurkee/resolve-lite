@@ -1,6 +1,8 @@
 package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
+import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.vcgen.ListBackedSequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.app.ConfirmApplicationStrategy;
 import edu.clemson.resolve.vcgen.Sequent;
@@ -30,6 +32,24 @@ public class VCConfirm extends VCRuleBackedStat {
     @NotNull
     public List<Sequent> getSequents() {
         return sequents;
+    }
+
+    @NotNull
+    public VCConfirm withSequentSubstituted(PExp s, PExp t) {
+        Map<PExp, PExp> substitutions = new HashMap<>();
+        substitutions.put(s, t);
+        return withSequentSubstituted(substitutions);
+    }
+
+    @NotNull
+    public VCConfirm withSequentSubstituted(Map<PExp, PExp> s) {
+        List<Sequent> newSequents = new LinkedList<>();
+        for (Sequent sequent : sequents) {
+            newSequents.add(new ListBackedSequent(
+                    Utils.apply(sequent.getLeftFormulas(), e->e.substitute(s)),
+                    Utils.apply(sequent.getRightFormulas(), e->e.substitute(s))));
+        }
+        return new VCConfirm(definingCtx, enclosingBlock, newSequents);
     }
 
     @NotNull

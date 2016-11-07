@@ -21,9 +21,6 @@ public interface Sequent {
     public Collection<PExp> getRightFormulas();
 
     @NotNull
-    public Collection<PExp> getAllFormulas();
-
-    @NotNull
     public Sequent addRight(@NotNull PExp formula);
 
     @NotNull
