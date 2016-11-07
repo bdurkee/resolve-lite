@@ -28,7 +28,7 @@ import java.util.*;
 public class AnnotatedModule {
 
     /**
-     * Any infix application that's defined (via a definition) to be chainable (i.e.: one where x OP y OP z is,
+     * Any infix app that's defined (via a definition) to be chainable (i.e.: one where x OP y OP z is,
      * internally, interpreted as "x OP y and y OP z"). Note that any operator defined
      * to be chainable had better be a predicate as it will become an argument to binary "and".
      */

@@ -38,7 +38,15 @@ public class ListBackedSequent implements Sequent {
     @NotNull
     @Override
     public Collection<PExp> getRightFormulas() {
-        return Collections.unmodifiableList(new LinkedList<>(left));
+        return Collections.unmodifiableList(new LinkedList<>(right));
+    }
+
+    @NotNull
+    @Override
+    public Collection<PExp> getAllFormulas() {
+        List<PExp> combined = getLeftFormulas();
+        combined.addAll(getRightFormulas());
+        return combined;
     }
 
     @NotNull

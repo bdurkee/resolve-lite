@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.VCStatRuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 

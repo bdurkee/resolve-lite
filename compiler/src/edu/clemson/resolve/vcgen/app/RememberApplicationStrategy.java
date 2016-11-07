@@ -1,4 +1,4 @@
-package edu.clemson.resolve.vcgen.application;
+package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
@@ -22,8 +22,10 @@ public class RememberApplicationStrategy implements VCStatRuleApplicationStrateg
                                       @NotNull VCRemember stat) {
         List<Sequent> sequents = new ArrayList<>();
         for (Sequent s : block.finalConfirm.getSequents()) {
-            sequents.add(new ListBackedSequent(Utils.apply(s.getLeftFormulas(), PExp::withIncomingSignsErased),
-                    Utils.apply(s.getLeftFormulas(), PExp::withIncomingSignsErased)));
+            Sequent t = new ListBackedSequent(
+                    Utils.apply(s.getLeftFormulas(), PExp::withIncomingSignsErased),
+                    Utils.apply(s.getRightFormulas(), PExp::withIncomingSignsErased));
+            sequents.add(t);
         }
         return block.finalConfirm(sequents).snapshot();
     }
@@ -31,6 +33,6 @@ public class RememberApplicationStrategy implements VCStatRuleApplicationStrateg
     @NotNull
     @Override
     public String getDescription() {
-        return "Remember rule application";
+        return "Remember rule app";
     }
 }

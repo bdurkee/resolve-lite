@@ -1,9 +1,8 @@
 package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.vcgen.ListBackedSequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.application.ConfirmApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.ConfirmApplicationStrategy;
 import edu.clemson.resolve.vcgen.Sequent;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;

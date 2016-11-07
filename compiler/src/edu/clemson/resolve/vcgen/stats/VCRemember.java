@@ -1,7 +1,7 @@
 package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.application.RememberApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.RememberApplicationStrategy;
 import org.jetbrains.annotations.NotNull;
 
 public class VCRemember extends VCRuleBackedStat {

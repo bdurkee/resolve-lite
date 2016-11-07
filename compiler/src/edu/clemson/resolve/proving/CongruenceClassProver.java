@@ -115,7 +115,7 @@ public final class CongruenceClassProver {
                 if (assertion.getTopLevelOperationName().equals("impliesB")) {
 
                     //O.k. it seems we can safely assume the assertion (at the top level at least) will be an instance
-                    //of a function application (PApply) TODO: bp this(103) when m_theorems is size 7
+                    //of a function app (PApply) TODO: bp this(103) when m_theorems is size 7
                     addGoalSearchingTheorem((PApply)assertion, eName);
                     //first arg (.get(1)) of function implies, second arg (.get(2))
                     t =
@@ -832,7 +832,7 @@ public final class CongruenceClassProver {
         Map<String, Integer> theoremAppliedCount = new HashMap<>();
         VerificationConditionCongruenceClosureImpl.STATUS status = vcc.isProved();
         String div = divLine(vcc.m_name);
-        String theseResults = div + ("Before application of theorems: " + vcc + "\n");
+        String theseResults = div + ("Before app of theorems: " + vcc + "\n");
 
         int iteration = 0;
         // ++++++ Create new PQ for instantiated theorems

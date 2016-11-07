@@ -1,7 +1,5 @@
-package edu.clemson.resolve.vcgen.application;
+package edu.clemson.resolve.vcgen.app;
 
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCSwap;
@@ -16,7 +14,7 @@ public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VC
     public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
                                       @NotNull VCAssertiveBlockBuilder block,
                                       @NotNull VCSwap stat) {
-        PExp workingConfirm = block.finalConfirm.getConfirmExp();
+        /*PExp workingConfirm = block.finalConfirm.getConfirmExp();
         PExp swapLeft = stat.getLeft();
         PExp swapRight = stat.getRight();
         PExp temp = new PSymbol.PSymbolBuilder((PSymbol)swapLeft).name("_t;").build();
@@ -24,13 +22,13 @@ public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VC
         workingConfirm = workingConfirm.substitute(swapRight, temp);
         workingConfirm = workingConfirm.substitute(swapLeft, swapRight);
         workingConfirm = workingConfirm.substitute(temp, swapLeft);
-        block.finalConfirm(workingConfirm);
+        block.finalConfirm(workingConfirm);*/
         return block.snapshot();
     }
 
     @NotNull
     @Override
     public String getDescription() {
-        return "Swap rule application";
+        return "Swap rule app";
     }
 }

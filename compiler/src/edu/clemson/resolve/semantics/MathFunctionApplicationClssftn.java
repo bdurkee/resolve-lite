@@ -22,7 +22,7 @@ public class MathFunctionApplicationClssftn extends MathClssftn {
                                           @NotNull MathFunctionClssftn f,
                                           @NotNull String name,
                                           @NotNull List<MathClssftn> arguments) {
-        //our range type is the result of an application, so we implicitly exhaust one layer from it...
+        //our range type is the result of an app, so we implicitly exhaust one layer from it...
         super(g, f.getRangeClssftn());
         this.function = f;
         this.name = name;

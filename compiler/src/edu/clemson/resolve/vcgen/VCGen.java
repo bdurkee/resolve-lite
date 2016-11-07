@@ -20,7 +20,7 @@ import edu.clemson.resolve.semantics.symbol.*;
 import edu.clemson.resolve.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.application.*;
+import edu.clemson.resolve.vcgen.app.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;

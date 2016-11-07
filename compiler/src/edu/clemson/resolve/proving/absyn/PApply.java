@@ -21,10 +21,10 @@ public class PApply extends PExp {
 
     /**
      * An enumerated type that provides additional information about how to display an instance of {@link PApply},
-     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style application.
+     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style app.
      * <p>
      * Note that while this enum indeed stands-in for the four subclasses we'd otherwise need to represent the
-     * application styles mentioned, we still can get specific visitor methods for each style (even with an enum)
+     * app styles mentioned, we still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
@@ -143,9 +143,9 @@ public class PApply extends PExp {
         };
 
         /**
-         * Returns a well formatted string representation of this application style.
+         * Returns a well formatted string representation of this app style.
          *
-         * @param s some application
+         * @param s some app
          * @return a string representation.
          */
         protected abstract String toString(PApply s, boolean parenthesizeApps);
@@ -161,7 +161,7 @@ public class PApply extends PExp {
     }
 
     /**
-     * Represents the 'first class function' this application is referencing. Note that the type of
+     * Represents the 'first class function' this app is referencing. Note that the type of
      * {@code functionPortion} can be considered independent of the types of the formals (which are rightly
      * embedded here in the argument {@code PExp}s).
      * <p>
@@ -518,10 +518,10 @@ public class PApply extends PExp {
         protected boolean bracketApp = false;
 
         /**
-         * Constructor for converting an existing function application back into a buildable format. This is useful
+         * Constructor for converting an existing function app back into a buildable format. This is useful
          * for adding (or editing) some information in an existing {@link PApply} instance.
          *
-         * @param e The existing application.
+         * @param e The existing app.
          */
         public PApplyBuilder(@NotNull PApply e) {
             this.functionPortion = e.functionPortion;

@@ -1364,7 +1364,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyPrefixNode.name = dummyName;
         typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
 
-        //TODO: For now, I assign the first class function type of the outfix application to the
+        //TODO: For now, I assign the first class function type of the outfix app to the
         //left hand side of the operator..
         tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
         return null;
@@ -1372,7 +1372,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
-        //construct a 'name' node for this non std application
+        //construct a 'name' node for this non std app
         ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
         dummyNode.name = dummyName;
@@ -1483,7 +1483,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
 
         //If we're describing a type, then the range (as a result of the function is too broad),
-        //so we'll annotate the type of this application with its (verbose) application type.
+        //so we'll annotate the type of this app with its (verbose) app type.
         //but it's enclosing type will of course still be the range.
         if (walkingType && expectedFuncType.getRangeClssftn().getTypeRefDepth() <= 1) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
@@ -1502,7 +1502,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, appType);
         }
         else {
-            //the classification of an f-application exp is the range of f,
+            //the classification of an f-app exp is the range of f,
             //according to the rule:
             //  C \ f : C x D -> R
             //  C \ E1 : C

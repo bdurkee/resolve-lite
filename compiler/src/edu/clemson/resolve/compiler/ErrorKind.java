@@ -95,7 +95,7 @@ public enum ErrorKind {
     NO_SUCH_MATH_FUNCTION(15, "no such function: <arg>", ErrorSeverity.ERROR),
 
     APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
-            " application, but it isn't a function", ErrorSeverity.ERROR),
+            " app, but it isn't a function", ErrorSeverity.ERROR),
 
     INCORRECT_FUNCTION_ARG_COUNT(17, "no such mathFor function: <arg>" +
             "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),

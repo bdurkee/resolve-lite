@@ -210,7 +210,7 @@ public abstract class PExp {
      * A predicate that returns {@code true} in any of the following cases:
      * <ul>
      * <li>If we're an instance of {@code PSymbol} whose name is simply {@code true}.</li>
-     * <li>If we're an expression with a top level application of of binary {@code =}s whose left and right arguments
+     * <li>If we're an expression with a top level app of of binary {@code =}s whose left and right arguments
      * are themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>;
      *
@@ -221,10 +221,10 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} if this {@code PExp} represents a primitive application of the {@code =} operator;
+     * Returns {@code true} if this {@code PExp} represents a primitive app of the {@code =} operator;
      * {@code false} otherwise.
      *
-     * @return whether or not we have represent a top-level application of equals
+     * @return whether or not we have represent a top-level app of equals
      */
     public boolean isEquality() {
         return false;
@@ -263,7 +263,7 @@ public abstract class PExp {
      * If {@code this} expression is anonoymous, then we simply return a canned string such as <code>\:PLamda</code>
      * or <code>{ PSet }</code>.</p>
      * <p>
-     * If your dealing with a curried style top-level application of the form {@code SS(k)(Cen(k))}, then the canonical
+     * If your dealing with a curried style top-level app of the form {@code SS(k)(Cen(k))}, then the canonical
      * name returned should simply be <tt>SS</tt>.</p>
      *
      * @return the canonical name
@@ -373,7 +373,7 @@ public abstract class PExp {
     public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
     //TODO: Consider making this List<PApply>.. but what about lambdas, isn't
-    //that a function application? Just a nameless function application?
+    //that a function app? Just a nameless function app?
     @NotNull
     public final List<PExp> getFunctionApplications() {
         if (cachedFunctionApplications == null) {

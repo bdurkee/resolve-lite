@@ -1,4 +1,4 @@
-package edu.clemson.resolve.vcgen.application;
+package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -13,7 +13,6 @@ public interface VCStatRuleApplicationStrategy<T extends VCRuleBackedStat> {
     public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                       @NotNull VCAssertiveBlockBuilder block,
                                       @NotNull T stat);
-
     @NotNull
     public String getDescription();
 }

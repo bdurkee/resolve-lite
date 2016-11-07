@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.ParsimoniousAssumeApplicationStrategy;
 import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;

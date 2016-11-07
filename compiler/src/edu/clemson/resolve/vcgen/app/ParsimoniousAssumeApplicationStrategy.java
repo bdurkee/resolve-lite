@@ -1,8 +1,9 @@
-package edu.clemson.resolve.vcgen.application;
+package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCAssume;
@@ -20,8 +21,9 @@ public class ParsimoniousAssumeApplicationStrategy
                                       @NotNull VCAssertiveBlockBuilder block,
                                       @NotNull VCAssume stat) {
         List<PExp> allAssumptions = stat.getAssumeExp().splitIntoConjuncts();
+        List<Sequent> existingSequents = block.finalConfirm.getSequents();
+
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
-        PExp existingConfirm = block.finalConfirm.getConfirmExp();
         List<PExp> remainingAssumptions = new ArrayList<>();
         List<PExp> nonEffectualEqualities = new ArrayList<>();
 
@@ -49,16 +51,19 @@ public class ParsimoniousAssumeApplicationStrategy
                 }
                 //left replaceablility
                 else if (lhs.isVariable()) {
-                    equalitySubstitutions.put(lhs, rhs);
-                    //if we didn't do a replacement, then add it
-                    if (existingConfirm.substitute(lhs, rhs).equals(existingConfirm)) {
+                    if (substitutesAny(existingSequents, lhs, rhs)) {
+                        equalitySubstitutions.put(lhs, rhs);
+                    }
+                    else {
                         nonEffectualEqualities.add(assume);
                     }
                 }
                 //right replaceability
                 else if (rhs.isVariable()) {
-                    equalitySubstitutions.put(rhs, lhs);
-                    if (existingConfirm.substitute(rhs, lhs).equals(existingConfirm)) {
+                    if (substitutesAny(existingSequents, rhs, lhs)) {
+                        equalitySubstitutions.put(rhs, lhs);
+                    }
+                    else {
                         nonEffectualEqualities.add(assume);
                     }
                 }
@@ -78,11 +83,11 @@ public class ParsimoniousAssumeApplicationStrategy
         }
         remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
 
-        PExp substitutedConfirm = block.finalConfirm.getConfirmExp()
-                .substitute(equalitySubstitutions);
-        PExp newFinalConfirm = performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
-                substitutedConfirm, stat.isStipulatedAssumption());
-        block.finalConfirm(newFinalConfirm);
+       /* PExp substitutedConfirm = block.finalConfirm.getConfirmExp()
+                .substitute(equalitySubstitutions);*/
+        //PExp newFinalConfirm = performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
+        //        substitutedConfirm, stat.isStipulatedAssumption());
+        //block.finalConfirm(newFinalConfirm);
         return block.snapshot();
     }
 
@@ -107,9 +112,31 @@ public class ParsimoniousAssumeApplicationStrategy
         return g.formConjuncts(result);
     }
 
+    /** Returns {@code true} if the substitution [s <~ t] affects any sequent in {@code sequents}. */
+    private boolean substitutesAny(List<Sequent> sequents, PExp s, PExp t) {
+        for (Sequent sequent : sequents) {
+            for (PExp wff : sequent.getAllFormulas()) {
+                PExp substituted = wff.substitute(s, t);
+                if (!wff.equals(substituted)) return true;
+            }
+        }
+        return false;
+    }
+
+    private Set<String> getSymbolNamesFromSequent(Sequent s) {
+        Set<String> result = new HashSet<>();
+        for (PExp e : s.getLeftFormulas()) {
+            result.addAll(e.getSymbolNames(true, true));
+        }
+        for (PExp e : s.getRightFormulas()) {
+            result.addAll(e.getSymbolNames(true, true));
+        }
+        return result;
+    }
+
     @NotNull
     @Override
     public String getDescription() {
-        return "Parsimonious assume application";
+        return "Parsimonious assume app";
     }
 }
