@@ -1,6 +1,5 @@
 package edu.clemson.resolve.vcgen.app;
 
-import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.vcgen.Sequent;
@@ -83,7 +82,7 @@ public class ParsimoniousAssumeApplicationStrategy
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
         remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
-        VCConfirm substitutedConfirm = block.finalConfirm.withSequentSubstituted(equalitySubstitutions);
+        VCConfirm substitutedConfirm = block.finalConfirm.withSequentFormulaSubstitution(equalitySubstitutions);
         List<Sequent> newFinalConfirmSequents =
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
                 substitutedConfirm.getSequents(), stat.isStipulatedAssumption());

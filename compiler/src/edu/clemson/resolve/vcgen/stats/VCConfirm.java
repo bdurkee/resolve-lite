@@ -35,14 +35,14 @@ public class VCConfirm extends VCRuleBackedStat {
     }
 
     @NotNull
-    public VCConfirm withSequentSubstituted(PExp s, PExp t) {
+    public VCConfirm withSequentFormulaSubstitution(PExp s, PExp t) {
         Map<PExp, PExp> substitutions = new HashMap<>();
         substitutions.put(s, t);
-        return withSequentSubstituted(substitutions);
+        return withSequentFormulaSubstitution(substitutions);
     }
 
     @NotNull
-    public VCConfirm withSequentSubstituted(Map<PExp, PExp> s) {
+    public VCConfirm withSequentFormulaSubstitution(Map<PExp, PExp> s) {
         List<Sequent> newSequents = new LinkedList<>();
         for (Sequent sequent : sequents) {
             newSequents.add(new ListBackedSequent(

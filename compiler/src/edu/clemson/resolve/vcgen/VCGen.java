@@ -23,6 +23,7 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.app.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -157,6 +158,10 @@ public class VCGen extends ResolveBaseListener {
                 .assume(corrFnExps)
                 .confirm(ctx, g.formConjuncts(paramConsequents))
                 .finalConfirm(corrFnExpEnsures);*/
+        StmtListener l = new StmtListener(block, tr.exprASTs);
+        ParseTreeWalker.DEFAULT.walk(l, ctx);
+        List<VCRuleBackedStat> x = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats);
+        block.stats(x);
         block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlocks(block.build());
     }
