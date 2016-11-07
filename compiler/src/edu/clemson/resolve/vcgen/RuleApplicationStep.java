@@ -1,8 +1,5 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.codegen.Model.OutputModelObject;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
-
 public class RuleApplicationStep {
 
     private final String step, description;

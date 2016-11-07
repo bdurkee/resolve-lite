@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCSwap;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +13,9 @@ public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VC
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
-                                    @NotNull VCAssertiveBlockBuilder block,
-                                    @NotNull VCSwap stat) {
+    public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                      @NotNull VCAssertiveBlockBuilder block,
+                                      @NotNull VCSwap stat) {
         PExp workingConfirm = block.finalConfirm.getConfirmExp();
         PExp swapLeft = stat.getLeft();
         PExp swapRight = stat.getRight();

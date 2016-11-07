@@ -5,7 +5,6 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PExpListener;
 import edu.clemson.resolve.proving.absyn.PSymbol;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCAssign;
@@ -21,9 +20,9 @@ public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationS
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
-                                    @NotNull VCAssertiveBlockBuilder block,
-                                    @NotNull VCAssign stat) {
+    public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                      @NotNull VCAssertiveBlockBuilder block,
+                                      @NotNull VCAssign stat) {
         PExp left = stat.getLeft();
         PExp right = stat.getRight();
 

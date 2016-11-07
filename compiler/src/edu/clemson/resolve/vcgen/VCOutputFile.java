@@ -16,11 +16,11 @@ public class VCOutputFile {
     private final RESOLVECompiler compiler;
 
     /**
-     * All raw {@link AssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
+     * All raw {@link VCAssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
      * must be satisfied to verify the program under consideration.
      */
     @ModelElement
-    public List<AssertiveBlock> chunks = new ArrayList<>();
+    public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
     @ModelElement
@@ -57,10 +57,11 @@ public class VCOutputFile {
         return result;
     }
 
-    private void addVCsInContext(final AssertiveBlock batch) {
+    private void addVCsInContext(final VCAssertiveBlock batch) {
 
         VCConfirm batchedConfirm = batch.getFinalConfirm();
-        List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
+        //finalVcs.addAll
+       /* List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
 
         PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
@@ -88,7 +89,7 @@ public class VCOutputFile {
             if (vc.getConsequent().isLiteralTrue()) continue;
             finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
             currentVcNumber++;
-        }
+        }*/
     }
 
     @Override
@@ -99,7 +100,7 @@ public class VCOutputFile {
             result += vc.toString() + "\n\n";
         }
 
-        for (AssertiveBlock b : chunks) {
+        for (VCAssertiveBlock b : chunks) {
             result += b.getDescription() + "\n";
             result += b.getText() + "\n";
             result += "<S T E P S>\n";

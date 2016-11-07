@@ -4,7 +4,6 @@ import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
-import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +37,7 @@ public class VCAssign extends VCRuleBackedStat {
 
     @NotNull
     @Override
-    public VCAssign copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
+    public VCAssign copyWithEnclosingBlock(@NotNull VCAssertiveBlock.VCAssertiveBlockBuilder b) {
         return new VCAssign(definingCtx, b, applicationStrategy, left, right);
     }
 

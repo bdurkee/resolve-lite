@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen.application;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +13,9 @@ public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
-                                    @NotNull VCAssertiveBlockBuilder block,
-                                    @NotNull VCConfirm stat) {
+    public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
+                                      @NotNull VCAssertiveBlockBuilder block,
+                                      @NotNull VCConfirm stat) {
         PExp newFinalConfirm = null;
         DumbMathClssftnHandler g = block.g;
 
