@@ -8,21 +8,24 @@ import org.jetbrains.annotations.NotNull;
 
 public class VCAssume extends VCRuleBackedStat {
 
-    protected boolean isStipulatedAssumption = false;
-    protected VCStatRuleApplicationStrategy<VCAssume> apply;
+    private final VCStatRuleApplicationStrategy<VCAssume> apply;
     private final PExp assume;
 
+    private final boolean isStipulatedAssumption, isNotice;
+
     public VCAssume(VCAssertiveBlockBuilder block, boolean stipulate, PExp assume) {
-        this(block, new ParsimoniousAssumeApplicationStrategy(), false, assume);
+        this(block, new ParsimoniousAssumeApplicationStrategy(), false, false, assume);
     }
 
     public VCAssume(VCAssertiveBlockBuilder block,
                     VCStatRuleApplicationStrategy<VCAssume> strategy,
                     boolean stipulate,
+                    boolean notice,
                     PExp assume) {
         super(null, block, strategy);
         this.apply = strategy;
         this.assume = assume;
+        this.isNotice = notice;
         this.isStipulatedAssumption = stipulate;
     }
 
@@ -36,12 +39,16 @@ public class VCAssume extends VCRuleBackedStat {
 
     @NotNull
     public VCAssume copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b) {
-        return new VCAssume(b, apply, isStipulatedAssumption, getAssumeExp());
+        return new VCAssume(b, apply, isStipulatedAssumption, isNotice, getAssumeExp());
     }
 
     @Override
     public String toString() {
-        String result = "Assume " + assume.toString(false) + ";";
+        String exp = assume.toString(false);
+        if (isNotice) {
+            return "Notice " + exp + ";";
+        }
+        String result = "Assume " + exp + ";";
         if (isStipulatedAssumption) {
             result += "Stipulated_" + result;
         }

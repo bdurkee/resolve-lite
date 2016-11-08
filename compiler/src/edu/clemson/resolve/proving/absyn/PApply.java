@@ -123,7 +123,7 @@ public class PApply extends PExp {
             protected String toString(PApply s, boolean parenthesizeApps) {
                 assert s.functionPortion instanceof PSymbol;
                 PSymbol f = (PSymbol) s.functionPortion;
-                return f.getLeftPrint() + Utils.join(s.arguments, ", ") + f.getRightPrint();
+                return f.getLeftPrint() + pexpJoin(s.arguments, parenthesizeApps) + f.getRightPrint();
             }
 
             @Override
