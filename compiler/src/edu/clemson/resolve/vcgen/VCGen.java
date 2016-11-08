@@ -44,8 +44,8 @@ public class VCGen extends ResolveBaseListener {
 
     //public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
     //        new ExplicitCallApplicationStrategy();
-    //public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
-    //        new GeneralCallApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
+            new GeneralCallApplicationStrategy();
     public static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
 
@@ -331,9 +331,8 @@ public class VCGen extends ResolveBaseListener {
 
         @Override
         public void exitCallStmt(ResolveParser.CallStmtContext ctx) {
-            //VCCall s = new VCCall(ctx, builder, GENERAL_CALL_APPLICATION, (PApply) asts.get(ctx.progParamExp()));
-            //stats.put(ctx, s);
-            throw new UnsupportedOperationException("call not yet implemented");
+            VCCall s = new VCCall(ctx, builder, GENERAL_CALL_APPLICATION, (PApply) asts.get(ctx.progParamExp()));
+            stats.put(ctx, s);
         }
 
         @Override
@@ -403,21 +402,42 @@ public class VCGen extends ResolveBaseListener {
         return simple;
     }
 
+    /** "Next Prime Variable" (over sequents) */
+    public static PSymbol NPV(List<Sequent> sequents, PSymbol oldSym) {
+        PSymbol result = oldSym;
+
+        for (Sequent sequent : sequents) {
+            for (PExp formula : sequent.getLeftFormulas()) {
+                PSymbol temp = NPV(formula, oldSym);
+                if (temp.getName().length() > result.getName().length()) {
+                    result = temp;
+                }
+            }
+            for (PExp formula : sequent.getRightFormulas()) {
+                PSymbol temp = NPV(formula, oldSym);
+                if (temp.getName().length() > result.getName().length()) {
+                    result = temp;
+                }
+            }
+        }
+        return result;
+    }
+
     /** "Next Prime Variable" */
-    public static PSymbol NPV(PExp RP, PSymbol oldSym) {
+    private static PSymbol NPV(PExp wff, PSymbol oldSym) {
         //Add an extra question mark to the front of oldSym
         PSymbol newOldSym = new PSymbol.PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
 
-        //Applies the question mark to oldSym if it is our first time visiting.
-        if (RP.containsName(oldSym.getName())) {
-            return NPV(RP, newOldSym);
+        //Primes oldSym if it is our first time visiting.
+        if (wff.containsName(oldSym.getName())) {
+            return NPV(wff, newOldSym);
         }
-        //Don't need to apply the question mark here.
-        else if (RP.containsName(newOldSym.getName())) {
-            return NPV(RP, newOldSym);
+        //Don't need to prime here
+        else if (wff.containsName(newOldSym.getName())) {
+            return NPV(wff, newOldSym);
         }
         else {
-            //Return the new variable expression with the question mark
+            //Return the new variable expression with the prime
             int i = oldSym.getName().length() - 1;
             if (oldSym.getName().charAt(i) != '′') {
                 return newOldSym;

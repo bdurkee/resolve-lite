@@ -162,6 +162,7 @@ public class DumbMathClssftnHandler {
 
     @Nullable
     public PExp formConjuncts(List<PExp> e) {
+
         if (e == null) {
             throw new IllegalArgumentException("can't conjunct a null list");
         }

@@ -150,11 +150,17 @@ public class VCAssertiveBlock {
             return this;
         }
 
+        //TODO: Make this no longer take a rulecontext...
         public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm) {
             if (confirm == null) {
                 confirm = g.getTrueExp();
             }
             stats.add(new VCConfirm(ctx, this, sequentFormRight(confirm)));
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder finalConfirm(VCConfirm confirm) {
+            this.finalConfirm = confirm;
             return this;
         }
 

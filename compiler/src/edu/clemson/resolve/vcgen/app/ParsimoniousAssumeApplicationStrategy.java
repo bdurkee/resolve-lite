@@ -39,7 +39,7 @@ public class ParsimoniousAssumeApplicationStrategy
                 //if both lhs and rhs are replaceable vars, then the left had better
                 //be a special verification-system conjured variable
                 if (lhs.isVariable() && rhs.isVariable()) {
-                    boolean hasVerificationVar = lhs.isVariable() &&
+                    boolean hasVerificationVar =
                             (lhs.getTopLevelOperationName().contains("P_Val") ||
                              lhs.getTopLevelOperationName().contains("conc"));
                     if (hasVerificationVar) {
@@ -110,8 +110,7 @@ public class ParsimoniousAssumeApplicationStrategy
         return result;
     }
 
-/*
-    private PExp performParsimoniousStep(DumbMathClssftnHandler g,
+/*  private PExp performParsimoniousStep(DumbMathClssftnHandler g,
                                          List<PExp> assumptions,
                                          PExp existingConfirm, boolean stipulated) {
         Map<PExp, PExp> confirmsToModifiedConfirms = new LinkedHashMap<>();
@@ -136,9 +135,9 @@ public class ParsimoniousAssumeApplicationStrategy
      * Returns {@code true} if the substitution wff[s <~ t] affects a wff of any sequent
      * in {@code sequents}.
      *
-     * @param sequents  the collection of sequents to test.
-     * @param s         the expression to replace.
-     * @param t         the (substitute) replacement expression.
+     * @param sequents the collection of sequents to test.
+     * @param s the expression to replace.
+     * @param t the (substitute) replacement expression.
      */
     private boolean substitutesAny(List<Sequent> sequents, PExp s, PExp t) {
         for (Sequent sequent : sequents) {

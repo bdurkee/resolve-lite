@@ -20,7 +20,6 @@ public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy
                                       @NotNull VCConfirm stat) {
         List<Sequent> combined = new ArrayList<>(stat.getSequents());
         combined.addAll(block.finalConfirm.getSequents());
-
         return block.finalConfirm(combined).snapshot();
     }
 
