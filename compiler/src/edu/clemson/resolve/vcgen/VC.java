@@ -18,7 +18,7 @@ public final class VC extends OutputModelObject {
     private final String explanation;
 
     private final Token location;
-    private final PExp antecedent, consequent;
+    private final List<PExp> antecedent, consequent;
     private final List<PExp> antecedentPieces = new ArrayList<>();
 
     public VC(int number, PExp antecedent, PExp consequent) {

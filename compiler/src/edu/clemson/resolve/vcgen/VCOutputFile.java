@@ -59,7 +59,6 @@ public class VCOutputFile {
 
     private void addVCsInContext(final VCAssertiveBlock batch) {
 
-        VCConfirm batchedConfirm = batch.getFinalConfirm();
         //finalVcs.addAll
        /* List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
         //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
