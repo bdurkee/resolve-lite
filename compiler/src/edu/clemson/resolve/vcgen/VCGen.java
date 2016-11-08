@@ -124,7 +124,7 @@ public class VCGen extends ResolveBaseListener {
             block = new VCAssertiveBlockBuilder(g, s,
                         "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
-                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
                         //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         //.assume(opParamAntecedents) //we assume correspondence for reprs here automatically
