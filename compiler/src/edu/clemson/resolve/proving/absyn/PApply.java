@@ -313,29 +313,6 @@ public class PApply extends PExp {
     }
 
     @NotNull
-    public List<PExp> split(PExp assumptions) {
-        List<PExp> result = new ArrayList<>();
-        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
-            arguments.forEach(a -> result.addAll(a.split(assumptions)));
-        }
-        else if (getTopLevelOperationName().equals("implies") || getTopLevelOperationName().equals("⟹")) {
-            PExp tempLeft, tempRight;
-            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).split(assumptions);
-            if (!assumptions.isObviouslyTrue()) {
-                tempLeft = g.formConjunct(assumptions, tempLeft);
-            }
-            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).split(tempLeft);
-        }
-        else {
-            result.add(g.formImplies(assumptions, this));
-        }
-        return result;
-    }
-
-    @NotNull
     @Override
     public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())

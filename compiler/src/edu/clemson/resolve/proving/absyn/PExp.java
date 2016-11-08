@@ -292,26 +292,6 @@ public abstract class PExp {
         return !myNames.isEmpty();
     }
 
-    /**
-     * Converts {@code this} expression, containing an arbitrary number of conjuncts with possibly nested implications,
-     * into a list of sequents.
-     *
-     * @return a list of sequents derived from {@code this}
-     */
-    @NotNull
-    public List<PExp> split() {
-        return split(getMathClssftn().getTypeGraph().getTrueExp());
-    }
-
-    /**
-     * A protected refinement of {@link PExp#split()} that adds an
-     * accumulator, {@code assumptions}, for developing our sequents.
-     */
-    @NotNull
-    protected List<PExp> split(PExp assumtions) {
-        return new ArrayList<>();
-    }
-
     @NotNull
     public final List<PExp> splitIntoConjuncts() {
         List<PExp> conjuncts = new ArrayList<>();
