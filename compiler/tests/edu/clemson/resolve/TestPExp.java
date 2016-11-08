@@ -274,7 +274,6 @@ public class TestPExp extends BaseTest {
     public void testSelectorExpWithCall() {
         PExp result = parseMathAssertionExp(g, "P(z).Q.Lab(s)(Cen(k))");
         Assert.assertEquals(false, result.isIncoming());
-
     }
 
     @Test

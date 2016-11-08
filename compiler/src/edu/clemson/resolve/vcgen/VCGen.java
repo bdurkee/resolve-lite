@@ -39,11 +39,9 @@ public class VCGen extends ResolveBaseListener {
     private final DumbMathClssftnHandler g;
 
     public static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
-    //public static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
-    //public static final VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
+    public static final VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
 
-    //public static final VCStatRuleApplicationStrategy<VCCall> EXPLICIT_CALL_APPLICATION =
-    //        new ExplicitCallApplicationStrategy();
     public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
             new GeneralCallApplicationStrategy();
     public static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
@@ -350,18 +348,17 @@ public class VCGen extends ResolveBaseListener {
 
         @Override
         public void exitIfStmt(ResolveParser.IfStmtContext ctx) {
-            /*PExp progCondition = asts.get(ctx.progExp());
+            PExp progCondition = asts.get(ctx.progExp());
             List<VCRuleBackedStat> thenStmts = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
             List<VCRuleBackedStat> elseStmts = ctx.elseStmt() != null ?
                     Utils.collect(VCRuleBackedStat.class, ctx.elseStmt().stmt(), stats) : new ArrayList<>();
             VCIfElse s = new VCIfElse(ctx, builder, thenStmts, elseStmts, progCondition);
-            stats.put(ctx, s);*/
-            throw new UnsupportedOperationException("if-else not yet implemented");
+            stats.put(ctx, s);
         }
 
         @Override
         public void exitWhileStmt(ResolveParser.WhileStmtContext ctx) {
-            /*PExp progCondition = asts.get(ctx.progExp());
+            PExp progCondition = asts.get(ctx.progExp());
             PExp maintainingClause = asts.get(ctx.maintainingClause().mathAssertionExp());
             PExp decreasingClause = ctx.decreasingClause() != null ? asts.get(ctx.decreasingClause().mathExp()) : null;
             List<VCRuleBackedStat> body = Utils.collect(VCRuleBackedStat.class, ctx.stmt(), stats);
@@ -375,8 +372,7 @@ public class VCGen extends ResolveBaseListener {
             }
             VCWhile s = new VCWhile(ctx, builder, WHILE_APPLICATION, progCondition,
                     maintainingClause, decreasingClause, changing, body);
-            stats.put(ctx, s);*/
-            throw new UnsupportedOperationException("while not yet implemented");
+            stats.put(ctx, s);
         }
 
         @Override
@@ -386,29 +382,8 @@ public class VCGen extends ResolveBaseListener {
         }
     }
 
-    //TODO: TEST THIS
-    public static boolean inSimpleForm(@NotNull PExp ensures, @NotNull List<ProgParameterSymbol> params) {
-        boolean simple = false;
-       /* if (ensures instanceof PApply) {
-            PApply ensuresAsPApply = (PApply) ensures;
-            List<PExp> args = ensuresAsPApply.getArguments();
-            if (ensuresAsPApply.isEquality()) {
-                if (inSimpleForm(args.get(0), params)) simple = true;
-            }
-            else if (ensuresAsPApply.isConjunct()) {
-                if (inSimpleForm(args.get(0), params) && inSimpleForm(args.get(1), params)) simple = true;
-            }
-        }
-        else if (ensures instanceof PSymbol) {
-            for (ProgParameterSymbol p : params) {
-                if (p.getMode() == ParameterMode.UPDATES && p.asPSymbol().equals(ensures)) simple = true;
-            }
-        }*/
-        return simple;
-    }
-
     /** "Next Prime Variable" (over sequents) */
-    public static PSymbol NPV(List<Sequent> sequents, PSymbol oldSym) {
+    public static PSymbol NPV(Collection<Sequent> sequents, PSymbol oldSym) {
         PSymbol result = oldSym;
 
         for (Sequent sequent : sequents) {

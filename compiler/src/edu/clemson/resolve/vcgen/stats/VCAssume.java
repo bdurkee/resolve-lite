@@ -48,10 +48,13 @@ public class VCAssume extends VCRuleBackedStat {
         if (isNotice) {
             return "Notice " + exp + ";";
         }
-        String result = "Assume " + exp + ";";
+        String result = "";
         if (isStipulatedAssumption) {
-            result += "Stipulated_" + result;
+            result += "Stipulated_Assume ";
+        } else {
+            result += "Assume ";
         }
+        result += exp + ";";
         return result;
     }
 }

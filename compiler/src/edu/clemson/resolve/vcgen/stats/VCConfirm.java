@@ -14,7 +14,7 @@ import java.util.*;
 //"A confirm just adds another sequent to the list"
 public class VCConfirm extends VCRuleBackedStat {
 
-    private final List<Sequent> sequents = new ArrayList<>();
+    private final Set<Sequent> sequents = new LinkedHashSet<>();
 
     public VCConfirm(ParserRuleContext definingCtx,
                      VCAssertiveBlockBuilder block,
@@ -30,7 +30,7 @@ public class VCConfirm extends VCRuleBackedStat {
     }
 
     @NotNull
-    public List<Sequent> getSequents() {
+    public Set<Sequent> getSequents() {
         return sequents;
     }
 

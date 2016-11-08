@@ -21,7 +21,7 @@ public class ParsimoniousAssumeApplicationStrategy
                                       @NotNull VCAssertiveBlockBuilder block,
                                       @NotNull VCAssume stat) {
         List<PExp> allAssumptions = stat.getAssumeExp().splitIntoConjuncts();
-        List<Sequent> existingSequents = block.finalConfirm.getSequents();
+        Collection<Sequent> existingSequents = block.finalConfirm.getSequents();
 
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
         List<PExp> remainingAssumptions = new ArrayList<>();
@@ -92,7 +92,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
     private List<Sequent> performParsimoniousStep(DumbMathClssftnHandler g,
                                                   List<PExp> assumptions,
-                                                  List<Sequent> sequents,
+                                                  Collection<Sequent> sequents,
                                                   boolean stipulated) {
         Map<PExp, PExp> confirmsToModifiedConfirms = new LinkedHashMap<>();
         List<Sequent> result = new LinkedList<>();
@@ -139,7 +139,7 @@ public class ParsimoniousAssumeApplicationStrategy
      * @param s the expression to replace.
      * @param t the (substitute) replacement expression.
      */
-    private boolean substitutesAny(List<Sequent> sequents, PExp s, PExp t) {
+    private boolean substitutesAny(Collection<Sequent> sequents, PExp s, PExp t) {
         for (Sequent sequent : sequents) {
             for (PExp wff : sequent.getLeftFormulas()) {
                 PExp substituted = wff.substitute(s, t);

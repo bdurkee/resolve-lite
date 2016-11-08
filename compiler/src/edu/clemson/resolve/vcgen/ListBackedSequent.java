@@ -3,10 +3,7 @@ package edu.clemson.resolve.vcgen;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ListBackedSequent implements Sequent {
 
@@ -58,6 +55,11 @@ public class ListBackedSequent implements Sequent {
     }
 
     @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
     public String toString() {
         String leftStr = "{";
         boolean first = true;
@@ -86,4 +88,26 @@ public class ListBackedSequent implements Sequent {
         rightStr += "}";
         return leftStr + " ⟹ " + rightStr;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (!(o instanceof ListBackedSequent)) return false;
+        //if contents (and length of left and right sides are the same)
+        boolean leftEqual = sideEqual(left, ((ListBackedSequent) o).left);
+        boolean rightEqual = sideEqual(right, ((ListBackedSequent) o).right);
+        return  leftEqual && rightEqual;
+    }
+
+    private boolean sideEqual(List<PExp> l1, List<PExp> l2) {
+        boolean retval = true;
+        Iterator<PExp> l1Iter = l1.iterator();
+        Iterator<PExp> l2Iter = l2.iterator();
+        while (retval && l1Iter.hasNext() && l2Iter.hasNext()) {
+            retval = l1Iter.next().equals(l2Iter.next());
+        }
+        return retval && !(l1Iter.hasNext() || l2Iter.hasNext());
+    }
+
 }
