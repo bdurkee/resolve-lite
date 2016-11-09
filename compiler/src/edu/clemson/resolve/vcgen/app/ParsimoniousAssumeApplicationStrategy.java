@@ -36,12 +36,12 @@ public class ParsimoniousAssumeApplicationStrategy
                 PExp lhs = assume.getSubExpressions().get(1);
                 PExp rhs = assume.getSubExpressions().get(2);
 
+                boolean hasVerificationVar =
+                        (lhs.getTopLevelOperationName().contains("P_Val") ||
+                                lhs.getTopLevelOperationName().contains("conc"));
                 //if both lhs and rhs are replaceable vars, then the left had better
                 //be a special verification-system conjured variable
                 if (lhs.isVariable() && rhs.isVariable()) {
-                    boolean hasVerificationVar =
-                            (lhs.getTopLevelOperationName().contains("P_Val") ||
-                             lhs.getTopLevelOperationName().contains("conc"));
                     if (hasVerificationVar) {
                         equalitySubstitutions.put(lhs, rhs);
                     }
@@ -55,7 +55,9 @@ public class ParsimoniousAssumeApplicationStrategy
                         equalitySubstitutions.put(lhs, rhs);
                     }
                     else {
-                        nonEffectualEqualities.add(assume);
+                        if (!hasVerificationVar) {
+                            nonEffectualEqualities.add(assume);
+                        }
                     }
                 }
                 //right replaceability
@@ -64,7 +66,9 @@ public class ParsimoniousAssumeApplicationStrategy
                         equalitySubstitutions.put(rhs, lhs);
                     }
                     else {
-                        nonEffectualEqualities.add(assume);
+                        if (!hasVerificationVar) {
+                            nonEffectualEqualities.add(assume);
+                        }
                     }
                 }
                 //not replaceable...
