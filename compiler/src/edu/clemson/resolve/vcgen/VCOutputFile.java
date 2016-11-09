@@ -19,12 +19,11 @@ public class VCOutputFile {
      * All raw {@link VCAssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
      * must be satisfied to verify the program under consideration.
      */
-    @ModelElement
     public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
-    @ModelElement
     public List<VC> finalVcs = new ArrayList<>();
+    public List<VC2> finalVcs2 = new ArrayList<>();
 
     public VCOutputFile(@NotNull RESOLVECompiler rc) {
         this.currentVcNumber = 1;
@@ -58,47 +57,40 @@ public class VCOutputFile {
     }
 
     private void addVCsInContext(final VCAssertiveBlock batch) {
+        Set<Sequent> sequents = batch.getFinalConfirm().getSequents();
 
-        //finalVcs.addAll
-       /* List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
-        //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
-
-        PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
+        PriorityQueue<VC2> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC2>() {
             @Override
-            public int compare(VC o1, VC o2) {
-                return o1.getNumber() <= o2.getNumber() ? -1 : 1;
+            public int compare(VC2 o1, VC2 o2) {
+                return o1.getLocation().getLine() <= o2.getLocation().getLine() ? -1 : 1;
             }
         });
-        for (PExp e : sequentComponents) {
-            List<? extends PExp> args = e.getSubExpressions();
-            if (!(e instanceof PApply)) continue;   //TODO: Why is this here again?
-
-            PExp antecedentExp = args.get(1);
-            PExp consequentExp = args.get(2);
-
-            if (consequentExp.getVCLocation() == null) {
-                compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, consequentExp.toString());
-                continue;
+        for (Sequent sequent : sequents) {
+            for (PExp succeedent : sequent.getRightFormulas()) {
+                if (succeedent == null) continue;
+                if (succeedent.getVCLocation() == null) {
+                    compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, succeedent.toString());
+                    continue;
+                }
+                VC2 vc = new VC2(succeedent.getVCLocation(), -1, succeedent.getVCExplanation(), sequent);
+                vcTempBatchOrderedByLine.add(vc);
             }
-            VC curVC = new VC(consequentExp.getVCLocation().getLine(), antecedentExp, consequentExp);
-            vcTempBatchOrderedByLine.add(curVC);
         }
-        VC vc = null;
+        VC2 vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
-            if (vc.getConsequent().isLiteralTrue()) continue;
-            finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
+            if (vc.isObviouslyTrue()) continue;
+            finalVcs2.add(new VC2(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
             currentVcNumber++;
-        }*/
+        }
     }
 
     @Override
     public String toString() {
         String result = "";
 
-        for (VC vc : finalVcs) {
+        for (VC2 vc : finalVcs2) {
             result += vc.toString() + "\n\n";
         }
-
         for (VCAssertiveBlock b : chunks) {
             result += b.getDescription() + "\n";
             result += b.getText() + "\n";

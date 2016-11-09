@@ -23,8 +23,8 @@ public final class VC extends OutputModelObject {
 
     public VC(int number, PExp antecedent, PExp consequent) {
         this.number = number;
-        this.antecedent = antecedent;
-        this.consequent = consequent;
+        this.antecedent = null; //antecedent;
+        this.consequent = null; //consequent;
 
         this.explanation = consequent.getVCExplanation();
         this.location = consequent.getVCLocation();
@@ -51,18 +51,16 @@ public final class VC extends OutputModelObject {
         return location;
     }
 
-    @NotNull
     public PExp getAntecedent() {
-        return antecedent;
+        return null;
     }
 
-    @NotNull
     public PExp getConsequent() {
-        return consequent;
+        return null;
     }
 
     @Override public String toString() {
-        Token location = consequent.getVCLocation();
+       /* Token location = consequent.getVCLocation();
         String explanation = consequent.getVCExplanation();
 
         String retval = "========== " + getName() + " ==========\n";
@@ -76,5 +74,7 @@ public final class VC extends OutputModelObject {
         }
         retval += "⊢\n" + consequent.toString(false);
         return retval;
+        */
+       return null;
     }
 }
