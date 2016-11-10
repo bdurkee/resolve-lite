@@ -19,14 +19,14 @@ public class VCOutputFile {
     public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
-    public List<VC> finalVcs = new ArrayList<>();
+    public Set<VC> finalVcs = new LinkedHashSet<>();
 
     public VCOutputFile(@NotNull RESOLVECompiler rc) {
         this.currentVcNumber = 1;
         this.compiler = rc;
     }
 
-    public List<VC> getFinalVCs() {
+    public Set<VC> getFinalVCs() {
         return this.finalVcs;
     }
 

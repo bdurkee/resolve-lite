@@ -97,7 +97,7 @@ public class ListBackedSequent implements Sequent {
         //if contents (and length of left and right sides are the same)
         boolean leftEqual = sideEqual(left, ((ListBackedSequent) o).left);
         boolean rightEqual = sideEqual(right, ((ListBackedSequent) o).right);
-        return  leftEqual && rightEqual;
+        return leftEqual && rightEqual;
     }
 
     private boolean sideEqual(List<PExp> l1, List<PExp> l2) {

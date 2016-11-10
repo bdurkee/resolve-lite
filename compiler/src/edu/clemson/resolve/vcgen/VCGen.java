@@ -23,6 +23,7 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.app.*;
 import edu.clemson.resolve.vcgen.stats.*;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -79,6 +80,79 @@ public class VCGen extends ResolveBaseListener {
         }
     }
 
+
+    @Override
+    public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, moduleScope,
+                        "Facility_Inst=" + ctx.name.getText(), ctx);
+        //block.assume(g.getTrueExp());
+
+        ModuleScopeBuilder spec = null, impl = null;
+        try {
+            ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
+            spec = symtab.getModuleScope(concept);
+            if (ctx.externally == null) {
+                ModuleIdentifier imp = moduleScope.getImportWithName(ctx.impl);
+                impl = symtab.getModuleScope(imp);
+            }
+        } catch (NoSuchModuleException nsme) {
+            return; //shouldn't happen...
+        }
+
+        List<ProgType> specArsgs = ctx.specArgs.progExp().stream()
+                .map(e -> tr.progTypes.get(e))
+                .collect(Collectors.toList());
+        List<PExp> specArgs = ctx.specArgs.progExp().stream()
+                .map(e -> tr.exprASTs.get(e))
+                .collect(Collectors.toList());
+        List<PExp> reducedSpecArgs = reduceArgs(block, specArgs);
+
+        List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class).stream()
+                .map(ModuleParameterSymbol::asPSymbol)
+                .collect(Collectors.toList());
+
+        Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
+        facilitySpecFormalActualMappings.put(ctx.name.getText(), specFormalsToActuals);
+
+        Optional<PExp> specReq = spec.getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                .stream()
+                .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                .findAny();
+
+        PExp result = specReq.isPresent() ? specReq.get() : g.getTrueExp();
+        result = result.withVCInfo(ctx.getStart(), "Requires clause for concept: " + ctx.spec.getText()
+                + " in facility instantiation rule");
+        if (ctx.externally == null && impl != null && ctx.implArgs != null) {
+            Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
+                    .stream()
+                    .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
+                    .map(GlobalMathAssertionSymbol::getEnclosedExp)
+                    .findAny();
+            List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
+            List<PExp> reducedImplArgs = reduceArgs(block, implArgs);
+            List<PExp> formalImplArgs =
+                    Utils.apply(spec.getSymbolsOfType(ProgParameterSymbol.class), ProgParameterSymbol::asPSymbol);
+            Map<PExp, PExp> implFormalsToActuals = Utils.zip(formalImplArgs, reducedImplArgs);
+
+            if (implReq.isPresent()) {
+                //RPC[rn ~> rn_exp, RR ~> IRR]
+                PExp RPC = implReq.get().substitute(implFormalsToActuals).withVCInfo(ctx.getStart(),
+                        "Requires clause for realization: " + ctx.impl.getText() + " in facility instantiation rule");
+
+                //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
+                result = g.formConjunct(RPC, result);
+            }
+        }
+        //(RPC[rn ~> rn_exp, RR ~> IRR] /\ CPC)[n ~> n_exp, r ~> IR]
+        result = result.substitute(specFormalsToActuals);
+        if (!result.isObviouslyTrue()) {
+            block.finalConfirm(result);
+            outputFile.addAssertiveBlocks(block.build());
+        }
+    }
+
     private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<PExp> args) {
         List<PExp> result = new ArrayList<>();
         for (PExp progArg : args) {
@@ -106,6 +180,47 @@ public class VCGen extends ResolveBaseListener {
             }
         }
         return result;
+    }
+
+    @Override
+    public void enterOperationProcedureDecl(ResolveParser.OperationProcedureDeclContext ctx) {
+        Scope s = symtab.getScope(ctx);
+        List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
+
+        //precondition[params 1..i ~> conc.X]
+        PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms,
+                tr.getMathExpASTFor(g, ctx.requiresClause()));
+
+        VCAssertiveBlockBuilder block =
+                new VCAssertiveBlockBuilder(g, s,
+                        "Proc_Decl_rule=" + ctx.name.getText(), ctx)
+                        .facilitySpecializations(facilitySpecFormalActualMappings)
+                        .assume(getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(), this::extractAssumptionsFromParameter))
+                        .assume(getAssertionsFromFormalParameters(paramSyms, this::extractAssumptionsFromParameter))
+                        //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                        .assume(corrFnExpRequires)
+                        .remember();
+        assumeVarDecls(ctx.varDeclGroup(), block);
+        //stats
+        StmtListener l = new StmtListener(block, tr.exprASTs);
+        ParseTreeWalker.DEFAULT.walk(l, ctx);
+        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
+
+        PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
+                tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
+        corrFnExpEnsures = corrFnExpEnsures.withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
+        Token loc = ctx.ensuresClause() != null ? ctx.ensuresClause().getStart() : ctx.getStart();
+
+        List<PExp> paramConsequents = new ArrayList<>();
+        Utils.apply(paramSyms, paramConsequents, this::extractConsequentsFromParameter);
+
+        //add any additional confirms from the parameters, etc
+        for (ProgParameterSymbol p : paramSyms) {
+            confirmParameterConsequentsForBlock(block, p); //modfies 'block' with additional confims!
+        }
+        block.finalConfirm(corrFnExpEnsures);
+        outputFile.addAssertiveBlocks(block.build());
     }
 
     @Override
@@ -318,6 +433,39 @@ public class VCGen extends ResolveBaseListener {
         return e.getEnclosedExp();
     }
 
+    private void confirmParameterConsequentsForBlock(VCAssertiveBlockBuilder block, ProgParameterSymbol p) {
+        PExp incParamExp = new PSymbolBuilder(p.asPSymbol()).incoming(true).build();
+        PExp paramExp = new PSymbolBuilder(p.asPSymbol()).incoming(false).build();
+
+        if (p.getDeclaredType() instanceof ProgNamedType) {
+            ProgNamedType t = (ProgNamedType) p.getDeclaredType();
+            PExp exemplar = new PSymbolBuilder(t.getExemplarName()).mathClssfctn(t.toMath()).build();
+
+            if (t instanceof PTRepresentation) {
+                ProgReprTypeSymbol repr = ((PTRepresentation) t).getReprTypeSymbol();
+
+                PExp convention = repr.getConvention();
+                PExp corrFnExp = repr.getCorrespondence();
+                //if we're doing this its going to be on a procedure decl or op-proc decl, so just
+                //say block.definingTree
+                PExp newConvention = convention.substitute(t.getExemplarAsPSymbol(), paramExp)
+                        .withVCInfo(block.definingTree.getStart(), "Convention for " + t.getName());
+                block.confirm(block.definingTree, newConvention);
+            }
+            if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
+                PExp equalsExp = g.formEquals(paramExp, incParamExp)
+                        .withVCInfo(block.definingTree.getStart(), "Ensure parameter " + p.getName() + " is restored");
+                block.confirm(block.definingTree, equalsExp);
+            }
+            else if (p.getMode() == ParameterMode.CLEARS) {
+                PExp init = ((ProgNamedType) p.getDeclaredType())
+                        .getInitializationEnsures()
+                        .substitute(exemplar, paramExp);
+                //result.add(init);
+            }
+        }
+    }
+
     private Map<PExp, PExp> getSpecializationsForFacility(@Nullable String facility) {
         Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
         if (result == null) result = new HashMap<>();
@@ -345,10 +493,6 @@ public class VCGen extends ResolveBaseListener {
         }
         return resultingClause == null ? g.getTrueExp() : resultingClause;
     }
-
-    //-----------------------------------------------
-    // S T A T S
-    //-----------------------------------------------
 
     private static class StmtListener extends ResolveBaseListener {
 

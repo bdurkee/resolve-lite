@@ -53,6 +53,22 @@ public final class VC {
     }
 
     @Override
+    public int hashCode() {
+        return sequent.toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean result = (o instanceof VC);
+        if (result) {
+            result = location.getLine() == ((VC)o).location.getLine() &&
+                    explanation.equals(((VC) o).explanation) &&
+                    sequent.equals(((VC) o).sequent);
+        }
+        return result;
+    }
+
+    @Override
     public String toString() {
         String retval = "//Vc #" + number + ": " + explanation + " (" + location.getLine() + ")" + "\n";
         int i = 1;
