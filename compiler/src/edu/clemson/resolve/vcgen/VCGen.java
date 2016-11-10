@@ -122,14 +122,14 @@ public class VCGen extends ResolveBaseListener {
             //This is the requires for the operation with some substutions made (see corrFnExp rule in HH-diss)
             PExp corrFnExpRequires = perParameterCorrFnExpSubstitute(paramSyms, op.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
-            //Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
+            Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
             block = new VCAssertiveBlockBuilder(g, s,
                         "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
                         //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
                         //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        //.assume(opParamAntecedents) //we assume correspondence for reprs here automatically
+                        .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
                         .assume(corrFnExpRequires)
                         .remember();
             //add in any user defined notices...
@@ -189,10 +189,12 @@ public class VCGen extends ResolveBaseListener {
                     if (vars.type() instanceof ResolveParser.NamedTypeContext) {
                         ResolveParser.NamedTypeContext namedTypeNode =
                                 (ResolveParser.NamedTypeContext) vars.type();
-                        Map<PExp, PExp> facilitySubstitutions =
-                                builder.facilitySpecializations.get(namedTypeNode.qualifier.getText());
-                        if (namedTypeNode.qualifier != null && facilitySubstitutions != null) {
-                            init = init.substitute(facilitySubstitutions);
+                        if (namedTypeNode.qualifier != null) {
+                            Map<PExp, PExp> facilitySubstitutions =
+                                    builder.facilitySpecializations.get(namedTypeNode.qualifier.getText());
+                            if (namedTypeNode.qualifier != null && facilitySubstitutions != null) {
+                                init = init.substitute(facilitySubstitutions);
+                            }
                         }
                     }
                     builder.assume(init);

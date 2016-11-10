@@ -1,11 +1,8 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -22,14 +19,14 @@ public class VCOutputFile {
     public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
-    public List<VC2> finalVcs = new ArrayList<>();
+    public List<VC> finalVcs = new ArrayList<>();
 
     public VCOutputFile(@NotNull RESOLVECompiler rc) {
         this.currentVcNumber = 1;
         this.compiler = rc;
     }
 
-    public List<VC2> getFinalVCs() {
+    public List<VC> getFinalVCs() {
         return this.finalVcs;
     }
 
@@ -41,13 +38,13 @@ public class VCOutputFile {
     }
 
     /**
-     * A convenience method for tools looking to annotate lines by {@link VC2} information
+     * A convenience method for tools looking to annotate lines by {@link VC} information
      *
      * @return A mapping from line number to the VCs arising from that particular line.
      */
-    public Map<Integer, List<VC2>> getVCsGroupedByLineNumber() {
-        Map<Integer, List<VC2>> result = new LinkedHashMap<>();
-        for (VC2 vc : finalVcs) {
+    public Map<Integer, List<VC>> getVCsGroupedByLineNumber() {
+        Map<Integer, List<VC>> result = new LinkedHashMap<>();
+        for (VC vc : finalVcs) {
             int line = vc.getLocation().getLine();
             result.putIfAbsent(line, new ArrayList<>());
             result.get(line).add(vc);
@@ -58,9 +55,9 @@ public class VCOutputFile {
     private void addVCsInContext(final VCAssertiveBlock batch) {
         Set<Sequent> sequents = batch.getFinalConfirm().getSequents();
 
-        PriorityQueue<VC2> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC2>() {
+        PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
             @Override
-            public int compare(VC2 o1, VC2 o2) {
+            public int compare(VC o1, VC o2) {
                 return o1.getLocation().getLine() <= o2.getLocation().getLine() ? -1 : 1;
             }
         });
@@ -71,14 +68,14 @@ public class VCOutputFile {
                     compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, succeedent.toString());
                     continue;
                 }
-                VC2 vc = new VC2(succeedent.getVCLocation(), -1, succeedent.getVCExplanation(), sequent);
+                VC vc = new VC(succeedent.getVCLocation(), -1, succeedent.getVCExplanation(), sequent);
                 vcTempBatchOrderedByLine.add(vc);
             }
         }
-        VC2 vc = null;
+        VC vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
             if (vc.isObviouslyTrue()) continue;
-            finalVcs.add(new VC2(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
+            finalVcs.add(new VC(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
             currentVcNumber++;
         }
     }
@@ -87,7 +84,7 @@ public class VCOutputFile {
     public String toString() {
         String result = "";
 
-        for (VC2 vc : finalVcs) {
+        for (VC vc : finalVcs) {
             result += vc.toString() + "\n\n";
         }
         for (VCAssertiveBlock b : chunks) {

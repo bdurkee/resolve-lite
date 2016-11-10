@@ -11,7 +11,7 @@ import java.util.Iterator;
  * A simple wrapper class that pairs a sequent with additional information such as location,
  * vc explanation, line number, etc.
  */
-public final class VC2 {
+public final class VC {
 
     /** A human-readable name for the VC; used for debugging purposes. */
     private final Token location;
@@ -19,7 +19,7 @@ public final class VC2 {
     private final Sequent sequent;
     private final int number;
 
-    public VC2(Token location, int number, String explanation, @NotNull Sequent sequent) {
+    public VC(Token location, int number, String explanation, @NotNull Sequent sequent) {
         this.sequent = sequent;
         this.location = location;
         this.explanation = explanation;

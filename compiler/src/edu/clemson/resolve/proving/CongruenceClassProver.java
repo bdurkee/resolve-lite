@@ -2,18 +2,16 @@ package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.*;
-import edu.clemson.resolve.semantics.query.MathSymbolQuery;
 import edu.clemson.resolve.semantics.query.NameQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
-import edu.clemson.resolve.vcgen.VC2;
+import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +51,7 @@ public final class CongruenceClassProver {
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
                                  @NotNull DumbMathClssftnHandler g,
-                                 @NotNull List<VC2> vcs) {
+                                 @NotNull List<VC> vcs) {
         this.compiler = compiler;
         this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
         this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
@@ -79,7 +77,7 @@ public final class CongruenceClassProver {
         if (compiler.proverListener != null) {
             this.proverListener = compiler.proverListener;
         }
-        List<VC2> preprocessedVcs = preprocessVCs(vcs);
+        List<VC> preprocessedVcs = preprocessVCs(vcs);
         //List<VC> preprocessedVcs = new ArrayList<>();
 
         //VC test = buildTestVC5(m_scope, g, z, n);
@@ -88,7 +86,7 @@ public final class CongruenceClassProver {
 
         //preprocessedVcs.add(test);
         int i = 0;
-        for (VC2 vc : preprocessedVcs) {
+        for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
             //models[i++] = new PerVCProverModel(g, vc.getNumber(), vc.getAntecedent().splitIntoConjuncts(),
             //        vc.getConsequent().splitIntoConjuncts());
@@ -595,14 +593,18 @@ public final class CongruenceClassProver {
         return result;
     }*/
 
-    private List<VC2> preprocessVCs(List<VC2> vcs) {
-        List<VC2> result = new ArrayList<>();
-        for (VC2 vc : vcs) {
-            //PExp newAntecedent = vc.getAntecedent();
-            //PExp newConsequent = vc.getConsequent();
-            //newAntecedent = Utilities.flattenPSelectors(newAntecedent);
-           // newConsequent = Utilities.flattenPSelectors(newConsequent);
+    private List<VC> preprocessVCs(List<VC> vcs) {
+        List<VC> result = new ArrayList<>();
+        for (VC vc : vcs) {
+            List<PExp> l = new LinkedList<>();
+            List<PExp> r = new LinkedList<>();
 
+            for (PExp e : vc.getSequent().getLeftFormulas()) {
+                l.add(Utilities.flattenPSelectors(e));
+            }
+            for (PExp e : vc.getSequent().getRightFormulas()) {
+                r.add(Utilities.flattenPSelectors(e));
+            }
             //result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
             // make every PExp a PSymbol
             //vc.convertAllToPsymbols(m_typeGraph);
