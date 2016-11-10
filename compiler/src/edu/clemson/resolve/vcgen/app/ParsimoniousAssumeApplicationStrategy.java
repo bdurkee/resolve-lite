@@ -114,27 +114,6 @@ public class ParsimoniousAssumeApplicationStrategy
         return result;
     }
 
-/*  private PExp performParsimoniousStep(DumbMathClssftnHandler g,
-                                         List<PExp> assumptions,
-                                         PExp existingConfirm, boolean stipulated) {
-        Map<PExp, PExp> confirmsToModifiedConfirms = new LinkedHashMap<>();
-        List<PExp> confirms = existingConfirm.splitIntoConjuncts();
-        confirmsToModifiedConfirms = Utils.zip(confirms, confirms);
-
-        for (PExp assume : assumptions) {
-            for (PExp confirm : confirms) {
-                Set<String> intersection = assume.getSymbolNames(true, true);
-                intersection.retainAll(confirm.getSymbolNames(true, true));
-                if ((!intersection.isEmpty() && !assume.isObviouslyTrue()) || stipulated) {
-                    PExp existing = confirmsToModifiedConfirms.get(confirm);
-                    confirmsToModifiedConfirms.put(confirm, g.formImplies(assume, existing));
-                }
-            }
-        }
-        List<PExp> result = new ArrayList<>(confirmsToModifiedConfirms.values());
-        return g.formConjuncts(result);
-    }*/
-
     /**
      * Returns {@code true} if the substitution wff[s <~ t] affects a wff of any sequent
      * in {@code sequents}.

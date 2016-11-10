@@ -36,6 +36,10 @@ public final class VC2 {
         return explanation;
     }
 
+    public int getNumber() {
+        return number;
+    }
+
     @NotNull
     public Sequent getSequent() {
         return sequent;

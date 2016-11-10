@@ -14,6 +14,7 @@ import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.programtype.PTRepresentation;
 import edu.clemson.resolve.semantics.programtype.ProgFamilyType;
 import edu.clemson.resolve.semantics.programtype.ProgNamedType;
+import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.*;
@@ -24,6 +25,7 @@ import edu.clemson.resolve.vcgen.app.*;
 import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,6 +136,7 @@ public class VCGen extends ResolveBaseListener {
             for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
                 block.assume(tr.exprASTs.get(notice.mathExp()), false, true);
             }
+            assumeVarDecls(ctx.varDeclGroup(), block);
         } catch (SymbolTableException e) {
             return; //shouldn't happen (we wouldn't have gotten here if it did)..
         }
@@ -167,6 +170,35 @@ public class VCGen extends ResolveBaseListener {
 
         block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlocks(block.build());
+    }
+
+    private void assumeVarDecls(List<ResolveParser.VarDeclGroupContext> group, VCAssertiveBlockBuilder builder) {
+        for (ResolveParser.VarDeclGroupContext vars : group) {
+            ProgType type = tr.progTypes.get(vars.type());
+            for (TerminalNode t : vars.ID()) {
+                PSymbol var = new PSymbol.PSymbolBuilder(t.getText())
+                        .progType(type).mathClssfctn(type.toMath())
+                        .build();
+                if (type instanceof ProgNamedType) {
+                    PSymbol exemplar = ((ProgNamedType) type).getExemplarAsPSymbol();
+                    PExp init = ((ProgNamedType) type).getInitializationEnsures();
+                    init = init.substitute(exemplar, var);
+                    //substitute by the facility the type came through
+
+                    //get the qualifier out of the concrete syntax.
+                    if (vars.type() instanceof ResolveParser.NamedTypeContext) {
+                        ResolveParser.NamedTypeContext namedTypeNode =
+                                (ResolveParser.NamedTypeContext) vars.type();
+                        Map<PExp, PExp> facilitySubstitutions =
+                                builder.facilitySpecializations.get(namedTypeNode.qualifier.getText());
+                        if (namedTypeNode.qualifier != null && facilitySubstitutions != null) {
+                            init = init.substitute(facilitySubstitutions);
+                        }
+                    }
+                    builder.assume(init);
+                }
+            }
+        }
     }
 
     private List<PExp> getAssertionsFromModuleFormalParameters(List<ModuleParameterSymbol> parameters,

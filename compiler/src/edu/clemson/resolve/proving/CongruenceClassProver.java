@@ -13,7 +13,7 @@ import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
-import edu.clemson.resolve.vcgen.VC;
+import edu.clemson.resolve.vcgen.VC2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +53,7 @@ public final class CongruenceClassProver {
     public CongruenceClassProver(@NotNull RESOLVECompiler compiler,
                                  @NotNull AnnotatedModule target,
                                  @NotNull DumbMathClssftnHandler g,
-                                 @NotNull List<VC> vcs) {
+                                 @NotNull List<VC2> vcs) {
         this.compiler = compiler;
         this.timeout = compiler.timeout != null ? Long.parseLong(compiler.timeout) : DEFAULT_TIMEOUT;
         this.numTriesBeforeQuitting = compiler.tries != null ? Integer.parseInt(compiler.tries) : DEFAULT_TRIES;
@@ -79,7 +79,7 @@ public final class CongruenceClassProver {
         if (compiler.proverListener != null) {
             this.proverListener = compiler.proverListener;
         }
-        List<VC> preprocessedVcs = preprocessVCs(vcs);
+        List<VC2> preprocessedVcs = preprocessVCs(vcs);
         //List<VC> preprocessedVcs = new ArrayList<>();
 
         //VC test = buildTestVC5(m_scope, g, z, n);
@@ -88,10 +88,10 @@ public final class CongruenceClassProver {
 
         //preprocessedVcs.add(test);
         int i = 0;
-        for (VC vc : preprocessedVcs) {
+        for (VC2 vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
-            models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
-                    vc.getConsequent().splitIntoConjuncts());
+            //models[i++] = new PerVCProverModel(g, vc.getNumber(), vc.getAntecedent().splitIntoConjuncts(),
+            //        vc.getConsequent().splitIntoConjuncts());
         }
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
@@ -141,7 +141,7 @@ public final class CongruenceClassProver {
         }
         m_results = "";
     }
-
+/*
     private VC buildTestVC1(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
         PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(z).build();
         PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(z).build();
@@ -188,12 +188,13 @@ public final class CongruenceClassProver {
 
         PExp antecedent = g.formConjuncts(zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
         PExp consequent = pcurrplaceLTEmaxlength;
-        VC result = new VC(1, antecedent, consequent);
+        //VC result = new VC2(1, antecedent, consequent);
         return result;
-    }
+    }*/
 
-    private VC buildTestVC3(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
-        VC result = null;
+/*
+    private VC2 buildTestVC3(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        VC2 result = null;
         try {
             MathClssftnWrappingSymbol ia = s.queryForOne(new MathSymbolQuery(null, "IA"));
             MathClssftnWrappingSymbol scd = s.queryForOne(new MathSymbolQuery(null, "SCD"));
@@ -272,8 +273,7 @@ public final class CongruenceClassProver {
                     .build();
 
             //SS
-            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
-*/
+
             //k
             PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
                     .mathClssfctn(n2.getClassification())
@@ -433,9 +433,6 @@ public final class CongruenceClassProver {
                     .arguments(pcurrPlace, maxlength)
                     .build();
 
-            //SS
-            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
-*/
             //k
             PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
                     .mathClssfctn(n2.getClassification())
@@ -596,17 +593,17 @@ public final class CongruenceClassProver {
             e.printStackTrace();
         }
         return result;
-    }
+    }*/
 
-    private List<VC> preprocessVCs(List<VC> vcs) {
-        List<VC> result = new ArrayList<>();
-        for (VC vc : vcs) {
-            PExp newAntecedent = vc.getAntecedent();
-            PExp newConsequent = vc.getConsequent();
-            newAntecedent = Utilities.flattenPSelectors(newAntecedent);
-            newConsequent = Utilities.flattenPSelectors(newConsequent);
+    private List<VC2> preprocessVCs(List<VC2> vcs) {
+        List<VC2> result = new ArrayList<>();
+        for (VC2 vc : vcs) {
+            //PExp newAntecedent = vc.getAntecedent();
+            //PExp newConsequent = vc.getConsequent();
+            //newAntecedent = Utilities.flattenPSelectors(newAntecedent);
+           // newConsequent = Utilities.flattenPSelectors(newConsequent);
 
-            result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
+            //result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
             // make every PExp a PSymbol
             //vc.convertAllToPsymbols(m_typeGraph);
             //result.add()

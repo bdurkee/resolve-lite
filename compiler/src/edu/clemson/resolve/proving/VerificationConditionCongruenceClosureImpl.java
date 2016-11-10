@@ -6,7 +6,7 @@ import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
-import edu.clemson.resolve.vcgen.VC;
+import edu.clemson.resolve.vcgen.VC2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -32,13 +32,13 @@ public class VerificationConditionCongruenceClosureImpl {
 
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(@NotNull DumbMathClssftnHandler g,
-                                                      @NotNull VC vc,
+                                                      @NotNull VC2 vc,
                                                       MathClssftn z, MathClssftn n) {
         m_typegraph = g;
         m_name = Integer.toString(vc.getNumber());
         m_VC_string = vc.toString();
-        m_antecedent = vc.getAntecedent();
-        m_consequent = vc.getConsequent();
+        m_antecedent = null;//vc.getAntecedent();
+        m_consequent = null;//vc.getConsequent();
         m_registry = new Registry(g);
         m_z = z;
         m_n = n;

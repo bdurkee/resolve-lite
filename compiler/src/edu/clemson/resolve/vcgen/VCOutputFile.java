@@ -22,15 +22,14 @@ public class VCOutputFile {
     public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
-    public List<VC> finalVcs = new ArrayList<>();
-    public List<VC2> finalVcs2 = new ArrayList<>();
+    public List<VC2> finalVcs = new ArrayList<>();
 
     public VCOutputFile(@NotNull RESOLVECompiler rc) {
         this.currentVcNumber = 1;
         this.compiler = rc;
     }
 
-    public List<VC> getFinalVCs() {
+    public List<VC2> getFinalVCs() {
         return this.finalVcs;
     }
 
@@ -42,13 +41,13 @@ public class VCOutputFile {
     }
 
     /**
-     * A convenience method for tools looking to annotate lines by {@link VC} information
+     * A convenience method for tools looking to annotate lines by {@link VC2} information
      *
      * @return A mapping from line number to the VCs arising from that particular line.
      */
-    public Map<Integer, List<VC>> getVCsGroupedByLineNumber() {
-        Map<Integer, List<VC>> result = new LinkedHashMap<>();
-        for (VC vc : finalVcs) {
+    public Map<Integer, List<VC2>> getVCsGroupedByLineNumber() {
+        Map<Integer, List<VC2>> result = new LinkedHashMap<>();
+        for (VC2 vc : finalVcs) {
             int line = vc.getLocation().getLine();
             result.putIfAbsent(line, new ArrayList<>());
             result.get(line).add(vc);
@@ -79,7 +78,7 @@ public class VCOutputFile {
         VC2 vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
             if (vc.isObviouslyTrue()) continue;
-            finalVcs2.add(new VC2(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
+            finalVcs.add(new VC2(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
             currentVcNumber++;
         }
     }
@@ -88,7 +87,7 @@ public class VCOutputFile {
     public String toString() {
         String result = "";
 
-        for (VC2 vc : finalVcs2) {
+        for (VC2 vc : finalVcs) {
             result += vc.toString() + "\n\n";
         }
         for (VCAssertiveBlock b : chunks) {
