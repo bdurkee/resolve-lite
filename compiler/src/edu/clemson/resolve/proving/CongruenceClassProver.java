@@ -11,6 +11,8 @@ import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
+import edu.clemson.resolve.vcgen.ListBackedSequent;
+import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -88,8 +90,9 @@ public final class CongruenceClassProver {
         int i = 0;
         for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
-            //models[i++] = new PerVCProverModel(g, vc.getNumber(), vc.getAntecedent().splitIntoConjuncts(),
-            //        vc.getConsequent().splitIntoConjuncts());
+            models[i++] = new PerVCProverModel(g, String.valueOf(vc.getNumber()),
+                    vc.getSequent().getLeftFormulas(),
+                    vc.getSequent().getRightFormulas());
         }
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
@@ -605,10 +608,11 @@ public final class CongruenceClassProver {
             for (PExp e : vc.getSequent().getRightFormulas()) {
                 r.add(Utilities.flattenPSelectors(e));
             }
-            //result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
-            // make every PExp a PSymbol
-            //vc.convertAllToPsymbols(m_typeGraph);
-            //result.add()
+            Sequent newSequent = new ListBackedSequent(l, r);
+            VC newVC = new VC(vc.getLocation(), vc.getNumber(), vc.getExplanation(), newSequent);
+            //newVC.convertAllToPsymbols(m_typeGraph);
+
+            result.add(newVC);
         }
         //result.addAll(vcs); //TODO: Not doing the conversions now. (I don't use lambdas right now, etc)
         return result;

@@ -160,6 +160,7 @@ public class DumbMathClssftnHandler {
         return formConjuncts(Arrays.asList(e));
     }
 
+    //TODO: Get rid of this one if the one that takes a Collection<..> works..
     @Nullable
     public PExp formConjuncts(List<PExp> e) {
 
@@ -172,6 +173,21 @@ public class DumbMathClssftnHandler {
         if (e.size() == 1) {
             return e.get(0);
         }
+        while (segsIter.hasNext()) {
+            result = formConjunct(result, segsIter.next());
+        }
+        return result;
+    }
+
+    @Nullable
+    public PExp formConjuncts(Collection<PExp> e) {
+
+        if (e == null) {
+            throw new IllegalArgumentException("can't conjunct a null list");
+        }
+        if (e.isEmpty()) return null;
+        Iterator<PExp> segsIter = e.iterator();
+        PExp result = segsIter.next();
         while (segsIter.hasNext()) {
             result = formConjunct(result, segsIter.next());
         }

@@ -1333,6 +1333,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathInfixAppExp(ResolveParser.MathInfixAppExpContext ctx) {
+        String text = ctx.getText();
         typeMathFunctionAppExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
         return null;
     }

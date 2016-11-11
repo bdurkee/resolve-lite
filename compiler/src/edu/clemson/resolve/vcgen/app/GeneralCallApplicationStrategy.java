@@ -57,7 +57,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
         confirmPrecondition = confirmPrecondition
                 .substitute(formalExps, callExp.getArguments())
                 .withVCInfo(block.definingTree.getStart(), "Requires clause of " + functionName.getName());
-        block.confirm(block.definingTree, confirmPrecondition);
+        block.confirm(stat.getDefiningContext(), confirmPrecondition);
         //^^^^^ Here's the old one:
         //block.confirm(ctx, op.getRequires().substitute(formalExps, e.getArguments()));
             /*for (ProgParameterSymbol p : op.getParameters()) {

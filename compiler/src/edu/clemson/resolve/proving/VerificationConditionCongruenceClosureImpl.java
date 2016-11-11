@@ -37,8 +37,8 @@ public class VerificationConditionCongruenceClosureImpl {
         m_typegraph = g;
         m_name = Integer.toString(vc.getNumber());
         m_VC_string = vc.toString();
-        m_antecedent = null;//vc.getAntecedent();
-        m_consequent = null;//vc.getConsequent();
+        m_antecedent = g.formConjuncts(vc.getSequent().getLeftFormulas());
+        m_consequent = g.formConjuncts(vc.getSequent().getRightFormulas());
         m_registry = new Registry(g);
         m_z = z;
         m_n = n;
