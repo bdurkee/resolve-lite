@@ -17,6 +17,7 @@ import edu.clemson.resolve.semantics.programtype.ProgNamedType;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.query.OperationQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
+import edu.clemson.resolve.semantics.query.UnqualifiedNameQuery;
 import edu.clemson.resolve.semantics.symbol.*;
 import edu.clemson.resolve.semantics.symbol.GlobalMathAssertionSymbol.ClauseType;
 import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
@@ -80,6 +81,54 @@ public class VCGen extends ResolveBaseListener {
         }
     }
 
+    @Override
+    public void enterTypeRepresentationDecl(ResolveParser.TypeRepresentationDeclContext ctx) {
+        Scope s = symtab.getScope(ctx);
+        currentTypeReprSym = null;
+        try {
+            currentTypeReprSym = moduleScope.queryForOne(
+                    new UnqualifiedNameQuery(ctx.name.getText())).toProgReprTypeSymbol();
+        } catch (SymbolTableException e) {
+        }
+        List<PExp> opParamAntecedents =
+                getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
+                        this::extractAssumptionsFromParameter);
+
+        //Correct type Realiz Hypo
+        //1. Well Defined Correspondence Hypothesis
+        VCAssertiveBlockBuilder well_def_corr_hyp_block =
+                new VCAssertiveBlockBuilder(g, s,
+                        "Well_Def_Corr_Hyp=" + ctx.name.getText(), ctx)
+                        //.assume(opParamAntecedents)
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(currentTypeReprSym.getConvention());
+
+        PExp constraint = g.getTrueExp();
+        PExp correspondence = g.getTrueExp();
+        if (currentTypeReprSym == null) return;
+        correspondence = currentTypeReprSym.getCorrespondence();
+
+        if (currentTypeReprSym.getDefinition() != null) {
+            constraint = currentTypeReprSym.getDefinition().getProgramType().getConstraint();
+        }
+        PExp newConstraint = constraint.substitute(
+                currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
+        newConstraint = newConstraint.withVCInfo(ctx.getStart(), "Constraint for type: " + ctx.name.getText());
+        well_def_corr_hyp_block.assume(correspondence.splitIntoConjuncts());
+        //throw new UnsupportedOperationException("re-institute the final confirm for this dan");
+        well_def_corr_hyp_block.finalConfirm(newConstraint);
+        outputFile.addAssertiveBlocks(well_def_corr_hyp_block.build());
+
+        //2. Type Initialization Hypothesis
+        /*List<ModuleParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
+        VCAssertiveBlockBuilder t_init_hyp_block =
+                new VCAssertiveBlockBuilder(g, s,
+                        "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(getAssertionsFromModuleFormalParameters(moduleParamSyms,
+                                this::extractAssumptionsFromParameter));
+        */
+    }
 
     @Override
     public void enterFacilityDecl(ResolveParser.FacilityDeclContext ctx) {

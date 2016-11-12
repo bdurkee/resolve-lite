@@ -60,6 +60,6 @@ public class VCConfirm extends VCRuleBackedStat {
 
     @Override
     public String toString() {
-        return "Confirm " + Utils.join(sequents, " ∧\n") + ";";
+        return "Confirm \n\t" + Utils.join(sequents, " ∧\n\t") + ";";
     }
 }

@@ -56,7 +56,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
         //TODO: Before this happens we need to be sure to apply invk condition listener to any evaluates arguments that are calls...
         confirmPrecondition = confirmPrecondition
                 .substitute(formalExps, callExp.getArguments())
-                .withVCInfo(block.definingTree.getStart(), "Requires clause of " + functionName.getName());
+                .withVCInfo(stat.getDefiningContext().getStart(), "Requires clause of " + functionName.getName());
         block.confirm(stat.getDefiningContext(), confirmPrecondition);
         //^^^^^ Here's the old one:
         //block.confirm(ctx, op.getRequires().substitute(formalExps, e.getArguments()));

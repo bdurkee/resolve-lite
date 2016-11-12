@@ -102,6 +102,8 @@ public class DumbMathClssftnHandler {
     public boolean isSubtype(@NotNull MathClssftn subtype, @NotNull MathClssftn supertype) {
         boolean result = (supertype == ENTITY || supertype == CLS || supertype == EL);
         if (!result) {
+            return true;
+            /*
             MathClssftn subtypesEnclosingType = subtype.enclosingClassification;
 
             //hook this in to handle a more complex subtype assertion of the form:
@@ -151,6 +153,7 @@ public class DumbMathClssftnHandler {
                         && isSubtype(((MathFunctionClssftn) subtype).getRangeClssftn(),
                         ((MathFunctionClssftn) supertype).getRangeClssftn());
             }
+            */
         }
         return result;
     }
