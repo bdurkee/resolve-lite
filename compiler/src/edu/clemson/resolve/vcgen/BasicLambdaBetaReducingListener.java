@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
  * Note: This listener will therefore only mutate parts of an expression where
  * the first class name portion of some {@link PApply} is an instance of {@link PLambda}.</p>
  */
-public class BasicBetaReducingListener extends PExpListener {
+public class BasicLambdaBetaReducingListener extends PExpListener {
 
     private PExp reducedExp;
 
-    public BasicBetaReducingListener(@NotNull PExp start) {
+    public BasicLambdaBetaReducingListener(@NotNull PExp start) {
         this.reducedExp = start;
     }
 

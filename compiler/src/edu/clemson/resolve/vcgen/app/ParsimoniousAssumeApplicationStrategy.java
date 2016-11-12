@@ -2,6 +2,8 @@ package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
+import edu.clemson.resolve.vcgen.BasicLambdaBetaReducingListener;
+import edu.clemson.resolve.vcgen.ListBackedSequent;
 import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -89,7 +91,10 @@ public class ParsimoniousAssumeApplicationStrategy
         VCConfirm substitutedConfirm = block.finalConfirm.withSequentFormulaSubstitution(equalitySubstitutions);
         List<Sequent> newFinalConfirmSequents =
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
-                substitutedConfirm.getSequents(), stat.isStipulatedAssumption());
+                        substitutedConfirm.getSequents(), stat.isStipulatedAssumption());
+
+        newFinalConfirmSequents = betaReduceSequentFormulas(newFinalConfirmSequents);
+
         block.finalConfirm(newFinalConfirmSequents);
         return block.snapshot();
     }
@@ -134,6 +139,27 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         return false;
+    }
+
+    @NotNull
+    private List<Sequent> betaReduceSequentFormulas(List<Sequent> existingSequents) {
+        List<Sequent> newFinalConfirmSequentsBetaReduced = new LinkedList<>();
+        for (Sequent sequent : existingSequents) {
+            List<PExp> newLeft = new LinkedList<>();
+            List<PExp> newRight = new LinkedList<>();
+            for (PExp x : sequent.getLeftFormulas()) {
+                BasicLambdaBetaReducingListener b = new BasicLambdaBetaReducingListener(x);
+                x.accept(b);
+                newLeft.add(b.getReducedExp());
+            }
+            for (PExp x : sequent.getRightFormulas()) {
+                BasicLambdaBetaReducingListener b = new BasicLambdaBetaReducingListener(x);
+                x.accept(b);
+                newRight.add(b.getReducedExp());
+            }
+            newFinalConfirmSequentsBetaReduced.add(new ListBackedSequent(newLeft, newRight));
+        }
+        return newFinalConfirmSequentsBetaReduced;
     }
 
     private Set<String> getSymbolNamesFromSequent(Sequent s) {

@@ -415,6 +415,7 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
     ;
 
+//TODO: Add and, or, implies, not, and arrow to the grammar.
 mathExp
     :   mathPrimeExp                                                                        #mathPrimaryExp
     |   '(' mathAssertionExp ')'                                                            #mathNestedExp

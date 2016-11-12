@@ -24,6 +24,7 @@ import edu.clemson.resolve.semantics.symbol.ProgParameterSymbol.ParameterMode;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.app.*;
 import edu.clemson.resolve.vcgen.stats.*;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -114,20 +115,35 @@ public class VCGen extends ResolveBaseListener {
         PExp newConstraint = constraint.substitute(
                 currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
         newConstraint = newConstraint.withVCInfo(ctx.getStart(), "Constraint for type: " + ctx.name.getText());
-        well_def_corr_hyp_block.assume(correspondence.splitIntoConjuncts());
+        List<PExp> correspondencePieces = correspondence.splitIntoConjuncts();
+        well_def_corr_hyp_block.assume(correspondencePieces);
         //throw new UnsupportedOperationException("re-institute the final confirm for this dan");
         well_def_corr_hyp_block.finalConfirm(newConstraint);
         outputFile.addAssertiveBlocks(well_def_corr_hyp_block.build());
 
         //2. Type Initialization Hypothesis
-        /*List<ModuleParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
-        VCAssertiveBlockBuilder t_init_hyp_block =
-                new VCAssertiveBlockBuilder(g, s,
-                        "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx)
-                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
-                        .assume(getAssertionsFromModuleFormalParameters(moduleParamSyms,
-                                this::extractAssumptionsFromParameter));
-        */
+        if (ctx.typeImplInit() != null) {
+            List<ModuleParameterSymbol> moduleParamSyms = getAllModuleParameterSyms();
+            VCAssertiveBlockBuilder t_init_hyp_block =
+                    new VCAssertiveBlockBuilder(g, s,
+                            "T_Init_Hypo=" + currentTypeReprSym.getName(), ctx.typeImplInit())
+                            .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES));
+                            //.assume(getAssertionsFromModuleFormalParameters(moduleParamSyms,
+                            //        this::extractAssumptionsFromParameter));
+            t_init_hyp_block.stats(getStatsFor(t_init_hyp_block, ctx.typeImplInit(), ctx.typeImplInit().stmt()));
+            t_init_hyp_block.assume(correspondencePieces);
+            if (!(currentTypeReprSym.getDefinition() == null) &&
+                    !(currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures().isLiteralTrue())) {
+                PExp initEnsures = currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures();
+                initEnsures = initEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
+                        currentTypeReprSym.conceptualExemplarAsPSymbol());
+                t_init_hyp_block.confirm(ctx.typeImplInit(), initEnsures);
+            }
+            t_init_hyp_block.confirm(ctx.typeImplInit(), currentTypeReprSym.getConvention());
+            outputFile.addAssertiveBlocks(t_init_hyp_block.build());
+        }
+
+
     }
 
     @Override
@@ -252,9 +268,7 @@ public class VCGen extends ResolveBaseListener {
                         .remember();
         assumeVarDecls(ctx.varDeclGroup(), block);
         //stats
-        StmtListener l = new StmtListener(block, tr.exprASTs);
-        ParseTreeWalker.DEFAULT.walk(l, ctx);
-        block.stats(Utils.collect(VCRuleBackedStat.class, ctx.stmt(), l.stats));
+        block.stats(getStatsFor(block, ctx, ctx.stmt()));
 
         PExp corrFnExpEnsures = perParameterCorrFnExpSubstitute(paramSyms,
                 tr.getMathExpASTFor(g, ctx.ensuresClause())); //postcondition[params 1..i <-- corr_fn_exp]
@@ -270,6 +284,15 @@ public class VCGen extends ResolveBaseListener {
         }
         block.finalConfirm(corrFnExpEnsures);
         outputFile.addAssertiveBlocks(block.build());
+    }
+
+    @NotNull
+    private List<VCRuleBackedStat> getStatsFor(VCAssertiveBlockBuilder block,
+                                                         ParserRuleContext ctx,
+                                                         List<ResolveParser.StmtContext> stmtsInCtx) {
+        StmtListener l = new StmtListener(block, tr.exprASTs);
+        ParseTreeWalker.DEFAULT.walk(l, ctx);
+        return Utils.collect(VCRuleBackedStat.class, stmtsInCtx, l.stats);
     }
 
     @Override

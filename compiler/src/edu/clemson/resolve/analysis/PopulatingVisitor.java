@@ -543,6 +543,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     nsme.getRequestedModule().getText());
         }
 
+        PExp typeInitializationEnsures = curTypeReprModelSymbol.getProgramType().getInitializationEnsures();
+        if (curTypeReprModelSymbol != null) {
+
+        }
         //need to implement visitprogrecordtype
         PTRepresentation reprType =
                 new PTRepresentation(g, tr.progTypes.get(reprTypeNode),
