@@ -178,7 +178,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-
     @Override
     public Void visitParameterDeclGroup(ResolveParser.ParameterDeclGroupContext ctx) {
         this.visit(ctx.type());
@@ -534,7 +533,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
-            //won't have a stats.
+            //won't have a model. //TODO: This is going to change...
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         } catch (NoSuchModuleException nsme) {
