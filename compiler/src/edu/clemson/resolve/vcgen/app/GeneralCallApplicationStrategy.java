@@ -2,10 +2,7 @@ package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveLexer;
-import edu.clemson.resolve.proving.absyn.PApply;
-import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PExpListener;
-import edu.clemson.resolve.proving.absyn.PSymbol;
+import edu.clemson.resolve.proving.absyn.*;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.Scope;
 import edu.clemson.resolve.semantics.SymbolTableException;
@@ -83,9 +80,12 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
             //t ~> NPV(RP, a), @t ~> a
             if (curFormal.getMode() == ParameterMode.UPDATES) {
-                newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGen.NPV(currFinalConfirm.getSequents(), (PSymbol) curActual));
+                if (curActual instanceof PSelector) {
+                    ((PSelector) curActual).getRight()
+                }
+                newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGen.NPV(currFinalConfirm.getSequents(), curActual));
                 newAssumeSubtitutions.put(new PSymbolBuilder(
-                        curFormal.asPSymbol()).incoming(true).build(), (PSymbol) curActual);
+                        curFormal.asPSymbol()).incoming(true).build(), curActual);
             }
             //v ~> NPV(RP, b)
             else if (curFormal.getMode() == ParameterMode.REPLACES) {

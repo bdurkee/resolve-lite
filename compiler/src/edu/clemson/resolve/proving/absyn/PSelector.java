@@ -18,12 +18,8 @@ public class PSelector extends PExp {
         this.right = right;
     }
 
-    public PSelector(@NotNull PExp left,
-                     @NotNull PExp right,
-                     @Nullable Token vcLocation,
-                     @Nullable String vcExplanation) {
-        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(),
-                right.getProgType(), vcLocation, vcExplanation);
+    public PSelector(@NotNull PExp left, @NotNull PExp right, @Nullable Token vcLocation, @Nullable String vcExplanation) {
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(), right.getProgType(), vcLocation, vcExplanation);
         this.left = left;
         this.right = right;
     }
@@ -40,6 +36,15 @@ public class PSelector extends PExp {
         v.endChildren(this);
         v.endPSelector(this);
         v.endPExp(this);
+    }
+
+    //TODO: This probably isn't right. (what if there is a parenthesized segment?, etc)
+    @NotNull
+    public PSymbol getRightmostLeafSymbol() {
+        if (!(right instanceof PSymbol)) {
+            throw new UnsupportedOperationException("Odd looking (unhandled) PSelector expression: " + this.toString());
+        }
+        return (PSymbol) right;
     }
 
     @NotNull

@@ -8,6 +8,7 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
@@ -653,7 +654,6 @@ public class VCGen extends ResolveBaseListener {
     /** "Next Prime Variable" (over sequents) */
     public static PSymbol NPV(Collection<Sequent> sequents, PSymbol oldSym) {
         PSymbol result = oldSym;
-
         for (Sequent sequent : sequents) {
             for (PExp formula : sequent.getLeftFormulas()) {
                 PSymbol temp = NPV(formula, oldSym);
@@ -673,7 +673,7 @@ public class VCGen extends ResolveBaseListener {
 
     /** "Next Prime Variable" */
     private static PSymbol NPV(PExp wff, PSymbol oldSym) {
-        //Add an extra question mark to the front of oldSym
+        //Add an extra prime to oldSym
         PSymbol newOldSym = new PSymbol.PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
 
         //Primes oldSym if it is our first time visiting.
