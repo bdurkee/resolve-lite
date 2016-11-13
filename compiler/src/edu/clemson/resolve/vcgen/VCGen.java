@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//Note: This is the newer one..
 public class VCGen extends ResolveBaseListener {
 
     private final AnnotatedModule tr;
@@ -95,7 +94,7 @@ public class VCGen extends ResolveBaseListener {
                 getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
                         this::extractAssumptionsFromParameter);
 
-        //Correct type Realiz Hypo
+        //Correct type Realiz Hypo:
         //1. Well Defined Correspondence Hypothesis
         VCAssertiveBlockBuilder well_def_corr_hyp_block =
                 new VCAssertiveBlockBuilder(g, s,
@@ -135,15 +134,18 @@ public class VCGen extends ResolveBaseListener {
             if (!(currentTypeReprSym.getDefinition() == null) &&
                     !(currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures().isLiteralTrue())) {
                 PExp initEnsures = currentTypeReprSym.getDefinition().getProgramType().getInitializationEnsures();
-                initEnsures = initEnsures.substitute(currentTypeReprSym.exemplarAsPSymbol(),
-                        currentTypeReprSym.conceptualExemplarAsPSymbol());
+                initEnsures = initEnsures.substitute(
+                        currentTypeReprSym.exemplarAsPSymbol(), currentTypeReprSym.conceptualExemplarAsPSymbol());
+                initEnsures = initEnsures.withVCInfo(ctx.typeImplInit().getStart(), "Init. ensures for: " + ctx.name.getText());
                 t_init_hyp_block.confirm(ctx.typeImplInit(), initEnsures);
             }
-            t_init_hyp_block.confirm(ctx.typeImplInit(), currentTypeReprSym.getConvention());
+            t_init_hyp_block.finalConfirm(currentTypeReprSym.getConvention()
+                    .withVCInfo(ctx.typeImplInit().getStart(), "Convention for: " + ctx.name.getText()));
             outputFile.addAssertiveBlocks(t_init_hyp_block.build());
         }
 
-
+        //3. Type Finalization Hypothesis.. TODO.
+        //if (ctx.typeImplFinal() != null) ...
     }
 
     @Override
@@ -218,6 +220,7 @@ public class VCGen extends ResolveBaseListener {
         }
     }
 
+    @NotNull
     private List<PExp> reduceArgs(VCAssertiveBlockBuilder b, List<PExp> args) {
         List<PExp> result = new ArrayList<>();
         for (PExp progArg : args) {
@@ -234,6 +237,7 @@ public class VCGen extends ResolveBaseListener {
         return result;
     }
 
+    @NotNull
     public List<ModuleParameterSymbol> getAllModuleParameterSyms() {
         List<ModuleParameterSymbol> result = moduleScope.getSymbolsOfType(ModuleParameterSymbol.class);
         for (ModuleIdentifier e : moduleScope.getInheritedIdentifiers()) {
@@ -288,8 +292,8 @@ public class VCGen extends ResolveBaseListener {
 
     @NotNull
     private List<VCRuleBackedStat> getStatsFor(VCAssertiveBlockBuilder block,
-                                                         ParserRuleContext ctx,
-                                                         List<ResolveParser.StmtContext> stmtsInCtx) {
+                                               ParserRuleContext ctx,
+                                               List<ResolveParser.StmtContext> stmtsInCtx) {
         StmtListener l = new StmtListener(block, tr.exprASTs);
         ParseTreeWalker.DEFAULT.walk(l, ctx);
         return Utils.collect(VCRuleBackedStat.class, stmtsInCtx, l.stats);
@@ -402,6 +406,7 @@ public class VCGen extends ResolveBaseListener {
         return result;
     }
 
+    @NotNull
     private List<PExp> getAssertionsFromFormalParameters(List<ProgParameterSymbol> parameters,
                                                          Function<ProgParameterSymbol, List<PExp>> extract) {
         List<PExp> result = new ArrayList<>();
@@ -411,6 +416,7 @@ public class VCGen extends ResolveBaseListener {
         return result;
     }
 
+    @NotNull
     private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
         if (p.getDeclaredType() instanceof ProgNamedType) {
@@ -441,6 +447,7 @@ public class VCGen extends ResolveBaseListener {
         return resultingAssumptions;
     }
 
+    @NotNull
     private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {
         List<PExp> result = new ArrayList<>();
         PExp incParamExp = new PSymbolBuilder(p.asPSymbol()).incoming(true).build();
@@ -475,6 +482,7 @@ public class VCGen extends ResolveBaseListener {
         return result;
     }
 
+    @NotNull
     private Set<PExp> getModuleLevelAssertionsOfType(ClauseType type) {
         Set<PExp> result = new LinkedHashSet<>();
         List<GlobalMathAssertionSymbol> assertions = new LinkedList<>();
@@ -538,6 +546,7 @@ public class VCGen extends ResolveBaseListener {
         }
     }
 
+    @NotNull
     private Map<PExp, PExp> getSpecializationsForFacility(@Nullable String facility) {
         Map<PExp, PExp> result = facilitySpecFormalActualMappings.get(facility);
         if (result == null) result = new HashMap<>();
@@ -566,7 +575,7 @@ public class VCGen extends ResolveBaseListener {
         return resultingClause == null ? g.getTrueExp() : resultingClause;
     }
 
-    private static class StmtListener extends ResolveBaseListener {
+    static class StmtListener extends ResolveBaseListener {
 
         final ParseTreeProperty<VCRuleBackedStat> stats = new ParseTreeProperty<>();
         final VCAssertiveBlockBuilder builder;
