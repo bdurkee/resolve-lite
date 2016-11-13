@@ -90,10 +90,6 @@ public class VCGen extends ResolveBaseListener {
                     new UnqualifiedNameQuery(ctx.name.getText())).toProgReprTypeSymbol();
         } catch (SymbolTableException e) {
         }
-        List<PExp> opParamAntecedents =
-                getAssertionsFromModuleFormalParameters(getAllModuleParameterSyms(),
-                        this::extractAssumptionsFromParameter);
-
         //Correct type Realiz Hypo:
         //1. Well Defined Correspondence Hypothesis
         VCAssertiveBlockBuilder well_def_corr_hyp_block =
@@ -153,7 +149,6 @@ public class VCGen extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
         //block.assume(g.getTrueExp());
-
         ModuleScopeBuilder spec = null, impl = null;
         try {
             ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
@@ -177,7 +172,6 @@ public class VCGen extends ResolveBaseListener {
         List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class).stream()
                 .map(ModuleParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
-
         Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
         facilitySpecFormalActualMappings.put(ctx.name.getText(), specFormalsToActuals);
 
@@ -206,7 +200,6 @@ public class VCGen extends ResolveBaseListener {
                 //RPC[rn ~> rn_exp, RR ~> IRR]
                 PExp RPC = implReq.get().substitute(implFormalsToActuals).withVCInfo(ctx.getStart(),
                         "Requires clause for realization: " + ctx.impl.getText() + " in facility instantiation rule");
-
                 //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
                 result = g.formConjunct(RPC, result);
             }
@@ -298,15 +291,15 @@ public class VCGen extends ResolveBaseListener {
         return Utils.collect(VCRuleBackedStat.class, stmtsInCtx, l.stats);
     }
 
-    private List<PExp> getCorrespondencesOfRelevantParams(List<ProgParameterSymbol> parameters) {
+    private List<PExp> getParamCorrespondences(List<ProgParameterSymbol> parameters) {
         List<PExp> result = new ArrayList<>();
         for (ProgParameterSymbol parameter : parameters) {
             if (parameter.getDeclaredType() instanceof ProgRepresentationType) {
                 ProgReprTypeSymbol s = ((ProgRepresentationType)parameter.getDeclaredType()).getReprTypeSymbol();
                 if (s == null) continue;
+                //substitute the exemplar for the name of the parameter...
                 PSymbol reprExemplar = s.getRepresentationType().getExemplarAsPSymbol();
-                PExp correspondence = s.getCorrespondence().substitute(reprExemplar, s.conceptualExemplarAsPSymbol());
-                result.add(correspondence);
+                result.add(s.getCorrespondence().substitute(s.exemplarAsPSymbol(), parameter.asPSymbol()));
             }
         }
         return result;
@@ -317,8 +310,6 @@ public class VCGen extends ResolveBaseListener {
         Scope s = symtab.getScope(ctx);
         OperationSymbol op = null;
         VCAssertiveBlockBuilder block = null;
-        List<PExp> correspondenceFnExprs = new ArrayList<>();
-
         try {
             List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
@@ -327,15 +318,16 @@ public class VCGen extends ResolveBaseListener {
 
             PExp concifiedRequires = concifyAssertionByParams(paramSyms, op.getRequires());
             List<PExp> opParamAntecedents = new ArrayList<>();
+
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
             block = new VCAssertiveBlockBuilder(g, s,
                         "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
-                        //.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
                         //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        .assume(concifiedRequires)
                         .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
+                        .assume(concifiedRequires)
                         .remember();
             //add in any user defined notices...
             for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
@@ -360,7 +352,7 @@ public class VCGen extends ResolveBaseListener {
         //postcondition[params 1..i <-- corr_fn_exp]
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
-        block.assume(correspondenceFnExprs)
+        block.assume(getParamCorrespondences(paramSyms))
                 .confirm(ctx, g.formConjuncts(paramConsequents))
                 .finalConfirm(ensures);
 
@@ -420,9 +412,12 @@ public class VCGen extends ResolveBaseListener {
         return result;
     }
 
+    //TODO: This probably should know whether its being called from a procedure of operationProcedure... op procedures shouldn't have to
+    //assume correspondences, etc.
     @NotNull
     private List<PExp> extractAssumptionsFromParameter(ProgParameterSymbol p) {
         List<PExp> resultingAssumptions = new ArrayList<>();
+        PSymbol pAsPSymbol = p.asPSymbol();
         if (p.getDeclaredType() instanceof ProgNamedType) {
 
             //both PTFamily AND PTRepresentation are a PTNamed
@@ -430,18 +425,19 @@ public class VCGen extends ResolveBaseListener {
             PExp exemplar = declaredType.getExemplarAsPSymbol();
             if (declaredType instanceof ProgFamilyType) {
                 PExp constraint = ((ProgFamilyType) declaredType).getConstraint();
-                constraint = constraint.substitute(
-                        getSpecializationsForFacility(p.getTypeQualifier()));
-                resultingAssumptions.add(constraint.substitute(
-                        declaredType.getExemplarAsPSymbol(), p.asPSymbol())); // ASSUME TC (type constraint -- since we're conceptual)
+                constraint = constraint.substitute(getSpecializationsForFacility(p.getTypeQualifier()));
+                resultingAssumptions.add(constraint.substitute(declaredType.getExemplarAsPSymbol(), pAsPSymbol)); // ASSUME TC (type constraint -- since we're conceptual)
             }
             else if (declaredType instanceof ProgRepresentationType) {
                 ProgReprTypeSymbol repr = ((ProgRepresentationType) declaredType).getReprTypeSymbol();
                 if (repr == null) return resultingAssumptions;
+
+                PExp concifiedCorrespondence = concifyAssertionByParam(p, repr.getCorrespondence());
+                resultingAssumptions.add(concifiedCorrespondence);
+
                 PExp convention = repr.getConvention();
                 resultingAssumptions.add(convention.substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
-                // ASSUME RC (repr convention -- since we're a repr)
-                resultingAssumptions.add(repr.getCorrespondence());
+
             }
         }
         else { //PTGeneric
@@ -454,8 +450,8 @@ public class VCGen extends ResolveBaseListener {
     @NotNull
     private List<PExp> extractConsequentsFromParameter(ProgParameterSymbol p) {
         List<PExp> result = new ArrayList<>();
-        PExp incParamExp = new PSymbolBuilder(p.asPSymbol()).incoming(true).build();
-        PExp paramExp = new PSymbolBuilder(p.asPSymbol()).incoming(false).build();
+        PSymbol paramExp = p.asPSymbol();
+        PSymbol incParamExp = new PSymbolBuilder(paramExp).incoming(true).build();
 
         if (p.getDeclaredType() instanceof ProgNamedType) {
             ProgNamedType t = (ProgNamedType) p.getDeclaredType();
@@ -464,10 +460,11 @@ public class VCGen extends ResolveBaseListener {
             //TODO: Maybe have a PTLocalRepresentation that cannot have a correspondence
             if (t instanceof ProgRepresentationType) {
                 ProgReprTypeSymbol repr = ((ProgRepresentationType) t).getReprTypeSymbol();
-                PExp convention = repr.getConvention();
-                result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp)
-                        .withVCInfo(p.getDefiningTree().getStart(), "Convention for type " +
-                                t.getName()));
+                if (repr != null) {
+                    PExp convention = repr.getConvention();
+                    result.add(convention.substitute(t.getExemplarAsPSymbol(), paramExp)
+                            .withVCInfo(p.getDefiningTree().getStart(), "Convention for type " + t.getName()));
+                }
             }
             if (p.getMode() == ParameterMode.PRESERVES || p.getMode() == ParameterMode.RESTORES) {
                 PExp equalsExp = g.formEquals(paramExp, incParamExp)
@@ -478,10 +475,10 @@ public class VCGen extends ResolveBaseListener {
             else if (p.getMode() == ParameterMode.CLEARS) {
                 PExp init = ((ProgNamedType) p.getDeclaredType())
                         .getInitializationEnsures()
-                        .substitute(exemplar, paramExp);
-                if (t instanceof ProgRepresentationType && ((ProgRepresentationType) t).getReprTypeSymbol() != null) {
-                    init = init.substitute(exemplar, ((ProgRepresentationType) t).getReprTypeSymbol()
-                            .conceptualExemplarAsPSymbol());
+                        .substitute(exemplar, paramExp).withVCInfo(
+                                p.getDefiningTree().getStart(), "Ensure parameter " + p.getName() + " is cleared");
+                if (t instanceof ProgRepresentationType) {
+                    init = init.substitute(exemplar, ((ProgRepresentationType) t).getConceptualExemplar(false));
                 }
                 result.add(init);
             }
@@ -573,19 +570,16 @@ public class VCGen extends ResolveBaseListener {
     }
 
     @NotNull
-    private PExp concifyAssertionByParam(@NotNull ProgParameterSymbol param,
+    private PExp concifyAssertionByParam(@NotNull ProgParameterSymbol parameter,
                                          @NotNull PExp assertion) {
         List<PExp> result = new ArrayList<>();
         PExp resultingClause = assertion;
-        if (param.getDeclaredType() instanceof ProgRepresentationType) {
-            ProgReprTypeSymbol repr = ((ProgRepresentationType) param.getDeclaredType()).getReprTypeSymbol();
+        if (parameter.getDeclaredType() instanceof ProgRepresentationType) {
+            ProgReprTypeSymbol repr = ((ProgRepresentationType) parameter.getDeclaredType()).getReprTypeSymbol();
             if (repr == null) return resultingClause;
 
             //distribute conc.X into the clause passed
-            Map<PExp, PExp> concReplMapping = new HashMap<>();
-            concReplMapping.put(repr.exemplarAsPSymbol(), repr.conceptualExemplarAsPSymbol());
-            concReplMapping.put(repr.exemplarAsPSymbol(true), repr.conceptualExemplarAsPSymbol(true));
-            resultingClause = resultingClause.substitute(concReplMapping);
+            resultingClause = resultingClause.substitute(repr.exemplarAsPSymbol(), parameter.asPSymbol());
         }
         return resultingClause;
     }

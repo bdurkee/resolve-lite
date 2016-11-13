@@ -132,7 +132,7 @@ public class VCAssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume, boolean stipulate, boolean notice) {
-            if (assume == null) {
+            if (assume == null || assume.isLiteralTrue()) {
                 return this;
             }
             //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), stipulate, assume));

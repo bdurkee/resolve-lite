@@ -1,5 +1,7 @@
 package edu.clemson.resolve.semantics.programtype;
 
+import edu.clemson.resolve.proving.absyn.PSelector;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathClssftn;
@@ -25,10 +27,7 @@ public class ProgRepresentationType extends ProgNamedType {
     private final ProgType baseType;
     private final String name;
 
-    /**
-     * This will be {@code null} for standalone representations (i.e. those that
-     * would appear in the context of a facility module.
-     */
+    /** This will be {@code null} for standalone representations (i.e. those that would appear in the context of a facility module. */
     private final TypeModelSymbol family;
     private ProgReprTypeSymbol repr;
 
@@ -64,6 +63,20 @@ public class ProgRepresentationType extends ProgNamedType {
             throw new NoSuchElementException("no family found for this representation: " + toString());
         }
         return family;
+    }
+
+    @NotNull
+    public PSelector getConceptualExemplar() {
+        return getConceptualExemplar(false);
+    }
+
+    @NotNull
+    public PSelector getConceptualExemplar(boolean incoming) {
+        return new PSelector(
+                new PSymbol.PSymbolBuilder("conc").mathClssfctn(g.BOOLEAN)
+                        .incoming(incoming).build(),
+                new PSymbol.PSymbolBuilder(getExemplarName())
+                        .mathClssfctn(getBaseType().toMath()).build());
     }
 
     @NotNull
