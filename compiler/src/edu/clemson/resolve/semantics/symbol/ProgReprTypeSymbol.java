@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import org.antlr.v4.runtime.ParserRuleContext;
-import edu.clemson.resolve.semantics.programtype.PTRepresentation;
+import edu.clemson.resolve.semantics.programtype.ProgRepresentationType;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 
 import java.util.Map;
@@ -33,14 +33,14 @@ public class ProgReprTypeSymbol extends Symbol {
     @NotNull
     protected final DumbMathClssftnHandler typeGraph;
     @NotNull
-    protected final PTRepresentation representation;
+    protected final ProgRepresentationType representation;
 
     public ProgReprTypeSymbol(@NotNull DumbMathClssftnHandler g,
                               @NotNull String name,
                               @Nullable ParserRuleContext definingElement,
                               @NotNull ModuleIdentifier moduleIdentifier,
                               @Nullable TypeModelSymbol definition,
-                              @NotNull PTRepresentation representation,
+                              @NotNull ProgRepresentationType representation,
                               @NotNull PExp convention,
                               @NotNull PExp correspondence) {
         super(name, definingElement, moduleIdentifier);
@@ -77,7 +77,7 @@ public class ProgReprTypeSymbol extends Symbol {
     }
 
     @NotNull
-    public PTRepresentation getRepresentationType() {
+    public ProgRepresentationType getRepresentationType() {
         return representation;
     }
 

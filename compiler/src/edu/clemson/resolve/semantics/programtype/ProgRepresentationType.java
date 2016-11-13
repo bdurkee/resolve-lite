@@ -13,11 +13,14 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * A {@code PTRepresentation} wraps an existing {@link ProgType ProgType} with additional information about a
+ * A {@code ProgRepresentation} wraps an existing {@link ProgType ProgType} with additional information about a
  * {@link ProgFamilyType ProgFamilyType} this type represents. An instance of {@code PTRepresentation} is thus a
  * special case of its wrapped type that happens to be functioning as a representation type.
  */
-public class PTRepresentation extends ProgNamedType {
+
+//TODO: Have a ProgFacilityRepresentationType that disallows correspondences..
+    //this will clarify some confusion during vcgen...
+public class ProgRepresentationType extends ProgNamedType {
 
     private final ProgType baseType;
     private final String name;
@@ -29,12 +32,13 @@ public class PTRepresentation extends ProgNamedType {
     private final TypeModelSymbol family;
     private ProgReprTypeSymbol repr;
 
-    public PTRepresentation(@NotNull DumbMathClssftnHandler g,
-                            @NotNull ProgType baseType,
-                            @NotNull String name,
-                            @Nullable TypeModelSymbol family,
-                            @NotNull ModuleIdentifier moduleIdentifier) {
-        super(g, name, g.getTrueExp(), moduleIdentifier);
+    public ProgRepresentationType(@NotNull DumbMathClssftnHandler g,
+                                  @NotNull ProgType baseType,
+                                  @NotNull String name,
+                                  @Nullable TypeModelSymbol family,
+                                  @NotNull ModuleIdentifier moduleIdentifier) {
+        super(g, name, family != null ? family.getProgramType().getInitializationEnsures() : g.getTrueExp(),
+                moduleIdentifier);
         this.name = name;
         this.baseType = baseType;
         this.family = family;

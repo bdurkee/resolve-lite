@@ -543,13 +543,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     nsme.getRequestedModule().getText());
         }
 
-        PExp typeInitializationEnsures = curTypeReprModelSymbol.getProgramType().getInitializationEnsures();
-        if (curTypeReprModelSymbol != null) {
-
-        }
         //need to implement visitprogrecordtype
-        PTRepresentation reprType =
-                new PTRepresentation(g, tr.progTypes.get(reprTypeNode),
+        ProgRepresentationType reprType =
+                new ProgRepresentationType(g, tr.progTypes.get(reprTypeNode),
                         ctx.name.getText(), curTypeReprModelSymbol,
                         getRootModuleIdentifier());
         try {
@@ -755,8 +751,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                            @NotNull String fieldName) {
         ProgType prevAccessType = tr.progTypes.get(previousAccess);
         ProgType type = ProgInvalidType.getInstance(g);
-        if (prevAccessType instanceof PTRepresentation) {
-            ProgType baseType = ((PTRepresentation) prevAccessType).getBaseType();
+        if (prevAccessType instanceof ProgRepresentationType) {
+            ProgType baseType = ((ProgRepresentationType) prevAccessType).getBaseType();
             try {
                 ProgRecordType record = (ProgRecordType) baseType;
                 type = record.getFieldType(fieldName);
