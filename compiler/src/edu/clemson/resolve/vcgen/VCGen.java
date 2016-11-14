@@ -350,7 +350,7 @@ public class VCGen extends ResolveBaseListener {
         block.stats(getStatsFor(block, ctx, ctx.stmt()));
         PExp ensures = concifyAssertionByParams(paramSyms, op.getEnsures()
                 .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText()));
-        //postcondition[params 1..i <-- corr_fn_exp]
+
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
         block.assume(getParamCorrespondences(paramSyms))
