@@ -201,9 +201,14 @@ public class ProgParameterSymbol extends Symbol {
 
     @NotNull
     public PSelector asConceptualSymbol() {
+        return asConceptualSymbol(false);
+    }
+
+    @NotNull
+    public PSelector asConceptualSymbol(boolean incoming) {
         return new PSelector(
                 new PSymbol.PSymbolBuilder("conc").mathClssfctn(typeGraph.BOOLEAN)
-                        /*.incoming(incoming)*/.build(),
+                        .incoming(incoming).build(),
                 new PSymbol.PSymbolBuilder(getName())
                         .mathClssfctn(declaredType.toMath()).build());
     }
@@ -216,10 +221,8 @@ public class ProgParameterSymbol extends Symbol {
 
     @NotNull
     @Override
-    public Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility) {
-
+    public Symbol instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                      @Nullable FacilitySymbol instantiatingFacility) {
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(), getModuleIdentifier());

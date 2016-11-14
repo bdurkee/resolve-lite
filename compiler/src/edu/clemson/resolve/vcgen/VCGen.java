@@ -580,7 +580,10 @@ public class VCGen extends ResolveBaseListener {
             if (repr == null) return resultingClause;
 
             //distribute conc.X into the clause passed
-            resultingClause = resultingClause.substitute(repr.exemplarAsPSymbol(), parameter.asPSymbol());
+            Map<PExp, PExp> x = new HashMap<>();
+            x.put(repr.exemplarAsPSymbol(true), parameter.asConceptualSymbol(true));
+            x.put(repr.exemplarAsPSymbol(), parameter.asConceptualSymbol());
+            resultingClause = resultingClause.substitute(x);
         }
         return resultingClause;
     }

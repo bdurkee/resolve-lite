@@ -25,4 +25,12 @@ public interface Sequent {
 
     @NotNull
     public Sequent addLeft(@NotNull PExp formula);
+
+    /**
+     * Returns {@code true} <strong>iff</strong> this is an identity axiom, that is, a sequent
+     * of the kind <code>S,H ==&gt; H</code>.
+     *
+     * @return {@code true} iff this is an identity axiom.
+     */
+    public abstract boolean isIdentityAxiom();
 }
