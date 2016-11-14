@@ -565,7 +565,7 @@ public class VCGen extends ResolveBaseListener {
                                           @NotNull PExp assertion) {
         PExp resultingAssertion = assertion;
         for (ProgParameterSymbol p : params) {
-            resultingAssertion = concifyAssertionByParam(p, assertion);
+            resultingAssertion = concifyAssertionByParam(p, resultingAssertion);
         }
         return resultingAssertion;
     }
@@ -652,18 +652,18 @@ public class VCGen extends ResolveBaseListener {
     }
 
     /** "Next Prime Variable" (over sequents) */
-    public static PSymbol NPV(Collection<Sequent> sequents, PSymbol oldSym) {
-        PSymbol result = oldSym;
+    public static PExp NPV(Collection<Sequent> sequents, PExp oldSym) {
+        PExp result = oldSym;
         for (Sequent sequent : sequents) {
             for (PExp formula : sequent.getLeftFormulas()) {
-                PSymbol temp = NPV(formula, oldSym);
-                if (temp.getName().length() > result.getName().length()) {
+                PExp temp = NPV(formula, oldSym);
+                if (temp.getTopLevelOperationName().length() > result.getTopLevelOperationName().length()) {
                     result = temp;
                 }
             }
             for (PExp formula : sequent.getRightFormulas()) {
-                PSymbol temp = NPV(formula, oldSym);
-                if (temp.getName().length() > result.getName().length()) {
+                PExp temp = NPV(formula, oldSym);
+                if (temp.getTopLevelOperationName().length() > result.getTopLevelOperationName().length()) {
                     result = temp;
                 }
             }
@@ -672,22 +672,22 @@ public class VCGen extends ResolveBaseListener {
     }
 
     /** "Next Prime Variable" */
-    private static PSymbol NPV(PExp wff, PSymbol oldSym) {
+    private static PExp NPV(PExp wff, PExp oldSym) {
         //Add an extra prime to oldSym
-        PSymbol newOldSym = new PSymbol.PSymbolBuilder(oldSym, oldSym.getName() + "′").build();
+        PExp newOldSym = oldSym.withPrimeMarkAdded();
 
         //Primes oldSym if it is our first time visiting.
-        if (wff.containsName(oldSym.getName())) {
+        if (wff.containsName(oldSym.getTopLevelOperationName())) {
             return NPV(wff, newOldSym);
         }
         //Don't need to prime here
-        else if (wff.containsName(newOldSym.getName())) {
+        else if (wff.containsName(newOldSym.getTopLevelOperationName())) {
             return NPV(wff, newOldSym);
         }
         else {
             //Return the new variable expression with the prime
-            int i = oldSym.getName().length() - 1;
-            if (oldSym.getName().charAt(i) != '′') {
+            int i = oldSym.getTopLevelOperationName().length() - 1;
+            if (oldSym.getTopLevelOperationName().charAt(i) != '′') {
                 return newOldSym;
             }
         }

@@ -25,6 +25,12 @@ public class PSelector extends PExp {
     }
 
     @Override
+    @NotNull
+    public PExp withPrimeMarkAdded() {
+        return new PSelector(left, right.withPrimeMarkAdded(), getVCLocation(), getVCExplanation());
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSelector(this);
@@ -36,15 +42,6 @@ public class PSelector extends PExp {
         v.endChildren(this);
         v.endPSelector(this);
         v.endPExp(this);
-    }
-
-    //TODO: This probably isn't right. (what if there is a parenthesized segment?, etc)
-    @NotNull
-    public PSymbol getRightmostLeafSymbol() {
-        if (!(right instanceof PSymbol)) {
-            throw new UnsupportedOperationException("Odd looking (unhandled) PSelector expression: " + this.toString());
-        }
-        return (PSymbol) right;
     }
 
     @NotNull
@@ -120,7 +117,7 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return this;
+        return new PSelector(left, right);
     }
 
     //TODO: Someday, if this class is still around, use Utils.apply (collection ver. here)

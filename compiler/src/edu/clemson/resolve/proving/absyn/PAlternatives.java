@@ -43,6 +43,11 @@ public class PAlternatives extends PExp {
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
 
+    @Override
+    public PExp withPrimeMarkAdded() {
+        return this;
+    }
+
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPAlternatives(this);

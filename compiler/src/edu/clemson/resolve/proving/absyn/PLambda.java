@@ -44,6 +44,11 @@ public class PLambda extends PExp {
     }
 
     @Override
+    public PExp withPrimeMarkAdded() {
+        return this;
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPLambda(this);

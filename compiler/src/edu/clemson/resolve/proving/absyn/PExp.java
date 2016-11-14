@@ -146,6 +146,8 @@ public abstract class PExp {
         return substitute(e);
     }
 
+    public abstract PExp withPrimeMarkAdded();
+
     /**
      * Returns true if the {@link MathClssftn} of this expression matches (or is a subtype) of {@code other};
      * {@code false} otherwise.

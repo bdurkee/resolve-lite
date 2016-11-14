@@ -80,9 +80,6 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
 
             //t ~> NPV(RP, a), @t ~> a
             if (curFormal.getMode() == ParameterMode.UPDATES) {
-                if (curActual instanceof PSelector) {
-                    ((PSelector) curActual).getRight()
-                }
                 newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGen.NPV(currFinalConfirm.getSequents(), curActual));
                 newAssumeSubtitutions.put(new PSymbolBuilder(
                         curFormal.asPSymbol()).incoming(true).build(), curActual);
@@ -131,7 +128,7 @@ public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStra
         for (PExp actualArg : callExp.getArguments()) {
             ProgParameterSymbol curFormal = formalIter.next();
             if (distinguishedModes.contains(curFormal.getMode())) {
-                confirmSubstitutions.put(actualArg, VCGen.NPV(currFinalConfirm.getSequents(), (PSymbol) actualArg));
+                confirmSubstitutions.put(actualArg, VCGen.NPV(currFinalConfirm.getSequents(), actualArg));
             }
         }
         VCConfirm workingConfirm = block.finalConfirm.withSequentFormulaSubstitution(confirmSubstitutions);

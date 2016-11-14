@@ -157,6 +157,12 @@ public class PSymbol extends PExp {
     }
 
     @Override
+    @NotNull
+    public PExp withPrimeMarkAdded() {
+        return new PSymbol.PSymbolBuilder(this, getName() + "′").build();
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
@@ -305,6 +311,9 @@ public class PSymbol extends PExp {
 
             this.mathType = existingPSymbol.getMathClssftn();
             this.progType = existingPSymbol.getProgType();
+
+            this.vcLocation = existingPSymbol.getVCLocation();
+            this.vcExplanation = existingPSymbol.getVCExplanation();
         }
 
         public PSymbolBuilder(String name) {

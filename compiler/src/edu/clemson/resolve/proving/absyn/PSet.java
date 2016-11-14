@@ -28,6 +28,11 @@ public class PSet extends PExp {
     }
 
     @Override
+    public PExp withPrimeMarkAdded() {
+        return new PSet(getMathClssftn(), elements, getVCLocation(), getVCExplanation());
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSet(this);

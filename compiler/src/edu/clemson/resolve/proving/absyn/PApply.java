@@ -379,6 +379,16 @@ public class PApply extends PExp {
     }
 
     @Override
+    public PExp withPrimeMarkAdded() {
+        return new PApplyBuilder(functionPortion.withPrimeMarkAdded())
+                .arguments(arguments)
+                .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
+                .style(displayStyle)
+                .build();
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPApply(this);
