@@ -215,7 +215,7 @@ public class PLambda extends PExp {
 
         @Override
         public String toString() {
-            return name + ":" + (type instanceof MathInvalidClssftn ? "Inv" : type);
+            return name + " : " + (type instanceof MathInvalidClssftn ? "Inv" : type);
         }
     }
 

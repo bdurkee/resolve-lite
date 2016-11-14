@@ -433,12 +433,12 @@ public class VCGen extends ResolveBaseListener {
                 ProgReprTypeSymbol repr = ((ProgRepresentationType) declaredType).getReprTypeSymbol();
                 if (repr == null) return resultingAssumptions;
 
-                PExp concifiedCorrespondence = concifyAssertionByParam(p, repr.getCorrespondence());
-                resultingAssumptions.add(concifiedCorrespondence);
+                PExp correspondence = repr.getCorrespondence()
+                        .substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol());
+                resultingAssumptions.add(correspondence);
 
                 PExp convention = repr.getConvention();
                 resultingAssumptions.add(convention.substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
-
             }
         }
         else { //PTGeneric

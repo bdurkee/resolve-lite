@@ -1,5 +1,6 @@
 package edu.clemson.resolve.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.*;
 import org.jetbrains.annotations.NotNull;
@@ -196,6 +197,15 @@ public class ProgParameterSymbol extends Symbol {
         return new PSymbol.PSymbolBuilder(getName())
                 .progType(declaredType)
                 .mathClssfctn(declaredType.toMath()).build();
+    }
+
+    @NotNull
+    public PSelector asConceptualSymbol() {
+        return new PSelector(
+                new PSymbol.PSymbolBuilder("conc").mathClssfctn(typeGraph.BOOLEAN)
+                        /*.incoming(incoming)*/.build(),
+                new PSymbol.PSymbolBuilder(getName())
+                        .mathClssfctn(declaredType.toMath()).build());
     }
 
     @NotNull
