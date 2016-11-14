@@ -74,7 +74,7 @@ public class VCOutputFile {
         }
         VC vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
-            if (vc.isObviouslyTrue()) continue;
+            if (vc.isObviouslyTrue() /*|| vc.getSequent().isIdentityAxiom()*/) continue;
             finalVcs.add(new VC(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
             currentVcNumber++;
         }

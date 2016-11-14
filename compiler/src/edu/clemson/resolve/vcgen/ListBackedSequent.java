@@ -55,6 +55,14 @@ public class ListBackedSequent implements Sequent {
     }
 
     @Override
+    public boolean isIdentityAxiom() {
+        for (PExp succeedent : right) {
+            if (left.contains(succeedent)) return true;
+        }
+        return false;
+    }
+
+    @Override
     public int hashCode() {
         return toString().hashCode();
     }
