@@ -27,7 +27,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
         List<PExp> remainingAssumptions = new ArrayList<>();
-        List<PExp> nonEffectualEqualities = new ArrayList<>();
+        //List<PExp> nonEffectualEqualities = new ArrayList<>();
 
         for (PExp assume : allAssumptions) {
             if (stat.isStipulatedAssumption()) {
@@ -38,13 +38,10 @@ public class ParsimoniousAssumeApplicationStrategy
                 PExp lhs = assume.getSubExpressions().get(1);
                 PExp rhs = assume.getSubExpressions().get(2);
 
-                boolean hasVerificationVar =
-                        (lhs.getTopLevelOperationName().contains("P_Val") ||
-                                lhs.getTopLevelOperationName().contains("conc"));
                 //if both lhs and rhs are replaceable vars, then the left had better
                 //be a special verification-system conjured variable
                 if (lhs.isVariable() && rhs.isVariable()) {
-                    if (hasVerificationVar) {
+                    if (hasVerificationVariable(lhs)) {
                         equalitySubstitutions.put(lhs, rhs);
                     }
                     else {
@@ -53,25 +50,25 @@ public class ParsimoniousAssumeApplicationStrategy
                 }
                 //left replaceablility
                 else if (lhs.isVariable()) {
-                    if (substitutesAny(existingSequents, lhs, rhs)) {
+                    if (substitutesAny(existingSequents, lhs, rhs) || hasVerificationVariable(lhs)) {
                         equalitySubstitutions.put(lhs, rhs);
                     }
-                    else {
-                        if (!hasVerificationVar) {
-                            nonEffectualEqualities.add(assume);
-                        }
-                    }
+                    //else {
+                    //    if (!hasVerificationVar) {
+                    //        nonEffectualEqualities.add(assume);
+                    //    }
+                    //}
                 }
                 //right replaceability
                 else if (rhs.isVariable()) {
-                    if (substitutesAny(existingSequents, rhs, lhs)) {
+                    if (substitutesAny(existingSequents, rhs, lhs) || hasVerificationVariable(rhs)) {
                         equalitySubstitutions.put(rhs, lhs);
                     }
-                    else {
-                        if (!hasVerificationVar) {
-                            nonEffectualEqualities.add(assume);
-                        }
-                    }
+                    //else {
+                    //    if (!hasVerificationVar) {
+                    //        nonEffectualEqualities.add(assume);
+                    //    }
+                    //}
                 }
                 //not replaceable...
                 else {
@@ -87,7 +84,7 @@ public class ParsimoniousAssumeApplicationStrategy
         for (PExp assumption : remainingAssumptions) {
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
-        remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
+        //remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
         VCConfirm substitutedConfirm = block.finalConfirm.withSequentFormulaSubstitution(equalitySubstitutions);
         List<Sequent> newFinalConfirmSequents =
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
@@ -97,6 +94,10 @@ public class ParsimoniousAssumeApplicationStrategy
 
         block.finalConfirm(newFinalConfirmSequents);
         return block.snapshot();
+    }
+
+    private boolean hasVerificationVariable(PExp s) {
+        return s.getTopLevelOperationName().contains("P_Val") || s.getTopLevelOperationName().contains("conc");
     }
 
     private List<Sequent> performParsimoniousStep(DumbMathClssftnHandler g,

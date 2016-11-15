@@ -173,9 +173,9 @@ public class DumbMathClssftnHandler {
         if (e.isEmpty()) return null;
         Iterator<PExp> segsIter = e.iterator();
         PExp result = segsIter.next();
-        if (e.size() == 1) {
-            return e.get(0);
-        }
+        //if (e.size() == 1) {
+        //    return e.get(0);
+        //}
         while (segsIter.hasNext()) {
             result = formConjunct(result, segsIter.next());
         }

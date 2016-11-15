@@ -330,6 +330,7 @@ public class VCGen extends ResolveBaseListener {
         Scope s = symtab.getScope(ctx);
         OperationSymbol op = null;
         VCAssertiveBlockBuilder block = null;
+        List<PExp> relevantCorrespondences = new ArrayList<>();
         try {
             List<ProgParameterSymbol> paramSyms = s.getSymbolsOfType(ProgParameterSymbol.class);
 
@@ -340,7 +341,10 @@ public class VCGen extends ResolveBaseListener {
             //TODO: the requires however, once it's conc-ified, we need to conjunct all relevant correspondences
             //to it: i.e.:
             //Utils.formConjuncts(getParamCorrespondences(op.getParameters)) /\ concifiedRequires
-
+            relevantCorrespondences.addAll(getParamCorrespondences(paramSyms));
+            if (!relevantCorrespondences.isEmpty() && !concifiedRequires.isLiteralTrue()) {
+                concifiedRequires = g.formConjunct(g.formConjuncts(relevantCorrespondences), concifiedRequires);
+            }
             List<PExp> opParamAntecedents = new ArrayList<>();
 
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
@@ -377,7 +381,7 @@ public class VCGen extends ResolveBaseListener {
 
         List<PExp> paramConsequents = new ArrayList<>();
         Utils.apply(formalParameters, paramConsequents, this::extractConsequentsFromParameter);
-        block.assume(getParamCorrespondences(paramSyms))
+        block.assume(relevantCorrespondences)
                 .confirm(ctx, g.formConjuncts(paramConsequents))
                 .finalConfirm(ensures);
 
@@ -451,7 +455,7 @@ public class VCGen extends ResolveBaseListener {
             if (declaredType instanceof ProgFamilyType) {
                 PExp constraint = ((ProgFamilyType) declaredType).getConstraint();
                 constraint = constraint.substitute(getSpecializationsForFacility(p.getTypeQualifier()));
-                resultingAssumptions.add(constraint.substitute(declaredType.getExemplarAsPSymbol(), pAsPSymbol)); // ASSUME TC (type constraint -- since we're conceptual)
+                //resultingAssumptions.add(constraint.substitute(declaredType.getExemplarAsPSymbol(), pAsPSymbol)); // ASSUME TC (type constraint -- since we're conceptual)
             }
             else if (declaredType instanceof ProgRepresentationType) {
                 ProgReprTypeSymbol repr = ((ProgRepresentationType) declaredType).getReprTypeSymbol();
