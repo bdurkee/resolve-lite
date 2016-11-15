@@ -351,7 +351,7 @@ public class TestPExp extends BaseTest {
     public void testSubstituteOnLambda() {
         PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{#e if j = i; #e(q) otherwise;}}")
                 .substitute(parseMathAssertionExp(g, "#e"), parseMathAssertionExp(g, "Y"));
-        Assert.assertEquals("(X = λ q:Inv,{{Y if (j = i);Y(q) otherwise;}})", result.toString());
+        Assert.assertEquals("(X = λ q : Inv,{{Y if j = i; Y(q) otherwise;}})", result.toString());
     }
 
     protected static ParseTree getTree(String input) {
