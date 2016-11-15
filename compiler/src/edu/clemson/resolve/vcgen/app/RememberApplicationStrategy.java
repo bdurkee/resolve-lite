@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-public class RememberApplicationStrategy implements VCStatRuleApplicationStrategy<VCRemember> {
+public class RememberApplicationStrategy implements RuleApplicationStrategy<VCRemember> {
 
     @NotNull
     @Override

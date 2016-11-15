@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
 
-public class SwapApplicationStrategy implements VCStatRuleApplicationStrategy<VCSwap> {
+public class SwapApplicationStrategy implements RuleApplicationStrategy<VCSwap> {
 
     @NotNull
     @Override

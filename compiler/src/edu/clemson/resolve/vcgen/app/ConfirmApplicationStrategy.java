@@ -1,6 +1,5 @@
 package edu.clemson.resolve.vcgen.app;
 
-import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-public class ConfirmApplicationStrategy implements VCStatRuleApplicationStrategy<VCConfirm> {
+public class ConfirmApplicationStrategy implements RuleApplicationStrategy<VCConfirm> {
 
     @NotNull
     @Override

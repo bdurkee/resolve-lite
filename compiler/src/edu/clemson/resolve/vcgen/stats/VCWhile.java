@@ -4,7 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import edu.clemson.resolve.vcgen.app.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.RuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public class VCWhile extends VCRuleBackedStat {
 
     public VCWhile(ParserRuleContext ctx,
                    VCAssertiveBlockBuilder block,
-                   VCStatRuleApplicationStrategy apply,
+                   RuleApplicationStrategy apply,
                    PExp condition,
                    PExp maintaining,
                    PExp decreasing,

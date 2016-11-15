@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class FunctionAssignApplicationStrategy implements VCStatRuleApplicationStrategy<VCAssign> {
+public class FunctionAssignApplicationStrategy implements RuleApplicationStrategy<VCAssign> {
 
     //TODO: Walk through this step by step in a .md file. Then store the .md file in docs/
     @NotNull

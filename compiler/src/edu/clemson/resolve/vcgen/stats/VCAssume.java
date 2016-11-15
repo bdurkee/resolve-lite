@@ -3,12 +3,12 @@ package edu.clemson.resolve.vcgen.stats;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import edu.clemson.resolve.vcgen.app.ParsimoniousAssumeApplicationStrategy;
-import edu.clemson.resolve.vcgen.app.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.RuleApplicationStrategy;
 import org.jetbrains.annotations.NotNull;
 
 public class VCAssume extends VCRuleBackedStat {
 
-    private final VCStatRuleApplicationStrategy<VCAssume> apply;
+    private final RuleApplicationStrategy<VCAssume> apply;
     private final PExp assume;
 
     private final boolean isStipulatedAssumption, isNotice;
@@ -18,7 +18,7 @@ public class VCAssume extends VCRuleBackedStat {
     }
 
     public VCAssume(VCAssertiveBlockBuilder block,
-                    VCStatRuleApplicationStrategy<VCAssume> strategy,
+                    RuleApplicationStrategy<VCAssume> strategy,
                     boolean stipulate,
                     boolean notice,
                     PExp assume) {

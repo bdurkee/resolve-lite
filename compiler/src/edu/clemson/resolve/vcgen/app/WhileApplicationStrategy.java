@@ -12,14 +12,13 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCGen;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<VCWhile> {
+public class WhileApplicationStrategy implements RuleApplicationStrategy<VCWhile> {
 
     @NotNull
     @Override
@@ -44,7 +43,7 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         PExp nqvPVal = VCGen.NPV(block.finalConfirm.getSequents(), pVal);
 
         if (whileNode.changingClause() != null) {
-            block.stats(new VCChange(whileNode.changingClause(), block, stat.getChangingVariables()));
+            block.stats(new VCChanging(whileNode.changingClause(), block, stat.getChangingVariables()));
         }
         //Assume the invariant (stipulate) -- the false indicates this isn't a notice...
         if (!invariant.isLiteralTrue()) {

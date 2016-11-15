@@ -7,24 +7,23 @@ import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 
 import edu.clemson.resolve.vcgen.VCGen;
-import edu.clemson.resolve.vcgen.stats.VCChange;
+import edu.clemson.resolve.vcgen.stats.VCChanging;
 import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
-import java.util.List;
 import java.util.Set;
 
-public class ChangeApplicationStrategy implements VCStatRuleApplicationStrategy<VCChange> {
+public class ChangeApplicationStrategy implements RuleApplicationStrategy<VCChanging> {
 
     @NotNull
     @Override
     public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
                                       @NotNull VCAssertiveBlockBuilder block,
-                                      @NotNull VCChange stat) {
+                                      @NotNull VCChanging stat) {
         VCConfirm workingConfirm = block.finalConfirm;
         Set<Sequent> existingSequents = workingConfirm.getSequents();
-        for (PSymbol v : stat.getChangeVariables()) {
+        for (PSymbol v : stat.getChangingVariables()) {
             PExp primed = VCGen.NPV(existingSequents, v);
             workingConfirm = workingConfirm.withSequentFormulaSubstitution(v, primed);
         }

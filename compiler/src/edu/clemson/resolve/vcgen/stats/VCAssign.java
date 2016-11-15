@@ -3,7 +3,7 @@ package edu.clemson.resolve.vcgen.stats;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
-import edu.clemson.resolve.vcgen.app.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.RuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ public class VCAssign extends VCRuleBackedStat {
 
     public VCAssign(ParserRuleContext ctx,
                     VCAssertiveBlock.VCAssertiveBlockBuilder block,
-                    VCStatRuleApplicationStrategy apply,
+                    RuleApplicationStrategy apply,
                     PExp left,
                     PExp right) {
         super(ctx, block, apply);

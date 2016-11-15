@@ -16,13 +16,12 @@ import edu.clemson.resolve.vcgen.VCGen;
 import edu.clemson.resolve.vcgen.stats.VCCall;
 import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class GeneralCallApplicationStrategy implements VCStatRuleApplicationStrategy<VCCall> {
+public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<VCCall> {
 
     //TODO: this will work for 'nested calls' if we use the invk_cond listener on any evaluates mode arguments.
     @NotNull

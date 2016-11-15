@@ -7,7 +7,7 @@ import edu.clemson.resolve.vcgen.stats.VCRuleBackedStat;
 
 import java.util.Deque;
 
-public interface VCStatRuleApplicationStrategy<T extends VCRuleBackedStat> {
+public interface RuleApplicationStrategy<T extends VCRuleBackedStat> {
 
     @NotNull
     public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,

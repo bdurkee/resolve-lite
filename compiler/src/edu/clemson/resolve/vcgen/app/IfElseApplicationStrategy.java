@@ -9,16 +9,14 @@ import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.RuleApplicationStep;
-import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.stats.VCIfElse;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
-import java.util.List;
 
-public class IfElseApplicationStrategy implements VCStatRuleApplicationStrategy<VCIfElse> {
+public class IfElseApplicationStrategy implements RuleApplicationStrategy<VCIfElse> {
 
     public static final String DEFAULT_DESCRIPTION = "If rule application";
     public static final String NEGATED_BRANCH_DESCRIPTION = "Negated if-else rule (branch) application";

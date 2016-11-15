@@ -8,7 +8,6 @@ import edu.clemson.resolve.parser.ResolveBaseListener;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.*;
@@ -43,13 +42,13 @@ public class VCGen extends ResolveBaseListener {
     private final MathSymbolTable symtab;
     private final DumbMathClssftnHandler g;
 
-    public static final VCStatRuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
+    public static final RuleApplicationStrategy<VCSwap> SWAP_APPLICATION = new SwapApplicationStrategy();
+    public static final RuleApplicationStrategy<VCWhile> WHILE_APPLICATION = new WhileApplicationStrategy();
+    public static final RuleApplicationStrategy<VCIfElse> IF_ELSE_APPLICATION = new IfElseApplicationStrategy();
 
-    public static final VCStatRuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
+    public static final RuleApplicationStrategy<VCCall> GENERAL_CALL_APPLICATION =
             new GeneralCallApplicationStrategy();
-    public static final VCStatRuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
+    public static final RuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
 
     /** A mapping from facility name to function that maps facility formal parameter names to their actuals. */
@@ -142,6 +141,26 @@ public class VCGen extends ResolveBaseListener {
 
         //3. Type Finalization Hypothesis.. TODO.
         //if (ctx.typeImplFinal() != null) ...
+    }
+
+    @NotNull
+    private PExp perParameterCorrFnExpSubstitute(@NotNull List<ProgParameterSymbol> params,
+                                                 @NotNull PExp requiresOrEnsures) {
+        List<PExp> result = new ArrayList<>();
+        PExp resultingClause = requiresOrEnsures;
+        for (ProgParameterSymbol p : params) {
+            if (p.getDeclaredType() instanceof ProgRepresentationType) {
+                ProgReprTypeSymbol repr = ((ProgRepresentationType) p.getDeclaredType()).getReprTypeSymbol();
+                if (repr == null) continue;
+                PExp corrFnExp = repr.getCorrespondence();
+                //distribute conc.X into the clause passed
+                Map<PExp, PExp> concReplMapping = new HashMap<>();
+                concReplMapping.put(repr.exemplarAsPSymbol(), repr.conceptualExemplarAsPSymbol());
+                concReplMapping.put(repr.exemplarAsPSymbol(true), repr.conceptualExemplarAsPSymbol(true));
+                resultingClause = resultingClause.substitute(concReplMapping);
+            }
+        }
+        return resultingClause;
     }
 
     @Override
@@ -251,7 +270,7 @@ public class VCGen extends ResolveBaseListener {
 
         //precondition[params 1..i ~> conc.X]
         PExp rawRequires = ctx.requiresClause() != null ? tr.getMathExpASTFor(g, ctx.requiresClause()) : g.getTrueExp();
-        PExp concifiedRequires = concifyAssertionByParams(paramSyms, rawRequires);
+        PExp concifiedRequires = concifyPreOrPostConditionByParams(paramSyms, rawRequires);
 
         VCAssertiveBlockBuilder block =
                 new VCAssertiveBlockBuilder(g, s,
@@ -268,7 +287,7 @@ public class VCGen extends ResolveBaseListener {
         block.stats(getStatsFor(block, ctx, ctx.stmt()));
 
         PExp rawEnsures = ctx.ensuresClause() != null ? tr.getMathExpASTFor(g, ctx.ensuresClause()) : g.getTrueExp();
-        PExp concifiedEnsures = concifyAssertionByParams(paramSyms, rawEnsures)
+        PExp concifiedEnsures = concifyPreOrPostConditionByParams(paramSyms, rawEnsures)
                 .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText());
         Token loc = ctx.ensuresClause() != null ? ctx.ensuresClause().getStart() : ctx.getStart();
 
@@ -317,7 +336,11 @@ public class VCGen extends ResolveBaseListener {
             op = s.queryForOne(new OperationQuery(null, ctx.name,
                     Utils.apply(paramSyms, ProgParameterSymbol::getDeclaredType)));
 
-            PExp concifiedRequires = concifyAssertionByParams(paramSyms, op.getRequires());
+            PExp concifiedRequires = concifyPreOrPostConditionByParams(paramSyms, op.getRequires());
+            //TODO: the requires however, once it's conc-ified, we need to conjunct all relevant correspondences
+            //to it: i.e.:
+            //Utils.formConjuncts(getParamCorrespondences(op.getParameters)) /\ concifiedRequires
+
             List<PExp> opParamAntecedents = new ArrayList<>();
 
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
@@ -327,7 +350,7 @@ public class VCGen extends ResolveBaseListener {
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
                         //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
-                        .assume(opParamAntecedents) //we assume correspondence for reprs here automatically
+                        .assume(opParamAntecedents) //we assume correspondence for reprs here automatically TODO: NO This can't happen here. Correspondences can't be assumed separately. You need to do exactly what the rule says
                         .assume(concifiedRequires)
                         .remember();
             //add in any user defined notices...
@@ -348,7 +371,8 @@ public class VCGen extends ResolveBaseListener {
         }
 
         block.stats(getStatsFor(block, ctx, ctx.stmt()));
-        PExp ensures = concifyAssertionByParams(paramSyms, op.getEnsures()
+        //This ensures is done and good to go!
+        PExp ensures = concifyPreOrPostConditionByParams(paramSyms, op.getEnsures()
                 .withVCInfo(ctx.getStart(), "Ensures clause of " + ctx.name.getText()));
 
         List<PExp> paramConsequents = new ArrayList<>();
@@ -433,9 +457,9 @@ public class VCGen extends ResolveBaseListener {
                 ProgReprTypeSymbol repr = ((ProgRepresentationType) declaredType).getReprTypeSymbol();
                 if (repr == null) return resultingAssumptions;
 
-                PExp correspondence = repr.getCorrespondence()
-                        .substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol());
-                resultingAssumptions.add(correspondence);
+                //PExp correspondence = repr.getCorrespondence()
+                //        .substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol());
+                //resultingAssumptions.add(correspondence);
 
                 PExp convention = repr.getConvention();
                 resultingAssumptions.add(convention.substitute(declaredType.getExemplarAsPSymbol(), p.asPSymbol()));
@@ -561,20 +585,21 @@ public class VCGen extends ResolveBaseListener {
     //for any param that is a program representation (meaning it has a correspondence), 'conc-ify'
     //anywhere the examplar appears...
     @NotNull
-    private PExp concifyAssertionByParams(@NotNull List<ProgParameterSymbol> params,
-                                          @NotNull PExp assertion) {
-        PExp resultingAssertion = assertion;
+    private PExp concifyPreOrPostConditionByParams(@NotNull List<ProgParameterSymbol> params,
+                                                   @NotNull PExp requiresOrEnsures) {
+        PExp resultingAssertion = requiresOrEnsures;
         for (ProgParameterSymbol p : params) {
-            resultingAssertion = concifyAssertionByParam(p, resultingAssertion);
+            resultingAssertion = concifyPreOrPostConditionByParams(p, resultingAssertion);
         }
         return resultingAssertion;
     }
 
     @NotNull
-    private PExp concifyAssertionByParam(@NotNull ProgParameterSymbol parameter,
-                                         @NotNull PExp assertion) {
+    private PExp concifyPreOrPostConditionByParams(@NotNull ProgParameterSymbol parameter,
+                                                   @NotNull PExp requiresOrEnsures) {
         List<PExp> result = new ArrayList<>();
-        PExp resultingClause = assertion;
+        PExp seenCorrespondencesConjuncted = null;
+        PExp resultingClause = requiresOrEnsures;
         if (parameter.getDeclaredType() instanceof ProgRepresentationType) {
             ProgReprTypeSymbol repr = ((ProgRepresentationType) parameter.getDeclaredType()).getReprTypeSymbol();
             if (repr == null) return resultingClause;

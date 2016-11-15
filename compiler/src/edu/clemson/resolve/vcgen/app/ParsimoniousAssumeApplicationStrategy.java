@@ -15,7 +15,7 @@ import java.util.*;
 
 public class ParsimoniousAssumeApplicationStrategy
         implements
-            VCStatRuleApplicationStrategy<VCAssume> {
+        RuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override

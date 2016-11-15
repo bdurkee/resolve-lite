@@ -2,9 +2,7 @@ package edu.clemson.resolve.vcgen.stats;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.VCGen;
 import edu.clemson.resolve.vcgen.app.IfElseApplicationStrategy;
-import edu.clemson.resolve.vcgen.app.VCStatRuleApplicationStrategy;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
