@@ -87,6 +87,9 @@ public class VCOutputFile {
         for (VC vc : finalVcs) {
             result += vc.toString() + "\n\n";
         }
+        result += "==========================================" +
+                "\n\t Proof Obligation Derivation Steps" +
+                "\n==========================================\n\n";
         for (VCAssertiveBlock b : chunks) {
             result += b.getDescription() + "\n";
             result += b.getText() + "\n";
