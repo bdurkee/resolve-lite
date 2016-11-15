@@ -27,7 +27,7 @@ public class ParsimoniousAssumeApplicationStrategy
 
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
         List<PExp> remainingAssumptions = new ArrayList<>();
-        //List<PExp> nonEffectualEqualities = new ArrayList<>();
+        List<PExp> nonEffectualEqualities = new ArrayList<>();
 
         for (PExp assume : allAssumptions) {
             if (stat.isStipulatedAssumption()) {
@@ -53,22 +53,18 @@ public class ParsimoniousAssumeApplicationStrategy
                     if (substitutesAny(existingSequents, lhs, rhs) || hasVerificationVariable(lhs)) {
                         equalitySubstitutions.put(lhs, rhs);
                     }
-                    //else {
-                    //    if (!hasVerificationVar) {
-                    //        nonEffectualEqualities.add(assume);
-                    //    }
-                    //}
+                    else {
+                        nonEffectualEqualities.add(assume);
+                    }
                 }
                 //right replaceability
                 else if (rhs.isVariable()) {
                     if (substitutesAny(existingSequents, rhs, lhs) || hasVerificationVariable(rhs)) {
                         equalitySubstitutions.put(rhs, lhs);
                     }
-                    //else {
-                    //    if (!hasVerificationVar) {
-                    //        nonEffectualEqualities.add(assume);
-                    //    }
-                    //}
+                    else {
+                        nonEffectualEqualities.add(assume);
+                    }
                 }
                 //not replaceable...
                 else {
@@ -81,10 +77,12 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         List<PExp> remainingAssumptionsWithEqualSubt = new ArrayList<>();
+        //ok, we know everything in "nonEffectualEqualities" doesn't affect any formulas in the sequents of the
+        //final confirm... I wonder though if they would affect any of the "remAssumptions"? look into this.
         for (PExp assumption : remainingAssumptions) {
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
-        //remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
+        remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
         VCConfirm substitutedConfirm = block.finalConfirm.withSequentFormulaSubstitution(equalitySubstitutions);
         List<Sequent> newFinalConfirmSequents =
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,

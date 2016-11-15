@@ -81,7 +81,7 @@ public class WhileApplicationStrategy implements RuleApplicationStrategy<VCWhile
 
         //Confirm Inv /\ P_Exp < NPV(RP, P_Val);
         PExp terminationMetricExp = block.g.formConjunct(invariant, progressClaimExp)
-                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop termination");
+                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop inductive step");
 
         VCConfirm terminationConfirm = new VCConfirm(block.definingTree, block,
                 VCAssertiveBlock.sequentFormRight(terminationMetricExp));
