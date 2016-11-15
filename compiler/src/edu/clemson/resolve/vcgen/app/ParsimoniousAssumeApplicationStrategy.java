@@ -77,7 +77,7 @@ public class ParsimoniousAssumeApplicationStrategy
             }
         }
         List<PExp> remainingAssumptionsWithEqualSubt = new ArrayList<>();
-        //ok, we know everything in "nonEffectualEqualities" doesn't affect any formulas in the sequents of the
+        //TODO: ok, we know everything in "nonEffectualEqualities" doesn't affect any formulas in the sequents of the
         //final confirm... I wonder though if they would affect any of the "remAssumptions"? look into this.
         for (PExp assumption : remainingAssumptions) {
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
