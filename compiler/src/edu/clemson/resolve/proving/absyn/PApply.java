@@ -21,10 +21,10 @@ public class PApply extends PExp {
 
     /**
      * An enumerated type that provides additional information about how to display an instance of {@link PApply},
-     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style application.
+     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style app.
      * <p>
      * Note that while this enum indeed stands-in for the four subclasses we'd otherwise need to represent the
-     * application styles mentioned, we still can get specific visitor methods for each style (even with an enum)
+     * app styles mentioned, we still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
@@ -123,7 +123,7 @@ public class PApply extends PExp {
             protected String toString(PApply s, boolean parenthesizeApps) {
                 assert s.functionPortion instanceof PSymbol;
                 PSymbol f = (PSymbol) s.functionPortion;
-                return f.getLeftPrint() + Utils.join(s.arguments, ", ") + f.getRightPrint();
+                return f.getLeftPrint() + pexpJoin(s.arguments, parenthesizeApps) + f.getRightPrint();
             }
 
             @Override
@@ -143,9 +143,9 @@ public class PApply extends PExp {
         };
 
         /**
-         * Returns a well formatted string representation of this application style.
+         * Returns a well formatted string representation of this app style.
          *
-         * @param s some application
+         * @param s some app
          * @return a string representation.
          */
         protected abstract String toString(PApply s, boolean parenthesizeApps);
@@ -161,7 +161,7 @@ public class PApply extends PExp {
     }
 
     /**
-     * Represents the 'first class function' this application is referencing. Note that the type of
+     * Represents the 'first class function' this app is referencing. Note that the type of
      * {@code functionPortion} can be considered independent of the types of the formals (which are rightly
      * embedded here in the argument {@code PExp}s).
      * <p>
@@ -313,29 +313,6 @@ public class PApply extends PExp {
     }
 
     @NotNull
-    public List<PExp> split(PExp assumptions) {
-        List<PExp> result = new ArrayList<>();
-        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getTopLevelOperationName().equals("and") || getTopLevelOperationName().equals("∧")) {
-            arguments.forEach(a -> result.addAll(a.split(assumptions)));
-        }
-        else if (getTopLevelOperationName().equals("implies") || getTopLevelOperationName().equals("⟹")) {
-            PExp tempLeft, tempRight;
-            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).split(assumptions);
-            if (!assumptions.isObviouslyTrue()) {
-                tempLeft = g.formConjunct(assumptions, tempLeft);
-            }
-            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).split(tempLeft);
-        }
-        else {
-            result.add(g.formImplies(assumptions, this));
-        }
-        return result;
-    }
-
-    @NotNull
     @Override
     public PExp withIncomingSignsErased() {
         return new PApplyBuilder(functionPortion.withIncomingSignsErased())
@@ -399,6 +376,16 @@ public class PApply extends PExp {
         Set<PSymbol> result = new HashSet<>();
         Utils.apply(getSubExpressions(), result, PExp::getFreeVariables);
         return result;
+    }
+
+    @Override
+    public PExp withPrimeMarkAdded() {
+        return new PApplyBuilder(functionPortion.withPrimeMarkAdded())
+                .arguments(arguments)
+                .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
+                .style(displayStyle)
+                .build();
     }
 
     @Override
@@ -518,10 +505,10 @@ public class PApply extends PExp {
         protected boolean bracketApp = false;
 
         /**
-         * Constructor for converting an existing function application back into a buildable format. This is useful
+         * Constructor for converting an existing function app back into a buildable format. This is useful
          * for adding (or editing) some information in an existing {@link PApply} instance.
          *
-         * @param e The existing application.
+         * @param e The existing app.
          */
         public PApplyBuilder(@NotNull PApply e) {
             this.functionPortion = e.functionPortion;

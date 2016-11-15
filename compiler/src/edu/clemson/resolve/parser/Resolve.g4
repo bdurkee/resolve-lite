@@ -239,6 +239,7 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
+        (noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -247,6 +248,7 @@ operationProcedureDecl
 procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
+        (noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -397,7 +399,7 @@ changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
-
+noticeClause : 'Notice' mathExp ';' ;
 // mathematical expressions
 
 mathClssftnExp
@@ -413,6 +415,7 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
     ;
 
+//TODO: Add and, or, implies, not, and arrow to the grammar.
 mathExp
     :   mathPrimeExp                                                                        #mathPrimaryExp
     |   '(' mathAssertionExp ')'                                                            #mathNestedExp

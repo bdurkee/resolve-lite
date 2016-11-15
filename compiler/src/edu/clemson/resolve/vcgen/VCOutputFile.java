@@ -1,11 +1,8 @@
 package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.RESOLVECompiler;
-import edu.clemson.resolve.codegen.ModelElement;
 import edu.clemson.resolve.compiler.ErrorKind;
-import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.stats.VCConfirm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -16,22 +13,20 @@ public class VCOutputFile {
     private final RESOLVECompiler compiler;
 
     /**
-     * All raw {@link AssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
+     * All raw {@link VCAssertiveBlock} objects arising in this file; where each represents a vc or group of vcs that
      * must be satisfied to verify the program under consideration.
      */
-    @ModelElement
-    public List<AssertiveBlock> chunks = new ArrayList<>();
+    public List<VCAssertiveBlock> chunks = new ArrayList<>();
 
     /** The final list of immutable vcs. */
-    @ModelElement
-    public List<VC> finalVcs = new ArrayList<>();
+    public Set<VC> finalVcs = new LinkedHashSet<>();
 
     public VCOutputFile(@NotNull RESOLVECompiler rc) {
         this.currentVcNumber = 1;
         this.compiler = rc;
     }
 
-    public List<VC> getFinalVCs() {
+    public Set<VC> getFinalVCs() {
         return this.finalVcs;
     }
 
@@ -57,36 +52,30 @@ public class VCOutputFile {
         return result;
     }
 
-    private void addVCsInContext(final AssertiveBlock batch) {
-
-        VCConfirm batchedConfirm = batch.getFinalConfirm();
-        List<PExp> sequentComponents = batchedConfirm.getConfirmExp().split();
-        //System.out.println("FINAL CONF: " + batch.getFinalConfirm().getConfirmExp());
+    private void addVCsInContext(final VCAssertiveBlock batch) {
+        Set<Sequent> sequents = batch.getFinalConfirm().getSequents();
 
         PriorityQueue<VC> vcTempBatchOrderedByLine = new PriorityQueue<>(new Comparator<VC>() {
             @Override
             public int compare(VC o1, VC o2) {
-                return o1.getNumber() <= o2.getNumber() ? -1 : 1;
+                return o1.getLocation().getLine() <= o2.getLocation().getLine() ? -1 : 1;
             }
         });
-        for (PExp e : sequentComponents) {
-            List<? extends PExp> args = e.getSubExpressions();
-            if (!(e instanceof PApply)) continue;   //TODO: Why is this here again?
-
-            PExp antecedentExp = args.get(1);
-            PExp consequentExp = args.get(2);
-
-            if (consequentExp.getVCLocation() == null) {
-                compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, consequentExp.toString());
-                continue;
+        for (Sequent sequent : sequents) {
+            for (PExp succeedent : sequent.getRightFormulas()) {
+                if (succeedent == null) continue;
+                if (succeedent.getVCLocation() == null) {
+                    compiler.errMgr.toolError(ErrorKind.VC_MISSING_LOCATION_INFO, succeedent.toString());
+                    continue;
+                }
+                VC vc = new VC(succeedent.getVCLocation(), -1, succeedent.getVCExplanation(), sequent);
+                vcTempBatchOrderedByLine.add(vc);
             }
-            VC curVC = new VC(consequentExp.getVCLocation().getLine(), antecedentExp, consequentExp);
-            vcTempBatchOrderedByLine.add(curVC);
         }
         VC vc = null;
         while ((vc = vcTempBatchOrderedByLine.poll()) != null) {
-            if (vc.getConsequent().isLiteralTrue()) continue;
-            finalVcs.add(new VC(currentVcNumber, vc.getAntecedent(), vc.getConsequent()));
+            if (vc.isObviouslyTrue() /*|| vc.getSequent().isIdentityAxiom()*/) continue;
+            finalVcs.add(new VC(vc.getLocation(), currentVcNumber, vc.getExplanation(), vc.getSequent()));
             currentVcNumber++;
         }
     }
@@ -98,8 +87,10 @@ public class VCOutputFile {
         for (VC vc : finalVcs) {
             result += vc.toString() + "\n\n";
         }
-
-        for (AssertiveBlock b : chunks) {
+        result += "==========================================" +
+                "\n\t Proof Obligation Derivation Steps" +
+                "\n==========================================\n\n";
+        for (VCAssertiveBlock b : chunks) {
             result += b.getDescription() + "\n";
             result += b.getText() + "\n";
             result += "<S T E P S>\n";

@@ -2,17 +2,17 @@ package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.compiler.AnnotatedModule;
-import edu.clemson.resolve.compiler.ErrorKind;
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.*;
-import edu.clemson.resolve.semantics.query.MathSymbolQuery;
 import edu.clemson.resolve.semantics.query.NameQuery;
 import edu.clemson.resolve.semantics.query.SymbolTypeQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
 import edu.clemson.resolve.semantics.symbol.TheoremSymbol;
+import edu.clemson.resolve.vcgen.ListBackedSequent;
+import edu.clemson.resolve.vcgen.Sequent;
 import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -90,8 +90,9 @@ public final class CongruenceClassProver {
         int i = 0;
         for (VC vc : preprocessedVcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc, z, n));
-            models[i++] = new PerVCProverModel(g, vc.getName(), vc.getAntecedent().splitIntoConjuncts(),
-                    vc.getConsequent().splitIntoConjuncts());
+            models[i++] = new PerVCProverModel(g, String.valueOf(vc.getNumber()),
+                    vc.getSequent().getLeftFormulas(),
+                    vc.getSequent().getRightFormulas());
         }
         List<TheoremSymbol> theoremSymbols = new ArrayList<>();
         try {
@@ -115,7 +116,7 @@ public final class CongruenceClassProver {
                 if (assertion.getTopLevelOperationName().equals("impliesB")) {
 
                     //O.k. it seems we can safely assume the assertion (at the top level at least) will be an instance
-                    //of a function application (PApply) TODO: bp this(103) when m_theorems is size 7
+                    //of a function app (PApply) TODO: bp this(103) when m_theorems is size 7
                     addGoalSearchingTheorem((PApply)assertion, eName);
                     //first arg (.get(1)) of function implies, second arg (.get(2))
                     t =
@@ -141,7 +142,7 @@ public final class CongruenceClassProver {
         }
         m_results = "";
     }
-
+/*
     private VC buildTestVC1(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
         PSymbol pcurrPlace = new PSymbol.PSymbolBuilder("P.Curr_Place").mathClssfctn(z).build();
         PSymbol zero = new PSymbol.PSymbolBuilder("0").mathClssfctn(z).build();
@@ -188,12 +189,13 @@ public final class CongruenceClassProver {
 
         PExp antecedent = g.formConjuncts(zeroLTEpcurrplace, pcurrplaceLTEplength, plengthLTmaxlength);
         PExp consequent = pcurrplaceLTEmaxlength;
-        VC result = new VC(1, antecedent, consequent);
+        //VC result = new VC2(1, antecedent, consequent);
         return result;
-    }
+    }*/
 
-    private VC buildTestVC3(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
-        VC result = null;
+/*
+    private VC2 buildTestVC3(Scope s, DumbMathClssftnHandler g, MathClssftn z, MathClssftn n) {
+        VC2 result = null;
         try {
             MathClssftnWrappingSymbol ia = s.queryForOne(new MathSymbolQuery(null, "IA"));
             MathClssftnWrappingSymbol scd = s.queryForOne(new MathSymbolQuery(null, "SCD"));
@@ -272,8 +274,7 @@ public final class CongruenceClassProver {
                     .build();
 
             //SS
-            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
-*/
+
             //k
             PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
                     .mathClssfctn(n2.getClassification())
@@ -433,9 +434,6 @@ public final class CongruenceClassProver {
                     .arguments(pcurrPlace, maxlength)
                     .build();
 
-            //SS
-            /*PSymbol ss_exp = new PSymbol(ss.getType(), null, "SS");
-*/
             //k
             PSymbol k_exp = new PSymbol.PSymbolBuilder("k")
                     .mathClssfctn(n2.getClassification())
@@ -596,20 +594,25 @@ public final class CongruenceClassProver {
             e.printStackTrace();
         }
         return result;
-    }
+    }*/
 
     private List<VC> preprocessVCs(List<VC> vcs) {
         List<VC> result = new ArrayList<>();
         for (VC vc : vcs) {
-            PExp newAntecedent = vc.getAntecedent();
-            PExp newConsequent = vc.getConsequent();
-            newAntecedent = Utilities.flattenPSelectors(newAntecedent);
-            newConsequent = Utilities.flattenPSelectors(newConsequent);
+            List<PExp> l = new LinkedList<>();
+            List<PExp> r = new LinkedList<>();
 
-            result.add(new VC(vc.getNumber(), newAntecedent, newConsequent));
-            // make every PExp a PSymbol
-            //vc.convertAllToPsymbols(m_typeGraph);
-            //result.add()
+            for (PExp e : vc.getSequent().getLeftFormulas()) {
+                l.add(Utilities.flattenPSelectors(e));
+            }
+            for (PExp e : vc.getSequent().getRightFormulas()) {
+                r.add(Utilities.flattenPSelectors(e));
+            }
+            Sequent newSequent = new ListBackedSequent(l, r);
+            VC newVC = new VC(vc.getLocation(), vc.getNumber(), vc.getExplanation(), newSequent);
+            //newVC.convertAllToPsymbols(m_typeGraph);
+
+            result.add(newVC);
         }
         //result.addAll(vcs); //TODO: Not doing the conversions now. (I don't use lambdas right now, etc)
         return result;
@@ -832,7 +835,7 @@ public final class CongruenceClassProver {
         Map<String, Integer> theoremAppliedCount = new HashMap<>();
         VerificationConditionCongruenceClosureImpl.STATUS status = vcc.isProved();
         String div = divLine(vcc.m_name);
-        String theseResults = div + ("Before application of theorems: " + vcc + "\n");
+        String theseResults = div + ("Before app of theorems: " + vcc + "\n");
 
         int iteration = 0;
         // ++++++ Create new PQ for instantiated theorems

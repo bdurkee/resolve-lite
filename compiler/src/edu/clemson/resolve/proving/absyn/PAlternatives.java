@@ -43,6 +43,11 @@ public class PAlternatives extends PExp {
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
 
+    @Override
+    public PExp withPrimeMarkAdded() {
+        return this;
+    }
+
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPAlternatives(this);
@@ -200,6 +205,7 @@ public class PAlternatives extends PExp {
         sb.append("{{");
         for (Alternative alternative : alternatives) {
             sb.append(alternative.toString());
+            sb.append(" ");
         }
         sb.append(otherwiseClauseResult).append(" otherwise;");
         sb.append("}}");
@@ -309,7 +315,7 @@ public class PAlternatives extends PExp {
         }
 
         public String toString() {
-            return result + " if " + condition + ";";
+            return result + " if " + condition.toString(false) + ";";
         }
     }
 }

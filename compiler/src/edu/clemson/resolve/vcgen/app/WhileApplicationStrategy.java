@@ -1,4 +1,4 @@
-package edu.clemson.resolve.vcgen.application;
+package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -8,30 +8,27 @@ import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.*;
 import edu.clemson.resolve.semantics.query.MathSymbolQuery;
 import edu.clemson.resolve.semantics.symbol.MathClssftnWrappingSymbol;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock;
-import edu.clemson.resolve.vcgen.VCGenerator;
+import edu.clemson.resolve.vcgen.VCGen;
 import edu.clemson.resolve.vcgen.stats.*;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<VCWhile> {
+public class WhileApplicationStrategy implements RuleApplicationStrategy<VCWhile> {
 
     @NotNull
     @Override
-    public AssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
-                                    @NotNull VCAssertiveBlockBuilder block,
-                                    @NotNull VCWhile stat) {
+    public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> branches,
+                                      @NotNull VCAssertiveBlockBuilder block,
+                                      @NotNull VCWhile stat) {
         ResolveParser.WhileStmtContext whileNode = (ResolveParser.WhileStmtContext) stat.getDefiningContext();
-
         //TODO: Look into this crap where the confirm needs a ctx...maybe it's needed.. can't remember..
         PExp decreasing = stat.getDecreasing();
-        PExp invariantAndProgressAssumption = stat.getInvariant();
+        PExp invariant = stat.getInvariant();
 
         //C :: code; Confirm Invariant
         if (!stat.getInvariant().equals(block.g.getTrueExp())) {
@@ -43,16 +40,18 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
         List<VCRuleBackedStat> thenStmts = Utils.apply(stat.getBody(), e->e.copyWithEnclosingBlock(block));
         List<VCRuleBackedStat> elseStmts = new ArrayList<>();
         PSymbol pVal = createPVal(block.g, block.scope);
-        PExp nqvPVal = VCGenerator.NPV(block.finalConfirm.getConfirmExp(), pVal);
+        PExp nqvPVal = VCGen.NPV(block.finalConfirm.getSequents(), pVal);
 
         if (whileNode.changingClause() != null) {
-            block.stats(new VCChange(whileNode.changingClause(), block, stat.getChangingVariables()));
+            block.stats(new VCChanging(whileNode.changingClause(), block, stat.getChangingVariables()));
         }
-        //Assume the invariant and NQV(RP, P_Val) = P_Exp
-        invariantAndProgressAssumption = block.g.formConjunct(
-                invariantAndProgressAssumption, block.g.formEquals(nqvPVal, decreasing));
-        block.assume(invariantAndProgressAssumption);
-        PExp invariant = stat.getInvariant();
+        //Assume the invariant (stipulate) -- the false indicates this isn't a notice...
+        if (!invariant.isLiteralTrue()) {
+            block.assume(invariant, true, false);
+        }
+
+        //Assume the specificational substitution for P_Val = ...
+        block.assume(block.g.formEquals(nqvPVal, decreasing));
 
         //decreasing < nqvPVal
         MathClssftn nat = getNat(block.g, block.scope);
@@ -82,8 +81,10 @@ public class WhileApplicationStrategy implements VCStatRuleApplicationStrategy<V
 
         //Confirm Inv /\ P_Exp < NPV(RP, P_Val);
         PExp terminationMetricExp = block.g.formConjunct(invariant, progressClaimExp)
-                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop termination");
-        VCConfirm terminationConfirm = new VCConfirm(block.definingTree, block, terminationMetricExp);
+                .withVCInfo(whileNode.decreasingClause().getStart(), "While loop inductive step");
+
+        VCConfirm terminationConfirm = new VCConfirm(block.definingTree, block,
+                VCAssertiveBlock.sequentFormRight(terminationMetricExp));
         thenStmts.add(terminationConfirm);
 
         //Confirm RP;

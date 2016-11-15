@@ -18,14 +18,16 @@ public class PSelector extends PExp {
         this.right = right;
     }
 
-    public PSelector(@NotNull PExp left,
-                     @NotNull PExp right,
-                     @Nullable Token vcLocation,
-                     @Nullable String vcExplanation) {
-        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(),
-                right.getProgType(), vcLocation, vcExplanation);
+    public PSelector(@NotNull PExp left, @NotNull PExp right, @Nullable Token vcLocation, @Nullable String vcExplanation) {
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(), right.getProgType(), vcLocation, vcExplanation);
         this.left = left;
         this.right = right;
+    }
+
+    @Override
+    @NotNull
+    public PExp withPrimeMarkAdded() {
+        return new PSelector(left, right.withPrimeMarkAdded(), getVCLocation(), getVCExplanation());
     }
 
     @Override
@@ -115,7 +117,7 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return this;
+        return new PSelector(left, right);
     }
 
     //TODO: Someday, if this class is still around, use Utils.apply (collection ver. here)

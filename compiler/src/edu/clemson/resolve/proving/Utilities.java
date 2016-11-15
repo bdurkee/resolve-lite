@@ -5,7 +5,6 @@ import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.semantics.Quantification;
-import edu.clemson.resolve.vcgen.VC;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

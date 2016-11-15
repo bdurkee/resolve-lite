@@ -48,6 +48,11 @@ public abstract class ProgNamedType extends ProgType {
 
     @NotNull
     public PSymbol getExemplarAsPSymbol() {
+        return getExemplarAsPSymbol(false);
+    }
+
+    @NotNull
+    public PSymbol getExemplarAsPSymbol(boolean incoming) {
         return new PSymbol.PSymbolBuilder(getExemplarName()).mathClssfctn(toMath()).build();
     }
 

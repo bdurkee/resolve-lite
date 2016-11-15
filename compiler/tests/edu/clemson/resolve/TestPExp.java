@@ -274,7 +274,6 @@ public class TestPExp extends BaseTest {
     public void testSelectorExpWithCall() {
         PExp result = parseMathAssertionExp(g, "P(z).Q.Lab(s)(Cen(k))");
         Assert.assertEquals(false, result.isIncoming());
-
     }
 
     @Test
@@ -352,36 +351,7 @@ public class TestPExp extends BaseTest {
     public void testSubstituteOnLambda() {
         PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{#e if j = i; #e(q) otherwise;}}")
                 .substitute(parseMathAssertionExp(g, "#e"), parseMathAssertionExp(g, "Y"));
-        Assert.assertEquals("(X = λ q:Inv,{{Y if (j = i);Y(q) otherwise;}})", result.toString());
-    }
-
-    @Test
-    public void testSplitIntoSequents() {
-        PExp e = parseMathAssertionExp(g, "(Post ⟹ (Q and R))");
-        List<PExp> partitions = e.split();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(Post ⟹ Q)", partitions.get(0).toString());
-        Assert.assertEquals("(Post ⟹ R)", partitions.get(1).toString());
-
-        e = parseMathAssertionExp(g, "(Pre and (Post ⟹ (Q and R)))");
-        partitions = e.split();
-        Assert.assertEquals(3, partitions.size());
-        Assert.assertEquals("(true ⟹ Pre)", partitions.get(0).toString());
-        Assert.assertEquals("(Post ⟹ Q)", partitions.get(1).toString());
-        Assert.assertEquals("(Post ⟹ R)", partitions.get(2).toString());
-
-        e = parseMathAssertionExp(g, "(P ⟹ (Pre and (Post ⟹ (Q and R))))");
-        partitions = e.split();
-        Assert.assertEquals(3, partitions.size());
-        Assert.assertEquals("(P ⟹ Pre)", partitions.get(0).toString());
-        Assert.assertEquals("((P ∧ Post) ⟹ Q)", partitions.get(1).toString());
-        Assert.assertEquals("((P ∧ Post) ⟹ R)", partitions.get(2).toString());
-
-        e = parseMathAssertionExp(g, "(P ⟹ (Q ⟹ (R ⟹ (T and true))))");
-        partitions = e.split();
-        Assert.assertEquals(2, partitions.size());
-        Assert.assertEquals("(((P ∧ Q) ∧ R) ⟹ T)", partitions.get(0).toString());
-        Assert.assertEquals("(((P ∧ Q) ∧ R) ⟹ true)", partitions.get(1).toString());
+        Assert.assertEquals("(X = λ q : Inv,{{Y if j = i; Y(q) otherwise;}})", result.toString());
     }
 
     protected static ParseTree getTree(String input) {

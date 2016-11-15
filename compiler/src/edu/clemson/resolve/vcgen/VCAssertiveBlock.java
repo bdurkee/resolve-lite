@@ -2,7 +2,7 @@ package edu.clemson.resolve.vcgen;
 
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.vcgen.application.ParsimoniousAssumeApplicationStrategy;
+import edu.clemson.resolve.vcgen.app.ParsimoniousAssumeApplicationStrategy;
 import edu.clemson.resolve.vcgen.stats.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
@@ -11,11 +11,58 @@ import edu.clemson.resolve.semantics.Scope;
 
 import java.util.*;
 
-public class VCAssertiveBlock extends AssertiveBlock {
+public class VCAssertiveBlock {
+
+    private final ParserRuleContext definingTree;
+    private final String blockDescription;
+    private final VCConfirm finalConfirm;
+
+    private final List<RuleApplicationStep> applicationSteps = new ArrayList<>();
+    private final List<String> stats = new ArrayList<>();
 
     private VCAssertiveBlock(VCAssertiveBlockBuilder builder) {
-        super(builder.definingTree, builder.finalConfirm, builder.applicationSteps,
-                builder.stats, builder.description);
+        this.definingTree = builder.definingTree;
+        this.finalConfirm = builder.finalConfirm;
+        this.blockDescription = builder.description;
+
+        this.applicationSteps.addAll(builder.applicationSteps);
+        for (VCRuleBackedStat s : builder.stats) {
+            this.stats.add(s.toString());
+        }
+        //this.stats.addAll(stats);
+    }
+
+    public String getDescription() {
+        return blockDescription;
+    }
+
+    public ParserRuleContext getDefiningTree() {
+        return definingTree;
+    }
+
+    public String getText() {
+        return Utils.getRawText(definingTree);
+    }
+
+    @NotNull
+    public VCConfirm getFinalConfirm() {
+        return finalConfirm;
+    }
+
+    public List<RuleApplicationStep> getApplicationSteps() {
+        return applicationSteps;
+    }
+
+    //Assertive block is a bunch of statements with a final confirm...
+    @Override
+    public String toString() {
+        String result = "";
+        for (String s : stats) {
+            //for (VCRuleBackedState s : stats) {
+            result += s + "\n";
+        }
+        result += finalConfirm.toString();
+        return result;
     }
 
     public static class VCAssertiveBlockBuilder implements Utils.Builder<List<VCAssertiveBlock>> {
@@ -45,7 +92,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
             }
             this.g = g;
             this.definingTree = ctx;
-            this.finalConfirm = new VCConfirm(ctx, this, g.getTrueExp());
+            this.finalConfirm = new VCConfirm(ctx, this, ListBackedSequent.EMPTY_SEQUENT);
             this.scope = s;
             this.description = description;
         }
@@ -81,15 +128,15 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         public VCAssertiveBlockBuilder assume(PExp assume) {
-            return assume(assume, false);
+            return assume(assume, false, false);
         }
 
-        public VCAssertiveBlockBuilder assume(PExp assume, boolean stipulate) {
-            if (assume == null) {
+        public VCAssertiveBlockBuilder assume(PExp assume, boolean stipulate, boolean notice) {
+            if (assume == null || assume.isLiteralTrue()) {
                 return this;
             }
             //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), stipulate, assume));
-            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), stipulate, assume));
+            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), stipulate, notice, assume));
             return this;
         }
 
@@ -103,11 +150,22 @@ public class VCAssertiveBlock extends AssertiveBlock {
             return this;
         }
 
+        //TODO: Make this no longer take a rulecontext...
         public VCAssertiveBlockBuilder confirm(ParserRuleContext ctx, PExp confirm) {
             if (confirm == null) {
                 confirm = g.getTrueExp();
             }
-            stats.add(new VCConfirm(ctx, this, confirm));
+            stats.add(new VCConfirm(ctx, this, sequentFormRight(confirm)));
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder finalConfirm(VCConfirm confirm) {
+            this.finalConfirm = confirm;
+            return this;
+        }
+
+        public VCAssertiveBlockBuilder finalConfirm(Collection<Sequent> s) {
+            this.finalConfirm = new VCConfirm(definingTree, this, s);
             return this;
         }
 
@@ -115,14 +173,14 @@ public class VCAssertiveBlock extends AssertiveBlock {
             if (confirm == null) {
                 throw new IllegalArgumentException("finalconfirm==null");
             }
-            this.finalConfirm = new VCConfirm(definingTree, this, confirm);
+            this.finalConfirm = new VCConfirm(definingTree, this, sequentFormRight(confirm));
             return this;
         }
 
         public VCAssertiveBlockBuilder stats(List<VCRuleBackedStat> e) {
             for (VCRuleBackedStat stat : e) {
                 if (stat == null) {
-                    throw new IllegalArgumentException("null rule app stat");
+                    throw new IllegalArgumentException("null rule app stats");
                 }
                 stats.add(stat);
             }
@@ -143,7 +201,7 @@ public class VCAssertiveBlock extends AssertiveBlock {
         }
 
         /**
-         * Applies the appropriate rule to each stat within this builder
+         * Applies the appropriate rule to each stats within this builder
          * (and also the rules for any branches arising from this). In other words, a call to this will fully
          * develop the final confirm for this particular block of assertive code, as well as its branching blocks.
          */
@@ -175,5 +233,15 @@ public class VCAssertiveBlock extends AssertiveBlock {
             }
             return new VCAssertiveBlock(this);
         }
+    }
+
+    //just does the and rule now.. ignores ->, \/, and not
+    public static List<Sequent> sequentFormRight(PExp e) {
+        List<Sequent> result = new ArrayList<>();
+
+        for (PExp conjunct : e.splitIntoConjuncts()) {
+            result.add(new ListBackedSequent(conjunct));
+        }
+        return result;
     }
 }

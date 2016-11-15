@@ -1,9 +1,8 @@
 package edu.clemson.resolve.vcgen.stats;
 
-import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.vcgen.AssertiveBlock;
-import edu.clemson.resolve.vcgen.application.VCStatRuleApplicationStrategy;
+import edu.clemson.resolve.vcgen.VCAssertiveBlock;
 import edu.clemson.resolve.vcgen.VCAssertiveBlock.VCAssertiveBlockBuilder;
+import edu.clemson.resolve.vcgen.app.RuleApplicationStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,12 +11,12 @@ import java.util.Deque;
 public abstract class VCRuleBackedStat {
 
     final ParserRuleContext definingCtx;
-    VCStatRuleApplicationStrategy applicationStrategy;
+    RuleApplicationStrategy applicationStrategy;
     final VCAssertiveBlockBuilder enclosingBlock;
 
     public VCRuleBackedStat(ParserRuleContext ctx,
                             VCAssertiveBlockBuilder block,
-                            VCStatRuleApplicationStrategy apply) {
+                            RuleApplicationStrategy apply) {
         this.applicationStrategy = apply;
         this.enclosingBlock = block;
         this.definingCtx = ctx;
@@ -33,7 +32,7 @@ public abstract class VCRuleBackedStat {
     public abstract VCRuleBackedStat copyWithEnclosingBlock(@NotNull VCAssertiveBlockBuilder b);
 
     @SuppressWarnings("unchecked")
-    public AssertiveBlock applyBackingRule(Deque<VCAssertiveBlockBuilder> accumulator) {
+    public VCAssertiveBlock applyBackingRule(Deque<VCAssertiveBlockBuilder> accumulator) {
         return applicationStrategy.applyRule(accumulator, enclosingBlock, this);
     }
 
@@ -44,4 +43,7 @@ public abstract class VCRuleBackedStat {
     public ParserRuleContext getDefiningContext() {
         return definingCtx;
     }
+
+
+
 }

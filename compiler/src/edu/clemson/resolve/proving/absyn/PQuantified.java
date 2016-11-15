@@ -54,6 +54,11 @@ public class PQuantified extends PExp {
     }
 
     @Override
+    public PExp withPrimeMarkAdded() {
+        return new PQuantified(assertion, quantificationType, declaredSymbols, getVCLocation(), getVCExplanation());
+    }
+
+    @Override
     public void accept(PExpListener v) {
 
     }

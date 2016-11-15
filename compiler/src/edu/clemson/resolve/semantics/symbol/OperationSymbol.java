@@ -17,7 +17,7 @@ public class OperationSymbol extends Symbol {
     private final ProgType returnType;
     private final List<ProgParameterSymbol> parameters = new ArrayList<>();
 
-    @NotNull
+    //will always be at least 'true'
     private final PExp requires, ensures;
 
     public OperationSymbol(@NotNull String name,
@@ -49,9 +49,8 @@ public class OperationSymbol extends Symbol {
     }
 
     /**
-     * Get the return type of this operation. Note that in the cases where
-     * there isn't something returned, this should always return an instance
-     * of {@link ProgVoidType}.
+     * Get the return type of this operation. Note that in the cases where there isn't something returned, this
+     * should always return an instance of {@link ProgVoidType}.
      *
      * @return the return {@link ProgType}.
      */
@@ -69,8 +68,7 @@ public class OperationSymbol extends Symbol {
     @NotNull
     @Override
     public ProgVariableSymbol toProgVariableSymbol() {
-        return new ProgVariableSymbol(name, definingTree, returnType,
-                moduleIdentifier);
+        return new ProgVariableSymbol(name, definingTree, returnType, moduleIdentifier);
     }
 
     @NotNull
@@ -101,28 +99,22 @@ public class OperationSymbol extends Symbol {
                 instantiatingFacility), getModuleIdentifier(), newParams);
     }
 
-    private static class InstantiationFunction
-            implements
-            Function<ProgParameterSymbol, ProgParameterSymbol> {
+    private static class InstantiationFunction implements Function<ProgParameterSymbol, ProgParameterSymbol> {
 
         @NotNull
         private final Map<String, ProgType> genericInstantiations;
         @NotNull
         private final FacilitySymbol instantiatingFacility;
 
-        public InstantiationFunction(
-                @NotNull Map<String, ProgType> instantiations,
-                @NotNull FacilitySymbol instantiatingFacility) {
-            this.genericInstantiations =
-                    new HashMap<String, ProgType>(instantiations);
+        public InstantiationFunction(@NotNull Map<String, ProgType> instantiations,
+                                     @NotNull FacilitySymbol instantiatingFacility) {
+            this.genericInstantiations = new HashMap<String, ProgType>(instantiations);
             this.instantiatingFacility = instantiatingFacility;
         }
 
         @Override
-        public ProgParameterSymbol apply(
-                @NotNull ProgParameterSymbol input) {
-            return (ProgParameterSymbol) input.instantiateGenerics(
-                    genericInstantiations, instantiatingFacility);
+        public ProgParameterSymbol apply(@NotNull ProgParameterSymbol input) {
+            return (ProgParameterSymbol) input.instantiateGenerics(genericInstantiations, instantiatingFacility);
         }
     }
 }

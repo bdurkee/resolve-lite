@@ -211,16 +211,8 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
         MathClssftn t = getMathClssfctn(ctx);
-
-        //makes the case for having a special rule for math integers at the grammar level..
-        boolean representsLiteral = false;
-        try {
-            Integer.parseInt(ctx.getText());
-            representsLiteral = true;
-        }
-        catch (NumberFormatException nfe) {
-            representsLiteral = false;
-        }
+        boolean representsLiteral = ctx.mathSymbolName().BOOL() != null ||
+                ctx.mathSymbolName().INT() != null;
         PSymbolBuilder result =
                 new PSymbolBuilder(ctx.name.getText())
                         .qualifier(ctx.qualifier)
@@ -228,14 +220,16 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .literal(representsLiteral)
                         .quantification(quantifiedVars.get(ctx.name.getText()))
                         .mathClssfctn(getMathClssfctn(ctx));
-        representsLiteral = false;
         repo.put(ctx, result.build());
     }
 
     @Override
     public void exitMathLambdaExp(ResolveParser.MathLambdaExpContext ctx) {
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
-        parameters.add(new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(), getMathClssfctn(ctx)));
+        PLambda.MathSymbolDeclaration parameter =
+                new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(),
+                        getMathClssfctn(ctx.mathVarDecl().mathClssftnExp().mathExp()));
+        parameters.add(parameter);
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
 

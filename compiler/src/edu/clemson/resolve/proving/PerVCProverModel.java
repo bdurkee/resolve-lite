@@ -72,7 +72,7 @@ public final class PerVCProverModel {
     private ChangeEventMode myChangeEventMode = ChangeEventMode.INTERMITTENT;
 
     public PerVCProverModel(DumbMathClssftnHandler g, String proofFor,
-                            List<PExp> antecedents, List<PExp> consequents) {
+                            Collection<PExp> antecedents, Collection<PExp> consequents) {
         myVCName = proofFor;
         myLocalTheoremSetForReturning = myLocalTheoremsSet.keySet();
         myTypeGraph = g;

@@ -44,6 +44,11 @@ public class PLambda extends PExp {
     }
 
     @Override
+    public PExp withPrimeMarkAdded() {
+        return this;
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPLambda(this);
@@ -143,8 +148,7 @@ public class PLambda extends PExp {
     }
 
     @Override
-    public Set<String> getSymbolNamesNoCache(
-            boolean excludeApplications, boolean excludeLiterals) {
+    public Set<String> getSymbolNamesNoCache(boolean excludeApplications, boolean excludeLiterals) {
         Set<String> bodyNames = new HashSet<>(body.getSymbolNames(excludeApplications, excludeLiterals));
         //bodyNames.add("lambda"); //not sure why the hell I was adding this...
         return bodyNames;
@@ -210,7 +214,7 @@ public class PLambda extends PExp {
 
         @Override
         public String toString() {
-            return name + ":" + (type instanceof MathInvalidClssftn ? "Inv" : type);
+            return name + " : " + (type instanceof MathInvalidClssftn ? "Inv" : type);
         }
     }
 

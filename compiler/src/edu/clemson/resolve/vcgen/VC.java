@@ -1,49 +1,29 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.codegen.Model;
-import edu.clemson.resolve.codegen.Model.OutputModelObject;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.List;
+import java.util.Iterator;
 
-/** Represents an immutable vc (verification condition), which takes the form of a mathematical implication. */
-public final class VC extends OutputModelObject {
+/**
+ * A simple wrapper class that pairs a sequent with additional information such as location,
+ * vc explanation, line number, etc.
+ */
+public final class VC {
 
     /** A human-readable name for the VC; used for debugging purposes. */
-    private final int number;
-    private final String explanation;
-
     private final Token location;
-    private final PExp antecedent, consequent;
-    private final List<PExp> antecedentPieces = new ArrayList<>();
+    private final String explanation;
+    private final Sequent sequent;
+    private final int number;
 
-    public VC(int number, PExp antecedent, PExp consequent) {
+    public VC(Token location, int number, String explanation, @NotNull Sequent sequent) {
+        this.sequent = sequent;
+        this.location = location;
+        this.explanation = explanation;
         this.number = number;
-        this.antecedent = antecedent;
-        this.consequent = consequent;
-
-        this.explanation = consequent.getVCExplanation();
-        this.location = consequent.getVCLocation();
-        this.antecedentPieces.addAll(antecedent.splitIntoConjuncts());
-    }
-
-    /** Same thing as {@link #getNumber} but gives back a string instead */
-    @NotNull
-    public String getName() {
-        return Integer.toString(number);
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    @NotNull
-    public String getExplanation() {
-        return explanation;
     }
 
     @NotNull
@@ -52,29 +32,67 @@ public final class VC extends OutputModelObject {
     }
 
     @NotNull
-    public PExp getAntecedent() {
-        return antecedent;
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     @NotNull
-    public PExp getConsequent() {
-        return consequent;
+    public Sequent getSequent() {
+        return sequent;
     }
 
-    @Override public String toString() {
-        Token location = consequent.getVCLocation();
-        String explanation = consequent.getVCExplanation();
+    public boolean isObviouslyTrue() {
+        for (PExp e : sequent.getRightFormulas()) {
+            if (!e.isLiteralTrue()) return false;
+        }
+        return true;
+    }
 
-        String retval = "========== " + getName() + " ==========\n";
-        if (location != null && explanation != null) {
-            retval = retval + consequent.getVCExplanation() + " (" + location.getLine() + ")\n";
+    @Override
+    public int hashCode() {
+        return sequent.toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean result = (o instanceof VC);
+        if (result) {
+            result = location.getLine() == ((VC)o).location.getLine() &&
+                    explanation.equals(((VC) o).explanation) &&
+                    sequent.equals(((VC) o).sequent);
         }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        String retval = "//Vc #" + number + ": " + explanation + " (" + location.getLine() + ")" + "\n";
         int i = 1;
-        for (PExp e : antecedentPieces) {
-            retval += i + ". " + e.toString(false) + "\n";
-            i++;
+        boolean first = true;
+        for (PExp e : sequent.getLeftFormulas()) {
+            if (first) {
+                retval += e.toString(false);
+                first = false;
+            }
+            else {
+                retval += ",\n" + e.toString(false);
+            }
         }
-        retval += "⊢\n" + consequent.toString(false);
+        retval += "\n⊢\n";
+        first = true;
+        for (PExp e : sequent.getRightFormulas()) {
+            if (first) {
+                retval += e.toString(false);
+                first = false;
+            }
+            else {
+                retval += ",\n" + e.toString(false);
+            }
+        }
         return retval;
     }
 }
