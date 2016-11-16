@@ -427,7 +427,7 @@ mathExp
 mathPrimeExp
     :   mathCartProdExp
     |   mathSymbolExp
-        |   mathSetRestrictionExp
+    |   mathSetRestrictionExp
     |   mathOutfixAppExp
     |   mathSetExp
     |   mathLambdaExp
