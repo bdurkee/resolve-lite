@@ -327,7 +327,7 @@ mathDefnSig
     :   mathPrefixDefnSigs
     |   mathInfixDefnSig
     |   mathOutfixDefnSig
-    |   mathPostfixDefnSig
+    |   mathMixfixDefnSig
     ;
 
 mathPrefixDefnSig
@@ -345,16 +345,15 @@ mathInfixDefnSig
     ;
 
 mathOutfixDefnSig
-    :   '`' leftSym=mathSymbolNameNoID '(' mathVarDecl ')'
-        rightSym=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
+    :   leftSym=mathOutfixOp '(' mathVarDecl ')'
+        rightSym=mathOutfixOp (':'|'⦂') mathClssftnExp
     ;
 
-mathPostfixDefnSig
-    :   '(' mathVarDecl ')' '`' lop=mathSymbolNameNoID '(' mathVarDecl ')'
-        rop=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
+mathMixfixDefnSig
+    :   '(' mathVarDecl ')' lop=mathOutfixOp '(' mathVarDecl ')'
+        rop=mathOutfixOp (':'|'⦂') mathClssftnExp
     ;
 
-//the bar needs to be there because of the set restriction exp
 mathSymbolName
     :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL)
     ;
@@ -415,22 +414,21 @@ mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
     ;
 
-//TODO: Add and, or, implies, not, and arrow to the grammar.
 mathExp
-    :   mathPrimeExp                                                                        #mathPrimaryExp
-    |   '(' mathAssertionExp ')'                                                            #mathNestedExp
-    |   lhs=mathExp op='.' rhs=mathExp                                                      #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'                                 #mathPrefixAppExp
-    |   mathExp '`' mathSymbolNameNoID mathExp (',' mathExp)* mathSymbolNameNoID '`'        #mathNonStdAppExp
-    |   mathExp (':'|'⦂') mathExp                                                           #mathClssftnAssertionExp
-    |   mathExp mathSymbolExp mathExp                                                       #mathInfixAppExp
+    :   mathPrimeExp                                                    #mathPrimaryExp
+    |   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
+    |   mathExp mathOutfixOp mathExp (',' mathExp)* mathOutfixOp        #mathNonStdAppExp
+    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
+    |   mathExp mathSymbolExp mathExp                                   #mathInfixAppExp
+    |   '(' mathAssertionExp ')'                                        #mathNestedExp
     ;
 
 mathPrimeExp
     :   mathCartProdExp
     |   mathSymbolExp
+        |   mathSetRestrictionExp
     |   mathOutfixAppExp
-    |   mathSetRestrictionExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
@@ -445,11 +443,15 @@ mathSymbolExp
     ;
 
 mathOutfixAppExp
-    :   '`' lop=mathSymbolNameNoID mathExp rop=mathSymbolNameNoID '`'
+    :   lop=mathOutfixOp mathExp rop=mathOutfixOp
+    ;
+
+mathOutfixOp
+    :   ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']')
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl '∣' mathAssertionExp '}'
+    :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp

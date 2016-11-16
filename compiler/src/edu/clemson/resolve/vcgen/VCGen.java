@@ -725,5 +725,4 @@ public class VCGen extends ResolveBaseListener {
         }
         return oldSym;
     }
-
 }
