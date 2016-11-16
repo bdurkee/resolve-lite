@@ -318,7 +318,7 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-//had better be an assertion involving the use of ':' or '⦂'
+//had better be an assertion involving the use of ':' or
 mathClssftnAssertionDecl
     :   'Classification' 'Corollary' ':' mathAssertionExp ';'
     ;
@@ -332,7 +332,7 @@ mathDefnSig
 
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
-        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? (':'|'⦂') mathClssftnExp
+        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? ':' mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -341,26 +341,22 @@ mathPrefixDefnSigs
 
 mathInfixDefnSig
     :   '(' mathVarDecl ')' name=mathSymbolName
-        '(' mathVarDecl ')' (':'|'⦂') mathClssftnExp
+        '(' mathVarDecl ')' ':' mathClssftnExp
     ;
 
 mathOutfixDefnSig
-    :   leftSym=mathOutfixOp '(' mathVarDecl ')'
-        rightSym=mathOutfixOp (':'|'⦂') mathClssftnExp
+    :   leftSym=mathBracketOp '(' mathVarDecl ')'
+        rightSym=mathBracketOp ':' mathClssftnExp
     ;
 
 mathMixfixDefnSig
-    :   '(' mathVarDecl ')' lop=mathOutfixOp '(' mathVarDecl ')'
-        rop=mathOutfixOp (':'|'⦂') mathClssftnExp
+    :   '(' mathVarDecl ')' lop=mathBracketOp '(' mathVarDecl ')'
+        rop=mathBracketOp ':' mathClssftnExp
     ;
 
-mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL)
-    ;
+mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
 
-mathSymbolNameNoID
-    :   (MATH_UNICODE_SYM | SYM)
-    ;
+mathBracketOp:  MATH_BRACKET_SYM ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -379,11 +375,11 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   mathSymbolName (',' mathSymbolName)* (':'|'⦂') mathClssftnExp
+    :   mathSymbolName (',' mathSymbolName)* ':' mathClssftnExp
     ;
 
 mathVarDecl
-    :   mathSymbolName (':'|'⦂') mathClssftnExp
+    :   mathSymbolName ':' mathClssftnExp
     ;
 
 // mathematical clauses
@@ -399,6 +395,7 @@ maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
 noticeClause : 'Notice' mathExp ';' ;
+
 // mathematical expressions
 
 mathClssftnExp
@@ -418,9 +415,11 @@ mathExp
     :   mathPrimeExp                                                    #mathPrimaryExp
     |   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
-    |   mathExp mathOutfixOp mathExp (',' mathExp)* mathOutfixOp        #mathNonStdAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
+//  |   <assoc=right> lhs=mathExp op='->' rhs=mathExp                   #mathBuiltinInfixAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
-    |   mathExp mathSymbolExp mathExp                                   #mathInfixAppExp
+    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+//  |   mathExp op=('and'|'∧'|'or'|'∨') mathExp                         #mathBuiltinInfixAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     ;
 
@@ -443,11 +442,7 @@ mathSymbolExp
     ;
 
 mathOutfixAppExp
-    :   lop=mathOutfixOp mathExp rop=mathOutfixOp
-    ;
-
-mathOutfixOp
-    :   ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']')
+    :   lop=mathBracketOp mathExp rop=mathBracketOp
     ;
 
 mathSetRestrictionExp
@@ -477,9 +472,10 @@ BOOL : ('true'|'false');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
-ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
-INT : [0-9]+ ;
-SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|'['|']'|[<->])+ ;
+ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+INT                 : [0-9]+ ;
+SYM                 : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|[<->])+ ;
+MATH_BRACKET_SYM    : ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
 
 MATH_UNICODE_SYM
     :   [\u2100-\u214F]
