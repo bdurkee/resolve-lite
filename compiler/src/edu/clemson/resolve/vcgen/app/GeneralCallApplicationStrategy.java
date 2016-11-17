@@ -23,7 +23,6 @@ import java.util.*;
 
 public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<VCCall> {
 
-    //TODO: this will work for 'nested calls' if we use the invk_cond listener on any evaluates mode arguments.
     @NotNull
     @Override
     public VCAssertiveBlock applyRule(@NotNull Deque<VCAssertiveBlockBuilder> accumulator,
@@ -66,7 +65,7 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
             ProgParameterSymbol curFormal = formalIter.next();
             PExp curActual = (PExp) argIter.next();
 
-            //t ~> NPV(RP, a), @t ~> a
+            //t ~> NPV(RP, a), #t ~> a
             if (curFormal.getMode() == ParameterMode.UPDATES) {
                 newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGen.NPV(currFinalConfirm.getSequents(), curActual));
                 newAssumeSubtitutions.put(new PSymbolBuilder(
@@ -76,7 +75,7 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
             else if (curFormal.getMode() == ParameterMode.REPLACES) {
                 newAssumeSubtitutions.put(curFormal.asPSymbol(), VCGen.NPV(currFinalConfirm.getSequents(), (PSymbol) curActual));
             }
-            //@y ~> e, @z ~> f
+            //#y ~> e, #z ~> f
             else if (curFormal.getMode() == ParameterMode.ALTERS || curFormal.getMode() == ParameterMode.CLEARS) {
                 newAssumeSubtitutions.put(new PSymbolBuilder(curFormal.asPSymbol())
                         .incoming(true).build(), curActual);
@@ -98,8 +97,8 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
         }
 
         //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
-        //Post [ t ~> NPV(RP, a), @t ~> a, u ~> Math(exp), v ~> NPV(RP, b),
-        //       w ~> c, x ~> d, @y ~> e, @z ~> f]
+        //Post [ t ~> NPV(RP, a), #t ~> a, u ~> Math(exp), v ~> NPV(RP, b),
+        //       w ~> c, x ~> d, #y ~> e, #z ~> f]
         block.assume(newPostAssume.substitute(newAssumeSubtitutions));
 
         //Ok, so this happens down here since the rule is laid out s.t.

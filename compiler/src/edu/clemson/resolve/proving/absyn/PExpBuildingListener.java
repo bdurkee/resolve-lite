@@ -243,18 +243,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         List<PExp> results = new ArrayList<>();
         PExp otherwiseResult = null;
 
+        MathClssftn altsType = g.INVALID;
+
         for (ResolveParser.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
             if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
+                altsType = getMathClssfctn(alt.result);
             }
             else {
                 otherwiseResult = repo.get(alt.result);
             }
         }
-        MathClssftn x = getMathClssfctn(ctx);
-        PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, getMathClssfctn(ctx));
+        PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, altsType);
         repo.put(ctx, result);
     }
 
