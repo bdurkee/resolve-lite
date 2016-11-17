@@ -45,29 +45,18 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
 
         PSymbol functionName = (PSymbol) callExp.getFunctionPortion();
 
-        PExp newAssume = op.getEnsures();
+        PExp newPostAssume = op.getEnsures().substitute(block.getSpecializationsForFacility(functionName.getQualifier()));
+
         List<PExp> formalExps = Utils.apply(op.getParameters(), ProgParameterSymbol::asPSymbol);
         PExp confirmPrecondition = op.getRequires();
 
         //TODO: Before this happens we need to be sure to apply invk condition listener to any evaluates arguments that are calls...
         confirmPrecondition = confirmPrecondition
                 .substitute(formalExps, callExp.getArguments())
+                .substitute(block.getSpecializationsForFacility(functionName.getQualifier()))
                 .withVCInfo(stat.getDefiningContext().getStart(), "Requires clause of " + functionName.getName());
         block.confirm(stat.getDefiningContext(), confirmPrecondition);
-        //^^^^^ Here's the old one:
-        //block.confirm(ctx, op.getRequires().substitute(formalExps, e.getArguments()));
-            /*for (ProgParameterSymbol p : op.getParameters()) {
-                //T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
-                //postcondition
-                //TODO: Ask about these constraints
-                if (distinguishedModes.contains(p.getMode())) {
-                    if (p.getDeclaredType() instanceof PTFamily) {
-                        newAssume = block.g.formConjunct(newAssume,
-                                ((PTFamily) p.getDeclaredType())
-                                        .getConstraint());
-                    }
-                }
-            }*/
+
         VCConfirm currFinalConfirm = block.finalConfirm;
         Map<PExp, PExp> newAssumeSubtitutions = new HashMap<>();
         Iterator<ProgParameterSymbol> formalIter = op.getParameters().iterator();
@@ -93,7 +82,15 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
                         .incoming(true).build(), curActual);
             }
             else if (curFormal.getMode() == ParameterMode.EVALUATES) {
-
+                if (curActual.isFunctionApplication()) {
+                    FunctionAssignApplicationStrategy.Invk_Cond x =
+                            new FunctionAssignApplicationStrategy.Invk_Cond(stat.getDefiningContext(), block);
+                    curActual.accept(x);
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), x.mathFor(curActual));
+                }
+                else {
+                    newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
+                }
             }
             else {
                 newAssumeSubtitutions.put(curFormal.asPSymbol(), curActual);
@@ -103,7 +100,7 @@ public class GeneralCallApplicationStrategy implements RuleApplicationStrategy<V
         //Assume (T1.Constraint(t) /\ T3.Constraint(v) /\ T6.Constraint(y) /\
         //Post [ t ~> NPV(RP, a), @t ~> a, u ~> Math(exp), v ~> NPV(RP, b),
         //       w ~> c, x ~> d, @y ~> e, @z ~> f]
-        block.assume(newAssume.substitute(newAssumeSubtitutions));
+        block.assume(newPostAssume.substitute(newAssumeSubtitutions));
 
         //Ok, so this happens down here since the rule is laid out s.t.
         //substitutions occur prior to conjuncting this -- consult the

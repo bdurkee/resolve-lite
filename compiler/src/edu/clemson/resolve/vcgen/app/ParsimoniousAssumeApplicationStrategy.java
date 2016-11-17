@@ -24,6 +24,7 @@ public class ParsimoniousAssumeApplicationStrategy
                                       @NotNull VCAssume stat) {
         List<PExp> allAssumptions = stat.getAssumeExp().splitIntoConjuncts();
         Collection<Sequent> existingSequents = block.finalConfirm.getSequents();
+        PExp assumeExp = stat.getAssumeExp();
 
         Map<PExp, PExp> equalitySubstitutions = new HashMap<>();
         List<PExp> remainingAssumptions = new ArrayList<>();
@@ -79,16 +80,17 @@ public class ParsimoniousAssumeApplicationStrategy
         List<PExp> remainingAssumptionsWithEqualSubt = new ArrayList<>();
         //TODO: ok, we know everything in "nonEffectualEqualities" doesn't affect any formulas in the sequents of the
         //final confirm... I wonder though if they would affect any of the "remAssumptions"? look into this.
+        remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
         for (PExp assumption : remainingAssumptions) {
             remainingAssumptionsWithEqualSubt.add(assumption.substitute(equalitySubstitutions));
         }
-        remainingAssumptionsWithEqualSubt.addAll(nonEffectualEqualities);
         VCConfirm substitutedConfirm = block.finalConfirm.withSequentFormulaSubstitution(equalitySubstitutions);
         List<Sequent> newFinalConfirmSequents =
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
                         substitutedConfirm.getSequents(), stat.isStipulatedAssumption());
 
         newFinalConfirmSequents = betaReduceSequentFormulas(newFinalConfirmSequents);
+        //newFinalConfirmSequents = simplifyLambdas(newFinalConfirmSequents);
 
         block.finalConfirm(newFinalConfirmSequents);
         return block.snapshot();
@@ -160,6 +162,29 @@ public class ParsimoniousAssumeApplicationStrategy
         }
         return newFinalConfirmSequentsBetaReduced;
     }
+
+    /**
+     * If there are nested lambdas where the otherwise conditions match up this collapses them into
+     * the same level for ease of reading.
+     */
+    /*private List<PExp> simplifyLambdas(List<Sequent> sequents) {
+        List<Sequent> newFinalConfirmWithSimplifiedSequents = new LinkedList<>();
+        for (Sequent sequent : sequents) {
+            List<PExp> newLeft = new LinkedList<>();
+            List<PExp> newRight = new LinkedList<>();
+            for (PExp x : sequent.getLeftFormulas()) {
+                BasicLambdaBetaReducingListener b = new BasicLambdaBetaReducingListener(x);
+                x.accept(b);
+                newLeft.add(b.getReducedExp());
+            }
+            for (PExp x : sequent.getRightFormulas()) {
+                BasicLambdaBetaReducingListener b = new BasicLambdaBetaReducingListener(x);
+                x.accept(b);
+                newRight.add(b.getReducedExp());
+            }
+            newFinalConfirmSequentsBetaReduced.add(new ListBackedSequent(newLeft, newRight));
+        }
+    }*/
 
     private Set<String> getSymbolNamesFromSequent(Sequent s) {
         Set<String> result = new HashSet<>();

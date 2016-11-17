@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.Scope;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -80,7 +81,8 @@ public class VCAssertiveBlock {
 
         public final Deque<VCAssertiveBlockBuilder> branchingBlocks = new LinkedList<>();
 
-        public Map<PExp, PExp> getSpecializationsForFacility(String facility) {
+        public Map<PExp, PExp> getSpecializationsForFacility(@Nullable String facility) {
+            if (facility == null) return Collections.emptyMap();
             Map<PExp, PExp> result = facilitySpecializations.get(facility);
             if (result == null) result = new HashMap<>();
             return result;

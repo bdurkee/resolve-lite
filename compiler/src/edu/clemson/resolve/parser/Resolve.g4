@@ -354,7 +354,7 @@ mathMixfixDefnSig
         rop=mathBracketOp ':' mathClssftnExp
     ;
 
-mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
+mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
 mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
 
 mathCategoricalDefnDecl
@@ -428,7 +428,6 @@ mathExp
     |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
-    |   lhs=mathExp op='=' rhs=mathExp                                  #mathBuiltinInfixAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     |   mathPrimeExp                                                    #mathPrimaryExp
     ;

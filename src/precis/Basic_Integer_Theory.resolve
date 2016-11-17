@@ -28,7 +28,7 @@ Precis Basic_Integer_Theory;
 
     Definition (m : Z) mod (n : Z) : Z;
 
-    Definition NN : ℘(Z) is {n : Z ∣ ⌐(Is_Neg(n))};
+    Definition NN : ℘(Z) is {n : Z | ⌐(Is_Neg(n))};
         //won't typecheck at the moment
         //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
         //Corollary nn2: ∀ n : NN, suc(n) : NN;
@@ -64,7 +64,6 @@ Precis Basic_Integer_Theory;
 	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
 
 	Theorem Nested_Subt_1: ∀ i, j : Z, (i + (j - j)) = i;
-	
 
 	//Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
 

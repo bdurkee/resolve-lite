@@ -11,7 +11,7 @@ Concept Bdd_Ceramic_Array_Template (type Entry;
                           updates e : Entry;
                           evaluates i : Std_Ints :: Integer);
         requires Lower_Bound ≤ i ≤ Upper_Bound;
-        ensures e = #A(i) and A = λ j : Z,(
+        ensures e = #A(i) and (A = λ j : Z,
                                {{#e     if j = i;
                                  #A(j)  otherwise;}});
 
