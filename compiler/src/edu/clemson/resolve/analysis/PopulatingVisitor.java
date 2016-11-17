@@ -1018,7 +1018,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathPostfixDefnSig(ResolveParser.MathPostfixDefnSigContext ctx) {
+    public Void visitMathMixfixDefnSig(ResolveParser.MathMixfixDefnSigContext ctx) {
         try {
             CommonToken name = new CommonToken(ctx.lop.getStart());
             name.setText(ctx.lop.getText() + ".." + ctx.rop.getText());
@@ -1350,8 +1350,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
 
-        Token left = ctx.mathSymbolNameNoID(0).getStart();
-        Token right = ctx.mathSymbolNameNoID(1).getStart();
+        Token left = ctx.mathBracketOp(0).getStart();
+        Token right = ctx.mathBracketOp(1).getStart();
 
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());
@@ -1377,8 +1377,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
         dummyNode.name = dummyName;
 
-        Token left = ctx.mathSymbolNameNoID(0).getStart();
-        Token right = ctx.mathSymbolNameNoID(1).getStart();
+        Token left = ctx.mathBracketOp(0).getStart();
+        Token right = ctx.mathBracketOp(1).getStart();
 
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());

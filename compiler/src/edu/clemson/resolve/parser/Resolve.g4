@@ -135,7 +135,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID 'is' type ';'?
+    :   'Type' name=ID '=' type ';'?
         (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -355,8 +355,7 @@ mathMixfixDefnSig
     ;
 
 mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
-
-mathBracketOp:  MATH_BRACKET_SYM ;
+mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -408,12 +407,11 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
-
+/*
 mathExp
-    :   mathPrimeExp                                                    #mathPrimaryExp
-    |   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
     |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
 //  |   <assoc=right> lhs=mathExp op='->' rhs=mathExp                   #mathBuiltinInfixAppExp
@@ -421,6 +419,18 @@ mathExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
 //  |   mathExp op=('and'|'∧'|'or'|'∨') mathExp                         #mathBuiltinInfixAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
+    |   mathPrimeExp                                                    #mathPrimaryExp
+    ;
+*/
+mathExp
+    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
+    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
+    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+    |   lhs=mathExp op='=' rhs=mathExp                                  #mathBuiltinInfixAppExp
+    |   '(' mathAssertionExp ')'                                        #mathNestedExp
+    |   mathPrimeExp                                                    #mathPrimaryExp
     ;
 
 mathPrimeExp
@@ -474,8 +484,8 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
 ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
+
 SYM                 : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|[<->])+ ;
-MATH_BRACKET_SYM    : ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
 
 MATH_UNICODE_SYM
     :   [\u2100-\u214F]

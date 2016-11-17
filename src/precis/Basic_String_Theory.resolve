@@ -13,13 +13,13 @@ Precis Basic_String_Theory;
 			(i.)  α ∘ Λ = α;
 			(ii.) ∀ x : El, α ∘ ext(β, x) = ext(α ∘ β, x);
 	
-	Inductive Definition `|(α : SStr)|` : N is					/* String length */
-			(i.)  `|Λ|` = 0;
-			(ii.) ∀ x : El, `|(ext(α, x))|` = suc(`|α|`);
+	//Inductive Definition |(α : SStr)| : N is					/* String length */
+	//		(i.)  |Λ| = 0;
+	//		(ii.) ∀ x : El, |ext(α, x)| = suc(|α|);
 			
-		Corollary SL1: ∀ α, β : SStr, `|(α ∘ β)|` = (`|α|` + `|β|`);
-	
-	Definition `⟨(x : El)⟩` : SStr is ext(Λ, x);				/* String Conversion */
-		Corollary C1: ∀ x : El, `⟨x⟩` ≠  Λ;
+    Corollary SL1: ∀ α, β : SStr, |α ∘ β| = (|α| + |β|);
+
+	Definition ⟨(x : El)⟩ : SStr is ext(Λ, x);				    /* String Conversion */
+		Corollary C1: ∀ x : El, ⟨x⟩ ≠ Λ;
 		
 end Basic_String_Theory;
