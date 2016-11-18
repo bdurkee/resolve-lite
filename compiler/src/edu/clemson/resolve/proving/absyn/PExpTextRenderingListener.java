@@ -9,6 +9,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +26,23 @@ public class PExpTextRenderingListener extends PExpListener {
     public PExpTextRenderingListener(int lineWidth) {
     }
 
+    public ST getSTFor(PExp e) {
+        return nodes.get(e);
+    }
+
+    @Override
+    public void endPSymbol(@NotNull PSymbol e) {
+        ST s = g.getInstanceOf(getTemplateFor(e));
+        s.add("name", e.getName());
+        nodes.put(e, s);
+    }
+
     @Override
     public void endInfixPApply(@NotNull PApply e) {
         ST s = g.getInstanceOf("InfixPApply");
-        s.add("left", nodes.get(e.getArguments().get(1)));
-        s.add("right", nodes.get(e.getArguments().get(2)));
+        s.add("left", nodes.get(e.getArguments().get(0)));
+        s.add("operator", nodes.get(e.getFunctionPortion()));
+        s.add("right", nodes.get(e.getArguments().get(1)));
         nodes.put(e, s);
     }
 
@@ -53,7 +66,7 @@ public class PExpTextRenderingListener extends PExpListener {
 
     @Override
     public void endPSelector(@NotNull PSelector e) {
-        ST s = g.getInstanceOf("PSelector");
+        ST s = g.getInstanceOf(getTemplateFor(e));
         s.add("left", nodes.get(e.getLeft()));
         s.add("right", nodes.get(e.getRight()));
         nodes.put(e, s);
@@ -61,22 +74,30 @@ public class PExpTextRenderingListener extends PExpListener {
 
     @Override
     public void endPLambda(@NotNull PLambda e) {
-        ST s = g.getInstanceOf("PLambda");
+        ST s = g.getInstanceOf(getTemplateFor(e));
         PLambda.MathSymbolDeclaration parameter = e.getParameters().get(0);
         s.add("var", parameter.getName());
-        s.add("right", parameter.getClssftn().toString());
+        s.add("type", parameter.getClssftn().toString());
         s.add("body", e.getBody());
         nodes.put(e, s);
     }
 
     @Override
     public void endPAlternatives(@NotNull PAlternatives e) {
-        /*ST s = g.getInstanceOf("PLambda");
-        PLambda.MathSymbolDeclaration parameter = e.getParameters().get(0);
-        s.add("var", parameter.getName());
-        s.add("right", parameter.getClssftn().toString());
-        s.add("body", e.getBody());
-        nodes.put(e, s);*/
+        List<ST> alternatives = new ArrayList<>();
+        for (PAlternatives.Alternative a : e.getAlternatives()) {
+            ST alt = g.getInstanceOf("Alternative")
+                    .add("condition", nodes.get(a.condition))
+                    .add("result", nodes.get(a.result));
+            alternatives.add(alt);
+        }
+        ST last = g.getInstanceOf("Alternative")
+                .add("result", nodes.get(e.getOtherwiseClauseResult()));
+
+        alternatives.add(last);
+        ST s = g.getInstanceOf(getTemplateFor(e));
+        s.add("alternatives", alternatives);
+        nodes.put(e, s);
     }
 
     @NotNull

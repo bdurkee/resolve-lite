@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.programtype.ProgType;
+import org.stringtemplate.v4.ST;
 
 import java.util.*;
 
@@ -408,8 +409,16 @@ public abstract class PExp {
         return toString();
     }
 
+    public String render(int lineWidth) {
+        PExpTextRenderingListener l = new PExpTextRenderingListener(lineWidth);
+        accept(l);
+        ST result = l.getSTFor(this);
+        String s = result.render(lineWidth);
+        return s;
+    }
+
     public String render() {
-        return this.toString(false);
+        return render(35);
     }
 
     /** A util container for storing node structural and value hashcodes. */

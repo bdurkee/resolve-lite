@@ -52,11 +52,6 @@ public class PApply extends PExp {
             }
 
             @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPrefixPApply(s);
-            }
-
-            @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endPrefixPApply(s);
             }
@@ -75,11 +70,6 @@ public class PApply extends PExp {
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
                 v.beginInfixPApply(s);
-            }
-
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostInfixPApply(s);
             }
 
             @Override
@@ -104,10 +94,10 @@ public class PApply extends PExp {
                 v.beginPostfixPApply(s);
             }
 
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPostfixPApply(s);
-            }
+            //@Override
+            //protected void fencepostAccept(PExpListener v, PApply s) {
+            //    v.fencepostPostfixPApply(s);
+            //}
 
             @Override
             protected void endAccept(PExpListener v, PApply s) {
@@ -132,11 +122,6 @@ public class PApply extends PExp {
             }
 
             @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostOutfixPApply(s);
-            }
-
-            @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endOutfixPApply(s);
             }
@@ -154,7 +139,7 @@ public class PApply extends PExp {
         protected abstract void beginAccept(PExpListener v, PApply s);
 
         /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
-        protected abstract void fencepostAccept(PExpListener v, PApply s);
+        //protected abstract void fencepostAccept(PExpListener v, PApply s);
 
         /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);
@@ -396,13 +381,8 @@ public class PApply extends PExp {
 
         v.beginChildren(this);
         functionPortion.accept(v);
-        boolean first = true;
+
         for (PExp arg : arguments) {
-            if (!first) {
-                displayStyle.fencepostAccept(v, this);
-                v.fencepostPApply(this);
-            }
-            first = false;
             arg.accept(v);
         }
         v.endChildren(this);
