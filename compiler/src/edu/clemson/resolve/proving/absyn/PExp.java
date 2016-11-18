@@ -409,7 +409,7 @@ public abstract class PExp {
     }
 
     public String render() {
-        return "";
+        return this.toString(false);
     }
 
     /** A util container for storing node structural and value hashcodes. */

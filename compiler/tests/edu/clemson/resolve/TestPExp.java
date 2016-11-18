@@ -90,8 +90,8 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true, parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise;}}")
                 .equals(parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise;}}")));
 
-        Assert.assertEquals(true, parseMathAssertionExp(g, "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")
-                .equals(parseMathAssertionExp(g, "{{λ j : Z,(true) if b = (c and f); b otherwise;}}")));
+        Assert.assertEquals(true, parseMathAssertionExp(g, "{{λ j : Z, (true) if b = (c and f); b otherwise;}}")
+                .equals(parseMathAssertionExp(g, "{{λ j : Z, (true) if b = (c and f); b otherwise;}}")));
     }
 
     //TODO: PSet needs finishing first -- this will probably be awhile
@@ -164,9 +164,9 @@ public class TestPExp extends BaseTest {
         Assert.assertEquals(true,
                 parseMathAssertionExp(g, "{{a if b = (c and f); b otherwise;}}").containsName("c"));
         Assert.assertEquals(true,
-                parseMathAssertionExp(g, "λ x : Z,{{x = r if j; false otherwise;}}").containsName("r"));
+                parseMathAssertionExp(g, "λ x : Z, {{x = r if j; false otherwise;}}").containsName("r"));
         Assert.assertEquals(true,
-                parseMathAssertionExp(g, "λ v : Z,{{x = r if j; false otherwise;}}").containsName("v"));
+                parseMathAssertionExp(g, "λ v : Z, {{x = r if j; false otherwise;}}").containsName("v"));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSplitIntoConjuncts() {
-        PExp result = parseMathAssertionExp(g, "x and (y = 2) and (P.Lab = λ q : Z,(true))");
+        PExp result = parseMathAssertionExp(g, "x and (y = 2) and (P.Lab = λ q : Z, (true))");
         List<PExp> conjuncts = result.splitIntoConjuncts();
         //Assert.assertEquals(2, conjuncts.size());
         Iterator<? extends PExp> exps = conjuncts.iterator();
@@ -282,7 +282,7 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(g,
                         "Forall x, y, z : Z, Exists u, v, w : N," +
                                 "#g(#u) + (h(#z, #w, #f(#u))) + " +
-                                "λ q : Z,{{#x if g(x); #b(#k) otherwise;}}");
+                                "λ q : Z, {{#x if g(x); #b(#k) otherwise;}}");
         Set<String> incomingNames = result.getIncomingVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());
         Set<String> expectedNames =
@@ -313,7 +313,7 @@ public class TestPExp extends BaseTest {
     @Test
     public void testGetSymbolNames() {
         PExp result = parseMathAssertionExp(g, "x + y");
-        Set<String> expectedNames = Arrays.asList("x", "+", "y").stream().collect(Collectors.toSet());
+        Set<String> expectedNames = Stream.of("x", "+", "y").collect(Collectors.toSet());
         Set<String> foundNames = result.getSymbolNames();
         Assert.assertEquals(expectedNames.size(), foundNames.size());
         Assert.assertEquals(true, foundNames.containsAll(expectedNames));
@@ -349,9 +349,9 @@ public class TestPExp extends BaseTest {
 
     @Test
     public void testSubstituteOnLambda() {
-        PExp result = parseMathAssertionExp(g, "X = λq : Inv,{{#e if j = i; #e(q) otherwise;}}")
+        PExp result = parseMathAssertionExp(g, "X = λq : Inv, {{#e if j = i; #e(q) otherwise;}}")
                 .substitute(parseMathAssertionExp(g, "#e"), parseMathAssertionExp(g, "Y"));
-        Assert.assertEquals("(X = λ q : Inv,{{Y if j = i; Y(q) otherwise;}})", result.toString());
+        Assert.assertEquals("(X = λ q : Inv, {{Y if j = i; Y(q) otherwise;}})", result.toString());
     }
 
     protected static ParseTree getTree(String input) {

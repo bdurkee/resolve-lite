@@ -89,7 +89,7 @@ public class ParsimoniousAssumeApplicationStrategy
                 performParsimoniousStep(block.g, remainingAssumptionsWithEqualSubt,
                         substitutedConfirm.getSequents(), stat.isStipulatedAssumption());
 
-        newFinalConfirmSequents = betaReduceSequentFormulas(newFinalConfirmSequents);
+        //newFinalConfirmSequents = betaReduceSequentFormulas(newFinalConfirmSequents);
         //newFinalConfirmSequents = simplifyLambdas(newFinalConfirmSequents);
 
         block.finalConfirm(newFinalConfirmSequents);
