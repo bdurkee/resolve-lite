@@ -204,24 +204,15 @@ public class PAlternatives extends PExp {
 
     @Override
     public String toString() {
-        /*StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{{");
         for (Alternative alternative : alternatives) {
             sb.append(alternative.toString());
             sb.append(" ");
         }
         sb.append(otherwiseClauseResult).append(" otherwise;");
-        sb.append("}}");*/
-        //return sb.toString();
-        //<first(funcImpls): {f | if (method.getName().equals("<f.func.name>")) return method.invoke(this, args);}; separator="\n">
-        STGroup g = new STGroupString("PAlternatives(alternatives, otherwise) ::= " +
-                "<<{{<alternatives; separator=\"\n\">\n<otherwise.render> otherwise;\n" +
-                "}}>>");
-
-        ST t = g.getInstanceOf("PAlternatives");
-        t.add("alternatives", alternatives);
-        t.add("otherwise", otherwiseClauseResult);
-        return t.render();
+        sb.append("}}");
+        return sb.toString();
     }
 
     @Override

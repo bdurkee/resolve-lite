@@ -468,6 +468,10 @@ public class PApply extends PExp {
         return displayStyle.toString(this, parenthesizeApplications);
     }
 
+    @Override
+    public String render() {
+        return super.render();
+    }
     @NotNull
     protected static String pexpJoin(@NotNull Collection<PExp> exps, boolean parenthesizeApplications) {
         String result = "";

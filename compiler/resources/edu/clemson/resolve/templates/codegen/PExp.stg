@@ -1,0 +1,13 @@
+PSymbol(s) ::= <s>
+
+InfixPApply(left, right, operator) ::= "<left> <operator> <right>"
+
+PrefixPApply(name, args) ::= "<name>(<args; wrap, anchor, separator=", ">)"
+
+PLambda(var, type, body) ::= "λ <var> : <type>, <body>"
+
+PLambdaWithAlts(var, type, body) ::= <<
+λ <var> : <type>,
+    <body>
+>>
+
