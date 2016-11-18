@@ -4,7 +4,11 @@ InfixPApply(left, right, operator) ::= "<left> <operator> <right>"
 
 PrefixPApply(name, args) ::= "<name>(<args; wrap, anchor, separator=", ">)"
 
+OutfixPApply(left, right, arg) ::= "<left><arg><right>"
+
 PLambda(var, type, body) ::= "λ <var> : <type>, <body>"
+
+PSelector(left, right) ::= "<left>.<right>"
 
 PLambdaWithAlts(var, type, body) ::= <<
 λ <var> : <type>,

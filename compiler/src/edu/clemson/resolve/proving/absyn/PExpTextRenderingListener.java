@@ -10,6 +10,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class PExpTextRenderingListener extends PExpListener {
 
     @Override
     public void endInfixPApply(@NotNull PApply e) {
-        ST s = g.getInstanceOf(getTemplateFor(e));
+        ST s = g.getInstanceOf("InfixPApply");
         s.add("left", nodes.get(e.getArguments().get(1)));
         s.add("right", nodes.get(e.getArguments().get(2)));
         nodes.put(e, s);
@@ -34,10 +35,48 @@ public class PExpTextRenderingListener extends PExpListener {
 
     @Override
     public void endPrefixPApply(@NotNull PApply e) {
-        ST s = g.getInstanceOf(getTemplateFor(e));
+        ST s = g.getInstanceOf("PrefixPApply");
         s.add("name", nodes.get(e.getFunctionPortion()));
         s.add("args", Utils.apply(e.getArguments(), nodes::get));
         nodes.put(e, s);
+    }
+
+    @Override
+    public void endOutfixPApply(@NotNull PApply e) {
+        ST s = g.getInstanceOf("OutfixPApply");
+        PSymbol name = (PSymbol) e.getFunctionPortion();
+        s.add("left", name.getLeftPrint());
+        s.add("right", name.getRightPrint());
+        s.add("arg", nodes.get(e.getArguments().get(0)));
+        nodes.put(e, s);
+    }
+
+    @Override
+    public void endPSelector(@NotNull PSelector e) {
+        ST s = g.getInstanceOf("PSelector");
+        s.add("left", nodes.get(e.getLeft()));
+        s.add("right", nodes.get(e.getRight()));
+        nodes.put(e, s);
+    }
+
+    @Override
+    public void endPLambda(@NotNull PLambda e) {
+        ST s = g.getInstanceOf("PLambda");
+        PLambda.MathSymbolDeclaration parameter = e.getParameters().get(0);
+        s.add("var", parameter.getName());
+        s.add("right", parameter.getClssftn().toString());
+        s.add("body", e.getBody());
+        nodes.put(e, s);
+    }
+
+    @Override
+    public void endPAlternatives(@NotNull PAlternatives e) {
+        /*ST s = g.getInstanceOf("PLambda");
+        PLambda.MathSymbolDeclaration parameter = e.getParameters().get(0);
+        s.add("var", parameter.getName());
+        s.add("right", parameter.getClssftn().toString());
+        s.add("body", e.getBody());
+        nodes.put(e, s);*/
     }
 
     @NotNull
