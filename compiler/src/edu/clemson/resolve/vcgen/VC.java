@@ -70,27 +70,31 @@ public final class VC {
 
     @Override
     public String toString() {
+        return toString(35);
+    }
+
+    public String toString(int lineWidth) {
         String retval = "//Vc #" + number + ": " + explanation + " (" + location.getLine() + ")" + "\n";
         int i = 1;
         boolean first = true;
         for (PExp e : sequent.getLeftFormulas()) {
             if (first) {
-                retval += e.render();
+                retval += e.render(lineWidth);
                 first = false;
             }
             else {
-                retval += ",\n" + e.render();
+                retval += ",\n" + e.render(lineWidth);
             }
         }
         retval += "\n⊢\n";
         first = true;
         for (PExp e : sequent.getRightFormulas()) {
             if (first) {
-                retval += e.render();
+                retval += e.render(lineWidth);
                 first = false;
             }
             else {
-                retval += ",\n" + e.render();
+                retval += ",\n" + e.render(lineWidth);
             }
         }
         return retval;

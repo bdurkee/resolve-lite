@@ -88,6 +88,13 @@ public class PExpTextRenderingListener extends PExpListener {
     }
 
     @Override
+    public void endPSet(@NotNull PSet e) {
+        ST s = g.getInstanceOf(getTemplateFor(e));
+        s.add("elements", Utils.apply(e.getSubExpressions(), nodes::get));
+        nodes.put(e, s);
+    }
+
+    @Override
     public void endPAlternatives(@NotNull PAlternatives e) {
         List<ST> alternatives = new ArrayList<>();
         for (PAlternatives.Alternative a : e.getAlternatives()) {

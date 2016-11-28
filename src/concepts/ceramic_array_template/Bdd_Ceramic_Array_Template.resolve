@@ -6,14 +6,14 @@ Concept Bdd_Ceramic_Array_Template (type Entry;
     requires Lower_Bound ≤ Upper_Bound;
 
     Type family Ceramic_Array
-            is modeled by Z ⟶ Entry;
+            is modeled by ℤ ⟶ Entry;
         exemplar A;
 
     Operation Swap_Entry (updates A : Ceramic_Array;
                           updates e : Entry;
                           evaluates i : Std_Ints :: Integer);
         requires Lower_Bound ≤ i ≤ Upper_Bound;
-        ensures e = #A(i) and (A = λ j : Z,
+        ensures e = #A(i) and (A = λ j : ℤ,
                                {{#e     if j = i;
                                  #A(j)  otherwise;}});
 

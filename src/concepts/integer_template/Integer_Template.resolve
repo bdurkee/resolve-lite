@@ -1,12 +1,12 @@
 Concept Integer_Template;
     uses Basic_Integer_Theory, Standard_Booleans;
 
-    Definition min_int : Z;
-    Definition max_int : Z;
+    Definition min_int : ℤ;
+    Definition max_int : ℤ;
     constraints min_int ≤ 0 ∧ (1 ≤ max_int);
 
     Type family Integer
-                is modeled by Z;
+                is modeled by ℤ;
         exemplar I;
         constraints
             min_int ≤ I ≤ max_int;

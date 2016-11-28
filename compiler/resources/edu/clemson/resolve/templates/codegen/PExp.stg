@@ -11,6 +11,7 @@ PLambda(var, type, body) ::= <<
     <body>
 >>
 
+PSet(elements) ::= "{<elements; separator=\", \">}"
 PSelector(left, right) ::= "<left>.<right>"
 
 PLambdaWithAlts(var, type, body) ::= <<

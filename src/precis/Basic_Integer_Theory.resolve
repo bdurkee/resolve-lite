@@ -1,77 +1,81 @@
 Precis Basic_Integer_Theory;
-        uses Monogenerator_Theory, Basic_Binary_Relation_Properties, Basic_Natural_Number_Theory;
+        uses (
+            Monogenerator_Theory,
+            Basic_Binary_Relation_Properties,
+            Basic_Natural_Number_Theory
+        );
     /** many theorems elided */
-    Categorical Definition for Z : SSet, 0 : Z, NB : Z ⟶ Z is
-        Is_Monogeneric_for(Z, 0, NB);
+    Categorical Definition for ℤ : SSet, 0 : ℤ, NB : ℤ ⟶ ℤ is
+        Is_Monogeneric_for(ℤ, 0, NB);
 
-    Inductive Definition Is_Neg(n : Z) : B is
+    Inductive Definition Is_Neg(n : ℤ) : B is
         (i.) Is_Neg(n);
         (ii.) Is_Neg(NB(n)) = ⌐(Is_Neg(n));
 
-    Inductive Definition ⨩(n : Z) : Z is
+    Inductive Definition ⨩(n : ℤ) : ℤ is
         (i.) ⨩(0) = 0;
         (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
 	Classification Corollary :
-		N : Z;
+		ℕ : ℤ;
 
-    Inductive Definition suc(n : Z) : Z is
+    Inductive Definition suc(n : ℤ) : ℤ is
         (i.) suc(0) = NB(NB(0));
         (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨩(n) otherwise;}};
 
-    Inductive Definition (m : Z) + (n : Z) : Z is
+    Inductive Definition (m : ℤ) + (n : ℤ) : ℤ is
         (i.) m + 0 = m;
         (ii.) m + NB(n) = {{⨩(m) + n if Is_Neg(n);
                 suc(⨩(m) + n) otherwise;}};
 
-    Definition (m : Z) - (n : Z) : Z;
+    Definition (m : ℤ) - (n : ℤ) : ℤ;
 
-    Definition (m : Z) mod (n : Z) : Z;
+    Definition (m : ℤ) mod (n : ℤ) : ℤ;
 
-    Definition NN : ℘(Z) is {n : Z | ⌐(Is_Neg(n))};
+    Definition NN : ℘(ℤ) is {n : ℤ | ⌐(Is_Neg(n))};
         //won't typecheck at the moment
         //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
         //Corollary nn2: ∀ n : NN, suc(n) : NN;
 
-    Definition (m : Z) > (n : Z) : B;
+    Definition (m : ℤ) > (n : ℤ) : B;
 
-    Chainable Definition (m : Z) < (n : Z) : B;
+    Chainable Definition (m : ℤ) < (n : ℤ) : B;
 
-    Chainable Definition (m : Z) ≤ (n : Z) : B is n + ⨩(m) ∈ NN;
+    Chainable Definition (m : ℤ) ≤ (n : ℤ) : B is n + ⨩(m) ∈ NN;
         //Corollary leq1: Is_Transitive(≤);
         //Corollary leq2: Is_Antisymmetric(≤);
         //Corollary leq3: Is_Total(≤);
 
-    Definition (m : Z) ≥ (n : Z) : B;
+    Definition (m : ℤ) ≥ (n : ℤ) : B;
 
-    Definition 1 : Z is suc(0);
+    Definition 1 : ℤ is suc(0);
         //Corollary one1: ∀ m : Z, suc(m) = (m + 1);
 
-    /*Literal*/ Definition 2 : Z is suc(1);
-    /*Literal*/ Definition 3 : Z is suc(2);
-    /*Literal*/ Definition 4 : Z is suc(3);
+    /*Literal*/ Definition 2 : ℤ is suc(1);
+    /*Literal*/ Definition 3 : ℤ is suc(2);
+    /*Literal*/ Definition 4 : ℤ is suc(3);
 
-    Inductive Definition (m : Z) * (n : Z) : Z is
+    Inductive Definition (m : ℤ) * (n : ℤ) : ℤ is
         (i.) m * 0 = 0;
         (ii.) m * NB(n) = {{⨩(m * n) if Is_Neg(n); ⨩(m * n + m) otherwise; }};
 
     Theorem one_N: 1 = 1;
 
-    Theorem I3: ∀ n : Z, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
+    Theorem I3: ∀ n : ℤ, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
 
-	Theorem Addition_Over_Equality: ∀ i, j, k : Z, (i - j = k) = (i = (k + j));
+	Theorem Addition_Over_Equality: ∀ i, j, k : ℤ, (i - j = k) = (i = (k + j));
 
-	Theorem Addition_Over_LTEa: ∀ i, j, k : Z, (i + j ≤ k) = (i ≤ (k - j));
+	Theorem Addition_Over_LTEa: ∀ i, j, k : ℤ, (i + j ≤ k) = (i ≤ (k - j));
 
-	Theorem Nested_Subt_1: ∀ i, j : Z, (i + (j - j)) = i;
+	Theorem Nested_Subt_1: ∀ i, j : ℤ, (i + (j - j)) = i;
 
-	//Theorem Not_LTE: ∀ i, j : Z, ⌐(i ≤ j) = (j + 1 ≤ i);
+	Theorem Not_LTE: ∀ i, j : ℤ, ⌐(i ≤ j) = (j + 1 ≤ i);
 
-	Corollary LTE_1a: ∀ i, j, k : Z, i ≤ j ∧ (j ≤ k) implies (i ≤ k);   //expand Is_Transitive(≤);
+	Corollary LTE_1a: ∀ i, j, k : ℤ, i ≤ j ∧ (j ≤ k) implies (i ≤ k);   //expand Is_Transitive(≤);
     //tod: Have special keyword which dictates when an application ought to be expanded.
     //For intance, Corollary lte1: expand Is_Transitive(≤);
 
-    Corollary LTE_3: ∀ m, n : Z, m ≤ n ∨ (n ≤ m);       //expand Is_Total(≤)
-	Corollary LTE_3a: ∀ n : Z, n ≤ n;                   //expand Is_Reflexive(≤)
+    Corollary LTE_3: ∀ m, n : ℤ, m ≤ n ∨ (n ≤ m);       //expand Is_Total(≤)
+	Corollary LTE_3a: ∀ n : ℤ, n ≤ n;                   //expand Is_Reflexive(≤)
 
 end Basic_Integer_Theory;
