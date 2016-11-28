@@ -15,7 +15,11 @@ Precis Basic_Natural_Number_Theory;
     Definition (m : ℕ) > (n : ℕ) : B;
     Chainable Definition (m : ℕ) < (n : ℕ) : B;
 
+    Definition ξ : SSet;
+
     Definition 1 : ℕ is suc(0);
     Definition 2 : ℕ is suc(1);
 
+    Definition ⟨(S : SSet)⟩ : SSet;
+    
 end Basic_Natural_Number_Theory;
