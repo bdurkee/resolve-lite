@@ -22,8 +22,10 @@ public class PExpTextRenderingListener extends PExpListener {
 
     private final STGroup g = new STGroupFile(AbstractCodeGenerator.TEMPLATE_ROOT + "/PExp.stg");
     private final Map<PExp, ST> nodes = new HashMap<>();
+    private final int lineWidth;
 
     public PExpTextRenderingListener(int lineWidth) {
+        this.lineWidth = lineWidth;
     }
 
     public ST getSTFor(PExp e) {
@@ -40,7 +42,10 @@ public class PExpTextRenderingListener extends PExpListener {
     @Override
     public void endInfixPApply(@NotNull PApply e) {
         ST s = g.getInstanceOf("InfixPApply");
-        s.add("left", nodes.get(e.getArguments().get(0)));
+        PExp left = e.getArguments().get(0);
+        //if (!(left.toString().length() <= lineWidth - 3))
+        s.add("left", nodes.get(left));
+        //if (e.toString()
         s.add("operator", nodes.get(e.getFunctionPortion()));
         s.add("right", nodes.get(e.getArguments().get(1)));
         nodes.put(e, s);
@@ -78,7 +83,7 @@ public class PExpTextRenderingListener extends PExpListener {
         PLambda.MathSymbolDeclaration parameter = e.getParameters().get(0);
         s.add("var", parameter.getName());
         s.add("type", parameter.getClssftn().toString());
-        s.add("body", e.getBody());
+        s.add("body", nodes.get(e.getBody()));
         nodes.put(e, s);
     }
 
@@ -87,8 +92,13 @@ public class PExpTextRenderingListener extends PExpListener {
         List<ST> alternatives = new ArrayList<>();
         for (PAlternatives.Alternative a : e.getAlternatives()) {
             ST alt = g.getInstanceOf("Alternative")
-                    .add("condition", nodes.get(a.condition))
-                    .add("result", nodes.get(a.result));
+                    .add("result", a.result.toString(false));
+            if (a.condition != null) {
+                alt.add("condition", a.condition.toString(false));
+            }
+            else {
+                alt.add("condition", null);
+            }
             alternatives.add(alt);
         }
         ST last = g.getInstanceOf("Alternative")

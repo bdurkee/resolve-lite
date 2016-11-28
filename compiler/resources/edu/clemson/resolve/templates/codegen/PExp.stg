@@ -1,18 +1,15 @@
 PSymbol(name) ::= "<name>"
 
-InfixPApply(left, right, operator) ::= "<left;wrap=\"\n      \"> <operator> <right>"
+InfixPApply(left, right, operator) ::= "<left;wrap=\"\n      \"> <operator; wrap=\"\n      \"> <right;wrap=\"\n      \">"
 
-InfixPApplyWrap(left, right, operator) ::= <<
-<left>
-  <operator>
-<right>
->>
-
-PrefixPApply(name, args) ::= "<name;wrap>(<args;  anchor, wrap, separator=\", \">)"
+PrefixPApply(name, args) ::= "<name;wrap>(<args; separator=\", \">)"
 
 OutfixPApply(left, right, arg) ::= "<left><arg><right>"
 
-PLambda(var, type, body) ::= "λ <var> : <type>, <body>"
+PLambda(var, type, body) ::= <<
+λ <var> : <type>,
+    <body>
+>>
 
 PSelector(left, right) ::= "<left>.<right>"
 
@@ -22,7 +19,7 @@ PLambdaWithAlts(var, type, body) ::= <<
 >>
 
 PAlternatives(alternatives) ::= <<
-{{<alternative; wrap, anchor, separator=" ">}}
+{{<alternatives; wrap, anchor, separator="\n">}}
 >>
 
 Alternative(result, condition) ::= "<result> <if(condition)>if <condition><else>otherwise<endif>;"

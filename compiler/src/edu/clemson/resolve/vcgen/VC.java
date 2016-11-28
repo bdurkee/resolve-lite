@@ -75,22 +75,22 @@ public final class VC {
         boolean first = true;
         for (PExp e : sequent.getLeftFormulas()) {
             if (first) {
-                retval += e.toString(false);
+                retval += e.render();
                 first = false;
             }
             else {
-                retval += ",\n" + e.toString(false);
+                retval += ",\n" + e.render();
             }
         }
         retval += "\n⊢\n";
         first = true;
         for (PExp e : sequent.getRightFormulas()) {
             if (first) {
-                retval += e.toString(false);
+                retval += e.render();
                 first = false;
             }
             else {
-                retval += ",\n" + e.toString(false);
+                retval += ",\n" + e.render();
             }
         }
         return retval;
