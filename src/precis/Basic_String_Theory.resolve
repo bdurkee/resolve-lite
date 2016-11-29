@@ -2,11 +2,11 @@ Precis Basic_String_Theory;
 	uses Basic_Natural_Number_Theory;
 
 	Definition Is_String_Former
-			(SStr : Cls, Λ : SStr, ext : SStr * El -> SStr) : B;
+			(SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr) : B;
 	 	/*is Pty1: ∀ α, β : SStr, */
 
 	Categorical Definition for 
-				SStr : Cls, Λ : SStr, ext : SStr * El -> SStr is 
+				SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr is
 		Is_String_Former(SStr, Λ, ext);
 	
 	Inductive Definition (β : SStr) ∘ (α : SStr) : SStr is		/* String concatenation */
@@ -21,7 +21,7 @@ Precis Basic_String_Theory;
 
 	Definition ⟨(x : El)⟩ : B;
 
-    Definition Iterated_Concatenation(m : ℕ, n : ℕ, F : ℕ->SStr) : SStr;
+    Definition Iterated_Concatenation(m : ℕ, n : ℕ, F : ℕ ⟶ SSet) : SStr;
 
     Definition Reverse(s : SStr) : SStr;
 end Basic_String_Theory;
