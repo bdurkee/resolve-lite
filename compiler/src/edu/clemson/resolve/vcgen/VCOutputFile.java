@@ -80,12 +80,11 @@ public class VCOutputFile {
         }
     }
 
-    @Override
-    public String toString() {
+    public String toString(int lineWidth) {
         String result = "";
 
         for (VC vc : finalVcs) {
-            result += vc.toString() + "\n\n";
+            result += vc.toString(lineWidth) + "\n\n";
         }
         result += "==========================================" +
                 "\n\t Proof Obligation Derivation Steps" +
@@ -100,5 +99,10 @@ public class VCOutputFile {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return toString(35);
     }
 }

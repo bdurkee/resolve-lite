@@ -10,10 +10,12 @@ Precis Basic_String_Theory;
 		Is_String_Former(SStr, Λ, ext);
 	
 	Inductive Definition (β : SStr) ∘ (α : SStr) : SStr is		/* String concatenation */
-			(i.)  α ∘ Λ = α;
-			(ii.) ∀ x : El, α ∘ ext(β, x) = ext(α ∘ β, x);
+        (i.)  α ∘ Λ = α;
+        (ii.) ∀ x : El, α ∘ ext(β, x) = ext(α ∘ β, x);
 
-	Definition |(x : SStr)| : ℕ;
+	Inductive Definition |(x : SStr)| : ℕ is
+	    (i.)  |Λ| = 0;
+	    (ii.) ∀ α : SStr, |ext(α, x)| = suc(|α|);
 
     Corollary SL1: ∀ α, β : SStr, |α ∘ β| = (|α| + |β|);
 
