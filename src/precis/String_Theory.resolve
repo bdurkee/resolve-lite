@@ -1,0 +1,30 @@
+Precis String_Theory;
+	uses Natural_Number_Theory;
+
+	Definition Str(T : Cls) : Cls;
+	Definition Is_String_Former
+			(SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr) : B;
+	 	/*is Pty1: ∀ α, β : SStr, */
+
+	Categorical Definition for 
+				SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr is
+		Is_String_Former(SStr, Λ, ext);
+
+	/* String concatenation */
+	Inductive Definition (β : SStr) ∘ (α : SStr) : SStr is
+        (i.)  α ∘ Λ = α;
+        (ii.) ∀ x : El, α ∘ ext(β, x) = ext(α ∘ β, x);
+
+    /* String length */
+	Inductive Definition |(x : SStr)| : ℕ is
+	    (i.)  |Λ| = 0;
+	    (ii.) ∀ α : SStr, |ext(α, x)| = suc(|α|);
+
+    Corollary SL1: ∀ α, β : SStr, |α ∘ β| = (|α| + |β|);
+
+    Definition ⟨(x : El)⟩ : SStr;
+
+    Definition Iterated_Concatenation(m : ℕ, n : ℕ, F : ℕ ⟶ SSet) : SStr;
+
+    Definition Reverse(s : SStr) : SStr;
+end String_Theory;
