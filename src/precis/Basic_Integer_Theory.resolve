@@ -2,7 +2,7 @@ Precis Basic_Integer_Theory;
         uses (
             Monogenerator_Theory,
             Basic_Binary_Relation_Properties,
-            Basic_Natural_Number_Theory
+            Natural_Number_Theory
         );
     /** many theorems elided */
     Categorical Definition for ℤ : SSet, 0 : ℤ, NB : ℤ ⟶ ℤ is

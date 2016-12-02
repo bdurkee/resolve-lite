@@ -284,7 +284,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp name=progSymbolExp progExp              #progInfixExp
-    |   progExp name=progSymbolName                     #progPostfixExp
+//    |   progExp name=progSymbolName                     #progPostfixExp
     ;
 
 progPrimary
@@ -302,7 +302,7 @@ progSymbolExp
     ;
 
 progSymbolName
-    :   (SYM | ID)
+    :   (SYM | ID | '=')
     ;
 
 progLiteralExp
@@ -355,7 +355,7 @@ mathMixfixDefnSig
     ;
 
 mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
-mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⟪'|'⟫'|'⟬'|'⟭'|'⟮'|'⟯'|'⟦'|'⟧'|'⦃'|'⦄'|'⦅'|'⦆'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
+mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -484,8 +484,8 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
 
-//TODO: removed '|' (10/28/2016)
-SYM                 : ('!'|'*'|'+'|'-'|'/'|'~'|[<->])+ ;
+//TODO: removed '|' AND '=' (10/28/2016) (equals is special).
+SYM                 : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>')+ ;
 
 MATH_UNICODE_SYM
     :   [\u2100-\u214F]
