@@ -484,7 +484,7 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
 
-//TODO: removed '|' AND '=' (10/28/2016) (equals is special).
+//TODO: removed '|' (10/28/2016)
 SYM                 : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>')+ ;
 
 MATH_UNICODE_SYM

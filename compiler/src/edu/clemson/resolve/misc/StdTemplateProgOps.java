@@ -31,10 +31,26 @@ public class StdTemplateProgOps {
             result = convertBooleanProgramOp(op);
         }
         else if (firstArgType.getName().equals("Integer")) {
-            result = convertIntegerProgramOp(op, argCount);
+            result = convertIntegerProgramOp(op);
+        }
+        else if (firstArgType.getName().equals("Character")) {
+            result = convertCharacterProgramOp(op);
         }
         else if (firstArgType.getName().equals("Char_Str")) {
             result = convertCharStrProgramOp(op);
+        }
+        return result;
+    }
+
+    public static BuiltInOpAttributes convertCharacterProgramOp(Token op) {
+        BuiltInOpAttributes result = new BuiltInOpAttributes(op);
+        switch (op.getText()) {
+            case "=":
+                result = new BuiltInOpAttributes("Std_Chars", op, "=");
+                break;
+            case "/=":
+                result = new BuiltInOpAttributes("Std_Chars", op, "/=");
+                break;
         }
         return result;
     }
@@ -49,17 +65,13 @@ public class StdTemplateProgOps {
         return result;
     }
 
-    public static BuiltInOpAttributes convertIntegerProgramOp(Token op, int argCount) {
+    public static BuiltInOpAttributes convertIntegerProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
         switch (op.getText()) {
             case "+":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Sum");
                 break;
             case "-":
-                if (argCount == 1) {
-                    result = new BuiltInOpAttributes("Std_Ints", op, "Negate");
-                    break;
-                }
                 result = new BuiltInOpAttributes("Std_Ints", op, "Difference");
                 break;
             case "*":
@@ -85,9 +97,6 @@ public class StdTemplateProgOps {
                 break;
             case "/=":
                 result = new BuiltInOpAttributes("Std_Ints", op, "Are_Not_Equal");
-                break;
-            case "%":
-                result = new BuiltInOpAttributes("Std_Ints", op, "Mod");
                 break;
         }
         return result;
