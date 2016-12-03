@@ -1,0 +1,23 @@
+Concept Character_Template;
+    uses Natural_Number_Theory, Standard_Booleans, 
+         Standard_Integers;
+
+    Definition Last_Char_Num : ℕ;
+
+    Type family Character is modeled by ℕ;
+        exemplar c;
+        constraints c ≤ Last_Char_Num;
+        initialization
+                ensures c = 0;
+
+    Operation Are_Equal (evaluates a, b : Character) : Boolean;
+        ensures Are_Equal = (a = b);
+
+    Operation Are_Not_Equal (evaluates a, b : Character) : Boolean;
+        ensures Are_Not_Equal = (a ≠ b);
+
+    Operation Write (evaluates a : Character);
+
+    Operation Write_Line (evaluates a : Character);
+
+end Character_Template;
