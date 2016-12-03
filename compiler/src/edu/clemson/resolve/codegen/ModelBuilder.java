@@ -613,6 +613,10 @@ public class ModelBuilder extends ResolveBaseListener {
                 } catch (Exception e1) {
                     return new NormalQualifier(refQualifier.getText());
                 }
+                //sure it was qualified in resolve, but if its not visible in java, handle
+                if (isLocallyAccessibleSymbol(s)) {
+                    return new NormalQualifier("this");
+                }
                 String qual = s.getModuleIdentifier().getPathRelativeToRootDir().toString();
                 if (qual.lastIndexOf(".") != -1) qual = qual.substring(0, qual.lastIndexOf(".")); //strip ext
                 return new NormalQualifier(qual.replaceAll(File.separator, "."));
