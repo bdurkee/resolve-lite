@@ -137,6 +137,7 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "El", g.EL));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "Empty_Set", g.EMPTY_SET));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "ϕ", g.EMPTY_SET));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "and", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∧", g.BOOLEAN_FUNCTION));
@@ -156,6 +157,9 @@ public class MathSymbolTable {
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∈",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
+
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∪",
+                    new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "is_not_in",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
@@ -183,7 +187,7 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "≠",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
         } catch (DuplicateSymbolException e) {
-            throw new RuntimeException("duplicate builtin symbol");
+            throw new RuntimeException("duplicate builtin symbol: " + e.getOffendingSymbol().getName());
         }
     }
 

@@ -43,9 +43,7 @@ public class PExpTextRenderingListener extends PExpListener {
     public void endInfixPApply(@NotNull PApply e) {
         ST s = g.getInstanceOf("InfixPApply");
         PExp left = e.getArguments().get(0);
-        //if (!(left.toString().length() <= lineWidth - 3))
         s.add("left", nodes.get(left));
-        //if (e.toString()
         s.add("operator", nodes.get(e.getFunctionPortion()));
         s.add("right", nodes.get(e.getArguments().get(1)));
         nodes.put(e, s);

@@ -355,7 +355,7 @@ mathMixfixDefnSig
     ;
 
 mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
-mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⎡'|'⎤'|'⎝'|'⎠'|'['|']') ;
+mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'['|']') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs

@@ -10,21 +10,26 @@ Precis String_Theory;
 				SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr is
 		Is_String_Former(SStr, Λ, ext);
 
-	/* String concatenation */
+	/* String Concatenation */
 	Inductive Definition (β : SStr) ∘ (α : SStr) : SStr is
         (i.)  α ∘ Λ = α;
         (ii.) ∀ x : El, α ∘ ext(β, x) = ext(α ∘ β, x);
 
-    /* String length */
+    /* String Length */
 	Inductive Definition |(x : SStr)| : ℕ is
 	    (i.)  |Λ| = 0;
-	    (ii.) ∀ α : SStr, |ext(α, x)| = suc(|α|);
+	    (ii.) ∀ α : SStr,
+	      |ext(α, x)| = suc(|α|);
 
-    Corollary SL1: ∀ α, β : SStr, |α ∘ β| = (|α| + |β|);
-
-    Definition ⟨(x : El)⟩ : SStr;
+    /* Singleton String */
+    Definition ⟨(x : El)⟩ : SStr is ext(Λ, x);
 
     Definition Iterated_Concatenation(m : ℕ, n : ℕ, F : ℕ ⟶ SSet) : SStr;
+        Corollary SL1: ∀ α, β : SStr, |α ∘ β| = (|α| + |β|);
 
-    Definition Reverse(s : SStr) : SStr;
+    /* String Reversal */
+    Inductive Definition Reverse(α : SStr) : SStr is
+        (i.)  Reverse(Λ) = Λ;
+        (ii.) ∀ x : El, ext(α, x) = ⟨x⟩ ∘ Reverse(α);
+
 end String_Theory;

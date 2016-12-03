@@ -38,12 +38,7 @@ public class PApply extends PExp {
         PREFIX {
             @Override
             protected String toString(PApply s, boolean parenthesizeApps) {
-                if (s.isBracketBasedApp) {
-                    return s.arguments.get(0) + "[" + s.arguments.get(1) + "]";
-                }
-                else {
-                    return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
-                }
+                return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
             }
 
             @Override
@@ -77,16 +72,15 @@ public class PApply extends PExp {
                 v.endInfixPApply(s);
             }
         },
-        /** Postfix style applications where the operator proceeds its argumemts: {@code x y F} */
-        POSTFIX {
+        /** Mixfix style applications where the operator proceeds its argumemts: {@code F *lname* x, y *rname*} */
+        MIXFIX {
             @Override
             protected String toString(PApply s, boolean parenthesizeApps) {
-                String retval = Utils.join(s.arguments, ", ");
-
-                if (s.arguments.size() > 1) {
-                    retval = "(" + retval + ")";
-                }
-                return retval + s.functionPortion.getTopLevelOperationName();
+                PSymbol functionPortion = (PSymbol) s.getFunctionPortion();
+                //seems risky, but the parser guarantees there will be at least 2 arguments.
+                return s.getArguments().get(0) + functionPortion.getLeftPrint()
+                        + pexpJoin(s.getArguments().subList(1, s.getArguments().size()), parenthesizeApps)
+                        + functionPortion.getRightPrint();
             }
 
             @Override

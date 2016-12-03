@@ -200,6 +200,12 @@ public class TestPExp extends BaseTest {
     }
 
     @Test
+    public void testMixfix() {
+        PExp result = parseMathAssertionExp(g, "M[x]");
+        Assert.assertEquals("M[x]", result.toString());
+    }
+
+    @Test
     public void testWithQuantifiersFlipped1() {
         PExp result = parseMathAssertionExp(g, "Forall x : Z, x = y");
         Iterator<? extends PExp> exps = result.getSubExpressions().iterator();

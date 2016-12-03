@@ -198,16 +198,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
     }
-/*
+
     @Override
-    public void exitMathBracketAppExp(ResolveParser.MathBracketAppExpContext ctx) {
+    public void exitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
+        PSymbol namePortion = new PSymbolBuilder(ctx.mathBracketOp(0).getText(), ctx.mathBracketOp(1).getText())
+                .mathClssfctn(new MathFunctionClssftn(g, g.INVALID, g.INVALID, g.INVALID)) //temp;
+                .build();
         PApplyBuilder result =
-                new PApplyBuilder((PSymbol) repo.get(ctx.mathSqBrOpExp()))
+                new PApplyBuilder(namePortion)
                         .applicationType(getMathClssfctn(ctx))
-                        .style(PREFIX, true)
+                        .style(PApply.DisplayStyle.MIXFIX, true)
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
-    }*/
+    }
 
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
