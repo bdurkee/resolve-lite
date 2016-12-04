@@ -202,7 +202,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 boolean walkingModuleParamList =
                         Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleParameterListContext.class,
                                 ResolveParser.ImplModuleParameterListContext.class) != null;
-                if (walkingModuleParamList) {
+                boolean walkingOperationDecl =
+                        Utils.getFirstAncestorOfType(ctx, ResolveParser.OperationDeclContext.class) != null;
+                if (walkingModuleParamList && !walkingOperationDecl) {
                     symtab.getInnermostActiveScope().define(new ModuleParameterSymbol(p));
                 }
                 else {
@@ -252,6 +254,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitOperationDecl(ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
+
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
         if (ctx.type() != null) {
             this.visit(ctx.type());
@@ -274,7 +277,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
         if (ctx.alt != null) {
             //sugared name support
-            insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+            //insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
         }
         return null;
     }
@@ -378,11 +381,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             PExp ensuresExp = g.getTrueExp();
             if (requires != null) requiresExp = getPExpFor(requires.mathAssertionExp());
             if (ensures != null) ensuresExp = getPExpFor(ensures.mathAssertionExp());
-            //TODO: this will need to be wrapped in a ModuleParameterSymbol
-            //if we're walking a specmodule param list
-            symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, requiresExp,
-                            ensuresExp, returnType, getRootModuleIdentifier(), params));
+
+            OperationSymbol s = new OperationSymbol(name.getText(), ctx, requiresExp,
+                    ensuresExp, returnType, getRootModuleIdentifier(), params);
+            boolean walkingModuleParamList =
+                    Utils.getFirstAncestorOfType(ctx, //concept enhancement realiz.class here too
+                            ResolveParser.ImplModuleParameterListContext.class) != null;
+            if (walkingModuleParamList) {
+                symtab.getInnermostActiveScope().define(new ModuleParameterSymbol(s));
+            }
+            else {
+                symtab.getInnermostActiveScope().define(s);
+            }
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name, name.getText());
         }

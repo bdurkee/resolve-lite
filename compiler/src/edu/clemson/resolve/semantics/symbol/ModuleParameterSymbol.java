@@ -27,6 +27,10 @@ public class ModuleParameterSymbol extends Symbol {
         this.wrappedParamSymbol = symbol;
     }
 
+    public ModuleParameterSymbol(OperationSymbol o) {
+        this(o, o.getName(), o.definingTree, o.getModuleIdentifier());
+    }
+
     public ModuleParameterSymbol(ProgParameterSymbol p) {
         this(p, p.getName(), p.definingTree, p.getModuleIdentifier());
     }
@@ -84,30 +88,32 @@ public class ModuleParameterSymbol extends Symbol {
      */
     @NotNull
     @Override
-    public MathClssftnWrappingSymbol toMathSymbol()
-            throws UnexpectedSymbolException {
+    public MathClssftnWrappingSymbol toMathSymbol() throws UnexpectedSymbolException {
         return wrappedParamSymbol.toMathSymbol();
     }
 
     @NotNull
     @Override
-    public ProgVariableSymbol toProgVariableSymbol()
-            throws UnexpectedSymbolException {
+    public ProgVariableSymbol toProgVariableSymbol() throws UnexpectedSymbolException {
         return wrappedParamSymbol.toProgVariableSymbol();
     }
 
     @NotNull
     @Override
-    public ProgParameterSymbol toProgParameterSymbol()
-            throws UnexpectedSymbolException {
+    public ProgParameterSymbol toProgParameterSymbol() throws UnexpectedSymbolException {
         return wrappedParamSymbol.toProgParameterSymbol();
     }
 
     @NotNull
     @Override
-    public ProgTypeSymbol toProgTypeSymbol()
-            throws UnexpectedSymbolException {
+    public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
         return wrappedParamSymbol.toProgTypeSymbol();
+    }
+
+    @NotNull
+    @Override
+    public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
+        return wrappedParamSymbol.toOperationSymbol();
     }
 
     @NotNull

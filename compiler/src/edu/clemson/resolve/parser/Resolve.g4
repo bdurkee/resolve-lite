@@ -175,7 +175,7 @@ specModuleParameterDecl
 
 implModuleParameterDecl
     :   parameterDeclGroup
-   // |   operationDecl
+    |   operationDecl
     ;
 
 parameterDeclGroup

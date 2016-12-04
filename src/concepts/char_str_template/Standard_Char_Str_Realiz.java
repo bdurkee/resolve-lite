@@ -43,7 +43,7 @@ public class Standard_Char_Str_Realiz extends RESOLVEBase implements Char_Str_Te
 
     public RType initChar_Str(String ... e) {
         if (e.length >= 1) {
-            return e[0];
+            return new Char_Str(e[0]);
         }
         else {
             return new Char_Str();
@@ -58,7 +58,7 @@ public class Standard_Char_Str_Realiz extends RESOLVEBase implements Char_Str_Te
     }
     
     @Override
-    public RType Are_Not_Equal(RType i1, RType i2) {
+    public RType Are_Not_Equal(RType s1, RType s2) {
         String js1 = ((Char_Str)s1).val;
         String js2 = ((Char_Str)s2).val;
         return Standard_Booleans.Std_Bools.initBoolean(!js1.equals(js2));
@@ -72,7 +72,7 @@ public class Standard_Char_Str_Realiz extends RESOLVEBase implements Char_Str_Te
     }
     
     @Override
-    public void Write(RType i) {
+    public void Write(RType s) {
         System.out.print(((Char_Str) s).val);
     }
     
