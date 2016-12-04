@@ -1,6 +1,0 @@
-Facility Standard_Characters;
-
-    Facility Std_Chars is Character_Template
-        externally
-            realized by Standard_Character_Realiz;
-end Standard_Characters;

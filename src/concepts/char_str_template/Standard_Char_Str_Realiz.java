@@ -1,4 +1,4 @@
-package concepts.chr_str_template;
+package concepts.char_str_template;
 
 import edu.clemson.resolve.runtime.RESOLVEBase;
 import edu.clemson.resolve.runtime.RType;
@@ -9,9 +9,9 @@ import java.util.Scanner;
 import java.lang.reflect.*;
 import edu.clemson.resolve.runtime.*;
 
-public class Standard_Char_Str_Realiz extends RESOLVEBase implements Character_Template {
+public class Standard_Char_Str_Realiz extends RESOLVEBase implements Char_Str_Template {
 
-    public class Char_Str implements Character_Template.Character {
+    public class Char_Str implements Char_Str_Template.Char_Str {
         public String val;
         
         Char_Str() {

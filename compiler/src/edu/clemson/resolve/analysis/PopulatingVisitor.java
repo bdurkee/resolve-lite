@@ -829,10 +829,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return typeProgLiteralExp(ctx, "Std_Ints", "Integer");
     }
 
-    @Override
+    /*@Override
     public Void visitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Chars", "Character");
-    }
+    }*/
 
     @Override
     public Void visitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {

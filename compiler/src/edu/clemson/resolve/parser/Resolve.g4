@@ -308,7 +308,7 @@ progSymbolName
 progLiteralExp
     :   BOOL                #progBooleanLiteralExp
     |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
+  //  |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 

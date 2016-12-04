@@ -387,11 +387,11 @@ public class ModelBuilder extends ResolveBaseListener {
                 ctx.getText()), "Integer", ctx.getText()));
     }
 
-    @Override
+    /*@Override
     public void exitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
         built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Chars"),
                 ctx.getText()), "Character", ctx.getText()));
-    }
+    }*/
 
     @Override
     public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
