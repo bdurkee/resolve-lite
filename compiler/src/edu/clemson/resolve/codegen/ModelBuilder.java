@@ -393,11 +393,11 @@ public class ModelBuilder extends ResolveBaseListener {
                 ctx.getText()), "Character", ctx.getText()));
     }
 
-    /*@Override
+    @Override
     public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier(
-                "concepts.char_str_template.Char_Str_Template", "Std_Char_Strs"), "Char_Str", ctx.getText()));
-    }*/
+        built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Strs"),
+                ctx.getText()), "Char_Str", ctx.getText()));
+    }
 
     @Override
     public void exitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {

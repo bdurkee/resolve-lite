@@ -834,11 +834,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return typeProgLiteralExp(ctx, "Std_Chars", "Character");
     }
 
-    /*@Override
-    public Void visitProgStringLiteralExp(
-            ResolveParser.ProgStringLiteralExpContext ctx) {
-        return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
-    }*/
+    @Override
+    public Void visitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Strs", "Char_Str");
+    }
 
     private Void typeProgLiteralExp(ParserRuleContext ctx, String typeQualifier, String typeName) {
         ProgTypeSymbol p = getProgTypeSymbol(ctx, typeQualifier, typeName);

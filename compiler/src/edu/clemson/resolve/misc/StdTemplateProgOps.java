@@ -57,11 +57,14 @@ public class StdTemplateProgOps {
 
     public static BuiltInOpAttributes convertCharStrProgramOp(Token op) {
         BuiltInOpAttributes result = new BuiltInOpAttributes(op);
-       /* switch (op.getType()) {
-            case ResolveLexer.PLUSPLUS:
-                result = new BuiltInOpAttributes("Std_Char_Str_Fac", op, "Merger");
+        switch (op.getText()) {
+            case "=":
+                result = new BuiltInOpAttributes("Std_Strs", op, "=");
                 break;
-        }*/
+            case "/=":
+                result = new BuiltInOpAttributes("Std_Strs", op, "/=");
+                break;
+        }
         return result;
     }
 
