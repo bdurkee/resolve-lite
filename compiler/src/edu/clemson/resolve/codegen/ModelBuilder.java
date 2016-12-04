@@ -26,6 +26,7 @@ import edu.clemson.resolve.semantics.symbol.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
 
@@ -411,9 +412,13 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
         try {
+            //because we only care about programmatic stuff, we filter out ModuleParameterSymbols from the
+            //concept that are mathematical functions, definitions, predicates, etc.
             allParamsFromSpecAndImpl =
                     symtab.getModuleScope(moduleScope.getImportWithName(ctx.concept))
-                            .getSymbolsOfType(ModuleParameterSymbol.class);
+                            .getSymbolsOfType(ModuleParameterSymbol.class).stream()
+                            .filter(p -> !(p.getWrappedParamSymbol() instanceof MathClssftnWrappingSymbol))
+                            .collect(Collectors.toList());
             allParamsFromSpecAndImpl.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allParamsFromSpecAndImpl);
         } catch (NoSuchModuleException e) { //shouldn't happen

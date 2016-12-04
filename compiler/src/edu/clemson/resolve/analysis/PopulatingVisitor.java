@@ -1078,6 +1078,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ParserRuleContext defnTopLevel =
                 Utils.getFirstAncestorOfType(ctx, ResolveParser.MathStandardDefnDeclContext.class);
         boolean chainableOperator = false;
+        boolean walkingModuleParamList =
+                Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleParameterListContext.class,
+                        ResolveParser.ImplModuleParameterListContext.class) != null;
         if (defnTopLevel != null) {
             chainableOperator = ((ResolveParser.MathStandardDefnDeclContext)defnTopLevel).chainable != null;
         }
@@ -1108,19 +1111,37 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 for (Token t : names) {
                     MathClssftn asNamed = new MathNamedClssftn(g, t.getText(), newTypeDepth, defnType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator));
+                    MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator);
+                    if (walkingModuleParamList) {
+                        defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                    }
+                    else {
+                        defnEnclosingScope.define(x);
+                    }
                 }
             }
             else {
                 for (Token t : names) {
                     defnType = new MathNamedClssftn(g, t.getText(), newTypeDepth, colonRhsType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator));
+                    MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator);
+                    if (walkingModuleParamList) {
+                        defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                    }
+                    else {
+                        defnEnclosingScope.define(x);
+                    }
                 }
             }
         }
         else {
             for (Token t : names) {
-                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator));
+                MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator);
+                if (walkingModuleParamList) {
+                    defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                }
+                else {
+                    defnEnclosingScope.define(x);
+                }
             }
         }
     }

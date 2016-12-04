@@ -180,10 +180,6 @@ public class VCGen extends ResolveBaseListener {
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-
-        List<ProgType> specArsgs = ctx.specArgs.progExp().stream()
-                .map(e -> tr.progTypes.get(e))
-                .collect(Collectors.toList());
         List<PExp> specArgs = ctx.specArgs.progExp().stream()
                 .map(e -> tr.exprASTs.get(e))
                 .collect(Collectors.toList());
@@ -192,6 +188,8 @@ public class VCGen extends ResolveBaseListener {
         List<PExp> formalSpecArgs = spec.getSymbolsOfType(ModuleParameterSymbol.class).stream()
                 .map(ModuleParameterSymbol::asPSymbol)
                 .collect(Collectors.toList());
+
+        //TODO: ModuleParamSymbols that are MathClssftnWrappingSymbols need asPSymbol implemented (I think..)
         Map<PExp, PExp> specFormalsToActuals = Utils.zip(formalSpecArgs, reducedSpecArgs);
         facilitySpecFormalActualMappings.put(ctx.name.getText(), specFormalsToActuals);
 
