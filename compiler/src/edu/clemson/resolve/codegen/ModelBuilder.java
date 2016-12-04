@@ -324,9 +324,9 @@ public class ModelBuilder extends ResolveBaseListener {
         if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
-                built.put(ctx, createFacilityArgumentModel(ctx));   //ok, if the above conditions are true, we're
-                //just a name or a variable (as opposed to some larger expression)
-            built.put(ctx, createFacilityArgumentModel(ctx));
+            OutputModelObject o = createFacilityArgumentModel(ctx);
+            //will be null in the case of a defn.
+            if (o != null) built.put(ctx, o);
         }
         else {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
@@ -347,7 +347,7 @@ public class ModelBuilder extends ResolveBaseListener {
      * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
      * for that argument.
      */
-    @NotNull
+    @Nullable
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;
         try {
@@ -362,6 +362,9 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
                 result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getText()), ctx.name.getText(), "");
+            }
+            else if (s instanceof MathClssftnWrappingSymbol) {
+                return null;    //don't handle math syms
             }
             else {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
@@ -450,11 +453,13 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
         }
-        try {
-            spec.addGettersAndMembersForModuleParameterSyms(moduleScope
-                    .query(new SymbolTypeQuery<>(ModuleParameterSymbol.class)));
-        } catch (NoSuchModuleException | UnexpectedSymbolException e) {
-        }
+        //try {
+            List<ModuleParameterSymbol> paramSyms = moduleScope.getSymbolsOfType(ModuleParameterSymbol.class).stream()
+                    .filter(p -> !(p.getWrappedParamSymbol() instanceof MathClssftnWrappingSymbol))
+                    .collect(Collectors.toList());
+            spec.addGettersAndMembersForModuleParameterSyms(paramSyms);
+        //} catch (NoSuchModuleException | UnexpectedSymbolException e) {
+        //}
         file.module = spec;
         built.put(ctx, file);
     }
