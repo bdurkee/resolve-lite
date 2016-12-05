@@ -42,15 +42,6 @@ public class UsesListener extends ResolveBaseListener {
                 continue;
             }
             ModuleIdentifier e = new ModuleIdentifier(u.ID().getSymbol(), f);
-            if (u.aliasClause() != null) {
-                String alias = u.aliasClause().ID().getText();
-                if (aliases.containsKey(alias)) {
-                    //TODO: error, duplicate alias
-                }
-                else {
-                    aliases.put(alias, e);
-                }
-            }
             uses.add(e);
         }
     }

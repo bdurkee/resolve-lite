@@ -80,9 +80,8 @@ usesSpecs
     :   moduleIdentifierSpec (',' moduleIdentifierSpec)*
     ;
 
-moduleIdentifierSpec : id=ID fromClause? aliasClause? ;
+moduleIdentifierSpec : id=ID fromClause?;
 fromClause : 'from' moduleLibraryIdentifier ;
-aliasClause : 'as' ID ;
 moduleLibraryIdentifier : ID ('.' ID)* ;
 
 // module blocks & items
