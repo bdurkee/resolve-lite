@@ -181,14 +181,14 @@ public class Utils {
         else if (ctx instanceof ResolveParser.ConceptModuleDeclContext) {
             return ((ResolveParser.ConceptModuleDeclContext) ctx).name;
         }
-        else if (ctx instanceof ResolveParser.ConceptImplModuleDeclContext) {
-            return ((ResolveParser.ConceptImplModuleDeclContext) ctx).name;
+        else if (ctx instanceof ResolveParser.ConceptRealizationModuleDeclContext) {
+            return ((ResolveParser.ConceptRealizationModuleDeclContext) ctx).name;
         }
-        else if (ctx instanceof ResolveParser.ConceptExtModuleDeclContext) {
-            return ((ResolveParser.ConceptExtModuleDeclContext) ctx).name;
+        else if (ctx instanceof ResolveParser.EnhancementModuleDeclContext) {
+            return ((ResolveParser.EnhancementModuleDeclContext) ctx).name;
         }
-        else if (ctx instanceof ResolveParser.ConceptExtImplModuleDeclContext) {
-            return ((ResolveParser.ConceptExtImplModuleDeclContext) ctx).name;
+        else if (ctx instanceof ResolveParser.EnhancementRealizationModuleDeclContext) {
+            return ((ResolveParser.EnhancementRealizationModuleDeclContext) ctx).name;
         }
         else if (ctx instanceof ResolveParser.ShortFacilityModuleDeclContext) {
             return ((ResolveParser.ShortFacilityModuleDeclContext) ctx).facilityDecl().name;

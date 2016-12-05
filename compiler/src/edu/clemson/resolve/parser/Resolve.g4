@@ -3,10 +3,10 @@ grammar Resolve;
 moduleDecl
     :   (precisModuleDecl
     |   precisExtModuleDecl
-    |   conceptExtModuleDecl
+    |   enhancementModuleDecl
     |   conceptModuleDecl
-    |   conceptImplModuleDecl
-    |   conceptExtImplModuleDecl
+    |   conceptRealizationModuleDecl
+    |   enhancementRealizationModuleDecl
     |   facilityModuleDecl
     |   shortFacilityModuleDecl) EOF
     ;
@@ -34,7 +34,7 @@ conceptModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptExtModuleDecl
+enhancementModuleDecl
     :   'Enhancement' name=ID specModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
@@ -42,7 +42,7 @@ conceptExtModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptImplModuleDecl
+conceptRealizationModuleDecl
     :   'Realization' name=ID implModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
@@ -50,7 +50,7 @@ conceptImplModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptExtImplModuleDecl
+enhancementRealizationModuleDecl
     :   'Realization' name=ID implModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?

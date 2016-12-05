@@ -404,7 +404,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public void exitConceptRealizationModuleDecl(ResolveParser.ConceptRealizationModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         ConceptImplModule impl = new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
         if (ctx.implBlock() != null) {
@@ -465,7 +465,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
+    public void exitEnhancementModuleDecl(ResolveParser.EnhancementModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         AbstractSpecModule spec = new SpecExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
 
@@ -482,7 +482,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public void exitEnhancementRealizationModuleDecl(ResolveParser.EnhancementRealizationModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         file.genPackage = buildPackage();
 

@@ -125,7 +125,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public Void visitConceptRealizationModuleDecl(ResolveParser.ConceptRealizationModuleDeclContext ctx) {
         try {
             //concept impls implicitly get the uses items of the parent concept
             ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
@@ -141,7 +141,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public Void visitEnhancementRealizationModuleDecl(ResolveParser.EnhancementRealizationModuleDeclContext ctx) {
         try {
             //concept impls implicitly get the uses items of the parent concept
             ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
@@ -163,7 +163,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
+    public Void visitEnhancementModuleDecl(ResolveParser.EnhancementModuleDeclContext ctx) {
         try {
             //concept exts implicitly get the uses items of the parent
             ModuleIdentifier conceptIdent = moduleScope.getImportWithName(ctx.concept);
