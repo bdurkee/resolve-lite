@@ -25,9 +25,6 @@ public abstract class PExpListener {
     public void beginPApply(@NotNull PApply p) {
     }
 
-    public void fencepostPApply(@NotNull PApply p) {
-    }
-
     public void endPApply(@NotNull PApply p) {
     }
 
@@ -35,17 +32,11 @@ public abstract class PExpListener {
     public void beginPrefixPApply(@NotNull PApply p) {
     }
 
-    public void fencepostPrefixPApply(@NotNull PApply p) {
-    }
-
     public void endPrefixPApply(@NotNull PApply p) {
     }
 
     // InfixPApply
     public void beginInfixPApply(@NotNull PApply p) {
-    }
-
-    public void fencepostInfixPApply(@NotNull PApply p) {
     }
 
     public void endInfixPApply(@NotNull PApply p) {
@@ -96,9 +87,6 @@ public abstract class PExpListener {
     public void beginPAlternatives(@NotNull PAlternatives p) {
     }
 
-    public void fencepostPAlternatives(@NotNull PAlternatives p) {
-    }
-
     public void endPAlternatives(@NotNull PAlternatives p) {
     }
 
@@ -111,9 +99,6 @@ public abstract class PExpListener {
 
     //PSet
     public void beginPSet(@NotNull PSet p) {
-    }
-
-    public void fencepostPSet(@NotNull PSet p) {
     }
 
     public void endPSet(@NotNull PSet p) {

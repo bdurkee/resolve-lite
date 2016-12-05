@@ -26,7 +26,8 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 VCGen gen = new VCGen(compiler, unit);
                 ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
                 VCOutputFile x = gen.getOutputFile();
-                System.out.println(x);
+                //System.out.println(x.toString(35));
+                unit.setVCs(x);
 
                 //List<VC> proverInput = vco.getFinalVCs();
                 //VCClassftnPrintingListener p = new VCClassftnPrintingListener(compiler);
@@ -36,19 +37,16 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 }*/
                 //List<VC> pvcs = new ArrayList<>();
                 //pvcs.add(vco.getFinalVCs().get(0));
-                if (compiler.prove) {
-                   /* CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
+                /*if (compiler.prove) {
+                    CongruenceClassProver prover = new CongruenceClassProver(compiler, unit,
                             compiler.symbolTable.getTypeGraph(), vco.getFinalVCs());
                     try {
                         prover.start();
                     }
                     catch (IOException ioe) {
                         throw new RuntimeException(ioe);
-                    }*/
-                }
-
-                int i;
-                i=0;
+                    }
+                }*/
             }
         }
     }

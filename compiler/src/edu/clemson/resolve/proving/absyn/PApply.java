@@ -38,22 +38,12 @@ public class PApply extends PExp {
         PREFIX {
             @Override
             protected String toString(PApply s, boolean parenthesizeApps) {
-                if (s.isBracketBasedApp) {
-                    return s.arguments.get(0) + "[" + s.arguments.get(1) + "]";
-                }
-                else {
-                    return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
-                }
+                return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
             }
 
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPrefixPApply(s);
-            }
-
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPrefixPApply(s);
             }
 
             @Override
@@ -78,25 +68,19 @@ public class PApply extends PExp {
             }
 
             @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostInfixPApply(s);
-            }
-
-            @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endInfixPApply(s);
             }
         },
-        /** Postfix style applications where the operator proceeds its argumemts: {@code x y F} */
-        POSTFIX {
+        /** Mixfix style applications where the operator proceeds its argumemts: {@code F *lname* x, y *rname*} */
+        MIXFIX {
             @Override
             protected String toString(PApply s, boolean parenthesizeApps) {
-                String retval = Utils.join(s.arguments, ", ");
-
-                if (s.arguments.size() > 1) {
-                    retval = "(" + retval + ")";
-                }
-                return retval + s.functionPortion.getTopLevelOperationName();
+                PSymbol functionPortion = (PSymbol) s.getFunctionPortion();
+                //seems risky, but the parser guarantees there will be at least 2 arguments.
+                return s.getArguments().get(0) + functionPortion.getLeftPrint()
+                        + pexpJoin(s.getArguments().subList(1, s.getArguments().size()), parenthesizeApps)
+                        + functionPortion.getRightPrint();
             }
 
             @Override
@@ -104,10 +88,10 @@ public class PApply extends PExp {
                 v.beginPostfixPApply(s);
             }
 
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPostfixPApply(s);
-            }
+            //@Override
+            //protected void fencepostAccept(PExpListener v, PApply s) {
+            //    v.fencepostPostfixPApply(s);
+            //}
 
             @Override
             protected void endAccept(PExpListener v, PApply s) {
@@ -132,11 +116,6 @@ public class PApply extends PExp {
             }
 
             @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostOutfixPApply(s);
-            }
-
-            @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endOutfixPApply(s);
             }
@@ -154,7 +133,7 @@ public class PApply extends PExp {
         protected abstract void beginAccept(PExpListener v, PApply s);
 
         /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
-        protected abstract void fencepostAccept(PExpListener v, PApply s);
+        //protected abstract void fencepostAccept(PExpListener v, PApply s);
 
         /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);
@@ -396,13 +375,8 @@ public class PApply extends PExp {
 
         v.beginChildren(this);
         functionPortion.accept(v);
-        boolean first = true;
+
         for (PExp arg : arguments) {
-            if (!first) {
-                displayStyle.fencepostAccept(v, this);
-                v.fencepostPApply(this);
-            }
-            first = false;
             arg.accept(v);
         }
         v.endChildren(this);
@@ -468,6 +442,10 @@ public class PApply extends PExp {
         return displayStyle.toString(this, parenthesizeApplications);
     }
 
+    @Override
+    public String render() {
+        return super.render();
+    }
     @NotNull
     protected static String pexpJoin(@NotNull Collection<PExp> exps, boolean parenthesizeApplications) {
         String result = "";

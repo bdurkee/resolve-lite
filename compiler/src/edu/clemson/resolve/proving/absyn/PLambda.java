@@ -231,6 +231,6 @@ public class PLambda extends PExp {
 
     @Override
     public String toString() {
-        return "λ " + parameters.get(0) + "," + body;
+        return "λ " + parameters.get(0) + ", " + body;
     }
 }

@@ -2,5 +2,5 @@ Facility Standard_Booleans;
         uses Boolean_Template;
     Facility Std_Bools is Boolean_Template
         externally
-            realized by Standard_Boolean_Impl;
+            realized by Standard_Boolean_Realiz;
 end Standard_Booleans;

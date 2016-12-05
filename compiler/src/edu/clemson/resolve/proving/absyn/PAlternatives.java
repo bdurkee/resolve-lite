@@ -4,6 +4,9 @@ import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.MathClssftn;
 import org.jetbrains.annotations.Nullable;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupString;
 
 import java.util.*;
 import java.util.function.Function;
@@ -43,6 +46,15 @@ public class PAlternatives extends PExp {
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
 
+    @NotNull
+    public PExp getOtherwiseClauseResult() {
+        return otherwiseClauseResult;
+    }
+
+    public List<Alternative> getAlternatives() {
+        return alternatives;
+    }
+
     @Override
     public PExp withPrimeMarkAdded() {
         return this;
@@ -53,16 +65,10 @@ public class PAlternatives extends PExp {
         v.beginPAlternatives(this);
         v.beginChildren(this);
 
-        boolean first = true;
         for (Alternative alt : alternatives) {
-            if (!first) {
-                v.fencepostPAlternatives(this);
-            }
-            first = false;
             alt.result.accept(v);
             alt.condition.accept(v);
         }
-        v.fencepostPAlternatives(this);
         otherwiseClauseResult.accept(v);
         v.endChildren(this);
         v.endPAlternatives(this);
@@ -306,7 +312,7 @@ public class PAlternatives extends PExp {
         }
     }
 
-    private static class Alternative {
+    protected static class Alternative {
         public final PExp condition, result;
 
         public Alternative(PExp condition, PExp result) {

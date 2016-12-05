@@ -26,6 +26,7 @@ import edu.clemson.resolve.semantics.symbol.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ModelBuilder extends ResolveBaseListener {
 
@@ -323,9 +324,9 @@ public class ModelBuilder extends ResolveBaseListener {
         if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
-                built.put(ctx, createFacilityArgumentModel(ctx));   //ok, if the above conditions are true, we're
-                //just a name or a variable (as opposed to some larger expression)
-            built.put(ctx, createFacilityArgumentModel(ctx));
+            OutputModelObject o = createFacilityArgumentModel(ctx);
+            //will be null in the case of a defn.
+            if (o != null) built.put(ctx, o);
         }
         else {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
@@ -346,7 +347,7 @@ public class ModelBuilder extends ResolveBaseListener {
      * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
      * for that argument.
      */
-    @NotNull
+    @Nullable
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;
         try {
@@ -361,6 +362,9 @@ public class ModelBuilder extends ResolveBaseListener {
             }
             else if (s instanceof ProgTypeSymbol || s instanceof ProgReprTypeSymbol) {
                 result = new TypeInit(buildQualifier(ctx.qualifier, ctx.name.getText()), ctx.name.getText(), "");
+            }
+            else if (s instanceof MathClssftnWrappingSymbol) {
+                return null;    //don't handle math syms
             }
             else {
                 result = new VarNameRef(new NormalQualifier("this"), ctx.name.getText());
@@ -387,16 +391,16 @@ public class ModelBuilder extends ResolveBaseListener {
                 ctx.getText()), "Integer", ctx.getText()));
     }
 
-    @Override
+    /*@Override
     public void exitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier(
-                "concepts.char_template.Char_Template", "Std_Chars"), "Character", ctx.getText()));
-    }
+        built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Chars"),
+                ctx.getText()), "Character", ctx.getText()));
+    }*/
 
     @Override
     public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
-        built.put(ctx, new TypeInit(new FacilityQualifier(
-                "concepts.char_str_template.Char_Str_Template", "Std_Char_Strs"), "Char_Str", ctx.getText()));
+        built.put(ctx, new TypeInit(buildQualifier(Utils.createTokenFrom(ctx.getStart(), "Std_Strs"),
+                ctx.getText()), "Char_Str", ctx.getText()));
     }
 
     @Override
@@ -411,9 +415,13 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         List<ModuleParameterSymbol> allParamsFromSpecAndImpl = null;
         try {
+            //because we only care about programmatic stuff, we filter out ModuleParameterSymbols from the
+            //concept that are mathematical functions, definitions, predicates, etc.
             allParamsFromSpecAndImpl =
                     symtab.getModuleScope(moduleScope.getImportWithName(ctx.concept))
-                            .getSymbolsOfType(ModuleParameterSymbol.class);
+                            .getSymbolsOfType(ModuleParameterSymbol.class).stream()
+                            .filter(p -> !(p.getWrappedParamSymbol() instanceof MathClssftnWrappingSymbol))
+                            .collect(Collectors.toList());
             allParamsFromSpecAndImpl.addAll(moduleScope.getSymbolsOfType(ModuleParameterSymbol.class));
             impl.addGettersAndMembersForModuleParameterSyms(allParamsFromSpecAndImpl);
         } catch (NoSuchModuleException e) { //shouldn't happen
@@ -445,11 +453,13 @@ public class ModelBuilder extends ResolveBaseListener {
             spec.types.addAll(Utils.collect(TypeInterfaceDef.class, ctx.conceptBlock().typeModelDecl(), built));
             spec.funcs.addAll(Utils.collect(FunctionDef.class, ctx.conceptBlock().operationDecl(), built));
         }
-        try {
-            spec.addGettersAndMembersForModuleParameterSyms(moduleScope
-                    .query(new SymbolTypeQuery<>(ModuleParameterSymbol.class)));
-        } catch (NoSuchModuleException | UnexpectedSymbolException e) {
-        }
+        //try {
+            List<ModuleParameterSymbol> paramSyms = moduleScope.getSymbolsOfType(ModuleParameterSymbol.class).stream()
+                    .filter(p -> !(p.getWrappedParamSymbol() instanceof MathClssftnWrappingSymbol))
+                    .collect(Collectors.toList());
+            spec.addGettersAndMembersForModuleParameterSyms(paramSyms);
+        //} catch (NoSuchModuleException | UnexpectedSymbolException e) {
+        //}
         file.module = spec;
         built.put(ctx, file);
     }
@@ -612,6 +622,10 @@ public class ModelBuilder extends ResolveBaseListener {
                     s = moduleScope.queryForOne(new NameQuery(refQualifier, refName, true));
                 } catch (Exception e1) {
                     return new NormalQualifier(refQualifier.getText());
+                }
+                //sure it was qualified in resolve, but if its not visible in java, handle
+                if (isLocallyAccessibleSymbol(s)) {
+                    return new NormalQualifier("this");
                 }
                 String qual = s.getModuleIdentifier().getPathRelativeToRootDir().toString();
                 if (qual.lastIndexOf(".") != -1) qual = qual.substring(0, qual.lastIndexOf(".")); //strip ext

@@ -10,6 +10,7 @@ import edu.clemson.resolve.proving.absyn.PApply.PApplyBuilder;
 import edu.clemson.resolve.proving.absyn.PSymbol.PSymbolBuilder;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -197,16 +198,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .arguments(repo.get(ctx.mathExp()));
         repo.put(ctx, result.build());
     }
-/*
+
     @Override
-    public void exitMathBracketAppExp(ResolveParser.MathBracketAppExpContext ctx) {
+    public void exitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
+        PSymbol namePortion = new PSymbolBuilder(ctx.mathBracketOp(0).getText(), ctx.mathBracketOp(1).getText())
+                .mathClssfctn(new MathFunctionClssftn(g, g.INVALID, g.INVALID, g.INVALID)) //temp;
+                .build();
         PApplyBuilder result =
-                new PApplyBuilder((PSymbol) repo.get(ctx.mathSqBrOpExp()))
+                new PApplyBuilder(namePortion)
                         .applicationType(getMathClssfctn(ctx))
-                        .style(PREFIX, true)
+                        .style(PApply.DisplayStyle.MIXFIX, true)
                         .arguments(Utils.collect(PExp.class, ctx.mathExp(), repo));
         repo.put(ctx, result.build());
-    }*/
+    }
 
     @Override
     public void exitMathSymbolExp(ResolveParser.MathSymbolExpContext ctx) {
@@ -225,10 +229,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitMathLambdaExp(ResolveParser.MathLambdaExpContext ctx) {
+        MathClssftn varClssftn = getMathClssfctn(ctx);
+        if (varClssftn instanceof MathFunctionClssftn) {
+            varClssftn = ((MathFunctionClssftn) varClssftn).getDomainType();
+        }
         List<PLambda.MathSymbolDeclaration> parameters = new ArrayList<>();
         PLambda.MathSymbolDeclaration parameter =
-                new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(),
-                        getMathClssfctn(ctx.mathVarDecl().mathClssftnExp().mathExp()));
+                new PLambda.MathSymbolDeclaration(ctx.mathVarDecl().mathSymbolName().getText(), varClssftn);
         parameters.add(parameter);
         repo.put(ctx, new PLambda(parameters, repo.get(ctx.mathExp())));
     }
@@ -239,18 +246,20 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         List<PExp> results = new ArrayList<>();
         PExp otherwiseResult = null;
 
+        MathClssftn altsType = g.INVALID;
+
         for (ResolveParser.MathAlternativeItemExpContext alt : ctx
                 .mathAlternativeItemExp()) {
             if (alt.condition != null) {
                 conditions.add(repo.get(alt.condition));
                 results.add(repo.get(alt.result));
+                altsType = getMathClssfctn(alt.result);
             }
             else {
                 otherwiseResult = repo.get(alt.result);
             }
         }
-        MathClssftn x = getMathClssfctn(ctx);
-        PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, getMathClssfctn(ctx));
+        PAlternatives result = new PAlternatives(conditions, results, otherwiseResult, altsType);
         repo.put(ctx, result);
     }
 
@@ -343,10 +352,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
     }
 
-    @Override
+    /*@Override
     public void exitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
         repo.put(ctx, buildLiteral(ctx.getText(), getMathClssfctn(ctx), annotations.progTypes.get(ctx)));
-    }
+    }*/
 
     @Override
     public void exitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {

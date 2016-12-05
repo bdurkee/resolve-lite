@@ -202,7 +202,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 boolean walkingModuleParamList =
                         Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleParameterListContext.class,
                                 ResolveParser.ImplModuleParameterListContext.class) != null;
-                if (walkingModuleParamList) {
+                boolean walkingOperationDecl =
+                        Utils.getFirstAncestorOfType(ctx, ResolveParser.OperationDeclContext.class) != null;
+                if (walkingModuleParamList && !walkingOperationDecl) {
                     symtab.getInnermostActiveScope().define(new ModuleParameterSymbol(p));
                 }
                 else {
@@ -252,6 +254,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitOperationDecl(ResolveParser.OperationDeclContext ctx) {
         symtab.startScope(ctx);
+
         ctx.operationParameterList().parameterDeclGroup().forEach(this::visit);
         if (ctx.type() != null) {
             this.visit(ctx.type());
@@ -274,7 +277,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
         if (ctx.alt != null) {
             //sugared name support
-            insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+            //insertFunction(ctx.alt.getStart(), ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
         }
         return null;
     }
@@ -378,11 +381,18 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             PExp ensuresExp = g.getTrueExp();
             if (requires != null) requiresExp = getPExpFor(requires.mathAssertionExp());
             if (ensures != null) ensuresExp = getPExpFor(ensures.mathAssertionExp());
-            //TODO: this will need to be wrapped in a ModuleParameterSymbol
-            //if we're walking a specmodule param list
-            symtab.getInnermostActiveScope().define(
-                    new OperationSymbol(name.getText(), ctx, requiresExp,
-                            ensuresExp, returnType, getRootModuleIdentifier(), params));
+
+            OperationSymbol s = new OperationSymbol(name.getText(), ctx, requiresExp,
+                    ensuresExp, returnType, getRootModuleIdentifier(), params);
+            boolean walkingModuleParamList =
+                    Utils.getFirstAncestorOfType(ctx, //concept enhancement realiz.class here too
+                            ResolveParser.ImplModuleParameterListContext.class) != null;
+            if (walkingModuleParamList) {
+                symtab.getInnermostActiveScope().define(new ModuleParameterSymbol(s));
+            }
+            else {
+                symtab.getInnermostActiveScope().define(s);
+            }
         } catch (DuplicateSymbolException dse) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, name, name.getText());
         }
@@ -829,14 +839,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return typeProgLiteralExp(ctx, "Std_Ints", "Integer");
     }
 
-    /*@Override public Void visitProgCharacterLiteralExp(
-            ResolveParser.ProgCharacterLiteralExpContext ctx) {
-        return typeProgLiteralExp(ctx, "Std_Character_Fac", "Character");
-    }
-    @Override public Void visitProgStringLiteralExp(
-            ResolveParser.ProgStringLiteralExpContext ctx) {
-        return typeProgLiteralExp(ctx, "Std_Char_Str_Fac", "Char_Str");
+    /*@Override
+    public Void visitProgCharacterLiteralExp(ResolveParser.ProgCharacterLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Chars", "Character");
     }*/
+
+    @Override
+    public Void visitProgStringLiteralExp(ResolveParser.ProgStringLiteralExpContext ctx) {
+        return typeProgLiteralExp(ctx, "Std_Strs", "Char_Str");
+    }
 
     private Void typeProgLiteralExp(ParserRuleContext ctx, String typeQualifier, String typeName) {
         ProgTypeSymbol p = getProgTypeSymbol(ctx, typeQualifier, typeName);
@@ -1018,7 +1029,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathPostfixDefnSig(ResolveParser.MathPostfixDefnSigContext ctx) {
+    public Void visitMathMixfixDefnSig(ResolveParser.MathMixfixDefnSigContext ctx) {
         try {
             CommonToken name = new CommonToken(ctx.lop.getStart());
             name.setText(ctx.lop.getText() + ".." + ctx.rop.getText());
@@ -1067,6 +1078,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ParserRuleContext defnTopLevel =
                 Utils.getFirstAncestorOfType(ctx, ResolveParser.MathStandardDefnDeclContext.class);
         boolean chainableOperator = false;
+        boolean walkingModuleParamList =
+                Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleParameterListContext.class,
+                        ResolveParser.ImplModuleParameterListContext.class) != null;
         if (defnTopLevel != null) {
             chainableOperator = ((ResolveParser.MathStandardDefnDeclContext)defnTopLevel).chainable != null;
         }
@@ -1097,19 +1111,37 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
                 for (Token t : names) {
                     MathClssftn asNamed = new MathNamedClssftn(g, t.getText(), newTypeDepth, defnType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator));
+                    MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), asNamed, chainableOperator);
+                    if (walkingModuleParamList) {
+                        defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                    }
+                    else {
+                        defnEnclosingScope.define(x);
+                    }
                 }
             }
             else {
                 for (Token t : names) {
                     defnType = new MathNamedClssftn(g, t.getText(), newTypeDepth, colonRhsType);
-                    defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator));
+                    MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), defnType, chainableOperator);
+                    if (walkingModuleParamList) {
+                        defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                    }
+                    else {
+                        defnEnclosingScope.define(x);
+                    }
                 }
             }
         }
         else {
             for (Token t : names) {
-                defnEnclosingScope.define(new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator));
+                MathClssftnWrappingSymbol x = new MathClssftnWrappingSymbol(g, t.getText(), g.INVALID, chainableOperator);
+                if (walkingModuleParamList) {
+                    defnEnclosingScope.define(new ModuleParameterSymbol(x));
+                }
+                else {
+                    defnEnclosingScope.define(x);
+                }
             }
         }
     }
@@ -1350,8 +1382,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
 
-        Token left = ctx.mathSymbolNameNoID(0).getStart();
-        Token right = ctx.mathSymbolNameNoID(1).getStart();
+        Token left = ctx.mathBracketOp(0).getStart();
+        Token right = ctx.mathBracketOp(1).getStart();
 
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());
@@ -1377,8 +1409,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
         dummyNode.name = dummyName;
 
-        Token left = ctx.mathSymbolNameNoID(0).getStart();
-        Token right = ctx.mathSymbolNameNoID(1).getStart();
+        Token left = ctx.mathBracketOp(0).getStart();
+        Token right = ctx.mathBracketOp(1).getStart();
 
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());

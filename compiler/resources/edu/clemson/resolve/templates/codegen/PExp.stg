@@ -1,0 +1,26 @@
+PSymbol(name) ::= "<name>"
+
+InfixPApply(left, right, operator) ::= "<left;wrap=\"\n      \"> <operator; wrap=\"\n      \"> <right;wrap=\"\n      \">"
+
+PrefixPApply(name, args) ::= "<name;wrap>(<args; separator=\", \">)"
+
+OutfixPApply(left, right, arg) ::= "<left><arg><right>"
+
+PLambda(var, type, body) ::= <<
+λ <var> : <type>,
+    <body>
+>>
+
+PSet(elements) ::= "{<elements; separator=\", \">}"
+PSelector(left, right) ::= "<left>.<right>"
+
+PLambdaWithAlts(var, type, body) ::= <<
+λ <var> : <type>,
+    <body>
+>>
+
+PAlternatives(alternatives) ::= <<
+{{<alternatives; wrap, anchor, separator="\n">}}
+>>
+
+Alternative(result, condition) ::= "<result> <if(condition)>if <condition><else>otherwise<endif>;"

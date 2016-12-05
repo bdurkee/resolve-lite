@@ -30,8 +30,9 @@
  */
 package edu.clemson.resolve.runtime;
 
-/** This class is provided to allow non-RESOLVE objects to interact with
- *  RESOLVE objects.
+/**
+ * This class is provided to allow non-RESOLVE objects to interact with
+ * RESOLVE objects.
  */
 public class RTypeWrapper implements RType {
     private Object contents;

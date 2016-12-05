@@ -135,7 +135,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID 'is' type ';'?
+    :   'Type' name=ID '=' type ';'?
         (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -175,7 +175,7 @@ specModuleParameterDecl
 
 implModuleParameterDecl
     :   parameterDeclGroup
-   // |   operationDecl
+    |   operationDecl
     ;
 
 parameterDeclGroup
@@ -284,7 +284,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp name=progSymbolExp progExp              #progInfixExp
-    |   progExp name=progSymbolName                     #progPostfixExp
+//    |   progExp name=progSymbolName                     #progPostfixExp
     ;
 
 progPrimary
@@ -302,13 +302,13 @@ progSymbolExp
     ;
 
 progSymbolName
-    :   (SYM | ID)
+    :   (SYM | ID | '=')
     ;
 
 progLiteralExp
     :   BOOL                #progBooleanLiteralExp
     |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
+  //  |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
@@ -318,7 +318,7 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-//had better be an assertion involving the use of ':' or '⦂'
+//had better be an assertion involving the use of ':' or
 mathClssftnAssertionDecl
     :   'Classification' 'Corollary' ':' mathAssertionExp ';'
     ;
@@ -327,12 +327,12 @@ mathDefnSig
     :   mathPrefixDefnSigs
     |   mathInfixDefnSig
     |   mathOutfixDefnSig
-    |   mathPostfixDefnSig
+    |   mathMixfixDefnSig
     ;
 
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
-        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? (':'|'⦂') mathClssftnExp
+        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? ':' mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -341,27 +341,21 @@ mathPrefixDefnSigs
 
 mathInfixDefnSig
     :   '(' mathVarDecl ')' name=mathSymbolName
-        '(' mathVarDecl ')' (':'|'⦂') mathClssftnExp
+        '(' mathVarDecl ')' ':' mathClssftnExp
     ;
 
 mathOutfixDefnSig
-    :   '`' leftSym=mathSymbolNameNoID '(' mathVarDecl ')'
-        rightSym=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
+    :   leftSym=mathBracketOp '(' mathVarDecl ')'
+        rightSym=mathBracketOp ':' mathClssftnExp
     ;
 
-mathPostfixDefnSig
-    :   '(' mathVarDecl ')' '`' lop=mathSymbolNameNoID '(' mathVarDecl ')'
-        rop=mathSymbolNameNoID '`' (':'|'⦂') mathClssftnExp
+mathMixfixDefnSig
+    :   '(' mathVarDecl ')' lop=mathBracketOp '(' mathVarDecl ')'
+        rop=mathBracketOp ':' mathClssftnExp
     ;
 
-//the bar needs to be there because of the set restriction exp
-mathSymbolName
-    :   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL)
-    ;
-
-mathSymbolNameNoID
-    :   (MATH_UNICODE_SYM | SYM)
-    ;
+mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
+mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'['|']') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -380,11 +374,11 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   mathSymbolName (',' mathSymbolName)* (':'|'⦂') mathClssftnExp
+    :   mathSymbolName (',' mathSymbolName)* ':' mathClssftnExp
     ;
 
 mathVarDecl
-    :   mathSymbolName (':'|'⦂') mathClssftnExp
+    :   mathSymbolName ':' mathClssftnExp
     ;
 
 // mathematical clauses
@@ -400,6 +394,7 @@ maintainingClause : 'maintaining' mathAssertionExp ';' ;
 decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
 noticeClause : 'Notice' mathExp ';' ;
+
 // mathematical expressions
 
 mathClssftnExp
@@ -412,25 +407,36 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS) mathVarDeclGroup ('∋'|',') mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
-
-//TODO: Add and, or, implies, not, and arrow to the grammar.
+/*
 mathExp
-    :   mathPrimeExp                                                                        #mathPrimaryExp
-    |   '(' mathAssertionExp ')'                                                            #mathNestedExp
-    |   lhs=mathExp op='.' rhs=mathExp                                                      #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'                                 #mathPrefixAppExp
-    |   mathExp '`' mathSymbolNameNoID mathExp (',' mathExp)* mathSymbolNameNoID '`'        #mathNonStdAppExp
-    |   mathExp (':'|'⦂') mathExp                                                           #mathClssftnAssertionExp
-    |   mathExp mathSymbolExp mathExp                                                       #mathInfixAppExp
+    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
+//  |   <assoc=right> lhs=mathExp op='->' rhs=mathExp                   #mathBuiltinInfixAppExp
+    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
+    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+//  |   mathExp op=('and'|'∧'|'or'|'∨') mathExp                         #mathBuiltinInfixAppExp
+    |   '(' mathAssertionExp ')'                                        #mathNestedExp
+    |   mathPrimeExp                                                    #mathPrimaryExp
+    ;
+*/
+mathExp
+    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
+    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
+    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+    |   '(' mathAssertionExp ')'                                        #mathNestedExp
+    |   mathPrimeExp                                                    #mathPrimaryExp
     ;
 
 mathPrimeExp
     :   mathCartProdExp
     |   mathSymbolExp
-    |   mathOutfixAppExp
     |   mathSetRestrictionExp
+    |   mathOutfixAppExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
@@ -445,11 +451,11 @@ mathSymbolExp
     ;
 
 mathOutfixAppExp
-    :   '`' lop=mathSymbolNameNoID mathExp rop=mathSymbolNameNoID '`'
+    :   lop=mathBracketOp mathExp rop=mathBracketOp
     ;
 
 mathSetRestrictionExp
-    :   '{' mathVarDecl '∣' mathAssertionExp '}'
+    :   '{' mathVarDecl '|' mathAssertionExp '}'
     ;
 
 mathSetExp
@@ -475,9 +481,11 @@ BOOL : ('true'|'false');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
-ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
-INT : [0-9]+ ;
-SYM : ('!'|'*'|'+'|'-'|'/'|'|'|'~'|'['|']'|[<->])+ ;
+ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+INT                 : [0-9]+ ;
+
+//TODO: removed '|' (10/28/2016)
+SYM                 : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>')+ ;
 
 MATH_UNICODE_SYM
     :   [\u2100-\u214F]
