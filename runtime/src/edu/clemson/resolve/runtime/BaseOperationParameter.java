@@ -6,21 +6,25 @@ package edu.clemson.resolve.runtime;
  */
 public class BaseOperationParameter implements OperationParameter {
 
-    @Override public RType op(RType... e) {
+    @Override
+    public RType op(RType... e) {
         return null;
     }
 
-    @Override public final Object getRep() {
+    @Override
+    public final Object getRep() {
         throw new UnsupportedOperationException("getRep() shouldn't be "
                 + "getting called from: " + this.getClass());
     }
 
-    @Override public final void setRep(Object setRep) {
+    @Override
+    public final void setRep(Object setRep) {
         throw new UnsupportedOperationException("setRep() shouldn't be "
                 + "getting called from: " + this.getClass());
     }
 
-    @Override public final RType initialValue() {
+    @Override
+    public final RType initialValue() {
         throw new UnsupportedOperationException("initialValue() shouldn't"
                 + " be getting called from: " + this.getClass());
     }

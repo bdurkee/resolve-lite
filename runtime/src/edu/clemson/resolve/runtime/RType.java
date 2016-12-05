@@ -42,9 +42,8 @@ public interface RType {
     void setRep(Object setRep);
 
     /**
-     * All types in Resolve are given an initialzation value at in the modeling
-     * phase. This initial value is implicitly applied when a variable is
-     * declared to a Resolve {@code RType}.
+     * All types in Resolve are given an initialzation value at in the modeling phase. This initial value is
+     * implicitly applied when a variable is declared to a Resolve {@code RType}.
      */
     RType initialValue();
 }

@@ -416,6 +416,9 @@ public class RESOLVECompiler {
 
         //if we have syntactic errors, better not risk processing imports with
         //our tree (as it usually will result in a flurry of npe's).
+
+        //TODO: I think the UsesListener, instead of using the libDir specified in this
+        //class, it needs the libDir for the thing its currently trying to find uses for...
         UsesListener l = new UsesListener(this);
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);

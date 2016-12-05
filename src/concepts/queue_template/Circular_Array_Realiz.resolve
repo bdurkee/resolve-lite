@@ -1,0 +1,33 @@
+Realization Circular_Array_Realiz for Queue_Template;
+	uses Queue_Template;
+
+	Facility Array_Fac is Bdd_Ceramic_Array_Template
+	    (Queue_Template::Entry, 0, Max_Length - 1)
+        externally realized by Standard_Array_Realiz;
+
+	Type Queue = Record
+			Contents : Array_Fac::Ceramic_Array;
+			Prefront, Length : Integer;
+		end;
+
+	Procedure Enqueue (alters e : Entry; updates Q : Queue);
+		Var Temp : Integer;
+		Q.Length := Q.Length + 1;
+		Temp := Q.Prefront + Q.Length;
+		Temp := Std_Ints::Mod(Temp, Max_Length);
+		Swap_Entry(Q.Contents, e, Temp);
+	end Push;
+
+	Procedure Dequeue (replaces e : Entry; updates Q : Queue);
+        Var Temp : Integer;
+        Temp := Q.Prefront + 1;
+        Q.Prefront := Mod(Temp, Max_Length);
+        Swap_Entry(Q.Contents, e, Q.Prefront);
+        Q.Length := Q.Length - 1;
+    end Dequeue;
+
+    Procedure Length (restores Q : Queue) : Integer;
+        Length := Q.Length;
+    end Push;
+
+end Circular_Array_Realiz;
