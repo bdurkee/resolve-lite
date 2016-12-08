@@ -97,16 +97,18 @@ public class MathFunctionClssftn extends MathClssftn {
         return result;
     }
 
-    private static List<MathClssftn> expandAsNeeded(@NotNull List<MathClssftn> t) {
+    public static List<MathClssftn> expandAsNeeded(@NotNull List<MathClssftn> t) {
         List<MathClssftn> result = new ArrayList<>();
-        for (MathClssftn c : t) {
-            result.addAll(expandAsNeeded(c));
+        if (t.size() == 1) {
+            result.addAll(expandAsNeeded(t.get(0)));
+        }
+        else {
+            result.addAll(t);
         }
         return result;
     }
 
-    private static List<MathClssftn> expandAsNeeded(
-            @NotNull MathClssftn t) {
+    public static List<MathClssftn> expandAsNeeded(@NotNull MathClssftn t) {
         List<MathClssftn> result = new ArrayList<>();
 
         if (t instanceof MathCartesianClssftn) {

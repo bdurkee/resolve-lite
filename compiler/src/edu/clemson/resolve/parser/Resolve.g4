@@ -108,6 +108,7 @@ implBlock
         | procedureDecl
         | typeRepresentationDecl
         | facilityDecl
+        | mathStandardDefnDecl
         )*
     ;
 
@@ -122,7 +123,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '::')? name=ID            #namedType
+    :   (qualifier=ID '::')? name=ID ('of' ID)  #namedType
     |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 

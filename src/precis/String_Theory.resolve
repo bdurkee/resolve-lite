@@ -32,4 +32,8 @@ Precis String_Theory;
         (i.)  Reverse(Λ) = Λ;
         (ii.) ∀ x : El, ext(α, x) = ⟨x⟩ ∘ Reverse(α);
 
+    Inductive Definition Occ_Set(α : SStr) : SSet is
+        (i.)  Occ_Set(Λ) = ϕ;
+        (ii.) ∀ x : El, Occ_Set(ext(α, x)) = Occ_Set(α) ∪ {x};
+
 end String_Theory;
