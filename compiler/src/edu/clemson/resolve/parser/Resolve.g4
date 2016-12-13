@@ -123,7 +123,7 @@ facilityBlock
 // type refs & decls
 
 type
-    :   (qualifier=ID '::')? name=ID ('of' ID)?  #namedType
+    :   (qualifier=ID '::')? name=ID            #namedType
     |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 
