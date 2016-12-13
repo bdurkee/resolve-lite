@@ -29,8 +29,11 @@ public class UsesListener extends ResolveBaseListener {
     public final Set<ModuleIdentifier> extUses = new HashSet<>();
     public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
-    public UsesListener(@NotNull RESOLVECompiler rc) {
+    private final String filePath;
+
+    public UsesListener(@NotNull String filePath, @NotNull RESOLVECompiler rc) {
         this.compiler = rc;
+        this.filePath = filePath;
     }
 
     @Override
@@ -83,7 +86,7 @@ public class UsesListener extends ResolveBaseListener {
                                                  @Nullable ResolveParser.ModuleLibraryIdentifierContext from) {
         if (!isExternal) {
             //we're not an external implementation
-            File resolve = resolveImport(compiler, t, from);
+            File resolve = resolveImport(t, from);
 
             if (resolve != null) {
                 uses.add(new ModuleIdentifier(t, resolve));
@@ -94,7 +97,7 @@ public class UsesListener extends ResolveBaseListener {
         }
         else {
             //we're an external implementation..
-            File resolveExternal = resolveImport(compiler, t, from, RESOLVECompiler.NON_NATIVE_FILE_EXTENSION);
+            File resolveExternal = resolveImport(t, from, RESOLVECompiler.NON_NATIVE_FILE_EXTENSION);
             if (resolveExternal != null) {
                 extUses.add(new ModuleIdentifier(t, resolveExternal));
             }
@@ -106,7 +109,7 @@ public class UsesListener extends ResolveBaseListener {
 
     //so we don't have Path resolveProjRootPath here because our projects should be on RESOLVEPATH anyways..
     @Nullable
-    private static Path getAppropriateRootDirectoryForFromClause(@NotNull Token t, @NotNull String fromStem) {
+    private static Path getAppropriateRootDirectoryForFromClause(@NotNull String fromStem) {
         Path resolveStdRootPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
         Path resolveLibRootPath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src");
 
@@ -118,38 +121,35 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Nullable
-    public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull ResolveParser.ModuleIdentifierSpecContext u) {
-        return resolveImport(compiler, u.ID().getSymbol(), u.fromClause() != null ?
+    public File resolveImport(@NotNull RESOLVECompiler compiler,
+                              @NotNull ResolveParser.ModuleIdentifierSpecContext u) {
+        return resolveImport(u.ID().getSymbol(), u.fromClause() != null ?
                 u.fromClause().moduleLibraryIdentifier() : null, RESOLVECompiler.NATIVE_FILE_EXTENSION);
     }
 
     @Nullable
-    public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull Token usesToken,
-                                     @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
-                                     @NotNull String ... extensions) {
+    public File resolveImport(@NotNull Token usesToken,
+                              @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
+                              @NotNull String ... extensions) {
         List<String> exts = (extensions.length == 0) ?
                 Collections.singletonList(RESOLVECompiler.NATIVE_FILE_EXTENSION) :
                 Arrays.asList(extensions);
-        return resolveImport(compiler, usesToken, fromPathCtx, exts);
+        return resolveImport(usesToken, fromPathCtx, exts);
     }
 
     @Nullable
-    public static File resolveImport(@NotNull RESOLVECompiler compiler,
-                                     @NotNull Token usesToken,
-                                     @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
-                                     @NotNull List<String> extensions) {
+    public File resolveImport(@NotNull Token usesToken,
+                              @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
+                              @NotNull List<String> extensions) {
         //first check to see if we're on RESOLVEPATH
-        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
+        Path projectPath = null; //Paths.get(compiler.libDirectory).toAbsolutePath();
         Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
         File result = null;
         if (fromPathCtx != null) {
             //a fromclause can either describe something on RESOLVEROOT or it can describe the root
             //of some other resolve project on RESOLVEPATH
 
-            Path s = getAppropriateRootDirectoryForFromClause(usesToken,
-                    fromPathCtx.getText().replace('.', File.separatorChar));
+            Path s = getAppropriateRootDirectoryForFromClause(fromPathCtx.getText().replace('.', File.separatorChar));
             if (s == null) {
                 compiler.errMgr.semanticError(ErrorKind.BAD_FROM_CLAUSE, fromPathCtx.getStart(), fromPathCtx.getText());
                 return null;
@@ -164,7 +164,6 @@ public class UsesListener extends ResolveBaseListener {
         else {
             //search the current project
             result = searchProjectRootDirectory(extensions, compiler, usesToken.getText());
-
             //now search the
             //then search the std libs.. if we didn't find anything
             if (result == null) result = searchStdRootDirectory(extensions, usesToken.getText());
@@ -174,7 +173,7 @@ public class UsesListener extends ResolveBaseListener {
 
     @Nullable
     private static File searchProjectRootDirectory(List<String> extensions, RESOLVECompiler compiler, String id) {
-        Path projectPath = Paths.get(compiler.libDirectory).toAbsolutePath();
+        Path projectPath = null;//Paths.get(compiler.libDirectory).toAbsolutePath();
         if (projectPath.endsWith(".")) {
             projectPath = projectPath.getParent();
         }

@@ -76,8 +76,6 @@ public class RESOLVECompiler {
     public final String[] args;
     protected boolean haveOutputDir = false;
 
-    //TODO: Change package of this to pkgLibDirectory or libDirectory.. something like that...
-    public String libDirectory;
     public String outputDirectory;
     public String genCode;
     public String timeout;
@@ -93,9 +91,7 @@ public class RESOLVECompiler {
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
-            new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
             new Option("prove", "-prove", "attempt to prove generated VCs for the current file"),
             new Option("timeout", "-timeout", OptionArgType.STRING, "how much time to spend attempting to dispatch a given vc (in milliseconds)"),
@@ -200,24 +196,10 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
-                libDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
-        }
-        if (libDirectory != null) {
-            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
-                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
-            }
-            File outDir = new File(libDirectory);
-            if (!outDir.exists()) {
-                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
-                libDirectory = ".";
-            }
-        }
-        else {
-            libDirectory = ".";
         }
     }
 
@@ -265,6 +247,7 @@ public class RESOLVECompiler {
     private List<AnnotatedModule> parseAndReturnRootModules() {
         List<AnnotatedModule> modules = new ArrayList<>();
         for (String e : targetFiles) {
+            //somehow we need to sanitycheck to ensure that the module appears on RESOLVEPATH or RESOLVEROOT...
             AnnotatedModule m = parseModule(e);
             if (m != null) {
                 modules.add(m);
@@ -351,6 +334,11 @@ public class RESOLVECompiler {
         }
     }
 
+    public static File getLibDirFromFileName(String fileName) {
+        //getCoreLibraryDirectory() + File.separator + "src"
+        return null;
+    }
+
     private List<String> getCompileOrder(DefaultDirectedGraph<String, DefaultEdge> g) {
         List<String> result = new ArrayList<>();
         EdgeReversedGraph<String, DefaultEdge> reversed = new EdgeReversedGraph<>(g);
@@ -385,13 +373,21 @@ public class RESOLVECompiler {
         try {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(libDirectory, fileName);    //first try searching in the local project..
+                file = new File(fileName);    //first try searching in the local project..
             }
             if (!file.exists()) {
                 errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
                 return null;
             }
-            return parseModule(new ANTLRFileStream(file.getCanonicalPath()));
+            Path canonicalPath = file.getCanonicalFile().toPath();
+            if (!canonicalPath.startsWith(getLibrariesPathDirectory())||
+                    canonicalPath.startsWith(getCoreLibraryDirectory())) {
+                throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
+                        "RESOLVEPATH or RESOLVEROOT");
+            }
+
+            ANTLRFileStream afs = new ANTLRFileStream(file.getCanonicalPath());
+            return parseModule(afs);
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -419,13 +415,15 @@ public class RESOLVECompiler {
 
         //TODO: I think the UsesListener, instead of using the libDir specified in this
         //class, it needs the libDir for the thing its currently trying to find uses for...
-        UsesListener l = new UsesListener(this);
+        UsesListener l = new UsesListener(input.getSourceName(), this);
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
         return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors,
                 l.uses, l.extUses, l.aliases);
     }
+
+
 
     @NotNull
     public static String getCoreLibraryDirectory() {
@@ -456,7 +454,7 @@ public class RESOLVECompiler {
             @Override
             public File apply(String filePath) {
                 File outputDir;
-                String fileDirectory = libDirectory;
+                String fileDirectory = ".";
                 if (haveOutputDir) {
                     if (new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~")) {
                         outputDir = new File(outputDirectory);
