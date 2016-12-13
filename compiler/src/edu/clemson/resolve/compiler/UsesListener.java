@@ -141,9 +141,6 @@ public class UsesListener extends ResolveBaseListener {
     public File resolveImport(@NotNull Token usesToken,
                               @Nullable ResolveParser.ModuleLibraryIdentifierContext fromPathCtx,
                               @NotNull List<String> extensions) {
-        //first check to see if we're on RESOLVEPATH
-        Path projectPath = null; //Paths.get(compiler.libDirectory).toAbsolutePath();
-        Path resolvePath = Paths.get(RESOLVECompiler.getLibrariesPathDirectory()).toAbsolutePath();
         File result = null;
         if (fromPathCtx != null) {
             //a fromclause can either describe something on RESOLVEROOT or it can describe the root
@@ -162,24 +159,18 @@ public class UsesListener extends ResolveBaseListener {
             }
         }
         else {
-            //search the current project
-            RESOLVECompiler.getProjectRootDirFromFileName(fileName);
-
-
+            //search the current project directory for usesToken..
             result = searchProjectRootDirectory(extensions, usesToken.getText());
-            //now search the
-            //then search the std libs.. if we didn't find anything
+
+            //if not found, then search the std libs...
             if (result == null) result = searchStdRootDirectory(extensions, usesToken.getText());
         }
         return result;
     }
 
     @Nullable
-    private static File searchProjectRootDirectory(List<String> extensions, String id) {
-        Path projectPath = null;//Paths.get(compiler.libDirectory).toAbsolutePath();
-        if (projectPath.endsWith(".")) {
-            projectPath = projectPath.getParent();
-        }
+    private File searchProjectRootDirectory(List<String> extensions, String id) {
+        Path projectPath = RESOLVECompiler.getProjectRootPathFor(fileName);
         try {
             return findFile(projectPath, id, extensions);
         } catch (IOException e) {
@@ -188,7 +179,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Nullable
-    private static File searchStdRootDirectory(List<String> extensions, String id) {
+    private File searchStdRootDirectory(List<String> extensions, String id) {
         Path stdLibPath = Paths.get(RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src");
         try {
             return findFile(stdLibPath, id, extensions);
@@ -198,12 +189,13 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Nullable
-    private static File findFile(@NotNull Path rootPath,
-                                 @NotNull String fileNameWithoutExt,
-                                 @NotNull List<String> extensions) throws IOException {
+    private File findFile(@NotNull Path rootPath,
+                          @NotNull String fileNameWithoutExt,
+                          @NotNull List<String> extensions) throws IOException {
         FileLocator l = new FileLocator(fileNameWithoutExt, extensions);
         Files.walkFileTree(rootPath, l);
         if (l.getFile() == null) throw new NoSuchFileException(fileNameWithoutExt);
-        return l.getFile();
+        File result = l.getFile();
+        return result;
     }
 }

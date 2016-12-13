@@ -336,7 +336,7 @@ public class RESOLVECompiler {
     }
 
 
-    public static File getProjectRootDirFromFileName(String fileName) {
+    public static Path getProjectRootPathFor(String fileName) {
         File file = new File(fileName);
         try {
             file.getCanonicalFile().toPath();
@@ -346,24 +346,12 @@ public class RESOLVECompiler {
         Path resolvePath = Paths.get(getLibrariesPathDirectory() + File.separator + "src");
         Path resolveCore = Paths.get(getCoreLibraryDirectory() + File.separator + "src");
         Path filePath = file.toPath();
-        String lib = "";
-        if (filePath.startsWith(resolvePath)) {
-            Path stem = resolvePath.relativize(filePath);
+        Path lib = filePath.startsWith(resolvePath) ?  resolvePath : resolveCore;
+        String stem = lib.relativize(filePath).toString();
 
-        }
-        int i;
-        i=0;
-        //if its on resolvepath
-        // then its resolvepath + src +
-        /*String stem = libPath.relativize(filePath).toString();
         String projectName = stem.substring(0, stem.indexOf(File.separator));
-
-        String result = libPath.toString() + File.separator + projectName;
-        File resultFile = new File(result);
-        if (!resultFile.exists() || !resultFile.isDirectory()) {
-            return null;
-        }*/
-        return null;
+        Path result = Paths.get(lib.toString() + File.separator + projectName);
+        return result;
     }
 
     private List<String> getCompileOrder(DefaultDirectedGraph<String, DefaultEdge> g) {
@@ -407,8 +395,8 @@ public class RESOLVECompiler {
                 return null;
             }
             Path canonicalPath = file.getCanonicalFile().toPath();
-            if (!canonicalPath.startsWith(getLibrariesPathDirectory())||
-                    canonicalPath.startsWith(getCoreLibraryDirectory())) {
+            if (!canonicalPath.startsWith(getLibrariesPathDirectory()) &&
+                    !canonicalPath.startsWith(getCoreLibraryDirectory())) {
                 throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
                         "RESOLVEPATH or RESOLVEROOT");
             }
@@ -449,8 +437,6 @@ public class RESOLVECompiler {
         return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors,
                 l.uses, l.extUses, l.aliases);
     }
-
-
 
     @NotNull
     public static String getCoreLibraryDirectory() {

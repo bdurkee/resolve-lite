@@ -210,6 +210,10 @@ varDeclGroup
 
 // facility decls
 
+//specModuleArgList
+//    :   '(' mathExp (',' mathExp)* ')'
+//    ;
+
 facilityDecl
     :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
         (externally='externally')? 'realized' 'by' impl=ID
