@@ -21,7 +21,7 @@ Precis Basic_Binary_Relation_Properties;
     //Theorem R1n1: ∀ D : SSet, ∀ p : D * D -> B,
     //    Is_Transitive(p) ⟹ Is_Irreflexive(p);
 
-    Definition Is_Total(p : (D : SSet) * D -> B) : B is
+    Definition Is_Total(p : (D : SSet) * D ⟶ B) : B is
         ∀ x, y : D, p(x, y) ∨ p(y, x) ∨ (x = y);
 
 end Basic_Binary_Relation_Properties;

@@ -71,15 +71,13 @@ public class AnnotatedModule {
                            @NotNull Token name,
                            @NotNull String fileName,
                            boolean hasParseErrors,
-                           @NotNull Set<ModuleIdentifier> uses,
-                           @NotNull Set<ModuleIdentifier> externalUses,
-                           @NotNull Map<String, ModuleIdentifier> aliases) {
+                           @NotNull DependencyListener.DependencyHolder dependencies) {
         this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
 
-        this.uses.addAll(uses);
+        this.uses.addAll(dependencies.uses);
         this.externalUses.addAll(externalUses);
         this.aliases.putAll(aliases);
 

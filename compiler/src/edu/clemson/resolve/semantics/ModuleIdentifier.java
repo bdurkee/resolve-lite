@@ -34,16 +34,11 @@ import java.util.Set;
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
-    @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
-    @NotNull
-    private Token name;
+    private final Token name;
     private final boolean globalFlag;
-    @NotNull
-    private File file;
-    @NotNull
-    public List<String> pathListRelativeToRoot = new ArrayList<>();
+    private final File file;
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");

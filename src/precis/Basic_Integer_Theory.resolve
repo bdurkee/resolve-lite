@@ -61,7 +61,7 @@ Precis Basic_Integer_Theory;
 
     Theorem one_N: 1 = 1;
 
-    Theorem I3: ∀ n : ℤ, ⌐(Is_Neg(n)) implies (suc(n) = NB(NB(n)));
+    Theorem I3: ∀ n : ℤ, ⌐(Is_Neg(n)) ⟹ (suc(n) = NB(NB(n)));
 
 	Theorem Addition_Over_Equality: ∀ i, j, k : ℤ, (i - j = k) = (i = (k + j));
 
@@ -71,7 +71,7 @@ Precis Basic_Integer_Theory;
 
 	Theorem Not_LTE: ∀ i, j : ℤ, ⌐(i ≤ j) = (j + 1 ≤ i);
 
-	Corollary LTE_1a: ∀ i, j, k : ℤ, i ≤ j ∧ (j ≤ k) implies (i ≤ k);   //expand Is_Transitive(≤);
+	Corollary LTE_1a: ∀ i, j, k : ℤ, i ≤ j ∧ (j ≤ k) ⟹ (i ≤ k);   //expand Is_Transitive(≤);
     //tod: Have special keyword which dictates when an application ought to be expanded.
     //For intance, Corollary lte1: expand Is_Transitive(≤);
 

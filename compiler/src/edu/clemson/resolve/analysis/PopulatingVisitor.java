@@ -95,7 +95,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         moduleScope = symtab.startModuleScope(tr)
-                .addImports(tr.uses)
+                .addImports(tr.uses)    //TODO: Facilities can't actually be included in things that aren't imported...
                 .addAliases(tr.aliases);
         super.visitChildren(ctx);
         symtab.endScope();
@@ -225,7 +225,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         int i;
         i=0;
         if (ctx.specArgs != null) this.visit(ctx.specArgs);
-
+        if (ctx.realizArgs != null) this.visit(ctx.realizArgs);
 
         //for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
         //    extension.moduleArgumentList().forEach(this::visit);
@@ -730,6 +730,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             }
             else if (namedSymbol instanceof ModuleParameterSymbol) {
                 programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+
+                //TODO: Don't know if the below is necessary anymore...
                 if (parentFacilityArgListCtx != null &&
                         ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
                     actualGenericTypesPerFacilitySpecArgs.get(
@@ -1572,14 +1574,28 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             typeMathSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
         }
         else {
-            MathClssftnWrappingSymbol foundSym = typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
+            typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
             //we're walking a module argument list
-            if (Utils.getFirstAncestorOfType(ctx, ResolveParser
-                    .SpecModuleArgumentListContext.class) != null && foundSym != null) {
+            ParserRuleContext listCtx = Utils.getFirstAncestorOfType(ctx,
+                    ResolveParser.SpecModuleArgumentListContext.class);
+            if (listCtx != null) {
                 try {
-                    foundSym.toProgTypeSymbol();
-                } catch (UnexpectedSymbolException e) {
-                    //no problem, we just don't add it to our map of facility actual generics...
+                    ProgTypeSymbol type =
+                            symtab.getInnermostActiveScope()
+                                    .queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(),
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE, true))
+                                    .toProgTypeSymbol();
+                    ProgTypeSymbol t = (ProgTypeSymbol) type.toProgTypeSymbol();
+                    actualGenericTypesPerFacilitySpecArgs
+                            .get((ResolveParser.SpecModuleArgumentListContext)listCtx).add(t);
+                } catch (DuplicateSymbolException e) {
+                    int i;
+                    i=0;
+                }
+                catch (SymbolTableException e) {
+                    //this is ok (especially if it's not a program type symbol (unexpected sym exception),
+                    //"typeMathSym" above should've reported the problems already.
                 }
             }
         }
@@ -1735,16 +1751,16 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         tr.mathClssftns.put(ctx, type);
     }
 
-    private MathClssftnWrappingSymbol typeMathSymbol(@NotNull ParserRuleContext ctx,
-                                                     @Nullable Token qualifier,
-                                                     @NotNull Token name) {
+    private void typeMathSymbol(@NotNull ParserRuleContext ctx,
+                                @Nullable Token qualifier,
+                                @NotNull Token name) {
         String here = ctx.getText();
 
         MathClssftnWrappingSymbol s = getIntendedMathSymbol(qualifier, name, ctx);
         if (s == null || s.getClassification() == null) {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
-            return null;
+            return;
         }
         if (entailsRetype != null) {
             s.setClassification(new MathNamedClssftn(g, name.getText(), entailsRetype.typeRefDepth - 1, entailsRetype));
@@ -1757,7 +1773,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             tr.mathClssftns.put(ctx, s.getClassification().getEnclosingClassification());
         }
         chainableSyms.put(ctx, s.isChainable());
-        return s;
     }
 
     @Nullable

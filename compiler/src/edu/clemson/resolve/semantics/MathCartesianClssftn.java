@@ -100,7 +100,6 @@ public class MathCartesianClssftn extends MathClssftn {
             String result = clssfcn.toString();
             if (tag != null && !tag.equals("")) {
                 String colonOp = " : ";
-                if (clssfcn == clssfcn.getTypeGraph().CLS) colonOp = " ː ";
                 result = "(" + tag + colonOp + clssfcn + ")";
             }
             return result;

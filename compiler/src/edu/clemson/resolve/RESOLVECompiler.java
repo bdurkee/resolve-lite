@@ -2,7 +2,6 @@ package edu.clemson.resolve;
 
 import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.*;
-import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
@@ -26,8 +25,6 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -430,7 +427,7 @@ public class RESOLVECompiler {
 
         //TODO: I think the UsesListener, instead of using the libDir specified in this
         //class, it needs the libDir for the thing its currently trying to find uses for...
-        UsesListener l = new UsesListener(input.getSourceName(), this);
+        DependencyListener l = new DependencyListener(input.getSourceName(), this);
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }

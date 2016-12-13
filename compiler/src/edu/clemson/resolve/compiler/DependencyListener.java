@@ -2,6 +2,7 @@ package edu.clemson.resolve.compiler;
 
 import edu.clemson.resolve.RESOLVECompiler;
 import edu.clemson.resolve.misc.FileLocator;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveBaseListener;
 import org.antlr.v4.runtime.Token;
@@ -22,18 +23,27 @@ import java.util.*;
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
  * references to other modules.
  */
-public class UsesListener extends ResolveBaseListener {
+public class DependencyListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
     public final Set<ModuleIdentifier> uses = new HashSet<>();
+    public final Set<ModuleIdentifier> facilityUses = new HashSet<>();
+    private final Set<ModuleIdentifier> combined = new HashSet<>();
+
     public final Set<ModuleIdentifier> extUses = new HashSet<>();
     public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
     private final String fileName;
+    private final DependencyHolderBuilder tracker = new DependencyHolderBuilder();
 
-    public UsesListener(@NotNull String fileName, @NotNull RESOLVECompiler rc) {
+    public DependencyListener(@NotNull String fileName, @NotNull RESOLVECompiler rc) {
         this.compiler = rc;
         this.fileName = fileName;
+    }
+
+    @NotNull
+    public DependencyHolder getDependencies() {
+        return tracker.build();
     }
 
     @Override
@@ -45,20 +55,10 @@ public class UsesListener extends ResolveBaseListener {
                 continue;
             }
             ModuleIdentifier e = new ModuleIdentifier(u.ID().getSymbol(), f);
-            uses.add(e);
+            tracker.addUses(e);
         }
     }
 
-    //TODO: Ok, assume the externally realized file is from the same package as the spec...
-    //slight restriction right now.. external uses must be in the same folder as the concept they are
-    //externally realizing.
-    //eventually I'd like to allow something like this for facilitydecls
-    //
-    // Facility SF is Stack_Template(Int, 4) from goo
-    //      externally implemented by Java_Stk_Impl from goo.ext;
-    //
-    // this also gives us a nice way of doing short facility modules (without explicit uses lists -- which from's)
-    // so right now, because we don't have implicit imports working yet, Stack_Template
     @Override
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
@@ -70,6 +70,7 @@ public class UsesListener extends ResolveBaseListener {
         resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
     }
 
+    /*
     @Override
     public void exitEnhancementPairing(ResolveParser.EnhancementPairingContext ctx) {
         ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
@@ -79,7 +80,7 @@ public class UsesListener extends ResolveBaseListener {
 
         resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
         resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
-    }
+    }*/
 
     private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
                                                  boolean isExternal,
@@ -89,7 +90,7 @@ public class UsesListener extends ResolveBaseListener {
             File resolve = resolveImport(t, from);
 
             if (resolve != null) {
-                uses.add(new ModuleIdentifier(t, resolve));
+                facilityUses.add(new ModuleIdentifier(t, resolve));
             }
             else {
                 compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, t, t.getText());
@@ -198,4 +199,53 @@ public class UsesListener extends ResolveBaseListener {
         File result = l.getFile();
         return result;
     }
+
+    public static class DependencyHolder {
+        public Set<ModuleIdentifier> uses = new HashSet<>();
+        public Set<ModuleIdentifier> facilityUses = new HashSet<>(); //, externalUses, combinedUses;
+        public Set<ModuleIdentifier> externalUses = new HashSet<>(); //, externalUses, combinedUses;
+
+        private DependencyHolder(DependencyHolderBuilder builder) {
+            this.uses.addAll(builder.uses);
+            this.externalUses.addAll(builder.externalUses);
+            this.facilityUses.addAll(builder.facilityUses);
+        }
+
+        /** Returns the set of uses items + those from facilities (excludes external uses) */
+        @NotNull
+        public Set<ModuleIdentifier> getCombinedUses() {
+            Set<ModuleIdentifier> result = new HashSet<>(facilityUses);
+            result.addAll(uses);
+            return result;
+        }
+    }
+
+    public static class DependencyHolderBuilder implements Utils.Builder<DependencyHolder> {
+        protected final Set<ModuleIdentifier> uses = new HashSet<>();
+        protected final Set<ModuleIdentifier> externalUses = new HashSet<>();
+        protected final Set<ModuleIdentifier> facilityUses = new HashSet<>();
+
+        public DependencyHolderBuilder addUses(@NotNull ModuleIdentifier identifier) {
+            uses.add(identifier);
+            return this;
+        }
+
+        public DependencyHolderBuilder addExternalUses(@NotNull ModuleIdentifier identifier) {
+            externalUses.add(identifier);
+            return this;
+        }
+
+        public DependencyHolderBuilder addFacilityUses(@NotNull ModuleIdentifier identifier) {
+            facilityUses.add(identifier);
+            return this;
+        }
+
+        @NotNull
+        @Override
+        public DependencyHolder build() {
+            return new DependencyHolder(this);
+        }
+    }
+
+
 }
