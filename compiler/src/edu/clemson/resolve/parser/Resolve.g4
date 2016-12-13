@@ -43,7 +43,7 @@ enhancementModuleDecl
     ;
 
 conceptRealizationModuleDecl
-    :   'Realization' name=ID implModuleParameterList?
+    :   'Realization' name=ID realizModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         implBlock
@@ -51,7 +51,7 @@ conceptRealizationModuleDecl
     ;
 
 enhancementRealizationModuleDecl
-    :   'Realization' name=ID implModuleParameterList?
+    :   'Realization' name=ID realizModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?
         implBlock
@@ -159,8 +159,8 @@ specModuleParameterList
     :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
     ;
 
-implModuleParameterList
-    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+realizModuleParameterList
+    :   '(' realizModuleParameterDecl (';' realizModuleParameterDecl)* ')'
     ;
 
 operationParameterList
@@ -173,7 +173,7 @@ specModuleParameterDecl
     |   genericTypeParameterDecl
     ;
 
-implModuleParameterDecl
+realizModuleParameterDecl
     :   parameterDeclGroup
     |   operationDecl
     ;
@@ -210,24 +210,24 @@ varDeclGroup
 
 // facility decls
 
-//specModuleArgList
-//    :   '(' mathExp (',' mathExp)* ')'
-//    ;
-
 facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'realized' 'by' impl=ID
-        (implArgs=moduleArgumentList)? implFrom=fromClause?
-        (extensionPairing)* ';'?
+    :   'Facility' name=ID 'is' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
+        (enhancementPairing)* ';'
     ;
 
-extensionPairing
-    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)? implFrom=fromClause?
+enhancementPairing
+    :   'enhanced' 'by' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
     ;
 
-moduleArgumentList
+specModuleArgumentList
+    :   '(' mathExp (',' mathExp)* ')'
+    ;
+
+realizModuleArgumentList
     :   '(' progExp (',' progExp)* ')'
     ;
 

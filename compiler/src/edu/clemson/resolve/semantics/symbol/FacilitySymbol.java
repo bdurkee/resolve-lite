@@ -49,7 +49,7 @@ public class FacilitySymbol extends Symbol {
 
             if (facility.externally == null) {
                 impl = new ModuleParameterization(
-                        m.getImportWithName(facility.impl), new ArrayList<>(), this, scopeRepo);
+                        m.getImportWithName(facility.realiz), new ArrayList<>(), this, scopeRepo);
             }
             this.type = new SpecImplementationPairing(spec, impl);
             //These are realized by the concept realization
@@ -66,12 +66,12 @@ public class FacilitySymbol extends Symbol {
                 myEnhancementRealizations.put(spec, realization);
             }*/
             //These are realized by individual extension implementations
-            for (ResolveParser.ExtensionPairingContext extension : facility.extensionPairing()) {
+            for (ResolveParser.EnhancementPairingContext extension : facility.enhancementPairing()) {
                 specGenericArgs = actualGenerics.get(extension.specArgs);
                 ModuleParameterization extSpec = new ModuleParameterization(m.getImportWithName(extension.spec),
                         specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
 
-                impl = new ModuleParameterization(m.getImportWithName(extension.impl),  new ArrayList<>(), this, scopeRepo);
+                impl = new ModuleParameterization(m.getImportWithName(extension.realiz),  new ArrayList<>(), this, scopeRepo);
                 enhancements.add(extSpec);
                 enhancementImplementations.put(extSpec, impl);
             }

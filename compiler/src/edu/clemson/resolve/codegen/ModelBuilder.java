@@ -128,13 +128,13 @@ public class ModelBuilder extends ResolveBaseListener {
         f.isStatic = withinFacilityModule();
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
 
-        DecoratedFacilityInstantiation basePtr = new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
+        DecoratedFacilityInstantiation basePtr = new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.realiz.getText());
         basePtr.isProxied = false;
-        List<Expr> specArgs = ctx.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
-        List<Expr> implArgs = ctx.implArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
-        basePtr.args.addAll(specArgs);
-        basePtr.args.addAll(implArgs);
-
+        //List<Expr> specArgs = ctx.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
+        //List<Expr> implArgs = ctx.implArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
+        //basePtr.args.addAll(specArgs);
+        //basePtr.args.addAll(implArgs);
+/*
         for (ResolveParser.ExtensionPairingContext pair : ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer = new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
             specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, pair.specArgs.progExp(), built);
@@ -153,7 +153,7 @@ public class ModelBuilder extends ResolveBaseListener {
             else {
                 layers.get(i).child = basePtr;
             }
-        }
+        }*/
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
     }
@@ -321,7 +321,7 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         //if we're within a module argument list:
-        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
+ /*       if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
             OutputModelObject o = createFacilityArgumentModel(ctx);
@@ -330,7 +330,7 @@ public class ModelBuilder extends ResolveBaseListener {
         }
         else {
             built.put(ctx, new VarNameRef(new NormalQualifier("this"), ctx.name.getText()));
-        }
+        }*/
     }
 
     @Override
@@ -342,11 +342,6 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, ref);
     }
 
-    /**
-     * Given an arbitrary expression within some
-     * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
-     * for that argument.
-     */
     @Nullable
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
         OutputModelObject result = null;

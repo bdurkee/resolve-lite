@@ -217,7 +217,7 @@ public enum ErrorKind {
 
     INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: [<arg2>, <arg3>]; these need to be the same types", ErrorSeverity.ERROR),
 
-    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the concluding " +
+    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the last " +
             "statement should be <arg> := [SOME RETURN VALUE];", ErrorSeverity.ERROR),
 
     ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued variable ref(s): [<arg; separator={, }>] in " +

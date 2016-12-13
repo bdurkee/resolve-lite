@@ -174,13 +174,13 @@ public class VCGen extends ResolveBaseListener {
             ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
             spec = symtab.getModuleScope(concept);
             if (ctx.externally == null) {
-                ModuleIdentifier imp = moduleScope.getImportWithName(ctx.impl);
+                ModuleIdentifier imp = moduleScope.getImportWithName(ctx.realiz);
                 impl = symtab.getModuleScope(imp);
             }
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-        List<PExp> specArgs = ctx.specArgs.progExp().stream()
+        List<PExp> specArgs = ctx.specArgs.mathExp().stream()
                 .map(e -> tr.exprASTs.get(e))
                 .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(block, specArgs);
@@ -202,13 +202,13 @@ public class VCGen extends ResolveBaseListener {
         PExp result = specReq.isPresent() ? specReq.get() : g.getTrueExp();
         result = result.withVCInfo(ctx.getStart(), "Requires clause for concept: " + ctx.spec.getText()
                 + " in facility instantiation rule");
-        if (ctx.externally == null && impl != null && ctx.implArgs != null) {
+        if (ctx.externally == null && impl != null && ctx.realizArgs != null) {
             Optional<PExp> implReq = impl.getSymbolsOfType(GlobalMathAssertionSymbol.class)
                     .stream()
                     .filter(e -> e.getClauseType() == ClauseType.REQUIRES)
                     .map(GlobalMathAssertionSymbol::getEnclosedExp)
                     .findAny();
-            List<PExp> implArgs = ctx.implArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
+            List<PExp> implArgs = ctx.realizArgs.progExp().stream().map(tr.exprASTs::get).collect(Collectors.toList());
             List<PExp> reducedImplArgs = reduceArgs(block, implArgs);
             List<PExp> formalImplArgs =
                     Utils.apply(spec.getSymbolsOfType(ProgParameterSymbol.class), ProgParameterSymbol::asPSymbol);
@@ -217,7 +217,7 @@ public class VCGen extends ResolveBaseListener {
             if (implReq.isPresent()) {
                 //RPC[rn ~> rn_exp, RR ~> IRR]
                 PExp RPC = implReq.get().substitute(implFormalsToActuals).withVCInfo(ctx.getStart(),
-                        "Requires clause for realization: " + ctx.impl.getText() + " in facility instantiation rule");
+                        "Requires clause for realization: " + ctx.realiz.getText() + " in facility instantiation rule");
                 //(RPC[rn ~> rn_exp, RR ~> IRR] /\ SpecRequires)
                 result = g.formConjunct(RPC, result);
             }

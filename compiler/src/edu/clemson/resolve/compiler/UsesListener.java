@@ -63,22 +63,22 @@ public class UsesListener extends ResolveBaseListener {
     public void exitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
                 ctx.specFrom.moduleLibraryIdentifier() : null;
-        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.implFrom != null ?
-                ctx.implFrom.moduleLibraryIdentifier() : null;
+        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.realizFrom != null ?
+                ctx.realizFrom.moduleLibraryIdentifier() : null;
 
         resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
-        resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
+        resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
     }
 
     @Override
-    public void exitExtensionPairing(ResolveParser.ExtensionPairingContext ctx) {
+    public void exitEnhancementPairing(ResolveParser.EnhancementPairingContext ctx) {
         ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
                 ctx.specFrom.moduleLibraryIdentifier() : null;
-        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.implFrom != null ?
-                ctx.implFrom.moduleLibraryIdentifier() : null;
+        ResolveParser.ModuleLibraryIdentifierContext implFrom = ctx.realizFrom != null ?
+                ctx.realizFrom.moduleLibraryIdentifier() : null;
 
         resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
-        resolveAndAddFacilitySpecOrImpl(ctx.impl, ctx.externally != null, implFrom);
+        resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
     }
 
     private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
