@@ -29,11 +29,11 @@ public class UsesListener extends ResolveBaseListener {
     public final Set<ModuleIdentifier> extUses = new HashSet<>();
     public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
-    private final String filePath;
+    private final String fileName;
 
-    public UsesListener(@NotNull String filePath, @NotNull RESOLVECompiler rc) {
+    public UsesListener(@NotNull String fileName, @NotNull RESOLVECompiler rc) {
         this.compiler = rc;
-        this.filePath = filePath;
+        this.fileName = fileName;
     }
 
     @Override
@@ -163,7 +163,10 @@ public class UsesListener extends ResolveBaseListener {
         }
         else {
             //search the current project
-            result = searchProjectRootDirectory(extensions, compiler, usesToken.getText());
+            RESOLVECompiler.getProjectRootDirFromFileName(fileName);
+
+
+            result = searchProjectRootDirectory(extensions, usesToken.getText());
             //now search the
             //then search the std libs.. if we didn't find anything
             if (result == null) result = searchStdRootDirectory(extensions, usesToken.getText());
@@ -172,7 +175,7 @@ public class UsesListener extends ResolveBaseListener {
     }
 
     @Nullable
-    private static File searchProjectRootDirectory(List<String> extensions, RESOLVECompiler compiler, String id) {
+    private static File searchProjectRootDirectory(List<String> extensions, String id) {
         Path projectPath = null;//Paths.get(compiler.libDirectory).toAbsolutePath();
         if (projectPath.endsWith(".")) {
             projectPath = projectPath.getParent();

@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -334,8 +335,34 @@ public class RESOLVECompiler {
         }
     }
 
-    public static File getLibDirFromFileName(String fileName) {
-        //getCoreLibraryDirectory() + File.separator + "src"
+
+    public static File getProjectRootDirFromFileName(String fileName) {
+        File file = new File(fileName);
+        try {
+            file.getCanonicalFile().toPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Path resolvePath = Paths.get(getLibrariesPathDirectory() + File.separator + "src");
+        Path resolveCore = Paths.get(getCoreLibraryDirectory() + File.separator + "src");
+        Path filePath = file.toPath();
+        String lib = "";
+        if (filePath.startsWith(resolvePath)) {
+            Path stem = resolvePath.relativize(filePath);
+
+        }
+        int i;
+        i=0;
+        //if its on resolvepath
+        // then its resolvepath + src +
+        /*String stem = libPath.relativize(filePath).toString();
+        String projectName = stem.substring(0, stem.indexOf(File.separator));
+
+        String result = libPath.toString() + File.separator + projectName;
+        File resultFile = new File(result);
+        if (!resultFile.exists() || !resultFile.isDirectory()) {
+            return null;
+        }*/
         return null;
     }
 
