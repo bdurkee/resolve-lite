@@ -1,5 +1,6 @@
 package edu.clemson.resolve.compiler;
 
+import edu.clemson.resolve.compiler.DependencyCollectingListener.DependencyHolder;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.vcgen.VCOutputFile;
 import org.antlr.v4.runtime.Token;
@@ -43,19 +44,6 @@ public class AnnotatedModule {
      */
     public ParseTreeProperty<PExp> exprASTs = new ParseTreeProperty<>();
 
-    public final Set<ModuleIdentifier> uses = new LinkedHashSet<>();
-
-    //use a map for more efficiency when checking whether a module references
-    //an external impl
-    public final Set<ModuleIdentifier> externalUses = new HashSet<>();
-
-    /**
-     * Think of the {@code uses} set (declared above) as refs useful for coming up with module orderings, etc. Think
-     * of these then as the refs the symboltable will see. We don't want implementations of facilities showing up
-     * in this set.
-     */
-    public final Set<ModuleIdentifier> semanticallyRelevantUses = new LinkedHashSet<>();
-
     /** Aliases to modules -- this gets passed off to various moduleScope's */
     public final Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
@@ -63,36 +51,39 @@ public class AnnotatedModule {
     private final Token name;
     private final ParseTree root;
     private VCOutputFile vcs = null;
+
     public boolean hasParseErrors;
     private final ModuleIdentifier identifier;
-    String contentRoot;
+    private final DependencyHolder dependencies;
 
     public AnnotatedModule(@NotNull ParseTree root,
                            @NotNull Token name,
                            @NotNull String fileName,
                            boolean hasParseErrors,
-                           @NotNull DependencyListener.DependencyHolder dependencies) {
+                           @NotNull DependencyHolder dependencies) {
         this.hasParseErrors = hasParseErrors;
         this.root = root;
         this.name = name;
         this.fileName = fileName;
-
-        this.uses.addAll(dependencies.uses);
-        this.externalUses.addAll(externalUses);
-        this.aliases.putAll(aliases);
-
+        this.dependencies = dependencies;
         this.identifier = new ModuleIdentifier(name, new File(fileName));
-        this.contentRoot = identifier.getPackageRoot();
     }
 
-    public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName,
+    public AnnotatedModule(@NotNull ParseTree root,
+                           @NotNull Token name,
+                           @NotNull String fileName,
                            boolean hasParseErrors,
                            @NotNull Set<ModuleIdentifier> uses) {
-        this(root, name, fileName, hasParseErrors, uses, new HashSet<>(), new HashMap<>());
+        this(root, name, fileName, hasParseErrors, new DependencyCollectingListener.DependencyHolderBuilder(uses).build());
     }
 
     public AnnotatedModule(@NotNull ParseTree root, @NotNull Token name, @NotNull String fileName) {
-        this(root, name, fileName, false, new HashSet<>());
+        this(root, name, fileName, false, Collections.emptySet());
+    }
+
+    @NotNull
+    public DependencyHolder getDependencies() {
+        return dependencies;
     }
 
     @NotNull

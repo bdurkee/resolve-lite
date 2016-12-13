@@ -95,7 +95,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitModuleDecl(ResolveParser.ModuleDeclContext ctx) {
         moduleScope = symtab.startModuleScope(tr)
-                .addImports(tr.uses)    //TODO: Facilities can't actually be included in things that aren't imported...
+                .addImports(tr.getDependencies().uses)    //TODO: Facilities can't actually be included in things that aren't imported...
+                .addFacilityImports(tr.getDependencies().facilityUses)
                 .addAliases(tr.aliases);
         super.visitChildren(ctx);
         symtab.endScope();

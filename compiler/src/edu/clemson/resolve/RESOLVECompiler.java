@@ -310,7 +310,7 @@ public class RESOLVECompiler {
     private void findDependencies(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
-        for (ModuleIdentifier importRequest : root.uses) {
+        for (ModuleIdentifier importRequest : root.getDependencies().getCombinedUses()) {
             AnnotatedModule module = roots.get(importRequest.getFile().getAbsolutePath());
             if (module == null) {
                 module = parseModule(importRequest.getFile().getAbsolutePath());
@@ -422,17 +422,12 @@ public class RESOLVECompiler {
         }
         boolean hasParseErrors = parser.getNumberOfSyntaxErrors() > 0;
 
-        //if we have syntactic errors, better not risk processing imports with
-        //our tree (as it usually will result in a flurry of npe's).
-
-        //TODO: I think the UsesListener, instead of using the libDir specified in this
-        //class, it needs the libDir for the thing its currently trying to find uses for...
-        DependencyListener l = new DependencyListener(input.getSourceName(), this);
+        //if we have syntactic errors in the tree, better to not risk trying to figure out dependencies
+        DependencyCollectingListener l = new DependencyCollectingListener(input.getSourceName(), this);
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors,
-                l.uses, l.extUses, l.aliases);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.getDependencies());
     }
 
     @NotNull

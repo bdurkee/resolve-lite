@@ -23,20 +23,14 @@ import java.util.*;
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
  * references to other modules.
  */
-public class DependencyListener extends ResolveBaseListener {
+public class DependencyCollectingListener extends ResolveBaseListener {
 
     private final RESOLVECompiler compiler;
-    public final Set<ModuleIdentifier> uses = new HashSet<>();
-    public final Set<ModuleIdentifier> facilityUses = new HashSet<>();
-    private final Set<ModuleIdentifier> combined = new HashSet<>();
-
-    public final Set<ModuleIdentifier> extUses = new HashSet<>();
-    public Map<String, ModuleIdentifier> aliases = new HashMap<>();
 
     private final String fileName;
     private final DependencyHolderBuilder tracker = new DependencyHolderBuilder();
 
-    public DependencyListener(@NotNull String fileName, @NotNull RESOLVECompiler rc) {
+    public DependencyCollectingListener(@NotNull String fileName, @NotNull RESOLVECompiler rc) {
         this.compiler = rc;
         this.fileName = fileName;
     }
@@ -55,7 +49,7 @@ public class DependencyListener extends ResolveBaseListener {
                 continue;
             }
             ModuleIdentifier e = new ModuleIdentifier(u.ID().getSymbol(), f);
-            tracker.addUses(e);
+            tracker.addUsesItem(e);
         }
     }
 
@@ -90,7 +84,7 @@ public class DependencyListener extends ResolveBaseListener {
             File resolve = resolveImport(t, from);
 
             if (resolve != null) {
-                facilityUses.add(new ModuleIdentifier(t, resolve));
+                tracker.addFacilityUsesItem(new ModuleIdentifier(t, resolve));
             }
             else {
                 compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, t, t.getText());
@@ -100,7 +94,7 @@ public class DependencyListener extends ResolveBaseListener {
             //we're an external implementation..
             File resolveExternal = resolveImport(t, from, RESOLVECompiler.NON_NATIVE_FILE_EXTENSION);
             if (resolveExternal != null) {
-                extUses.add(new ModuleIdentifier(t, resolveExternal));
+                tracker.addExternalUsesItem(new ModuleIdentifier(t, resolveExternal));
             }
             else {
                 compiler.errMgr.semanticError(ErrorKind.MISSING_IMPORT_FILE, t, t.getText());
@@ -201,9 +195,9 @@ public class DependencyListener extends ResolveBaseListener {
     }
 
     public static class DependencyHolder {
-        public Set<ModuleIdentifier> uses = new HashSet<>();
-        public Set<ModuleIdentifier> facilityUses = new HashSet<>(); //, externalUses, combinedUses;
-        public Set<ModuleIdentifier> externalUses = new HashSet<>(); //, externalUses, combinedUses;
+        public final Set<ModuleIdentifier> uses = new HashSet<>();
+        public final Set<ModuleIdentifier> facilityUses = new HashSet<>();
+        public final Set<ModuleIdentifier> externalUses = new HashSet<>();
 
         private DependencyHolder(DependencyHolderBuilder builder) {
             this.uses.addAll(builder.uses);
@@ -221,21 +215,36 @@ public class DependencyListener extends ResolveBaseListener {
     }
 
     public static class DependencyHolderBuilder implements Utils.Builder<DependencyHolder> {
-        protected final Set<ModuleIdentifier> uses = new HashSet<>();
         protected final Set<ModuleIdentifier> externalUses = new HashSet<>();
         protected final Set<ModuleIdentifier> facilityUses = new HashSet<>();
+        protected final Set<ModuleIdentifier> uses;
 
-        public DependencyHolderBuilder addUses(@NotNull ModuleIdentifier identifier) {
+        public DependencyHolderBuilder() {
+            this(new HashSet<>());
+        }
+
+        public DependencyHolderBuilder(@NotNull Collection<ModuleIdentifier> initialIdentifiers) {
+            this.uses = new HashSet<>(initialIdentifiers);
+        }
+
+        public DependencyHolderBuilder addUsesItem(@NotNull ModuleIdentifier identifier) {
             uses.add(identifier);
             return this;
         }
 
-        public DependencyHolderBuilder addExternalUses(@NotNull ModuleIdentifier identifier) {
+        public DependencyHolderBuilder addUsesItems(@NotNull Collection<ModuleIdentifier> identifiers) {
+            for (ModuleIdentifier identifier : identifiers) {
+                uses.add(identifier);
+            }
+            return this;
+        }
+
+        public DependencyHolderBuilder addExternalUsesItem(@NotNull ModuleIdentifier identifier) {
             externalUses.add(identifier);
             return this;
         }
 
-        public DependencyHolderBuilder addFacilityUses(@NotNull ModuleIdentifier identifier) {
+        public DependencyHolderBuilder addFacilityUsesItem(@NotNull ModuleIdentifier identifier) {
             facilityUses.add(identifier);
             return this;
         }

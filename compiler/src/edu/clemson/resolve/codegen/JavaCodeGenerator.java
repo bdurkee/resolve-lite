@@ -69,7 +69,7 @@ class JavaCodeGenerator extends AbstractCodeGenerator {
     }
 
     public void writeAllExternallyReferencedFiles() {
-        for (ModuleIdentifier e : module.externalUses) {
+        for (ModuleIdentifier e : module.getDependencies().externalUses) {
             try {
                 ST code = templates.getInstanceOf("externalClassCode").add("code",
                         new String(Files.readAllBytes(Paths.get(e.getFile().getPath()))));

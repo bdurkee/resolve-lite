@@ -549,8 +549,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.uses);
-        allImports.addAll(gen.module.externalUses);
+        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.getDependencies().getCombinedUses());
+        allImports.addAll(gen.module.getDependencies().externalUses);
 
         for (ModuleIdentifier e : allImports) {
             Path p = e.getPathRelativeToRootDir();

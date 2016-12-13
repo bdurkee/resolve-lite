@@ -10,6 +10,7 @@ import java.util.*;
 public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final Set<ModuleIdentifier> importedModules = new HashSet<>();
+    private final Set<ModuleIdentifier> facilityModules = new HashSet<>();
 
     /**
      * The set of all modules {@code this} either extends or inherits from. This set should be a subset of
@@ -41,6 +42,12 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     @NotNull
     public ModuleScopeBuilder addImports(@NotNull Collection<ModuleIdentifier> imports) {
         importedModules.addAll(imports);
+        return this;
+    }
+
+    @NotNull
+    public ModuleScopeBuilder addFacilityImports(@NotNull Collection<ModuleIdentifier> facilityIdentifiers) {
+        facilityModules.addAll(facilityIdentifiers);
         return this;
     }
 
