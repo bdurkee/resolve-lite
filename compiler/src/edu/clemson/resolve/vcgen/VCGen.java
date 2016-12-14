@@ -180,8 +180,8 @@ public class VCGen extends ResolveBaseListener {
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
         }
-        List<PExp> specArgs = ctx.specArgs.mathExp().stream()
-                .map(e -> tr.exprASTs.get(e))
+        List<PExp> specArgs = ctx.specArgs.specModuleArg().stream()
+                .map(e -> (PExp)tr.exprASTs.get(e.getChild(0)))
                 .collect(Collectors.toList());
         List<PExp> reducedSpecArgs = reduceArgs(block, specArgs);
 

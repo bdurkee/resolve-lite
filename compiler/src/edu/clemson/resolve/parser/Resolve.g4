@@ -7,8 +7,7 @@ moduleDecl
     |   conceptModuleDecl
     |   conceptRealizationModuleDecl
     |   enhancementRealizationModuleDecl
-    |   facilityModuleDecl
-    |   shortFacilityModuleDecl) EOF
+    |   facilityModuleDecl) EOF
     ;
 
 precisModuleDecl
@@ -64,10 +63,6 @@ facilityModuleDecl
          (requiresClause)?
          facilityBlock
         'end' closename=ID ';'
-    ;
-
-shortFacilityModuleDecl
-    :   facilityDecl
     ;
 
 // uses, imports
@@ -224,7 +219,12 @@ enhancementPairing
     ;
 
 specModuleArgumentList
-    :   '(' mathExp (',' mathExp)* ')'
+    :   '(' specModuleArg (',' specModuleArg)* ')'
+    ;
+
+specModuleArg
+    :   progExp
+    |   mathExp
     ;
 
 realizModuleArgumentList
@@ -234,7 +234,7 @@ realizModuleArgumentList
 // operations & procedures
 
 operationDecl
-    :   ('Infix'|'Postfix')? 'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
+    :   'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 

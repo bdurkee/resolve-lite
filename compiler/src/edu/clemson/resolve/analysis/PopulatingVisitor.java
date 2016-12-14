@@ -712,7 +712,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
             }
             //I don't think this is true anymore....assuming we use MathExps for specModuleArgs
-            /*else if (namedSymbol instanceof ProgTypeSymbol) {
+            else if (namedSymbol instanceof ProgTypeSymbol) {
                 programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
 
                 if (parentFacilityArgListCtx != null) {
@@ -720,7 +720,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             (ResolveParser.RealizModuleArgumentListContext)
                                     parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
                 }
-            }*/
+            }
             //special case (don't want to adapt "mathVariableQuery" to coerce
             //OperationSymbols, so in the meantime
             else if (namedSymbol instanceof OperationSymbol) {
@@ -1576,29 +1576,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
         else {
             typeMathSymbol(ctx, ctx.qualifier, ctx.name.getStart());
-            //we're walking a module argument list
-            ParserRuleContext listCtx = Utils.getFirstAncestorOfType(ctx,
-                    ResolveParser.SpecModuleArgumentListContext.class);
-            if (listCtx != null) {
-                try {
-                    ProgTypeSymbol type =
-                            symtab.getInnermostActiveScope()
-                                    .queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(),
-                                            ImportStrategy.IMPORT_NAMED,
-                                            FacilityStrategy.FACILITY_INSTANTIATE, true))
-                                    .toProgTypeSymbol();
-                    ProgTypeSymbol t = (ProgTypeSymbol) type.toProgTypeSymbol();
-                    actualGenericTypesPerFacilitySpecArgs
-                            .get((ResolveParser.SpecModuleArgumentListContext)listCtx).add(t);
-                } catch (DuplicateSymbolException e) {
-                    int i;
-                    i=0;
-                }
-                catch (SymbolTableException e) {
-                    //this is ok (especially if it's not a program type symbol (unexpected sym exception),
-                    //"typeMathSym" above should've reported the problems already.
-                }
-            }
         }
         return null;
     }
