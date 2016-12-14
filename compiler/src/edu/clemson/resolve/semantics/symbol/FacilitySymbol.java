@@ -43,7 +43,7 @@ public class FacilitySymbol extends Symbol {
         try {
             ModuleScopeBuilder m = scopeRepo.getModuleScope(moduleIdentifier);
             ModuleParameterization spec = new ModuleParameterization(
-                    m.getImportWithName(facility.spec),
+                    m.getFacilityImportWithName(facility.spec),
                     specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
             ModuleParameterization impl = null;
 

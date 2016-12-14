@@ -234,7 +234,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         try {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
-            symtab.getModuleScope(moduleScope.getImportWithName(ctx.spec));
+            symtab.getModuleScope(moduleScope.getFacilityImportWithName(ctx.spec));
 
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same

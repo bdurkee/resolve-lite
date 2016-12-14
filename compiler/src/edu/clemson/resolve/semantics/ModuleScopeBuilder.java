@@ -72,6 +72,17 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         throw new NoSuchModuleException(name);
     }
 
+    //TODO: Use a map instead... but need to
+    @NotNull
+    public ModuleIdentifier getFacilityImportWithName(@NotNull Token name) throws NoSuchModuleException {
+        for (ModuleIdentifier e : facilityModules) {
+            if (e.getNameToken().getText().equals(name.getText())) {
+                return e;
+            }
+        }
+        throw new NoSuchModuleException(name);
+    }
+
     @NotNull
     public ModuleIdentifier getAlias(@NotNull Token name) throws NoSuchModuleException {
         if (aliases.get(name.getText()) == null) {
