@@ -338,8 +338,8 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
         //if we're within a module argument list:
-        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.RealizModuleArgumentListContext.class) != null &&
-                (Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class) != null) &&
+        if ((Utils.getFirstAncestorOfType(ctx, ResolveParser.RealizModuleArgumentListContext.class) != null ||
+                (Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class) != null)) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
             OutputModelObject o = createFacilityArgumentModel(ctx);
