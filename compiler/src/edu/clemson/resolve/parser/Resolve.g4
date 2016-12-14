@@ -291,17 +291,20 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp name=progSymbolExp progExp              #progInfixExp
-//    |   progExp name=progSymbolName                     #progPostfixExp
     ;
 
 progPrimary
     :   progLiteralExp
     |   progParamExp
-    |   progSymbolExp
+    |   progNameExp
     ;
 
 progParamExp
-    :   progSymbolExp '(' (progExp (',' progExp)*)? ')'
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNameExp
+    :   (qualifier=ID '::')? name=ID
     ;
 
 progSymbolExp
@@ -319,7 +322,7 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-// mathFor constructs
+// math constructs
 
 mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'

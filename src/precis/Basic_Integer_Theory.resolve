@@ -33,9 +33,6 @@ Precis Basic_Integer_Theory;
     Definition (m : ℤ) mod (n : ℤ) : ℤ;
 
     Definition NN : ℘(ℤ) is {n : ℤ | ⌐(Is_Neg(n))};
-        //won't typecheck at the moment
-        //Corollary nn1: ∀ n : NN, suc(n) = NB(NB(n));
-        //Corollary nn2: ∀ n : NN, suc(n) : NN;
 
     Definition (m : ℤ) > (n : ℤ) : B;
 
