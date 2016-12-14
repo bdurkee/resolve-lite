@@ -218,6 +218,10 @@ enhancementPairing
         (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
     ;
 
+realizModuleArgumentList
+    :   '(' progExp (',' progExp)* ')'
+    ;
+
 specModuleArgumentList
     :   '(' specModuleArg (',' specModuleArg)* ')'
     ;
@@ -225,10 +229,6 @@ specModuleArgumentList
 specModuleArg
     :   progExp
     |   mathExp
-    ;
-
-realizModuleArgumentList
-    :   '(' progExp (',' progExp)* ')'
     ;
 
 // operations & procedures

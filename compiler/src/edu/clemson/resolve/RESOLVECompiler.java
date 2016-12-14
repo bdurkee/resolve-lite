@@ -111,9 +111,8 @@ public class RESOLVECompiler {
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    @NotNull
+
     public final ErrorManager errMgr;
-    @NotNull
     public LogManager logMgr = new LogManager();
 
     /**
@@ -331,7 +330,6 @@ public class RESOLVECompiler {
             }
         }
     }
-
 
     public static Path getProjectRootPathFor(String fileName) {
         File file = new File(fileName);

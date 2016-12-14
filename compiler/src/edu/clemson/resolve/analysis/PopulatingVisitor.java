@@ -222,9 +222,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitFacilityDecl(ResolveParser.FacilityDeclContext ctx) {
         initializeAndSanityCheckInfo(ctx);
         //now visit all supplied actual arg exprs
-        //ctx.moduleArgumentList().forEach(this::visit);
-        int i;
-        i=0;
         if (ctx.specArgs != null) this.visit(ctx.specArgs);
         if (ctx.realizArgs != null) this.visit(ctx.realizArgs);
 
@@ -704,7 +701,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             new NameQuery(ctx.qualifier, ctx.name.getText(), true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
-                    Utils.getFirstAncestorOfType(ctx, ResolveParser.RealizModuleArgumentListContext.class);
+                    Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class,
+                            ResolveParser.RealizModuleArgumentListContext.class);
             if (namedSymbol instanceof ProgVariableSymbol) {
                 programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
             }
@@ -716,9 +714,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
 
                 if (parentFacilityArgListCtx != null) {
-                    actualGenericTypesPerFacilitySpecArgs.get(
-                            (ResolveParser.RealizModuleArgumentListContext)
-                                    parentFacilityArgListCtx).add((ProgTypeSymbol) namedSymbol);
+                    //can only happen (grammatically) under a
+                    actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
+                            .add((ProgTypeSymbol) namedSymbol);
                 }
             }
             //special case (don't want to adapt "mathVariableQuery" to coerce
@@ -735,9 +733,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 //TODO: Don't know if the below is necessary anymore...
                 if (parentFacilityArgListCtx != null &&
                         ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
-                    actualGenericTypesPerFacilitySpecArgs.get(
-                            (ResolveParser.RealizModuleArgumentListContext)
-                                    parentFacilityArgListCtx).add(namedSymbol.toProgTypeSymbol());
+                    actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
+                            .add(namedSymbol.toProgTypeSymbol());
                 }
             }
             if (ctx.qualifier == null) {
