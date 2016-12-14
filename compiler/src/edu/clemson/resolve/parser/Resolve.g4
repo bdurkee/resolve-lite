@@ -290,7 +290,7 @@ progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   progExp name=progSymbolExp progExp              #progInfixExp
+    |   progExp op=progOperatorExp progExp              #progInfixExp
     ;
 
 progPrimary
@@ -307,12 +307,12 @@ progNameExp
     :   (qualifier=ID '::')? name=ID
     ;
 
-progSymbolExp
+progOperatorExp
     :   (qualifier=ID '::')? name=progSymbolName
     ;
 
 progSymbolName
-    :   (SYM | ID | '=')
+    :   (ID | SYM | '=')
     ;
 
 progLiteralExp

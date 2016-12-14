@@ -298,13 +298,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        if (referencesOperationParameter(ctx.progSymbolExp().name.getText())) {
-            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progSymbolExp().name.getText(), args));
+        if (referencesOperationParameter(ctx.progNameExp().name.getText())) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progNameExp().name.getText(), args));
         }
         else {
             built.put(ctx, new MethodCall(buildQualifier(
-                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name.getText()),
-                    ctx.progSymbolExp().name.getText(), args));
+                    ctx.progNameExp().qualifier, ctx.progNameExp().name.getText()),
+                    ctx.progNameExp().name.getText(), args));
         }
     }
 
@@ -318,7 +318,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.name.getStart(), ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op.getStart(), ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
@@ -336,7 +336,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
+    public void exitProgNameExp(ResolveParser.ProgNameExpContext ctx) {
         //if we're within a module argument list:
         if ((Utils.getFirstAncestorOfType(ctx, ResolveParser.RealizModuleArgumentListContext.class) != null ||
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class) != null)) &&
@@ -361,7 +361,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Nullable
-    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
+    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNameExpContext ctx) {
         OutputModelObject result = null;
         try {
             Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(), true));

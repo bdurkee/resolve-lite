@@ -307,14 +307,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
-        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progSymbolExp()))
+        /*PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progSymbolExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
-        repo.put(ctx, result.build());
+        repo.put(ctx, result.build());*/
     }
 
     @Override
-    public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
+    public void exitProgNameExp(ResolveParser.ProgNameExpContext ctx) {
         PSymbolBuilder result = new PSymbolBuilder(ctx.name.getText())
                 .progType(annotations.progTypes.get(ctx))
                 .mathClssfctn(getMathClssfctn(ctx))
