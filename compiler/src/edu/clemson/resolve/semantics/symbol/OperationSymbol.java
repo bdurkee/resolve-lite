@@ -1,6 +1,8 @@
 package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.semantics.MathClssftn;
+import edu.clemson.resolve.semantics.MathFunctionClssftn;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +59,16 @@ public class OperationSymbol extends Symbol {
     @NotNull
     public ProgType getReturnType() {
         return returnType;
+    }
+
+    public MathClssftn getAppropriateMathClssftn() {
+        if (parameters.size() == 0) return returnType.toMath();
+        List<MathClssftn> argTypes = new ArrayList<>();
+        for (ProgParameterSymbol parameter : parameters) {
+            argTypes.add(parameter.getDeclaredType().toMath());
+        }
+        MathFunctionClssftn f = new MathFunctionClssftn(returnType.getTypeGraph(), returnType.toMath(), argTypes);
+        return f;
     }
 
     @NotNull

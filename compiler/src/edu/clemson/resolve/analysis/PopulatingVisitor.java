@@ -737,7 +737,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             else if (namedSymbol instanceof OperationSymbol) {
                 ProgType returnType = ((OperationSymbol) namedSymbol).getReturnType();
                 tr.progTypes.put(ctx, returnType);
-                tr.mathClssftns.put(ctx, returnType.toMath());
+                tr.mathClssftns.put(ctx, ((OperationSymbol) namedSymbol).getAppropriateMathClssftn());
                 return;
             }
             else if (namedSymbol instanceof ModuleParameterSymbol) {

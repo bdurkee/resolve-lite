@@ -338,11 +338,11 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitProgOperatorExp(ResolveParser.ProgOperatorExpContext ctx) {
-        PSymbol operator = new PSymbolBuilder(ctx.name.start.getText())
+        PSymbolBuilder result = new PSymbolBuilder(ctx.name.start.getText())
                 .qualifier(ctx.qualifier)
-                .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
-                .progType(annotations.progTypes.get(ctx))
-                .build();
+                .mathClssfctn(getMathClssfctn(ctx))
+                .progType(annotations.progTypes.get(ctx));
+        repo.put(ctx, result.build());
     }
 
     @Override
