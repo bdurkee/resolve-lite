@@ -695,10 +695,17 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return null;
         }
         try {
+            //(here's the old one)
+            //Symbol namedSymbol =
+            //        symtab.getInnermostActiveScope().queryForOne(
+            //                new NameQuery(ctx.qualifier, ctx.name.getText(), true));
+
             //definition, operation, type, parameter, module param, or just some variable.
             Symbol namedSymbol =
-                    symtab.getInnermostActiveScope().queryForOne(
-                            new NameQuery(ctx.qualifier, ctx.name.getText(), true));
+                    symtab.getInnermostActiveScope()
+                            .queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(),
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_GENERIC, true));
             ProgType programType = ProgInvalidType.getInstance(g);
             ParserRuleContext parentFacilityArgListCtx =
                     Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class,

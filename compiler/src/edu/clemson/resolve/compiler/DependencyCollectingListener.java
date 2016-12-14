@@ -165,7 +165,14 @@ public class DependencyCollectingListener extends ResolveBaseListener {
 
     @Nullable
     private File searchProjectRootDirectory(List<String> extensions, String id) {
-        Path projectPath = RESOLVECompiler.getProjectRootPathFor(fileName);
+        Path projectPath = null;
+        if (!compiler.pathConformalProject) {
+            projectPath = Paths.get(compiler.libDirectory);
+        }
+        else {
+            projectPath = RESOLVECompiler.getProjectRootPathFor(fileName);
+        }
+        if (projectPath == null) return null;
         try {
             return findFile(projectPath, id, extensions);
         } catch (IOException e) {

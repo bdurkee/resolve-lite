@@ -79,12 +79,14 @@ public class RESOLVECompiler {
     public String timeout;
     public String tries;
 
+    public String libDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
     public boolean prove = false;
     public boolean log = false;
     public boolean printEnv = false;
+    public boolean pathConformalProject = true;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
@@ -96,6 +98,7 @@ public class RESOLVECompiler {
             new Option("tries", "-numTries", OptionArgType.STRING, "number of tries to dispatch a vc"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
             new Option("printEnv", "-env", "print path variables"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify custom location of resolve source files"),
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
@@ -193,10 +196,24 @@ public class RESOLVECompiler {
             haveOutputDir = true;
             if (outDir.exists() && !outDir.isDirectory()) {
                 errMgr.toolError(ErrorKind.OUTPUT_DIR_IS_FILE, outputDirectory);
+                libDirectory = ".";
             }
         }
         else {
             outputDirectory = ".";
+        }
+        if (libDirectory != null) {
+            if (libDirectory.endsWith("/") || libDirectory.endsWith("\\")) {
+                libDirectory = libDirectory.substring(0, libDirectory.length() - 1);
+            }
+            File outDir = new File(libDirectory);
+            if (!outDir.exists()) {
+                errMgr.toolError(ErrorKind.DIR_NOT_FOUND, libDirectory);
+                libDirectory = ".";
+            }
+        }
+        else {
+            libDirectory = ".";
         }
     }
 
@@ -331,12 +348,13 @@ public class RESOLVECompiler {
         }
     }
 
+    @Nullable
     public static Path getProjectRootPathFor(String fileName) {
         File file = new File(fileName);
         try {
             file.getCanonicalFile().toPath();
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
         Path resolvePath = Paths.get(getLibrariesPathDirectory() + File.separator + "src");
         Path resolveCore = Paths.get(getCoreLibraryDirectory() + File.separator + "src");
@@ -383,7 +401,7 @@ public class RESOLVECompiler {
         try {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(fileName);    //first try searching in the local project..
+                file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
             if (!file.exists()) {
                 errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
@@ -392,10 +410,11 @@ public class RESOLVECompiler {
             Path canonicalPath = file.getCanonicalFile().toPath();
             if (!canonicalPath.startsWith(getLibrariesPathDirectory()) &&
                     !canonicalPath.startsWith(getCoreLibraryDirectory())) {
-                throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
-                        "RESOLVEPATH or RESOLVEROOT");
+                pathConformalProject = false;
+                //TODO: Warning not on RESOLVEPATH or CORE path.
+              //  throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
+              //          "RESOLVEPATH or RESOLVEROOT");
             }
-
             ANTLRFileStream afs = new ANTLRFileStream(file.getCanonicalPath());
             return parseModule(afs);
         } catch (IOException ioe) {

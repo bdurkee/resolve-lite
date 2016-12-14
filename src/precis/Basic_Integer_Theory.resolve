@@ -42,9 +42,9 @@ Precis Basic_Integer_Theory;
     Chainable Definition (m : ℤ) < (n : ℤ) : B;
 
     Chainable Definition (m : ℤ) ≤ (n : ℤ) : B is n + ⨩(m) ∈ NN;
-        //Corollary leq1: Is_Transitive(≤);
-        //Corollary leq2: Is_Antisymmetric(≤);
-        //Corollary leq3: Is_Total(≤);
+        Corollary leq1: Is_Transitive(≤);
+        Corollary leq2: Is_Antisymmetric(≤);
+        Corollary leq3: Is_Total(≤);
 
     Definition (m : ℤ) ≥ (n : ℤ) : B;
 
