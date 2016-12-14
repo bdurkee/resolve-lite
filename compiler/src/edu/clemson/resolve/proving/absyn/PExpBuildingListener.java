@@ -307,10 +307,10 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
-        /*PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progSymbolExp()))
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNameExp()))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
-        repo.put(ctx, result.build());*/
+        repo.put(ctx, result.build());
     }
 
     @Override
@@ -330,16 +330,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         List<ProgType> argTypes = Utils.apply(ctx.progExp(), annotations.progTypes::get);
-        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
-        PSymbol operator = new PSymbolBuilder(attr.name.getText())
-                .qualifier(attr.qualifier.getText())
-                .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
-                .progType(annotations.progTypes.get(ctx))
-                .build();
-        PApplyBuilder result = new PApplyBuilder(operator)
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.op))
                 .arguments(Utils.collect(PExp.class, ctx.progExp(), repo))
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
+    }
+
+    @Override
+    public void exitProgOperatorExp(ResolveParser.ProgOperatorExpContext ctx) {
+        PSymbol operator = new PSymbolBuilder(ctx.name.start.getText())
+                .qualifier(ctx.qualifier)
+                .mathClssfctn(getMathClssfctn(ctx))  //<- this isn't right yet, this will just be the range.
+                .progType(annotations.progTypes.get(ctx))
+                .build();
     }
 
     @Override

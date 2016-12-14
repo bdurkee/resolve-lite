@@ -839,29 +839,19 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    //TODO: Eventually we'll have syntax so users can supply this
     @Override
     public Void visitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
         ctx.progExp().forEach(this::visit);
         this.visit(ctx.op);
-        typeOperationRefExp();
-        /*List<ProgType> argTypes = Utils.apply(ctx.progExp(), tr.progTypes::get);
-        StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
-        ResolveParser.ProgSymbolExpContext sym = new ResolveParser.ProgSymbolExpContext(ctx.getParent(), 0);
-        ResolveParser.ProgSymbolNameContext symName = new ResolveParser.ProgSymbolNameContext(sym, 0);
-        sym.qualifier = attr.qualifier;
-        symName.start = attr.name;
-        sym.name = symName;*/
-        //typeOperationRefExp(ctx, sym, ctx.progExp());
+        typeOperationRefExp(ctx, ctx.op.qualifier, ctx.op.name.start, ctx.progExp());
         return null;
     }
 
     @Override
     public Void visitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         ctx.progExp().forEach(this::visit);
-        //TODO: Change this so we just visit
-        typeOperationRefExp(ctx, ctx.progNameExp(), ctx.progNameExp().qualifier,
-                ctx.progNameExp().name, ctx.progExp());
+        this.visit(ctx.progNameExp());
+        typeOperationRefExp(ctx, ctx.progNameExp().qualifier, ctx.progNameExp().name, ctx.progExp());
         return null;
     }
 
@@ -916,50 +906,31 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return result;
     }
 
-    protected void typeOperationRefExp(@NotNull ParserRuleContext overallCtx,
-                                       @NotNull ParserRuleContext nameNodeCtx,
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @Nullable Token qualifier,
                                        @NotNull Token name,
                                        @NotNull ResolveParser.ProgExpContext... args) {
-        typeOperationRefExp(overallCtx, nameNodeCtx, qualifier, name, Arrays.asList(args));
+        typeOperationRefExp(ctx, qualifier, name, Arrays.asList(args));
     }
 
-    protected void typeOperationRefExp(@NotNull ParserRuleContext overallCtx,
-                                       @NotNull ParserRuleContext nameNodeCtx,
+    protected void typeOperationRefExp(@NotNull ParserRuleContext ctx,
                                        @Nullable Token qualifier,
                                        @NotNull Token name,
                                        @NotNull List<ResolveParser.ProgExpContext> args) {
         List<ProgType> argTypes = Utils.apply(args, tr.progTypes::get);
-        //every other call
         try {
             OperationSymbol opSym = symtab.getInnermostActiveScope().queryForOne(
                     new OperationQuery(qualifier, name, argTypes,
                             FacilityStrategy.FACILITY_INSTANTIATE,
                             ImportStrategy.IMPORT_NAMED, true));
-
-            if (qualifier == null) {
-                FacilitySymbol s = getFacilityForSymbol(nameNodeCtx, opSym);
-                if (s != null) {
-                    Token newQualifier = Utils.createTokenFrom(nameNodeCtx.getStart(), s.getName());
-                    if (nameNodeCtx instanceof ResolveParser.ProgNameExpContext) {
-                        ((ResolveParser.ProgNameExpContext)nameNodeCtx).qualifier = newQualifier;
-                    }
-                    else if (nameNodeCtx instanceof ResolveParser.ProgOperatorExpContext) {
-                        ((ResolveParser.ProgOperatorExpContext)nameNodeCtx).qualifier = newQualifier;
-                    }
-                }
-            }
-            tr.progTypes.put(overallCtx, opSym.getReturnType());
-            tr.progTypes.put(nameNodeCtx, opSym.getReturnType());
-            tr.mathClssftns.put(overallCtx, opSym.getReturnType().toMath());
-            tr.mathClssftns.put(nameNodeCtx, opSym.getReturnType().toMath());
+            tr.progTypes.put(ctx, opSym.getReturnType());
+            tr.mathClssftns.put(ctx, opSym.getReturnType().toMath());
             return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
             List<String> argStrList = Utils.apply(args, ResolveParser.ProgExpContext::getText);
             compiler.errMgr.semanticError(ErrorKind.NO_SUCH_OPERATION, name, name.getText(), argStrList, argTypes);
         } catch (UnexpectedSymbolException use) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    nameNodeCtx.getStart(), "an operation", name.getText(),
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL, name, "an operation", name.getText(),
                 use.getTheUnexpectedSymbolDescription());
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
