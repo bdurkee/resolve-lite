@@ -226,6 +226,9 @@ specModuleArgumentList
     :   '(' specModuleArg (',' specModuleArg)* ')'
     ;
 
+//this is cool, I want to match program expressions FIRST, then if
+//I see a strange glyph (or something involving a strange glyph),
+//THEN we parse the math and carry on as usual.
 specModuleArg
     :   progExp
     |   mathExp
