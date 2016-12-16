@@ -364,7 +364,11 @@ public class ModelBuilder extends ResolveBaseListener {
     private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNameExpContext ctx) {
         OutputModelObject result = null;
         try {
-            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(), true));
+            Symbol s = moduleScope
+                    .queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(),
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_GENERIC, true));
+
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
                         ctx.qualifier, ctx.name.getText()), s.toOperationSymbol());

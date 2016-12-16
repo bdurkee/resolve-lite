@@ -497,6 +497,7 @@ INT                 : [0-9]+ ;
 //TODO: removed '|' (10/28/2016)
 SYM                 : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>')+ ;
 
+//TODO: I'm missing a lot of arrows (that, according to the symbol browser, I have access to)
 MATH_UNICODE_SYM
     :   [\u2100-\u214F]
     |   [\u2200-\u22FF]

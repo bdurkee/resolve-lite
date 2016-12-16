@@ -49,7 +49,7 @@ public class FacilitySymbol extends Symbol {
 
             if (facility.externally == null) {
                 impl = new ModuleParameterization(
-                        m.getImportWithName(facility.realiz), new ArrayList<>(), this, scopeRepo);
+                        m.getFacilityImportWithName(facility.realiz), new ArrayList<>(), this, scopeRepo);
             }
             this.type = new SpecImplementationPairing(spec, impl);
             //These are realized by the concept realization

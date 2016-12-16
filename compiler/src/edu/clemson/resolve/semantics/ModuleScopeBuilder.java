@@ -72,7 +72,7 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         throw new NoSuchModuleException(name);
     }
 
-    //TODO: Use a map instead... but need to
+    //TODO: Use a map instead..
     @NotNull
     public ModuleIdentifier getFacilityImportWithName(@NotNull Token name) throws NoSuchModuleException {
         for (ModuleIdentifier e : facilityModules) {

@@ -1,12 +1,10 @@
 package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
-import edu.clemson.resolve.semantics.MathClssftn;
-import edu.clemson.resolve.semantics.MathFunctionClssftn;
+import edu.clemson.resolve.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.programtype.ProgVoidType;
 
@@ -81,6 +79,15 @@ public class OperationSymbol extends Symbol {
     @Override
     public ProgVariableSymbol toProgVariableSymbol() {
         return new ProgVariableSymbol(name, definingTree, returnType, moduleIdentifier);
+    }
+
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
+        DumbMathClssftnHandler g = returnType.getTypeGraph();
+        MathClssftn x = getAppropriateMathClssftn();
+        return new MathClssftnWrappingSymbol(g, name,
+                new MathNamedClssftn(g, name, x.typeRefDepth, x), definingTree, moduleIdentifier);
     }
 
     @NotNull

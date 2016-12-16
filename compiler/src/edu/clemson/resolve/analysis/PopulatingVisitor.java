@@ -116,8 +116,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             ModuleIdentifier precisIdent = moduleScope.getImportWithName(ctx.precis);
             ModuleScopeBuilder precisScope = symtab.getModuleScope(precisIdent);
             moduleScope.addImports(precisScope.getImports())
-                    .addInheritedModules(precisIdent)
-                    .addAliases(precisScope.getAliases());
+                    .addInheritedModules(precisIdent);
         } catch (NoSuchModuleException e) {
             noSuchModule(e);
         }
@@ -153,9 +152,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
             moduleScope.addImports(conceptScope.getImports())
                     .addImports(extensionScope.getImports())
-                    .addInheritedModules(conceptIdent, extensionIdent)
-                    .addAliases(conceptScope.getAliases())
-                    .addAliases(extensionScope.getAliases());
+                    .addInheritedModules(conceptIdent, extensionIdent);
         } catch (NoSuchModuleException e) {
             noSuchModule(e);
         }
@@ -232,6 +229,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
             symtab.getModuleScope(moduleScope.getFacilityImportWithName(ctx.spec));
+            if (ctx.externally == null) symtab.getModuleScope(moduleScope.getFacilityImportWithName(ctx.realiz));
 
             //before we even construct the facility we ensure things like
             //formal counts and actual counts (also for generics) is the same
@@ -694,96 +692,91 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             typeProgSelectorAccessExp(ctx, prevSelectorAccess, ctx.name.getText());
             return null;
         }
-        typeProgNameLikeCtx(ctx, ctx.qualifier, ctx.name);
+        Symbol sym = findSymbolAndTypeProgExp(ctx, ctx.qualifier, ctx.name);
+        //set the facility qualifier if it's missing from the ctx
+        if (ctx.qualifier == null) {
+            FacilitySymbol s = getFacilityForSymbol(ctx, sym);
+            if (s != null) ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
+        }
+        typeMathSymbol(ctx, ctx.qualifier, ctx.name);
         return null;
     }
 
-    private void typeProgNameLikeCtx(@NotNull ParserRuleContext ctx,
-                                     @Nullable Token qualifier,
-                                     @NotNull Token name) {
+    @Nullable
+    private Symbol findSymbolAndTypeProgExp(@NotNull ParserRuleContext ctx,
+                                            @Nullable Token qualifier,
+                                            @NotNull Token name) {
+        Symbol namedSymbol = getSymbolFor(qualifier, name);
+        if (namedSymbol == null) {
+            tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
+            return null;
+        }
+        ProgType programType = ProgInvalidType.getInstance(g);
+        ParserRuleContext parentFacilityArgListCtx =
+                Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class,
+                        ResolveParser.RealizModuleArgumentListContext.class);
+        if (namedSymbol instanceof ProgVariableSymbol) {
+            programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
+        }
+        else if (namedSymbol instanceof ProgParameterSymbol) {
+            programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
+        }
+        //I don't think this is true anymore....assuming we use MathExps for specModuleArgs
+        else if (namedSymbol instanceof ProgTypeSymbol) {
+            programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
+            if (parentFacilityArgListCtx != null) {
+                //can only happen (grammatically) under a
+                actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
+                        .add((ProgTypeSymbol) namedSymbol);
+            }
+        }
+        else if (namedSymbol instanceof OperationSymbol) {
+            programType = ((OperationSymbol) namedSymbol).getReturnType();
+        }
+        else if (namedSymbol instanceof ModuleParameterSymbol) {
+            programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
+            if (parentFacilityArgListCtx != null &&
+                    ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
+                try {
+                    actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
+                            .add(namedSymbol.toProgTypeSymbol());
+                } catch (UnexpectedSymbolException e) {
+                }
+            }
+        }
+        tr.progTypes.put(ctx, programType);
+        return namedSymbol;
+    }
+
+    @Nullable
+    private Symbol getSymbolFor(@Nullable Token qualifier, @NotNull Token name) {
         try {
-            //(here's the old one)
-            //Symbol namedSymbol =
-            //        symtab.getInnermostActiveScope().queryForOne(
-            //                new NameQuery(ctx.qualifier, ctx.name.getText(), true));
-            //definition, operation, type, parameter, module param, or just some variable.
-            Symbol namedSymbol =
-                    symtab.getInnermostActiveScope()
+            return symtab.getInnermostActiveScope()
                             .queryForOne(new NameQuery(qualifier, name.getText(),
                                     ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_GENERIC, true));
-            ProgType programType = ProgInvalidType.getInstance(g);
-            ParserRuleContext parentFacilityArgListCtx =
-                    Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class,
-                            ResolveParser.RealizModuleArgumentListContext.class);
-            if (namedSymbol instanceof ProgVariableSymbol) {
-                programType = ((ProgVariableSymbol) namedSymbol).getProgramType();
-            }
-            else if (namedSymbol instanceof ProgParameterSymbol) {
-                programType = ((ProgParameterSymbol) namedSymbol).getDeclaredType();
-            }
-            //I don't think this is true anymore....assuming we use MathExps for specModuleArgs
-            else if (namedSymbol instanceof ProgTypeSymbol) {
-                programType = ((ProgTypeSymbol) namedSymbol).getProgramType();
-
-                if (parentFacilityArgListCtx != null) {
-                    //can only happen (grammatically) under a
-                    actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
-                            .add((ProgTypeSymbol) namedSymbol);
-                }
-            }
-            //special case (don't want to adapt "mathVariableQuery" to coerce
-            //OperationSymbols, so in the meantime
-            else if (namedSymbol instanceof OperationSymbol) {
-                ProgType returnType = ((OperationSymbol) namedSymbol).getReturnType();
-                tr.progTypes.put(ctx, returnType);
-                tr.mathClssftns.put(ctx, ((OperationSymbol) namedSymbol).getAppropriateMathClssftn());
-                return;
-            }
-            else if (namedSymbol instanceof ModuleParameterSymbol) {
-                programType = ((ModuleParameterSymbol) namedSymbol).getProgramType();
-
-                //TODO: Don't know if the below is necessary anymore...
-                if (parentFacilityArgListCtx != null &&
-                        ((ModuleParameterSymbol) namedSymbol).isModuleTypeParameter()) {
-                    actualGenericTypesPerFacilitySpecArgs.get(parentFacilityArgListCtx)
-                            .add(namedSymbol.toProgTypeSymbol());
-                }
-            }
-            if (qualifier == null) {
-                FacilitySymbol s = getFacilityForSymbol(ctx, namedSymbol);
-                if (s != null) {
-                    qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
-                }
-            }
-            tr.progTypes.put(ctx, programType);
-            typeMathSymbol(ctx, qualifier, name);
-            return;
         } catch (NoSuchSymbolException | DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(e.getErrorKind(), ctx.getStart(),
+            compiler.errMgr.semanticError(e.getErrorKind(), name,
                     name.getText());
         } catch (UnexpectedSymbolException use) {
-            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL,
-                    ctx.getStart(), "a variable", name.getText(),
+            compiler.errMgr.semanticError(ErrorKind.UNEXPECTED_SYMBOL, name, "a variable", name.getText(),
                     use.getTheUnexpectedSymbolDescription());
         } catch (NoSuchModuleException nsme) {
             noSuchModule(nsme);
         }
-        tr.progTypes.put(ctx, ProgInvalidType.getInstance(g));
-        tr.mathClssftns.put(ctx, g.INVALID);
+        return null;
     }
 
     @Override
     public Void visitProgOperatorExp(ResolveParser.ProgOperatorExpContext ctx) {
         ResolveParser.ProgInfixExpContext app = (ResolveParser.ProgInfixExpContext) ctx.getParent();
-        //we've already visited the arguments.
         List<ProgType> argTypes = Utils.apply(app.progExp(), tr.progTypes::get);
         StdTemplateProgOps.BuiltInOpAttributes attr = StdTemplateProgOps.convert(ctx.name.getStart(), argTypes);
         //change the tree slightly to be the desugared name...
         ctx.qualifier = attr.qualifier;
         ctx.name.start = attr.name;
         ctx.name.stop = attr.name;
-        typeProgNameLikeCtx(ctx, ctx.qualifier, ctx.name.start);
+        findSymbolAndTypeProgExp(ctx, ctx.qualifier, ctx.name.start);
         return null;
     }
 
@@ -1785,7 +1778,8 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
      * as the tree context where s is referenced from.
      */
     @Nullable
-    private FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @NotNull Symbol s) {
+    private FacilitySymbol getFacilityForSymbol(@NotNull ParserRuleContext ctx, @Nullable Symbol s) {
+        if (s == null) return null;
         try {
             List<FacilitySymbol> facilities = moduleScope.query(new SymbolTypeQuery<>(FacilitySymbol.class));
             List<FacilitySymbol> result = new ArrayList<>();
