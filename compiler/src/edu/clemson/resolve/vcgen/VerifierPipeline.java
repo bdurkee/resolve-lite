@@ -21,7 +21,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
             if (compiler.targetNames.contains(unit.getNameToken().getText()) && (compiler.vcs || compiler.prove)) {
                 if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptModuleDeclContext) continue;
-                else if (unit.getRoot().getChild(0) instanceof ResolveParser.ConceptExtModuleDeclContext) continue;
+                else if (unit.getRoot().getChild(0) instanceof ResolveParser.EnhancementModuleDeclContext) continue;
                 else if (unit.getRoot().getChild(0) instanceof ResolveParser.PrecisExtModuleDeclContext) continue;
                 VCGen gen = new VCGen(compiler, unit);
                 ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());

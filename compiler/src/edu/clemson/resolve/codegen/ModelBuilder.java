@@ -128,13 +128,25 @@ public class ModelBuilder extends ResolveBaseListener {
         f.isStatic = withinFacilityModule();
         List<DecoratedFacilityInstantiation> layers = new ArrayList<>();
 
-        DecoratedFacilityInstantiation basePtr = new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.impl.getText());
+        DecoratedFacilityInstantiation basePtr = new DecoratedFacilityInstantiation(ctx.spec.getText(), ctx.realiz.getText());
         basePtr.isProxied = false;
-        List<Expr> specArgs = ctx.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.specArgs.progExp(), built);
-        List<Expr> implArgs = ctx.implArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, ctx.implArgs.progExp(), built);
+        List<Expr> specArgs = new ArrayList<>();
+        List<Expr> implArgs = new ArrayList<>();
+        if (ctx.specArgs != null) {
+            for (ResolveParser.SpecModuleArgContext arg : ctx.specArgs.specModuleArg()) {
+                //no need to add anything that is an arg.mathExp (since it will be a definition)...
+                if (arg.progExp() != null) specArgs.add((Expr) built.get(arg.progExp()));
+            }
+        }
+        if (ctx.realizArgs != null) {
+            for (ResolveParser.ProgExpContext exp : ctx.realizArgs.progExp()) {
+                //no need to add anything that is an arg.mathExp (since it will be a definition)...
+                implArgs.add((Expr) built.get(exp));
+            }
+        }
         basePtr.args.addAll(specArgs);
         basePtr.args.addAll(implArgs);
-
+/*
         for (ResolveParser.ExtensionPairingContext pair : ctx.extensionPairing()) {
             DecoratedFacilityInstantiation layer = new DecoratedFacilityInstantiation(pair.spec.getText(), pair.impl.getText());
             specArgs = pair.specArgs == null ? new ArrayList<>() : Utils.collect(Expr.class, pair.specArgs.progExp(), built);
@@ -153,9 +165,14 @@ public class ModelBuilder extends ResolveBaseListener {
             else {
                 layers.get(i).child = basePtr;
             }
-        }
+        }*/
         f.root = layers.isEmpty() ? basePtr : layers.get(0);
         built.put(ctx, f);
+    }
+
+    @Override
+    public void exitSpecModuleArg(ResolveParser.SpecModuleArgContext ctx) {
+
     }
 
     @Override
@@ -281,13 +298,13 @@ public class ModelBuilder extends ResolveBaseListener {
     @Override
     public void exitProgParamExp(ResolveParser.ProgParamExpContext ctx) {
         List<Expr> args = Utils.collect(Expr.class, ctx.progExp(), built);
-        if (referencesOperationParameter(ctx.progSymbolExp().name.getText())) {
-            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progSymbolExp().name.getText(), args));
+        if (referencesOperationParameter(ctx.progNameExp().name.getText())) {
+            built.put(ctx, new MethodCall.OperationParameterMethodCall(ctx.progNameExp().name.getText(), args));
         }
         else {
             built.put(ctx, new MethodCall(buildQualifier(
-                    ctx.progSymbolExp().qualifier, ctx.progSymbolExp().name.getText()),
-                    ctx.progSymbolExp().name.getText(), args));
+                    ctx.progNameExp().qualifier, ctx.progNameExp().name.getText()),
+                    ctx.progNameExp().name.getText(), args));
         }
     }
 
@@ -301,7 +318,7 @@ public class ModelBuilder extends ResolveBaseListener {
 
     @Override
     public void exitProgInfixExp(ResolveParser.ProgInfixExpContext ctx) {
-        built.put(ctx, buildSugaredProgExp(ctx, ctx.name.getStart(), ctx.progExp()));
+        built.put(ctx, buildSugaredProgExp(ctx, ctx.op.getStart(), ctx.progExp()));
     }
 
     private MethodCall buildSugaredProgExp(@NotNull ParserRuleContext ctx,
@@ -319,9 +336,10 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitProgSymbolExp(ResolveParser.ProgSymbolExpContext ctx) {
+    public void exitProgNameExp(ResolveParser.ProgNameExpContext ctx) {
         //if we're within a module argument list:
-        if (Utils.getFirstAncestorOfType(ctx, ResolveParser.ModuleArgumentListContext.class) != null &&
+        if ((Utils.getFirstAncestorOfType(ctx, ResolveParser.RealizModuleArgumentListContext.class) != null ||
+                (Utils.getFirstAncestorOfType(ctx, ResolveParser.SpecModuleArgumentListContext.class) != null)) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgInfixExpContext.class) == null) &&
                 (Utils.getFirstAncestorOfType(ctx, ResolveParser.ProgParamExpContext.class) == null)) {
             OutputModelObject o = createFacilityArgumentModel(ctx);
@@ -342,16 +360,15 @@ public class ModelBuilder extends ResolveBaseListener {
         built.put(ctx, ref);
     }
 
-    /**
-     * Given an arbitrary expression within some
-     * {@link ResolveParser.ModuleArgumentListContext}, returns an {@link OutputModelObject}
-     * for that argument.
-     */
     @Nullable
-    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgSymbolExpContext ctx) {
+    private OutputModelObject createFacilityArgumentModel(@NotNull ResolveParser.ProgNameExpContext ctx) {
         OutputModelObject result = null;
         try {
-            Symbol s = moduleScope.queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(), true));
+            Symbol s = moduleScope
+                    .queryForOne(new NameQuery(ctx.qualifier, ctx.name.getText(),
+                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                            MathSymbolTable.FacilityStrategy.FACILITY_GENERIC, true));
+
             if (s instanceof OperationSymbol || s.isModuleOperationParameter()) {
                 result = new AnonOpParameterClassInstance(buildQualifier(
                         ctx.qualifier, ctx.name.getText()), s.toOperationSymbol());
@@ -404,7 +421,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public void exitConceptRealizationModuleDecl(ResolveParser.ConceptRealizationModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         ConceptImplModule impl = new ConceptImplModule(ctx.name.getText(), ctx.concept.getText(), file);
         if (ctx.implBlock() != null) {
@@ -465,7 +482,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
+    public void exitEnhancementModuleDecl(ResolveParser.EnhancementModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         AbstractSpecModule spec = new SpecExtensionModule(ctx.name.getText(), ctx.concept.getText(), file);
 
@@ -482,7 +499,7 @@ public class ModelBuilder extends ResolveBaseListener {
     }
 
     @Override
-    public void exitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public void exitEnhancementRealizationModuleDecl(ResolveParser.EnhancementRealizationModuleDeclContext ctx) {
         ModuleFile file = buildFile();
         file.genPackage = buildPackage();
 
@@ -554,8 +571,8 @@ public class ModelBuilder extends ResolveBaseListener {
 
     private List<String> buildImports() {
         List<String> result = new ArrayList<>();
-        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.uses);
-        allImports.addAll(gen.module.externalUses);
+        Set<ModuleIdentifier> allImports = new LinkedHashSet<>(gen.module.getDependencies().getCombinedUses());
+        allImports.addAll(gen.module.getDependencies().externalUses);
 
         for (ModuleIdentifier e : allImports) {
             Path p = e.getPathRelativeToRootDir();

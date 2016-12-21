@@ -82,7 +82,7 @@ public class TestPExp extends BaseTest {
         Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "bar::f.y"));
         Assert.assertNotEquals(parseMathAssertionExp(g, "bar::f.x"), parseMathAssertionExp(g, "baz::f.x"));
 
-        Assert.assertEquals(parseMathAssertionExp(g, "||S||"), parseMathAssertionExp(g, "||S||"));
+        Assert.assertEquals(parseMathAssertionExp(g, "∥S∥"), parseMathAssertionExp(g, "∥S∥"));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class TestPExp extends BaseTest {
     @Test
     public void testNestedQuantifierDistribution() {
         PExp result = parseMathAssertionExp(g, "Forall x, y : Z, Exists v : Z, " +
-                "Forall f : Entity * Entity -> B, f(x, v)");
+                "Forall f : Entity * Entity ⟶ B, f(x, v)");
         Assert.assertEquals(3, result.getSubExpressions().size());
         Assert.assertEquals(3, result.getQuantifiedVariables().size());
         Assert.assertEquals(UNIVERSAL, result.getQuantification());
@@ -303,7 +303,7 @@ public class TestPExp extends BaseTest {
                 parseMathAssertionExp(
                         g,
                         "Forall x, y, z : Z, Exists u, v : N," +
-                                "Forall f, h : Z * Z -> B, "
+                                "Forall f, h : Z * Z ⟶ B, "
                                 + "g(#u) + (h(#z, #w, f(#u)))");
         Set<String> quantifiedNames = result.getQuantifiedVariables().stream()
                 .map(e -> ((PSymbol) e).getName()).collect(Collectors.toSet());

@@ -39,4 +39,5 @@ public class AnalysisPipeline extends AbstractCompilationPipeline {
             ParseTreeWalker.DEFAULT.walk(pl, unit.getRoot());
         }
     }
+
 }

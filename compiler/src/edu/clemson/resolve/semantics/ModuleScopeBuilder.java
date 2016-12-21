@@ -10,6 +10,7 @@ import java.util.*;
 public class ModuleScopeBuilder extends ScopeBuilder {
 
     private final Set<ModuleIdentifier> importedModules = new HashSet<>();
+    private final Set<ModuleIdentifier> facilityModules = new HashSet<>();
 
     /**
      * The set of all modules {@code this} either extends or inherits from. This set should be a subset of
@@ -44,6 +45,12 @@ public class ModuleScopeBuilder extends ScopeBuilder {
         return this;
     }
 
+    @NotNull
+    public ModuleScopeBuilder addFacilityImports(@NotNull Collection<ModuleIdentifier> facilityIdentifiers) {
+        facilityModules.addAll(facilityIdentifiers);
+        return this;
+    }
+
     public boolean imports(@Nullable ModuleIdentifier i) {
         return i != null && i.equals(getModuleIdentifier()) || importedModules.contains(i);
     }
@@ -58,6 +65,17 @@ public class ModuleScopeBuilder extends ScopeBuilder {
     @NotNull
     public ModuleIdentifier getImportWithName(@NotNull Token name) throws NoSuchModuleException {
         for (ModuleIdentifier e : importedModules) {
+            if (e.getNameToken().getText().equals(name.getText())) {
+                return e;
+            }
+        }
+        throw new NoSuchModuleException(name);
+    }
+
+    //TODO: Use a map instead..
+    @NotNull
+    public ModuleIdentifier getFacilityImportWithName(@NotNull Token name) throws NoSuchModuleException {
+        for (ModuleIdentifier e : facilityModules) {
             if (e.getNameToken().getText().equals(name.getText())) {
                 return e;
             }

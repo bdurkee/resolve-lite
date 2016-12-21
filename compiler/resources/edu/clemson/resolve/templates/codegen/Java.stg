@@ -280,13 +280,13 @@ CallStat(call, methodParamExp) ::= "<methodParamExp>;"
 ReturnStat(ret) ::= "return <ret.name>;"
 
 WhileStat(while, cond, stats) ::= <<
-while (((Standard_Boolean_Realiz.Boolean)(<cond>)).val) {
+while (Boolean.parseBoolean((<cond>).toString())) {
     <stats; separator="\n">
 }
 >>
 
 IfStat(if, cond, ifStats, elseStats) ::= <<
-if (((Standard_Boolean_Realiz.Boolean)(<cond>)).val) {
+if (Boolean.parseBoolean((<cond>).toString())) {
     <ifStats; separator="\n">
 }<if(elseStats)>
 else {

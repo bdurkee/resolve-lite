@@ -136,7 +136,8 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "Cls", g.CLS));
             globalScope.define(new MathClssftnWrappingSymbol(g, "El", g.EL));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "Empty_Set", g.EMPTY_SET));
+
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∥..∥", new MathFunctionClssftn(g, g.SSET, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "ϕ", g.EMPTY_SET));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "and", g.BOOLEAN_FUNCTION));
@@ -145,27 +146,19 @@ public class MathSymbolTable {
             globalScope.define(new MathClssftnWrappingSymbol(g, "or", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∨", g.BOOLEAN_FUNCTION));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "implies", g.BOOLEAN_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "⟹", g.BOOLEAN_FUNCTION));
-
-            globalScope.define(new MathClssftnWrappingSymbol(g, "Powerset", g.POWERSET_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "℘", g.POWERSET_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "Powerset", g.POWERSET_FUNCTION));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "conc", g.BOOLEAN));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "is_in",
-                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∈",
-                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
-
-            globalScope.define(new MathClssftnWrappingSymbol(g, "∪",
-                    new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
-
-            globalScope.define(new MathClssftnWrappingSymbol(g, "is_not_in",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "∉",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.SSET)));
 
+            globalScope.define(new MathClssftnWrappingSymbol(g, "∪",
+                    new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "~",
                     new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
 
@@ -177,12 +170,9 @@ public class MathSymbolTable {
 
             //aliases for our 'arrow type'
             globalScope.define(new MathClssftnWrappingSymbol(g, "⟶", g.ARROW_FUNCTION));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "->", g.ARROW_FUNCTION));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "*", g.CROSS_PROD_FUNCTION));
             globalScope.define(new MathClssftnWrappingSymbol(g, "=",
-                    new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "/=",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "≠",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));

@@ -1,10 +1,10 @@
 package edu.clemson.resolve.semantics.symbol;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.semantics.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.programtype.ProgVoidType;
 
@@ -59,6 +59,16 @@ public class OperationSymbol extends Symbol {
         return returnType;
     }
 
+    public MathClssftn getAppropriateMathClssftn() {
+        if (parameters.size() == 0) return returnType.toMath();
+        List<MathClssftn> argTypes = new ArrayList<>();
+        for (ProgParameterSymbol parameter : parameters) {
+            argTypes.add(parameter.getDeclaredType().toMath());
+        }
+        MathFunctionClssftn f = new MathFunctionClssftn(returnType.getTypeGraph(), returnType.toMath(), argTypes);
+        return f;
+    }
+
     @NotNull
     @Override
     public OperationSymbol toOperationSymbol() {
@@ -69,6 +79,15 @@ public class OperationSymbol extends Symbol {
     @Override
     public ProgVariableSymbol toProgVariableSymbol() {
         return new ProgVariableSymbol(name, definingTree, returnType, moduleIdentifier);
+    }
+
+    @NotNull
+    @Override
+    public MathClssftnWrappingSymbol toMathSymbol() {
+        DumbMathClssftnHandler g = returnType.getTypeGraph();
+        MathClssftn x = getAppropriateMathClssftn();
+        return new MathClssftnWrappingSymbol(g, name,
+                new MathNamedClssftn(g, name, x.typeRefDepth, x), definingTree, moduleIdentifier);
     }
 
     @NotNull

@@ -34,16 +34,11 @@ import java.util.Set;
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
-    @NotNull
     public static final ModuleIdentifier GLOBAL = new ModuleIdentifier();
 
-    @NotNull
-    private Token name;
+    private final Token name;
     private final boolean globalFlag;
-    @NotNull
-    private File file;
-    @NotNull
-    public List<String> pathListRelativeToRoot = new ArrayList<>();
+    private final File file;
 
     private ModuleIdentifier() {
         this.name = new CommonToken(ResolveLexer.ID, "GLOBAL");
@@ -90,29 +85,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
     public Path getPathRelativeToRootDir() {
         Path filePath = Paths.get(file.getAbsolutePath());
         return getPackageRootPath().relativize(filePath);
-    }
-
-    public static String getModuleFilePathRelativeToProjectLibDirs(String filePath) {
-        String resolveRoot = RESOLVECompiler.getCoreLibraryDirectory() + File.separator + "src";
-        String resolvePath = RESOLVECompiler.getLibrariesPathDirectory() + File.separator + "src";
-
-        String result = null;
-        Path modulePath = new File(filePath).toPath();
-        if (modulePath.startsWith(resolvePath)) {
-            Path projectPathAbsolute = Paths.get(new File(resolvePath).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else if (modulePath.startsWith(resolveRoot)) {
-            Path projectPathAbsolute = Paths.get(new File(resolveRoot).getAbsolutePath());
-            Path pathRelative = projectPathAbsolute.relativize(modulePath);
-            result = pathRelative.toString();
-        }
-        else {
-            //just use the lib directory if the user has a non-conformal project..
-            result = new File(modulePath.toFile().getPath()).getPath();
-        }
-        return result;
     }
 
     @Override

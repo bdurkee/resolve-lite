@@ -97,21 +97,18 @@ public class ErrorManager extends BaseErrorListener {
     public void syntaxError(Recognizer<?, ?> recognizer,
                             Object offendingSymbol, int line, int charPositionInLine,
                             String msg, RecognitionException e) {
-        RESOLVEMessage m =
-                new LanguageSyntaxMessage(ErrorKind.SYNTAX_ERROR,
-                        (Token) offendingSymbol, e, msg);
+        RESOLVEMessage m = new LanguageSyntaxMessage(ErrorKind.SYNTAX_ERROR, (Token) offendingSymbol, e, msg);
         emit(ErrorKind.SYNTAX_ERROR, m);
     }
 
-    public void semanticError(ErrorKind etype, Token offendingSymbol,
-                              Object... args) {
+    public void semanticError(ErrorKind etype, Token offendingSymbol, Object... args) {
         RESOLVEMessage msg = new LanguageSemanticsMessage(etype, offendingSymbol, args);
         emit(etype, msg);
     }
 
     /**
-     * Raise a predefined message with some number of paramters for the
-     * StringTemplate but for which there is no location information possible.
+     * Raise a predefined message with some number of paramters for the StringTemplate but for which
+     * there is no location information possible.
      *
      * @param errorType The Message Descriptor
      * @param args      The arguments to pass to the StringTemplate
@@ -141,9 +138,7 @@ public class ErrorManager extends BaseErrorListener {
         System.err.println("internal error: " + msg);
     }
 
-    /**
-     * Returns first non ErrorManager code location for generating messages.
-     */
+    /** Returns first non ErrorManager code location for generating messages. */
     private static StackTraceElement getLastNonErrorManagerCodeLocation(Throwable e) {
         StackTraceElement[] stack = e.getStackTrace();
         int i = 0;

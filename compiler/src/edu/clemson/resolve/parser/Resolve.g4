@@ -3,12 +3,11 @@ grammar Resolve;
 moduleDecl
     :   (precisModuleDecl
     |   precisExtModuleDecl
-    |   conceptExtModuleDecl
+    |   enhancementModuleDecl
     |   conceptModuleDecl
-    |   conceptImplModuleDecl
-    |   conceptExtImplModuleDecl
-    |   facilityModuleDecl
-    |   shortFacilityModuleDecl) EOF
+    |   conceptRealizationModuleDecl
+    |   enhancementRealizationModuleDecl
+    |   facilityModuleDecl) EOF
     ;
 
 precisModuleDecl
@@ -34,7 +33,7 @@ conceptModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptExtModuleDecl
+enhancementModuleDecl
     :   'Enhancement' name=ID specModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
@@ -42,16 +41,16 @@ conceptExtModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptImplModuleDecl
-    :   'Realization' name=ID implModuleParameterList?
+conceptRealizationModuleDecl
+    :   'Realization' name=ID realizModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         implBlock
         'end' closename=ID ';'
     ;
 
-conceptExtImplModuleDecl
-    :   'Realization' name=ID implModuleParameterList?
+enhancementRealizationModuleDecl
+    :   'Realization' name=ID realizModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?
         implBlock
@@ -66,10 +65,6 @@ facilityModuleDecl
         'end' closename=ID ';'
     ;
 
-shortFacilityModuleDecl
-    :   facilityDecl
-    ;
-
 // uses, imports
 
 usesList
@@ -80,9 +75,8 @@ usesSpecs
     :   moduleIdentifierSpec (',' moduleIdentifierSpec)*
     ;
 
-moduleIdentifierSpec : id=ID fromClause? aliasClause? ;
+moduleIdentifierSpec : id=ID fromClause?;
 fromClause : 'from' moduleLibraryIdentifier ;
-aliasClause : 'as' ID ;
 moduleLibraryIdentifier : ID ('.' ID)* ;
 
 // module blocks & items
@@ -109,6 +103,7 @@ implBlock
         | procedureDecl
         | typeRepresentationDecl
         | facilityDecl
+        | mathStandardDefnDecl
         )*
     ;
 
@@ -159,8 +154,8 @@ specModuleParameterList
     :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
     ;
 
-implModuleParameterList
-    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+realizModuleParameterList
+    :   '(' realizModuleParameterDecl (';' realizModuleParameterDecl)* ')'
     ;
 
 operationParameterList
@@ -173,7 +168,7 @@ specModuleParameterDecl
     |   genericTypeParameterDecl
     ;
 
-implModuleParameterDecl
+realizModuleParameterDecl
     :   parameterDeclGroup
     |   operationDecl
     ;
@@ -211,26 +206,38 @@ varDeclGroup
 // facility decls
 
 facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'realized' 'by' impl=ID
-        (implArgs=moduleArgumentList)? implFrom=fromClause?
-        (extensionPairing)* ';'?
+    :   'Facility' name=ID 'is' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
+        (enhancementPairing)* ';'
     ;
 
-extensionPairing
-    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClause?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)? implFrom=fromClause?
+enhancementPairing
+    :   'enhanced' 'by' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
     ;
 
-moduleArgumentList
+realizModuleArgumentList
     :   '(' progExp (',' progExp)* ')'
+    ;
+
+specModuleArgumentList
+    :   '(' specModuleArg (',' specModuleArg)* ')'
+    ;
+
+//this is cool, I want to match program expressions FIRST, then if
+//I see a strange glyph (or something involving a strange glyph),
+//THEN we parse the math and carry on as usual.
+specModuleArg
+    :   progExp
+    |   mathExp
     ;
 
 // operations & procedures
 
 operationDecl
-    :   ('Infix'|'Postfix')? 'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
+    :   'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
@@ -283,26 +290,29 @@ progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   progExp name=progSymbolExp progExp              #progInfixExp
-//    |   progExp name=progSymbolName                     #progPostfixExp
+    |   progExp op=progOperatorExp progExp              #progInfixExp
     ;
 
 progPrimary
     :   progLiteralExp
     |   progParamExp
-    |   progSymbolExp
+    |   progNameExp
     ;
 
 progParamExp
-    :   progSymbolExp '(' (progExp (',' progExp)*)? ')'
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
     ;
 
-progSymbolExp
+progNameExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progOperatorExp
     :   (qualifier=ID '::')? name=progSymbolName
     ;
 
 progSymbolName
-    :   (SYM | ID | '=')
+    :   (ID | SYM | '=')
     ;
 
 progLiteralExp
@@ -312,7 +322,7 @@ progLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
-// mathFor constructs
+// math constructs
 
 mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
@@ -354,8 +364,8 @@ mathMixfixDefnSig
         rop=mathBracketOp ':' mathClssftnExp
     ;
 
-mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
-mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'['|']') ;
+mathSymbolName:     (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
+mathBracketOp :     ('⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'∥'|'['|']'|'|') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -409,25 +419,14 @@ mathAssertionExp
 mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
-/*
+
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
-    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
-//  |   <assoc=right> lhs=mathExp op='->' rhs=mathExp                   #mathBuiltinInfixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathMixfixAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
-//  |   mathExp op=('and'|'∧'|'or'|'∨') mathExp                         #mathBuiltinInfixAppExp
-    |   '(' mathAssertionExp ')'                                        #mathNestedExp
-    |   mathPrimeExp                                                    #mathPrimaryExp
-    ;
-*/
-mathExp
-    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
-    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
-    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
-    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+    |   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     |   mathPrimeExp                                                    #mathPrimaryExp
     ;
@@ -484,18 +483,34 @@ COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
 
-//TODO: removed '|' (10/28/2016)
-SYM                 : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>')+ ;
+//really I'm not sure we need this to be '+' at the end
+SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>') ;
 
 MATH_UNICODE_SYM
-    :   [\u2100-\u214F]
-    |   [\u2200-\u22FF]
-    |   [\u27C0-\u27EF]
-    |   [\u27F0-\u27FF]
-    |   [\u2A00-\u2AFF]
-    |   [\u2300-\u23BF]
-    |   [\u0370-\u03FF] //greek letters
+    :   U_ARROW
+    |   U_LOGIC
+    |   U_LETTER
+    |   U_OPERATOR
+    |   U_RELATION
+    |   [\u0370-\u03FF] //all greek letters
     ;
+
+U_ARROW        : ('←'|'⇐'|'⟵'|'⟸'|'→'|'⇒'|'⟶'|'⟹'|'↔'|'⇔'|'⟷'|
+                  '⟺'|'↩'|'↪'|'↽'|'⇁'|'↼'|'⇀'|'⇌'|'↝'|'⇃'|'⇂'|'↿'|'↾'|
+                  '↑'|'⇑'|'↓'|'⇓'|'↕'|'⇕'|'↤'|'↦'|'↢'|'↣') ;
+
+U_LOGIC        : ('∧'|'⋀'|'∨'|'⋁'|'¬'|'⋄') ;
+
+/* Notice that U_BRACKET glyphs are special: they don't extend MATH_UNICODE_SYM */
+U_LETTER       : ('ℂ'|'ℕ'|'ℚ'|'ℝ'|'ℤ'|'℘') ;
+
+U_OPERATOR     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'⨄'|'±'|'∓'|'×'|'÷'|
+                  '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⊘'|'⟕'|'⟖'|'⟗'|
+                  '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪') ;
+
+U_RELATION     : ('⊢'|'⊨'|'⊩'|'⊫'|'⊣'|'≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|
+                  '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈' '≍'|
+                  '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|'⊴'|'⊵'|'△'|'≜') ;
 
 CHAR: '\'' . '\'' ;
 RAW_STRING : '\'' (ESC | ~["\\])* '\'' ;

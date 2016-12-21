@@ -62,19 +62,19 @@ class BasicSanityCheckingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitConceptExtModuleDecl(ResolveParser.ConceptExtModuleDeclContext ctx) {
+    public Void visitEnhancementModuleDecl(ResolveParser.EnhancementModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptExtImplModuleDecl(ResolveParser.ConceptExtImplModuleDeclContext ctx) {
+    public Void visitEnhancementRealizationModuleDecl(ResolveParser.EnhancementRealizationModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
 
     @Override
-    public Void visitConceptImplModuleDecl(ResolveParser.ConceptImplModuleDeclContext ctx) {
+    public Void visitConceptRealizationModuleDecl(ResolveParser.ConceptRealizationModuleDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
         return null;
     }
