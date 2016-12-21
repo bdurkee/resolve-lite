@@ -1380,6 +1380,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
+        tr.mathClssftns.put(ctx, g.BOOLEAN);
+        return null;
+    }
+
+    @Override
     public Void visitMathPrefixAppExp(ResolveParser.MathPrefixAppExpContext ctx) {
         typeMathFunctionAppExp(ctx, ctx.name, ctx.mathExp().subList(1, ctx.mathExp().size()));
         return null;
@@ -1413,7 +1419,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
+    public Void visitMathMixfixAppExp(ResolveParser.MathMixfixAppExpContext ctx) {
         //construct a 'name' node for this non std app
         ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);

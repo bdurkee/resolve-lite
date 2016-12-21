@@ -187,6 +187,19 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override
+    public void exitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
+        PSymbol operator = new PSymbolBuilder(ctx.op.getText())
+                .mathClssfctn(g.BOOLEAN_FUNCTION)
+                .quantification(quantifiedVars.get(ctx.op.getText()))
+                .build();
+        PApplyBuilder result =
+                new PApplyBuilder(operator)
+                        .applicationType(g.BOOLEAN).style(INFIX)
+                        .arguments(repo.get(ctx.l), repo.get(ctx.r));
+        repo.put(ctx, result.build());
+    }
+
+    @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
         PSymbol operator = new PSymbolBuilder(ctx.lop.getText(), ctx.rop.getText())
                 .mathClssfctn(getMathClssfctn(ctx.lop))
@@ -200,7 +213,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
     }
 
     @Override
-    public void exitMathNonStdAppExp(ResolveParser.MathNonStdAppExpContext ctx) {
+    public void exitMathMixfixAppExp(ResolveParser.MathMixfixAppExpContext ctx) {
         PSymbol namePortion = new PSymbolBuilder(ctx.mathBracketOp(0).getText(), ctx.mathBracketOp(1).getText())
                 .mathClssfctn(new MathFunctionClssftn(g, g.INVALID, g.INVALID, g.INVALID)) //temp;
                 .build();

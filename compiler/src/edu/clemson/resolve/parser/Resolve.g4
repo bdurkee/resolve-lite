@@ -364,8 +364,8 @@ mathMixfixDefnSig
         rop=mathBracketOp ':' mathClssftnExp
     ;
 
-mathSymbolName:   (ID | MATH_UNICODE_SYM | SYM | INT | BOOL | '=') ;
-mathBracketOp:  ('|'|'∥'|'⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'['|']') ;
+mathSymbolName:     (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
+mathBracketOp :     ('⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'∥'|'['|']'|'|') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -419,25 +419,14 @@ mathAssertionExp
 mathQuantifiedExp
     :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
-/*
+
 mathExp
     :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
     |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
-    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
-//  |   <assoc=right> lhs=mathExp op='->' rhs=mathExp                   #mathBuiltinInfixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathMixfixAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
-//  |   mathExp op=('and'|'∧'|'or'|'∨') mathExp                         #mathBuiltinInfixAppExp
-    |   '(' mathAssertionExp ')'                                        #mathNestedExp
-    |   mathPrimeExp                                                    #mathPrimaryExp
-    ;
-*/
-mathExp
-    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
-    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathNonStdAppExp
-    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
-    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+    |   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     |   mathPrimeExp                                                    #mathPrimaryExp
     ;
@@ -498,29 +487,30 @@ INT                 : [0-9]+ ;
 SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>') ;
 
 MATH_UNICODE_SYM
-    :   U_ARROWS
+    :   U_ARROW
     |   U_LOGIC
-    |   U_LETTERS
-    |   U_OPERATORS
-    |   U_RELATIONS
+    |   U_LETTER
+    |   U_OPERATOR
+    |   U_RELATION
     |   [\u0370-\u03FF] //all greek letters
     ;
 
-U_ARROWS        : ('←'|'⇐'|'⟵'|'⟸'|'→'|'⇒'|'⟶'|'⟹'|'↔'|'⇔'|'⟷'|
-                   '⟺'|'↩'|'↪'|'↽'|'⇁'|'↼'|'⇀'|'⇌'|'↝'|'⇃'|'⇂'|'↿'|'↾'|
-                   '↑'|'⇑'|'↓'|'⇓'|'↕'|'⇕'|'↤'|'↦'|'↢'|'↣');
+U_ARROW        : ('←'|'⇐'|'⟵'|'⟸'|'→'|'⇒'|'⟶'|'⟹'|'↔'|'⇔'|'⟷'|
+                  '⟺'|'↩'|'↪'|'↽'|'⇁'|'↼'|'⇀'|'⇌'|'↝'|'⇃'|'⇂'|'↿'|'↾'|
+                  '↑'|'⇑'|'↓'|'⇓'|'↕'|'⇕'|'↤'|'↦'|'↢'|'↣') ;
 
-U_LOGIC         : ('∧'|'⋀'|'∨'|'⋁'|'∀'|'∃'|'¬'|'⋄');
+U_LOGIC        : ('∧'|'⋀'|'∨'|'⋁'|'¬'|'⋄') ;
 
-U_LETTERS       : ('ℂ'|'ℕ'|'ℚ'|'ℝ'|'ℤ'|'℘');
+/* Notice that U_BRACKET glyphs are special: they don't extend MATH_UNICODE_SYM */
+U_LETTER       : ('ℂ'|'ℕ'|'ℚ'|'ℝ'|'ℤ'|'℘') ;
 
-U_OPERATORS     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'⨄'|'±'|'∓'|'×'|'÷'|
-                   '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⊘'|'⟕'|'⟖'|'⟗'|
-                   '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪');
+U_OPERATOR     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'⨄'|'±'|'∓'|'×'|'÷'|
+                  '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⊘'|'⟕'|'⟖'|'⟗'|
+                  '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪') ;
 
-U_RELATIONS     : ('⊢'|'⊨'|'⊩'|'⊫'|'⊣'|'≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|
-                   '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'≠'|'∼'|'≐'|'≃'|'≈'
-                   '≍'|'≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|'⊴'|'⊵'|'△'|'≜');
+U_RELATION     : ('⊢'|'⊨'|'⊩'|'⊫'|'⊣'|'≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|
+                  '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈' '≍'|
+                  '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|'⊴'|'⊵'|'△'|'≜') ;
 
 CHAR: '\'' . '\'' ;
 RAW_STRING : '\'' (ESC | ~["\\])* '\'' ;
