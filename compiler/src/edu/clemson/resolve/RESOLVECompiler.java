@@ -516,8 +516,18 @@ public class RESOLVECompiler {
         if (pl != null) proverListener = pl;
     }
 
-    public void addListener(@Nullable RESOLVECompilerListener cl) {
-        if (cl != null) listeners.add(cl);
+    public void addListener(@Nullable RESOLVECompilerListener l) {
+        if (l != null) listeners.add(l);
+    }
+
+    public void addListeners(RESOLVECompilerListener ... listeners) {
+        addListeners(Arrays.asList(listeners));
+    }
+
+    public void addListeners(List<RESOLVECompilerListener> listeners) {
+        for (RESOLVECompilerListener listener : listeners) {
+            addListener(listener);
+        }
     }
 
     public void removeListener(@Nullable RESOLVECompilerListener tl) {

@@ -698,6 +698,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             FacilitySymbol s = getFacilityForSymbol(ctx, sym);
             if (s != null) ctx.qualifier = Utils.createTokenFrom(ctx.getStart(), s.getName());
         }
+        if (sym == null) {
+            tr.mathClssftns.put(ctx, g.INVALID); return null;
+        }
         typeMathSymbol(ctx, ctx.qualifier, ctx.name);
         return null;
     }
