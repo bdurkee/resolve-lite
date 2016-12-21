@@ -186,7 +186,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result;
     }
 
-    @Override
+    /*@Override
     public void exitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
         PSymbol operator = new PSymbolBuilder(ctx.op.getText())
                 .mathClssfctn(g.BOOLEAN_FUNCTION)
@@ -197,7 +197,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .applicationType(g.BOOLEAN).style(INFIX)
                         .arguments(repo.get(ctx.l), repo.get(ctx.r));
         repo.put(ctx, result.build());
-    }
+    }*/
 
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {

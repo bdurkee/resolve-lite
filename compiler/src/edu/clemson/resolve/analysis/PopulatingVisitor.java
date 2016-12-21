@@ -1378,12 +1378,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         typeMathFunctionAppExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
         return null;
     }
-
+/*
     @Override
     public Void visitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
         tr.mathClssftns.put(ctx, g.BOOLEAN);
         return null;
-    }
+    }*/
 
     @Override
     public Void visitMathPrefixAppExp(ResolveParser.MathPrefixAppExpContext ctx) {

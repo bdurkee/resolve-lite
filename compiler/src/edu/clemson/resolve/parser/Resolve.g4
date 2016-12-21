@@ -130,7 +130,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID '=' type ';'?
+    :   'Type' name=ID 'is' type ';'?
         (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -312,7 +312,7 @@ progOperatorExp
     ;
 
 progSymbolName
-    :   (ID | SYM | '=')
+    :   (ID | SYM)
     ;
 
 progLiteralExp
@@ -426,7 +426,7 @@ mathExp
     |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathMixfixAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
-    |   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
+    //|   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     |   mathPrimeExp                                                    #mathPrimaryExp
     ;
@@ -509,7 +509,7 @@ U_OPERATOR     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'�
                   '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪') ;
 
 U_RELATION     : ('⊢'|'⊨'|'⊩'|'⊫'|'⊣'|'≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|
-                  '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈' '≍'|
+                  '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈' '≍'|'≠'
                   '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|'⊴'|'⊵'|'△'|'≜') ;
 
 CHAR: '\'' . '\'' ;
