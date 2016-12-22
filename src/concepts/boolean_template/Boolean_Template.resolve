@@ -18,7 +18,7 @@ Concept Boolean_Template;
         ensures Or = (a ∨ b);
 
     Operation Not (evaluates a : Boolean) : Boolean;
-        ensures Not = ⌐(a);
+        ensures Not = ¬(a);
 
     Operation Are_Equal (evaluates a, b : Boolean) : Boolean;
         ensures Are_Equal = (a = b);

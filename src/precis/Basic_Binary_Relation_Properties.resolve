@@ -13,10 +13,10 @@ Precis Basic_Binary_Relation_Properties;
         ∀ x, y : D, p(x, y) ∧ p(y, x) ⟹ (x = y);
 
     Definition Is_Asymmetric(p : (D : SSet) * D ⟶ B) : B is
-        ∀ x, y : D, p(x, y) ⟹ ⌐(p(y, x));
+        ∀ x, y : D, p(x, y) ⟹ ¬(p(y, x));
 
     Definition Is_Irreflexive(p : (D : SSet) * D ⟶ B) : B is
-        ∀ x : D, ⌐(p(x, x));
+        ∀ x : D, ¬(p(x, x));
 
     //Theorem R1n1: ∀ D : SSet, ∀ p : D * D -> B,
     //    Is_Transitive(p) ⟹ Is_Irreflexive(p);
