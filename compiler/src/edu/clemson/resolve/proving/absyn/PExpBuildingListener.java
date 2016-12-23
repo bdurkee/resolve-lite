@@ -158,7 +158,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         //hardcode hook to handle chained relationals (generalize this at the syntax level with some
         //special syntax)
-        if (annotations.chainableCtx(ctx) && annotations.chainableCtx(ctx.mathExp(0))) {
+        boolean isChainableCtx = annotations.chainableCtx(ctx);
+        boolean isLeftChainable = annotations.chainableCtx(ctx.mathExp(0));
+        if (isChainableCtx && isLeftChainable) {
             PExp left2 = getBottommostFormula(left);
             PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
                     .applicationType(getMathClssfctn(ctx))

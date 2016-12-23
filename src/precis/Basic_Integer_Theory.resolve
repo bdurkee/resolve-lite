@@ -10,35 +10,32 @@ Precis Basic_Integer_Theory;
 
     Inductive Definition Is_Neg(n : ℤ) : B is
         (i.) Is_Neg(n);
-        (ii.) Is_Neg(NB(n)) = ⌐(Is_Neg(n));
+        (ii.) Is_Neg(NB(n)) = ¬(Is_Neg(n));
 
-    Inductive Definition ⨩(n : ℤ) : ℤ is
-        (i.) ⨩(0) = 0;
-        (ii.) ⨩(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
-
-	Classification Corollary :
-		ℕ : ℤ;
+    Inductive Definition ⨪(n : ℤ) : ℤ is
+        (i.) ⨪(0) = 0;
+        (ii.) ⨪(NB(n)) = {{n if Is_Neg(n); NB(NB(n)) otherwise; }};
 
     Inductive Definition suc(n : ℤ) : ℤ is
         (i.) suc(0) = NB(NB(0));
-        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨩(n) otherwise;}};
+        (ii.) suc(NB(n)) = {{NB(NB(NB(n))) if Is_Neg(n); ⨪(n) otherwise;}};
 
     Inductive Definition (m : ℤ) + (n : ℤ) : ℤ is
         (i.) m + 0 = m;
-        (ii.) m + NB(n) = {{⨩(m) + n if Is_Neg(n);
-                suc(⨩(m) + n) otherwise;}};
+        (ii.) m + NB(n) = {{⨪(m) + n if Is_Neg(n);
+                suc(⨪(m) + n) otherwise;}};
 
     Definition (m : ℤ) - (n : ℤ) : ℤ;
 
     Definition (m : ℤ) mod (n : ℤ) : ℤ;
 
-    Definition NN : ℘(ℤ) is {n : ℤ | ⌐(Is_Neg(n))};
+    Definition NN : ℘(ℤ) is {n : ℤ | ¬(Is_Neg(n))};
 
     Definition (m : ℤ) > (n : ℤ) : B;
 
     Chainable Definition (m : ℤ) < (n : ℤ) : B;
 
-    Chainable Definition (m : ℤ) ≤ (n : ℤ) : B is n + ⨩(m) ∈ NN;
+    Chainable Definition (m : ℤ) ≤ (n : ℤ) : B is n + ⨪(m) ∈ NN;
         Corollary leq1: Is_Transitive(≤);
         Corollary leq2: Is_Antisymmetric(≤);
         Corollary leq3: Is_Total(≤);
@@ -54,11 +51,11 @@ Precis Basic_Integer_Theory;
 
     Inductive Definition (m : ℤ) * (n : ℤ) : ℤ is
         (i.) m * 0 = 0;
-        (ii.) m * NB(n) = {{⨩(m * n) if Is_Neg(n); ⨩(m * n + m) otherwise; }};
+        (ii.) m * NB(n) = {{⨪(m * n) if Is_Neg(n); ⨪(m * n + m) otherwise; }};
 
     Theorem one_N: 1 = 1;
 
-    Theorem I3: ∀ n : ℤ, ⌐(Is_Neg(n)) ⟹ (suc(n) = NB(NB(n)));
+    Theorem I3: ∀ n : ℤ, ¬(Is_Neg(n)) ⟹ (suc(n) = NB(NB(n)));
 
 	Theorem Addition_Over_Equality: ∀ i, j, k : ℤ, (i - j = k) = (i = (k + j));
 
@@ -66,7 +63,7 @@ Precis Basic_Integer_Theory;
 
 	Theorem Nested_Subt_1: ∀ i, j : ℤ, (i + (j - j)) = i;
 
-	Theorem Not_LTE: ∀ i, j : ℤ, ⌐(i ≤ j) = (j + 1 ≤ i);
+	Theorem Not_LTE: ∀ i, j : ℤ, ¬(i ≤ j) = (j + 1 ≤ i);
 
 	Corollary LTE_1a: ∀ i, j, k : ℤ, i ≤ j ∧ (j ≤ k) ⟹ (i ≤ k);   //expand Is_Transitive(≤);
     //tod: Have special keyword which dictates when an application ought to be expanded.

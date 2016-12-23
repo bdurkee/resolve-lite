@@ -26,8 +26,8 @@ Concept Integer_Template;
         ensures Are_Not_Equal = (i ≠ j);
 
     Operation Negate (evaluates i : Integer) : Integer;
-        requires min_int ≤ ⨩(i) ≤ max_int;
-        ensures Negate = ⨩(i);
+        //requires min_int ≤ ⨩(i) ≤ max_int;
+        //ensures Negate = ⨩(i);
 
     Operation Less_Or_Equal (evaluates i, j : Integer) : Boolean;
         ensures Less_Or_Equal = (i ≤ j);

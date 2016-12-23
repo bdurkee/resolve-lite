@@ -1,6 +1,7 @@
 package edu.clemson.resolve.vcgen.app;
 
 import edu.clemson.resolve.proving.absyn.PExp;
+import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.vcgen.BasicLambdaBetaReducingListener;
 import edu.clemson.resolve.vcgen.ListBackedSequent;
@@ -13,9 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ParsimoniousAssumeApplicationStrategy
-        implements
-        RuleApplicationStrategy<VCAssume> {
+public class ParsimoniousAssumeApplicationStrategy implements RuleApplicationStrategy<VCAssume> {
 
     @NotNull
     @Override
@@ -97,7 +96,8 @@ public class ParsimoniousAssumeApplicationStrategy
     }
 
     private boolean hasVerificationVariable(PExp s) {
-        return s.getTopLevelOperationName().contains("P_Val") || s.getTopLevelOperationName().contains("conc");
+        return s.containsName("P_Val") || s.containsName("conc");
+        //return s.getTopLevelOperationName().contains("P_Val") || s.getTopLevelOperationName().contains("conc");
     }
 
     private List<Sequent> performParsimoniousStep(DumbMathClssftnHandler g,

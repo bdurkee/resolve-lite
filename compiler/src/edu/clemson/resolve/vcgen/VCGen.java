@@ -169,9 +169,10 @@ public class VCGen extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
         //block.assume(g.getTrueExp());
+        block.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES));
         ModuleScopeBuilder spec = null, impl = null;
         try {
-            ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
+            ModuleIdentifier concept = moduleScope.getFacilityImportWithName(ctx.spec);
             spec = symtab.getModuleScope(concept);
             if (ctx.externally == null) {
                 ModuleIdentifier imp = moduleScope.getImportWithName(ctx.realiz);
@@ -351,7 +352,7 @@ public class VCGen extends ResolveBaseListener {
                         .facilitySpecializations(facilitySpecFormalActualMappings)
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
-                        //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                        .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(opParamAntecedents) //we assume correspondence for reprs here automatically TODO: NO This can't happen here. Correspondences can't be assumed separately. You need to do exactly what the rule says
                         .assume(concifiedRequires)
                         .remember();

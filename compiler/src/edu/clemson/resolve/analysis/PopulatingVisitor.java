@@ -348,6 +348,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             returnType = ProgVoidType.getInstance(g);
         }
         ctx.varDeclGroup().forEach(this::visit);
+        ctx.noticeClause().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
         symtab.endScope();
@@ -1357,18 +1358,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathPrimaryExp(ResolveParser.MathPrimaryExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathPrimeExp());
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
     @Override
     public Void visitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.getChild(0));
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
     @Override
     public Void visitMathNestedExp(ResolveParser.MathNestedExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathAssertionExp());
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
@@ -1450,7 +1454,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
-        tr.chainableInfixApps.put(ctx, chainableSyms.get(nameExp));
+        Boolean isChainableName = chainableSyms.get(nameExp);
+        if (isChainableName == null) isChainableName = false;
+        String appText = ctx.getText();
+
+        tr.chainableInfixApps.put(ctx, isChainableName);
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClssftn t = exactNamedMathClssftns.get(nameExp);

@@ -2,7 +2,7 @@ PSymbol(name) ::= "<name>"
 
 InfixPApply(left, right, operator) ::= "<left;wrap=\"\n      \"> <operator; wrap=\"\n      \"> <right;wrap=\"\n      \">"
 
-PrefixPApply(name, args) ::= "<name;wrap>(<args; separator=\", \">)"
+PrefixPApply(name, args) ::= "<name;wrap=\"\n      \">(<args; separator=\", \">)"
 
 OutfixPApply(left, right, arg) ::= "<left><arg><right>"
 

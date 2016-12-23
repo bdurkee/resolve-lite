@@ -163,7 +163,7 @@ public class MathSymbolTable {
                     new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "not", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "⌐", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "¬", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "true", new MathNamedClssftn(g, "true", 0, g.BOOLEAN)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "false", new MathNamedClssftn(g, "false", 0, g.BOOLEAN)));
