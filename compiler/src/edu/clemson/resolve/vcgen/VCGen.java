@@ -346,13 +346,18 @@ public class VCGen extends ResolveBaseListener {
             }
             List<PExp> opParamAntecedents = new ArrayList<>();
 
+            //TODO: We can have modes... one mode automatically adds all givens it can think of
+            //(at the price of extra givens)... for example, the query below finds all module parameter syms
+            //we would need to assume constraints for these...
+
+            //List<ModuleParameterSymbol> x=  moduleScope.query(new SymbolTypeQuery<ModuleParameterSymbol>(ModuleParameterSymbol.class));
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
             block = new VCAssertiveBlockBuilder(g, s,
                         "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
                         .facilitySpecializations(facilitySpecFormalActualMappings)
                         .assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES))
                         //TODO: constraints should be added on demand via NOTICE:...
-                        .assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
+                        //.assume(getModuleLevelAssertionsOfType(ClauseType.CONSTRAINT))
                         .assume(opParamAntecedents) //we assume correspondence for reprs here automatically TODO: NO This can't happen here. Correspondences can't be assumed separately. You need to do exactly what the rule says
                         .assume(concifiedRequires)
                         .remember();

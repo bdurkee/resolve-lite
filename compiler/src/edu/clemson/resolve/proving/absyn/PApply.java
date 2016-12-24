@@ -28,7 +28,6 @@ public class PApply extends PExp {
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
-     * <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
      * <li>{@link #endAccept(PExpListener, PApply)}</li>
      * </ul>
      */
@@ -88,11 +87,6 @@ public class PApply extends PExp {
                 v.beginPostfixPApply(s);
             }
 
-            //@Override
-            //protected void fencepostAccept(PExpListener v, PApply s) {
-            //    v.fencepostPostfixPApply(s);
-            //}
-
             @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endPostfixPApply(s);
@@ -131,9 +125,6 @@ public class PApply extends PExp {
 
         /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
-
-        /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
-        //protected abstract void fencepostAccept(PExpListener v, PApply s);
 
         /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);

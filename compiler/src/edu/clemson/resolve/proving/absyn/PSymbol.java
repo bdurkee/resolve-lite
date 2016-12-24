@@ -184,6 +184,7 @@ public class PSymbol extends PExp {
     @Override
     public PExp withQuantifiersFlipped() {
         return new PSymbolBuilder(this)
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .quantification(quantification.flipped())
                 .build();
     }

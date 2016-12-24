@@ -49,7 +49,8 @@ public class PSet extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        return new PSet(getMathClssftn(), Utils.apply(elements, u -> u.substitute(substitutions)));
+        return new PSet(getMathClssftn(), Utils.apply(elements, u -> u.substitute(substitutions)),
+                getVCLocation(), getVCExplanation());
     }
 
     @Override
@@ -105,14 +106,14 @@ public class PSet extends PExp {
 
     @Override
     public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
-        return null;
+        return new PSet(getMathClssftn(), elements, location, explanation);
     }
 
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
         return new PSet(getMathClssftn(),
-                Utils.apply(elements, PExp::withIncomingSignsErased));
+                Utils.apply(elements, PExp::withIncomingSignsErased), getVCLocation(), getVCExplanation());
     }
 
     @NotNull
@@ -147,7 +148,16 @@ public class PSet extends PExp {
 
     @Override
     public boolean equals(Object o) {
-        return false;
+        boolean result = (o instanceof PSet);
+        if (result) {
+            if (elements.size() != ((PSet)o).elements.size()) return true;
+            Iterator<PExp> thisIter = elements.iterator();
+            Iterator<PExp> oIter = ((PSet)o).elements.iterator();
+            while (oIter.hasNext()) {
+                if (!thisIter.next().equals(oIter.next())) return false;
+            }
+        }
+        return true;
     }
 
     @Override
