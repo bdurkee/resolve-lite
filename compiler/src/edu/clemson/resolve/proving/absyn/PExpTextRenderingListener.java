@@ -2,13 +2,11 @@ package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.codegen.AbstractCodeGenerator;
 import edu.clemson.resolve.misc.Utils;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +62,17 @@ public class PExpTextRenderingListener extends PExpListener {
         s.add("left", name.getLeftPrint());
         s.add("right", name.getRightPrint());
         s.add("arg", nodes.get(e.getArguments().get(0)));
+        nodes.put(e, s);
+    }
+
+    @Override
+    public void endMixfixPApply(@NotNull PApply e) {
+        ST s = g.getInstanceOf("MixfixPApply");
+        PSymbol name = (PSymbol) e.getFunctionPortion();
+        s.add("left", name.getLeftPrint());
+        s.add("right", name.getRightPrint());
+        s.add("functionArg", nodes.get(e.getArguments().get(0)));
+        s.add("args", nodes.get(e.getArguments().get(1)));
         nodes.put(e, s);
     }
 

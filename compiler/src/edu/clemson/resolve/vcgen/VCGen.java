@@ -169,7 +169,6 @@ public class VCGen extends ResolveBaseListener {
                 new VCAssertiveBlockBuilder(g, moduleScope,
                         "Facility_Inst=" + ctx.name.getText(), ctx);
         //block.assume(g.getTrueExp());
-        block.assume(getModuleLevelAssertionsOfType(ClauseType.REQUIRES));
         ModuleScopeBuilder spec = null, impl = null;
         try {
             ModuleIdentifier concept = moduleScope.getFacilityImportWithName(ctx.spec);
@@ -180,6 +179,19 @@ public class VCGen extends ResolveBaseListener {
             }
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
+        }
+        //Assume requires clauses for the concept we're implementing (or the *enhancement* & concept!)
+        //why isn't this in the rule??
+        for (ModuleIdentifier identifier : moduleScope.getInheritedIdentifiers()) {
+            try {
+                ModuleScopeBuilder s = symtab.getModuleScope(identifier);
+                List<GlobalMathAssertionSymbol> globalAssertions =
+                        s.query(new SymbolTypeQuery<GlobalMathAssertionSymbol>(GlobalMathAssertionSymbol.class));
+                for (GlobalMathAssertionSymbol a : globalAssertions) {
+                    if (a.getClauseType() == ClauseType.REQUIRES) block.assume(a.getEnclosedExp());
+                }
+            } catch (NoSuchModuleException | UnexpectedSymbolException e) {
+            }
         }
         List<PExp> specArgs = ctx.specArgs.specModuleArg().stream()
                 .map(e -> (PExp)tr.exprASTs.get(e.getChild(0)))

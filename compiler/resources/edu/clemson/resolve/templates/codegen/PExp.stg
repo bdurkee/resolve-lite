@@ -6,6 +6,8 @@ PrefixPApply(name, args) ::= "<name;wrap=\"\n      \">(<args; separator=\", \">)
 
 OutfixPApply(left, right, arg) ::= "<left><arg><right>"
 
+MixfixPApply(functionArg, left, right, args) ::= "<functionArg><left><args><right>"
+
 PLambda(var, type, body) ::= <<
 λ <var> : <type>,
     <body>

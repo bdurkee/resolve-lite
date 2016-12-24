@@ -53,13 +53,10 @@ public abstract class PExpListener {
     }
 
     // PostfixPApply
-    public void beginPostfixPApply(@NotNull PApply p) {
+    public void beginMixfixPApply(@NotNull PApply p) {
     }
 
-    public void fencepostPostfixPApply(@NotNull PApply p) {
-    }
-
-    public void endPostfixPApply(@NotNull PApply p) {
+    public void endMixfixPApply(@NotNull PApply p) {
     }
 
     //PSymbol

@@ -1,7 +1,6 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.Token;
@@ -84,12 +83,12 @@ public class PApply extends PExp {
 
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
-                v.beginPostfixPApply(s);
+                v.beginMixfixPApply(s);
             }
 
             @Override
             protected void endAccept(PExpListener v, PApply s) {
-                v.endPostfixPApply(s);
+                v.endMixfixPApply(s);
             }
         },
         /**

@@ -18,5 +18,5 @@ Concept Bdd_Ceramic_Array_Template (type Entry;
         requires Lower_Bound ≤ i ≤ Upper_Bound;
         ensures x = #A(i) ∧ (A = λ j : ℤ,
                                {{#x     if j = i;
-                                 #A  otherwise;}});
+                                 #A(i)  otherwise;}});
 end Bdd_Ceramic_Array_Template;
