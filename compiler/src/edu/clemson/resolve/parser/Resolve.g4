@@ -474,8 +474,8 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-FORALL : '∀';
-EXISTS : '∃';
+FORALL : ('Forall'|'∀');
+EXISTS : ('Exists'|'∃');
 BOOL : ('true'|'false');
 
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
