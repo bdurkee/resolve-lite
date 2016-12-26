@@ -95,9 +95,10 @@ public class ParsimoniousAssumeApplicationStrategy implements RuleApplicationStr
         return block.snapshot();
     }
 
+    //TODO: Feels hacky... :)
     private boolean hasVerificationVariable(PExp s) {
-        return s.containsName("P_Val") || s.containsName("conc");
-        //return s.getTopLevelOperationName().contains("P_Val") || s.getTopLevelOperationName().contains("conc");
+        //return s.containsName("P_Val") || s.containsName("conc");
+        return s.getTopLevelOperationName().contains("P_Val") || s.getTopLevelOperationName().contains("conc");
     }
 
     private List<Sequent> performParsimoniousStep(DumbMathClssftnHandler g,

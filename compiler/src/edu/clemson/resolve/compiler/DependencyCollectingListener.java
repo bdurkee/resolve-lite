@@ -21,7 +21,7 @@ import java.util.*;
 
 /**
  * Updates the containers tracking uses reference info by visiting the various {@link ParseTree} nodes that include
- * references to other modules.
+ * references to other modules such as facility declarations, uses lists, etc.
  */
 public class DependencyCollectingListener extends ResolveBaseListener {
 
@@ -64,7 +64,6 @@ public class DependencyCollectingListener extends ResolveBaseListener {
         resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
     }
 
-    /*
     @Override
     public void exitEnhancementPairing(ResolveParser.EnhancementPairingContext ctx) {
         ResolveParser.ModuleLibraryIdentifierContext specFrom = ctx.specFrom != null ?
@@ -74,7 +73,7 @@ public class DependencyCollectingListener extends ResolveBaseListener {
 
         resolveAndAddFacilitySpecOrImpl(ctx.spec, false, specFrom);
         resolveAndAddFacilitySpecOrImpl(ctx.realiz, ctx.externally != null, implFrom);
-    }*/
+    }
 
     private void resolveAndAddFacilitySpecOrImpl(@NotNull Token t,
                                                  boolean isExternal,

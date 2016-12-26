@@ -222,9 +222,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.specArgs != null) this.visit(ctx.specArgs);
         if (ctx.realizArgs != null) this.visit(ctx.realizArgs);
 
-        //for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
-        //    extension.moduleArgumentList().forEach(this::visit);
-        //}
         try {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
@@ -1197,8 +1194,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-
-
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
                                        ResolveParser.MathAssertionExpContext assertion) {
@@ -1209,8 +1204,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
                             ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), ctx.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.getStart(), ctx.getText());
         }
     }
 
@@ -1397,51 +1391,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyPrefixNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
-        dummyPrefixNode.start = ctx.lop.start;
-        dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
-        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
-
-        Token left = ctx.mathBracketOp(0).getStart();
-        Token right = ctx.mathBracketOp(1).getStart();
-
-        CommonToken t = new CommonToken(left);
-        t.setText(left.getText() + ".." + right.getText());
-        dummyName.start = t;
-        dummyName.stop = t;
-        dummyName.parent = dummyPrefixNode;
-
-        dummyName.addChild(t);
-        dummyPrefixNode.addChild(dummyName);
-        dummyPrefixNode.name = dummyName;
-        typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
-
-        //TODO: For now, I assign the first class function type of the outfix app to the
-        //left hand side of the operator..
+        ResolveParser.MathSymbolExpContext dummyPrefixNode =
+                buildDummyTwoPartOperatorNode(ctx, ctx.mathBracketOp(0).getStart(),
+                        ctx.mathBracketOp(1).getStart());
         tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
         return null;
     }
 
     @Override
     public Void visitMathMixfixAppExp(ResolveParser.MathMixfixAppExpContext ctx) {
-        //construct a 'name' node for this non std app
+        ResolveParser.MathSymbolExpContext dummyNode =
+                buildDummyTwoPartOperatorNode(ctx, ctx.mathBracketOp(0).getStart(),
+                        ctx.mathBracketOp(1).getStart());
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
+        return null;
+    }
+
+    /**
+     * Builds a concrete syntax 'dummy node' for names of mixfix or outfix style applications.
+     * For example, given {@code |S|}, this returns {@code |..|}. And for {@code Tally[X]}, returns {@code [..]}.
+     */
+    private ResolveParser.MathSymbolExpContext buildDummyTwoPartOperatorNode(ParserRuleContext ctx,
+                                                                             Token left,
+                                                                             Token right) {
         ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
         dummyNode.name = dummyName;
-
-        Token left = ctx.mathBracketOp(0).getStart();
-        Token right = ctx.mathBracketOp(1).getStart();
-
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());
         dummyNode.start = t; dummyNode.stop = t;
         dummyName.start = t; dummyName.stop = t;
-
         dummyName.addChild(t);
         dummyNode.addChild(dummyName);
-
-        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
-        return null;
+        return dummyNode;
     }
 
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
