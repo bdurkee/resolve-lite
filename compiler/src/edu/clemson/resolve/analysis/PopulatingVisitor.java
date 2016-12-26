@@ -1391,10 +1391,10 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyPrefixNode =
+        ResolveParser.MathSymbolExpContext dummyNode =
                 buildDummyTwoPartOperatorNode(ctx, ctx.mathBracketOp(0).getStart(),
                         ctx.mathBracketOp(1).getStart());
-        tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
         return null;
     }
 
