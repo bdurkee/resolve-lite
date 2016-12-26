@@ -345,7 +345,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             returnType = ProgVoidType.getInstance(g);
         }
         ctx.varDeclGroup().forEach(this::visit);
-        ctx.noticeClause().forEach(this::visit);
+        //ctx.noticeClause().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
         symtab.endScope();

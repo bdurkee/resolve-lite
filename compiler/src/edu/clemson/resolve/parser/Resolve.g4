@@ -246,7 +246,6 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
-        (noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -255,7 +254,7 @@ operationProcedureDecl
 procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
-        (noticeClause)*
+        //(noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -268,12 +267,14 @@ stmt
     |   swapStmt
     |   callStmt
     |   whileStmt
+    |   noticeStmt
     |   ifStmt
     ;
 
 assignStmt : left=progExp ':=' right=progExp ';' ;
 swapStmt : left=progExp ':=:' right=progExp ';' ;
 callStmt : progParamExp ';' ;
+noticeStmt : 'Notice' mathAssertionExp ';' ;
 
 whileStmt
     :   'While' progExp

@@ -50,6 +50,8 @@ public class VCGen extends ResolveBaseListener {
             new GeneralCallApplicationStrategy();
     public static final RuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
+    public static final RuleApplicationStrategy<VCAssume> PARSIMONIOUS_ASSUME_APPLICATION =
+            new ParsimoniousAssumeApplicationStrategy();
 
     /** A mapping from facility name to function that maps facility formal parameter names to their actuals. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
@@ -374,9 +376,9 @@ public class VCGen extends ResolveBaseListener {
                         .assume(concifiedRequires)
                         .remember();
             //add in any user defined notices...
-            for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
-                block.assume(tr.exprASTs.get(notice.mathExp()), false, true);
-            }
+            //for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
+            //    block.assume(tr.exprASTs.get(notice.mathExp()), false, true);
+            //}
             assumeVarDecls(ctx.varDeclGroup(), block);
         } catch (SymbolTableException e) {
             return; //shouldn't happen (we wouldn't have gotten here if it did)..
@@ -695,6 +697,13 @@ public class VCGen extends ResolveBaseListener {
         @Override
         public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
             VCSwap s = new VCSwap(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitNoticeStmt(ResolveParser.NoticeStmtContext ctx) {
+            VCAssume s = new VCAssume(builder, PARSIMONIOUS_ASSUME_APPLICATION,
+                    false, true, asts.get(ctx.mathAssertionExp()));
             stats.put(ctx, s);
         }
     }
