@@ -8,12 +8,16 @@ public interface Spiral<T> {
     public boolean atCenter();
     public boolean atEdge();
 
+    public void moveToCenter();
+    public void moveToEnd();
+
     public void spiralOut();
     public void spiralIn();
 
     public void hopOut();
-    public void hopIn();
+    public int hopIn();
 
+    public int lengthOf();
     public T swapLabel(T x);
 
 }
