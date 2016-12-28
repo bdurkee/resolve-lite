@@ -6,6 +6,7 @@ public interface Spiral<T> {
     public T shorten();
 
     public boolean atCenter();
+    public boolean atEnd();
     public boolean atEdge();
 
     public void moveToCenter();
@@ -19,5 +20,9 @@ public interface Spiral<T> {
 
     public int lengthOf();
     public T swapLabel(T x);
+
+    public T getLabel();
+
+    public T putLabel(T lab);
 
 }

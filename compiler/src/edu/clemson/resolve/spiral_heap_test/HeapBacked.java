@@ -69,155 +69,46 @@ public class HeapBacked<T> implements Prioritizer<T> {
     //  correspondence conc.K.Accepting = K.Accpt_Flag ∧
     //      conc.K.Entry_Tally =
     //          K.Heap.Lab[Inward_Loc(K.Heap.Trmnl_Loc) ⋆ 1]
-
-    /*
-    Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
-        requires ∀ q : Sp_Loc(2),
-            (RP(k)(q) = P.Curr_Loc ⟹ q Domin_Ord_Sect P);
-        ensures (P Is_Relabeling_of #P) ∧
-            ( ¬r In_Sect_of P.Curr_Loc ⟹ P.Lab(r) = #P.Lab(r));
-    Recursive Procedure
-        decreasing SCD(P.Trmnl_Loc) - SCD(P.Curr_Loc);
-        Var Top, Left, Right : Entry;
-        Var recurseOffset := 2;
-
-        If not At_End(P) then
-            Swap_Label(P, Top);
-            Spiral_Out(P)
-            Swap_Label(P, Left);
-            If Is_Gtr(Left, Top) then
-                Left :=: Top;
-                recurseOffset := 0;
-            end;
-            Swap_Label(P, Left);
-            If not At_End(P) then
-                Spiral_Out(P);
-                Swap_Label(P, Right);
-                If Is_Gtr(Right, Top) then
-                    Right :=: Top;
-                    recurseOffset := 1;
-                end;
-                Swap_Label(P, Right)
-
-                Hop_Out(P);
-                Swap_Label(P, Top);
-            end;
-        end;
-
-        If
-
-
-
-    end Fix_Pos;
-
-     */
-
-
-
-
-    //  T top = s.swapLabel(null)
-    //int offsetNum = Negate(1);
-    //if not s.atEnd()
-    //  s.spiralOut();
-    //  left = s.swapLabel(temp);
-    //  if gtr.test(left, top)
-    //      left :=: top;
-    //      offsetNum = s.hopIn()
-    //      s.swapLabel(top);
-    //      s.spiralOut();
-    //  end;
-    //  s.swapLabel(left)
-
-    //if not s.atEnd()
-    //  s.spiralOut();
-    //  left = s.swapLabel(temp);
-    //  if gtr.test(left, top) top :=: left;
-    //  s.swapLabel(left)
-
-
+    
     private void fixPosition(Spiral<T> s) {
+        T top, left, right, temp;
+        int recurseOffset = 2;
+        top = s.getLabel();
+        if (!s.atEdge()) {
+            s.hopOut();
+            left = s.getLabel();
+            if (gtr.test(left, top)) {
 
-        //T largest
-        //  top = s.swapLabel(temp);
+                //////////// shorthand for left :=: top;
+                s.putLabel(top);
+                s.hopIn();
+                s.putLabel(left);
+                s.hopOut();
+                ////////////
+                recurseOffset = 0;
+            }
 
-        //if not s.atEnd()
-        //  s.spiralOut();
-        //  left = s.swapLabel(temp);
-        //  if gtr.test(left, top) top :=: left;
-        //  s.swapLabel(left)
+            if (!s.atEnd()) {
+                s.spiralOut();
+                right = s.getLabel();
+                if (gtr.test(right, top)) {
 
-        //if not s.atEnd()
-        //  s.spiralOut();
-        //  left = s.swapLabel(temp);
-        //  if gtr.test(left, top) top :=: left;
-        //  s.swapLabel(left)
-
-        //!use offsetNum to tell which child
-        //to recurse on...!
-
-        //you want to position the current
-        //cursor where the max element is...
-
-
-
-        //T left, right, top;
-        //if not at_end
-        //  top = s.swapLabel(temp);
-        //  s.hopOut();
-        //  left = s.swapLabel(temp);
-
-        //  if not at_end
-        //      s.spiralOut();
-        //      right = s.swapLabel(null);
-        //  end;
-        //  s.hopIn();
-        //  s.swapLabel(top)
-        //  if (gtr.test(left, top))
-        //      s.hopOut;
-        //      s.swapLabel(left)
-        //  if gtr.test(right, top)
-        //
-
-
-        //
-
-        //so we remove labels, recurse, then sift them? NO. Before we can
-        //recurse, we need to know which sector to recurse *on/into*
-        //if not at_end and gtr.test(left, top))
-
-
-
-        //
-
-        //
-    }
-
-    //T left, right, top;
-    //if not at_end
-    //  top = s.swapLabel(temp);
-    //  s.hopOut();
-    //  left = s.swapLabel(temp);
-    //  if gtr.test(left, top) top :=: left
-    //  s.swap_label(left)
-
-    //  if not at_end
-    //      s.spiralOut();
-    //      right = s.swapLabel(null);
-    //      if gtr.test(top, right) top :=: right;
-    //      //put the right side back
-    //      s.swap_label(right);
-    //  else
-    //      //replace the top
-    //  end;
-
-    @Override
-    public String toString() {
-        return heap.toString();
+                    //////////// shorthand for left :=: top;
+                    s.putLabel(top);
+                    s.hopIn();
+                    s.putLabel(right);
+                    s.hopOut();
+                    s.spiralOut();
+                    ////////////
+                    recurseOffset = 1;
+                }
+            }
+        }
     }
 
 
-        /*
-    Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
+
+/*  Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
         requires ∀ q : Sp_Loc(2),
             (RP(k)(q) = P.Curr_Loc ⟹ q Domin_Ord_Sect P);
         ensures (P Is_Relabeling_of #P) ∧
@@ -246,7 +137,7 @@ public class HeapBacked<T> implements Prioritizer<T> {
                 end;
                 Swap_Label(P, Right)
             end;
-            Hop_Out(P);
+            Hop_In(P);
         end;
         Swap_Label(P, Top);
 
@@ -257,8 +148,16 @@ public class HeapBacked<T> implements Prioritizer<T> {
         end;
     end Fix_Pos;
 
-    Operation Compare_Edge_Labels(
+    Operation Compare_Edge_Labels(..)
      */
+
+    @Override
+    public String toString() {
+        return heap.toString();
+    }
+
+
+
 
 
 

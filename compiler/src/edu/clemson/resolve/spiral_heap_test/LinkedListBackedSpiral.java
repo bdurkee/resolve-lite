@@ -52,8 +52,23 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
     }
 
     @Override
+    public T getLabel() {
+        return contents.get(currentPosition);
+    }
+
+    @Override
+    public T putLabel(T lab) {
+        return contents.set(currentPosition, lab);
+    }
+
+    @Override
     public boolean atCenter() {
         return currentPosition == 0;
+    }
+
+    @Override
+    public boolean atEnd() {
+        return currentPosition == contents.size()-1;
     }
 
     @Override
