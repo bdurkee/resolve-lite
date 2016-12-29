@@ -62,48 +62,45 @@ public class HeapBacked<T> implements Prioritizer<T> {
     //          K.Heap.Lab[Inward_Loc(K.Heap.Trmnl_Loc) ⋆ 1]
 
     private void fixPosition(Spiral<T> s) {
-        T left, right;
-        boolean leftside = false;
+        T top, small_sect_pos;
+        int offset = 0;
+
         if (!s.atEdge()) {
+            top = s.swapLabel(null);
             s.hopOut();
-            if (!s.atEnd()) {
-                left = s.swapLabel(null);
-                s.spiralOut();
-                right = s.swapLabel(null);
-                leftside = gtr.test(left, right);
-                s.swapLabel(right);
-                s.spiralIn();
-                s.swapLabel(left);
-                if (!leftside) s.spiralOut();
-            }
-            int offset = 0;
-            T curr = s.swapLabel(null);
-            offset = s.hopIn();
-            T top = s.swapLabel(null);
 
-            boolean lss = gtr.test(curr, top);
-            if (gtr.test(curr, top)) {
+            if (!s.atEnd()) moveToGtrPos(s);
+            small_sect_pos = s.swapLabel(null);
+
+            if (gtr.test(small_sect_pos, top)) {
                 T temp = top;
-                top = curr;
-                curr = temp;
-
-                s.swapLabel(top);
-                s.hopOut();
-                if (offset == 1) s.spiralOut();
-                s.swapLabel(curr);
-                fixPosition(s);
-                s.hopIn();
+                top = small_sect_pos;
+                small_sect_pos = temp;
             }
-            else { //no change case...
-                s.swapLabel(top);
-                s.hopOut();
-                s.swapLabel(curr);
-                s.hopIn();
-            }
+            s.swapLabel(small_sect_pos);
+            fixPosition(s);
+            s.hopIn();
+            s.swapLabel(top);
         }
     }
 
-    /*
+    private void moveToGtrPos(Spiral<T> s) {
+        T left, right;
+        boolean l_side;
+
+        left = s.swapLabel(null);
+        s.spiralOut();
+        right = s.swapLabel(null);
+
+        l_side = gtr.test(left, right);
+
+        s.swapLabel(right);
+        s.spiralIn();
+        s.swapLabel(left);
+        if (!l_side) s.spiralOut();
+    }
+
+/*
     Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
     requires ∀ q : Sp_Loc(2),
         (RP(k)(q) = P.Curr_Loc ⟹ q Domin_Ord_Sect P);
@@ -111,47 +108,42 @@ public class HeapBacked<T> implements Prioritizer<T> {
         (∀ r : Sp_Loc(2),
             ¬r In_Sect_of P.Curr_Loc ⟹ P.Lab(r) = #P.Lab(r));
     Recursive Procedure
-        Var Top, Candidate : Entry;
-        Var Offset_Num : Integer;
-
+        Var Top, Smallest_Sect_Pos : Entry;
+        Var Offset : Integer;
+        //If not at 'leaf'
         If not At_Edge(P) then
+            Swap_Label(P, Top);
             Hop_Out(P);
-            If not At_End(P) then Move_to_Minimum(P); end;
-
-            Swap_Label(P, Candidate);
-            Offset_Num := Hop_In(P, Offset_Num);
+            If not At_End(P) then Move_to_Gtr_Pos(P); end;
+            Swap_Label(P, Smallest_Sect_Pos);
+            If Is_Gtr(Smallest_Sect_Pos, Top) then
+                Smallest_Sect_Pos :=: Top;
+                Fix_Pos(P);
+            end;
+            Swap_Label(P, Smallest_Sect_Pos);
+            Hop_In(P, Offset);
             Swap_Label(P, Top);
-
-            If Is_Gtr(Candidate, Top) then Candidate :=: Top; end;
-
-            Swap_Label(P, Top);
-            Hop_Out(P, Offset_Num);
-            Swap_Label(P, Candidate);
-
-            If Offset_Num = 1 then Spiral_Out(P); end;
-            Fix_Pos(P);
-            Hop_In(P, Offset_Num);
         end;
     end Fix_Pos;
 
-        //Updates the position of the cursor to the minimum subsector..
-        Operation Move_to_Minimum(updates P : Spiral_Pos);
-            Procedure
-                Var Left, Right : Entry;
+    //Updates the position of the cursor to the minimum subsector..
+    Operation Move_to_Gtr_Pos(updates P : Spiral_Pos);
+        Procedure
+        Var Left, Right : Entry;
 
-                Swap_Label(P, Left);
-                Spiral_Out(P);
-                Swap_Label(P, Right);
+        Swap_Label(P, Left);
+        Spiral_Out(P);
+        Swap_Label(P, Right);
 
-                L_Side := Is_Gtr(Left, Right);
+        L_Side := Is_Gtr(Left, Right);
 
-                Swap_Label(P, Right);
-                Spiral_In(P);
-                Swap_Label(P, Left);
+        Swap_Label(P, Right);
+        Spiral_In(P);
+        Swap_Label(P, Left);
 
-                If not L_Side then Spiral_Out(P); end;
-        end Find_Minimum;
-    */
+        If not L_Side then Spiral_Out(P); end;
+    end Move_to_Gtr_Pos;
+*/
 
     @Override
     public String toString() {

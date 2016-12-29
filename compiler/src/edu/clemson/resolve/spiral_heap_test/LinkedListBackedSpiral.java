@@ -73,7 +73,7 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
 
     @Override
     public boolean atEdge() {
-        return k * currentPosition >= contents.size();
+        return k * currentPosition >= contents.size()-1;
     }
 
     @Override
