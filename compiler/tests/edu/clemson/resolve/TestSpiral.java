@@ -98,15 +98,41 @@ public class TestSpiral {
     }
 
     @Test
+    public void testAtEnd() {
+        Spiral<Integer> s = new LinkedListBackedSpiral<>(2);
+        s.lengthen(-10);
+        s.lengthen(5);
+        s.lengthen(-2);
+        s.lengthen( 6);
+        s.lengthen(20);
+        s.lengthen(10);
+        Assert.assertEquals("-10, 5, -2, 6, 20, 10", s.toString());
+
+        Assert.assertEquals(false, s.atEdge());
+        s.spiralOut();
+        Assert.assertEquals(false, s.atEdge());
+        s.spiralOut();
+        Assert.assertEquals(false, s.atEdge());
+        s.spiralOut();
+        Assert.assertEquals(true, s.atEdge());
+        s.spiralOut();
+        Assert.assertEquals(true, s.atEdge());
+        s.spiralOut();
+        Assert.assertEquals(true, s.atEdge());
+        s.hopIn();
+        Assert.assertEquals(false, s.atEdge());
+    }
+
+    @Test
     public void testPrioritizer() {
         Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
 
-        p.addEntry(5);
+        /*p.addEntry(5);
         p.addEntry(-2);
         p.addEntry(10);
         p.addEntry(6);
         p.addEntry(20);
-        p.addEntry(-10);
+        p.addEntry(-10);*/
         int i;
         i=0;
     }
