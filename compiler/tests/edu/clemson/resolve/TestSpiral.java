@@ -1,9 +1,14 @@
 package edu.clemson.resolve;
 
+import edu.clemson.resolve.spiral_heap_test.HeapBacked;
 import edu.clemson.resolve.spiral_heap_test.LinkedListBackedSpiral;
+import edu.clemson.resolve.spiral_heap_test.Prioritizer;
 import edu.clemson.resolve.spiral_heap_test.Spiral;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestSpiral {
 
@@ -47,7 +52,11 @@ public class TestSpiral {
         s.hopIn();
         Assert.assertEquals("3", s.swapLabel(0).toString());
     }
-
+    /*
+        2
+    3        4
+5      1   9      7
+     */
     @Test
     public void testHopIn() {
         Spiral<Integer> s = buildExample();
@@ -86,6 +95,20 @@ public class TestSpiral {
         Assert.assertEquals("2", s.swapLabel(0).toString());
         s.swapLabel(2);
         Assert.assertEquals("2, 3, 4, 5, 1, 9, 7", s.toString());
+    }
+
+    @Test
+    public void testPrioritizer() {
+        Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
+
+        p.addEntry(5);
+        p.addEntry(-2);
+        p.addEntry(10);
+        p.addEntry(6);
+        p.addEntry(20);
+        p.addEntry(-10);
+        int i;
+        i=0;
     }
 
     private Spiral<Integer> buildExample() {

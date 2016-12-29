@@ -35,7 +35,7 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
     @Override
     public int hopIn() {
         int offset = (monus(currentPosition, 1)) % k;
-        currentPosition = (currentPosition - 1) / k;
+        currentPosition = (monus(currentPosition, 1) / k);
         return offset;
     }
 
@@ -83,7 +83,7 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
 
     @Override
     public void moveToEnd() {
-        currentPosition = contents.size() - 1;
+        currentPosition = contents.size();
     }
 
     @Override
