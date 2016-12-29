@@ -103,8 +103,6 @@ public class HeapBacked<T> implements Prioritizer<T> {
         }
     }
 
-
-
     /*
     Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
     requires ∀ q : Sp_Loc(2),
@@ -113,47 +111,45 @@ public class HeapBacked<T> implements Prioritizer<T> {
         (∀ r : Sp_Loc(2),
             ¬r In_Sect_of P.Curr_Loc ⟹ P.Lab(r) = #P.Lab(r));
     Recursive Procedure
-        Var Left, Right : Entry;
+        Var Top, Candidate : Entry;
+        Var Offset_Num : Integer;
 
         If not At_Edge(P) then
             Hop_Out(P);
-            If not At_End(P) then
-                Move_to_Minimum(P);
-            end;
+            If not At_End(P) then Move_to_Minimum(P); end;
 
-            if (gtr.test(curr, top)) {
-                T temp = top;
-                top = curr;
-                curr = temp;
+            Swap_Label(P, Candidate);
+            Offset_Num := Hop_In(P, Offset_Num);
+            Swap_Label(P, Top);
 
-                s.swapLabel(top);
-                s.hopOut();
-                if (offset == 1) s.spiralOut();
-                s.swapLabel(curr);
-                fixPosition(s);
-                s.hopIn();
-            }
-            else { //no change case...
-                s.swapLabel(top);
-                s.hopOut();
-                s.swapLabel(curr);
-                s.hopIn();
-            }
-        }
-        end Fix_Pos;
+            If Is_Gtr(Candidate, Top) then Candidate :=: Top; end;
+
+            Swap_Label(P, Top);
+            Hop_Out(P, Offset_Num);
+            Swap_Label(P, Candidate);
+
+            If Offset_Num = 1 then Spiral_Out(P); end;
+            Fix_Pos(P);
+            Hop_In(P, Offset_Num);
+        end;
+    end Fix_Pos;
 
         //Updates the position of the cursor to the minimum subsector..
         Operation Move_to_Minimum(updates P : Spiral_Pos);
             Procedure
-            Var Left, Right : Entry;
-            Swap_Label(P, Left);
-            Spiral_Out(P);
-            Swap_Label(P, Right);
-            L_Side := Is_Gtr(Left, Right);
-            Swap_Label(P, Right);
-            Spiral_In(P);
-            Swap_Label(P, Left);
-            If not L_Side then Spiral_Out(P); end;
+                Var Left, Right : Entry;
+
+                Swap_Label(P, Left);
+                Spiral_Out(P);
+                Swap_Label(P, Right);
+
+                L_Side := Is_Gtr(Left, Right);
+
+                Swap_Label(P, Right);
+                Spiral_In(P);
+                Swap_Label(P, Left);
+
+                If not L_Side then Spiral_Out(P); end;
         end Find_Minimum;
     */
 
@@ -161,10 +157,4 @@ public class HeapBacked<T> implements Prioritizer<T> {
     public String toString() {
         return heap.toString();
     }
-
-
-
-
-
-
 }
