@@ -73,6 +73,7 @@ public class HeapBacked<T> implements Prioritizer<T> {
             small_sect_pos = s.swapLabel(null);
 
             if (gtr.test(small_sect_pos, top)) {
+                //basically: top :=: small_sect_pos
                 T temp = top;
                 top = small_sect_pos;
                 small_sect_pos = temp;
@@ -99,51 +100,6 @@ public class HeapBacked<T> implements Prioritizer<T> {
         s.swapLabel(left);
         if (!l_side) s.spiralOut();
     }
-
-/*
-    Operation Fix_Pos(updates P : Heap_Fac.Spiral_Pos);
-    requires ∀ q : Sp_Loc(2),
-        (RP(k)(q) = P.Curr_Loc ⟹ q Domin_Ord_Sect P);
-    ensures (P Is_Relabeling_of #P) ∧
-        (∀ r : Sp_Loc(2),
-            ¬r In_Sect_of P.Curr_Loc ⟹ P.Lab(r) = #P.Lab(r));
-    Recursive Procedure
-        Var Top, Smallest_Sect_Pos : Entry;
-        Var Offset : Integer;
-        //If not at 'leaf'
-        If not At_Edge(P) then
-            Swap_Label(P, Top);
-            Hop_Out(P);
-            If not At_End(P) then Move_to_Gtr_Pos(P); end;
-            Swap_Label(P, Smallest_Sect_Pos);
-            If Is_Gtr(Smallest_Sect_Pos, Top) then
-                Smallest_Sect_Pos :=: Top;
-                Fix_Pos(P);
-            end;
-            Swap_Label(P, Smallest_Sect_Pos);
-            Hop_In(P, Offset);
-            Swap_Label(P, Top);
-        end;
-    end Fix_Pos;
-
-    //Updates the position of the cursor to the minimum subsector..
-    Operation Move_to_Gtr_Pos(updates P : Spiral_Pos);
-        Procedure
-        Var Left, Right : Entry;
-
-        Swap_Label(P, Left);
-        Spiral_Out(P);
-        Swap_Label(P, Right);
-
-        L_Side := Is_Gtr(Left, Right);
-
-        Swap_Label(P, Right);
-        Spiral_In(P);
-        Swap_Label(P, Left);
-
-        If not L_Side then Spiral_Out(P); end;
-    end Move_to_Gtr_Pos;
-*/
 
     @Override
     public String toString() {

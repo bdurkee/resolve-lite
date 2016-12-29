@@ -7,6 +7,7 @@ import edu.clemson.resolve.spiral_heap_test.Spiral;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,7 +104,7 @@ public class TestSpiral {
         s.lengthen(-10);
         s.lengthen(5);
         s.lengthen(-2);
-        s.lengthen( 6);
+        s.lengthen(6);
         s.lengthen(20);
         s.lengthen(10);
         Assert.assertEquals("-10, 5, -2, 6, 20, 10", s.toString());
@@ -124,17 +125,59 @@ public class TestSpiral {
     }
 
     @Test
-    public void testPrioritizer() {
+    public void testPrioritizerAddEntry1() {
         Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
+        p.addEntry(5);
+        Assert.assertEquals("5", p.toString());
 
-        /*p.addEntry(5);
-        p.addEntry(-2);
+        p.addEntry(2);
+        Assert.assertEquals("2, 5", p.toString());
+
         p.addEntry(10);
+        Assert.assertEquals("2, 5, 10", p.toString());
+
         p.addEntry(6);
+        Assert.assertEquals("2, 5, 10, 6", p.toString());
+
         p.addEntry(20);
-        p.addEntry(-10);*/
-        int i;
-        i=0;
+        Assert.assertEquals("2, 5, 10, 6, 20", p.toString());
+
+        p.addEntry(1);
+        Assert.assertEquals("1, 5, 2, 6, 20, 10", p.toString());
+    }
+
+    @Test
+    public void testPrioritizerAddEntry2() {
+        Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
+        p.addEntry(10);
+        Assert.assertEquals("10", p.toString());
+
+        p.addEntry(9);
+        Assert.assertEquals("9, 10", p.toString());
+
+        p.addEntry(8);
+        Assert.assertEquals("8, 10, 9", p.toString());
+
+        p.addEntry(7);
+        Assert.assertEquals("7, 8, 9, 10", p.toString());
+
+        p.addEntry(5);
+        Assert.assertEquals("5, 7, 9, 10, 8", p.toString());
+
+        p.addEntry(4);
+        Assert.assertEquals("4, 7, 5, 10, 8, 9", p.toString());
+
+        p.addEntry(3);
+        Assert.assertEquals("3, 7, 4, 10, 8, 9, 5", p.toString());
+
+        p.addEntry(2);
+        Assert.assertEquals("2, 3, 4, 7, 8, 9, 5, 10", p.toString());
+
+        p.addEntry(1);
+        Assert.assertEquals("1, 2, 4, 3, 8, 9, 5, 10, 7", p.toString());
+
+        p.addEntry(6);
+        Assert.assertEquals("1, 2, 4, 3, 6, 9, 5, 10, 7, 8", p.toString());
     }
 
     private Spiral<Integer> buildExample() {
