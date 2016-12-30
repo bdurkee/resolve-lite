@@ -1,5 +1,6 @@
 package edu.clemson.resolve.spiral_heap_test;
 
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,6 +26,20 @@ public class HeapBacked<T> implements Prioritizer<T> {
             int subsectNum = heap.hopIn();
             //if (subsectNum < 1) break;
             fixPosition(heap);
+        }
+    }
+
+    @Override
+    public void fullyOrder(List<T> entries) {
+        for (T t : entries) {
+            heap.lengthen(t);
+        }
+        heap.moveToEnd();
+        heap.hopIn();
+        while (true) {
+            fixPosition(heap);
+            if (heap.atCenter()) break;
+            heap.spiralIn();   //TODO: This needs to be spiral_in I think..
         }
     }
 

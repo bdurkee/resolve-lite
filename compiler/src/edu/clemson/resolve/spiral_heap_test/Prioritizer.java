@@ -1,8 +1,12 @@
 package edu.clemson.resolve.spiral_heap_test;
 
+import java.util.List;
+
 public interface Prioritizer<T> {
 
     public void addEntry(T x);
+
+    public void fullyOrder(List<T> entries);
 
     public T removeSmallest(T s);
 

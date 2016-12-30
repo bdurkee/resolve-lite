@@ -7,7 +7,7 @@ import edu.clemson.resolve.spiral_heap_test.Spiral;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.PriorityQueue;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -178,6 +178,20 @@ public class TestSpiral {
 
         p.addEntry(6);
         Assert.assertEquals("1, 2, 4, 3, 6, 9, 5, 10, 7, 8", p.toString());
+    }
+
+    //Woo! works! :)
+    @Test
+    public void testBuildHeap() {
+        //List<Integer> e = Stream.of(10, 9, 8, 7, 6, 5, 4, 3, 2, 1).collect(Collectors.toList());
+        List<Integer> e = Stream.of(31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15,
+                14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1).collect(Collectors.toList());
+
+        Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
+        p.fullyOrder(e);
+        Assert.assertEquals("1, 9, 2, 13, 10, 5, 3, 15, 14, 11, 21, 7, 6, 4, 17, 16, 24, 28, 23, 12, 22, 27, 30, 8, " +
+                "20, 26, 19, 31, 18, 25, 29", p.toString());
+        //System.out.println(p.toString());
     }
 
     private Spiral<Integer> buildExample() {
