@@ -8,7 +8,7 @@ public interface Prioritizer<T> {
 
     public void fullyOrder(List<T> entries);
 
-    public T removeSmallest(T s);
+    public T removeSmallest();
 
     public int totalCount();
 

@@ -49,10 +49,12 @@ public class HeapBacked<T> implements Prioritizer<T> {
     }
 
     @Override
-    public T removeSmallest(T s) {
-        T result = heap.shorten();
+    public T removeSmallest() {
+        T result;
+        T x = heap.shorten();
+        if (heap.atCenter()) return x;
         heap.moveToCenter();
-        heap.swapLabel(s);
+        result = heap.swapLabel(x);
         fixPosition(heap);
         return result;
     }

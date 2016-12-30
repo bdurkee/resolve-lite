@@ -22,8 +22,8 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
 
     @Override
     public T shorten() {
-        T result = contents.removeLast();
         currentPosition = contents.size() - 1;
+        T result = contents.removeLast();
         return result;
     }
 
@@ -34,14 +34,9 @@ public class LinkedListBackedSpiral<T> implements Spiral<T> {
 
     @Override
     public int hopIn() {
-        int offset = (monus(currentPosition, 1)) % k;
-        currentPosition = (monus(currentPosition, 1) / k);
+        int offset = (currentPosition-1) % k;
+        currentPosition = ((currentPosition-1) / k);
         return offset;
-    }
-
-    private int monus(int a, int b) {
-        if (a < b) return 0;
-        else return a - b;
     }
 
     @Override

@@ -194,6 +194,37 @@ public class TestSpiral {
         //System.out.println(p.toString());
     }
 
+    @Test
+    public void testRemoveSmallest1() {
+        Prioritizer<Integer> p = new HeapBacked<>((x, y) -> x < y);
+        p.addEntry(5);
+        p.addEntry(2);
+        p.addEntry(10);
+        p.addEntry(6);
+        p.addEntry(20);
+        p.addEntry(1);
+        Assert.assertEquals("1, 5, 2, 6, 20, 10", p.toString());
+
+        //now keep removing smallest entries..
+        Assert.assertEquals("1", p.removeSmallest().toString());
+        Assert.assertEquals("2, 5, 10, 6, 20", p.toString());
+
+        Assert.assertEquals("2", p.removeSmallest().toString());
+        Assert.assertEquals("5, 6, 10, 20", p.toString());
+
+        Assert.assertEquals("5", p.removeSmallest().toString());
+        Assert.assertEquals("6, 20, 10", p.toString());
+
+        Assert.assertEquals("6", p.removeSmallest().toString());
+        Assert.assertEquals("10, 20", p.toString());
+
+        Assert.assertEquals("10", p.removeSmallest().toString());
+        Assert.assertEquals("20", p.toString());
+
+        Assert.assertEquals("20", p.removeSmallest().toString());
+        Assert.assertEquals("", p.toString());
+    }
+
     private Spiral<Integer> buildExample() {
         return buildExample(2);
     }
