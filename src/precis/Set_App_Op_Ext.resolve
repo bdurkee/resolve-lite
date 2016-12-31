@@ -1,6 +1,6 @@
 Precis Set_App_Op_Ext;
 
 	Definition (f : (D : SSet) ⟶ (R : SSet))[(S : ℘(D))] : ℘(R) is
-		{y : R | ∃ x : S, f(x) = y};
+		{y : R | (∃ x : S, f(x) = y)};
 
 end Set_App_Op_Ext;
