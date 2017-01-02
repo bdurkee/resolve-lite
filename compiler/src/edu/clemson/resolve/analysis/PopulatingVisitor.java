@@ -850,6 +850,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+        this.visit(ctx.progExp());  //visit arg
+        this.visit(ctx.progNameExp());
+        typeOperationRefExp(ctx, ctx.progNameExp().qualifier, ctx.progNameExp().name, ctx.progExp());
+        return null;
+    }
+
+    @Override
     public Void visitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
         return typeProgLiteralExp(ctx, "Std_Bools", "Boolean");
     }

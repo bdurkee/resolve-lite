@@ -21,10 +21,14 @@ public class HeapBacked<T> implements Prioritizer<T> {
         heap.lengthen(x);
         this.fullyOrdered = false;
 
-        while (true) {
+        /*while (true) {
             if (heap.atCenter()) { fullyOrdered = true; break; }
             int subsectNum = heap.hopIn();
             //if (subsectNum < 1) break;
+            fixPosition(heap);
+        }*/
+        while (!heap.atCenter()) {
+            int subsectNum = heap.hopIn();
             fixPosition(heap);
         }
     }

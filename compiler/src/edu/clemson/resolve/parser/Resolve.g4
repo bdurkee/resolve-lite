@@ -292,6 +292,7 @@ progExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp op=progOperatorExp progExp              #progInfixExp
+    |   progNameExp progExp                             #progUnaryExp
     ;
 
 progPrimary
