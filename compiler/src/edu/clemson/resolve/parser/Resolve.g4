@@ -287,12 +287,12 @@ elseStmt : 'else' stmt* ;
 
 // program expressions
 
+/*
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   progExp op=progOperatorExp progExp              #progInfixExp
-    |   progNameExp progExp                             #progUnaryExp
+    |   progExp progOperatorExp progExp                 #progInfixExp
     ;
 
 progPrimary
@@ -303,6 +303,19 @@ progPrimary
 
 progParamExp
     :   progNameExp '(' (progExp (',' progExp)*)? ')'
+    ;
+*/
+progExp
+    :   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    |   progNameExp '(' (progExp (',' progExp)*)? ')'   #progParamExp
+    |   progExp progOperatorExp progExp                 #progInfixExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   progPrimary                                     #progPrimaryExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progNameExp
     ;
 
 progNameExp

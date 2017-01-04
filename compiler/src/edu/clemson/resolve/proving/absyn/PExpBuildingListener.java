@@ -328,13 +328,13 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         repo.put(ctx, result.build());
     }
 
-    @Override
+    /*@Override
     public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNameExp()))
                 .arguments(repo.get(ctx.progExp()))
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
-    }
+    }*/
 
     @Override
     public void exitProgNameExp(ResolveParser.ProgNameExpContext ctx) {

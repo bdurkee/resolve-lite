@@ -849,13 +849,13 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         return null;
     }
 
-    @Override
+    /*@Override
     public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
         this.visit(ctx.progExp());  //visit arg
         this.visit(ctx.progNameExp());
         typeOperationRefExp(ctx, ctx.progNameExp().qualifier, ctx.progNameExp().name, ctx.progExp());
         return null;
-    }
+    }*/
 
     @Override
     public Void visitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
@@ -1794,6 +1794,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 if (f.getFacility().getSpecification().getModuleIdentifier().equals(s.getModuleIdentifier())) {
                     result.add(f);
                 }
+                //or if it comes through an enhancement....
+                else {
+                    for (ModuleParameterization p : f.getEnhancements()) {
+                        if (p.getModuleIdentifier().equals(s.getModuleIdentifier())) {
+                            result.add(f);
+                        }
+                    }
+                }
+
             }
             if (result.size() > 1) {
                 compiler.errMgr.semanticError(ErrorKind.AMBIGUOUS_FACILITY, ctx.getStart(), s.getName());
