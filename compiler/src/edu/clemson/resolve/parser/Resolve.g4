@@ -307,8 +307,8 @@ progParamExp
 */
 progExp
     :   lhs=progExp '.' rhs=progExp                     #progSelectorExp
-    |   progNameExp '(' (progExp (',' progExp)*)? ')'   #progParamExp
-    |   progExp progOperatorExp progExp                 #progInfixExp
+    |   progExp op=progOperatorExp progExp              #progInfixExp
+    |   progParamExp                                    #progCallExp
     |   '(' progExp ')'                                 #progNestedExp
     |   progPrimary                                     #progPrimaryExp
     ;
@@ -316,6 +316,10 @@ progExp
 progPrimary
     :   progLiteralExp
     |   progNameExp
+    ;
+
+progParamExp
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
     ;
 
 progNameExp

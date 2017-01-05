@@ -411,7 +411,7 @@ public class RESOLVECompiler {
             if (!canonicalPath.startsWith(getLibrariesPathDirectory()) &&
                     !canonicalPath.startsWith(getCoreLibraryDirectory())) {
                 pathConformalProject = false;
-                //TODO: Warning not on RESOLVEPATH or CORE path.
+                //Todos: Warning not on RESOLVEPATH or CORE path.
               //  throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
               //          "RESOLVEPATH or RESOLVEROOT");
             }
