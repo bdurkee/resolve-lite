@@ -301,6 +301,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
 
+        if (ctx.recursive != null) {
+            insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        }
         ctx.varDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
@@ -542,7 +545,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
-            //won't have a model. //TODO: This is going to change...
+            //won't have a model. //TODOs: This is going to change...
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         } catch (NoSuchModuleException nsme) {
@@ -598,7 +601,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
         Map<String, ProgType> fields = new LinkedHashMap<>();
         List<MathClssftnWrappingSymbol> mathSyms = new ArrayList<>();
-        //TODO: Maybe instead of fields just use the ProgVariableSymbols...
+        //TODOs: Maybe instead of fields just use the ProgVariableSymbols...
         for (ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx.recordVarDeclGroup()) {
             this.visit(fieldGrp);
             ProgType grpType = tr.progTypes.get(fieldGrp.type());
