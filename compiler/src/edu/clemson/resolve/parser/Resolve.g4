@@ -308,13 +308,13 @@ progParamExp
 progExp
     :   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp op=progOperatorExp progExp              #progInfixExp
-    |   progParamExp                                    #progCallExp
     |   '(' progExp ')'                                 #progNestedExp
     |   progPrimary                                     #progPrimaryExp
     ;
 
 progPrimary
     :   progLiteralExp
+    |   progParamExp
     |   progNameExp
     ;
 
@@ -503,7 +503,7 @@ ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
 
 //really I'm not sure we need this to be '+' at the end
-SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'/='|'~'|'<'|'>') ;
+SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'/='|'~'|'<'|'>'|'>='|'<=') ;
 
 MATH_UNICODE_SYM
     :   U_ARROW
