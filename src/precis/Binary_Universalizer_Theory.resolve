@@ -1,7 +1,7 @@
 Precis Binary_Universalizer_Theory;
 		
     Definition Is_Universally_Related 
-        (S : Powerset(X : SSet), T : Powerset(X), f : X * X ⟶ B) : B is
+        (S : Powerset(Γ : SSet), T : Powerset(Γ), f : Γ × Γ ⟶ 𝔹) : 𝔹 is
             ∀ s : S, ∀ t : T, f(s, t);
 
 end Binary_Universalizer_Theory;

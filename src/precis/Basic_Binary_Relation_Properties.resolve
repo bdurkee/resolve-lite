@@ -1,27 +1,27 @@
 Precis Basic_Binary_Relation_Properties;
 
-    Definition Is_Reflexive(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Reflexive(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x : D, p(x, x);
 
-    Definition Is_Transitive(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Transitive(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x, y, z : D, p(x, y) ∧ p(y, z) ⟹ p(x, z);
 
-    Definition Is_Symmetric(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Symmetric(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x, y : D, p(x, y) ⟹ p(y, x);
 
-    Definition Is_Antisymmetric(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Antisymmetric(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x, y : D, p(x, y) ∧ p(y, x) ⟹ (x = y);
 
-    Definition Is_Asymmetric(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Asymmetric(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x, y : D, p(x, y) ⟹ ¬(p(y, x));
 
-    Definition Is_Irreflexive(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Irreflexive(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x : D, ¬(p(x, x));
 
     //Theorem R1n1: ∀ D : SSet, ∀ p : D * D -> B,
     //    Is_Transitive(p) ⟹ Is_Irreflexive(p);
 
-    Definition Is_Total(p : (D : SSet) * D ⟶ B) : B is
+    Definition Is_Total(p : (D : SSet) × D ⟶ 𝔹) : 𝔹 is
         ∀ x, y : D, p(x, y) ∨ p(y, x) ∨ (x = y);
 
 end Basic_Binary_Relation_Properties;

@@ -5,15 +5,15 @@ Precis Natural_Number_Theory;
         Is_Monogeneric_for(ℕ, 0, suc);
 
     Inductive Definition (m : ℕ) + (n : ℕ) : ℕ is
-        (i.)    m + 0 = m;
-        (ii.)   m + suc(n) = suc(m + n);
+        (i.) m + 0 = m;
+        (ii.) m + suc(n) = suc(m + n);
 
     Definition (m : ℕ) - (n : ℕ) : ℕ;
 
-    Definition (m : ℕ) ≥ (n : ℕ) : B;
-    Chainable Definition (m : ℕ) ≤ (n : ℕ) : B;
-    Definition (m : ℕ) > (n : ℕ) : B;
-    Chainable Definition (m : ℕ) < (n : ℕ) : B;
+    Definition (m : ℕ) ≥ (n : ℕ) : 𝔹;
+    Chainable Definition (m : ℕ) ≤ (n : ℕ) : 𝔹;
+    Definition (m : ℕ) > (n : ℕ) : 𝔹;
+    Chainable Definition (m : ℕ) < (n : ℕ) : 𝔹;
 
     Definition 1 : ℕ is suc(0);
     Definition 2 : ℕ is suc(1);

@@ -3,11 +3,11 @@ Precis String_Theory;
 
 	Definition Str(T : Cls) : Cls;
 	Definition Is_String_Former
-			(SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr) : B;
+        (SStr : Cls, Λ : SStr, ext : SStr × El ⟶ SStr) : 𝔹;
 	 	/*is Pty1: ∀ α, β : SStr, */
 
 	Categorical Definition for 
-				SStr : Cls, Λ : SStr, ext : SStr * El ⟶ SStr is
+				SStr : Cls, Λ : SStr, ext : SStr × El ⟶ SStr is
 		Is_String_Former(SStr, Λ, ext);
 
 	/* String Concatenation */

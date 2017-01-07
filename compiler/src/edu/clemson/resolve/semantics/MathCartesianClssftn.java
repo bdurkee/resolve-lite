@@ -74,7 +74,7 @@ public class MathCartesianClssftn extends MathClssftn {
 
     @Override
     public String toString() {
-        return "(" + Utils.join(elements, " * ") + ")";
+        return "(" + Utils.join(elements, " × ") + ")";
     }
 
     public static class Element {

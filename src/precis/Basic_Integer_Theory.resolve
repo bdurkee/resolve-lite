@@ -8,7 +8,7 @@ Precis Basic_Integer_Theory;
     Categorical Definition for ℤ : SSet, 0 : ℤ, NB : ℤ ⟶ ℤ is
         Is_Monogeneric_for(ℤ, 0, NB);
 
-    Inductive Definition Is_Neg(n : ℤ) : B is
+    Inductive Definition Is_Neg(n : ℤ) : 𝔹 is
         (i.) Is_Neg(n);
         (ii.) Is_Neg(NB(n)) = ¬(Is_Neg(n));
 
@@ -31,16 +31,16 @@ Precis Basic_Integer_Theory;
 
     Definition NN : ℘(ℤ) is {n : ℤ | ¬(Is_Neg(n))};
 
-    Definition (m : ℤ) > (n : ℤ) : B;
+    Definition (m : ℤ) > (n : ℤ) : 𝔹;
 
-    Chainable Definition (m : ℤ) < (n : ℤ) : B;
+    Chainable Definition (m : ℤ) < (n : ℤ) : 𝔹;
 
-    Chainable Definition (m : ℤ) ≤ (n : ℤ) : B is n + ⨪(m) ∈ NN;
+    Chainable Definition (m : ℤ) ≤ (n : ℤ) : 𝔹 is n + ⨪(m) ∈ NN;
         Corollary leq1: Is_Transitive(≤);
         Corollary leq2: Is_Antisymmetric(≤);
         Corollary leq3: Is_Total(≤);
 
-    Definition (m : ℤ) ≥ (n : ℤ) : B;
+    Definition (m : ℤ) ≥ (n : ℤ) : 𝔹;
 
     Definition 1 : ℤ is suc(0);
         //Corollary one1: ∀ m : Z, suc(m) = (m + 1);
