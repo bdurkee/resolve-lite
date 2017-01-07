@@ -1469,6 +1469,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         MathFunctionClssftn expectedFuncType = (MathFunctionClssftn) t;
+
         List<MathClssftn> actualArgumentTypes = Utils.apply(args, tr.mathClssftns::get);
         List<MathClssftn> formalParameterTypes = expectedFuncType.getParamTypes();
 
@@ -1479,6 +1480,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
+        }
+
+        if (expectedFuncType.equals(g.BOOLEAN_FUNCTION)) {
+            Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
+            Iterator<MathClssftn> formalsIter = formalParameterTypes.iterator();
+
+            ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
+
+            for (MathClssftn actual : actualArgumentTypes) {
+                MathClssftn formal = formalsIter.next();
+                if (!(actual == g.BOOLEAN)) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
+                            actual.toString(), formal.toString());
+                }
+            }
         }
         try {
             MathClssftn oldExpectedFuncType = expectedFuncType;

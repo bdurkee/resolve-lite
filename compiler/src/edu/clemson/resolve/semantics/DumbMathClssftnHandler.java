@@ -25,7 +25,7 @@ public class DumbMathClssftnHandler {
     public final MathClssftn ENTITY = new MathNamedClssftn(this, "Entity", 1, INVALID);
     public final MathClssftn EL = new MathNamedClssftn(this, "El", 1, CLS);
 
-    public final MathClssftn BOOLEAN = new MathNamedClssftn(this, "B", 1, SSET);
+    public final MathClssftn BOOLEAN = new MathNamedClssftn(this, "\uD835\uDD39", 1, SSET);
     public final MathClssftn VOID = new MathNamedClssftn(this, "Void", 0, INVALID);
 
     /**
