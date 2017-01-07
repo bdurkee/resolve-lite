@@ -52,7 +52,8 @@ public class PSelector extends PExp {
             result = substitutions.get(this);
         }
         else {
-            result = new PSelector(left.substitute(substitutions), right.substitute(substitutions));
+            result = new PSelector(left.substitute(substitutions), right.substitute(substitutions),
+                    getVCLocation(), getVCExplanation());
         }
         return result;
     }
@@ -110,14 +111,15 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PSelector(left.withIncomingSignsErased(), right.withIncomingSignsErased());
+        return new PSelector(left.withIncomingSignsErased(), right.withIncomingSignsErased(),
+                getVCLocation(), getVCExplanation());
     }
 
     //shouldn't be any quantifiers in a dot expr
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return new PSelector(left, right);
+        return new PSelector(left, right, getVCLocation(), getVCExplanation());
     }
 
     //TODO: Someday, if this class is still around, use Utils.apply (collection ver. here)

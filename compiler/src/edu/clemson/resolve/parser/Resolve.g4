@@ -130,7 +130,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID '=' type ';'?
+    :   'Type' name=ID 'is' type ';'?
         (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -246,7 +246,7 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
-        (noticeClause)*
+        decreasingClause?
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -255,7 +255,7 @@ operationProcedureDecl
 procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
-        (noticeClause)*
+        //(noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -268,12 +268,14 @@ stmt
     |   swapStmt
     |   callStmt
     |   whileStmt
+    |   noticeStmt
     |   ifStmt
     ;
 
 assignStmt : left=progExp ':=' right=progExp ';' ;
 swapStmt : left=progExp ':=:' right=progExp ';' ;
 callStmt : progParamExp ';' ;
+noticeStmt : 'Notice' mathAssertionExp ';' ;
 
 whileStmt
     :   'While' progExp
@@ -286,11 +288,29 @@ elseStmt : 'else' stmt* ;
 
 // program expressions
 
+/*
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
     |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    |   progExp progOperatorExp progExp                 #progInfixExp
+    ;
+
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNameExp
+    ;
+
+progParamExp
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
+    ;
+*/
+progExp
+    :   lhs=progExp '.' rhs=progExp                     #progSelectorExp
     |   progExp op=progOperatorExp progExp              #progInfixExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   progPrimary                                     #progPrimaryExp
     ;
 
 progPrimary
@@ -312,7 +332,7 @@ progOperatorExp
     ;
 
 progSymbolName
-    :   (ID | SYM | '=')
+    :   (ID | SYM)
     ;
 
 progLiteralExp
@@ -426,7 +446,7 @@ mathExp
     |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathMixfixAppExp
     |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
     |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
-    |   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
+    //|   l=mathExp op=('='|'≠') r=mathExp                                #mathEqualsAppExp
     |   '(' mathAssertionExp ')'                                        #mathNestedExp
     |   mathPrimeExp                                                    #mathPrimaryExp
     ;
@@ -484,7 +504,7 @@ ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
 INT                 : [0-9]+ ;
 
 //really I'm not sure we need this to be '+' at the end
-SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'~'|'<'|'>') ;
+SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'/='|'~'|'<'|'>'|'>='|'<=') ;
 
 MATH_UNICODE_SYM
     :   U_ARROW
@@ -502,15 +522,16 @@ U_ARROW        : ('←'|'⇐'|'⟵'|'⟸'|'→'|'⇒'|'⟶'|'⟹'|'↔'|'⇔'|'�
 U_LOGIC        : ('∧'|'⋀'|'∨'|'⋁'|'¬'|'⋄') ;
 
 /* Notice that U_BRACKET glyphs are special: they don't extend MATH_UNICODE_SYM */
-U_LETTER       : ('ℂ'|'ℕ'|'ℚ'|'ℝ'|'ℤ'|'℘') ;
+U_LETTER       : ('𝔸'|'𝔹'|'ℂ'|'𝔻'|'𝔼'|'𝔽'|'𝔾'|'ℍ'|'𝕀'|'𝕁'|'𝕂'|'𝕃'|'𝕄'|'ℕ'|'𝕆'|
+                  'ℙ'|'ℚ'|'ℝ'|'𝕊'|'𝕋'|'ℤ'|'℘') ;
 
 U_OPERATOR     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'⨄'|'±'|'∓'|'×'|'÷'|
-                  '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⊘'|'⟕'|'⟖'|'⟗'|
+                  '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⟕'|'⟖'|'⟗'|
                   '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪') ;
 
-U_RELATION     : ('⊢'|'⊨'|'⊩'|'⊫'|'⊣'|'≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|
-                  '∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|'⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈' '≍'|
-                  '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|'⊴'|'⊵'|'△'|'≜') ;
+U_RELATION     : ('≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|'∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|
+                  '⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈'|'≍'|'≠'| '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|
+                  '⊴'|'⊵'|'△'|'≜') ;
 
 CHAR: '\'' . '\'' ;
 RAW_STRING : '\'' (ESC | ~["\\])* '\'' ;

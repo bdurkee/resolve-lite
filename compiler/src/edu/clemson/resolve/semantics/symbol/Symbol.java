@@ -68,84 +68,70 @@ public abstract class Symbol {
     public abstract String getSymbolDescription();
 
     @NotNull
-    public MathClssftnWrappingSymbol toMathSymbol()
-            throws UnexpectedSymbolException {
+    public MathClssftnWrappingSymbol toMathSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public ProgTypeSymbol toProgTypeSymbol()
-            throws UnexpectedSymbolException {
+    public ProgTypeSymbol toProgTypeSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public TypeModelSymbol toTypeModelSymbol()
-            throws UnexpectedSymbolException {
+    public TypeModelSymbol toTypeModelSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public ProgParameterSymbol toProgParameterSymbol()
-            throws UnexpectedSymbolException {
+    public ProgParameterSymbol toProgParameterSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public OperationSymbol toOperationSymbol()
-            throws UnexpectedSymbolException {
+    public OperationSymbol toOperationSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public FacilitySymbol toFacilitySymbol()
-            throws UnexpectedSymbolException {
+    public FacilitySymbol toFacilitySymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public ProgReprTypeSymbol toProgReprTypeSymbol()
-            throws UnexpectedSymbolException {
+    public ProgReprTypeSymbol toProgReprTypeSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public ProgVariableSymbol toProgVariableSymbol()
-            throws UnexpectedSymbolException {
+    public ProgVariableSymbol toProgVariableSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol()
-            throws UnexpectedSymbolException {
+    public GlobalMathAssertionSymbol toWrappedGlobalSpecSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public ProcedureSymbol toProcedureSymbol()
-            throws UnexpectedSymbolException {
+    public ProcedureSymbol toProcedureSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public TheoremSymbol toTheoremSymbol()
-            throws UnexpectedSymbolException {
+    public TheoremSymbol toTheoremSymbol() throws UnexpectedSymbolException {
         throw new UnexpectedSymbolException(this.getSymbolDescription());
     }
 
     @NotNull
-    public abstract Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility);
+    public abstract Symbol instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                               @Nullable FacilitySymbol instantiatingFacility);
 
     @NotNull
     public static Map<String, MathClssftn> buildMathTypeGenerics(
             @NotNull Map<String, ProgType> genericInstantiations) {
-
         Map<String, MathClssftn> genericMathematicalInstantiations = new HashMap<>();
 
-        for (Map.Entry<String, ProgType> instantiation : genericInstantiations
-                .entrySet()) {
+        for (Map.Entry<String, ProgType> instantiation : genericInstantiations.entrySet()) {
             genericMathematicalInstantiations.put(instantiation.getKey(),
                     instantiation.getValue().toMath());
         }

@@ -158,7 +158,9 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
 
         //hardcode hook to handle chained relationals (generalize this at the syntax level with some
         //special syntax)
-        if (annotations.chainableCtx(ctx) && annotations.chainableCtx(ctx.mathExp(0))) {
+        boolean isChainableCtx = annotations.chainableCtx(ctx);
+        boolean isLeftChainable = annotations.chainableCtx(ctx.mathExp(0));
+        if (isChainableCtx && isLeftChainable) {
             PExp left2 = getBottommostFormula(left);
             PApply newRight = new PApplyBuilder((PSymbol) repo.get(ctx.getChild(1)))
                     .applicationType(getMathClssfctn(ctx))
@@ -186,7 +188,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
         return result;
     }
 
-    @Override
+    /*@Override
     public void exitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
         PSymbol operator = new PSymbolBuilder(ctx.op.getText())
                 .mathClssfctn(g.BOOLEAN_FUNCTION)
@@ -197,7 +199,7 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                         .applicationType(g.BOOLEAN).style(INFIX)
                         .arguments(repo.get(ctx.l), repo.get(ctx.r));
         repo.put(ctx, result.build());
-    }
+    }*/
 
     @Override
     public void exitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
@@ -325,6 +327,14 @@ public class PExpBuildingListener<T extends PExp> extends ResolveBaseListener {
                 .applicationType(getMathClssfctn(ctx));
         repo.put(ctx, result.build());
     }
+
+    /*@Override
+    public void exitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+        PApplyBuilder result = new PApplyBuilder(repo.get(ctx.progNameExp()))
+                .arguments(repo.get(ctx.progExp()))
+                .applicationType(getMathClssfctn(ctx));
+        repo.put(ctx, result.build());
+    }*/
 
     @Override
     public void exitProgNameExp(ResolveParser.ProgNameExpContext ctx) {

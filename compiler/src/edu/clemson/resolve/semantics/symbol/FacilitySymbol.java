@@ -68,10 +68,10 @@ public class FacilitySymbol extends Symbol {
             //These are realized by individual extension implementations
             for (ResolveParser.EnhancementPairingContext extension : facility.enhancementPairing()) {
                 specGenericArgs = actualGenerics.get(extension.specArgs);
-                ModuleParameterization extSpec = new ModuleParameterization(m.getImportWithName(extension.spec),
+                ModuleParameterization extSpec = new ModuleParameterization(m.getFacilityImportWithName(extension.spec),
                         specGenericArgs == null ? new ArrayList<>() : specGenericArgs, this, scopeRepo);
 
-                impl = new ModuleParameterization(m.getImportWithName(extension.realiz),  new ArrayList<>(), this, scopeRepo);
+                impl = new ModuleParameterization(m.getFacilityImportWithName(extension.realiz),  new ArrayList<>(), this, scopeRepo);
                 enhancements.add(extSpec);
                 enhancementImplementations.put(extSpec, impl);
             }

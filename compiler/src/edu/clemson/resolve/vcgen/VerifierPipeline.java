@@ -26,7 +26,7 @@ public class VerifierPipeline extends AbstractCompilationPipeline {
                 VCGen gen = new VCGen(compiler, unit);
                 ParseTreeWalker.DEFAULT.walk(gen, unit.getRoot());
                 VCOutputFile x = gen.getOutputFile();
-                //System.out.println(x.toString(35));
+                System.out.println(x.toString(35));
                 unit.setVCs(x);
 
                 //List<VC> proverInput = vco.getFinalVCs();

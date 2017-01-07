@@ -50,6 +50,8 @@ public class VCGen extends ResolveBaseListener {
             new GeneralCallApplicationStrategy();
     public static final RuleApplicationStrategy<VCAssign> FUNCTION_ASSIGN_APPLICATION =
             new FunctionAssignApplicationStrategy();
+    public static final RuleApplicationStrategy<VCAssume> PARSIMONIOUS_ASSUME_APPLICATION =
+            new ParsimoniousAssumeApplicationStrategy();
 
     /** A mapping from facility name to function that maps facility formal parameter names to their actuals. */
     private final Map<String, Map<PExp, PExp>> facilitySpecFormalActualMappings = new HashMap<>();
@@ -171,7 +173,7 @@ public class VCGen extends ResolveBaseListener {
         //block.assume(g.getTrueExp());
         ModuleScopeBuilder spec = null, impl = null;
         try {
-            ModuleIdentifier concept = moduleScope.getImportWithName(ctx.spec);
+            ModuleIdentifier concept = moduleScope.getFacilityImportWithName(ctx.spec);
             spec = symtab.getModuleScope(concept);
             if (ctx.externally == null) {
                 ModuleIdentifier imp = moduleScope.getImportWithName(ctx.realiz);
@@ -179,6 +181,19 @@ public class VCGen extends ResolveBaseListener {
             }
         } catch (NoSuchModuleException nsme) {
             return; //shouldn't happen...
+        }
+        //Assume requires clauses for the concept we're implementing (or the *enhancement* & concept!)
+        //why isn't this in the rule??
+        for (ModuleIdentifier identifier : moduleScope.getInheritedIdentifiers()) {
+            try {
+                ModuleScopeBuilder s = symtab.getModuleScope(identifier);
+                List<GlobalMathAssertionSymbol> globalAssertions =
+                        s.query(new SymbolTypeQuery<GlobalMathAssertionSymbol>(GlobalMathAssertionSymbol.class));
+                for (GlobalMathAssertionSymbol a : globalAssertions) {
+                    if (a.getClauseType() == ClauseType.REQUIRES) block.assume(a.getEnclosedExp());
+                }
+            } catch (NoSuchModuleException | UnexpectedSymbolException e) {
+            }
         }
         List<PExp> specArgs = ctx.specArgs.specModuleArg().stream()
                 .map(e -> (PExp)tr.exprASTs.get(e.getChild(0)))
@@ -345,6 +360,11 @@ public class VCGen extends ResolveBaseListener {
             }
             List<PExp> opParamAntecedents = new ArrayList<>();
 
+            //TODO: We can have modes... one mode automatically adds all givens it can think of
+            //(at the price of extra givens)... for example, the query below finds all module parameter syms
+            //we would need to assume constraints for these...
+
+            //List<ModuleParameterSymbol> x=  moduleScope.query(new SymbolTypeQuery<ModuleParameterSymbol>(ModuleParameterSymbol.class));
             Utils.apply(paramSyms, opParamAntecedents, this::extractAssumptionsFromParameter);
             block = new VCAssertiveBlockBuilder(g, s,
                         "Correct_Op_Hypo=" + ctx.name.getText(), ctx)
@@ -356,9 +376,9 @@ public class VCGen extends ResolveBaseListener {
                         .assume(concifiedRequires)
                         .remember();
             //add in any user defined notices...
-            for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
-                block.assume(tr.exprASTs.get(notice.mathExp()), false, true);
-            }
+            //for (ResolveParser.NoticeClauseContext notice : ctx.noticeClause()) {
+            //    block.assume(tr.exprASTs.get(notice.mathExp()), false, true);
+            //}
             assumeVarDecls(ctx.varDeclGroup(), block);
         } catch (SymbolTableException e) {
             return; //shouldn't happen (we wouldn't have gotten here if it did)..
@@ -677,6 +697,13 @@ public class VCGen extends ResolveBaseListener {
         @Override
         public void exitSwapStmt(ResolveParser.SwapStmtContext ctx) {
             VCSwap s = new VCSwap(ctx, builder, SWAP_APPLICATION, asts.get(ctx.left), asts.get(ctx.right));
+            stats.put(ctx, s);
+        }
+
+        @Override
+        public void exitNoticeStmt(ResolveParser.NoticeStmtContext ctx) {
+            VCAssume s = new VCAssume(builder, PARSIMONIOUS_ASSUME_APPLICATION,
+                    false, true, asts.get(ctx.mathAssertionExp()));
             stats.put(ctx, s);
         }
     }

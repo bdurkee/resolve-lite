@@ -222,9 +222,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.specArgs != null) this.visit(ctx.specArgs);
         if (ctx.realizArgs != null) this.visit(ctx.realizArgs);
 
-        //for (ResolveParser.ExtensionPairingContext extension : ctx.extensionPairing()) {
-        //    extension.moduleArgumentList().forEach(this::visit);
-        //}
         try {
             //these two lines will throw the appropriate exception (that is caught below)
             //if the modules don't exist or aren't imported...
@@ -304,6 +301,9 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         if (ctx.requiresClause() != null) this.visit(ctx.requiresClause());
         if (ctx.ensuresClause() != null) this.visit(ctx.ensuresClause());
 
+        if (ctx.recursive != null) {
+            insertFunction(ctx.name, ctx.type(), ctx.requiresClause(), ctx.ensuresClause(), ctx);
+        }
         ctx.varDeclGroup().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
@@ -348,6 +348,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             returnType = ProgVoidType.getInstance(g);
         }
         ctx.varDeclGroup().forEach(this::visit);
+        //ctx.noticeClause().forEach(this::visit);
         ctx.stmt().forEach(this::visit);
         sanityCheckStmtsForReturn(ctx.name, ctx.type(), ctx.stmt());
         symtab.endScope();
@@ -544,7 +545,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                             .toTypeModelSymbol();
         } catch (NoSuchSymbolException | UnexpectedSymbolException nsse) {
             //this is actually ok for now. Facility module bound type reprs
-            //won't have a model. //TODO: This is going to change...
+            //won't have a model. //TODOs: This is going to change...
         } catch (DuplicateSymbolException e) {
             compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.name, ctx.name.getText());
         } catch (NoSuchModuleException nsme) {
@@ -600,7 +601,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     public Void visitRecordType(ResolveParser.RecordTypeContext ctx) {
         Map<String, ProgType> fields = new LinkedHashMap<>();
         List<MathClssftnWrappingSymbol> mathSyms = new ArrayList<>();
-        //TODO: Maybe instead of fields just use the ProgVariableSymbols...
+        //TODOs: Maybe instead of fields just use the ProgVariableSymbols...
         for (ResolveParser.RecordVarDeclGroupContext fieldGrp : ctx.recordVarDeclGroup()) {
             this.visit(fieldGrp);
             ProgType grpType = tr.progTypes.get(fieldGrp.type());
@@ -850,6 +851,14 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         typeOperationRefExp(ctx, ctx.progNameExp().qualifier, ctx.progNameExp().name, ctx.progExp());
         return null;
     }
+
+    /*@Override
+    public Void visitProgUnaryExp(ResolveParser.ProgUnaryExpContext ctx) {
+        this.visit(ctx.progExp());  //visit arg
+        this.visit(ctx.progNameExp());
+        typeOperationRefExp(ctx, ctx.progNameExp().qualifier, ctx.progNameExp().name, ctx.progExp());
+        return null;
+    }*/
 
     @Override
     public Void visitProgBooleanLiteralExp(ResolveParser.ProgBooleanLiteralExpContext ctx) {
@@ -1196,8 +1205,6 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         }
     }
 
-
-
     private void insertGlobalAssertion(ParserRuleContext ctx,
                                        GlobalMathAssertionSymbol.ClauseType type,
                                        ResolveParser.MathAssertionExpContext assertion) {
@@ -1208,8 +1215,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                     new GlobalMathAssertionSymbol(name, assertionAsPExp, type,
                             ctx, getRootModuleIdentifier()));
         } catch (DuplicateSymbolException e) {
-            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL,
-                    ctx.getStart(), ctx.getText());
+            compiler.errMgr.semanticError(ErrorKind.DUP_SYMBOL, ctx.getStart(), ctx.getText());
         }
     }
 
@@ -1357,18 +1363,21 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
     @Override
     public Void visitMathPrimaryExp(ResolveParser.MathPrimaryExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathPrimeExp());
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
     @Override
     public Void visitMathPrimeExp(ResolveParser.MathPrimeExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.getChild(0));
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
     @Override
     public Void visitMathNestedExp(ResolveParser.MathNestedExpContext ctx) {
         visitAndClassifyMathExpCtx(ctx, ctx.mathAssertionExp());
+        //chainableSyms.put(ctx, chainableSyms.get(ctx.getChild(0)));
         return null;
     }
 
@@ -1378,12 +1387,12 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
         typeMathFunctionAppExp(ctx, (ParserRuleContext) ctx.getChild(1), ctx.mathExp());
         return null;
     }
-
+/*
     @Override
     public Void visitMathEqualsAppExp(ResolveParser.MathEqualsAppExpContext ctx) {
         tr.mathClssftns.put(ctx, g.BOOLEAN);
         return null;
-    }
+    }*/
 
     @Override
     public Void visitMathPrefixAppExp(ResolveParser.MathPrefixAppExpContext ctx) {
@@ -1393,51 +1402,39 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
 
     @Override
     public Void visitMathOutfixAppExp(ResolveParser.MathOutfixAppExpContext ctx) {
-        ResolveParser.MathSymbolExpContext dummyPrefixNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
-        dummyPrefixNode.start = ctx.lop.start;
-        dummyPrefixNode.stop = ctx.rop.stop;  //maybe lop.stop?
-        ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyPrefixNode, 0);
-
-        Token left = ctx.mathBracketOp(0).getStart();
-        Token right = ctx.mathBracketOp(1).getStart();
-
-        CommonToken t = new CommonToken(left);
-        t.setText(left.getText() + ".." + right.getText());
-        dummyName.start = t;
-        dummyName.stop = t;
-        dummyName.parent = dummyPrefixNode;
-
-        dummyName.addChild(t);
-        dummyPrefixNode.addChild(dummyName);
-        dummyPrefixNode.name = dummyName;
-        typeMathFunctionAppExp(ctx, dummyPrefixNode, ctx.mathExp());
-
-        //TODO: For now, I assign the first class function type of the outfix app to the
-        //left hand side of the operator..
-        tr.mathClssftns.put(ctx.lop, tr.mathClssftns.get(dummyPrefixNode));
+        ResolveParser.MathSymbolExpContext dummyNode =
+                buildDummyTwoPartOperatorNode(ctx, ctx.mathBracketOp(0).getStart(),
+                        ctx.mathBracketOp(1).getStart());
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
         return null;
     }
 
     @Override
     public Void visitMathMixfixAppExp(ResolveParser.MathMixfixAppExpContext ctx) {
-        //construct a 'name' node for this non std app
+        ResolveParser.MathSymbolExpContext dummyNode =
+                buildDummyTwoPartOperatorNode(ctx, ctx.mathBracketOp(0).getStart(),
+                        ctx.mathBracketOp(1).getStart());
+        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
+        return null;
+    }
+
+    /**
+     * Builds a concrete syntax 'dummy node' for names of mixfix or outfix style applications.
+     * For example, given {@code |S|}, this returns {@code |..|}. And for {@code Tally[X]}, returns {@code [..]}.
+     */
+    private ResolveParser.MathSymbolExpContext buildDummyTwoPartOperatorNode(ParserRuleContext ctx,
+                                                                             Token left,
+                                                                             Token right) {
         ResolveParser.MathSymbolExpContext dummyNode = new ResolveParser.MathSymbolExpContext(ctx, 0);
         ResolveParser.MathSymbolNameContext dummyName = new ResolveParser.MathSymbolNameContext(dummyNode, 0);
         dummyNode.name = dummyName;
-
-        Token left = ctx.mathBracketOp(0).getStart();
-        Token right = ctx.mathBracketOp(1).getStart();
-
         CommonToken t = new CommonToken(left);
         t.setText(left.getText() + ".." + right.getText());
         dummyNode.start = t; dummyNode.stop = t;
         dummyName.start = t; dummyName.stop = t;
-
         dummyName.addChild(t);
         dummyNode.addChild(dummyName);
-
-        typeMathFunctionAppExp(ctx, dummyNode, ctx.mathExp());
-        return null;
+        return dummyNode;
     }
 
     private void typeMathFunctionAppExp(@NotNull ParserRuleContext ctx,
@@ -1450,7 +1447,11 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                                         @NotNull ParserRuleContext nameExp,
                                         @NotNull List<? extends ParseTree> args) {
         this.visit(nameExp);
-        tr.chainableInfixApps.put(ctx, chainableSyms.get(nameExp));
+        Boolean isChainableName = chainableSyms.get(nameExp);
+        if (isChainableName == null) isChainableName = false;
+        String appText = ctx.getText();
+
+        tr.chainableInfixApps.put(ctx, isChainableName);
         args.forEach(this::visit);
         String asString = ctx.getText();
         MathClssftn t = exactNamedMathClssftns.get(nameExp);
@@ -1468,6 +1469,7 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             return;
         }
         MathFunctionClssftn expectedFuncType = (MathFunctionClssftn) t;
+
         List<MathClssftn> actualArgumentTypes = Utils.apply(args, tr.mathClssftns::get);
         List<MathClssftn> formalParameterTypes = expectedFuncType.getParamTypes();
 
@@ -1478,6 +1480,22 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
             exactNamedMathClssftns.put(ctx, g.INVALID);
             tr.mathClssftns.put(ctx, g.INVALID);
             return;
+        }
+
+        if (expectedFuncType.equals(g.BOOLEAN_FUNCTION)) {
+            Iterator<? extends ParseTree> actualsCtxIter = args.iterator();
+            Iterator<MathClssftn> formalsIter = formalParameterTypes.iterator();
+
+            ParserRuleContext argCtx = (ParserRuleContext) actualsCtxIter.next();
+
+            for (MathClssftn actual : actualArgumentTypes) {
+                MathClssftn formal = formalsIter.next();
+                if (!(actual == g.BOOLEAN)) {
+                    compiler.errMgr.semanticError(
+                            ErrorKind.INVALID_APPLICATION_ARG, argCtx.getStart(),
+                            actual.toString(), formal.toString());
+                }
+            }
         }
         try {
             MathClssftn oldExpectedFuncType = expectedFuncType;
@@ -1796,6 +1814,15 @@ public class PopulatingVisitor extends ResolveBaseVisitor<Void> {
                 if (f.getFacility().getSpecification().getModuleIdentifier().equals(s.getModuleIdentifier())) {
                     result.add(f);
                 }
+                //or if it comes through an enhancement....
+                else {
+                    for (ModuleParameterization p : f.getEnhancements()) {
+                        if (p.getModuleIdentifier().equals(s.getModuleIdentifier())) {
+                            result.add(f);
+                        }
+                    }
+                }
+
             }
             if (result.size() > 1) {
                 compiler.errMgr.semanticError(ErrorKind.AMBIGUOUS_FACILITY, ctx.getStart(), s.getName());

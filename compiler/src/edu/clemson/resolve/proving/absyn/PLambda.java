@@ -132,7 +132,7 @@ public class PLambda extends PExp {
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PLambda(parameters, body.withIncomingSignsErased());
+        return new PLambda(parameters, body.withIncomingSignsErased(), getVCLocation(), getVCExplanation());
     }
 
     @NotNull

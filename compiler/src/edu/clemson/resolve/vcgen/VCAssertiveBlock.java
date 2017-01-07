@@ -138,7 +138,7 @@ public class VCAssertiveBlock {
                 return this;
             }
             //stats.add(new VCAssume(this, new DefaultAssumeApplicationStrategy(), stipulate, assume));
-            stats.add(new VCAssume(this, new ParsimoniousAssumeApplicationStrategy(), stipulate, notice, assume));
+            stats.add(new VCAssume(this, VCGen.PARSIMONIOUS_ASSUME_APPLICATION, stipulate, notice, assume));
             return this;
         }
 

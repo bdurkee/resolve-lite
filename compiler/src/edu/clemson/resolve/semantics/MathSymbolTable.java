@@ -130,7 +130,9 @@ public class MathSymbolTable {
 
     private void initializeMathTypeSystem(@NotNull DumbMathClssftnHandler g, @NotNull ScopeBuilder globalScope) {
         try {
-            globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
+            //globalScope.define(new MathClssftnWrappingSymbol(g, "B", g.BOOLEAN));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "\uD835\uDD39", g.BOOLEAN));    //script 'b'
+
             globalScope.define(new MathClssftnWrappingSymbol(g, "SSet", g.SSET));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "Cls", g.CLS));
@@ -163,7 +165,7 @@ public class MathSymbolTable {
                     new MathFunctionClssftn(g, g.SSET, g.SSET, g.SSET)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "not", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
-            globalScope.define(new MathClssftnWrappingSymbol(g, "⌐", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "¬", new MathFunctionClssftn(g, g.BOOLEAN, g.BOOLEAN)));
 
             globalScope.define(new MathClssftnWrappingSymbol(g, "true", new MathNamedClssftn(g, "true", 0, g.BOOLEAN)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "false", new MathNamedClssftn(g, "false", 0, g.BOOLEAN)));
@@ -171,7 +173,8 @@ public class MathSymbolTable {
             //aliases for our 'arrow type'
             globalScope.define(new MathClssftnWrappingSymbol(g, "⟶", g.ARROW_FUNCTION));
 
-            globalScope.define(new MathClssftnWrappingSymbol(g, "*", g.CROSS_PROD_FUNCTION));
+            globalScope.define(new MathClssftnWrappingSymbol(g, "×", g.CROSS_PROD_FUNCTION));
+
             globalScope.define(new MathClssftnWrappingSymbol(g, "=",
                     new MathFunctionClssftn(g, g.BOOLEAN, g.ENTITY, g.ENTITY)));
             globalScope.define(new MathClssftnWrappingSymbol(g, "≠",

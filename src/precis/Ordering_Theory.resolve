@@ -1,4 +1,4 @@
 Precis Ordering_Theory;
 		uses Basic_Binary_Relation_Properties;
-	Definition Is_Total_Preordering(f : (D : SSet) * D ⟶ B) : B;
+	Definition Is_Total_Preordering(f : (D : SSet) × D ⟶ 𝔹) : 𝔹;
 end Ordering_Theory;

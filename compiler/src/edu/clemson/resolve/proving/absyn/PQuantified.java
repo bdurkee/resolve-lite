@@ -66,7 +66,8 @@ public class PQuantified extends PExp {
     @NotNull
     @Override
     public PExp substitute(@NotNull Map<PExp, PExp> substitutions) {
-        return new PQuantified(assertion.substitute(substitutions), quantificationType, declaredSymbols);
+        return new PQuantified(assertion.substitute(substitutions), quantificationType, declaredSymbols,
+                getVCLocation(), getVCExplanation());
     }
 
     @Override
@@ -101,13 +102,15 @@ public class PQuantified extends PExp {
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PQuantified(assertion.withIncomingSignsErased(), quantificationType, declaredSymbols);
+        return new PQuantified(assertion.withIncomingSignsErased(), quantificationType, declaredSymbols,
+                getVCLocation(), getVCExplanation());
     }
 
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return new PQuantified(assertion.withQuantifiersFlipped(), quantificationType.flipped(), declaredSymbols);
+        return new PQuantified(assertion.withQuantifiersFlipped(), quantificationType.flipped(), declaredSymbols,
+                getVCLocation(), getVCExplanation());
     }
 
     @NotNull
